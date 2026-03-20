@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import _ from 'lodash';
 
 import { isDefined } from '../../../../common/utils/nullable';
@@ -29,6 +29,7 @@ import {
 } from './modifiers/asset_criticality';
 
 import { applyPrivmonModifier } from './modifiers/privileged_users';
+import { applyPostureModifier } from './modifiers/endpoint_posture';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Modifier } from './modifiers/types';
 import { bayesianUpdate } from '../asset_criticality/helpers';
@@ -37,6 +38,8 @@ interface ModifiersUpdateParams {
   deps: {
     privmonUserCrudService: PrivmonUserCrudService;
     assetCriticalityService: AssetCriticalityService;
+    esClient: ElasticsearchClient;
+    namespace: string;
     logger: Logger;
   };
 
@@ -78,14 +81,21 @@ export const applyScoreModifiers = async ({
       experimentalFeatures,
       deps: _.pick(deps, ['privmonUserCrudService', 'logger']),
     }),
+
+    applyPostureModifier({
+      page,
+      globalWeight,
+      deps: _.pick(deps, ['esClient', 'namespace', 'logger']),
+    }),
   ] as const;
 
-  const [criticality, privmon] = await Promise.all(modifierPromises);
+  const [criticality, privmon, posture] = await Promise.all(modifierPromises);
 
   return _.zipWith(
     page.buckets,
     criticality,
     privmon,
+    posture,
     riskScoreDocFactory({ now, identifierField: page.identifierField, globalWeight })
   );
 };
@@ -101,7 +111,8 @@ export const riskScoreDocFactory =
   (
     bucket: RiskScoreBucket,
     criticalityModifierFields: Modifier<'asset_criticality'> | undefined,
-    privmonWatchlistModifierFields: Modifier<'watchlist'> | undefined
+    privmonWatchlistModifierFields: Modifier<'watchlist'> | undefined,
+    postureModifierFields: Modifier<'endpoint_posture'> | undefined
   ): EntityRiskScoreRecord => {
     const risk = bucket.top_inputs.risk_details;
 
@@ -112,7 +123,8 @@ export const riskScoreDocFactory =
 
     const totalModifier =
       (criticalityModifierFields?.modifier_value ?? 1) *
-      (privmonWatchlistModifierFields?.modifier_value ?? 1);
+      (privmonWatchlistModifierFields?.modifier_value ?? 1) *
+      (postureModifierFields?.modifier_value ?? 1);
 
     const originalScore = risk.value.normalized_score * globalWeight;
     const totalScoreWithModifiers = bayesianUpdate({
@@ -128,9 +140,11 @@ export const riskScoreDocFactory =
       calculated_score_norm: max10DecimalPlaces(totalScoreWithModifiers),
     };
 
-    const appliedModifiers = [criticalityModifierFields, privmonWatchlistModifierFields].filter(
-      isDefined
-    );
+    const appliedModifiers = [
+      criticalityModifierFields,
+      privmonWatchlistModifierFields,
+      postureModifierFields,
+    ].filter(isDefined);
 
     const getContribution = getProportionalModifierContribution(
       appliedModifiers.map((modifier) => modifier.modifier_value ?? 1),

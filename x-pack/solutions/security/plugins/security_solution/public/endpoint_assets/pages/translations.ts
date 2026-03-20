@@ -1,0 +1,804 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.pageTitle',
+  {
+    defaultMessage: 'Endpoint Assets',
+  }
+);
+
+export const PAGE_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.pageSubtitle',
+  {
+    defaultMessage: 'Security Posture & Asset Visibility powered by Osquery',
+  }
+);
+
+export const TAB_INVENTORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabInventory',
+  {
+    defaultMessage: 'Inventory',
+  }
+);
+
+export const TAB_POSTURE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabPosture',
+  {
+    defaultMessage: 'Security Posture',
+  }
+);
+
+export const TAB_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabPrivileges',
+  {
+    defaultMessage: 'Privileges',
+  }
+);
+
+export const TAB_DRIFT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabDrift',
+  {
+    defaultMessage: 'Drift',
+  }
+);
+
+export const TOTAL_ASSETS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.totalAssets',
+  {
+    defaultMessage: 'Total Assets',
+  }
+);
+
+export const ACTIVE_24H = i18n.translate(
+  'xpack.securitySolution.endpointAssets.active24h',
+  {
+    defaultMessage: 'Active (24h)',
+  }
+);
+
+export const CRITICAL_POSTURE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.criticalPosture',
+  {
+    defaultMessage: 'Critical Posture',
+  }
+);
+
+export const ELEVATED_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.elevatedPrivileges',
+  {
+    defaultMessage: 'Elevated Privileges',
+  }
+);
+
+export const RECENTLY_CHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.recentlyChanged',
+  {
+    defaultMessage: 'Recently Changed',
+  }
+);
+
+export const REFRESH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.refresh',
+  {
+    defaultMessage: 'Refresh',
+  }
+);
+
+export const COLUMN_NAME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.columnName',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const COLUMN_PLATFORM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.columnPlatform',
+  {
+    defaultMessage: 'Platform',
+  }
+);
+
+export const COLUMN_POSTURE_SCORE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.columnPostureScore',
+  {
+    defaultMessage: 'Posture Score',
+  }
+);
+
+export const COLUMN_ADMIN_COUNT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.columnAdminCount',
+  {
+    defaultMessage: 'Admins',
+  }
+);
+
+export const COLUMN_LAST_SEEN = i18n.translate(
+  'xpack.securitySolution.endpointAssets.columnLastSeen',
+  {
+    defaultMessage: 'Last Seen',
+  }
+);
+
+export const NO_ASSETS_FOUND = i18n.translate(
+  'xpack.securitySolution.endpointAssets.noAssetsFound',
+  {
+    defaultMessage: 'No endpoint assets found',
+  }
+);
+
+export const POSTURE_OK = i18n.translate(
+  'xpack.securitySolution.endpointAssets.postureOk',
+  {
+    defaultMessage: 'OK',
+  }
+);
+
+export const POSTURE_FAIL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.postureFail',
+  {
+    defaultMessage: 'FAIL',
+  }
+);
+
+export const DISK_ENCRYPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.diskEncryption',
+  {
+    defaultMessage: 'Disk Encryption',
+  }
+);
+
+export const FIREWALL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.firewall',
+  {
+    defaultMessage: 'Firewall',
+  }
+);
+
+export const SECURE_BOOT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.secureBoot',
+  {
+    defaultMessage: 'Secure Boot',
+  }
+);
+
+export const LOCAL_ADMINS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.localAdmins',
+  {
+    defaultMessage: 'Local Admins',
+  }
+);
+
+export const ELASTIC_AGENT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.elasticAgent',
+  {
+    defaultMessage: 'Elastic Agent',
+  }
+);
+
+export const DRIFT_EVENTS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftEvents',
+  {
+    defaultMessage: 'Events',
+  }
+);
+
+export const DRIFT_EVENTS_24H = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftEvents24h',
+  {
+    defaultMessage: 'Events (24h)',
+  }
+);
+
+export const DRIFT_CRITICAL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCritical',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
+export const DRIFT_HIGH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftHigh',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const DRIFT_ASSETS_CHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftAssetsChanged',
+  {
+    defaultMessage: 'Assets Changed',
+  }
+);
+
+export const DRIFT_EVENTS_BY_CATEGORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftEventsByCategory',
+  {
+    defaultMessage: 'Events by Category',
+  }
+);
+
+export const DRIFT_RECENT_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftRecentChanges',
+  {
+    defaultMessage: 'Recent Changes',
+  }
+);
+
+export const DRIFT_CATEGORY_PERSISTENCE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryPersistence',
+  {
+    defaultMessage: 'Persistence',
+  }
+);
+
+export const DRIFT_CATEGORY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryPrivileges',
+  {
+    defaultMessage: 'Privileges',
+  }
+);
+
+export const DRIFT_CATEGORY_NETWORK = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryNetwork',
+  {
+    defaultMessage: 'Network',
+  }
+);
+
+export const DRIFT_CATEGORY_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategorySoftware',
+  {
+    defaultMessage: 'Software',
+  }
+);
+
+export const DRIFT_CATEGORY_POSTURE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryPosture',
+  {
+    defaultMessage: 'Posture',
+  }
+);
+
+export const DRIFT_COLUMN_TIME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnTime',
+  {
+    defaultMessage: 'Time',
+  }
+);
+
+export const DRIFT_COLUMN_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnHost',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const DRIFT_COLUMN_CATEGORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnCategory',
+  {
+    defaultMessage: 'Category',
+  }
+);
+
+export const DRIFT_COLUMN_CHANGE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnChange',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const DRIFT_COLUMN_SEVERITY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const DRIFT_ERROR_LOADING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftErrorLoading',
+  {
+    defaultMessage: 'Error loading drift summary',
+  }
+);
+
+export const DRIFT_NO_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftNoChanges',
+  {
+    defaultMessage: 'No drift events detected in the selected time range',
+  }
+);
+
+export const DRIFT_FILTER_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterTimeRange',
+  {
+    defaultMessage: 'Time Range',
+  }
+);
+
+export const DRIFT_FILTER_CATEGORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterCategory',
+  {
+    defaultMessage: 'Category',
+  }
+);
+
+export const DRIFT_FILTER_SEVERITY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const DRIFT_FILTER_HOST_SEARCH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterHostSearch',
+  {
+    defaultMessage: 'Search hosts',
+  }
+);
+
+export const DRIFT_FILTER_HOST_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterHostSearchPlaceholder',
+  {
+    defaultMessage: 'Search by host name...',
+  }
+);
+
+export const DRIFT_FILTER_ALL_HOSTS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterAllHosts',
+  {
+    defaultMessage: 'All hosts',
+  }
+);
+
+export const DRIFT_FILTER_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterHost',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const DRIFT_FILTER_REFRESH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterRefresh',
+  {
+    defaultMessage: 'Refresh',
+  }
+);
+
+export const DRIFT_SHOWING_RESULTS = (count: number, total: number) =>
+  i18n.translate('xpack.securitySolution.endpointAssets.driftShowingResults', {
+    defaultMessage: 'Showing {count} of {total} events',
+    values: { count, total },
+  });
+
+export const DRIFT_NO_RESULTS_FILTERED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftNoResultsFiltered',
+  {
+    defaultMessage: 'No events match your filter criteria',
+  }
+);
+
+export const DRIFT_SEVERITY_MEDIUM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftSeverityMedium',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const DRIFT_SEVERITY_LOW = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftSeverityLow',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+// Unknown Knowns (Dormant Risk) Translations
+export const TAB_UNKNOWN_KNOWNS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabUnknownKnowns',
+  {
+    defaultMessage: 'Dormant Risks',
+  }
+);
+
+export const UNKNOWN_KNOWNS_ASSETS_AT_RISK = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsAssetsAtRisk',
+  {
+    defaultMessage: 'Assets at Risk',
+  }
+);
+
+export const UNKNOWN_KNOWNS_ASSETS_AT_RISK_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsAssetsAtRiskTooltip',
+  {
+    defaultMessage: 'Assets with at least one dormant risk indicator',
+  }
+);
+
+export const UNKNOWN_KNOWNS_OF_TOTAL_ASSETS = (total: number) =>
+  i18n.translate('xpack.securitySolution.endpointAssets.unknownKnownsOfTotalAssets', {
+    defaultMessage: 'of {total} total assets',
+    values: { total },
+  });
+
+export const UNKNOWN_KNOWNS_SSH_KEYS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsSshKeys',
+  {
+    defaultMessage: 'Old SSH Keys',
+  }
+);
+
+export const UNKNOWN_KNOWNS_SSH_KEYS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsSshKeysTooltip',
+  {
+    defaultMessage: 'SSH authorized keys older than 180 days that have not been rotated',
+  }
+);
+
+export const UNKNOWN_KNOWNS_DORMANT_USERS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsDormantUsers',
+  {
+    defaultMessage: 'Dormant Users',
+  }
+);
+
+export const UNKNOWN_KNOWNS_DORMANT_USERS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsDormantUsersTooltip',
+  {
+    defaultMessage: 'User accounts with no login activity in the last 30 days',
+  }
+);
+
+export const UNKNOWN_KNOWNS_EXTERNAL_TASKS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsExternalTasks',
+  {
+    defaultMessage: 'External Tasks',
+  }
+);
+
+export const UNKNOWN_KNOWNS_EXTERNAL_TASKS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsExternalTasksTooltip',
+  {
+    defaultMessage:
+      'Scheduled tasks, cron jobs, and launch items that call external URLs or resources',
+  }
+);
+
+export const UNKNOWN_KNOWNS_RISK_DISTRIBUTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsRiskDistribution',
+  {
+    defaultMessage: 'Risk Distribution',
+  }
+);
+
+export const UNKNOWN_KNOWNS_HIGH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsHigh',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const UNKNOWN_KNOWNS_MEDIUM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsMedium',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const UNKNOWN_KNOWNS_LOW = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsLow',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const UNKNOWN_KNOWNS_TOP_RISK_ASSETS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsTopRiskAssets',
+  {
+    defaultMessage: 'Top Assets by Dormant Risk',
+  }
+);
+
+export const UNKNOWN_KNOWNS_TOP_DORMANT_USERS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsTopDormantUsers',
+  {
+    defaultMessage: 'Most Common Dormant Users',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnHost',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_RISKS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnRisks',
+  {
+    defaultMessage: 'Risks',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnRiskLevel',
+  {
+    defaultMessage: 'Level',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_USERNAME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnUsername',
+  {
+    defaultMessage: 'Username',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_ASSET_COUNT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnAssetCount',
+  {
+    defaultMessage: 'Assets',
+  }
+);
+
+export const UNKNOWN_KNOWNS_ERROR_LOADING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsErrorLoading',
+  {
+    defaultMessage: 'Error loading dormant risks summary',
+  }
+);
+
+export const UNKNOWN_KNOWNS_NO_RISKS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsNoRisks',
+  {
+    defaultMessage: 'No dormant risks detected',
+  }
+);
+
+export const UNKNOWN_KNOWNS_NO_RISKS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsNoRisksDescription',
+  {
+    defaultMessage:
+      'No old SSH keys, dormant users, or external scheduled tasks were detected across your fleet.',
+  }
+);
+
+// Snapshot Comparison Translations
+export const SNAPSHOT_COMPARISON_TITLE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotComparisonTitle',
+  {
+    defaultMessage: 'Historical Snapshot Comparison',
+  }
+);
+
+export const SNAPSHOT_COMPARISON_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotComparisonDescription',
+  {
+    defaultMessage:
+      'Compare endpoint asset configurations between two dates to identify changes over time.',
+  }
+);
+
+export const SNAPSHOT_COMPARE_FROM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotCompareFrom',
+  {
+    defaultMessage: 'Compare From',
+  }
+);
+
+export const SNAPSHOT_COMPARE_TO = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotCompareTo',
+  {
+    defaultMessage: 'Compare To',
+  }
+);
+
+export const SNAPSHOT_VIEW_CHANGES_ONLY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotViewChangesOnly',
+  {
+    defaultMessage: 'Changes Only',
+  }
+);
+
+export const SNAPSHOT_VIEW_FULL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotViewFull',
+  {
+    defaultMessage: 'Full Comparison',
+  }
+);
+
+export const SNAPSHOT_TOTAL_ASSETS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotTotalAssets',
+  {
+    defaultMessage: 'Total Assets',
+  }
+);
+
+export const SNAPSHOT_CHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotChanged',
+  {
+    defaultMessage: 'Changed',
+  }
+);
+
+export const SNAPSHOT_ADDED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotAdded',
+  {
+    defaultMessage: 'Added',
+  }
+);
+
+export const SNAPSHOT_REMOVED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotRemoved',
+  {
+    defaultMessage: 'Removed',
+  }
+);
+
+export const SNAPSHOT_ASSET_COMPARISON = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotAssetComparison',
+  {
+    defaultMessage: 'Asset Comparison',
+  }
+);
+
+export const SNAPSHOT_NO_SNAPSHOTS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotNoSnapshots',
+  {
+    defaultMessage: 'No Snapshots Available',
+  }
+);
+
+export const SNAPSHOT_NO_SNAPSHOTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotNoSnapshotsDescription',
+  {
+    defaultMessage:
+      'Entity Store snapshots are created daily. Please wait for the snapshot task to run, or ensure the Entity Store is enabled and configured.',
+  }
+);
+
+export const SNAPSHOT_ONE_SNAPSHOT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotOneSnapshot',
+  {
+    defaultMessage: 'Only One Snapshot Available',
+  }
+);
+
+export const SNAPSHOT_ONE_SNAPSHOT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotOneSnapshotDescription',
+  {
+    defaultMessage:
+      'Snapshot comparison requires at least two snapshots. The next snapshot will be created at 00:01 UTC.',
+  }
+);
+
+export const SNAPSHOT_SELECT_DATE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotSelectDate',
+  {
+    defaultMessage: 'Select a date...',
+  }
+);
+
+export const SNAPSHOT_SELECT_DATES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotSelectDates',
+  {
+    defaultMessage: 'Select two dates to compare snapshots',
+  }
+);
+
+export const SNAPSHOT_NO_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotNoChanges',
+  {
+    defaultMessage: 'No changes detected between the selected dates',
+  }
+);
+
+export const SNAPSHOT_COLUMN_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnHost',
+  {
+    defaultMessage: 'Host Name',
+  }
+);
+
+export const SNAPSHOT_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const SNAPSHOT_COLUMN_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnChanges',
+  {
+    defaultMessage: 'Changes',
+  }
+);
+
+export const SNAPSHOT_COLUMN_FIELD = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnField',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const SNAPSHOT_COLUMN_CHANGE_TYPE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnChangeType',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const SNAPSHOT_STATUS_ADDED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusAdded',
+  {
+    defaultMessage: 'Added',
+  }
+);
+
+export const SNAPSHOT_STATUS_REMOVED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusRemoved',
+  {
+    defaultMessage: 'Removed',
+  }
+);
+
+export const SNAPSHOT_STATUS_MODIFIED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusModified',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const SNAPSHOT_STATUS_UNCHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusUnchanged',
+  {
+    defaultMessage: 'Unchanged',
+  }
+);
+
+export const SNAPSHOT_ERROR_LOADING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotErrorLoading',
+  {
+    defaultMessage: 'Error loading snapshots',
+  }
+);
+
+export const SNAPSHOT_ERROR_COMPARING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotErrorComparing',
+  {
+    defaultMessage: 'Error comparing snapshots',
+  }
+);
+
+export const DRIFT_TIMELINE_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.title',
+  {
+    defaultMessage: 'Time Range',
+  }
+);
+
+export const DRIFT_TIMELINE_UPDATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.update',
+  {
+    defaultMessage: 'Update',
+  }
+);
+
+export const DRIFT_TIMELINE_START_TIME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.startTime',
+  {
+    defaultMessage: 'Start Time',
+  }
+);
+
+export const DRIFT_TIMELINE_END_TIME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.endTime',
+  {
+    defaultMessage: 'End Time',
+  }
+);

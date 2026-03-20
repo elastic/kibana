@@ -105,6 +105,130 @@ export const Asset = z
     environment: z.string().optional(),
     criticality: AssetCriticalityLevel.optional(),
     business_unit: z.string().optional(),
+    /**
+     * Asset category (e.g., endpoint, server, network)
+     */
+    category: z.string().optional(),
+    /**
+     * Platform type (e.g., windows, ubuntu, rhel, macos)
+     */
+    platform: z.string().optional(),
+  })
+  .strict();
+
+/**
+ * Endpoint trust intelligence fields collected via osquery for CAASM
+ */
+export type EndpointTrust = z.infer<typeof EndpointTrust>;
+export const EndpointTrust = z
+  .object({
+    lifecycle: z
+      .object({
+        first_seen: z.string().datetime().optional(),
+        last_seen: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+    posture: z
+      .object({
+        /**
+         * Trust/posture score (0-100)
+         */
+        score: z.number().optional(),
+        /**
+         * Posture level (LOW, MEDIUM, HIGH)
+         */
+        level: z.string().optional(),
+        failed_checks: z.array(z.string()).optional(),
+        checks: z
+          .object({
+            total: z.number().int().optional(),
+            passed: z.number().int().optional(),
+            failed: z.number().int().optional(),
+          })
+          .strict()
+          .optional(),
+        firewall_enabled: z.boolean().optional(),
+        firewall_enabled_raw: z.string().optional(),
+        secure_boot: z.boolean().optional(),
+        secure_boot_raw: z.string().optional(),
+        disk_encryption: z.string().optional(),
+        disk_encryption_raw: z.string().optional(),
+        gatekeeper_enabled: z.boolean().optional(),
+        gatekeeper_enabled_raw: z.string().optional(),
+        sip_enabled: z.boolean().optional(),
+        sip_enabled_raw: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    privileges: z
+      .object({
+        admin_count: z.number().int().optional(),
+        ssh_keys_count: z.number().int().optional(),
+        elevated_risk: z.boolean().optional(),
+        local_admins: z.array(z.string()).optional(),
+        root_users: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    software: z
+      .object({
+        installed_count: z.number().int().optional(),
+        services_count: z.number().int().optional(),
+        scheduled_tasks_count: z.number().int().optional(),
+        startup_items_count: z.number().int().optional(),
+        browser_extensions_count: z.number().int().optional(),
+        chrome_extensions_count: z.number().int().optional(),
+        launch_agents_count: z.number().int().optional(),
+        launch_daemons_count: z.number().int().optional(),
+        unsigned_apps_count: z.number().int().optional(),
+      })
+      .strict()
+      .optional(),
+    hardware: z
+      .object({
+        vendor: z.string().optional(),
+        cpu: z.string().optional(),
+        model: z.string().optional(),
+        usb_removable_count: z.number().int().optional(),
+        disk: z
+          .object({
+            total_capacity_gb: z.number().optional(),
+            free_space_gb: z.number().optional(),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    network: z
+      .object({
+        listening_ports_count: z.number().int().optional(),
+        interfaces: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    detections: z
+      .object({
+        encoded_powershell_count: z.number().int().optional(),
+        suspicious_ports_count: z.number().int().optional(),
+        hidden_temp_files_count: z.number().int().optional(),
+      })
+      .strict()
+      .optional(),
+    drift: z
+      .object({
+        recently_changed: z.boolean().optional(),
+        change_types: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    queries: z
+      .object({
+        total_results: z.number().int().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -151,12 +275,34 @@ export const HostEntity = z
         type: z.array(z.string()).optional(),
         mac: z.array(z.string()).optional(),
         architecture: z.array(z.string()).optional(),
+        os: z
+          .object({
+            name: z.array(z.string()).optional(),
+            type: z.array(z.string()).optional(),
+            family: z.string().optional(),
+            kernel: z.string().optional(),
+            version: z.string().optional(),
+            platform: z.string().optional(),
+            build: z.string().optional(),
+          })
+          .strict()
+          .optional(),
         risk: EntityRiskScoreRecord.optional(),
         entity: EntityField.optional(),
       })
       .strict()
       .optional(),
+    agent: z
+      .object({
+        id: z.string().optional(),
+        name: z.string().optional(),
+        type: z.string().optional(),
+        version: z.string().optional(),
+      })
+      .strict()
+      .optional(),
     asset: Asset.optional(),
+    endpoint: EndpointTrust.optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),

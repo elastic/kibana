@@ -82,6 +82,8 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useEndpointAssetData } from '../../../entity_details/endpoint_assets/hooks/use_endpoint_asset_data';
+import { EndpointAssetsSection } from './endpoint_assets_section';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -208,6 +210,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   });
   const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+
+  // Fetch CAASM endpoint asset data
+  const { data: endpointAssetData, isLoading: isEndpointAssetLoading } = useEndpointAssetData(hostName);
+  const hasEndpointAssetData = !!(
+    endpointAssetData?.endpoint?.posture ||
+    endpointAssetData?.endpoint?.drift ||
+    endpointAssetData?.endpoint?.privileges
+  );
 
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,

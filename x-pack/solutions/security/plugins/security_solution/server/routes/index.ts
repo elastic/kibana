@@ -59,6 +59,7 @@ import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
+import { registerEndpointAssetsRoutes } from '../lib/endpoint_assets';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -152,6 +153,8 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, logger });
+
+  registerEndpointAssetsRoutes(router, logger);
 
   registerSiemReadinessRoutes({ router, logger });
 

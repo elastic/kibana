@@ -12,6 +12,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH,
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   ENTITY_ANALYTICS_WATCHLISTS_PATH,
 } from '../../common/constants';
@@ -65,6 +66,30 @@ const watchlistsLinks: LinkItem = {
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
   experimentalKey: 'entityAnalyticsWatchlistEnabled',
+};
+
+const endpointAssetsLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsEndpointAssets,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.endpointAssets', {
+    defaultMessage: 'Endpoint Assets',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.endpointAssets.description',
+    {
+      defaultMessage:
+        'Security posture and asset visibility for endpoints, powered by osquery. Monitor disk encryption, firewall status, privileged users, and configuration drift.',
+    }
+  ),
+  path: ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.endpointAssets', {
+      defaultMessage: 'Endpoint assets',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
 };
 
 const eaOverviewLinks: LinkItem = {
@@ -129,7 +154,7 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks, threatHuntingLinks, watchlistsLinks],
+  links: [eaOverviewLinks, privMonLinks, endpointAssetsLinks, threatHuntingLinks, watchlistsLinks],
   hideTimeline: true,
   skipUrlState: true,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],

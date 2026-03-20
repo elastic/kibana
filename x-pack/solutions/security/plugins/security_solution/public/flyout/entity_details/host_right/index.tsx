@@ -31,6 +31,7 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import { useEndpointAssetData } from '../endpoint_assets/hooks/use_endpoint_asset_data';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -112,6 +113,14 @@ export const HostPanel = ({
     setQuery,
   });
 
+  // Fetch endpoint asset data for CAASM tab in left panel
+  const { data: endpointAssetData } = useEndpointAssetData(hostName);
+  const hasEndpointAssetData = !!(
+    endpointAssetData?.endpoint?.posture ||
+    endpointAssetData?.endpoint?.drift ||
+    endpointAssetData?.endpoint?.privileges
+  );
+
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
     scopeId,
@@ -119,6 +128,7 @@ export const HostPanel = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    hasEndpointAssetData,
     isPreviewMode,
     contextID,
   });
@@ -142,7 +152,8 @@ export const HostPanel = ({
           isRiskScoreExist ||
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts
+          hasNonClosedAlerts ||
+          hasEndpointAssetData
         }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}

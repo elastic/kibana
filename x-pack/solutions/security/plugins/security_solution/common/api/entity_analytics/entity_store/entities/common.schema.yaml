@@ -146,6 +146,170 @@ components:
           $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
         business_unit:
           type: string
+        # CAASM endpoint asset fields
+        category:
+          type: string
+          description: Asset category (e.g., endpoint, server, network)
+        platform:
+          type: string
+          description: Platform type (e.g., windows, ubuntu, rhel, macos)
+
+    # Endpoint Trust Intelligence schema for CAASM data from osquery
+    EndpointTrust:
+      type: object
+      additionalProperties: false
+      description: Endpoint trust intelligence fields collected via osquery for CAASM
+      properties:
+        lifecycle:
+          type: object
+          additionalProperties: false
+          properties:
+            first_seen:
+              type: string
+              format: date-time
+            last_seen:
+              type: string
+              format: date-time
+        posture:
+          type: object
+          additionalProperties: false
+          properties:
+            score:
+              type: number
+              description: Trust/posture score (0-100)
+            level:
+              type: string
+              description: Posture level (LOW, MEDIUM, HIGH)
+            failed_checks:
+              type: array
+              items:
+                type: string
+            checks:
+              type: object
+              additionalProperties: false
+              properties:
+                total:
+                  type: integer
+                passed:
+                  type: integer
+                failed:
+                  type: integer
+            firewall_enabled:
+              type: boolean
+            firewall_enabled_raw:
+              type: string
+            secure_boot:
+              type: boolean
+            secure_boot_raw:
+              type: string
+            disk_encryption:
+              type: string
+            disk_encryption_raw:
+              type: string
+            gatekeeper_enabled:
+              type: boolean
+            gatekeeper_enabled_raw:
+              type: string
+            sip_enabled:
+              type: boolean
+            sip_enabled_raw:
+              type: string
+        privileges:
+          type: object
+          additionalProperties: false
+          properties:
+            admin_count:
+              type: integer
+            ssh_keys_count:
+              type: integer
+            elevated_risk:
+              type: boolean
+            local_admins:
+              type: array
+              items:
+                type: string
+            root_users:
+              type: array
+              items:
+                type: string
+        software:
+          type: object
+          additionalProperties: false
+          properties:
+            installed_count:
+              type: integer
+            services_count:
+              type: integer
+            scheduled_tasks_count:
+              type: integer
+            startup_items_count:
+              type: integer
+            browser_extensions_count:
+              type: integer
+            chrome_extensions_count:
+              type: integer
+            launch_agents_count:
+              type: integer
+            launch_daemons_count:
+              type: integer
+            unsigned_apps_count:
+              type: integer
+        hardware:
+          type: object
+          additionalProperties: false
+          properties:
+            vendor:
+              type: string
+            cpu:
+              type: string
+            model:
+              type: string
+            usb_removable_count:
+              type: integer
+            disk:
+              type: object
+              additionalProperties: false
+              properties:
+                total_capacity_gb:
+                  type: number
+                free_space_gb:
+                  type: number
+        network:
+          type: object
+          additionalProperties: false
+          properties:
+            listening_ports_count:
+              type: integer
+            interfaces:
+              type: array
+              items:
+                type: string
+        detections:
+          type: object
+          additionalProperties: false
+          properties:
+            encoded_powershell_count:
+              type: integer
+            suspicious_ports_count:
+              type: integer
+            hidden_temp_files_count:
+              type: integer
+        drift:
+          type: object
+          additionalProperties: false
+          properties:
+            recently_changed:
+              type: boolean
+            change_types:
+              type: array
+              items:
+                type: string
+        queries:
+          type: object
+          additionalProperties: false
+          properties:
+            total_results:
+              type: integer
 
     UserEntity:
       type: object
@@ -249,15 +413,54 @@ components:
               type: array
               items:
                 type: string
+            # OS information from osquery
+            os:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: array
+                  items:
+                    type: string
+                type:
+                  type: array
+                  items:
+                    type: string
+                family:
+                  type: string
+                kernel:
+                  type: string
+                version:
+                  type: string
+                platform:
+                  type: string
+                build:
+                  type: string
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
           required:
             - name
+        # Agent information from osquery
+        agent:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            type:
+              type: string
+            version:
+              type: string
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
+        # Endpoint trust intelligence fields from CAASM/osquery
+        endpoint:
+          $ref: '#/components/schemas/EndpointTrust'
         event:
           type: object
           additionalProperties: false

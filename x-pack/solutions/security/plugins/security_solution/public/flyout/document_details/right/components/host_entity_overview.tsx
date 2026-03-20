@@ -66,6 +66,7 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { useEndpointAssetData } from '../../../entity_details/endpoint_assets/hooks/use_endpoint_asset_data';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -209,6 +210,8 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   });
   const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+  const { data: endpointAssetData } = useEndpointAssetData(hostName);
+  const hasEndpointAssetData = !!(endpointAssetData?.endpoint?.posture || endpointAssetData?.endpoint?.drift || endpointAssetData?.endpoint?.privileges);
 
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
@@ -217,6 +220,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    hasEndpointAssetData,
     isPreviewMode: true, // setting to true to always open a new host flyout
     contextID: 'HostEntityOverview',
   });
