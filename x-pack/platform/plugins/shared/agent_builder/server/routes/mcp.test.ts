@@ -7,9 +7,10 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
+import { registerMCPRoutes, filterToolsByNamespace, buildSkillPromptContent } from './mcp';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import { MCP_SERVER_PATH } from '../../common/mcp';
@@ -27,6 +28,22 @@ const createMockTool = (
   isAvailable: jest.fn().mockResolvedValue({ status: 'available' }),
   getSchema: jest.fn().mockResolvedValue(z.object({})),
   getHandler: jest.fn().mockResolvedValue(jest.fn()),
+  ...overrides,
+});
+
+const createMockSkill = (
+  id: string,
+  overrides: Partial<InternalSkillDefinition> = {}
+): InternalSkillDefinition => ({
+  id,
+  name: id,
+  description: `Skill ${id}`,
+  content: `# ${id}\nSkill content`,
+  readonly: true,
+  experimental: false,
+  basePath: `skills/platform/${id}`,
+  referencedContentCount: 0,
+  getRegistryTools: jest.fn().mockResolvedValue([]),
   ...overrides,
 });
 
@@ -138,6 +155,35 @@ describe('filterToolsByNamespace', () => {
   });
 });
 
+describe('buildSkillPromptContent', () => {
+  it('returns skill content when there is no referenced content', () => {
+    const skill = createMockSkill('data-exploration');
+    const content = buildSkillPromptContent(skill);
+    expect(content).toBe(skill.content);
+  });
+
+  it('appends referenced content separated by horizontal rules', () => {
+    const skill = createMockSkill('data-exploration', {
+      content: '# Main content',
+      referencedContent: [
+        { name: 'ref-one', relativePath: '.', content: 'Reference one content' },
+        { name: 'ref-two', relativePath: '.', content: 'Reference two content' },
+      ],
+      referencedContentCount: 2,
+    });
+    const content = buildSkillPromptContent(skill);
+    expect(content).toBe(
+      '# Main content\n\n---\n\nReference one content\n\n---\n\nReference two content'
+    );
+  });
+
+  it('handles empty referencedContent array', () => {
+    const skill = createMockSkill('data-exploration', { referencedContent: [] });
+    const content = buildSkillPromptContent(skill);
+    expect(content).toBe(skill.content);
+  });
+});
+
 describe('registerMCPRoutes', () => {
   const routeKey = `POST:${MCP_SERVER_PATH}`;
   let routeHandlers: Record<string, { config: any; handler: Function }>;
@@ -147,12 +193,16 @@ describe('registerMCPRoutes', () => {
     routeHandlers = {};
 
     const mockLogger = loggingSystemMock.createLogger();
-    const mockRegistry = {
-      list: jest.fn(),
+    const mockToolRegistry = {
+      list: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
+    const mockSkillRegistry = {
+      list: jest.fn().mockResolvedValue([]),
+    };
     const getInternalServices = jest.fn().mockReturnValue({
-      tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
+      tools: { getRegistry: jest.fn().mockResolvedValue(mockToolRegistry) },
+      skills: { getRegistry: jest.fn().mockResolvedValue(mockSkillRegistry) },
     });
 
     const mockRouter = {

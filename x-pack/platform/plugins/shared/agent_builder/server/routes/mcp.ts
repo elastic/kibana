@@ -9,8 +9,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
+import { createToolIdMappings, sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -19,6 +20,16 @@ import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
+
+export function buildSkillPromptContent(skill: InternalSkillDefinition): string {
+  let content = skill.content;
+  if (skill.referencedContent && skill.referencedContent.length > 0) {
+    for (const ref of skill.referencedContent) {
+      content += `\n\n---\n\n${ref.content}`;
+    }
+  }
+  return content;
+}
 
 export function filterToolsByNamespace(
   tools: InternalToolDefinition[],
@@ -112,7 +123,7 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
             version: MCP_SERVER_VERSION,
           });
 
-          const { tools: toolService } = getInternalServices();
+          const { tools: toolService, skills: skillService } = getInternalServices();
 
           const registry = await toolService.getRegistry({ request });
           const allTools = await registry.list({});
@@ -138,6 +149,25 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
                 };
               }
             );
+          }
+
+          // Expose skills as MCP prompts so they appear as slash commands in Claude Code
+          const skillRegistry = await skillService.getRegistry({ request });
+          const skills = await skillRegistry.list({});
+
+          for (const skill of skills) {
+            const promptName = sanitizeToolId(skill.id);
+            server.prompt(promptName, skill.description, async () => ({
+              messages: [
+                {
+                  role: 'user' as const,
+                  content: {
+                    type: 'text' as const,
+                    text: buildSkillPromptContent(skill),
+                  },
+                },
+              ],
+            }));
           }
 
           request.events.aborted$.subscribe(async () => {
