@@ -16,6 +16,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { WorkflowsRequestHandlerContext } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
@@ -30,13 +31,7 @@ export const getWorkflowExecutionEngineMock = (enabled = true, logEventsEnabled 
 
 export const createMockRouterInstance = () => createMockRouter.create();
 
-interface MockSpaces {
-  getSpaceId: (req: unknown) => Promise<string>;
-}
-
-export const createSpacesMock = (id = 'default'): jest.Mocked<MockSpaces> => ({
-  getSpaceId: jest.fn().mockReturnValue(id),
-});
+export const createSpacesMock = () => spacesMock.createStart().spacesService;
 
 export const createMockWorkflowsApi = (): WorkflowsManagementApi => {
   // Create a mock object that automatically creates jest.fn() for any property access
@@ -58,6 +53,7 @@ export const createMockResponse = () => ({
   notFound: jest.fn().mockReturnThis(),
   badRequest: jest.fn().mockReturnThis(),
   conflict: jest.fn().mockReturnThis(),
+  forbidden: jest.fn().mockReturnThis(),
   customError: jest.fn().mockReturnThis(),
 });
 
