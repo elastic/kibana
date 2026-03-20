@@ -35,15 +35,11 @@ import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
+import { euid } from '@kbn/entity-store/common';
 import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
-import type { HostEntity, UserEntity } from '../../../../common/api/entity_analytics';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import {
-  getHostIdentityFieldsFromStoreRecord,
-  getUserIdentityFieldsFromStoreRecord,
-} from '../../../flyout/entity_details/shared/entity_record_to_identifiers';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type MisconfigurationSortFieldType =
@@ -209,28 +205,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
       skip: !entityStoreV2Enabled || !entityId,
     });
 
-    const identityForEuidDoc = useMemo((): Record<string, string> | null => {
-      if (entityStoreV2Enabled && entityId) {
-        if (entityRecord) {
-          return entityTypeResolved === 'host'
-            ? getHostIdentityFieldsFromStoreRecord(entityRecord as HostEntity)
-            : getUserIdentityFieldsFromStoreRecord(entityRecord as UserEntity);
-        }
-        if (isEntityRecordLoading) {
-          return null;
-        }
-        return { [field]: value };
-      }
-      return { [field]: value };
-    }, [
-      entityStoreV2Enabled,
-      entityId,
-      entityRecord,
-      entityTypeResolved,
-      field,
-      value,
-      isEntityRecordLoading,
-    ]);
+    const identityForEuidDoc = useMemo<Record<string, string>>(
+      () => euid.getEntityIdentifiersFromDocument(entityTypeResolved, entityRecord) ?? {},
+      [entityRecord, entityTypeResolved]
+    );
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo(() => {

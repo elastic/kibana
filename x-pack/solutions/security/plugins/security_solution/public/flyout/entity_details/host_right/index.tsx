@@ -11,7 +11,8 @@ import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi, FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { euid } from '@kbn/entity-store/common';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -24,7 +25,6 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
@@ -44,8 +44,6 @@ import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
-import { getHostIdentityFieldsFromStoreRecord } from '../shared/entity_record_to_identifiers';
-import type { HostEntity } from '../../../../common/api/entity_analytics';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -110,13 +108,10 @@ export const HostPanel = ({
     skip: !entityStoreV2Enabled || isInitializing,
   });
 
-  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    const record = entityFromStoreResult.entityRecord;
-    if (record && 'host' in record) {
-      return getHostIdentityFieldsFromStoreRecord(record as HostEntity);
-    }
-    return resolutionSeedIdentifiers;
-  }, [entityFromStoreResult.entityRecord, resolutionSeedIdentifiers]);
+  const documentEntityIdentifiers = useMemo<IdentityFields>(
+    () => euid.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ?? {},
+    [entityFromStoreResult.entityRecord]
+  );
 
   const resolvedEntityId = entityFromStoreResult.entityRecord?.entity?.id ?? entityIdProp;
 

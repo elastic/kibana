@@ -6,6 +6,7 @@
  */
 
 import { FILTER_CLOSED } from '@kbn/securitysolution-data-table/common/types';
+import type { ESBoolQuery } from '../../../common/typed_json';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
@@ -16,11 +17,15 @@ export const useNonClosedAlerts = ({
   to,
   from,
   queryId,
+  additionalFilters,
+  skip = false,
 }: {
   identityFields: IdentityFields;
   to: string;
   from: string;
   queryId: string;
+  additionalFilters?: ESBoolQuery[];
+  skip?: boolean;
 }) => {
   const { signalIndexName } = useSignalIndex();
 
@@ -30,6 +35,8 @@ export const useNonClosedAlerts = ({
     queryId,
     to,
     from,
+    additionalFilters,
+    skip,
   });
 
   const filteredAlertsData: ParsedAlertsData = alertsData

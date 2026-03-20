@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 
+import { euid } from '@kbn/entity-store/common';
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -17,10 +18,6 @@ import type { ESBoolQuery, ESQuery, ESTermQuery } from '../../../../common/typed
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import {
-  getHostIdentityFieldsFromStoreRecord,
-  getUserIdentityFieldsFromStoreRecord,
-} from '../../../flyout/entity_details/shared/entity_record_to_identifiers';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useUiSetting } from '../../lib/kibana';
 import { useQueryInspector } from '../page/manage_query';
@@ -91,31 +88,10 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
 
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
-  const identityFieldsForQuery = useMemo(() => {
-    if (!isEntityIdField || !shouldFetchFromEntityStore) {
-      return undefined;
-    }
-    if (entityFromStoreLoading) {
-      return undefined;
-    }
-    if (!entityRecord) {
-      return { [ENTITY_ID_FIELD]: value };
-    }
-    if (storeEntityType === 'host' && 'host' in entityRecord) {
-      return getHostIdentityFieldsFromStoreRecord(entityRecord);
-    }
-    if (storeEntityType === 'user' && 'user' in entityRecord) {
-      return getUserIdentityFieldsFromStoreRecord(entityRecord);
-    }
-    return { [ENTITY_ID_FIELD]: value };
-  }, [
-    entityRecord,
-    entityFromStoreLoading,
-    isEntityIdField,
-    shouldFetchFromEntityStore,
-    storeEntityType,
-    value,
-  ]);
+  const identityFieldsForQuery = useMemo<Record<string, string>>(
+    () => euid.getEntityIdentifiersFromDocument(storeEntityType ?? 'generic', entityRecord) ?? {},
+    [entityRecord, storeEntityType]
+  );
 
   const skipAlertsQuery =
     skip ||

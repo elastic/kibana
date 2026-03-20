@@ -47,15 +47,11 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
+import { euid } from '@kbn/entity-store/common';
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
-import type { HostEntity, UserEntity } from '../../../../common/api/entity_analytics';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import {
-  getHostIdentityFieldsFromStoreRecord,
-  getUserIdentityFieldsFromStoreRecord,
-} from '../../../flyout/entity_details/shared/entity_record_to_identifiers';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type VulnerabilitySortFieldType =
@@ -170,9 +166,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     const identityForEuidDoc = useMemo((): Record<string, string> | null => {
       if (entityStoreV2Enabled && entityId) {
         if (entityRecord) {
-          return entityTypeResolved === 'host'
-            ? getHostIdentityFieldsFromStoreRecord(entityRecord as HostEntity)
-            : getUserIdentityFieldsFromStoreRecord(entityRecord as UserEntity);
+          return euid.getEntityIdentifiersFromDocument(entityTypeResolved, entityRecord) ?? {};
         }
         if (isEntityRecordLoading) {
           return null;

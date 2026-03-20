@@ -24,9 +24,6 @@ export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
 // Privileges required for the transform to run
 export const ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES = ['read', 'view_index_metadata'];
 
-/** Kibana advanced setting key to enable Entity Store v2 (must match entity_store plugin). */
-export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
-
 // The index pattern for the entity store has to support '.entities.v1.latest.noop' and '.entities.v2.*' indices
 export const ENTITY_STORE_INDEX_PATTERN = '.entities.*';
 export const ENTITY_STORE_HISTORY_INDEX_PATTERN = '.entities.*history*';

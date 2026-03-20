@@ -189,7 +189,12 @@ export const InsightsTabCsp = memo(
             entityType={entityType}
           />
         ) : (
-          <AlertsDetailsTable field={field} value={value} />
+          <AlertsDetailsTable
+            field={field}
+            value={value}
+            entityId={entityId}
+            entityType={entityType}
+          />
         )}
       </>
     );

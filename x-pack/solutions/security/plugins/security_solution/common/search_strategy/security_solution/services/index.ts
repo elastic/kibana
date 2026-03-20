@@ -8,6 +8,4 @@
 export type * from './observed_details';
 export type * from './common';
 
-// Import from model only to avoid loading api/search_strategy index (and its zod discriminatedUnion)
-// during plugin init; the full index pulls in all schema modules and can cause init-order errors.
-export { ServicesQueries } from '../../../api/search_strategy/model/factory_query_type';
+export { ServicesQueries } from '../../../api/search_strategy';

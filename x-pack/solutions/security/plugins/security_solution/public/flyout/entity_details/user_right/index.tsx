@@ -10,10 +10,10 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { euid } from '@kbn/entity-store/common';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -45,8 +45,6 @@ import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
-import { getUserIdentityFieldsFromStoreRecord } from '../shared/entity_record_to_identifiers';
-import type { UserEntity } from '../../../../common/api/entity_analytics';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -110,12 +108,8 @@ export const UserPanel = ({
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    const record = entityFromStoreResult.entityRecord;
-    if (record && 'user' in record) {
-      return getUserIdentityFieldsFromStoreRecord(record as UserEntity);
-    }
-    return resolutionSeedIdentifiers;
-  }, [entityFromStoreResult.entityRecord, resolutionSeedIdentifiers]);
+    return euid.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ?? {};
+  }, [entityFromStoreResult.entityRecord]);
 
   const resolvedEntityId = entityFromStoreResult.entityRecord?.entity?.id ?? entityIdProp;
 
