@@ -13,9 +13,7 @@ export { triggerCaseAttackDiscovery } from './case_integration';
 export { getIncrementalDelta, markAlertsProcessed } from './incremental';
 export { EnrichmentRegistry } from './enrichment';
 export type { EnrichmentStrategy, EnrichedEntity, EnrichmentResult } from './enrichment';
-export { ThreatIntelEnrichment } from './enrichment_strategies/threat_intel_enrichment';
-export { MlAnomalyEnrichment } from './enrichment_strategies/ml_anomaly_enrichment';
-export { MitreAttackEnrichment } from './enrichment_strategies/mitre_attack_enrichment';
+// Enrichment strategies removed - were exploratory, not used in spike
 export type {
   PipelineConfig,
   PipelineExecutionResult,
