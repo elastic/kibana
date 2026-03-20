@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ScopedHistory } from '@kbn/core/public';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
@@ -12,7 +12,6 @@ import type { DataStream } from '../../../../../../common/types';
 import { DataStreamTable } from './data_stream_table';
 
 jest.mock('@elastic/eui', () => {
-  const ReactImport = jest.requireActual('react');
   const actual = jest.requireActual('@elastic/eui');
 
   const EuiInMemoryTable = ({
@@ -22,7 +21,7 @@ jest.mock('@elastic/eui', () => {
     selection,
     'data-test-subj': dataTestSubj,
   }: any) => {
-    const [selectedNames, setSelectedNames] = ReactImport.useState<string[]>([]);
+    const [selectedNames, setSelectedNames] = useState<string[]>([]);
 
     const toggleSelect = (item: any) => {
       const nextSelectedNames = selectedNames.includes(item.name)
@@ -205,7 +204,7 @@ describe('DataStreamTable', () => {
     expect(screen.getByTestId('bulkEditDataRetentionButton')).toBeInTheDocument();
   });
 
-  it('does not show bulk edit data retention action when selected stream is next-gen ILM-managed', () => {
+  it('does not show bulk edit data retention action when selected stream is ILM-managed', () => {
     const dataStream = createDataStream({
       name: 'ds1',
       nextGenerationManagedBy: 'Index Lifecycle Management',
@@ -258,7 +257,7 @@ describe('DataStreamTable', () => {
     expect(screen.getByTestId('usingMaxRetention')).toBeInTheDocument();
   });
 
-  it('does not render the max retention indicator for next-gen ILM-managed streams', () => {
+  it('does not render the max retention indicator for ILM-managed streams', () => {
     const dataStream = createDataStream({
       name: 'ds1',
       nextGenerationManagedBy: 'Index Lifecycle Management',
