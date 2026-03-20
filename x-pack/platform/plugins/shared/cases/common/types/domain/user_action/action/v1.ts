@@ -27,6 +27,7 @@ export const UserActionTypes = {
   category: 'category',
   customFields: 'customFields',
   observables: 'observables',
+  extended_fields: 'extended_fields',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;
