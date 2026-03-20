@@ -4036,7 +4036,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/all_operators.ts",
-        "lineNumber": 183,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
