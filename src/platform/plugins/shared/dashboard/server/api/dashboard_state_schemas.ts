@@ -185,7 +185,10 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
+export function getDashboardStateSchema(
+  isDashboardAppRequest: boolean,
+  { allowAccessControl = true }: { allowAccessControl?: boolean } = {}
+) {
   return schema.object({
     pinned_panels: pinnedPanelsSchema,
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
@@ -214,6 +217,6 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    access_control: accessControlSchema,
+    ...(allowAccessControl ? { access_control: accessControlSchema } : {}),
   });
 }
