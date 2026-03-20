@@ -316,15 +316,15 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async navigateToToolsLanding() {
-    await this.navigateToApp('tools');
+    await this.navigateToApp('manage/tools');
   }
 
   async navigateToNewTool() {
-    await this.navigateToApp('tools/new');
+    await this.navigateToApp('manage/tools/new');
   }
 
   async navigateToTool(toolId: string) {
-    await this.navigateToApp(`tools/${toolId}`);
+    await this.navigateToApp(`manage/tools/${toolId}`);
   }
 
   /*
@@ -393,7 +393,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async navigateToBulkImportMcp() {
-    await this.navigateToApp('tools/bulk_import_mcp');
+    await this.navigateToApp('manage/tools/bulk_import_mcp');
   }
 
   async openManageMcpMenu() {
@@ -543,7 +543,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async createAgentViaUI({ id, name, labels }: { id: string; name: string; labels: string[] }) {
-    await this.navigateToApp('agents/new');
+    await this.navigateToApp('manage/agents/new');
     const selectors = {
       inputs: {
         id: 'agentSettingsIdInput',

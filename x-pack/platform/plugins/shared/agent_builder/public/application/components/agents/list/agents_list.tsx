@@ -202,7 +202,8 @@ export const AgentsList: React.FC = () => {
           'data-test-subj': (agent) => `agentBuilderAgentsListChat-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
-          href: (agent) => createAgentBuilderUrl(appPaths.agent.root({ agentId: agent.id })),
+          href: (agent) =>
+            createAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: agent.id })),
         },
         {
           type: 'icon',
