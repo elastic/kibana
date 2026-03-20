@@ -47,6 +47,18 @@ jest.mock('../../hooks/use_delete_rule', () => ({
   useDeleteRule: () => mockUseDeleteRule(),
 }));
 
+const mockBulkDeleteMutate = jest.fn();
+jest.mock('../../hooks/use_bulk_delete_rules', () => ({
+  useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
+}));
+
+const mockBulkEnableMutate = jest.fn();
+const mockBulkDisableMutate = jest.fn();
+jest.mock('../../hooks/use_bulk_enable_disable_rules', () => ({
+  useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
+  useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
+}));
+
 const mockToggleEnabledMutate = jest.fn();
 const mockUseToggleRuleEnabled = jest.fn();
 jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
@@ -366,5 +378,266 @@ describe('RulesListPage', () => {
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
       '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
     );
+  });
+
+  describe('selection', () => {
+    beforeEach(() => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+    });
+
+    it('renders selection checkboxes for each row', () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      // 1 header "select all" checkbox + 2 row checkboxes
+      expect(checkboxes.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('does not show selected count or clear button when no rules are selected', () => {
+      renderPage();
+
+      expect(screen.queryByTestId('bulkActionsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
+    });
+
+    it('shows selected count when rules are selected', async () => {
+      renderPage();
+
+      // Click the first row checkbox (skip index 0 which is "select all")
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('1 Selected');
+      });
+    });
+
+    it('shows clear selection button when rules are selected', async () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('clearSelectionButton')).toBeInTheDocument();
+      });
+    });
+
+    it('updates selected count when selecting multiple rules', async () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      // Select both rows
+      fireEvent.click(checkboxes[1]);
+      fireEvent.click(checkboxes[2]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+      });
+    });
+
+    it('clears selection when clear button is clicked', async () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('clearSelectionButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('bulkActionsButton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
+      });
+    });
+
+    it('selects all rules when header checkbox is clicked', async () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      // Click the header "select all" checkbox (first checkbox)
+      fireEvent.click(checkboxes[0]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+      });
+    });
+  });
+
+  describe('bulk actions menu', () => {
+    beforeEach(() => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+    });
+
+    const selectFirstRuleAndOpenMenu = async () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+    };
+
+    it('opens context menu with enable, disable, and delete options', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
+        expect(screen.getByTestId('bulkDisableRules')).toBeInTheDocument();
+        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
+      });
+    });
+
+    it('shows bulk delete confirmation modal when delete is clicked', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkDeleteRules'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toHaveTextContent(/1 rule/);
+      });
+
+      // Mutation should NOT have been called yet
+      expect(mockBulkDeleteMutate).not.toHaveBeenCalled();
+    });
+
+    it('calls bulkDeleteRules when bulk delete is confirmed', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkDeleteRules'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
+        { ids: ['rule-1'] },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+      );
+    });
+
+    it('dismisses bulk delete modal on cancel', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkDeleteRules'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls bulkEnableRules with selected ids when enable is clicked', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkEnableRules'));
+
+      expect(mockBulkEnableMutate).toHaveBeenCalledWith(
+        { ids: ['rule-1'] },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+
+    it('calls bulkDisableRules with selected ids when disable is clicked', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkDisableRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkDisableRules'));
+
+      expect(mockBulkDisableMutate).toHaveBeenCalledWith(
+        { ids: ['rule-1'] },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+
+    it('shows correct count in bulk delete modal when multiple rules are selected', async () => {
+      renderPage();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+      fireEvent.click(checkboxes[2]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkDeleteRules'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toHaveTextContent(/2 rules/);
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
+        { ids: expect.arrayContaining(['rule-1', 'rule-2']) },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+      );
+    });
+
+    it('closes the popover after clicking a bulk action', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkEnableRules'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('bulkEnableRules')).not.toBeInTheDocument();
+      });
+    });
   });
 });

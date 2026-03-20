@@ -14,20 +14,19 @@ export const notificationPolicyDestinationSchema = schema.oneOf([
   }),
 ]);
 
-/**
- * Attributes for the notification policy saved object.
- */
 export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   enabled: schema.boolean(),
   destinations: schema.arrayOf(notificationPolicyDestinationSchema),
-  matcher: schema.maybe(schema.string()),
-  group_by: schema.maybe(schema.arrayOf(schema.string())),
+  matcher: schema.maybe(schema.nullable(schema.string())),
+  groupBy: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
   throttle: schema.maybe(
-    schema.object({
-      interval: schema.string(),
-    })
+    schema.nullable(
+      schema.object({
+        interval: schema.string(),
+      })
+    )
   ),
   snoozedUntil: schema.maybe(schema.nullable(schema.string())),
   auth: schema.object({
@@ -36,7 +35,9 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
     createdByUser: schema.boolean(),
   }),
   createdBy: schema.nullable(schema.string()),
+  createdByUsername: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
+  updatedByUsername: schema.nullable(schema.string()),
   createdAt: schema.string(),
   updatedAt: schema.string(),
 });

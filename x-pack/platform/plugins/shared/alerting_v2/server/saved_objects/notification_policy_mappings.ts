@@ -16,6 +16,7 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
     name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     description: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     enabled: { type: 'boolean' },
+    groupBy: { type: 'keyword' },
     destinations: {
       type: 'object',
       properties: {
@@ -33,8 +34,10 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     createdBy: { type: 'keyword' },
+    createdByUsername: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },
+    updatedByUsername: { type: 'keyword' },
     updatedAt: { type: 'date' },
   },
 };

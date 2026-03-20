@@ -73,10 +73,6 @@ export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TES
 export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
   `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
 
-const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
-export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
-export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
-
 export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
 
 export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
@@ -201,10 +197,6 @@ export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
 export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = VISUALIZATIONS_TEST_ID + HEADER_TEST_ID;
 export const VISUALIZATIONS_SECTION_CONTENT_TEST_ID = VISUALIZATIONS_TEST_ID + CONTENT_TEST_ID;
-
-export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
-export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
-  `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
 
 export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
 export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;

@@ -87,3 +87,39 @@ export const bulkCreateAlertActionBodySchema = z
     'Request body for bulk create alert actions. Array of 1 to 100 actions, each with group_hash and action payload.'
   );
 export type BulkCreateAlertActionBody = z.infer<typeof bulkCreateAlertActionBodySchema>;
+
+export const bulkGetAlertActionsBodySchema = z
+  .object({
+    episode_ids: z
+      .array(z.string())
+      .min(1, 'At least one episode ID must be provided')
+      .max(100, 'Cannot query more than 100 episode IDs in a single request')
+      .describe('List of episode identifiers to fetch alert actions for.'),
+  })
+  .describe('Request body for bulk getting alert actions by episode IDs.');
+
+export type BulkGetAlertActionsBody = z.infer<typeof bulkGetAlertActionsBodySchema>;
+
+export const bulkGetAlertActionsResponseSchema = z
+  .array(
+    z.object({
+      episode_id: z.string().describe('The episode identifier.'),
+      rule_id: z.string().nullable().describe('The rule identifier, or null if not found.'),
+      group_hash: z.string().nullable().describe('The alert group hash, or null if not found.'),
+      last_ack_action: z
+        .enum(['ack', 'unack'])
+        .nullable()
+        .describe('The last acknowledge action, or null if none.'),
+      last_deactivate_action: z
+        .enum(['activate', 'deactivate'])
+        .nullable()
+        .describe('The last deactivate action, or null if none.'),
+      last_snooze_action: z
+        .enum(['snooze', 'unsnooze'])
+        .nullable()
+        .describe('The last snooze action, or null if none.'),
+    })
+  )
+  .describe('Response body for bulk getting alert actions by episode IDs.');
+
+export type BulkGetAlertActionsResponse = z.infer<typeof bulkGetAlertActionsResponseSchema>;

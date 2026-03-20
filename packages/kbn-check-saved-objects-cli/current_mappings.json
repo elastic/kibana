@@ -332,10 +332,27 @@
         },
         "type": "object"
       },
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "createdAt": {
         "type": "date"
       },
       "createdBy": {
+        "type": "keyword"
+      },
+      "createdByUsername": {
         "type": "keyword"
       },
       "description": {
@@ -361,6 +378,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "groupBy": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -378,12 +398,29 @@
       },
       "updatedBy": {
         "type": "keyword"
+      },
+      "updatedByUsername": {
+        "type": "keyword"
       }
     }
   },
   "alerting_rule": {
     "dynamic": false,
     "properties": {
+      "artifacts": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "createdAt": {
         "type": "date"
       },
@@ -1684,6 +1721,10 @@
       "internal": {
         "type": "boolean"
       },
+      "is_dependency_of": {
+        "dynamic": false,
+        "properties": {}
+      },
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
@@ -1695,6 +1736,9 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
+      },
+      "installed_as_dependency": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -2190,6 +2234,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
@@ -2206,6 +2253,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2355,6 +2406,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -2620,6 +2674,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_diagnostics": {
         "index": false,
         "type": "flattened"
@@ -2648,6 +2705,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2979,6 +3040,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -3389,6 +3453,20 @@
   "monitoring-telemetry": {
     "properties": {
       "reportedClusterUuids": {
+        "type": "keyword"
+      }
+    }
+  },
+  "oauth_state": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "state": {
         "type": "keyword"
       }
     }
@@ -4696,6 +4774,25 @@
       }
     }
   },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      }
+    }
+  },
   "upgrade-assistant-ml-upgrade-operation": {
     "dynamic": false,
     "properties": {
@@ -4776,6 +4873,20 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user_connector_token": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "credentialType": {
+        "type": "keyword"
+      },
+      "profileUid": {
         "type": "keyword"
       }
     }

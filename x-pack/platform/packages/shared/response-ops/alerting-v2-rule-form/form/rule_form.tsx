@@ -34,6 +34,8 @@ import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
 
+export type { RuleFormServices } from './contexts';
+
 export interface RuleFormProps {
   services: RuleFormServices;
   /** Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'. */

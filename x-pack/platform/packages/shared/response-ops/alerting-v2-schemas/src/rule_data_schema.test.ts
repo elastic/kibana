@@ -62,6 +62,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       });
 
       expect(result).toEqual(
@@ -78,6 +79,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
+          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
         })
       );
     });
@@ -404,6 +406,15 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects recovering_count greater than 1000', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { recovering_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('rejects an invalid pending_operator', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -584,6 +595,18 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.description).toBe('updated description');
   });
 
+  it('accepts artifacts in update payload and supports null removal', () => {
+    const withArtifacts = updateRuleDataSchema.parse({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+    expect(withArtifacts).toMatchObject({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+
+    const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
+    expect(nullArtifacts).toMatchObject({ artifacts: null });
+  });
+
   it('accepts an enabled field set to true', () => {
     const result = updateRuleDataSchema.parse({ enabled: true });
     expect(result).toEqual({ enabled: true });
@@ -691,6 +714,14 @@ describe('updateRuleDataSchema', () => {
     it('rejects pending_count greater than 1000', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovering_count greater than 1000', () => {
+      const result = updateRuleDataSchema.safeParse({
+        state_transition: { recovering_count: 1001 },
       });
 
       expect(result.success).toBe(false);
