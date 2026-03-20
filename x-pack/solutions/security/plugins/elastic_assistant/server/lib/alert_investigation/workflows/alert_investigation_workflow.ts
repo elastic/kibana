@@ -116,14 +116,14 @@ export const alertInvestigationWorkflowDefinition = {
  * Complete E2E Alert Investigation Pipeline as Elastic Workflow
  *
  * This workflow definition orchestrates all 6 stages:
- * 1. Fetch → 2. Dedup → 3. Extract → 4. Match → 5. Incremental AD → 6. Tag
+ * 1. Fetch -> 2. Dedup -> 3. Extract -> 4. Match -> 5. Incremental AD -> 6. Tag
  *
  * Replaces the need for orchestrator.ts (719 lines) - Elastic Workflows handles orchestration!
  *
  * Execution:
- * - Scheduled: Every 15 minutes (cron: */15 * * * *)
+ * - Scheduled: Every 15 minutes
  * - Feature flag: Controlled by elasticAssistant:alertInvestigationPipeline_enabled
- * - State management: Automatic (${steps.X.output} interpolation)
+ * - State management: Automatic state interpolation between stages
  * - Error handling: Built-in workflow error handling
  * - Monitoring: Elastic Workflows execution history UI
  */
