@@ -326,7 +326,7 @@ export const ListNotificationPoliciesPage = () => {
           </EuiButton>,
         ]}
       />
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
         <EuiSpacer size="m" />
         <EuiFlexItem grow={false}>
           <NotificationPoliciesSearchBar
@@ -335,7 +335,6 @@ export const ListNotificationPoliciesPage = () => {
             onEnabledChange={handleEnabledChange}
           />
         </EuiFlexItem>
-        <EuiSpacer size="m" />
         {errorMessage ? (
           <>
             <EuiCallOut
@@ -354,71 +353,73 @@ export const ListNotificationPoliciesPage = () => {
             <EuiSpacer />
           </>
         ) : null}
-        {total > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <FormattedMessage
-                    id="xpack.alertingV2.notificationPoliciesList.showingLabel"
-                    defaultMessage="Showing {rangeBold} of {totalBold}"
-                    values={{
-                      rangeBold: (
-                        <strong>
-                          {Math.min(page * perPage + 1, total)}-
-                          {Math.min((page + 1) * perPage, total)}
-                        </strong>
-                      ),
-                      totalBold: (
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.alertingV2.notificationPoliciesList.showingLabelTotal"
-                            defaultMessage="{total} {total, plural, one {notification policy} other {notification policies}}"
-                            values={{ total }}
-                          />
-                        </strong>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-              {hasSelection && (
+        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          {total > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <NotificationPoliciesBulkActions
-                    selectedPolicies={selectedPolicies}
-                    onClearSelection={clearSelection}
-                    onBulkAction={handleBulkAction}
-                    isLoading={isBulkActionInProgress}
-                  />
+                  <EuiText size="xs">
+                    <FormattedMessage
+                      id="xpack.alertingV2.notificationPoliciesList.showingLabel"
+                      defaultMessage="Showing {rangeBold} of {totalBold}"
+                      values={{
+                        rangeBold: (
+                          <strong>
+                            {Math.min(page * perPage + 1, total)}-
+                            {Math.min((page + 1) * perPage, total)}
+                          </strong>
+                        ),
+                        totalBold: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.alertingV2.notificationPoliciesList.showingLabelTotal"
+                              defaultMessage="{total} {total, plural, one {notification policy} other {notification policies}}"
+                              values={{ total }}
+                            />
+                          </strong>
+                        ),
+                      }}
+                    />
+                  </EuiText>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-        <EuiBasicTable
-          items={items}
-          columns={columns}
-          itemId="id"
-          selection={selection}
-          loading={isLoading}
-          pagination={pagination}
-          responsiveBreakpoint={false}
-          css={css`
-            .euiTableHeaderMobile .euiCheckbox {
-              display: none;
-            }
-          `}
-          sorting={{
-            sort: {
-              field: sortField,
-              direction: sortDirection,
-            },
-          }}
-          onChange={onTableChange}
-          tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
-            defaultMessage: 'Notification Policies',
-          })}
-        />
+                {hasSelection && (
+                  <EuiFlexItem grow={false}>
+                    <NotificationPoliciesBulkActions
+                      selectedPolicies={selectedPolicies}
+                      onClearSelection={clearSelection}
+                      onBulkAction={handleBulkAction}
+                      isLoading={isBulkActionInProgress}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          <EuiBasicTable
+            items={items}
+            columns={columns}
+            itemId="id"
+            selection={selection}
+            loading={isLoading}
+            pagination={pagination}
+            responsiveBreakpoint={false}
+            css={css`
+              .euiTableHeaderMobile .euiCheckbox {
+                display: none;
+              }
+            `}
+            sorting={{
+              sort: {
+                field: sortField,
+                direction: sortDirection,
+              },
+            }}
+            onChange={onTableChange}
+            tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
+              defaultMessage: 'Notification Policies',
+            })}
+          />
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       {policyToDelete && (

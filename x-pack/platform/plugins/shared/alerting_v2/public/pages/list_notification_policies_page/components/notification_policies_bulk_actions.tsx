@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
