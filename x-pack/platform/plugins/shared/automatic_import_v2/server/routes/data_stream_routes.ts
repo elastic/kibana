@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
@@ -48,7 +48,7 @@ export const registerDataStreamRoutes = (
 
 const UpdateDataStreamPipelineRequestBody = z
   .object({
-    ingest_pipeline: z.union([z.string(), z.record(z.unknown())]),
+    ingest_pipeline: z.union([z.string(), z.record(z.any(), z.unknown())]),
   })
   .strict();
 
@@ -123,8 +123,7 @@ const uploadSamplesRoute = (
             dataStreamId,
             rawSamples,
             originalSource,
-            authenticatedUser: currentUser,
-            esClient,
+            createdBy: currentUser.username,
           });
           return response.ok({ body: result });
         } catch (err) {
@@ -172,8 +171,7 @@ const deleteDataStreamRoute = (
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const esClient = automaticImportv2.esClient;
-          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId);
           return response.ok();
         } catch (err) {
           logger.error(`deleteDataStreamRoute: Caught error:`, err);
