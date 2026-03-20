@@ -165,8 +165,10 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       createdByUser ??= createResponse.body.data.created_by;
     }
 
+    expect(createdByUser).toBeDefined();
+
     const searchResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_PACKS}?search=${uniquePrefix}`,
+      `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(uniquePrefix)}`,
       {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
         responseType: 'json',
@@ -186,7 +188,9 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
     expect(noMatchResponse.body.total).toBe(0);
 
     const createdByResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_PACKS}?search=${uniquePrefix}&createdBy=${createdByUser}`,
+      `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(
+        uniquePrefix
+      )}&createdBy=${encodeURIComponent(createdByUser!)}`,
       {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
         responseType: 'json',
