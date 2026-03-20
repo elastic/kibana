@@ -47,8 +47,9 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v9.2.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.19.0.json';
+import { useEcsSchema } from '../../common/hooks/use_ecs_schema';
+import { useOsquerySchema } from '../../common/hooks/use_osquery_schema';
+import type { EcsField, OsqueryTable } from '../../../common/types/schema';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -88,15 +89,20 @@ const typeMap = {
 
 const SINGLE_SELECTION = { asPlainText: true };
 
-const ECSSchemaOptions = ECSSchema.map((ecs) => ({
-  label: ecs.field,
-  value: ecs,
-}));
+interface ECSSchemaOption {
+  label: string;
+  value: EcsField;
+}
 
-type ECSSchemaOption = (typeof ECSSchemaOptions)[0];
+const buildEcsSchemaOptions = (ecsFields: EcsField[]): ECSSchemaOption[] =>
+  ecsFields.map((ecs) => ({
+    label: ecs.field,
+    value: ecs,
+  }));
 
 interface ECSComboboxFieldProps {
   euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;
+  ecsSchemaOptions: ECSSchemaOption[];
   control: ECSMappingFormReturn['control'];
   watch: ECSMappingFormReturn['watch'];
   index: number;
@@ -106,6 +112,7 @@ interface ECSComboboxFieldProps {
 
 const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   euiFieldProps = {},
+  ecsSchemaOptions,
   idAria,
   index,
   watch,
@@ -215,15 +222,15 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   const availableECSSchemaOptions = useMemo(() => {
     const currentFormECSFieldValues = map(watchedEcsMapping, 'key');
 
-    return ECSSchemaOptions.filter(({ label }) => !currentFormECSFieldValues.includes(label));
-  }, [watchedEcsMapping]);
+    return ecsSchemaOptions.filter(({ label }) => !currentFormECSFieldValues.includes(label));
+  }, [watchedEcsMapping, ecsSchemaOptions]);
 
   useEffect(() => {
     // @ts-expect-error update types
     setSelected(() => {
       if (!ECSField.value?.length) return [];
 
-      const selectedOption = find(ECSSchemaOptions, ['label', ECSField.value]);
+      const selectedOption = find(ecsSchemaOptions, ['label', ECSField.value]);
 
       return selectedOption
         ? [selectedOption]
@@ -317,6 +324,7 @@ const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
 
 interface OsqueryColumnFieldProps {
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
+  ecsSchemaOptions: ECSSchemaOption[];
   index: number;
   control: ECSMappingFormReturn['control'];
   watch: ECSMappingFormReturn['watch'];
@@ -327,6 +335,7 @@ interface OsqueryColumnFieldProps {
 
 const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   euiFieldProps,
+  ecsSchemaOptions,
   idAria,
   index,
   isLastItem,
@@ -430,7 +439,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const isSingleSelection = useMemo(() => {
     const ecsData = get(ecsMappingArray, `${index}`);
     if (ecsData?.key?.length && resultTypeField.value === 'value') {
-      const ecsKeySchemaOption = find(ECSSchemaOptions, ['label', ecsData?.key]);
+      const ecsKeySchemaOption = find(ecsSchemaOptions, ['label', ecsData?.key]);
 
       return ecsKeySchemaOption?.value?.normalization !== 'array';
     }
@@ -588,6 +597,7 @@ export interface ECSMappingEditorFieldProps {
 
 interface ECSMappingEditorFormProps {
   isDisabled?: boolean;
+  ecsSchemaOptions: ECSSchemaOption[];
   osquerySchemaOptions: OsquerySchemaOption[];
   index: number;
   isLastItem: boolean;
@@ -607,6 +617,7 @@ export const defaultEcsFormData = {
 
 export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   isDisabled,
+  ecsSchemaOptions,
   osquerySchemaOptions,
   isLastItem,
   index,
@@ -631,6 +642,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 control={control}
                 watch={watch}
                 index={index}
+                ecsSchemaOptions={ecsSchemaOptions}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
                   isDisabled,
@@ -649,6 +661,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 control={control}
                 watch={watch}
                 trigger={trigger}
+                ecsSchemaOptions={ecsSchemaOptions}
                 index={index}
                 isLastItem={isLastItem}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -707,6 +720,19 @@ interface OsqueryColumn {
 
 // eslint-disable-next-line react/display-name
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
+  const { data: ecsSchemaData } = useEcsSchema();
+  const { data: osquerySchemaData } = useOsquerySchema();
+
+  const ecsSchemaOptions = useMemo(
+    () => buildEcsSchemaOptions(ecsSchemaData ?? []),
+    [ecsSchemaData]
+  );
+
+  const osquerySchemaRef = useMemo(
+    () => osquerySchemaData ?? ([] as OsqueryTable[]),
+    [osquerySchemaData]
+  );
+
   const {
     setError,
     clearErrors,
@@ -812,7 +838,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
         (acc, data) => {
           // select * from uptime
           if (data?.type === 'identifier' && data?.variant === 'table') {
-            const osqueryTable = find(osquerySchema, ['name', data.name]);
+            const osqueryTable = find(osquerySchemaRef, ['name', data.name]);
 
             if (osqueryTable) {
               acc[data.alias || data.name] = {
@@ -825,7 +851,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
           // select * from uptime, routes
           if (data?.type === 'map' && data?.variant === 'join') {
             if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
-              const osqueryTable = find(osquerySchema, ['name', data?.source?.name]);
+              const osqueryTable = find(osquerySchemaRef, ['name', data?.source?.name]);
 
               if (osqueryTable) {
                 acc[data?.source?.alias || data?.source?.name] = {
@@ -840,7 +866,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
                 data?.source?.statement.from.type === 'identifier' &&
                 data?.source?.statement.from.variant === 'table'
               ) {
-                const osqueryTable = find(osquerySchema, [
+                const osqueryTable = find(osquerySchemaRef, [
                   'name',
                   data?.source?.statement.from.name,
                 ]);
@@ -865,7 +891,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
                     mapValue?.source?.type === 'identifier' &&
                     mapValue?.source?.variant === 'table'
                   ) {
-                    const osqueryTable = find(osquerySchema, ['name', mapValue?.source?.name]);
+                    const osqueryTable = find(osquerySchemaRef, ['name', mapValue?.source?.name]);
 
                     if (osqueryTable) {
                       acc[mapValue?.source?.alias || mapValue?.source?.name] = {
@@ -1018,7 +1044,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
       return prevValue;
     });
-  }, [query, trigger]);
+  }, [query, trigger, osquerySchemaRef]);
 
   useEffect(() => {
     const parsedMapping = convertECSMappingToObject(formValue.ecsMappingArray);
@@ -1054,6 +1080,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
       {fields.map((item, index, array) => (
         <div key={item.id}>
           <ECSMappingEditorForm
+            ecsSchemaOptions={ecsSchemaOptions}
             osquerySchemaOptions={osquerySchemaOptions}
             index={index}
             isLastItem={index === array.length - 1}

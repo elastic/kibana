@@ -6,15 +6,19 @@
  */
 
 import { flatMap, sortBy } from 'lodash';
+import { useMemo } from 'react';
+import type { OsqueryTable } from '../../common/types/schema';
+import { useOsquerySchema } from '../common/hooks/use_osquery_schema';
 
 type TablesJSON = Array<{
   name: string;
 }>;
-export const normalizeTables = (tablesJSON: TablesJSON) => sortBy(tablesJSON, 'name');
+const normalizeTables = (tablesJSON: TablesJSON) => sortBy(tablesJSON, 'name');
 
+// Sync fallback used while the async API data is loading
 let osqueryTables: TablesJSON | null = null;
 
-export const getOsqueryTables = () => {
+const getOsqueryTables = () => {
   if (!osqueryTables) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.19.0.json'));
@@ -23,15 +27,36 @@ export const getOsqueryTables = () => {
   return osqueryTables;
 };
 
-const normalizedOsqueryTables = getOsqueryTables();
+/**
+ * React hook that provides osquery tables from the Fleet package (with fallback).
+ * Use this in React components instead of the sync getOsqueryTables().
+ */
+export const useOsqueryTables = () => {
+  const { data, isLoading, osqueryVersion } = useOsquerySchema();
 
-export const osqueryTablesRecord: Record<string, { columns: Array<{ name: string }> }> =
-  normalizedOsqueryTables.reduce(
-    (acc, table) => ({
-      ...acc,
-      [table.name]: table,
-    }),
-    {}
+  const tables = useMemo(() => data ?? getOsqueryTables(), [data]);
+
+  const tablesRecord = useMemo(
+    () =>
+      (tables as OsqueryTable[]).reduce<
+        Record<string, { columns: Array<{ name: string }> }>
+      >(
+        (acc, table) => ({
+          ...acc,
+          [table.name]: table,
+        }),
+        {}
+      ),
+    [tables]
   );
 
-export const getOsqueryTableNames = () => flatMap(normalizedOsqueryTables, 'name');
+  const tableNames = useMemo(() => flatMap(tables, 'name'), [tables]);
+
+  return {
+    tables,
+    tablesRecord,
+    tableNames,
+    isLoading,
+    osqueryVersion,
+  };
+};

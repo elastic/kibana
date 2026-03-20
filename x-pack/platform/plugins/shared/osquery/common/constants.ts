@@ -34,6 +34,11 @@ export const API_VERSIONS = {
   },
 };
 
+export const SCHEMAS_ROUTE = '/internal/osquery/schemas/{schemaType}';
+
+export const FALLBACK_OSQUERY_VERSION = '5.19.0';
+export const FALLBACK_ECS_VERSION = '9.2.0';
+
 export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
   MAX = 900, // 15 minutes (matches backend inRangeRt(60, 60 * 15))

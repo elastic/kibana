@@ -7,9 +7,10 @@
 
 import { monaco } from '@kbn/monaco';
 import { findLast, map, uniqBy } from 'lodash';
-import { getOsqueryTableNames, osqueryTablesRecord } from './osquery_tables';
 
-export const osqueryTableNames = getOsqueryTableNames();
+// Mutable state updated by initializeOsqueryEditor when dynamic data arrives
+let currentTableNames: string[] = [];
+let currentTablesRecord: Record<string, { columns: Array<{ name: string }> }> = {};
 
 export const keywords = [
   'select',
@@ -133,14 +134,20 @@ const theme = {
   },
 };
 
-export const initializeOsqueryEditor = () => {
+export const initializeOsqueryEditor = (
+  tableNames?: string[],
+  tablesRecord?: Record<string, { columns: Array<{ name: string }> }>
+) => {
+  if (tableNames) currentTableNames = tableNames;
+  if (tablesRecord) currentTablesRecord = tablesRecord;
+
   let disposable: IDisposable | null = null;
   if (monaco) {
     monaco?.editor.defineTheme('osquery', theme);
     disposable = monaco.languages.onLanguage('sql', () => {
       monaco.languages.setMonarchTokensProvider('sql', {
         ignoreCase: true,
-        osqueryTableNames,
+        osqueryTableNames: currentTableNames,
         builtinFunctions,
         keywords,
         builtinConstants,
@@ -241,7 +248,7 @@ export const getEditorAutoCompleteSuggestion = (
   }));
 
   const osqueryColumns = name
-    ? map(osqueryTablesRecord[name]?.columns, ({ name: columnName }) => ({
+    ? map(currentTablesRecord[name]?.columns, ({ name: columnName }) => ({
         label: columnName,
         kind: monaco.languages.CompletionItemKind.Folder,
         detail: `${name} column`,
@@ -250,7 +257,7 @@ export const getEditorAutoCompleteSuggestion = (
       }))
     : [];
 
-  const tableNameKeywords = osqueryTableNames.map((tableName: string) => ({
+  const tableNameKeywords = currentTableNames.map((tableName: string) => ({
     label: tableName,
     kind: monaco.languages.CompletionItemKind.Folder,
     detail: 'Osquery',
