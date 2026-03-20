@@ -11,6 +11,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
@@ -84,6 +85,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarHidden = sidebarToggleState?.isCollapsed ?? false;
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const onToggleChart = useCallback(() => {
     dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
@@ -93,12 +95,16 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     sidebarToggleState?.toggle?.(!isSidebarHidden);
   }, [isSidebarHidden, sidebarToggleState]);
 
-  const buttons = [
-    getSidebarButton({
-      isHidden: isSidebarHidden,
-      toggleSidebar: onToggleSidebar,
-    }),
-  ];
+  const buttons = [];
+
+  if (!isMobile) {
+    buttons.push(
+      getSidebarButton({
+        isHidden: isSidebarHidden,
+        toggleSidebar: onToggleSidebar,
+      })
+    );
+  }
 
   if (!omitChartButton) {
     buttons.push(
@@ -107,6 +113,10 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         toggleChart: onToggleChart,
       })
     );
+  }
+
+  if (!buttons.length) {
+    return null;
   }
 
   return (
