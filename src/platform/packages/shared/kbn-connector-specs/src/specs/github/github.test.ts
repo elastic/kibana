@@ -35,7 +35,8 @@ describe('GithubConnector', () => {
     config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
   } as unknown as ActionContext;
 
-  const mockContent = [{ type: 'text', text: 'result' }];
+  const mockJson = { ok: true };
+  const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,7 +49,7 @@ describe('GithubConnector', () => {
       const result = await GithubConnector.actions.getMe.handler(mockContext, {});
 
       expect(mockCallTool).toHaveBeenCalledWith({ name: 'get_me', arguments: {} });
-      expect(result).toEqual(mockContent);
+      expect(result).toEqual(mockJson);
     });
   });
 
@@ -413,7 +414,7 @@ describe('GithubConnector', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_me',
-        arguments: undefined,
+        arguments: {},
       });
     });
   });
