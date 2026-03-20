@@ -21,9 +21,11 @@ import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_sh
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
+import { RelatedAttacks } from './related_attacks';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
+import { useShowRelatedAttacks } from '../../shared/hooks/use_show_related_attacks';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -57,11 +59,13 @@ export const CorrelationsDetails: React.FC = () => {
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });
+  const { show: showRelatedAttacks, attackIds } = useShowRelatedAttacks({ getFieldsData });
 
   const canShowAtLeastOneInsight =
     showAlertsByAncestry ||
     showSameSourceAlerts ||
     showAlertsBySession ||
+    showRelatedAttacks ||
     showCases ||
     showSuppressedAlerts;
 
@@ -104,6 +108,11 @@ export const CorrelationsDetails: React.FC = () => {
                 scopeId={scopeId}
                 documentId={documentId}
               />
+            </EuiFlexItem>
+          )}
+          {showRelatedAttacks && (
+            <EuiFlexItem>
+              <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

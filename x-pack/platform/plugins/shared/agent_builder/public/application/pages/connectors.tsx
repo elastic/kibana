@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPageTemplate, EuiBasicTable, EuiButton, EuiLink } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorItem } from '../../../common/http_api/tools';
@@ -71,6 +72,7 @@ export const AgentBuilderConnectorsPage: React.FC = () => {
       triggersActionsUi.getAddConnectorFlyout({
         onClose: createFlyoutState.closeFlyout,
         onConnectorCreated: handleConnectorCreated,
+        featureId: AgentBuilderConnectorFeatureId,
       }),
     [createFlyoutState.closeFlyout, handleConnectorCreated, triggersActionsUi]
   );
