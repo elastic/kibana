@@ -67,7 +67,7 @@ export const FullScreenWaterfall = ({
   )?.render;
   const { euiTheme } = useEuiTheme();
 
-  useTrackFlyoutViewed({ contentId: FlyoutContentId.TIMELINE_WATERFALL });
+  useTrackFlyoutViewed({ contentId: FlyoutContentId.TRACE_TIMELINE });
 
   /*
    * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers

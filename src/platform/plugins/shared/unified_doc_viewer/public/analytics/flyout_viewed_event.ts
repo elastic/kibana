@@ -15,7 +15,7 @@ import { FLYOUT_VIEWED_EVENT_TYPE } from '../plugin';
  */
 export enum FlyoutContentId {
   DOC_DETAIL = 'doc_detail',
-  TIMELINE_WATERFALL = 'timeline_waterfall',
+  TRACE_TIMELINE = 'trace_timeline',
   SPAN_DETAIL = 'span_detail',
   LOG_DETAIL = 'log_detail',
 }
