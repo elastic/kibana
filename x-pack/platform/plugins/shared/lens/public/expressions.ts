@@ -14,6 +14,7 @@ import { formatColumn } from '../common/expressions/defs/format_column';
 import { counterRate } from '../common/expressions/defs/counter_rate';
 import { getTimeScale } from '../common/expressions/defs/time_scale/time_scale';
 import { collapse } from '../common/expressions/defs/collapse';
+import { downsample } from '../common/expressions/defs/downsample';
 import {
   formulaIntervalFn,
   formulaNowFn,
@@ -34,6 +35,7 @@ export const setupExpressions = (
     formulaNowFn,
     formulaIntervalFn,
     collapse,
+    downsample,
     counterRate,
     formatColumn,
     mapToColumns,

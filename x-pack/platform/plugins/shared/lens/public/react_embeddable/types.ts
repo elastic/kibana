@@ -31,7 +31,8 @@ export type LensEmbeddableStartServices = Simplify<
     expressionRenderer: ReactExpressionRendererType;
     documentToExpression: (
       doc: LensDocument,
-      forceDSL?: boolean
+      forceDSL?: boolean,
+      maxDataPoints?: number
     ) => Promise<DocumentToExpressionReturnType>;
     injectFilterReferences: FilterManager['inject'];
     visualizationMap: VisualizationMap;

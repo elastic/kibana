@@ -404,6 +404,8 @@ export type LensInternalApi = Simplify<
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;
+      containerWidth$: PublishingSubject<number>;
+      updateContainerWidth: (width: number) => void;
     }
 >;
 

@@ -95,7 +95,8 @@ export const toExpression = (
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
-  eventAnnotationService: EventAnnotationServiceType
+  eventAnnotationService: EventAnnotationServiceType,
+  maxDataPoints?: number
 ): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -120,7 +121,8 @@ export const toExpression = (
     datasourceLayers,
     paletteService,
     datasourceExpressionsByLayers,
-    eventAnnotationService
+    eventAnnotationService,
+    maxDataPoints
   );
 };
 
@@ -199,7 +201,8 @@ export const buildXYExpression = (
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
-  eventAnnotationService: EventAnnotationServiceType
+  eventAnnotationService: EventAnnotationServiceType,
+  maxDataPoints?: number
 ): Ast | null => {
   const validDataLayers: ValidXYDataLayerConfig[] = getDataLayers(state.layers)
     .filter<ValidXYDataLayerConfig>((layer): layer is ValidXYDataLayerConfig =>
@@ -364,7 +367,8 @@ export const buildXYExpression = (
           metadata,
           paletteService,
           datasourceExpressionsByLayers[layer.layerId],
-          state.curveType || 'LINEAR'
+          state.curveType || 'LINEAR',
+          maxDataPoints
         )
       ),
       ...validReferenceLayers.map((layer) =>
@@ -477,7 +481,8 @@ const dataLayerToExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
   datasourceExpression: Ast,
-  curveType: XYCurveType
+  curveType: XYCurveType,
+  maxDataPoints?: number
 ): Ast => {
   const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
 
@@ -538,12 +543,24 @@ const dataLayerToExpression = (
     colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   });
 
+  const isTextBasedDatasource = datasourceExpression?.chain.some((fn) => fn.function === 'esql');
+
+  const downsampleStep =
+    isTextBasedDatasource && maxDataPoints && maxDataPoints > 0
+      ? [
+          buildExpressionFunction('lens_downsample', {
+            targetPoints: maxDataPoints,
+          }).toAst(),
+        ]
+      : [];
+
   return {
     type: 'expression',
     chain: [
       ...(datasourceExpression
         ? [...datasourceExpression.chain, ...(layer.collapseFn ? [collapseFn.toAst()] : [])]
         : []),
+      ...downsampleStep,
       extendedDataLayerFn.toAst(),
     ],
   };
