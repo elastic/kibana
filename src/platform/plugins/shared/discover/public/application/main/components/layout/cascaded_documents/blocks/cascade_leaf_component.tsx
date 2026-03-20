@@ -31,7 +31,7 @@ interface ESQLDataCascadeLeafCellProps
       | 'showTimeCol'
       | 'dataView'
       | 'showKeyboardShortcuts'
-      | 'renderDocumentViewFlyout'
+      | 'documentViewFlyoutConnectionHandler'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
     >,
@@ -196,7 +196,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showTimeCol,
     dataView,
     showKeyboardShortcuts,
-    renderDocumentViewFlyout,
+    documentViewFlyoutConnectionHandler,
     externalCustomRenderers,
     getScrollElement,
     getScrollMargin,
@@ -298,7 +298,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         renderCustomToolbar={renderCustomToolbarWithElements}
         dataGridDensityState={cascadeDataGridDensityState}
         onUpdateDataGridDensity={setCascadeDataGridDensityState}
-        renderDocumentViewFlyout={renderDocumentViewFlyout}
+        documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
         renderCustomGridBody={renderCustomCascadeGridBodyCallback}
         onFullScreenChange={setIsCellInFullScreenMode}
         externalCustomRenderers={externalCustomRenderers}

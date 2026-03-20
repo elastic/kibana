@@ -75,7 +75,6 @@ function getProps(): UnifiedDataTableProps {
     columns: [],
     dataView: dataViewMock,
     loadingState: DataLoadingState.loaded,
-    expandedDoc: undefined,
     onFilter: jest.fn(),
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
@@ -84,7 +83,6 @@ function getProps(): UnifiedDataTableProps {
     sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
-    setExpandedDoc: jest.fn(),
     settings: {},
     showTimeCol: true,
     sort: [],
@@ -801,16 +799,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         const component = await getComponent({
           ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-            flattened: { test: jest.fn() },
-          },
-          setExpandedDoc: jest.fn(),
-          renderDocumentViewFlyout: jest.fn(),
+          documentViewFlyoutConnectionHandler: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
         });
@@ -835,16 +824,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         const component = await getComponent({
           ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-            flattened: { test: jest.fn() },
-          },
-          setExpandedDoc: jest.fn(),
-          renderDocumentViewFlyout: jest.fn(),
+          documentViewFlyoutConnectionHandler: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
           trailingControlColumns: testTrailingControlColumns,
         });
@@ -864,16 +844,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         const component = await getComponent({
           ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-            flattened: { test: jest.fn() },
-          },
-          setExpandedDoc: jest.fn(),
-          renderDocumentViewFlyout: jest.fn(),
+          documentViewFlyoutConnectionHandler: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
         });
 
@@ -884,45 +855,87 @@ describe('UnifiedDataTable', () => {
     );
   });
 
-  it(
-    'should render provided in renderDocumentView DocumentView on expand clicked',
-    async () => {
-      const expandedDoc = {
-        id: 'test',
-        raw: {
-          _index: 'test_i',
-          _id: 'test',
-        },
-        flattened: { test: jest.fn() },
-      };
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
-        <div data-test-subj="test-document-view">{hit.id}</div>
-      ));
+  describe('documentViewFlyoutConnectionHandler', () => {
+    it(
+      'calls documentViewFlyoutConnectionHandler with displayedRows, displayedColumns, and columnsMeta',
+      async () => {
+        const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
+        const setExpandedDocMock = jest.fn();
+        const subscribeMock = jest.fn(() => () => {});
+        const getSnapshotMock = jest.fn(() => ({ expandedDoc: undefined }));
 
-      const setExpandedDocMock = jest.fn();
+        const connectionHandlerMock = jest.fn(
+          (
+            _displayedRows: DataTableRecord[],
+            _displayedColumns: string[],
+            _customColumnsMeta?: object
+          ) => ({
+            externalStore: {
+              subscribe: subscribeMock,
+              getSnapshot: getSnapshotMock,
+              getServerSnapshot: getSnapshotMock,
+            },
+            setExpandedDoc: setExpandedDocMock,
+          })
+        );
 
-      const component = await getComponent({
-        ...getProps(),
-        expandedDoc,
-        setExpandedDoc: setExpandedDocMock,
-        columnsMeta: columnsMetaOverride,
-        renderDocumentViewFlyout: renderDocumentViewMock,
-        externalControlColumns: [testLeadingControlColumn],
-      });
+        render(
+          <DataTable
+            {...{
+              columnsMeta: columnsMetaOverride,
+              documentViewFlyoutConnectionHandler: connectionHandlerMock,
+              externalControlColumns: [testLeadingControlColumn],
+            }}
+          />
+        );
 
-      findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
-      expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
-      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
-        expandedDoc,
-        getProps().rows,
-        ['_source'],
-        setExpandedDocMock,
-        columnsMetaOverride
-      );
-    },
-    EXTENDED_JEST_TIMEOUT
-  );
+        expect(connectionHandlerMock).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.arrayContaining(['_source']),
+          columnsMetaOverride
+        );
+        expect(connectionHandlerMock.mock.calls[0][0]).toHaveLength(getProps().rows!.length);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'calls setExpandedDoc from documentViewFlyoutConnectionHandler when expand button is clicked',
+      async () => {
+        const setExpandedDocMock = jest.fn();
+        const getSnapshotMock = jest.fn(() => ({ expandedDoc: undefined }));
+
+        const connectionHandlerMock = jest.fn((_displayedRows: DataTableRecord[]) => ({
+          externalStore: {
+            subscribe: () => () => {},
+            getSnapshot: getSnapshotMock,
+            getServerSnapshot: getSnapshotMock,
+          },
+          setExpandedDoc: setExpandedDocMock,
+        }));
+
+        render(
+          <DataTable
+            {...{
+              documentViewFlyoutConnectionHandler: connectionHandlerMock,
+              externalControlColumns: [testLeadingControlColumn],
+            }}
+          />
+        );
+
+        fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+        expect(setExpandedDocMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: expect.any(String),
+            raw: expect.any(Object),
+            flattened: expect.any(Object),
+          })
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
 
   describe('externalAdditionalControls', () => {
     it(
@@ -1005,16 +1018,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         const component = await getComponent({
           ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-            flattened: { test: jest.fn() },
-          },
-          setExpandedDoc: jest.fn(),
-          renderDocumentViewFlyout: jest.fn(),
+          documentViewFlyoutConnectionHandler: jest.fn(),
           componentsTourSteps: { expandButton: 'test-expand' },
         });
 
