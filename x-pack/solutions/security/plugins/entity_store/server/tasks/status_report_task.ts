@@ -19,7 +19,7 @@ import { createAssetManagerClient } from './factories';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
-import { getLatestEntitiesIndexName } from '../domain/asset_manager/latest_index';
+import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
 import type { GetStatusResult } from '../domain/types';
 import {
