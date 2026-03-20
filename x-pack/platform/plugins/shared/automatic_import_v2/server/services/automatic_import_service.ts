@@ -153,20 +153,23 @@ export class AutomaticImportService {
       loggerFactory,
       this.taskManagerSetup,
       core,
-      analytics
+      analytics,
+      this.samplesIndexService
     );
   }
 
   // Run initialize in the start phase of plugin
   public async initialize(
     savedObjectsClient: SavedObjectsClient,
-    taskManagerStart: TaskManagerStartContract
+    taskManagerStart: TaskManagerStartContract,
+    internalEsClient: ElasticsearchClient
   ): Promise<void> {
     this.savedObjectService = new AutomaticImportSavedObjectService(
       this.loggerFactory,
       savedObjectsClient
     );
     this.taskManagerService.initialize(taskManagerStart, this.savedObjectService);
+    this.samplesIndexService.initialize(internalEsClient);
   }
 
   public async createUpdateIntegration(params: CreateUpdateIntegrationParams): Promise<void> {
@@ -422,7 +425,6 @@ export class AutomaticImportService {
   public async deleteDataStream(
     integrationId: string,
     dataStreamId: string,
-    esClient: ElasticsearchClient,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
@@ -438,11 +440,7 @@ export class AutomaticImportService {
       dataStreamId,
     });
     // Delete the samples from the samples index
-    await this.samplesIndexService.deleteSamplesForDataStream(
-      integrationId,
-      dataStreamId,
-      esClient
-    );
+    await this.samplesIndexService.deleteSamplesForDataStream(integrationId, dataStreamId);
     // Delete the data stream from the saved objects
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
   }
@@ -583,8 +581,7 @@ export class AutomaticImportService {
 
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
-      dataStreamId,
-      esClient
+      dataStreamId
     );
     if (samples.length === 0) {
       throw new Error(`No samples found for data stream ${dataStreamId}`);

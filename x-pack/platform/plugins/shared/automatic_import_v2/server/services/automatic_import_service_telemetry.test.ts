@@ -22,6 +22,7 @@ jest.mock('./samples_index/index_service', () => {
   return {
     AutomaticImportSamplesIndexService: jest.fn().mockImplementation(() => ({
       createSamplesDocs: jest.fn().mockResolvedValue(undefined),
+      initialize: jest.fn(),
     })),
   };
 });
@@ -98,14 +99,16 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('initialize', () => {
+    const mockInternalEsClient = {} as any;
+
     it('should initialize saved object service', async () => {
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, mockInternalEsClient);
 
       expect((service as any).savedObjectService).toBeDefined();
     });
 
     it('should create savedObjectService with correct parameters', async () => {
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, mockInternalEsClient);
 
       const savedObjectService = (service as any).savedObjectService;
       expect(savedObjectService).toBeDefined();
@@ -375,8 +378,7 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['sample1', 'sample2'],
         originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
-        authenticatedUser: { username: 'test-user' } as any,
-        esClient: {} as any,
+        createdBy: 'test-user',
       };
 
       const mockResult = { items: [], errors: false };
@@ -398,8 +400,7 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['sample1'],
         originalSource: { sourceType: 'index' as const, sourceValue: 'logs-*' },
-        authenticatedUser: { username: 'test-user' } as any,
-        esClient: {} as any,
+        createdBy: 'test-user',
       };
 
       const mockResult = { items: [], errors: false };
@@ -424,8 +425,7 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'test-datastream',
         rawSamples: ['log line 1', 'log line 2', 'log line 3'],
         originalSource: { sourceType: 'file' as const, sourceValue: 'application.log' },
-        authenticatedUser: { username: 'admin', roles: ['admin'] } as any,
-        esClient: { bulk: jest.fn() } as any,
+        createdBy: 'admin',
       };
 
       const mockAddSamples = jest.fn().mockResolvedValue({});
@@ -445,8 +445,7 @@ describe('AutomaticImportSetupService', () => {
         sourceType: 'file',
         sourceValue: 'application.log',
       });
-      expect(callArgs.authenticatedUser.username).toBe('admin');
-      expect(callArgs.esClient).toBe(mockParams.esClient);
+      expect(callArgs.createdBy).toBe('admin');
     });
 
     it('should propagate errors from samplesIndexService', async () => {
@@ -455,8 +454,7 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['sample1'],
         originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
-        authenticatedUser: { username: 'test-user' } as any,
-        esClient: {} as any,
+        createdBy: 'test-user',
       };
 
       const mockError = new Error('Failed to add samples');
@@ -473,11 +471,10 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('deleteDataStream', () => {
-    let mockEsClient: any;
+    const mockInternalEsClient = {} as any;
 
     beforeEach(async () => {
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
-      mockEsClient = {} as any;
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, mockInternalEsClient);
     });
 
     it('should delete data stream and call all required services', async () => {
@@ -497,7 +494,7 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
+      await service.deleteDataStream('integration-123', 'data-stream-456');
 
       expect(mockUpdateStatus).toHaveBeenCalledWith(
         'data-stream-456',
@@ -508,11 +505,7 @@ describe('AutomaticImportSetupService', () => {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
       });
-      expect(mockDeleteSamples).toHaveBeenCalledWith(
-        'integration-123',
-        'data-stream-456',
-        mockEsClient
-      );
+      expect(mockDeleteSamples).toHaveBeenCalledWith('integration-123', 'data-stream-456');
       expect(mockDeleteSavedObject).toHaveBeenCalledWith(
         'data-stream-456',
         'integration-123',
@@ -538,7 +531,7 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
+      await service.deleteDataStream('integration-123', 'data-stream-456', options);
 
       expect(mockDeleteSavedObject).toHaveBeenCalledWith(
         'data-stream-456',
@@ -550,9 +543,9 @@ describe('AutomaticImportSetupService', () => {
     it('should throw error if saved object service is not initialized', async () => {
       (service as any).savedObjectService = null;
 
-      await expect(
-        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
-      ).rejects.toThrow('Saved Objects service not initialized.');
+      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
+        'Saved Objects service not initialized.'
+      );
     });
 
     it('should handle errors from task manager service', async () => {
@@ -572,9 +565,9 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(
-        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
-      ).rejects.toThrow('Task removal failed');
+      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
+        'Task removal failed'
+      );
 
       expect(mockDeleteSamples).not.toHaveBeenCalled();
       expect(mockDeleteSavedObject).not.toHaveBeenCalled();
@@ -597,9 +590,9 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(
-        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
-      ).rejects.toThrow('Sample deletion failed');
+      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
+        'Sample deletion failed'
+      );
 
       expect(mockDeleteSavedObject).not.toHaveBeenCalled();
     });
@@ -623,9 +616,9 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(
-        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
-      ).rejects.toThrow('Saved object deletion failed');
+      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
+        'Saved object deletion failed'
+      );
     });
 
     it('should execute operations in correct order', async () => {
@@ -655,7 +648,7 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
+      await service.deleteDataStream('integration-123', 'data-stream-456');
 
       expect(executionOrder).toEqual([
         'updateStatus',
@@ -749,7 +742,7 @@ describe('AutomaticImportSetupService', () => {
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
 
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, {} as any);
 
       // Stop the service
       service.stop();
@@ -778,7 +771,7 @@ describe('AutomaticImportSetupService', () => {
     it('should complete full lifecycle: construct -> initialize -> stop', async () => {
       expect((service as any).savedObjectService).toBeNull();
 
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, {} as any);
       expect((service as any).savedObjectService).toBeDefined();
 
       // Stop
@@ -789,7 +782,7 @@ describe('AutomaticImportSetupService', () => {
 
   describe('task manager service integration', () => {
     beforeEach(async () => {
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, {} as any);
     });
 
     it('should register task definitions during construction', () => {
@@ -876,9 +869,9 @@ describe('AutomaticImportSetupService', () => {
         getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
-      // Mock agent service
+      // Mock agent service - must return valid pipeline with at least one processor
       const mockInvokeAgent = jest.fn().mockResolvedValue({
-        current_pipeline: { processors: [] },
+        current_pipeline: { processors: [{ set: { field: 'test', value: true } }] },
         pipeline_generation_results: [],
       });
 
