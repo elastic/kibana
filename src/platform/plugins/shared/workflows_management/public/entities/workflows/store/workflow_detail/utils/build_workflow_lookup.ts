@@ -46,6 +46,8 @@ export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unk
 export interface WorkflowLookup {
   /** Map of step IDs to their corresponding step information and metadata */
   steps: Record<string, StepInfo>;
+  /** Line number where the triggers section starts in the YAML document */
+  triggersLineStart?: number;
 }
 
 /**
@@ -93,8 +95,15 @@ export function buildWorkflowLookup(
     );
   }
 
+  let triggersLineStart: number | undefined;
+  const triggersNode = (yamlDocument.contents as any).get('triggers');
+  if (triggersNode?.range) {
+    triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
+  }
+
   return {
     steps,
+    triggersLineStart,
   };
 }
 

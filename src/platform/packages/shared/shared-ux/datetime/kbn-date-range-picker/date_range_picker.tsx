@@ -12,7 +12,12 @@ import React, { useMemo, type ComponentType } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRangeBoundsOption } from './types';
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  CalendarOptions,
+  DateRangePickerSettings,
+} from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
 import { DateRangePickerLayout } from './date_range_picker_layout';
@@ -25,6 +30,8 @@ import {
 import { MainPanel } from './panels/main_panel';
 import { CalendarPanel } from './panels/calendar_panel';
 import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
+import { DocumentationPanel } from './panels/documentation_panel';
+import { SettingsPanel } from './panels/settings_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
 const DEFAULT_PANEL_ID = 'main' as const;
@@ -125,6 +132,18 @@ export interface DateRangePickerProps {
   onPresetSave?: (option: TimeRangeBoundsOption) => void;
   /** Called when the user wants to delete a saved preset. */
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
+  /** Current picker settings (e.g. rounding, refresh). */
+  settings: DateRangePickerSettings;
+  /** Called when the user changes a setting in the settings panel. */
+  onSettingsChange: (settings: DateRangePickerSettings) => void;
+  /**
+   * A valid time zone name, from the IANA database, e.g. "America/Los_Angeles".
+   * This is only informational, it won't affect how dates are handled.
+   * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+   */
+  timeZone?: string;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
@@ -170,6 +189,12 @@ export function DateRangePicker({
             </DateRangePickerPanel>
             <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
               <CustomTimeRangePanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={DocumentationPanel.PANEL_ID}>
+              <DocumentationPanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={SettingsPanel.PANEL_ID}>
+              <SettingsPanel />
             </DateRangePickerPanel>
             {panels.map(({ id, component: Component }) => (
               <DateRangePickerPanel key={id} id={id}>

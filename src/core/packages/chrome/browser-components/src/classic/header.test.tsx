@@ -8,10 +8,12 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
-import { ChromeComponentsProvider } from '../context';
-import { createMockChromeComponentsDeps } from '../test_helpers';
+import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { ClassicHeader } from './header';
 
 describe('Header', () => {
@@ -23,19 +25,13 @@ describe('Header', () => {
 
   it('renders', () => {
     const deps = createMockChromeComponentsDeps();
+    const chrome = chromeServiceMock.createStartContract();
 
-    deps.classic.breadcrumbs$.next([{ text: 'test' }]);
-    deps.navLinks$.next([
-      {
-        id: 'kibana',
-        title: 'kibana',
-        baseUrl: '',
-        href: '',
-        url: '',
-        visibleIn: ['globalSearch' as const],
-      },
-    ]);
-    deps.classic.customNavLink$.next({
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
+    chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    chrome.getBreadcrumbs.mockReturnValue([{ text: 'test' }]);
+
+    const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
       baseUrl: '',
@@ -43,19 +39,42 @@ describe('Header', () => {
       href: '',
       visibleIn: ['globalSearch' as const],
     });
-    deps.classic.recentlyAccessed$.next([{ link: '', label: 'dashboard', id: 'dashboard' }]);
+    chrome.getCustomNavLink$.mockReturnValue(customNavLink$);
+
+    const recentlyAccessed$ = new BehaviorSubject([
+      { link: '', label: 'dashboard', id: 'dashboard' },
+    ]);
+    chrome.recentlyAccessed.get$.mockReturnValue(recentlyAccessed$);
+
+    chrome.navLinks.getNavLinks$.mockReturnValue(
+      new BehaviorSubject([
+        {
+          id: 'kibana',
+          title: 'kibana',
+          baseUrl: '',
+          href: '',
+          url: '',
+          visibleIn: ['globalSearch' as const],
+        },
+      ])
+    );
+
+    const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
+      []
+    );
+    chrome.getBreadcrumbsAppendExtensionsWithBadges$.mockReturnValue(breadcrumbsAppendExtensions$);
 
     const component = mountWithIntl(
-      <ChromeComponentsProvider value={deps}>
+      <TestChromeProviders deps={deps} chrome={chrome}>
         <ClassicHeader />
-      </ChromeComponentsProvider>
+      </TestChromeProviders>
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
     expect(component.render()).toMatchSnapshot();
 
     act(() =>
-      deps.breadcrumbsAppendExtensions$.next([
+      breadcrumbsAppendExtensions$.next([
         { content: <div className="my-extension1">__render__</div> },
         { content: <div className="my-extension2">__render__</div> },
       ])

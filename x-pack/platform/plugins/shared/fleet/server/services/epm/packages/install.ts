@@ -26,6 +26,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type {
   KibanaAssetReference,
   PackageDataStreamTypes,
+  PackageDependencies,
   PackageInstallContext,
 } from '../../../../common/types';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
@@ -411,6 +412,7 @@ interface InstallRegistryPackageParams {
   keepFailedInstallation?: boolean;
   useStreaming?: boolean;
   automaticInstall?: boolean;
+  skipDependencyCheck?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -496,6 +498,7 @@ async function installPackageFromRegistry({
   keepFailedInstallation = false,
   useStreaming = false,
   automaticInstall = false,
+  skipDependencyCheck = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -602,6 +605,7 @@ async function installPackageFromRegistry({
       useStreaming,
       keepFailedInstallation,
       automaticInstall,
+      skipDependencyCheck,
     });
   } catch (e) {
     sendEventWithLatestState(
@@ -645,6 +649,7 @@ export async function installPackageWithStateMachine(options: {
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
   automaticInstall?: boolean;
+  skipDependencyCheck?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -667,6 +672,7 @@ export async function installPackageWithStateMachine(options: {
     useStreaming,
     keepFailedInstallation,
     automaticInstall,
+    skipDependencyCheck,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -791,6 +797,7 @@ export async function installPackageWithStateMachine(options: {
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      skipDependencyCheck,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -959,6 +966,7 @@ export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
   retryFromLastState?: boolean;
+  skipDependencyCheck?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -993,6 +1001,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      skipDependencyCheck,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1038,6 +1047,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      skipDependencyCheck,
     });
 
     return response;
@@ -1202,6 +1212,7 @@ export async function restartInstallation(options: {
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
   previousVersion?: string | null;
+  dependencies?: PackageDependencies | null;
 }) {
   const {
     savedObjectsClient,
@@ -1210,6 +1221,7 @@ export async function restartInstallation(options: {
     installSource,
     verificationResult,
     previousVersion,
+    dependencies,
   } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
@@ -1218,6 +1230,7 @@ export async function restartInstallation(options: {
     install_started_at: new Date().toISOString(),
     install_source: installSource,
     previous_version: previousVersion,
+    ...(dependencies ? { dependencies } : {}),
   };
 
   if (verificationResult) {
@@ -1244,8 +1257,10 @@ export async function createInstallation(options: {
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
+  dependencies?: PackageDependencies | null;
 }) {
-  const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
+  const { savedObjectsClient, packageInfo, installSource, verificationResult, dependencies } =
+    options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
@@ -1275,6 +1290,7 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
+    ...(dependencies ? { dependencies } : {}),
   };
 
   if (verificationResult) {

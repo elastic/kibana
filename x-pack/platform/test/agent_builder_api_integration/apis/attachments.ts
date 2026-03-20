@@ -98,14 +98,14 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
         expect(body).to.have.property('success', true);
         expect(body).to.have.property('attachment');
         expect(body.attachment.id).to.equal(attachment.id);
-        expect(body.attachment.origin).to.eql({ saved_object_id: 'saved-object-123' });
+        expect(body.attachment.origin).to.eql('saved-object-123');
       });
 
       it('should persist the updated origin', async () => {
@@ -117,7 +117,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'persisted-saved-object-456' } })
+          .send({ origin: 'persisted-saved-object-456' })
           .expect(200);
 
         const listResponse = await supertest
@@ -129,7 +129,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         const updatedAttachment = listBody.results.find((a) => a.id === attachment.id);
 
         expect(updatedAttachment).to.be.ok();
-        expect(updatedAttachment!.origin).to.eql({ saved_object_id: 'persisted-saved-object-456' });
+        expect(updatedAttachment!.origin).to.eql('persisted-saved-object-456');
       });
 
       it('should return 404 for non-existent conversation', async () => {
@@ -138,7 +138,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/non-existent-conversation/attachments/some-attachment/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(404);
 
         const body: Payload = response.body;
@@ -154,7 +154,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/non-existent-attachment/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(404);
 
         const body: Payload = response.body;
@@ -176,7 +176,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(400);
 
         const body: Payload = response.body;
@@ -193,7 +193,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'first-saved-object' } })
+          .send({ origin: 'first-saved-object' })
           .expect(200);
 
         const response = await supertest
@@ -201,11 +201,11 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'second-saved-object' } })
+          .send({ origin: 'second-saved-object' })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
-        expect(body.attachment.origin).to.eql({ saved_object_id: 'second-saved-object' });
+        expect(body.attachment.origin).to.eql('second-saved-object');
       });
 
       it('should not create a new version when updating origin', async () => {
@@ -218,7 +218,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;

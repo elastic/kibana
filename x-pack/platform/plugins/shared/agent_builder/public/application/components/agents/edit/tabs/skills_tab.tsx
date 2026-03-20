@@ -25,8 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublicSkillSummary, SkillSelection } from '@kbn/agent-builder-common';
-import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -56,13 +55,13 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
     <>
       <EuiSpacer size="l" />
       <Controller
-        name="configuration.skills"
+        name="configuration.skill_ids"
         control={control}
         render={({ field }) => (
           <SkillsSelection
             skills={skills}
             skillsLoading={isLoading}
-            selectedSkills={field.value ?? [{ skill_ids: ['*'] }]}
+            selectedSkills={field.value}
             onSkillsChange={field.onChange}
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
@@ -77,8 +76,8 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
 interface SkillsSelectionProps {
   skills: PublicSkillSummary[];
   skillsLoading: boolean;
-  selectedSkills: SkillSelection[];
-  onSkillsChange: (skills: SkillSelection[]) => void;
+  selectedSkills: string[] | undefined;
+  onSkillsChange: (skills: string[]) => void;
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
@@ -97,30 +96,18 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const isAllBuiltinSelected = hasSkillSelectionWildcard(selectedSkills);
-  const explicitSelectedIds = useMemo(
-    () => new Set(getExplicitSkillIds(selectedSkills)),
-    [selectedSkills]
-  );
+  const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillActive = useCallback(
-    (skill: PublicSkillSummary) => {
-      if (isAllBuiltinSelected && skill.readonly) {
-        return true;
-      }
-      return explicitSelectedIds.has(skill.id);
-    },
-    [isAllBuiltinSelected, explicitSelectedIds]
+    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id),
+    [selectedIdSet]
   );
 
   const displaySkills = useMemo(() => {
-    let result = skills;
-
     if (showActiveOnly) {
-      result = skills.filter((skill) => isSkillActive(skill));
+      return skills.filter((skill) => isSkillActive(skill));
     }
-
-    return result;
+    return skills;
   }, [skills, showActiveOnly, isSkillActive]);
 
   const filteredSkills = useMemo(() => {
@@ -139,30 +126,14 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const handleToggleSkill = useCallback(
     (skillId: string) => {
-      const skill = skills.find((s) => s.id === skillId);
-      if (!skill) return;
-
-      if (isAllBuiltinSelected && skill.readonly) {
-        const builtinIds = skills.filter((s) => s.readonly && s.id !== skillId).map((s) => s.id);
-        const explicitIds = getExplicitSkillIds(selectedSkills);
-        onSkillsChange([{ skill_ids: [...builtinIds, ...explicitIds] }]);
-      } else if (explicitSelectedIds.has(skillId)) {
-        const newExplicitIds = getExplicitSkillIds(selectedSkills).filter((id) => id !== skillId);
-        if (isAllBuiltinSelected) {
-          onSkillsChange([{ skill_ids: ['*', ...newExplicitIds] }]);
-        } else {
-          onSkillsChange(newExplicitIds.length > 0 ? [{ skill_ids: newExplicitIds }] : []);
-        }
+      const currentIds = selectedSkills ?? [];
+      if (currentIds.includes(skillId)) {
+        onSkillsChange(currentIds.filter((id) => id !== skillId));
       } else {
-        const currentExplicitIds = getExplicitSkillIds(selectedSkills);
-        if (isAllBuiltinSelected) {
-          onSkillsChange([{ skill_ids: ['*', ...currentExplicitIds, skillId] }]);
-        } else {
-          onSkillsChange([{ skill_ids: [...currentExplicitIds, skillId] }]);
-        }
+        onSkillsChange([...currentIds, skillId]);
       }
     },
-    [isAllBuiltinSelected, explicitSelectedIds, selectedSkills, skills, onSkillsChange]
+    [selectedSkills, onSkillsChange]
   );
 
   const handleSearchChange = useCallback((query: string) => {

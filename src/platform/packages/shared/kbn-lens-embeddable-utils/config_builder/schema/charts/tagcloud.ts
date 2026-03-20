@@ -67,7 +67,7 @@ const tagcloudStateSharedOptionsSchema = {
 
 export const tagcloudStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('tagcloud'),
+    type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
@@ -89,7 +89,7 @@ export const tagcloudStateSchemaNoESQL = schema.object(
 
 export const tagcloudStateSchemaESQL = schema.object(
   {
-    type: schema.literal('tagcloud'),
+    type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,

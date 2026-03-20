@@ -204,21 +204,6 @@ describe('buildKibanaRequest', () => {
       });
     });
 
-    it('should handle query parameters', () => {
-      const result = buildKibanaRequest(
-        'kibana.getCase',
-        {
-          caseId: 'test-case-id',
-          includeComments: true,
-        },
-        'cases-space'
-      );
-
-      expect(result.path).toBe('/s/cases-space/api/cases/test-case-id');
-      expect(result.query).toBeDefined();
-      expect(result.query).toHaveProperty('includeComments');
-    });
-
     it('should handle requests with no body', () => {
       const result = buildKibanaRequest('kibana.getCase', { caseId: 'test-case' }, 'monitoring');
 
