@@ -28,8 +28,8 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import { isTextBasedLanguage, stripInheritedContext, transformToApiConfig } from '../helper';
-
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
