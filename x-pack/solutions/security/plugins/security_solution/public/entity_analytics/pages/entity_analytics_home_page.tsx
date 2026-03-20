@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +29,6 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { PageLoader } from '../../common/components/page_loader';
 import { PageScope } from '../../data_view_manager/constants';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { CombinedRiskDonutChart } from '../components/home/combined_risk_donut_chart';
 import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_placeholder_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
@@ -44,6 +43,7 @@ import {
   type EntitiesBaseURLQuery,
   type URLQuery,
 } from '../components/home/entities_table';
+import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -65,6 +65,8 @@ export const EntityAnalyticsHomePage = () => {
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
     [newDataViewPickerEnabled, oldIsSourcererLoading, status]
   );
+
+  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string | undefined>();
 
   const indicesExist = useMemo(
     () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
@@ -100,7 +102,7 @@ export const EntityAnalyticsHomePage = () => {
               defaultMessage="Entity Analytics"
             />
           }
-          rightSideItems={[<WatchlistFilter />]}
+          rightSideItems={[<WatchlistFilter onChangeSelectedId={setSelectedWatchlistId} />]}
         />
 
         {isSourcererLoading ? (
@@ -115,7 +117,7 @@ export const EntityAnalyticsHomePage = () => {
               >
                 <EuiFlexItem grow={2}>
                   <EuiPanel hasBorder>
-                    <CombinedRiskDonutChart />
+                    <DynamicRiskLevelPanel watchlistId={selectedWatchlistId} />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={3}>
