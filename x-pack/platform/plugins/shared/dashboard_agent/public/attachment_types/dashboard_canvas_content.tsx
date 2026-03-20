@@ -53,29 +53,34 @@ const dashboardCanvasContentStyles = {
 };
 
 export const DashboardCanvasContent = ({
+  isSidebar,
   attachment,
   registerActionButtons,
   updateOrigin,
+  closeCanvas,
+  openSidebarConversation,
   dashboardLocator,
   searchBarComponent: SearchBar,
   checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
+  closeCanvas: () => void;
   dashboardLocator?: DashboardRendererProps['locator'];
+  openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
-  const linkedSavedObjectId = attachment.origin;
+  const attachmentOrigin = attachment.origin;
   const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
     status: 'idle',
   });
 
   useEffect(
     function checkSavedObjectExists() {
-      if (!linkedSavedObjectId) {
+      if (!attachmentOrigin) {
         setSavedObjectStatus({ status: 'resolved', exists: false });
         return;
       }
@@ -83,7 +88,7 @@ export const DashboardCanvasContent = ({
       let canceled = false;
       setSavedObjectStatus({ status: 'loading' });
 
-      checkSavedDashboardExist(linkedSavedObjectId)
+      checkSavedDashboardExist(attachmentOrigin)
         .then((exists) => {
           if (!canceled) {
             setSavedObjectStatus({ status: 'resolved', exists });
@@ -99,7 +104,7 @@ export const DashboardCanvasContent = ({
         canceled = true;
       };
     },
-    [linkedSavedObjectId, checkSavedDashboardExist]
+    [attachmentOrigin, checkSavedDashboardExist]
   );
 
   const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
@@ -120,10 +125,13 @@ export const DashboardCanvasContent = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
+    closeCanvas,
+    openSidebarConversation,
     timeRange,
     dashboardState,
-    linkedSavedObjectId,
+    attachmentOrigin,
     checkSavedDashboardExist,
+    isSidebar,
   });
 
   return (
@@ -159,7 +167,7 @@ export const DashboardCanvasContent = ({
           locator={dashboardLocator}
           savedObjectId={
             savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
-              ? linkedSavedObjectId
+              ? attachmentOrigin
               : undefined
           }
           onApiAvailable={(api) => {
