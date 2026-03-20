@@ -13,7 +13,6 @@ import {
 } from './agent_downloads_service';
 import fs from 'fs';
 import { readFile, unlink, writeFile } from 'fs/promises';
-import { finished } from 'stream/promises';
 
 const mockedFetch = jest.spyOn(global, 'fetch');
 const mockDigest = jest.fn();

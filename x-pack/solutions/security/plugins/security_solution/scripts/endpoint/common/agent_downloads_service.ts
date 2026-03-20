@@ -24,7 +24,9 @@ import { SettingsStorage } from './settings_storage';
 export const fetchExpectedHash = async (shaUrl: string): Promise<string> => {
   const response = await fetch(shaUrl);
   if (!response.ok) {
-    throw new Error(`Failed to fetch hash from ${shaUrl}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch hash from ${shaUrl}: ${response.status} ${response.statusText}`
+    );
   }
   const text = await response.text();
   // Format is "<hash>  <filename>" — extract just the hash
@@ -133,14 +135,18 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           const expectedHash = (await readFile(sidecarPath, 'utf-8')).trim();
           const actualHash = await computeFileHash(newDownloadInfo.fullFilePath);
           if (expectedHash === actualHash) {
-            this.log.debug(`Download already cached and verified at [${newDownloadInfo.fullFilePath}]`);
+            this.log.debug(
+              `Download already cached and verified at [${newDownloadInfo.fullFilePath}]`
+            );
             return newDownloadInfo;
           }
           this.log.error(
             `Cached file integrity check failed for [${newDownloadInfo.fullFilePath}] — expected ${expectedHash}, got ${actualHash}. Re-downloading.`
           );
         } catch (error) {
-          this.log.error(`Error validating cached file: ${(error as Error).message}. Re-downloading.`);
+          this.log.error(
+            `Error validating cached file: ${(error as Error).message}. Re-downloading.`
+          );
         }
       } else {
         this.log.info(
@@ -158,7 +164,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
         expectedHash = await fetchExpectedHash(shaUrl);
       } catch (error) {
         this.log.warning(
-          `Failed to fetch SHA512 hash from [${shaUrl}]: ${(error as Error).message}. Proceeding without integrity validation.`
+          `Failed to fetch SHA512 hash from [${shaUrl}]: ${
+            (error as Error).message
+          }. Proceeding without integrity validation.`
         );
       }
     }
@@ -181,7 +189,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
                 const nodeStream = Readable.fromWeb(response.body as WebReadableStream);
                 await finished(nodeStream.pipe(outputStream));
               } catch (error) {
-                this.log.error(`Error during download attempt ${attempt}: ${(error as Error).message}`);
+                this.log.error(
+                  `Error during download attempt ${attempt}: ${(error as Error).message}`
+                );
                 throw error;
               }
             },
@@ -223,10 +233,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     return newDownloadInfo;
   }
 
-  private async deleteCachedFileAndSidecar(
-    filePath: string,
-    sidecarPath: string
-  ): Promise<void> {
+  private async deleteCachedFileAndSidecar(filePath: string, sidecarPath: string): Promise<void> {
     try {
       await unlink(filePath);
     } catch {
