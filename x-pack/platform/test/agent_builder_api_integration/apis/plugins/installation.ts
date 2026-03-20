@@ -115,8 +115,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('elastic-api-version', '2023-10-31');
     };
 
-    const listSkills = async () => {
-      const response = await supertest.get('/api/agent_builder/skills').expect(200);
+    const listSkills = async ({ includePlugins = false }: { includePlugins?: boolean } = {}) => {
+      const response = await supertest
+        .get('/api/agent_builder/skills')
+        .query({ include_plugins: includePlugins })
+        .expect(200);
       return response.body.results as Array<{
         id: string;
         name: string;
@@ -126,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     const findPluginSkill = async (skillId: string) => {
-      const skills = await listSkills();
+      const skills = await listSkills({ includePlugins: true });
       return skills.find((s) => s.id === skillId);
     };
 
