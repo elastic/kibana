@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '@kbn/scout';
 import { INTERNAL_API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../fixtures';
-export type { Client as EsClient } from '@elastic/elasticsearch';
 
 /**
  * E2E episode lifecycle tests for alerting_v2 alert rules.
