@@ -8,9 +8,13 @@
 /**
  * Strict / negative request-body checks for automatic_import_v2 (manager role).
  *
+ * Payloads that include a JSON key named "__proto__" are sent as raw JSON strings with an explicit
+ * Content-Type. Parsing them into a JavaScript object before `apiClient.send()` can mutate
+ * `Object.prototype` in some engines and break serialization.
+ *
  * - PUT /integrations uses a Zod `.strict()` schema: unknown top-level keys are rejected (400).
- * - POST .../upload uses a plain Zod object: unknown top-level keys are typically stripped (still 200
- *   when required fields are valid) — callers should not rely on passive stripping as a security boundary.
+ * - POST .../upload uses `.strict()` as well: unknown top-level keys are rejected (400).
+ * - Raw JSON `__proto__` on PUT is sent as a string body only (avoid client-side prototype hazards).
  * - `originalSource.sourceValue` accepts arbitrary non-empty strings (including “odd” extensions /
  *   path-like names); uploads are not gated on file extension.
  */
@@ -82,16 +86,20 @@ apiTest.describe(
       async ({ apiClient }) => {
         const id = 'scout-neg-proto-key';
         const base = validPutIntegrationBody(id);
-        const body = JSON.parse(
-          `{"connectorId":${JSON.stringify(base.connectorId)},"integrationId":${JSON.stringify(
-            base.integrationId
-          )},"title":${JSON.stringify(base.title)},"description":${JSON.stringify(
-            base.description
-          )},"__proto__":{"polluted":true}}`
-        ) as Record<string, unknown>;
+        const bodyJson = `{"connectorId":${JSON.stringify(
+          base.connectorId
+        )},"integrationId":${JSON.stringify(base.integrationId)},"title":${JSON.stringify(
+          base.title
+        )},"description":${JSON.stringify(base.description)},"__proto__":${JSON.stringify({
+          polluted: true,
+        })}}`;
         const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body,
+          headers: {
+            ...COMMON_API_HEADERS,
+            ...cookieHeader,
+            'Content-Type': 'application/json',
+          },
+          body: bodyJson,
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(400);
@@ -223,17 +231,20 @@ apiTest.describe(
     );
 
     apiTest(
-      'POST .../upload: extra top-level keys are ignored when samples are valid (non-strict object schema)',
+      'POST .../upload: rejects unknown top-level keys (strict schema)',
       async ({ apiClient }) => {
-        const body = JSON.parse(
-          '{"samples":["{\\"message\\":\\"extra-key-stripped\\"}"],"originalSource":{"sourceType":"file","sourceValue":"extras.log"},"shouldBeIgnoredByZod":true,"__proto__":{"x":1}}'
-        ) as Record<string, unknown>;
         const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body,
+          body: {
+            samples: ['{"message":"extra-key-stripped"}'],
+            originalSource: { sourceType: 'file', sourceValue: 'extras.log' },
+            shouldBeIgnoredByZod: true,
+          },
           responseType: 'json',
         });
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+        expect(scoutApiErrorText(response.body)).toMatch(/unrecognized|Unrecognized/i);
       }
     );
   }
