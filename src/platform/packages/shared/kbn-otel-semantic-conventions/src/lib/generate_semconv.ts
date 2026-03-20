@@ -77,7 +77,7 @@ function mapOtelTypeToEsType(otelType?: unknown): string {
 
   // Handle complex type objects (like enum definitions with members)
   if (typeof otelType === 'object' && otelType !== null) {
-    const typeObj = otelType as any;
+    const typeObj = otelType as Record<string, unknown>;
 
     // Check if it's an enum type with members
     if (typeObj.members && Array.isArray(typeObj.members)) {

@@ -30,6 +30,7 @@ const _allowedExperimentalValues = {
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
   enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
   enableOpAMP: false, // When enabled, OpAMP features will be available in the API and UI.
+  enableResolveDependencies: false, // When enabled, the resolve dependencies step will be available during package installation.
 };
 
 /**

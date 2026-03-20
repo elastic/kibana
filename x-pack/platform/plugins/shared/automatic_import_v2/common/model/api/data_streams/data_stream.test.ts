@@ -218,15 +218,19 @@ describe('data stream schemas', () => {
       sourceValue: 'test.log',
     };
 
-    it('requires samples array', () => {
+    it('accepts payload with sourceIndex and originalSource (index-based upload)', () => {
       const payload = {
-        originalSource: validOriginalSource,
+        sourceIndex: 'logs-*',
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
       };
 
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
+      expectParseSuccess(result);
 
-      expect(stringifyZodError(result.error)).toContain('samples: Invalid input');
+      expect(result.data).toEqual(payload);
     });
 
     it('requires originalSource', () => {
@@ -237,7 +241,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('originalSource: Invalid input');
+      expect(stringifyZodError(result.error)).toContain('originalSource');
     });
 
     it('rejects non-array samples', () => {
@@ -362,6 +366,19 @@ describe('data stream schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual(payload);
+    });
+
+    it('rejects empty sourceIndex when provided', () => {
+      const payload = {
+        sourceIndex: '',
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
     });
 
     it('rejects invalid source type', () => {

@@ -22,7 +22,7 @@ import * as esKuery from '@kbn/es-query';
 import type { File } from '@kbn/files-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
+import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/script_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 import {

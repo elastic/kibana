@@ -22,6 +22,7 @@ export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
 interface StreamQueryBase {
   id: string;
   title: string;
+  description: string;
 }
 
 export interface StreamQuery extends StreamQueryBase {
@@ -34,6 +35,7 @@ export interface StreamQuery extends StreamQueryBase {
 const streamQueryBaseSchema = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
+  description: z.string(),
 }) satisfies z.Schema<StreamQueryBase>;
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
@@ -54,6 +56,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   esql: esqlQuerySchema,
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  description: z.string().default(''),
 });
 
 export interface QueriesGetResponse {
@@ -66,4 +69,16 @@ export interface QueriesGetResponse {
 export interface QueriesOccurrencesGetResponse {
   occurrences_histogram: Array<{ x: string; y: number }>;
   total_occurrences: number;
+}
+
+export interface QueryLink {
+  'asset.uuid': string;
+  'asset.type': 'query';
+  'asset.id': string;
+  query: StreamQuery;
+  stream_name: string;
+  /** Whether a Kibana rule exists for this query. */
+  rule_backed: boolean;
+  /** The deterministic ID of the Kibana rule associated with this query. */
+  rule_id: string;
 }

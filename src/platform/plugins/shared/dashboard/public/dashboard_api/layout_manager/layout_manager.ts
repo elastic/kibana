@@ -145,13 +145,19 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
 
   let lastSavedChildState = initialChildState;
-  const resetLayout = () => {
-    layout$.next({ ...lastSavedLayout });
-    currentChildState = { ...lastSavedChildState };
+  const resetLayout = (state: DashboardState) => {
+    const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
+      state.panels,
+      state.pinned_panels
+    );
+
+    layout$.next({ ...layoutToApply });
+    currentChildState = { ...childStateToApply };
+
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (lastSavedLayout.panels[uuid] || lastSavedLayout.pinnedPanels[uuid]) {
+      if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {

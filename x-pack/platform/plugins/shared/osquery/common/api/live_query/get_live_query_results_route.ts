@@ -11,6 +11,7 @@ import { Direction } from '../../search_strategy';
 
 export const getLiveQueryResultsRequestQuerySchema = t.type({
   kuery: t.union([t.string, t.undefined]),
+  esFilters: t.union([t.string, t.undefined]),
   page: t.union([toNumberRt, t.undefined]),
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),

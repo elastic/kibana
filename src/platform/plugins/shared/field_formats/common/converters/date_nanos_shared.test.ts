@@ -129,4 +129,17 @@ describe('analysePatternForFract', () => {
     }
   `);
   });
+
+  test('escapes HTML characters in html context via fallback', () => {
+    const dateNanos = new DateNanosFormat(
+      {
+        pattern: 'MMM D, YYYY @ HH:mm:ss.SSS',
+        timezone: 'UTC',
+      },
+      jest.fn()
+    );
+    expect(dateNanos.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+    );
+  });
 });
