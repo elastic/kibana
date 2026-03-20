@@ -6,35 +6,35 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { TriggerMatchResult, AnchorPosition } from './types';
+import type { CommandMatchResult, AnchorPosition } from './types';
 import { getRectAtOffset } from './cursor_rect';
 
-interface UseInlineActionsMenuAnchorOptions {
-  readonly triggerMatch: TriggerMatchResult;
+interface UseCommandMenuAnchorOptions {
+  readonly commandMatch: CommandMatchResult;
   readonly editorRef: React.RefObject<HTMLDivElement>;
   readonly containerRef: React.RefObject<HTMLDivElement>;
 }
 
 /**
- * Computes the popover anchor position from the active trigger's character
- * offset. Retains the last known position when the trigger becomes inactive
+ * Computes the popover anchor position from the active command's character
+ * offset. Retains the last known position when the command becomes inactive
  * so the popover can animate closed in place.
  */
-export const useInlineActionsMenuAnchor = ({
-  triggerMatch,
+export const useCommandMenuAnchor = ({
+  commandMatch,
   editorRef,
   containerRef,
-}: UseInlineActionsMenuAnchorOptions): AnchorPosition | null => {
+}: UseCommandMenuAnchorOptions): AnchorPosition | null => {
   const [anchorPosition, setAnchorPosition] = useState<AnchorPosition | null>(null);
-  const triggerStartOffset = triggerMatch.activeTrigger?.triggerStartOffset;
+  const commandStartOffset = commandMatch.activeCommand?.commandStartOffset;
 
   // Update anchor position
   useEffect(() => {
-    if (typeof triggerStartOffset !== 'number' || !editorRef.current || !containerRef.current) {
+    if (typeof commandStartOffset !== 'number' || !editorRef.current || !containerRef.current) {
       return;
     }
 
-    const rect = getRectAtOffset(editorRef.current, triggerStartOffset);
+    const rect = getRectAtOffset(editorRef.current, commandStartOffset);
     if (!rect) {
       return;
     }
@@ -45,7 +45,7 @@ export const useInlineActionsMenuAnchor = ({
       left: rect.left - containerRect.left,
       top: rect.top - containerRect.top,
     });
-  }, [triggerStartOffset, editorRef, containerRef]);
+  }, [commandStartOffset, editorRef, containerRef]);
 
   return anchorPosition;
 };

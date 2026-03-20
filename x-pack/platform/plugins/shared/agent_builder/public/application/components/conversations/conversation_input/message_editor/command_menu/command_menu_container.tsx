@@ -7,9 +7,9 @@
 
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
-import type { TriggerMatchResult } from './types';
-import { InlineActionPopover } from './inline_action_popover';
-import { useInlineActionsMenuAnchor } from './use_inline_actions_menu_anchor';
+import type { CommandMatchResult, CommandMenuHandle, CommandBadgeData } from './types';
+import { CommandMenuPopover } from './command_menu_popover';
+import { useCommandMenuAnchor } from './use_command_menu_anchor';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
 
 const containerStyles = css`
@@ -18,24 +18,26 @@ const containerStyles = css`
   height: 100%;
 `;
 
-interface InlineActionsContainerProps {
-  triggerMatch: TriggerMatchResult;
-  onClose: () => void;
+interface CommandMenuContainerProps {
+  commandMatch: CommandMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
+  onSelect: (selection: CommandBadgeData) => void;
+  commandMenuRef: React.RefObject<CommandMenuHandle>;
   children: React.ReactNode;
   'data-test-subj'?: string;
 }
 
-export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
-  triggerMatch,
-  onClose,
+export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
+  commandMatch,
   editorRef,
+  onSelect,
+  commandMenuRef,
   children,
   'data-test-subj': dataTestSubj,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const anchorPosition = useInlineActionsMenuAnchor({
-    triggerMatch,
+  const anchorPosition = useCommandMenuAnchor({
+    commandMatch,
     editorRef,
     containerRef,
   });
@@ -46,10 +48,11 @@ export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
       {isExperimentalFeaturesEnabled && (
-        <InlineActionPopover
-          triggerMatch={triggerMatch}
-          onClose={onClose}
+        <CommandMenuPopover
+          commandMatch={commandMatch}
           anchorPosition={anchorPosition}
+          onSelect={onSelect}
+          commandMenuRef={commandMenuRef}
         />
       )}
     </div>
