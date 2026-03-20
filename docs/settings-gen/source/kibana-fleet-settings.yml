@@ -164,7 +164,7 @@ groups:
 
           - setting: "[n].version"
             description: |
-              Required.Either an exact semantic version, or the keyword `latest` to fetch the latest integration version.
+              Required. Either an exact semantic version, or the keyword `latest` to fetch the latest integration version.
             datatype: string
 
       - setting: xpack.fleet.agentPolicies
