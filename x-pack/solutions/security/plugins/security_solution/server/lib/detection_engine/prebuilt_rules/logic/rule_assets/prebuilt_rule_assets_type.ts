@@ -43,6 +43,8 @@ const securityRuleV3 = schema.object(
     version: schema.number(),
     name: schema.string(),
     tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
+    // Relaxed to optional for V3: deprecated rule stubs from the Fleet package
+    // lack severity and risk_score since they only carry identification fields.
     severity: schema.maybe(schema.string()),
     risk_score: schema.maybe(schema.number()),
     // New field for deprecated detection-rule objects
