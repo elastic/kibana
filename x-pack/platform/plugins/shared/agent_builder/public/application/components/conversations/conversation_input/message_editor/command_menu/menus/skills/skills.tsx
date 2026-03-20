@@ -6,7 +6,8 @@
  */
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
-import { useSkills } from '../../../../../../../hooks/skills/use_skills';
+import { useAgentSkills } from '../../../../../../../hooks/skills/use_agent_skills';
+import { useAgentId } from '../../../../../../../hooks/use_conversation';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
 import { CommandMenuList } from '../components/command_menu_list';
@@ -14,7 +15,8 @@ import type { CommandMenuListOption } from '../components/command_menu_list';
 
 export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {
-    const { skills, isLoading } = useSkills();
+    const agentId = useAgentId();
+    const { skills, isLoading } = useAgentSkills({ agentId });
 
     const options: CommandMenuListOption[] = useMemo(() => {
       const lowerQuery = query.toLowerCase();
