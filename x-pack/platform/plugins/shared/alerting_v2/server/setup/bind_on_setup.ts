@@ -16,6 +16,8 @@ import { registerSavedObjects } from '../saved_objects';
 import { registerTools } from '../agent_builder/tools';
 import { registerSkills } from '../agent_builder/skills';
 import { createScopedServicesFactory } from '../agent_builder/scoped_services';
+import { createDataSourceDescriptionType } from '../agent_builder/attachment_types/data_source_description';
+import { createRuleType } from '../agent_builder/attachment_types/rule';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -46,6 +48,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       const coreSetup = container.get(CoreSetup('getStartServices'));
       const getScopedServices = createScopedServicesFactory(coreSetup);
 
+      agentBuilder.attachments.registerType(createDataSourceDescriptionType() as any);
+      agentBuilder.attachments.registerType(createRuleType() as any);
       registerTools({ agentBuilder, getScopedServices });
       registerSkills(agentBuilder);
     }

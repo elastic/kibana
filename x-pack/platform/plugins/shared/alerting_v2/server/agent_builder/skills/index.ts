@@ -13,8 +13,12 @@ import { notificationPolicyManagementSkill } from './notification_policy_managem
 import { alertingRulesOverviewSkill } from './alerting_rules_overview_skill';
 import { workflowTriggerInvestigationSkill } from './workflow_trigger_investigation_skill';
 import { alertEpisodesSkill } from './alert_episodes_skill';
+import { dataDiscoverySkill } from './data_discovery_skill';
 
 export const registerSkills = (agentBuilder: AgentBuilderPluginSetup) => {
+  // P0 — data discovery & profiling
+  agentBuilder.skills.register(dataDiscoverySkill);
+
   // P1 — investigation, creation & episodes
   agentBuilder.skills.register(alertInvestigationSkill);
   agentBuilder.skills.register(alertRuleCreationSkill);

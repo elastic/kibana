@@ -17,6 +17,9 @@ import { bulkManageRulesTool } from './bulk_manage_rules_tool';
 import { explainRuleQueryTool } from './explain_rule_query_tool';
 import { validateEsqlQueryTool } from './validate_esql_query_tool';
 import { listNotificationPoliciesTool } from './list_notification_policies_tool';
+import { discoverDataSourcesTool } from './discover_data_sources_tool';
+import { describeDataSourceTool } from './describe_data_source_tool';
+import { proposeRuleTool } from './propose_rule_tool';
 
 export const registerTools = ({
   agentBuilder,
@@ -42,4 +45,11 @@ export const registerTools = ({
 
   // P3 — notification policies
   agentBuilder.tools.register(listNotificationPoliciesTool(getScopedServices));
+
+  // P4 — data discovery & profiling
+  agentBuilder.tools.register(discoverDataSourcesTool());
+  agentBuilder.tools.register(describeDataSourceTool());
+
+  // P5 — rule proposals
+  agentBuilder.tools.register(proposeRuleTool());
 };

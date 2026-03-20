@@ -5,6 +5,7 @@
     "outDir": "target/types"
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
@@ -67,7 +68,19 @@
     "@kbn/react-query",
     "@kbn/es-query",
     "@kbn/react-hooks",
-    "@kbn/core-security-server-mocks"
+    "@kbn/core-security-server-mocks",
+    "@kbn/inference-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-plugin",
+    "@kbn/share-plugin",
+    "@kbn/esql",
+    "@kbn/esql-utils",
+    "@kbn/es-types",
+    "@kbn/search-types",
+    "@kbn/discover-plugin",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

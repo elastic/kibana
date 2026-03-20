@@ -30,7 +30,10 @@ const CLONE_NAME_SUFFIX = i18n.translate('xpack.alertingV2.ruleFormPage.cloneNam
 
 export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
-  const { search } = useLocation();
+  const { search, state: locationState } = useLocation<{
+    initialValues?: Partial<FormValues>;
+    initialQuery?: string;
+  }>();
   const cloneFromId = new URLSearchParams(search).get('cloneFrom');
 
   if (ruleId) {
@@ -41,7 +44,12 @@ export const RuleFormPage = () => {
     return <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
   }
 
-  return <RuleFormPageContent />;
+  return (
+    <RuleFormPageContent
+      initialValues={locationState?.initialValues}
+      initialQuery={locationState?.initialQuery}
+    />
+  );
 };
 
 interface FetchedRuleFormPageProps {

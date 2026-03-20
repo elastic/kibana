@@ -61,6 +61,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.alertingV2}.list_notification_policies`,
   `${internalNamespaces.alertingV2}.explain_rule_query`,
   `${internalNamespaces.alertingV2}.validate_esql_query`,
+  `${internalNamespaces.alertingV2}.discover_data_sources`,
+  `${internalNamespaces.alertingV2}.describe_data_source`,
+  `${internalNamespaces.alertingV2}.propose_rule`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

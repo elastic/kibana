@@ -80,7 +80,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     z-index: ${euiTheme.levels.content};
   `;
 
-  if (!actionButtons || actionButtons.length === 0) {
+  if ((!actionButtons || actionButtons.length === 0) && !onClose) {
     return null;
   }
 
