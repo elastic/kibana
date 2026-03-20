@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo, useRef, useEffect, type PropsWithChildren } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { useKibana } from '../common/hooks/use_kibana';
-import { AIV2TelemetryEventType } from '../../common';
+import { AIV2TelemetryEventType } from '../../common/telemetry/types';
 
 export type LogsSource = 'file' | 'index';
 type ReportDataStreamFlyoutOpened = (params: {

@@ -7,7 +7,7 @@
 
 import type { RootSchema } from '@kbn/core-analytics-browser';
 
-import { AIV2TelemetryEventType } from '../../../common';
+import { AIV2TelemetryEventType } from '../../../common/telemetry/types';
 
 /**
  * EBT schema definitions for browser-side telemetry events.

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { AIV2TelemetryEventType } from '../../../common';
+import { AIV2TelemetryEventType } from '../../../common/telemetry/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import type { Services } from '../../services/types';
 import type { AutomaticImportV2PluginStart } from '../../types';

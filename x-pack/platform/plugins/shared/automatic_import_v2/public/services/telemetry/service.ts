@@ -7,8 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
-import type { AIV2TelemetryEventType } from '../../../common';
-import { type AIV2EventPayload } from '../../../common';
+import type { AIV2TelemetryEventType, AIV2EventPayload } from '../../../common/telemetry/types';
 import { telemetryEventsSchemas } from './events';
 
 /**
