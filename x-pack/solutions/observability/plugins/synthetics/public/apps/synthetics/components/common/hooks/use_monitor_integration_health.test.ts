@@ -144,10 +144,12 @@ describe('useMonitorIntegrationHealth', () => {
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
+      let resetResult: { error?: Error } | undefined;
       await act(async () => {
-        await result.current.resetMonitor('mon-2');
+        resetResult = await result.current.resetMonitor('mon-2');
       });
 
+      expect(resetResult).toEqual({});
       expect(mockedResetMonitorAPI).toHaveBeenCalledWith({ id: 'mon-2' });
       expect(result.current.isResetting).toBe(false);
       const healthDispatches = dispatchSpy.mock.calls.filter(
@@ -156,16 +158,19 @@ describe('useMonitorIntegrationHealth', () => {
       expect(healthDispatches.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('sets isResetting to false even on API failure', async () => {
+    it('returns error and sets isResetting to false on API failure', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorAPI.mockRejectedValue(new Error('Server error'));
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
+      let resetResult: { error?: Error } | undefined;
       await act(async () => {
-        await result.current.resetMonitor('mon-2').catch(() => {});
+        resetResult = await result.current.resetMonitor('mon-2');
       });
 
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(resetResult?.error?.message).toBe('Server error');
       expect(result.current.isResetting).toBe(false);
     });
   });
@@ -179,10 +184,12 @@ describe('useMonitorIntegrationHealth', () => {
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
+      let resetResult: { error?: Error } | undefined;
       await act(async () => {
-        await result.current.resetMonitors(['mon-2']);
+        resetResult = await result.current.resetMonitors(['mon-2']);
       });
 
+      expect(resetResult).toEqual({});
       expect(mockedResetMonitorBulkAPI).toHaveBeenCalledWith({ ids: ['mon-2'] });
       expect(result.current.isResetting).toBe(false);
     });

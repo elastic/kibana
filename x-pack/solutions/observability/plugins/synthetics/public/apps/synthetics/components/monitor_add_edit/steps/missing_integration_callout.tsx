@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../common/hooks/status_labels';
+import { kibanaService } from '../../../../../utils/kibana_service';
 
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
   const {
@@ -21,34 +22,26 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
     configIds: [configId],
   });
 
-  const [resetSuccess, setResetSuccess] = useState(false);
-
   const isMissing = hasMissingIntegrations(configId);
   const missingStatuses = getMissingStatuses(configId);
 
   const handleReset = useCallback(async () => {
-    await resetMonitor(configId);
-    setResetSuccess(true);
+    const { error } = await resetMonitor(configId);
+    if (error) {
+      kibanaService.toasts.addDanger({
+        title: RESET_ERROR_TITLE,
+        toastLifeTimeMs: 5000,
+      });
+    } else {
+      kibanaService.toasts.addSuccess({
+        title: RESET_SUCCESS_TITLE,
+        toastLifeTimeMs: 3000,
+      });
+    }
   }, [resetMonitor, configId]);
 
-  if (!isMissing && !resetSuccess) {
+  if (!isMissing) {
     return null;
-  }
-
-  if (resetSuccess) {
-    return (
-      <>
-        <EuiCallOut
-          title={RESET_SUCCESS_TITLE}
-          color="success"
-          iconType="check"
-          data-test-subj="syntheticsMissingIntegrationResetSuccess"
-        >
-          <p>{RESET_SUCCESS_DESCRIPTION}</p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
   }
 
   return (
@@ -97,14 +90,10 @@ const RESET_BUTTON_LABEL = i18n.translate('xpack.synthetics.missingIntegration.r
   defaultMessage: 'Reset monitor',
 });
 
+const RESET_ERROR_TITLE = i18n.translate('xpack.synthetics.missingIntegration.resetError', {
+  defaultMessage: 'Failed to reset monitor',
+});
+
 const RESET_SUCCESS_TITLE = i18n.translate('xpack.synthetics.missingIntegration.resetSuccess', {
   defaultMessage: 'Monitor reset successfully',
 });
-
-const RESET_SUCCESS_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.missingIntegration.resetSuccess.description',
-  {
-    defaultMessage:
-      'The Fleet integration has been recreated. The monitor should start running again shortly.',
-  }
-);

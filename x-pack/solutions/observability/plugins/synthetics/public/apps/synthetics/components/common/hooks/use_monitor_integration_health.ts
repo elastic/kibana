@@ -34,8 +34,8 @@ interface UseMonitorIntegrationHealthReturn {
   statuses: Map<string, MonitorIntegrationStatus[]>;
   loading: boolean;
   isResetting: boolean;
-  resetMonitor: (configId: string) => Promise<void>;
-  resetMonitors: (configIds: string[]) => Promise<void>;
+  resetMonitor: (configId: string) => Promise<{ error?: Error }>;
+  resetMonitors: (configIds: string[]) => Promise<{ error?: Error }>;
   isUnhealthy: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
   getUnhealthyLocationCount: () => number;
@@ -156,11 +156,14 @@ export const useMonitorIntegrationHealth = (
   }, [dispatch, monitorIdsToFetch]);
 
   const resetMonitor = useCallback(
-    async (configId: string): Promise<void> => {
+    async (configId: string): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
         await resetMonitorAPI({ id: configId });
         refetchHealth();
+        return {};
+      } catch (err) {
+        return { error: err instanceof Error ? err : new Error(String(err)) };
       } finally {
         setIsResetting(false);
       }
@@ -169,11 +172,14 @@ export const useMonitorIntegrationHealth = (
   );
 
   const resetMonitors = useCallback(
-    async (ids: string[]): Promise<void> => {
+    async (ids: string[]): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
         await resetMonitorBulkAPI({ ids });
         refetchHealth();
+        return {};
+      } catch (err) {
+        return { error: err instanceof Error ? err : new Error(String(err)) };
       } finally {
         setIsResetting(false);
       }

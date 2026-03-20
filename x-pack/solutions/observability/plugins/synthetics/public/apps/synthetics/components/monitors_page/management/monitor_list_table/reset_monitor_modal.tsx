@@ -17,15 +17,16 @@ export const ResetMonitorModal = ({
 }: {
   configIds: string[];
   onClose: () => void;
-  resetMonitors: (ids: string[]) => Promise<void>;
+  resetMonitors: (ids: string[]) => Promise<{ error?: Error }>;
 }) => {
   const [isResetting, setIsResetting] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
   const handleConfirm = useCallback(async () => {
     setIsResetting(true);
-    try {
-      await resetMonitors(configIds);
+    const { error } = await resetMonitors(configIds);
+    setIsResetting(false);
+    if (!error) {
       kibanaService.toasts.addSuccess({
         title: i18n.translate('xpack.synthetics.resetMonitorModal.success', {
           defaultMessage: '{count, plural, one {# monitor} other {# monitors}} reset successfully',
@@ -33,17 +34,15 @@ export const ResetMonitorModal = ({
         }),
         toastLifeTimeMs: 3000,
       });
-    } catch (error) {
+    } else {
       kibanaService.toasts.addDanger({
         title: i18n.translate('xpack.synthetics.resetMonitorModal.error', {
           defaultMessage: 'Failed to reset monitors',
         }),
         toastLifeTimeMs: 5000,
       });
-    } finally {
-      setIsResetting(false);
-      onClose();
     }
+    onClose();
   }, [configIds, onClose, resetMonitors]);
 
   return (
