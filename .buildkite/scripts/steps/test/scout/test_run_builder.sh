@@ -8,22 +8,74 @@ echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
 echo '--- Update Scout Test Config Manifests'
-node scripts/scout.js update-test-config-manifests
+# Updates **/test/scout/.meta (manifest) files. Those paths are excluded from affected-packages
+# so they do not cause extra modules to be considered "changed" in the next step.
+node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
-echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
-# Look for both stateful and serverless tests when run on "main" / PRs to "main", otherwise only stateful tests to be discovered and run
-if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
-  SCOUT_DISCOVERY_TARGET="local"
+SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
+
+if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
+  echo '--- Update Scout Test Config Stats'
+  node scripts/scout update-test-config-stats
+
+  echo '--- Create Test Tracks'
+  SERVERLESS_TARGETS=(
+    local-serverless-search
+    local-serverless-observability_complete
+    local-serverless-observability_logs_essentials
+    local-serverless-security_complete
+    local-serverless-security_essentials
+    local-serverless-security_ease
+    local-serverless-workplaceai
+  )
+
+  TEST_TARGET_FLAGS=()
+
+  if [[ -z "${SERVERLESS_TESTS_ONLY:-}" ]]; then
+    TEST_TARGET_FLAGS+=(--testTarget local-stateful-classic)
+  fi
+
+  if [[ -n "${SERVERLESS_TESTS_ONLY:-}" || "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
+    for target in "${SERVERLESS_TARGETS[@]}"; do
+      TEST_TARGET_FLAGS+=(--testTarget "$target")
+    done
+  fi
+
+  node scripts/scout create-test-tracks \
+    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-3}" \
+    --targetRuntimeMinutes "${SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES:-15}" \
+    "${TEST_TARGET_FLAGS[@]}" \
+    --showMultiTrackSummary
+
 else
-  SCOUT_DISCOVERY_TARGET="local-stateful-only"
-fi
-node scripts/scout discover-playwright-configs \
-  --include-custom-servers \
-  --target "$SCOUT_DISCOVERY_TARGET" \
-  --save
+  if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
+    SCOUT_DISCOVERY_TARGET="local"
+  else
+    SCOUT_DISCOVERY_TARGET="local-stateful-only"
+  fi
 
-cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
-buildkite-agent artifact upload "scout_playwright_configs.json"
+  AFFECTED_MODULES_FILE=""
+  if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]] && [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]]; then
+    mkdir -p .scout
+    AFFECTED_MODULES_FILE=".scout/affected_modules.json"
+    .buildkite/pipeline-utils/affected-packages/list_affected \
+      --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
+      > "$AFFECTED_MODULES_FILE"
+  fi
+
+  echo "--- Discover Playwright Configs and upload to Buildkite artifacts${AFFECTED_MODULES_FILE:+ (selective testing)}"
+  AFFECTED_FLAG=()
+  if [[ -n "$AFFECTED_MODULES_FILE" ]]; then
+    AFFECTED_FLAG=(--affected-modules "$AFFECTED_MODULES_FILE")
+  fi
+  node scripts/scout discover-playwright-configs \
+    --include-custom-servers \
+    --target "$SCOUT_DISCOVERY_TARGET" \
+    "${AFFECTED_FLAG[@]}" \
+    --save
+  cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
+  buildkite-agent artifact upload "scout_playwright_configs.json"
+fi
 
 echo '--- Running Scout API Integration Tests'
 node scripts/scout.js run-tests \
