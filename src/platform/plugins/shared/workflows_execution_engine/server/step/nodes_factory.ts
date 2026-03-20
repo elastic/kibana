@@ -9,14 +9,19 @@
 
 import type {
   AtomicGraphNode,
+  EnterCaseBranchNode,
   EnterConditionBranchNode,
   EnterContinueNode,
+  EnterDefaultBranchNode,
   EnterForeachNode,
   EnterIfNode,
   EnterRetryNode,
+  EnterSwitchNode,
   EnterTryBlockNode,
   EnterWhileNode,
+  ExitCaseBranchNode,
   ExitConditionBranchNode,
+  ExitDefaultBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
@@ -59,8 +64,14 @@ import {
   ExitFallbackPathNodeImpl,
   ExitNormalPathNodeImpl,
   ExitTryBlockNodeImpl,
-} from './on_failure/fallback-step';
+} from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import {
+  EnterBranchNodeImpl,
+  EnterSwitchNodeImpl,
+  ExitBranchNodeImpl,
+  ExitSwitchNodeImpl,
+} from './switch_step';
 import {
   EnterStepTimeoutZoneNodeImpl,
   EnterWorkflowTimeoutZoneNodeImpl,
@@ -294,6 +305,30 @@ export class NodesFactory {
         );
       case 'exit-if':
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
+      case 'enter-switch':
+        return new EnterSwitchNodeImpl(
+          node as EnterSwitchNode,
+          this.workflowRuntime,
+          this.workflowGraph,
+          stepExecutionRuntime,
+          stepLogger
+        );
+      case 'enter-case-branch':
+      case 'enter-default-branch':
+        return new EnterBranchNodeImpl(
+          node as EnterCaseBranchNode | EnterDefaultBranchNode,
+          this.workflowRuntime,
+          stepExecutionRuntime
+        );
+      case 'exit-case-branch':
+      case 'exit-default-branch':
+        return new ExitBranchNodeImpl(
+          node as ExitCaseBranchNode | ExitDefaultBranchNode,
+          this.workflowGraph,
+          this.workflowRuntime
+        );
+      case 'exit-switch':
+        return new ExitSwitchNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
