@@ -14,7 +14,7 @@ import { invariant } from '../../../../../../../common/utils/invariant';
 import { nsToMs, toOptionalInt } from './utils';
 
 /**
- * Maps a raw event log event to a UnifiedExecutionResult.
+ * Produces a UnifiedExecutionResult from an "execute"/"execute-backfill" event.
  *
  * This function is the single place that knows about the raw event structure.
  * If the underlying event source changes, only this function needs to be updated.
@@ -48,8 +48,9 @@ const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome
 
 const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics'] => {
   const metrics = event?.kibana?.alert?.rule?.execution?.metrics;
-  // alerts_candidate_count and matched_indices_count are to be added to the
-  // Alerting Framework event log schema in a forthcoming PR.
+  // TODO: Remove this comment once we merge Maxim's PR
+  // `alerts_candidate_count` and `matched_indices_count` are to be added to the
+  // Alerting Framework event log schema in an upcoming PR.
   const additionalMetrics = metrics as Record<string, unknown> | undefined;
 
   return {
@@ -68,31 +69,29 @@ const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics
   };
 };
 
-/**
- * The Alerting Framework stores event.duration in nanoseconds.
- */
 const extractDurationMs = (event: IValidatedEvent): number => {
   invariant(event?.event?.duration != null, 'Required "event.duration" field is not found');
   return nsToMs(event.event.duration) ?? 0;
 };
 
-/**
- * The Alerting Framework stores kibana.task.schedule_delay in nanoseconds.
- */
 const extractScheduleDelayMs = (event: IValidatedEvent): number | null =>
   nsToMs(event?.kibana?.task?.schedule_delay);
 
 /**
  * Converts a backfill event field to a { from, to } time range.
  * kibana.alert.rule.execution.backfill.start is the later end of the range (to),
- * so `from` is derived by subtracting the interval — matching the logic in getExecutionResults.
+ * so `from` is derived by subtracting the interval.
  */
 const extractBackfill = (event: IValidatedEvent): { from: string; to: string } | null => {
   const backfill = event?.kibana?.alert?.rule?.execution?.backfill;
-  if (!backfill) return null;
+  if (!backfill) {
+    return null;
+  }
 
   const { start, interval } = backfill;
-  if (!start || !interval) return null;
+  if (!start || !interval) {
+    return null;
+  }
 
   return {
     from: moment(start).subtract(parseDuration(interval), 'ms').toISOString(),

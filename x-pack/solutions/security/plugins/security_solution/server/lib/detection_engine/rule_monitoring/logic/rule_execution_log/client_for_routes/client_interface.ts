@@ -38,8 +38,7 @@ export interface IRuleExecutionLogForRoutes {
   getExecutionResults(args: GetExecutionResultsArgs): Promise<GetRuleExecutionResultsResponse>;
 
   /**
-   * Fetches unified execution results directly from the Alerting Framework's execute events,
-   * using the simpler findEventsBySavedObjectIds API instead of aggregations.
+   * Fetches rule execution results for a given rule ID.
    */
   getUnifiedExecutionResults(
     args: GetUnifiedExecutionResultsArgs

@@ -5,21 +5,6 @@
  * 2.0.
  */
 
-/**
- * When using these execution events as templates be sure to replace all the following fields with their updated values
- *
- * E.g.
- *  set(e, '@timestamp', timestamp);
- *  set(e, 'event.start', timestamp);
- *  set(e, 'event.end', timestamp);
- *  set(e, 'rule.id', id);
- *  set(e, 'kibana.saved_objects[0].id', id);
- *  set(e, 'kibana.alert.rule.execution.uuid', executionId);
- */
-
-/**
- * An AF execute event for a successful execution with the new security metrics.
- */
 export const successfulExecuteEvent = {
   '@timestamp': '2026-03-11T11:54:41.352Z',
   message: "rule executed: siem.queryRule:PLACEHOLDER_RULE_ID: 'Test Rule'",
@@ -90,11 +75,6 @@ export const successfulExecuteEvent = {
   },
 };
 
-/**
- * AF execute event that completed with a warning (e.g., missing index).
- * Status: kibana.alerting.outcome = 'warning', event.outcome = 'success'.
- * Warning message is in the top-level `message` field.
- */
 export const warningExecuteEvent = {
   '@timestamp': '2026-03-11T10:30:00.000Z',
   message: 'Unable to find matching indices for rule "Test Rule".',
@@ -166,11 +146,6 @@ export const warningExecuteEvent = {
   },
 };
 
-/**
- * AF execute event that failed.
- * Status: kibana.alerting.outcome = 'failure', event.outcome = 'failure'.
- * Error message is at error.message (single string).
- */
 export const failedExecuteEvent = {
   '@timestamp': '2026-03-11T09:00:00.000Z',
   message:
@@ -247,9 +222,8 @@ export const failedExecuteEvent = {
 };
 
 /**
- * AF execute-backfill event for a manual (backfill) run.
- * Note: action is 'execute-backfill', not 'execute'.
- * Has backfill data at kibana.alert.rule.execution.backfill.
+ * Event for a manual (backfill) run.
+ * Note: action is "execute-backfill", not "execute".
  */
 export const manualRunExecuteEvent = {
   '@timestamp': '2026-03-11T12:00:00.000Z',
