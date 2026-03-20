@@ -134,7 +134,13 @@ describe('github workflows', () => {
     it('routes to listIssues and forwards repository and pagination parameters', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'source.list'),
-        inputs: { list_type: 'listIssues', owner: 'elastic', repo: 'kibana', state: 'open', first: 10 },
+        inputs: {
+          list_type: 'listIssues',
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'open',
+          first: 10,
+        },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
