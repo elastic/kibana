@@ -254,12 +254,12 @@ groups:
 
               - setting: "[n].name"
                 description: |
-                  Name of the integration policy.
+                  Required. Name of the integration policy.
                 datatype: string
 
               - setting: "[n].package"
                 description: |
-                  Integration that this policy configures.
+                  Required. Integration that this policy configures.
                 datatype: string
                 settings:
                   - setting: name
