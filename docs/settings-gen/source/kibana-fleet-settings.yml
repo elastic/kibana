@@ -481,7 +481,7 @@ groups:
         description: |
           List of experimental feature flag to enable in Fleet.
           It is available in {{ecloud}} 8.6.0 and later versions.
-          From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features.
+          Deprecated beginning in 9.3.0.
         datatype: string
         applies_to:
           - "stack: deprecated 9.3.0"
