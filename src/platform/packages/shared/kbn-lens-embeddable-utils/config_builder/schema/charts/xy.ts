@@ -24,7 +24,7 @@ import {
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
 } from './shared';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
@@ -435,7 +435,7 @@ const xyDataLayerSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      esqlColumnSchema.extends(
+      esqlColumnWithFormatSchema.extends(
         {
           color: schema.maybe(colorMappingSchema),
           collapse_by: schema.maybe(collapseBySchema),
@@ -444,7 +444,7 @@ const xyDataLayerSchemaESQL = schema.object(
       )
     ),
     y: schema.arrayOf(
-      esqlColumnSchema.extends(
+      esqlColumnWithFormatSchema.extends(
         {
           axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
           color: schema.maybe(staticColorSchema),
@@ -453,7 +453,7 @@ const xyDataLayerSchemaESQL = schema.object(
       ),
       { meta: { description: 'Array of ES|QL columns for Y-axis metrics' }, maxSize: 100 }
     ),
-    x: schema.maybe(esqlColumnSchema),
+    x: schema.maybe(esqlColumnWithFormatSchema),
   },
   {
     meta: {
@@ -564,7 +564,7 @@ const referenceLineLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     type: schema.literal('referenceLines'),
-    thresholds: schema.arrayOf(esqlColumnSchema.extends(referenceLineLayerShared), {
+    thresholds: schema.arrayOf(esqlColumnWithFormatSchema.extends(referenceLineLayerShared), {
       meta: { description: 'Array of ES|QL-based reference line thresholds' },
       minSize: 1,
       maxSize: 100,

@@ -231,7 +231,7 @@ describe('Textbased Data Source', () => {
       `);
     });
 
-    it('uses label instead of fieldName when label is present', () => {
+    it('uses label when customLabel is true', () => {
       const map = TextBasedDatasource.uniqueLabels(
         {
           layers: {
@@ -241,6 +241,7 @@ describe('Textbased Data Source', () => {
                   columnId: 'a',
                   fieldName: 'bucket_0_0',
                   label: 'Avg',
+                  customLabel: true,
                   meta: {
                     type: 'number',
                   },
@@ -249,6 +250,7 @@ describe('Textbased Data Source', () => {
                   columnId: 'b',
                   fieldName: 'bucket_1_1',
                   label: 'Sum',
+                  customLabel: true,
                   meta: {
                     type: 'number',
                   },
@@ -265,6 +267,36 @@ describe('Textbased Data Source', () => {
         Object {
           "a": "Avg",
           "b": "Sum",
+        }
+      `);
+    });
+
+    it('uses fieldName when customLabel is false even if label differs', () => {
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'AVG(bytes)',
+                  label: 'count',
+                  customLabel: false,
+                  meta: {
+                    type: 'number',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "AVG(bytes)",
         }
       `);
     });
@@ -286,6 +318,7 @@ describe('Textbased Data Source', () => {
                   columnId: 'b',
                   fieldName: 'bucket_1_1',
                   label: 'Sum',
+                  customLabel: true,
                   meta: {
                     type: 'number',
                   },
