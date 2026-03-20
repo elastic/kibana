@@ -108,24 +108,25 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     }
     // Step 1: Create data stream definition
     // TODO: What about ILM policy (defaults to none = keep forever)
-    const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> = {
-      name: DATA_STREAM_NAME,
-      version: 1,
-      hidden: true,
-      template: {
-        priority: 100,
-        mappings: changeHistoryMappings.v1,
-      },
-    };
+    const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
+      {
+        name: DATA_STREAM_NAME,
+        version: 1,
+        hidden: true,
+        template: {
+          priority: 100,
+          mappings: changeHistoryMappings.v1,
+        },
+      };
 
     // Step 2: Initialize data stream
     try {
-      this.client = (await DataStreamClient.initialize({
+      this.client = await DataStreamClient.initialize({
         dataStream: definition,
         elasticsearchClient,
         logger: this.logger,
         lazyCreation: false,
-      }));
+      });
     } catch (error) {
       const err = new Error(
         `Unable to initialize change history data stream for: module [${this.module}] and dataset [${this.dataset}]: ${error}`,
