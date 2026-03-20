@@ -158,6 +158,27 @@ describe('useMonitorIntegrationHealth', () => {
       expect(healthDispatches.length).toBeGreaterThanOrEqual(2);
     });
 
+    it('returns error when response contains attributes (logical failure)', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetMonitorAPI.mockResolvedValue({
+        attributes: { message: 'Fleet error', errors: [] },
+      } as any);
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetMonitor('mon-2');
+      });
+
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(result.current.isResetting).toBe(false);
+      const healthDispatches = dispatchSpy.mock.calls.filter(
+        ([action]: any) => action.type === '[MONITOR HEALTH] GET'
+      );
+      expect(healthDispatches.length).toBe(1); // only initial fetch, no refetch
+    });
+
     it('returns error and sets isResetting to false on API failure', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorAPI.mockRejectedValue(new Error('Server error'));
@@ -176,6 +197,45 @@ describe('useMonitorIntegrationHealth', () => {
   });
 
   describe('resetMonitors (bulk)', () => {
+    it('returns error and does not refetch when a result item has reset: false', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetMonitorBulkAPI.mockResolvedValue({
+        result: [{ id: 'mon-2', reset: false, error: 'fleet error' }],
+      });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetMonitors(['mon-2']);
+      });
+
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(result.current.isResetting).toBe(false);
+      const healthDispatches = dispatchSpy.mock.calls.filter(
+        ([action]: any) => action.type === '[MONITOR HEALTH] GET'
+      );
+      expect(healthDispatches.length).toBe(1); // only initial fetch, no refetch
+    });
+
+    it('returns error and does not refetch when top-level errors are present', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetMonitorBulkAPI.mockResolvedValue({
+        result: [{ id: 'mon-2', reset: true }],
+        errors: [{ message: 'partial failure' }],
+      });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetMonitors(['mon-2']);
+      });
+
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(result.current.isResetting).toBe(false);
+    });
+
     it('calls resetMonitorBulkAPI and re-fetches health', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorBulkAPI.mockResolvedValue({

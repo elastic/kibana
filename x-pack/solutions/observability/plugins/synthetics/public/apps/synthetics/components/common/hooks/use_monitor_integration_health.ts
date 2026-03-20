@@ -159,7 +159,10 @@ export const useMonitorIntegrationHealth = (
     async (configId: string): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
-        await resetMonitorAPI({ id: configId });
+        const response = await resetMonitorAPI({ id: configId });
+        if ('attributes' in response) {
+          return { error: new Error('Failed to reset monitor') };
+        }
         refetchHealth();
         return {};
       } catch (err) {
@@ -175,7 +178,13 @@ export const useMonitorIntegrationHealth = (
     async (ids: string[]): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
-        await resetMonitorBulkAPI({ ids });
+        const response = await resetMonitorBulkAPI({ ids });
+        const hasFailures =
+          response.result.some((r) => !r.reset) ||
+          (response.errors != null && response.errors.length > 0);
+        if (hasFailures) {
+          return { error: new Error('Failed to reset one or more monitors') };
+        }
         refetchHealth();
         return {};
       } catch (err) {
