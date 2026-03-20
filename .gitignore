@@ -193,3 +193,30 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
+
+# Spike planning/temporary files
+SPIKE_*.md
+REFACTORING_*.md
+FINAL_SESSION_*.md
+ENHANCEMENTS_*.md
+*_SUMMARY.md
+*_REPORT.md
+*_REVIEW_*.md
+
+# Openspec planning files
+openspec/
+
+# Local tools
+elastic-llm-benchmarker
+
+# Spike builder enhancement docs
+docs/spike_builder_*.md
+docs/dependency_diagram.*
+docs/spike_communication_*.md
+docs/spike_module_*.md
+
+# Demo/testing guides (local use only)
+DEMO_TESTING_GUIDE.md
+
+# RFC documents (planning phase)
+docs/rfc_*.md
