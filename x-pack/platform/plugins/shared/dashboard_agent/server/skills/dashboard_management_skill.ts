@@ -20,6 +20,7 @@ export const dashboardManagementSkill = defineSkillType({
   content: `## When to Use This Skill
 
 Use this skill when:
+- A user asks to find, list, inspect, or modify existing Kibana dashboards.
 - A user asks to create a dashboard from one or more visualizations.
 - A user asks to update an in-memory dashboard created earlier in the conversation.
 - A request involves dashboard metadata, markdown, panel, or section changes.
@@ -29,6 +30,14 @@ Do **not** use this skill when:
 - The user needs help exploring data, fields, or query logic.
 
 ## Core Instructions
+
+For dashboard discovery:
+- When a user asks what dashboards are available, search for existing saved dashboards with \`platform.core.sml_search\`.
+- Use specific keywords from the user's request. For a broad listing of available dashboards, you may use \`keywords: ["*"]\`.
+- Summarize matches in plain language by title and description, and include lightweight structure when available such as panel and section counts.
+- Do **not** attach dashboards by default when only listing or comparing available dashboards.
+- When the user wants to inspect or modify a saved dashboard, attach it with \`platform.core.sml_attach\` using the exact \`chunk_id\`, \`attachment_id\`, and \`attachment_type\` from the search result.
+- After attaching a saved dashboard, treat the returned dashboard attachment as the editable working copy. Use its \`attachment_id\` in conversation context for later dashboard updates.
 
 Build the request for ${dashboardTools.manageDashboard} as an ordered \
 \`operations\` array. Operations run in order, so earlier operations should set up state needed by later ones.
