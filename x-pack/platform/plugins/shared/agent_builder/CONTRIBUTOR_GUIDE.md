@@ -674,6 +674,8 @@ This is useful when the save operation happens outside the attachment's UI, such
 
 ## Registering skills
 
+**Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
+
 Skills for Agent Builder are very close to the same concept is being used in Cursor or Claude for example.
 They are markdown files the agent can access via the filestore, providing specific instructions to complete a task.
 Skills can also expose tools when enabled, similar to how that works for attachments: when the agent reads the skill from the filestore,
