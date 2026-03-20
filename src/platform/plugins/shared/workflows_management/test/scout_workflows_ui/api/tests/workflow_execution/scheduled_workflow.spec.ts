@@ -34,7 +34,7 @@ const TASK_MANAGER_POLL_INTERVAL_MS = 3_000;
 const SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML = `
 name: Scout Scheduled Workflow Test
 enabled: false
-description: Scheduled workflow that runs every 10s for testing
+description: Scheduled workflow that runs every ${SCHEDULED_WORKFLOW_INTERVAL_SECONDS}s for testing
 triggers:
   - type: scheduled
     with:
@@ -49,7 +49,7 @@ steps:
 const LONG_RUNNING_SCHEDULED_WORKFLOW_YAML = `
 name: Scout Scheduled Workflow Test
 enabled: true
-description: Scheduled workflow that runs every 10s for testing
+description: Scheduled workflow that runs every ${SCHEDULED_WORKFLOW_INTERVAL_SECONDS}s for testing
 triggers:
   - type: scheduled
     with:
@@ -63,7 +63,7 @@ steps:
   - name: wait
     type: wait
     with:
-      duration: 11s
+      duration: ${SCHEDULED_WORKFLOW_INTERVAL_SECONDS + 1}s
 `;
 
 spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
@@ -162,12 +162,10 @@ spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnosti
   spaceTest(
     'scheduled executions do not overlap when a previous run is still in progress',
     async () => {
-      // Each execution takes ~11s (wait step) plus overhead, scheduled every 5s.
-      // The scheduler must wait for the previous run to finish before starting the next,
-      // so consecutive start-to-start gaps must exceed the task execution duration (~11s).
-      //
-      // Minimum time for 2 completions ≈ 11s (run 1) + poll delay + 11s (run 2) ≈ 25s.
-      // Timeout is set to 40s to cover startup jitter and slow environments.
+      // Workflow is scheduled every 5s with an 11s wait step (execution > interval).
+      // The scheduler must wait for the active run to finish before starting the next.
+      // We verify this by checking that no two consecutive runs overlap in time using
+      // the finishedAt / startedAt fields from WorkflowExecutionDto.
       const createdLongRunningWorkflow = await workflowsApi.create(
         LONG_RUNNING_SCHEDULED_WORKFLOW_YAML
       );
@@ -191,21 +189,26 @@ spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnosti
         results.map((e) => workflowsApi.waitForTermination({ workflowExecutionId: e.id }))
       );
 
-      // Keep only completed executions, sorted chronologically by start time
+      // Keep only completed executions with both timestamps, sorted by startedAt
       const completedExecutions = terminalExecutions
-        .filter((e) => e?.status === ExecutionStatus.COMPLETED)
-        .toSorted((a, b) => (a?.startedAt ?? '').localeCompare(b?.startedAt ?? ''));
+        .filter(
+          (e): e is NonNullable<typeof e> & { startedAt: string; finishedAt: string } =>
+            e?.status === ExecutionStatus.COMPLETED && e.startedAt != null && e.finishedAt != null
+        )
+        .toSorted((a, b) => a.startedAt.localeCompare(b.startedAt));
 
       expect(completedExecutions.length).toBeGreaterThan(1);
 
-      // Each gap between consecutive start times must exceed the task execution duration
-      // (~11s wait step), proving the scheduler waited for the prior run to finish
-      // rather than overlapping.
-      const LONG_RUNNING_WAIT_STEP_SECONDS = 11;
+      // Non-overlap invariant: each run must finish before the next one starts.
+      // This is a direct structural check that does not depend on the wait step
+      // duration or on the Task Manager poll interval.
       for (let index = 1; index < completedExecutions.length; index++) {
-        const currentStart = new Date(completedExecutions[index]?.startedAt ?? '').getTime();
-        const previousStart = new Date(completedExecutions[index - 1]?.startedAt ?? '').getTime();
-        expect(currentStart - previousStart).toBeGreaterThan(LONG_RUNNING_WAIT_STEP_SECONDS * 1000);
+        const previousFinished = new Date(completedExecutions[index - 1].finishedAt).getTime();
+        const currentStarted = new Date(completedExecutions[index].startedAt).getTime();
+        expect(
+          currentStarted,
+          `run ${index + 1} started before run ${index} finished (overlap detected)`
+        ).toBeGreaterThan(previousFinished);
       }
     }
   );
