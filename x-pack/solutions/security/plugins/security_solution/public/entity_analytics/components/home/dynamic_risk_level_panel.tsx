@@ -62,7 +62,8 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
       [RiskSeverity.Low]:
         riskLevelsStats.records.find((r) => r.level === RiskSeverity.Low)?.count ?? 0,
       [RiskSeverity.Unknown]:
-        riskLevelsStats.records.find((r) => r.level === RiskSeverity.Unknown)?.count ?? 0,
+        riskLevelsStats.records.find((r) => r.level === RiskSeverity.Unknown || r.level === null)
+          ?.count ?? 0,
     };
   }, [useLegacy, combinedRiskStats.severityCount, riskLevelsStats.records]);
 
