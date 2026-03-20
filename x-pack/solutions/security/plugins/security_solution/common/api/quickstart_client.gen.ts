@@ -403,6 +403,10 @@ import type {
   UpdateWatchlistResponse,
 } from './entity_analytics/watchlists/management/update.gen';
 import type {
+  InitializeSecuritySolutionRequestBodyInput,
+  InitializeSecuritySolutionResponse,
+} from './initialization/initialization.gen';
+import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
@@ -2363,6 +2367,19 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
+    return this.kbnClient
+      .request<InitializeSecuritySolutionResponse>({
+        path: '/api/security_solution/initialize',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
     return this.kbnClient
@@ -3798,6 +3815,9 @@ export interface InitEntityEngineProps {
 }
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
+}
+export interface InitializeSecuritySolutionProps {
+  body: InitializeSecuritySolutionRequestBodyInput;
 }
 export interface InstallMigrationDashboardsProps {
   params: InstallMigrationDashboardsRequestParamsInput;
