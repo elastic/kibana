@@ -39,8 +39,6 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 :::{changelog} /releases/kibana
 :subsections:
 :type: breaking-change
-:config: /changelog.yml
-:product: kibana
 :::
 
 <!--

@@ -26,8 +26,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 :::{changelog} /releases/kibana
 :subsections:
-:config: /changelog.yml
-:product: kibana
 :::
 
 ## 9.3.2 [kibana-9.3.2-release-notes]
