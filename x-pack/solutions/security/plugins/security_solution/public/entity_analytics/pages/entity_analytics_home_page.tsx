@@ -44,6 +44,7 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { PREBUILT_WATCHLIST_NAMES } from '../../../common/entity_analytics/watchlists/constants';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -129,7 +130,7 @@ export const EntityAnalyticsHomePage = () => {
             </EuiFlexItem>
 
             <EuiPanel hasBorder>
-              <EntityAnalyticsEntitiesTable />
+              <EntityAnalyticsEntitiesTable watchlistId={selectedWatchlistId} />
             </EuiPanel>
           </EuiFlexGroup>
         )}
@@ -140,7 +141,7 @@ export const EntityAnalyticsHomePage = () => {
   );
 };
 
-const EntityAnalyticsEntitiesTable = () => {
+const EntityAnalyticsEntitiesTable = ({ watchlistId }: { watchlistId?: string }) => {
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
@@ -159,24 +160,54 @@ const EntityAnalyticsEntitiesTable = () => {
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-              defaultMessage="Entities"
-            />
+            {watchlistId ? (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
+                defaultMessage="{watchlistName} entities"
+                values={{
+                  watchlistName: PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+                defaultMessage="Entities"
+              />
+            )}
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      <EntityAnalyticsEntitiesTableContent />
+      <EntityAnalyticsEntitiesTableContent watchlistId={watchlistId} />
     </DataViewContext.Provider>
   );
 };
 
-const EntityAnalyticsEntitiesTableContent = () => {
-  const state = useEntityURLState({
+const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: string }) => {
+  const urlState = useEntityURLState({
     paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
     columnsLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
     defaultQuery: getDefaultQuery,
   });
+
+  const state = useMemo(() => {
+    if (!watchlistId) return urlState;
+
+    const watchlistName = PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId;
+
+    return {
+      ...urlState,
+      query: {
+        ...urlState.query,
+        bool: {
+          ...urlState.query?.bool,
+          filter: [
+            ...(urlState.query?.bool?.filter ?? []),
+            { term: { 'entity.attributes.watchlists': watchlistName } },
+          ],
+        },
+      },
+    };
+  }, [urlState, watchlistId]);
 
   return <EntitiesTableSection state={state} />;
 };
