@@ -27,6 +27,8 @@ export const UserActionTypes = {
   category: 'category',
   customFields: 'customFields',
   observables: 'observables',
+  // Key intentionally uses snake_case to match the saved object attribute name returned by
+  // Object.keys(updatedAttributes), which is used in getUserActionItemByDifference.
   extended_fields: 'extended_fields',
 } as const;
 
