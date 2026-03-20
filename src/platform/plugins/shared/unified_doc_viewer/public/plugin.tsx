@@ -21,10 +21,11 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
-import { registerFlyoutViewedEvent } from './analytics/flyout_viewed_event';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
+
+export const FLYOUT_VIEWED_EVENT_TYPE = 'flyout_viewed';
 
 const fallback = (
   <EuiDelayRender delay={300}>
@@ -57,7 +58,25 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
-    registerFlyoutViewedEvent(core.analytics);
+    core.analytics.registerEventType({
+      eventType: FLYOUT_VIEWED_EVENT_TYPE,
+      schema: {
+        content: {
+          type: 'keyword',
+          _meta: {
+            description: 'Flyout content viewed.',
+            optional: false,
+          },
+        },
+        tabId: {
+          type: 'keyword',
+          _meta: {
+            description: 'Active tab identifier within the flyout.',
+            optional: true,
+          },
+        },
+      },
+    });
 
     this.docViewsRegistry.add({
       id: 'doc_view_table',

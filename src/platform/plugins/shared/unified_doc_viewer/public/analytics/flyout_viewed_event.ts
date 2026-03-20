@@ -7,21 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import { FLYOUT_VIEWED_EVENT_TYPE } from '../plugin';
 
-export const FLYOUT_VIEWED_EVENT_TYPE = 'flyout_viewed';
-
+/**
+ * Identifies which flyout content is being viewed.
+ */
 export enum FlyoutViewedContent {
   DOC_DETAIL = 'doc_detail',
   TIMELINE_WATERFALL = 'timeline_waterfall',
   SPAN_DETAIL = 'span_detail',
 }
 
+/**
+ * Payload for the `flyout_viewed` event.
+ *
+ * @property content -Identifies which flyout content is being viewed.
+ * @property tabId - Active tab identifier within the flyout. For document flyouts this is typically
+ * the `DocView` id (e.g. `doc_view_table`, `doc_view_source`, `doc_view_logs_overview`).
+ */
 export interface FlyoutViewedEvent {
   content: FlyoutViewedContent;
   tabId?: string;
 }
 
+/**
+ * Reports a `flyout_viewed` telemetry event.
+ */
 export const reportFlyoutViewedEvent = (
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'> | undefined,
   { content, tabId }: FlyoutViewedEvent
@@ -31,29 +43,5 @@ export const reportFlyoutViewedEvent = (
   analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
     content,
     tabId,
-  });
-};
-
-export const registerFlyoutViewedEvent = (analytics: AnalyticsServiceSetup) => {
-  analytics.registerEventType({
-    eventType: FLYOUT_VIEWED_EVENT_TYPE,
-    schema: {
-      content: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'Which flyout content is being viewed. Expected values: doc_detail, timeline_waterfall, span_detail.',
-          optional: false,
-        },
-      },
-      tabId: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'The active tab identifier within the flyout. Values are content-specific (e.g. doc_view_table, doc_view_source, doc_view_logs_overview, overview, table, json). Omitted for flyouts without tabs.',
-          optional: true,
-        },
-      },
-    },
   });
 };

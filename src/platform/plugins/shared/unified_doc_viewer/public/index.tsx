@@ -31,8 +31,6 @@ export { UnifiedDocViewer } from './components/lazy_doc_viewer';
 export type { UnifiedDocViewerFlyoutProps } from './components/doc_viewer_flyout/doc_viewer_flyout';
 export { UnifiedDocViewerFlyout } from './components/lazy_doc_viewer_flyout';
 export { ContentFrameworkSection } from './components/content_framework/lazy_content_framework_section';
-export { FLYOUT_VIEWED_EVENT_TYPE, FlyoutViewedContent } from './analytics/flyout_viewed_event';
-export { type TrackFlyoutViewedParams } from './analytics/use_track_flyout_viewed';
 
 export type {
   LogsOverviewProps as UnifiedDocViewerLogsOverviewProps,
