@@ -111,6 +111,7 @@ export {
   type EsqlQuery,
   esqlQuerySchema,
   type StreamQuery,
+  type QueryLink,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
