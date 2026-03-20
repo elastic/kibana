@@ -30,7 +30,6 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
       name: node.stepId,
       type: node.stepType,
       stepId: node.stepId,
-      spaceId: '',
       with: node.configuration.with || {},
       'max-step-size': node.configuration['max-step-size'],
     };

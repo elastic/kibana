@@ -12,8 +12,8 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 
+import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
-import type { ElasticsearchActionStep } from './elasticsearch_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -61,17 +61,17 @@ describe('ElasticsearchActionStepImpl', () => {
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
-    } as any;
+    } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
       navigateToNextNode: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     mockWorkflowLogger = {
       logInfo: jest.fn(),
       logError: jest.fn(),
       logDebug: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<IWorkflowEventLogger>;
 
     jest.clearAllMocks();
   });
@@ -90,13 +90,13 @@ describe('ElasticsearchActionStepImpl', () => {
         query: { match_all: {} },
         size: 10,
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'search_step',
-        name: 'search_step',
+      const step = {
+        id: 'search_step',
         type: 'elasticsearch.search',
-        spaceId: 'default',
+        stepId: 'search_step',
+        stepType: 'elasticsearch.search',
         configuration: { name: 'search_step', type: 'elasticsearch.search', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -136,13 +136,13 @@ describe('ElasticsearchActionStepImpl', () => {
         index: 'my-test',
         operations: bulkOperations,
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'bulk_step',
-        name: 'bulk_step',
+      const step = {
+        id: 'bulk_step',
         type: 'elasticsearch.bulk',
-        spaceId: 'default',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
         configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -179,13 +179,13 @@ describe('ElasticsearchActionStepImpl', () => {
         pipeline: 'my-pipeline',
         operations: [{ index: {} }, { field: 'value' }],
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'bulk_step',
-        name: 'bulk_step',
+      const step = {
+        id: 'bulk_step',
         type: 'elasticsearch.bulk',
-        spaceId: 'default',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
         configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -217,13 +217,13 @@ describe('ElasticsearchActionStepImpl', () => {
           body: { 'index.number_of_replicas': 2 },
         },
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'raw_step',
-        name: 'raw_step',
+      const step = {
+        id: 'raw_step',
         type: 'elasticsearch.custom',
-        spaceId: 'default',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.custom',
         configuration: { name: 'raw_step', type: 'elasticsearch.custom', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -251,13 +251,13 @@ describe('ElasticsearchActionStepImpl', () => {
         method: 'DELETE',
         path: '/my-index',
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'raw_step',
-        name: 'raw_step',
+      const step = {
+        id: 'raw_step',
         type: 'elasticsearch.request',
-        spaceId: 'default',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.request',
         configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -283,13 +283,13 @@ describe('ElasticsearchActionStepImpl', () => {
         body: { query: { match_all: {} } },
         headers: { 'X-Custom-Header': 'value' },
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'raw_step',
-        name: 'raw_step',
+      const step = {
+        id: 'raw_step',
         type: 'elasticsearch.request',
-        spaceId: 'default',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.request',
         configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -321,13 +321,13 @@ describe('ElasticsearchActionStepImpl', () => {
         index: 'large-index',
         body: { query: { match_all: {} }, size: 10000 },
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'size_limit_step',
-        name: 'size_limit_step',
+      const step = {
+        id: 'size_limit_step',
         type: 'elasticsearch.search',
-        spaceId: 'default',
+        stepId: 'size_limit_step',
+        stepType: 'elasticsearch.search',
         configuration: { name: 'size_limit_step', type: 'elasticsearch.search', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,
@@ -353,13 +353,13 @@ describe('ElasticsearchActionStepImpl', () => {
         index: 'test',
         body: { query: { match_all: {} } },
       };
-      const step: ElasticsearchActionStep = {
-        stepId: 'abort_step',
-        name: 'abort_step',
+      const step = {
+        id: 'abort_step',
         type: 'elasticsearch.search',
-        spaceId: 'default',
+        stepId: 'abort_step',
+        stepType: 'elasticsearch.search',
         configuration: { name: 'abort_step', type: 'elasticsearch.search', with: stepWith },
-      };
+      } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
         step,

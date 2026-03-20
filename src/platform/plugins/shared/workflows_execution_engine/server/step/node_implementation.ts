@@ -33,11 +33,7 @@ export interface BaseStep {
   stepId: string;
   name: string;
   type: string;
-  if?: string;
-  foreach?: string;
-  timeout?: number;
   'max-step-size'?: string;
-  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;

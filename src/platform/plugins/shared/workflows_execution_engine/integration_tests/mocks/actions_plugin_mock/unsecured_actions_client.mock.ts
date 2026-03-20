@@ -24,7 +24,7 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
     params,
   }: {
     id: string;
-    params: Record<string, any>;
+    params: Record<string, unknown>;
     spaceId: string;
     requesterId: string;
   }): Promise<ActionTypeExecutorResult<unknown>> {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaActionStep } from './kibana_action_step';
+import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
+
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
@@ -116,13 +117,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           skip_ssl_verification: true,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -161,13 +162,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           skip_ssl_verification: true,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.api',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.api',
         configuration: { name: 'test_step', type: 'kibana.api', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -193,13 +194,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const stepWith = {
         title: 'Test Case',
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -232,13 +233,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           skip_ssl_verification: true,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -267,13 +268,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const stepWith = {
         title: 'Test',
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -301,13 +302,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           keep_alive: true,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -337,13 +338,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           follow_redirects: false,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -371,13 +372,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           max_redirects: 10,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -407,13 +408,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           pipelining: 10,
         } as Record<string, unknown>,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -454,13 +455,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         path: '/api/status',
         use_server_info: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -485,13 +486,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         path: '/api/status',
         use_localhost: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -516,13 +517,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         use_server_info: true,
         use_localhost: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -546,13 +547,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         body: { title: 'Test' },
         debug: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -573,13 +574,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         method: 'GET',
         path: '/api/status',
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -601,13 +602,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         path: '/api/bad-endpoint',
         debug: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -630,13 +631,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         query: { page: '1', perPage: '10' },
         debug: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
         configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -663,13 +664,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         use_localhost: false,
         debug: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -706,13 +707,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           follow_redirects: false,
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'test_step',
-        name: 'test_step',
+      const step = {
+        id: 'test_step',
         type: 'kibana.createCase',
-        spaceId: 'default',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
         configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -769,14 +770,18 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const stepWith = {
         request: { method: 'GET', path: '/api/status' },
       };
-      const step: KibanaActionStep = {
-        stepId: 'size_limit_step',
-        name: 'size_limit_step',
+      const step = {
+        id: 'size_limit_step',
         type: 'kibana.request',
-        spaceId: 'default',
-        'max-step-size': '100b',
-        configuration: { name: 'size_limit_step', type: 'kibana.request', with: stepWith },
-      };
+        stepId: 'size_limit_step',
+        stepType: 'kibana.request',
+        configuration: {
+          name: 'size_limit_step',
+          type: 'kibana.request',
+          'max-step-size': '100b',
+          with: stepWith,
+        },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -816,13 +821,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const stepWith = {
         request: { method: 'GET', path: '/api/broken' },
       };
-      const step: KibanaActionStep = {
-        stepId: 'error_truncation_step',
-        name: 'error_truncation_step',
+      const step = {
+        id: 'error_truncation_step',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'error_truncation_step',
+        stepType: 'kibana.request',
         configuration: { name: 'error_truncation_step', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -849,13 +854,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const stepWith = {
         request: { method: 'DELETE', path: '/api/alerting/rule/some-rule-id' },
       };
-      const step: KibanaActionStep = {
-        stepId: 'delete_rule',
-        name: 'delete_rule',
+      const step = {
+        id: 'delete_rule',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'delete_rule',
+        stepType: 'kibana.request',
         configuration: { name: 'delete_rule', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -883,13 +888,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         },
         debug: true,
       };
-      const step: KibanaActionStep = {
-        stepId: 'delete_rule',
-        name: 'delete_rule',
+      const step = {
+        id: 'delete_rule',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'delete_rule',
+        stepType: 'kibana.request',
         configuration: { name: 'delete_rule', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -933,13 +938,13 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           body: { title: 'Test' },
         },
       };
-      const step: KibanaActionStep = {
-        stepId: 'create_case',
-        name: 'create_case',
+      const step = {
+        id: 'create_case',
         type: 'kibana.request',
-        spaceId: 'default',
+        stepId: 'create_case',
+        stepType: 'kibana.request',
         configuration: { name: 'create_case', type: 'kibana.request', with: stepWith },
-      };
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,

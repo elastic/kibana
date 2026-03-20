@@ -12,7 +12,7 @@
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
-import type { KibanaStep } from '@kbn/workflows/spec/schema';
+import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -21,12 +21,6 @@ import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
-
-// Extend BaseStep for kibana-specific properties
-export interface KibanaActionStep extends BaseStep {
-  type: string; // e.g., 'kibana.createCase'
-  configuration: KibanaStep;
-}
 
 /**
  * Fetcher configuration options for customizing HTTP requests
@@ -37,25 +31,32 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
   [key: string]: any;
 };
 
-export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
+export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
-    step: KibanaActionStep,
+    private node: KibanaGraphNode,
     stepExecutionRuntime: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
+    const step = {
+      name: node.id,
+      type: node.type,
+      stepId: node.id,
+      spaceId: '',
+      'max-step-size': node.configuration['max-step-size'],
+    };
     super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
   public getInput() {
-    const stepWith = this.step.configuration?.with || {};
+    const stepWith = this.node.configuration?.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    const stepType = this.step.configuration.type;
+    const stepType = this.node.configuration.type;
     // Use rendered inputs if provided, otherwise fall back to raw configuration.with
-    const stepWith = withInputs || this.step.configuration.with;
+    const stepWith = withInputs || this.node.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {
       use_server_info = false,

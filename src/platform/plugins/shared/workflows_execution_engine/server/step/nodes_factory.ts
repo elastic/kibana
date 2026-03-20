@@ -43,10 +43,10 @@ import {
   isExitStepTimeoutZone,
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
+import type { ElasticsearchGraphNode, KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
-import type { ElasticsearchActionStep } from './elasticsearch_action_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
@@ -56,7 +56,6 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
-import type { KibanaActionStep } from './kibana_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { NodeImplementation } from './node_implementation';
 import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
@@ -119,7 +118,7 @@ export class NodesFactory {
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
       return new ElasticsearchActionStepImpl(
-        node as unknown as ElasticsearchActionStep,
+        node as ElasticsearchGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
@@ -132,7 +131,7 @@ export class NodesFactory {
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
       return new KibanaActionStepImpl(
-        node as unknown as KibanaActionStep,
+        node as KibanaGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger

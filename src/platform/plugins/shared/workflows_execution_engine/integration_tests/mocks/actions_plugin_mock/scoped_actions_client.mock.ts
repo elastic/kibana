@@ -24,7 +24,7 @@ export class ScopedActionsClientMock implements Partial<ActionsClient> {
     params,
   }: {
     actionId: string;
-    params: Record<string, any>;
+    params: Record<string, unknown>;
   }): Promise<ActionTypeExecutorResult<unknown>> {
     return getMockedConnectorResult(actionId, params);
   }

@@ -41,7 +41,6 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       name: node.stepId,
       stepId: node.stepId,
       type: node.stepType,
-      spaceId: '',
       'max-step-size': node.configuration['max-step-size'],
     };
     super(baseStep, stepExecutionRuntime, connectorExecutor, workflowExecutionRuntime);
