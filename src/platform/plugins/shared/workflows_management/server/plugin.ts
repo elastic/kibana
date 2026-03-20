@@ -45,9 +45,9 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
-import { defineRoutes } from './workflows_management/routes';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
+import { defineRoutes } from './api/routes';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsService } from './api/workflows_management_service';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
