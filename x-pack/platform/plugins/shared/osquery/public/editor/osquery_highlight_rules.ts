@@ -141,10 +141,10 @@ export const initializeOsqueryEditor = (
   if (tableNames) currentTableNames = tableNames;
   if (tablesRecord) currentTablesRecord = tablesRecord;
 
-  let disposable: IDisposable | null = null;
+  let languageDisposable: IDisposable | null = null;
   if (monaco) {
     monaco?.editor.defineTheme('osquery', theme);
-    disposable = monaco.languages.onLanguage('sql', () => {
+    languageDisposable = monaco.languages.onLanguage('sql', () => {
       monaco.languages.setMonarchTokensProvider('sql', {
         ignoreCase: true,
         osqueryTableNames: currentTableNames,
@@ -218,7 +218,13 @@ export const initializeOsqueryEditor = (
       });
     });
 
-    return disposable;
+    return {
+      dispose: () => {
+        languageDisposable?.dispose();
+        currentTableNames = [];
+        currentTablesRecord = {};
+      },
+    };
   }
 };
 

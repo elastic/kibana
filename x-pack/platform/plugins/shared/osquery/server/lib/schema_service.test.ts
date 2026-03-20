@@ -174,9 +174,11 @@ describe('SchemaService', () => {
     });
 
     describe('cache miss / version change', () => {
-      it('should fetch fresh data when package version changes', async () => {
+      it('should fetch fresh data when package version changes after TTL expires', async () => {
         const firstVersion = '1.4.0';
         const secondVersion = '1.5.0';
+        const now = Date.now();
+        const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
 
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValueOnce({
           version: firstVersion,
@@ -199,6 +201,9 @@ describe('SchemaService', () => {
 
         // First call with version 1.4.0
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+
+        // Advance time past the installation TTL (60s)
+        dateNowSpy.mockReturnValue(now + 61_000);
 
         // Version bumps to 1.5.0
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValueOnce({
@@ -235,6 +240,8 @@ describe('SchemaService', () => {
 
         expect(result).toEqual({ version: secondVersion, data: updatedTables });
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+
+        dateNowSpy.mockRestore();
       });
     });
 

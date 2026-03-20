@@ -166,7 +166,7 @@ describe('createGetSchemasRoute', () => {
 
         expect(mockSchemaService.getSchema).toHaveBeenCalledWith(
           'osquery',
-          expect.anything(),
+          undefined,
           mockSavedObjectsClient
         );
       });
@@ -213,7 +213,7 @@ describe('createGetSchemasRoute', () => {
 
         expect(mockSchemaService.getSchema).toHaveBeenCalledWith(
           'ecs',
-          expect.anything(),
+          undefined,
           mockSavedObjectsClient
         );
       });
@@ -323,34 +323,42 @@ describe('createGetSchemasRoute', () => {
     });
 
     describe('error handling', () => {
-      it('should propagate errors thrown by SchemaService', async () => {
-        const schemaError = new Error('Failed to read schema file');
-
-        mockSchemaService.getSchema.mockRejectedValue(schemaError);
+      it('should return customError when SchemaService throws', async () => {
+        mockSchemaService.getSchema.mockRejectedValue(new Error('Failed to read schema file'));
 
         const mockRequest = httpServerMock.createKibanaRequest({
           params: { schemaType: 'osquery' },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
-        await expect(routeHandler({} as any, mockRequest, mockResponse)).rejects.toThrow(
-          'Failed to read schema file'
-        );
+        await routeHandler({} as any, mockRequest, mockResponse);
+
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          statusCode: 500,
+          body: {
+            message: 'Failed to fetch schema: Failed to read schema file',
+          },
+        });
       });
 
-      it('should propagate errors from createInternalSavedObjectsClientForSpaceId', async () => {
-        const clientError = new Error('Could not resolve space');
-
-        (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockRejectedValue(clientError);
+      it('should return customError when createInternalSavedObjectsClientForSpaceId throws', async () => {
+        (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockRejectedValue(
+          new Error('Could not resolve space')
+        );
 
         const mockRequest = httpServerMock.createKibanaRequest({
           params: { schemaType: 'osquery' },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
-        await expect(routeHandler({} as any, mockRequest, mockResponse)).rejects.toThrow(
-          'Could not resolve space'
-        );
+        await routeHandler({} as any, mockRequest, mockResponse);
+
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          statusCode: 500,
+          body: {
+            message: 'Failed to fetch schema: Could not resolve space',
+          },
+        });
       });
     });
   });

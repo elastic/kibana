@@ -19,6 +19,8 @@ export const createGetSchemasRoute = (
   osqueryContext: OsqueryAppContext,
   schemaService: SchemaService
 ) => {
+  const logger = osqueryContext.logFactory.get('schemas');
+
   router.versioned
     .get({
       access: 'internal',
@@ -41,20 +43,31 @@ export const createGetSchemasRoute = (
         },
       },
       async (context, request, response) => {
-        const schemaType = request.params.schemaType as SchemaType;
-        const packageService = osqueryContext.service.getPackageService();
-        const savedObjectsClient = await createInternalSavedObjectsClientForSpaceId(
-          osqueryContext,
-          request
-        );
+        try {
+          const schemaType = request.params.schemaType as SchemaType;
+          const packageService = osqueryContext.service.getPackageService();
+          const savedObjectsClient = await createInternalSavedObjectsClientForSpaceId(
+            osqueryContext,
+            request
+          );
 
-        const result = await schemaService.getSchema(
-          schemaType,
-          packageService,
-          savedObjectsClient
-        );
+          const result = await schemaService.getSchema(
+            schemaType,
+            packageService,
+            savedObjectsClient
+          );
 
-        return response.ok({ body: result });
+          return response.ok({ body: result });
+        } catch (error) {
+          logger.error(`Failed to fetch schema: ${error.message}`);
+
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `Failed to fetch schema: ${error.message}`,
+            },
+          });
+        }
       }
     );
 };

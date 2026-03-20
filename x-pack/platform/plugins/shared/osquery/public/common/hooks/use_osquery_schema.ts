@@ -51,7 +51,10 @@ export const useOsquerySchema = () => {
     return undefined;
   }, [query.data, query.isError]);
 
-  const osqueryVersion = query.data?.version ?? FALLBACK_OSQUERY_VERSION;
+  const osqueryVersion = useMemo(
+    () => query.data?.version ?? FALLBACK_OSQUERY_VERSION,
+    [query.data?.version]
+  );
 
   return {
     data,

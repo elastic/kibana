@@ -24,6 +24,11 @@ interface CacheEntry<T> {
   data: T[];
 }
 
+interface InstallationCache {
+  version: string;
+  fetchedAt: number;
+}
+
 interface PackageAssetAttributes {
   data_utf8: string;
   data_base64: string;
@@ -31,8 +36,12 @@ interface PackageAssetAttributes {
   media_type: string;
 }
 
-// Same namespace UUID used by Fleet's assetPathToObjectId
+// Same namespace UUID used by Fleet's assetPathToObjectId.
+// Source: x-pack/platform/plugins/shared/fleet/server/services/epm/archive/storage.ts
+// Keep in sync — if Fleet changes this constant, asset lookups will silently fail.
 const ASSET_PATH_UUID_NAMESPACE = '71403015-cdd5-404b-a5da-6c43f35cad84';
+
+const INSTALLATION_TTL_MS = 60_000;
 
 function assetPathToObjectId(assetPath: string): string {
   return uuidv5(assetPath, ASSET_PATH_UUID_NAMESPACE);
@@ -41,6 +50,7 @@ function assetPathToObjectId(assetPath: string): string {
 export class SchemaService {
   private osqueryCache: CacheEntry<OsqueryTable> | null = null;
   private ecsCache: CacheEntry<EcsField> | null = null;
+  private installationCache: InstallationCache | null = null;
 
   constructor(private readonly logger: Logger) {}
 
@@ -49,20 +59,19 @@ export class SchemaService {
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<{ version: string; data: OsqueryTable[] | EcsField[] }> {
+    const pkgVersion = await this.getPackageVersion(packageService, savedObjectsClient);
+
     if (schemaType === 'osquery') {
-      return this.getOsquerySchema(packageService, savedObjectsClient);
+      return this.getOsquerySchema(pkgVersion, savedObjectsClient);
     }
 
-    return this.getEcsSchema(packageService, savedObjectsClient);
+    return this.getEcsSchema(pkgVersion, savedObjectsClient);
   }
 
   private async getOsquerySchema(
-    packageService: PackageService | undefined,
+    pkgVersion: string | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<{ version: string; data: OsqueryTable[] }> {
-    const installation = await this.getInstallation(packageService, savedObjectsClient);
-    const pkgVersion = installation?.version;
-
     if (pkgVersion && this.osqueryCache?.version === pkgVersion) {
       return this.osqueryCache;
     }
@@ -85,12 +94,9 @@ export class SchemaService {
   }
 
   private async getEcsSchema(
-    packageService: PackageService | undefined,
+    pkgVersion: string | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<{ version: string; data: EcsField[] }> {
-    const installation = await this.getInstallation(packageService, savedObjectsClient);
-    const pkgVersion = installation?.version;
-
     if (pkgVersion && this.ecsCache?.version === pkgVersion) {
       return this.ecsCache;
     }
@@ -112,15 +118,33 @@ export class SchemaService {
     return this.getFallbackSchema('ecs');
   }
 
-  private async getInstallation(
+  private async getPackageVersion(
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
-  ) {
+  ): Promise<string | undefined> {
+    if (
+      this.installationCache &&
+      Date.now() - this.installationCache.fetchedAt < INSTALLATION_TTL_MS
+    ) {
+      return this.installationCache.version;
+    }
+
     try {
-      return await packageService?.asInternalUser.getInstallation(
+      const installation = await packageService?.asInternalUser.getInstallation(
         OSQUERY_INTEGRATION_NAME,
         savedObjectsClient
       );
+
+      if (installation?.version) {
+        this.installationCache = {
+          version: installation.version,
+          fetchedAt: Date.now(),
+        };
+
+        return installation.version;
+      }
+
+      return undefined;
     } catch (e) {
       this.logger.debug(`Failed to get osquery_manager installation: ${e.message}`);
 

@@ -38,15 +38,9 @@ export const useOsqueryTables = () => {
 
   const tablesRecord = useMemo(
     () =>
-      (tables as OsqueryTable[]).reduce<
-        Record<string, { columns: Array<{ name: string }> }>
-      >(
-        (acc, table) => ({
-          ...acc,
-          [table.name]: table,
-        }),
-        {}
-      ),
+      Object.fromEntries(
+        (tables as OsqueryTable[]).map((table) => [table.name, table])
+      ) as Record<string, { columns: Array<{ name: string }> }>,
     [tables]
   );
 

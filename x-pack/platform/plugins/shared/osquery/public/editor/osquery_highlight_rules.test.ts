@@ -11,7 +11,6 @@ import {
   dataTypes,
   getEditorAutoCompleteSuggestion,
   keywords,
-  osqueryTableNames,
 } from './osquery_highlight_rules';
 import { flatMap, uniq } from 'lodash';
 
@@ -60,9 +59,9 @@ describe('Osquery Editor', () => {
 
 const keywordsSuggestionLabels = keywords.map((kw) => kw.toUpperCase());
 
+// Table names are now loaded dynamically — when no tables are initialized, the list is empty
 const suggestionLabels = uniq([
   ...keywordsSuggestionLabels,
-  ...osqueryTableNames,
   ...builtinConstants,
   ...builtinFunctions,
   ...dataTypes,
