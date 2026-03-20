@@ -1,0 +1,22 @@
+{
+  "name": "@kbn/evals-extensions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Advanced evaluation capabilities - standalone extensions for @kbn/evals. Features ported from cursor-plugin-evals and home for Phases 3-5 of evals roadmap.",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "main": "./index.ts",
+  "scripts": {
+    "build": "echo 'No build required - types built by Kibana build system'",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@kbn/evals": "link:../kbn-evals",
+    "@kbn/inference-common": "link:../../packages/private/kbn-inference-common",
+    "@kbn/scout": "link:../../../../../packages/kbn-scout",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.5",
+    "jest": "^29.7.0"
+  }
+}

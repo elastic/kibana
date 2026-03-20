@@ -6739,6 +6739,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-extensions@link:x-pack/platform/packages/shared/kbn-evals-extensions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-phoenix-executor@link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor":
   version "0.0.0"
   uid ""
@@ -7180,6 +7184,10 @@
   uid ""
 
 "@kbn/inference-cli@link:x-pack/platform/packages/shared/kbn-inference-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inference-common@link:x-pack/platform/packages/packages/private/kbn-inference-common":
   version "0.0.0"
   uid ""
 
@@ -8400,6 +8408,10 @@
   uid ""
 
 "@kbn/scout-security@link:x-pack/solutions/security/packages/kbn-scout-security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/scout@link:packages/kbn-scout":
   version "0.0.0"
   uid ""
 

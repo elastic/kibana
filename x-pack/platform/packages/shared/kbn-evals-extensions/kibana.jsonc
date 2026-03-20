@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/evals-extensions",
+  "owner": ["@elastic/kibana-obs-ai"],
+  "description": "Advanced evaluation capabilities for @kbn/evals - standalone extensions package. Home for features ported from cursor-plugin-evals and Phases 3-5 of evals roadmap."
+}
