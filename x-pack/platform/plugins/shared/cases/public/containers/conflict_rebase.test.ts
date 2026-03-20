@@ -74,6 +74,31 @@ describe('conflict_rebase', () => {
     });
   });
 
+  it('re-throws the original error when user-visible fields changed on the latest case', async () => {
+    const executeRequest = jest
+      .fn()
+      .mockRejectedValueOnce(conflictError)
+      .mockResolvedValueOnce('ok');
+    const fetchLatestCase = jest.fn().mockResolvedValue({
+      ...basicCaseFixture,
+      title: 'A different title',
+      version: 'WzQ4LDFd',
+    });
+
+    await expect(
+      rebaseCaseMutationOnConflict({
+        request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
+        staleCases: [basicCaseFixture],
+        executeRequest,
+        fetchLatestCase,
+        buildRetryRequest: ({ request }) => request,
+      })
+    ).rejects.toThrow('Conflict');
+
+    expect(fetchLatestCase).toHaveBeenCalledWith(basicCaseFixture.id);
+    expect(executeRequest).toHaveBeenCalledTimes(1);
+  });
+
   it('does not attempt a rebase for non-conflict errors', async () => {
     const executeRequest = jest.fn().mockRejectedValue(new Error('boom'));
     const fetchLatestCase = jest.fn();

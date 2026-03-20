@@ -9,7 +9,7 @@ import { isEqual, omit } from 'lodash';
 import type { CaseUI } from './types';
 import type { ServerError } from '../types';
 
-const REBASEABLE_STATUS_CODES = new Set([409, 429]);
+const REBASEABLE_STATUS_CODES = new Set([409]);
 const SYSTEM_MANAGED_CASE_FIELDS = ['comments', 'incrementalId', 'updatedAt', 'version'] as const;
 
 export type CaseWithOptionalComments = Omit<CaseUI, 'comments'> & {
