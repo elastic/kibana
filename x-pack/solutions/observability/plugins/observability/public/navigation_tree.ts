@@ -425,13 +425,17 @@ function createNavTree({
             },
           ]
         : []),
-      {
-        title: i18n.translate('xpack.observability.obltNav.addData', {
-          defaultMessage: 'Add data',
-        }),
-        link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
-      },
+      ...(ingestHubAvailable
+        ? []
+        : [
+            {
+              title: i18n.translate('xpack.observability.obltNav.addData', {
+                defaultMessage: 'Add data',
+              }),
+              link: 'observabilityOnboarding' as const,
+              icon: 'plusInCircle',
+            },
+          ]),
       {
         id: 'devTools',
         title: i18n.translate('xpack.observability.obltNav.devTools', {
