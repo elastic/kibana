@@ -41,18 +41,17 @@ export const useInitialControlGroupState = (
         creationOptions?.initialState?.initialChildControlState ?? {}
       ).reduce((prev, [id, control]) => {
         const legacyUseGlobalFilters = ignoreParentSettings
-          ? ignoreParentSettings.ignoreFilters || ignoreParentSettings.ignoreQuery
+          ? // pass in legacy ignore parent settings into respective panel level settings, if necessary
+            !(ignoreParentSettings.ignoreFilters || ignoreParentSettings.ignoreQuery)
           : undefined;
         const controlState = {
-          uid: id,
           ...control,
-          // pass in legacy ignore parent settings into respective panel level settings, if necessary
-          use_global_filters:
-            ('use_global_filters' in control && control.use_global_filters) ||
-            !legacyUseGlobalFilters,
-          ignore_validations:
-            ('ignore_validations' in control && control.ignore_validations) ||
-            Boolean(ignoreParentSettings?.ignoreValidations),
+          ...(typeof legacyUseGlobalFilters === 'boolean' && {
+            use_global_filters: legacyUseGlobalFilters,
+          }),
+          ...(typeof ignoreParentSettings?.ignoreValidations === 'boolean' && {
+            ignore_validations: ignoreParentSettings.ignoreValidations,
+          }),
         };
         return {
           ...prev,
