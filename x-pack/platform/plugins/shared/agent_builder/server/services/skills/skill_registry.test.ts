@@ -224,6 +224,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list();
@@ -236,6 +237,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ includePlugins: false });
@@ -248,6 +250,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ includePlugins: true });
@@ -260,6 +263,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const withFlag = await registry.list({ includePlugins: true });
@@ -279,6 +283,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([builtinSkill1, builtinPluginSkill]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ type: 'built-in' });
@@ -291,6 +296,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
         toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
       });
 
       const result = await registry.list({ type: 'persisted' });
