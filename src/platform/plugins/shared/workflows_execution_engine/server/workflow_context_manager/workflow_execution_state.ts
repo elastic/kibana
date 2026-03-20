@@ -179,8 +179,8 @@ export class WorkflowExecutionState {
     this.stepExecutions.set(stepId, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes
     // ES partial update (doc_as_upsert) preserves fields not included in the update
-    this.stepDocumentsChanges.set(step.id as string, {
-      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
+    this.stepDocumentsChanges.set(stepId, {
+      ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
   }

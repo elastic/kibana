@@ -141,7 +141,7 @@ export class WorkflowExecuteSyncStrategy {
         startedAt: new Date().toISOString(),
         pollCount: 0,
       };
-      state.pollCount = 0;
+
       this.stepExecutionRuntime.setCurrentStepState(state);
 
       if (this.stepExecutionRuntime.abortController.signal.aborted) {

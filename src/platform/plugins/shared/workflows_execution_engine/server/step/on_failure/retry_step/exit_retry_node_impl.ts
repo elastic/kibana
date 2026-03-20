@@ -8,6 +8,7 @@
  */
 
 import type { ExitRetryNode } from '@kbn/workflows/graph';
+import type { RetryStepState } from './types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -23,7 +24,9 @@ export class ExitRetryNodeImpl implements NodeImplementation {
 
   public async run(): Promise<void> {
     this.stepExecutionRuntime.finishStep();
-    const retryState = this.stepExecutionRuntime.getCurrentStepState();
+    const retryState = this.stepExecutionRuntime.getCurrentStepState() as
+      | RetryStepState
+      | undefined;
 
     if (retryState) {
       this.workflowLogger.logDebug(
