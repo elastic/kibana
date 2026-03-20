@@ -52,7 +52,9 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
       label={i18n.translate('xpack.osquery.savedQuery.queryEditorLabel', {
         defaultMessage: 'Query',
       })}
-      labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink osqueryVersion={osqueryVersion} />}
+      labelAppend={
+        !isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink osqueryVersion={osqueryVersion} />
+      }
       helpText={helpText}
       isInvalid={!!error?.message}
       error={error?.message}

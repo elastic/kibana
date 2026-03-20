@@ -232,7 +232,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
             },
           ];
     });
-  }, [ECSField.value]);
+  }, [ECSField.value, ecsSchemaOptions]);
 
   return (
     <EuiFormRow
@@ -437,7 +437,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     }
 
     return !!ecsData?.key?.length;
-  }, [ecsMappingArray, index, isLastItem, resultTypeField.value]);
+  }, [ecsMappingArray, ecsSchemaOptions, index, isLastItem, resultTypeField.value]);
 
   const onTypeChange = useCallback(
     (newType: any) => {
