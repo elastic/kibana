@@ -20,6 +20,10 @@ import {
   EMPTY_RESULTS_FOOTER_MESSAGE_ID,
 } from './empty_results_prompt';
 import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+
+jest.mock('../../../../common/lib/kibana');
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
@@ -27,9 +31,17 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('EmptyResultsPrompt', () => {
   const openSchedulesFlyout = jest.fn();
+  const reportEvent = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
+    });
   });
 
   test('renders container elements correctly', () => {
@@ -79,5 +91,8 @@ describe('EmptyResultsPrompt', () => {
 
     fireEvent.click(getByTestId(EMPTY_RESULTS_PROMPT_SCHEDULES_LINK_TEST_ID));
     expect(openSchedulesFlyout).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ScheduleFlyoutOpened, {
+      source: 'attacks_page_empty_state',
+    });
   });
 });

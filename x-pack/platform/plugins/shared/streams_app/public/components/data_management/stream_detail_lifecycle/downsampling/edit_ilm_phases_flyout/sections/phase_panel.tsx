@@ -10,8 +10,9 @@ import type { SerializedStyles } from '@emotion/react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 
+import { useIlmPhasesColorAndDescription } from '../../../hooks/use_ilm_phases_color_and_description';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { DeleteSearchableSnapshotToggleField, MinAgeField, ReadOnlyToggleField } from '../form';
 import { READONLY_ALLOWED_PHASES, TIME_UNIT_OPTIONS } from '../constants';
@@ -34,6 +35,7 @@ export interface PhasePanelProps {
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
   isMetricsStream: boolean;
+  phaseDescriptionStyles: SerializedStyles;
 }
 
 export const PhasePanel = ({
@@ -50,8 +52,11 @@ export const PhasePanel = ({
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
   isMetricsStream,
+  phaseDescriptionStyles,
 }: PhasePanelProps) => {
   const isHidden = selectedPhase !== phase;
+
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
 
   const isHotPhase = phase === 'hot';
   const isWarmPhase = phase === 'warm';
@@ -71,7 +76,9 @@ export const PhasePanel = ({
   return (
     <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-${phase}`}>
       <PhaseFieldsMount phase={phase} />
-
+      <EuiText size="s" color="subdued" css={phaseDescriptionStyles}>
+        {ilmPhases[phase].description}
+      </EuiText>
       {(!isHotPhase || !isDownsampleEnabled) && (
         <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={sectionStyles}>
           {!isHotPhase && (

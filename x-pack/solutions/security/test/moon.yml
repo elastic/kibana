@@ -4,17 +4,16 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-security'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-security'
+  title: '@kbn/test-suites-xpack-security'
   description: Moon project for @kbn/test-suites-xpack-security
   channel: ''
-  metadata:
-    sourceRoot: x-pack/solutions/security/test
+  sourceRoot: x-pack/solutions/security/test
 dependsOn:
   - '@kbn/security-solution-test-api-clients'
   - '@kbn/detections-response-ftr-services'

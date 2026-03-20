@@ -39,6 +39,7 @@ const mosaicStateSharedSchema = {
       {
         meta: {
           id: 'mosaicLegend',
+          title: 'Legend',
           description: 'Legend configuration for mosaic chart appearance and behavior',
         },
       }
@@ -102,15 +103,8 @@ export const mosaicStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
-    metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
-      ),
-      {
-        minSize: 1,
-        maxSize: 1,
-        meta: { description: 'Array of metric configurations (only 1 allowed)' },
-      }
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      partitionStatePrimaryMetricOptionsSchema
     ),
     group_by: schema.maybe(
       schema.arrayOf(
@@ -141,6 +135,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'mosaicNoESQL',
+      title: 'Mosaic Chart (DSL)',
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -148,7 +143,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
   }
 );
 
-const mosaicStateSchemaESQL = schema.object(
+export const mosaicStateSchemaESQL = schema.object(
   {
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
@@ -158,20 +153,13 @@ const mosaicStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(
-        partitionStatePrimaryMetricOptionsSchema,
-        {
-          meta: {
-            description:
-              'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
-          },
-        }
-      ),
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
+      partitionStatePrimaryMetricOptionsSchema,
       {
-        minSize: 1,
-        maxSize: 1,
-        meta: { description: 'Array of metric configurations (only 1 allowed)' },
+        meta: {
+          description:
+            'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+        },
       }
     ),
     /**
@@ -195,6 +183,7 @@ const mosaicStateSchemaESQL = schema.object(
   {
     meta: {
       id: 'mosaicESQL',
+      title: 'Mosaic Chart (ES|QL)',
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
@@ -204,7 +193,8 @@ const mosaicStateSchemaESQL = schema.object(
 
 export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
-    id: 'mosaicChartSchema',
+    id: 'mosaicChart',
+    title: 'Mosaic Chart',
     description:
       'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

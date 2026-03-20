@@ -17,6 +17,8 @@ import type {
   ProcessorType,
   RedactProcessor,
   ReplaceProcessor,
+  SplitProcessor,
+  SortProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
@@ -33,8 +35,13 @@ import {
 } from '@kbn/streamlang';
 import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
-import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import {
+  Streams,
+  isSchema,
+  type FieldDefinition,
+  type ClassicFieldDefinition,
+} from '@kbn/streams-schema';
+import type { IngestUpsertRequest } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -61,6 +68,8 @@ import type {
   RedactFormState,
   ReplaceFormState,
   SetFormState,
+  SplitFormState,
+  SortFormState,
   TrimFormState,
   UppercaseFormState,
 } from './types';
@@ -82,6 +91,8 @@ export const SPECIALISED_TYPES = [
   'lowercase',
   'trim',
   'join',
+  'split',
+  'sort',
   'concat',
   'network_direction',
 ];
@@ -276,6 +287,24 @@ const defaultJoinProcessorFormState = (): JoinFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultSplitProcessorFormState = (): SplitFormState => ({
+  action: 'split' as const,
+  from: '',
+  separator: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultSortProcessorFormState = (): SortFormState => ({
+  action: 'sort' as const,
+  from: '',
+  order: 'asc',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -330,6 +359,8 @@ const defaultProcessorFormStateByType: Record<
   trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
+  split: defaultSplitProcessorFormState,
+  sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
   network_direction: defaultNetworkDirectionProcessorFormState,
   ...configDrivenDefaultFormStates,
@@ -397,6 +428,8 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
+    step.action === 'split' ||
+    step.action === 'sort' ||
     step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
@@ -695,6 +728,39 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'split') {
+      const { from, separator, to, ignore_failure, ignore_missing, preserve_trailing } = formState;
+      return {
+        processorDefinition: {
+          action: 'split',
+          from,
+          separator,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          preserve_trailing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SplitProcessor,
+      };
+    }
+
+    if (formState.action === 'sort') {
+      const { from, order, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'sort',
+          from,
+          order,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SortProcessor,
+      };
+    }
+
     if (formState.action === 'concat') {
       const { from, to, ignore_failure, ignore_missing } = formState;
       return {
@@ -904,7 +970,8 @@ export const buildUpsertStreamRequestPayload = (
           ...(fields && {
             classic: {
               ...definition.stream.ingest.classic,
-              field_overrides: fields,
+              // Cast is safe: callers provide fields with types for classic streams
+              field_overrides: fields as ClassicFieldDefinition,
             },
           }),
         },

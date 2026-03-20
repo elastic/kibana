@@ -18,6 +18,21 @@ export interface ExecuteToolReturn {
   results: ToolResult[];
 }
 
+export interface ListWorkflowsParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface WorkflowListItem {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface ListWorkflowsResponse {
+  results: WorkflowListItem[];
+}
+
 /**
  * Public-facing contract for AgentBuilder's tool service.
  */
@@ -34,4 +49,8 @@ export interface ToolServiceStartContract {
    * Execute a tool and returns the results.
    */
   execute(params: ExecuteToolParams): Promise<ExecuteToolReturn>;
+  /**
+   * List available workflows for pre-execution selection.
+   */
+  listWorkflows(params: ListWorkflowsParams): Promise<ListWorkflowsResponse>;
 }

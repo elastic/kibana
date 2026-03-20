@@ -99,13 +99,26 @@
         "children": [
           {
             "parentPluginId": "workplaceAIApp",
+            "id": "def-common.ExchangeCodeRequest.pkce_verifier",
+            "type": "string",
+            "tags": [],
+            "label": "pkce_verifier",
+            "description": [],
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workplaceAIApp",
             "id": "def-common.ExchangeCodeRequest.code",
             "type": "string",
             "tags": [],
             "label": "code",
             "description": [],
             "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -121,7 +134,7 @@
         "label": "GoogleUserInfo",
         "description": [],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -134,7 +147,7 @@
             "label": "picture",
             "description": [],
             "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -147,7 +160,7 @@
             "label": "email",
             "description": [],
             "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -327,7 +340,7 @@
           "{ access_token: string; refresh_token?: string | undefined; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -372,7 +385,7 @@
           "{ access_token: string; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 51,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -389,7 +402,7 @@
           "{}"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 60,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -485,7 +498,7 @@
           ", { access_token: string; refresh_token?: string | undefined; }, { access_token: string; refresh_token?: string | undefined; }>"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -507,7 +520,7 @@
           ", { access_token: string; }, { access_token: string; }>"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

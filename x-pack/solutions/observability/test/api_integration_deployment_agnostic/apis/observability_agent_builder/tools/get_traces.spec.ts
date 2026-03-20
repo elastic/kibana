@@ -126,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            kqlFilter: 'transaction.duration.us > 5',
+            kqlFilter: 'transaction.type: "request"',
             maxTraces: 1,
           },
         });

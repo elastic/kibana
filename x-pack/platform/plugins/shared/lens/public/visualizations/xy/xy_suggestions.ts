@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 
 import type {
   SuggestionRequest,
@@ -22,7 +24,7 @@ import { getColorMappingDefaults } from '../../utils';
 import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const COLUMN_SORT_ORDER = {
   document: 0,
@@ -138,7 +140,7 @@ function getSuggestionForColumns(
     query,
   };
 
-  const isEsql = datasourceId === 'textBased';
+  const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
   // we have 2 different suggestion: with DSL we can split by only when we have a max of 2 buckets (one for the X and the other for the breakdown)
   // in ESQL we instead suggest split by with more then 1 buckets always.
   const whenToSuggestSplitBy = isEsql
@@ -278,7 +280,7 @@ function getSuggestionsForLayer({
   if (
     changeType === 'initial' &&
     xValue?.operation.dataType === 'date' &&
-    datasourceId === 'formBased'
+    datasourceId === LENS_DATASOURCE_ID.FORM_BASED
   ) {
     return buildSuggestion({ ...options, seriesType: 'line' });
   }
@@ -596,8 +598,7 @@ function buildSuggestion({
       : undefined,
   };
 
-  const hasDateHistogramDomain =
-    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+  const hasDateHistogramDomain = isDateHistogramOperation(xValue?.operation);
 
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
@@ -638,7 +639,8 @@ function buildSuggestion({
     yLeftScale: currentState?.yLeftScale,
     yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
-      x: true,
+      // Default X axis title to "None" for date histogram to reduce redundant information
+      x: !hasDateHistogramDomain,
       yLeft: true,
       yRight: true,
     },

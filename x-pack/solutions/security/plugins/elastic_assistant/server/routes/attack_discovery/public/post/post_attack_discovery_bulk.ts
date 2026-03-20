@@ -14,7 +14,7 @@ import {
   PostAttackDiscoveryBulkRequestBody,
   PostAttackDiscoveryBulkResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';
 import { buildResponse } from '../../../../lib/build_response';

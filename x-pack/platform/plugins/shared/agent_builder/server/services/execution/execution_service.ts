@@ -25,6 +25,7 @@ import type {
   ExecuteAgentParams,
   ExecuteAgentResult,
   FollowExecutionOptions,
+  FindExecutionsOptions,
 } from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
@@ -84,12 +85,23 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   async executeAgent({
     request,
     params,
+    executionId: providedExecutionId,
     useTaskManager,
     abortSignal,
+    metadata,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
-    const executionId = uuidv4();
+    const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+
+    const executionClient = this.createExecutionClient();
+
+    if (providedExecutionId) {
+      const existing = await executionClient.peek(providedExecutionId);
+      if (existing) {
+        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
+      }
+    }
 
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments
@@ -98,12 +110,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const executionClient = this.createExecutionClient();
     const execution = await executionClient.create({
       executionId,
       agentId,
       spaceId,
       agentParams: validatedParams,
+      metadata,
     });
 
     // Wire up external abort signal to execution abort
@@ -124,6 +136,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } else {
       return this.executeLocally({ execution, request });
     }
+  }
+
+  async getExecution(executionId: string): Promise<AgentExecution | undefined> {
+    const executionClient = this.createExecutionClient();
+    return executionClient.get(executionId);
   }
 
   async abortExecution(executionId: string): Promise<void> {
@@ -312,6 +329,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const soClient = this.deps.savedObjects.getScopedClient(request);
     const uiSettingsClient = this.deps.uiSettings.asScopedToClient(soClient);
     return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+  }
+
+  /**
+   * Find executions matching the given filters. Defaults to the current space derived from request.
+   * Callers that override spaceId are responsible for their own authorization when querying cross-space.
+   */
+  async findExecutions(
+    request: KibanaRequest,
+    options?: FindExecutionsOptions
+  ): Promise<AgentExecution[]> {
+    const defaultSpaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const executionClient = this.createExecutionClient();
+    return executionClient.find({
+      ...options,
+      spaceId: options?.spaceId || defaultSpaceId,
+    });
   }
 
   private createExecutionClient(): AgentExecutionClient {

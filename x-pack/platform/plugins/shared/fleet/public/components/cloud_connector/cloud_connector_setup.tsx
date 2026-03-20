@@ -10,8 +10,8 @@ import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../common';
-import type { CloudProvider } from '../../types';
+import type { NewPackagePolicy, PackageInfo } from '../../../common';
+import type { AccountType, CloudProvider } from '../../types';
 
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { ReusableCloudConnectorForm } from './form/reusable_cloud_connector_form';
@@ -19,10 +19,10 @@ import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from './types';
-import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
+import { TABS, SINGLE_ACCOUNT } from './constants';
 import { isCloudConnectorReusableEnabled } from './utils';
+
 export interface CloudConnectorSetupProps {
-  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -31,10 +31,13 @@ export interface CloudConnectorSetupProps {
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
   templateName: string;
+  /** Optional account type. When undefined, defaults to 'single-account'. */
+  accountType?: AccountType;
+  /** Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates. */
+  iacTemplateUrl?: string;
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
-  input,
   newPolicy,
   packageInfo,
   updatePolicy,
@@ -43,6 +46,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   cloud,
   cloudProvider,
   templateName,
+  accountType = SINGLE_ACCOUNT,
+  iacTemplateUrl,
 }) => {
   const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
     cloudProvider || '',
@@ -50,40 +55,44 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     templateName
   );
 
-  // Use the cloud connector setup hook
   const {
     newConnectionCredentials,
     existingConnectionCredentials,
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
-    accountTypeFromInputs,
   } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo, cloudProvider);
 
-  // Get filtered cloud connectors based on provider and account type
   const { data: cloudConnectors } = useGetCloudConnectors({
     cloudProvider,
-    accountType: accountTypeFromInputs,
+    accountType,
   });
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
   useEffect(() => {
-    setSelectedTabId(
-      cloudConnectorsCount && cloudConnectorsCount > 0
-        ? TABS.EXISTING_CONNECTION
-        : TABS.NEW_CONNECTION
-    );
-  }, [cloudConnectorsCount]);
+    if (isEditPage) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+    } else {
+      setSelectedTabId(
+        cloudConnectorsCount && cloudConnectorsCount > 0
+          ? TABS.EXISTING_CONNECTION
+          : TABS.NEW_CONNECTION
+      );
+    }
+  }, [cloudConnectorsCount, isEditPage]);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
-  if (!newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  }
+  // NOTE: This must be in a useEffect, NOT during render, to avoid React errors
+  useEffect(() => {
+    if (!newPolicy.supports_cloud_connector) {
+      updatePolicy({
+        updatedPolicy: {
+          ...newPolicy,
+          supports_cloud_connector: true,
+        },
+      });
+    }
+  }, [newPolicy, updatePolicy]);
 
   const tabs: CloudConnectorTab[] = [
     {
@@ -97,33 +106,34 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       content: (
         <>
           <EuiSpacer size="m" />
-          <div>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.cloudConnector.setup.cloudFormation.guide.description"
-                defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below. You'll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
-                values={{
-                  learnMore: (
-                    <EuiLink
-                      href={CLOUD_FORMATION_EXTERNAL_DOC_URL}
-                      target="_blank"
-                      rel="noopener nofollow noreferrer"
-                      data-test-subj="externalLink"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.cloudConnector.setup.cloudFormation.guide.learnMoreLink"
-                        defaultMessage="Learn more about CloudFormation"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
-          </div>
-          <EuiSpacer size="l" />
+          {cloudProvider === 'gcp' && (
+            <>
+              <div>
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.setup.gcp.guide.description"
+                    defaultMessage="Create a reusable Service Account in your GCP project, then give Elastic its Service Account email and Audience below. You'll need permissions to create service accounts and configure workload identity federation in your GCP project. {learnMore}"
+                    values={{
+                      learnMore: (
+                        <EuiLink
+                          href="https://cloud.google.com/iam/docs/workload-identity-federation"
+                          target="_blank"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.cloudConnector.setup.gcp.guide.learnMoreLink"
+                            defaultMessage="Learn more about Workload Identity Federation"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </div>
+              <EuiSpacer size="l" />
+            </>
+          )}
           <NewCloudConnectorForm
-            input={input}
-            templateName={templateName}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
@@ -133,6 +143,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             cloudProvider={cloudProvider}
             credentials={newConnectionCredentials}
             setCredentials={updatePolicyWithNewCredentials}
+            accountType={accountType}
+            iacTemplateUrl={iacTemplateUrl}
           />
         </>
       ),
@@ -152,7 +164,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
-          accountType={accountTypeFromInputs}
+          accountType={accountType}
         />
       ),
     },
@@ -162,7 +174,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     (tab: { id: 'new-connection' | 'existing-connection' }) => {
       setSelectedTabId(tab.id);
 
-      // Always update policy when switching tabs to ensure validation is correct
       if (tab.id === TABS.NEW_CONNECTION) {
         updatePolicyWithNewCredentials(newConnectionCredentials);
       } else if (tab.id === TABS.EXISTING_CONNECTION) {
@@ -181,8 +192,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     <>
       {!reusableFeatureEnabled && (
         <NewCloudConnectorForm
-          input={input}
-          templateName={templateName}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
@@ -192,6 +201,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={newConnectionCredentials}
           setCredentials={updatePolicyWithNewCredentials}
+          accountType={accountType}
+          iacTemplateUrl={iacTemplateUrl}
         />
       )}
       {reusableFeatureEnabled && (

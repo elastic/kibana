@@ -61,11 +61,13 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 import { VarGroupSelector } from './var_group_selector';
+import { MigrationTooltip } from './package_policy_input_panel';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -80,7 +82,9 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   totalStreams?: number;
+  showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
 }
 
@@ -93,11 +97,19 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    isUpgrade,
     totalStreams,
+    showDescriptionColumn = true,
     varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
+    const { enableVarGroups } = ExperimentalFeaturesService.get();
+
+    const pkgVarGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const streamVarGroups =
+      enableVarGroups && packageInputStream.var_groups ? packageInputStream.var_groups : undefined;
 
     const {
       params: { packagePolicyId },
@@ -159,20 +171,17 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     }, [isDefaultDatastream, containerRef]);
 
     // Determine if this stream has its own var_groups (stream-level) or should use package-level
-    const hasStreamLevelVarGroups =
-      packageInputStream.var_groups && packageInputStream.var_groups.length > 0;
+    const hasStreamLevelVarGroups = streamVarGroups && streamVarGroups.length > 0;
 
     // Use stream-level var_groups if present, otherwise fall back to package-level
-    const effectiveVarGroups = hasStreamLevelVarGroups
-      ? packageInputStream.var_groups
-      : packageInfo.var_groups;
+    const effectiveVarGroups = hasStreamLevelVarGroups ? streamVarGroups : pkgVarGroups;
 
     // Stream-level var group selections - derives from policy, initializes defaults, handles changes
     const {
       selections: streamVarGroupSelections,
       handleSelectionChange: handleStreamVarGroupSelectionChange,
     } = useVarGroupSelections({
-      varGroups: hasStreamLevelVarGroups ? packageInputStream.var_groups : undefined,
+      varGroups: hasStreamLevelVarGroups ? streamVarGroups : undefined,
       savedSelections: packagePolicyInputStream.var_group_selections,
       isAgentlessEnabled,
       onSelectionsChange: updatePackagePolicyInputStream,
@@ -260,7 +269,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     return (
       <>
         <EuiFlexGrid
-          columns={2}
+          columns={showDescriptionColumn ? 2 : 1}
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
@@ -302,6 +311,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             </span>
                           </EuiFlexItem>
                         )}
+                        {isUpgrade &&
+                          packagePolicyInputStream.migrate_from &&
+                          !showStreamDeprecationIcon && (
+                            <MigrationTooltip
+                              migrateFrom={packagePolicyInputStream.migrate_from}
+                              isStream
+                            />
+                          )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
@@ -367,7 +384,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
             <EuiFlexGroup direction="column" gutterSize="m">
               {/* Stream-level Var Group Selectors */}
               {hasStreamLevelVarGroups &&
-                packageInputStream.var_groups?.map((varGroup) => (
+                streamVarGroups?.map((varGroup) => (
                   <EuiFlexItem key={varGroup.name}>
                     <VarGroupSelector
                       varGroup={varGroup}

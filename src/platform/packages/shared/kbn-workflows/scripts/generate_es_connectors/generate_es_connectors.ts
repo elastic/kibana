@@ -24,7 +24,7 @@ import {
 } from './constants';
 import { INCLUDED_OPERATIONS } from './included_operations';
 import type { SpecificationTypes } from './types';
-import type { HttpMethod } from '../../types/latest';
+import type { HttpMethod, StepStabilityLevel } from '../../types/latest';
 import {
   type ContractMeta,
   eslintFixGeneratedCode,
@@ -246,6 +246,7 @@ function generateContractMeta(
   const documentation = endpoint.docUrl;
   const { methods, patterns } = generateMethodsAndPatterns(endpoint);
   const parameterTypes = generateParameterTypes(operations, openApiDocument);
+  const stability = resolveEndpointStability(endpoint);
 
   const contractName = generateContractName(endpoint);
   const operationIds = operations
@@ -265,6 +266,7 @@ function generateContractMeta(
     methods,
     patterns,
     documentation,
+    stability,
     parameterTypes,
 
     // Use underscores in filename to avoid build exclusion (files with .test. are excluded)
@@ -323,4 +325,19 @@ function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
   // removing leading slash if present
   const patterns = endpoint.urls.map((url) => url.path.replace(/^\//, ''));
   return { methods: Array.from(methods), patterns };
+}
+
+const SPEC_STABILITY_MAP: Partial<Record<SpecificationTypes.Stability, StepStabilityLevel>> = {
+  beta: 'beta',
+  experimental: 'tech_preview',
+};
+
+function resolveEndpointStability(
+  endpoint: SpecificationTypes.Endpoint
+): StepStabilityLevel | undefined {
+  const specStability = endpoint.stability ?? endpoint.availability?.stack?.stability;
+  if (specStability === undefined) {
+    return undefined;
+  }
+  return SPEC_STABILITY_MAP[specStability];
 }

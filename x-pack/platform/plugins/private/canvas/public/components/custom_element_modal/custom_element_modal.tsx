@@ -7,7 +7,6 @@
 
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -119,15 +118,6 @@ interface State {
 }
 
 export class CustomElementModal extends PureComponent<Props, State> {
-  public static propTypes = {
-    name: PropTypes.string,
-    description: PropTypes.string,
-    image: PropTypes.string,
-    title: PropTypes.string.isRequired,
-    onSave: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-  };
-
   public state = {
     name: this.props.name || '',
     description: this.props.description || '',

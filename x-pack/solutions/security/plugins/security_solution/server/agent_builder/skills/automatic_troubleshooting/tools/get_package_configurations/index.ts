@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';

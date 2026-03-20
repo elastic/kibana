@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omitBy } from 'lodash';
+
 import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
+  optionsListDSLControlSchema,
   type LegacyStoredOptionsListExplicitInput,
   type OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import { omitBy } from 'lodash';
+
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
 
 const OPTIONS_LIST_REF_NAME = 'optionsListDataView' as const;
@@ -26,6 +29,7 @@ const OPTIONS_LIST_LEGACY_REF_NAMES = [
 
 export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(OPTIONS_LIST_CONTROL, {
+    getSchema: () => optionsListDSLControlSchema,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(

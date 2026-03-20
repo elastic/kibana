@@ -11,13 +11,12 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { runBumpDiff } from '../src/diff/run_bump_diff';
-import { BumpServiceError } from '../src/diff/errors';
-import { parseBumpDiff } from '../src/diff/parse_bump_diff';
-import { applyAllowlist } from '../src/diff/breaking_rules';
+import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
 import { formatFailure } from '../src/report/format_failure';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
+import { loadTerraformApis } from '../src/terraform/load_terraform_apis';
+import { buildMatchPath } from '../src/terraform/build_match_path';
 
 type Distribution = 'stack' | 'serverless';
 
@@ -73,9 +72,13 @@ const isFileNotInCommit = (error: unknown): boolean => {
   return stderr.includes('does not exist in') || stderr.includes('path not found');
 };
 
-const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | null => {
+const getBaseOasFromMergeBase = (
+  specPath: string,
+  mergeBase: string,
+  distribution: Distribution
+): string | null => {
   mkdirSync(TMP_DIR, { recursive: true });
-  const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
+  const tmpPath = resolve(TMP_DIR, `base-${distribution}-${Date.now()}.yaml`);
 
   try {
     const baseContent = execSync(`git show ${mergeBase}:${specPath}`, {
@@ -96,10 +99,11 @@ const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | 
 const getBaseOasFromRemote = (
   specPath: string,
   baseBranch: string,
-  remote: string
+  remote: string,
+  distribution: Distribution
 ): string | null => {
   mkdirSync(TMP_DIR, { recursive: true });
-  const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
+  const tmpPath = resolve(TMP_DIR, `base-${distribution}-${Date.now()}.yaml`);
 
   try {
     const baseContent = execSync(`git show ${remote}/${baseBranch}:${specPath}`, {
@@ -158,11 +162,11 @@ run(
     let basePath: string | null;
     if (opts.mergeBase) {
       log.info(`Using merge base: ${opts.mergeBase}`);
-      basePath = getBaseOasFromMergeBase(opts.specPath, opts.mergeBase);
+      basePath = getBaseOasFromMergeBase(opts.specPath, opts.mergeBase, opts.distribution);
     } else {
       const remote = resolveElasticRemote();
       log.info(`Base: ${remote}/${opts.baseBranch}`);
-      basePath = getBaseOasFromRemote(opts.specPath, opts.baseBranch, remote);
+      basePath = getBaseOasFromRemote(opts.specPath, opts.baseBranch, remote, opts.distribution);
     }
 
     if (!basePath) {
@@ -172,8 +176,30 @@ run(
 
     try {
       const currentPath = resolve(process.cwd(), opts.specPath);
-      const diffEntries = runBumpDiff(basePath, currentPath);
-      const allBreakingChanges = parseBumpDiff(diffEntries);
+      const terraformApis = loadTerraformApis(opts.terraformApisPath);
+      const matchPath = buildMatchPath(terraformApis);
+      if (matchPath) {
+        log.info(`Filtering oasdiff to ${terraformApis.length} Terraform provider API paths`);
+      }
+      let diffEntries;
+      try {
+        diffEntries = runOasdiff(basePath, currentPath, { matchPath });
+      } catch (error: unknown) {
+        // Some older branch specs (e.g. 9.3) have example objects incorrectly
+        // placed under `#/components/schemas/` instead of `#/components/examples/`.
+        // oasdiff rightfully rejects these malformed specs. Rather than failing
+        // CI when comparing against affected branches, we warn and skip.
+        // This can be removed once all supported base branches have correct specs.
+        if ((error as Error)?.message?.includes('expecting ref to example object')) {
+          log.warning(
+            'oasdiff cannot parse the base spec (likely due to example objects ' +
+              'misplaced under components/schemas). Skipping breaking change detection.'
+          );
+          return;
+        }
+        throw error;
+      }
+      const allBreakingChanges = parseOasdiff(diffEntries);
 
       if (allBreakingChanges.length === 0) {
         log.success('No breaking changes detected');
@@ -210,15 +236,6 @@ run(
       throw new Error(
         `Found ${breakingChanges.length} breaking change(s) affecting Terraform provider APIs`
       );
-    } catch (error) {
-      if (error instanceof BumpServiceError) {
-        log.warning(`${error.message}`);
-        log.warning(
-          'Skipping API contract check — results are inconclusive due to external service failure.'
-        );
-        return;
-      }
-      throw error;
     } finally {
       cleanup(basePath);
     }
@@ -252,8 +269,8 @@ run(
           # Local: check serverless contracts against main
           node scripts/check_contracts.ts --distribution serverless
 
-          # Local: check against a specific branch
-          node scripts/check_contracts.ts --distribution stack --baseBranch 9.3
+          # Local: check against a specific commit
+          node scripts/check_contracts.ts --distribution stack --mergeBase <commit-sha>
       `,
     },
   }

@@ -50,7 +50,7 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
-  varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -83,12 +83,12 @@ import type {
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
-  PackagePolicyConfigRecord,
   ArchiveEntry,
 } from '../../common/types';
 import type {
   AzureCloudConnectorVars,
   CloudConnectorVar,
+  GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import {
   FleetError,
@@ -142,6 +142,12 @@ import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  GCP_SERVICE_ACCOUNT_VAR_NAME,
+  GCP_AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -217,6 +223,15 @@ import {
   hasAgentVersionConditionInInputTemplate,
 } from './utils/version_specific_policies';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
+import {
+  findInputForMigration,
+  applyInputLevelMigration,
+  migrateStreamVars,
+  applyStreamLevelMigration,
+  deepMergeVars,
+  getUpdatedGlobalVars,
+  removeStaleVars,
+} from './package_policy_migration_helpers';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -397,6 +412,42 @@ const extractPackagePolicyVars = (
       );
     }
   }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'gcp') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const serviceAccount = vars[SERVICE_ACCOUNT_VAR_NAME] || vars[GCP_SERVICE_ACCOUNT_VAR_NAME];
+    const audience = vars[AUDIENCE_VAR_NAME] || vars[GCP_AUDIENCE_VAR_NAME];
+    const gcpCredentials =
+      vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID] || vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
+
+    if (serviceAccount && audience && gcpCredentials) {
+      // Type assertions are needed because PackagePolicyConfigRecordEntry has loose types (type?: string, value?: any)
+      // service_account and audience are non-secret text fields (CloudConnectorVar);
+      // only gcp_credentials_cloud_connector_id is a secret (CloudConnectorSecretVar).
+      // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
+      const gcpCloudConnectorVars: GcpCloudConnectorVars = {
+        service_account: serviceAccount as CloudConnectorVar,
+        audience: audience as CloudConnectorVar,
+        gcp_credentials_cloud_connector_id: gcpCredentials as CloudConnectorSecretVar,
+      };
+
+      logger.debug(
+        `Extracted GCP cloud connector vars: service_account=${!!serviceAccount}, audience=${!!audience}, gcp_credentials=[REDACTED]`
+      );
+
+      return gcpCloudConnectorVars;
+    } else {
+      logger.error(
+        `Missing required GCP vars: service_account=${!!serviceAccount}, audience=${!!audience}, gcp_credentials=[REDACTED]`
+      );
+    }
+  }
 };
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
@@ -471,7 +522,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       request
     );
 
-    const agentPolicies = [];
+    const agentPolicies: AgentPolicy[] = [];
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
@@ -653,6 +704,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           created_by: options?.user?.username ?? 'system',
           updated_at: isoDate,
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo.conditions?.agent?.version,
         },
 
         { ...options, id: packagePolicyId }
@@ -1644,6 +1696,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
         },
         {
           version,
@@ -2257,7 +2310,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
-    const agentlessAgentPolicies = [];
+    const agentlessAgentPolicies: string[] = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
@@ -2537,7 +2590,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-
           return {
             ...defaultInput,
             enabled: input.enabled,
@@ -3460,6 +3512,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
       );
     }
   }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
+  }
 }
 
 export function _compilePackagePolicyInputs(
@@ -3854,7 +3915,6 @@ export function updatePackageInputs(
         : policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
           ) ?? false;
-
       return policyTemplateStillIncludesInput;
     }),
   ];
@@ -3885,6 +3945,13 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      const originalInputToMigrate = applyInputLevelMigration(
+        update,
+        basePackagePolicy.inputs,
+        inputs
+      );
+      applyStreamLevelMigration(update, originalInputToMigrate, basePackagePolicy.inputs);
+
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
         update.enabled = false;
@@ -3910,6 +3977,12 @@ export function updatePackageInputs(
       originalInput.policy_template = update.policy_template;
     }
 
+    // `deprecated` and `migrate_from` are package schema fields, not user-configured state.
+    // They must be unconditionally synced from the new package definition so they are cleared
+    // when the new package version no longer declares them.
+    originalInput.deprecated = update.deprecated;
+    originalInput.migrate_from = update.migrate_from;
+
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -3923,6 +3996,9 @@ export function updatePackageInputs(
         packageInfo.type === 'input' &&
         update.streams.length === 1 &&
         originalInput?.streams.length === 1;
+      // Per-source-type counters for positional stream matching when a stream declares
+      // migrate_from. Shared across iterations so each source stream is consumed once.
+      const streamMigrateFromCounters: Record<string, number> = {};
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -3939,6 +4015,26 @@ export function updatePackageInputs(
         }
 
         if (originalStream === undefined) {
+          // When a new stream declares migrate_from, carry vars and enabled state over from
+          // the positionally-matched old stream instead of pushing with package defaults.
+          // This handles partial-migration integrations where
+          // the new input type already exists in the old policy alongside the old input type.
+          if (stream.migrate_from) {
+            const counter = streamMigrateFromCounters[stream.migrate_from] ?? 0;
+            streamMigrateFromCounters[stream.migrate_from] = counter + 1;
+            const oldInputForStream = findInputForMigration(
+              basePackagePolicy.inputs,
+              stream.migrate_from,
+              update.policy_template
+            );
+            const oldStream = oldInputForStream?.streams[counter];
+            if (oldStream) {
+              originalInput.streams.push(
+                migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
+              );
+              continue;
+            }
+          }
           originalInput.streams.push(stream);
           continue;
         }
@@ -3946,6 +4042,9 @@ export function updatePackageInputs(
         if (originalStream?.enabled === undefined) {
           originalStream.enabled = stream.enabled;
         }
+
+        // Sync migrate_from from the new package schema — package-owned field, not user-configured.
+        originalStream.migrate_from = stream.migrate_from;
 
         if (stream.vars || originalStream.vars) {
           // streams wont match for input pkgs
@@ -3959,7 +4058,6 @@ export function updatePackageInputs(
         }
       }
     }
-
     // Filter all stream that have been removed from the input
     originalInput.streams = originalInput.streams.filter((originalStream) => {
       return (
@@ -4230,83 +4328,6 @@ export function sendUpdatePackagePolicyTelemetryEvent(
       }
     }
   });
-}
-
-function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
-  if (!override.vars) {
-    return original;
-  }
-  if (!original.vars) {
-    original.vars = { ...override.vars };
-  }
-
-  const result = { ...original };
-
-  const overrideVars = Array.isArray(override.vars)
-    ? override.vars
-    : Object.entries(override.vars!).map(([key, rest]) => ({
-        name: key,
-        ...(rest as any),
-      }));
-
-  for (const { name, ...overrideVal } of overrideVars) {
-    const originalVar = original.vars[name];
-
-    result.vars[name] = { ...originalVar, ...overrideVal };
-
-    // Ensure that any value from the original object is persisted on the newly merged resulting object,
-    // even if we merge other data about the given variable
-    if (keepOriginalValue && originalVar?.value !== undefined) {
-      result.vars[name].value = originalVar.value;
-    }
-  }
-
-  return result;
-}
-
-function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
-  if (!packageInfo.vars) {
-    return undefined;
-  }
-
-  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
-  const result = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true);
-  return removeStaleVars(result, { vars: packageInfoVars }).vars;
-}
-
-interface SupportsVars {
-  vars?: PackagePolicyConfigRecord;
-}
-
-function removeStaleVars<T extends SupportsVars>(
-  currentWithVars: T,
-  expectedVars: SupportsVars
-): T {
-  if (!currentWithVars.vars) {
-    return currentWithVars;
-  }
-
-  if (!expectedVars.vars) {
-    return {
-      ...currentWithVars,
-      vars: {},
-    };
-  }
-
-  const filteredVars = Object.entries(currentWithVars.vars).reduce<PackagePolicyConfigRecord>(
-    (acc, [key, val]) => {
-      if (key in expectedVars.vars!) {
-        acc[key] = val;
-      }
-      return acc;
-    },
-    {}
-  );
-
-  return {
-    ...currentWithVars,
-    vars: filteredVars,
-  };
 }
 
 async function requireUniqueName(

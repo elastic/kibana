@@ -32,5 +32,6 @@
     "@kbn/ai-assistant-common",
     "@kbn/ai-assistant-icon",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/cases-plugin",
   ]
 }

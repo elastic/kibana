@@ -20,8 +20,4 @@ It manages the lifecycle of Elasticsearch clients, ensures the connection is hea
   - Validates the connection to Elasticsearch.
   - Verifies that inline scripting is enabled on the cluster.
   - Fetches and exposes cluster capabilities.
-- **Cross-Project Search (CPS) Handling**:
-  - Configures the `CpsRequestHandler` based on the `cps.cpsEnabled` configuration flag (read from `coreContext.configService`).
-  - **Behavior based on `cpsEnabled`**:
-    - **Enabled (`true`)**: The `CpsRequestHandler` injects `project_routing: '_alias:_origin'` into requests if `project_routing` is missing (unless it's a PIT request, where it is stripped).
-    - **Disabled (`false`)**: The `CpsRequestHandler` strictly strips any `project_routing` parameter from request bodies to prevent unintended cross-project queries.
+- **Cross-Project Search (CPS) Handling**: Configures the `CpsRequestHandler` based on the `cps.cpsEnabled` flag. See [`@kbn/core-elasticsearch-client-server-internal` — CPS Request Handler](../client-server-internal/src/cps_request_handler/README.md) for full details.

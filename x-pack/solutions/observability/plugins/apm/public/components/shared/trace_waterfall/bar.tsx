@@ -39,6 +39,7 @@ export function Bar({
       css={css`
         position: relative;
         height: ${euiTheme.size.base};
+        min-width: 1px;
         width: ${width}%;
         margin-left: ${left}%;
       `}

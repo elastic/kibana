@@ -19,7 +19,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiCallOut,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -56,7 +55,6 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
 }
 
 export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
-  const { euiTheme } = useEuiTheme();
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -156,13 +154,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyou
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        style={{
-          overflowY: 'auto',
-          maxHeight: 'calc(100vh - 200px)',
-          padding: euiTheme.size.base,
-        }}
-      >
+      <EuiFlyoutBody>
         <DiagnosticConfigurationForm
           sourceNode={form.sourceNode}
           onSelectionUpdate={handleSelectionUpdate}

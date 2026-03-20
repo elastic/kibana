@@ -112,7 +112,7 @@
           ">) => React.ReactElement<any>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
-        "lineNumber": 699,
+        "lineNumber": 705,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -154,7 +154,7 @@
           ">) => React.ReactElement<any>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
-        "lineNumber": 699,
+        "lineNumber": 705,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

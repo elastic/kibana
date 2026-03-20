@@ -9,7 +9,7 @@
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLNumericLiteralType } from '../../types';
+import type { ESQLNumericLiteralType } from '@elastic/esql/types';
 import type { Location } from '../registry/types';
 import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
@@ -475,6 +475,14 @@ export interface ValidationErrors {
   invalidMapParameterValueType: {
     message: string;
     type: { paramName: string; expectedType: string; actualType: string };
+  };
+  mmrQueryVectorWrongType: {
+    message: string;
+    type: { type: string };
+  };
+  mmrOnFieldWrongType: {
+    message: string;
+    type: { type: string };
   };
 }
 

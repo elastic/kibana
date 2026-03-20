@@ -3098,7 +3098,7 @@
         "label": "dedot",
         "description": [],
         "signature": [
-          "(source: Record<string, any>, target: Record<string, any>) => Record<string, any>"
+          "(source: Record<string, unknown>, target: Record<string, unknown>) => Record<string, unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
         "lineNumber": 12,
@@ -3114,7 +3114,7 @@
             "label": "source",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
             "lineNumber": 12,
@@ -3131,11 +3131,11 @@
             "label": "target",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
             "lineNumber": 12,
-            "columnNumber": 52,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4558,7 +4558,49 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.service.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/service.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.service.$2",
+                "type": "string",
+                "tags": [],
+                "label": "environment",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/service.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.service.$3",
+                "type": "string",
+                "tags": [],
+                "label": "agentName",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/service.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/synthtrace-client",
@@ -4616,7 +4658,52 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.mobileApp.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_app.ts",
+                "lineNumber": 28,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.mobileApp.$2",
+                "type": "string",
+                "tags": [],
+                "label": "environment",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_app.ts",
+                "lineNumber": 28,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.mobileApp.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "agentName",
+                "description": [],
+                "signature": [
+                  "\"iOS/swift\" | \"android/java\""
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_app.ts",
+                "lineNumber": 28,
+                "columnNumber": 62,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/synthtrace-client",

@@ -10,10 +10,13 @@ import type { Logger } from '@kbn/logging';
 import type {
   BoundInferenceClient,
   InferenceClient,
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
   AnonymizationSettings,
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
@@ -26,10 +29,55 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { uiSettings } from '../common/ui_settings';
+import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById } from './util/get_connector_by_id';
+import { getInferenceEndpoints } from './util/get_inference_endpoints';
+import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
+import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
+
+const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
+  let parsed: unknown = value;
+
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+
+  if (
+    !parsed ||
+    typeof parsed !== 'object' ||
+    !Array.isArray((parsed as AnonymizationSettings).rules)
+  ) {
+    return [];
+  }
+
+  const allRules = (parsed as AnonymizationSettings).rules;
+  const enabledRules = allRules.filter((rule) => rule.enabled);
+  return enabledRules;
+};
+
+export const resolveReplacementsEncryptionKey = async ({
+  namespace,
+  anonymizationEnabled,
+  policyService,
+}: {
+  namespace: string;
+  anonymizationEnabled: boolean;
+  policyService?: {
+    getReplacementsEncryptionKey: (targetNamespace: string) => Promise<string>;
+  };
+}): Promise<string | undefined> => {
+  if (!anonymizationEnabled || !policyService) {
+    return undefined;
+  }
+
+  return policyService.getReplacementsEncryptionKey(namespace);
+};
 
 export class InferencePlugin
   implements
@@ -43,16 +91,19 @@ export class InferencePlugin
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
+  private endpointIdCache: InferenceEndpointIdCache;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get<InferenceConfig>();
+    this.endpointIdCache = new InferenceEndpointIdCache();
   }
   setup(
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    coreSetup.uiSettings.register(uiSettings);
+    const anonymizationEnabled = pluginsSetup.anonymization?.isEnabled() ?? false;
+    coreSetup.uiSettings.register(getUiSettings({ anonymizationEnabled }));
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -65,38 +116,110 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+    this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
+
+    if (anonymizationEnabled) {
+      this.logger.info(
+        'Persistent anonymization replacements key material is auto-managed per space via the anonymization plugin'
+      );
+    }
+
     this.regexWorker = new RegexWorkerService(
       this.config.workers.anonymization,
       this.logger.get('regex_worker')
     );
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
-      const soClient = core.savedObjects.getScopedClient(request);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-      const settingsStr = await uiSettingsClient.get<string | undefined>(aiAnonymizationSettings);
+      const namespace =
+        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+      const policyService = pluginsStart.anonymization?.getPolicyService();
 
-      if (!settingsStr) {
+      const getLegacyRules = async (): Promise<AnonymizationRule[]> => {
+        const legacySettings = await uiSettingsClient.get<unknown>(aiAnonymizationSettings);
+        const parsedRules = parseLegacyAnonymizationRules(legacySettings);
+        return parsedRules;
+      };
+
+      if (!anonymizationEnabled || !policyService) {
+        return getLegacyRules();
+      }
+
+      await policyService.ensureGlobalProfile(namespace);
+      const globalProfile = await policyService.getGlobalProfile(namespace);
+      if (!globalProfile) {
         return [];
       }
 
-      try {
-        const settings = JSON.parse(settingsStr) as AnonymizationSettings;
-        return settings.rules || [];
-      } catch (error) {
-        this.logger.error('Failed to parse anonymization settings:', error);
-        return [];
-      }
+      const regexRules: AnonymizationRule[] = globalProfile.rules.regexRules.map((rule) => ({
+        type: 'RegExp',
+        enabled: rule.enabled,
+        pattern: rule.pattern,
+        entityClass: rule.entityClass,
+      }));
+      const nerRules: AnonymizationRule[] = globalProfile.rules.nerRules.map((rule) => ({
+        type: 'NER',
+        enabled: rule.enabled,
+        modelId: rule.modelId,
+        allowedEntityClasses: rule.allowedEntityClasses,
+      }));
+
+      return [...regexRules, ...nerRules];
+    };
+
+    const getAnonymizationOptions = (request: KibanaRequest) => {
+      const namespace =
+        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+      const policyService = pluginsStart.anonymization?.getPolicyService();
+      const replacementsEncryptionKeyPromise = resolveReplacementsEncryptionKey({
+        namespace,
+        anonymizationEnabled,
+        policyService,
+      });
+      return {
+        namespace,
+        anonymizationRulesPromise: createAnonymizationRulesPromise(request),
+        regexWorker: (() => {
+          if (!this.regexWorker) {
+            this.logger.error(
+              'RegexWorkerService is not initialized — Anonymization plugin.start() may not have completed'
+            );
+          }
+          return this.regexWorker!;
+        })(),
+        esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
+        anonymization: {
+          saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
+          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
+            if (!anonymizationEnabled || !policyService || !target) {
+              return undefined;
+            }
+            return policyService.resolveEffectivePolicy(namespace, {
+              type: target.targetType,
+              id: target.targetId,
+            });
+          },
+          replacements: {
+            esClient: core.elasticsearch.client.asInternalUser,
+            encryptionKeyPromise: replacementsEncryptionKeyPromise,
+            usePersistentReplacements: anonymizationEnabled,
+            requireEncryptionKey: anonymizationEnabled,
+          },
+        },
+      };
     };
 
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
           ...options,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
-          regexWorker: this.regexWorker!,
+          ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          endpointIdCache: this.endpointIdCache,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -106,22 +229,51 @@ export class InferencePlugin
           connectorId: options.connectorId,
           chatModelOptions: options.chatModelOptions,
           callbacks: options.callbacks,
+          ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          endpointIdCache: this.endpointIdCache,
           logger: this.logger,
         });
       },
 
       getConnectorList: async (request: KibanaRequest) => {
-        return getConnectorList({ actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getConnectorList({
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
       },
       getDefaultConnector: async (request: KibanaRequest) => {
-        return loadDefaultConnector({ actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return loadDefaultConnector({
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
-        return getConnectorById({ connectorId: id, actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getConnectorById({
+          connectorId: id,
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
+      },
+      getInferenceEndpoints: async (taskType?: InferenceTaskType) => {
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getInferenceEndpoints({ esClient, taskType });
+      },
+      getInferenceEndpointById: async (inferenceId: string) => {
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getInferenceEndpointById({ inferenceId, esClient });
       },
     };
   }

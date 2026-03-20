@@ -108,6 +108,62 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/router-to-openapispec",
+        "id": "def-server.registerZodV4Component",
+        "type": "Function",
+        "tags": [],
+        "label": "registerZodV4Component",
+        "description": [
+          "\nRegister a Zod v4 schema so that the OAS converter emits it as a named\ncomponent (`$ref: '#/components/schemas/<name>'`) instead of inlining it.\n\nCall this once per schema, at module load time (e.g. in an `oas_definitions.ts`\nfile next to the schema definitions):\n\n```ts\nimport { registerZodV4Component } from '@kbn/router-to-openapispec';\nimport { conditionSchema } from './schemas';\n\nregisterZodV4Component(conditionSchema, 'Condition');\n```\n\nThe name must be unique across all registered schemas in the document.\nNames follow the same rules as OpenAPI component names: `[a-zA-Z0-9._-]+`."
+        ],
+        "signature": [
+          "(schema: z4.ZodType, name: string) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
+        "lineNumber": 631,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.registerZodV4Component.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "z4.ZodType"
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
+            "lineNumber": 631,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.registerZodV4Component.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
+            "lineNumber": 631,
+            "columnNumber": 60,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
