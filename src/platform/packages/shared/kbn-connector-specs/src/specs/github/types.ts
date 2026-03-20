@@ -16,6 +16,9 @@ import { z } from '@kbn/zod/v4';
 export const GetMeInputSchema = z.object({});
 export type GetMeInput = z.infer<typeof GetMeInputSchema>;
 
+export const ListToolsInputSchema = z.object({});
+export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
+
 export const SearchCodeInputSchema = z.object({
   query: z.string().min(1).describe('GitHub code search query'),
   page: z.number().optional().default(1),

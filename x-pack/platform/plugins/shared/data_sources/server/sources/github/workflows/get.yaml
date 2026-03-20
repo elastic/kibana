@@ -13,7 +13,7 @@ inputs:
       The type of GitHub resource to retrieve. Each requires owner and repo, plus resource-specific inputs:
         getCommit - Get details of a specific commit (requires sha)
         getLatestRelease - Get the latest release for a repository (no extra inputs)
-        pullRequestRead - Read full details of a pull request (requires pull_number)
+        pullRequestRead - Read pull request details, diff, or review comments (requires pull_number; optional pull_request_method)
         getFileContents - Get the contents of a file or directory (requires path; ref is optional)
         getIssue - Get details of a specific issue (requires issue_number)
         getIssueComments - Get comments for a specific issue (requires issue_number)
@@ -48,6 +48,20 @@ inputs:
     type: number
     required: false
     description: "Pull request number. Required for pullRequestRead."
+  - name: pull_request_method
+    type: choice
+    required: false
+    default: get
+    description: |
+      What to retrieve for pullRequestRead:
+        get - Full pull request details (default)
+        get_diff - Unified diff for the pull request
+        get_review_comments - Review comments for the pull request
+      Used by pullRequestRead only.
+    options:
+      - get
+      - get_diff
+      - get_review_comments
   - name: issue_number
     type: number
     required: false
@@ -83,6 +97,7 @@ steps:
               owner: "${{inputs.owner}}"
               repo: "${{inputs.repo}}"
               pullNumber: ${{inputs.pull_number}}
+              method: "${{inputs.pull_request_method}}"
       - match: getFileContents
         steps:
           - name: get-file-contents

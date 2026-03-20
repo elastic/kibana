@@ -19,8 +19,29 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient } from '../../lib/mcp';
+import type {
+  CallToolInput,
+  GetCommitInput,
+  GetFileContentsInput,
+  GetIssueCommentsInput,
+  GetIssueInput,
+  GetLatestReleaseInput,
+  ListBranchesInput,
+  ListCommitsInput,
+  ListIssuesInput,
+  ListPullRequestsInput,
+  ListReleasesInput,
+  ListTagsInput,
+  PullRequestReadInput,
+  SearchCodeInput,
+  SearchIssuesInput,
+  SearchPullRequestsInput,
+  SearchRepositoriesInput,
+  SearchUsersInput,
+} from './types';
 import {
   GetMeInputSchema,
+  ListToolsInputSchema,
   SearchCodeInputSchema,
   SearchRepositoriesInputSchema,
   SearchIssuesInputSchema,
@@ -137,7 +158,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Search for code across GitHub repositories.',
       }),
       input: SearchCodeInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SearchCodeInput) => {
         return callToolJson(ctx, 'search_code', {
           query: input.query,
           page: input.page,
@@ -152,7 +173,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Search for GitHub repositories.',
       }),
       input: SearchRepositoriesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SearchRepositoriesInput) => {
         return callToolJson(ctx, 'search_repositories', {
           query: input.query,
           page: input.page,
@@ -167,7 +188,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Search for issues across GitHub repositories.',
       }),
       input: SearchIssuesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SearchIssuesInput) => {
         return callToolJson(ctx, 'search_issues', {
           query: input.query,
           order: input.order,
@@ -184,7 +205,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Search for pull requests across GitHub repositories.',
       }),
       input: SearchPullRequestsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SearchPullRequestsInput) => {
         return callToolJson(ctx, 'search_pull_requests', {
           query: input.query,
           order: input.order,
@@ -201,7 +222,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Search for GitHub users.',
       }),
       input: SearchUsersInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SearchUsersInput) => {
         return callToolJson(ctx, 'search_users', {
           query: input.query,
           page: input.page,
@@ -216,7 +237,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.',
       }),
       input: ListIssuesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListIssuesInput) => {
         return callToolJson(ctx, 'list_issues', {
           owner: input.owner,
           repo: input.repo,
@@ -233,7 +254,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
       }),
       input: ListPullRequestsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListPullRequestsInput) => {
         return callToolJson(ctx, 'list_pull_requests', {
           owner: input.owner,
           repo: input.repo,
@@ -250,7 +271,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.',
       }),
       input: ListCommitsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListCommitsInput) => {
         return callToolJson(ctx, 'list_commits', {
           owner: input.owner,
           repo: input.repo,
@@ -267,7 +288,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       }),
       input: ListBranchesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListBranchesInput) => {
         return callToolJson(ctx, 'list_branches', {
           owner: input.owner,
           repo: input.repo,
@@ -283,7 +304,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.',
       }),
       input: ListReleasesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListReleasesInput) => {
         return callToolJson(ctx, 'list_releases', {
           owner: input.owner,
           repo: input.repo,
@@ -299,7 +320,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.',
       }),
       input: ListTagsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListTagsInput) => {
         return callToolJson(ctx, 'list_tags', {
           owner: input.owner,
           repo: input.repo,
@@ -315,7 +336,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Get details of a specific commit.',
       }),
       input: GetCommitInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GetCommitInput) => {
         return callToolJson(ctx, 'get_commit', {
           owner: input.owner,
           repo: input.repo,
@@ -330,7 +351,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Get the latest release of a GitHub repository.',
       }),
       input: GetLatestReleaseInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GetLatestReleaseInput) => {
         return callToolJson(ctx, 'get_latest_release', { owner: input.owner, repo: input.repo });
       },
     },
@@ -341,7 +362,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Read the full details of a specific pull request.',
       }),
       input: PullRequestReadInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: PullRequestReadInput) => {
         return callToolJson(ctx, 'pull_request_read', {
           owner: input.owner,
           repo: input.repo,
@@ -357,7 +378,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Get the contents of a file or directory from a GitHub repository.',
       }),
       input: GetFileContentsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GetFileContentsInput) => {
         return callToolContent(ctx, 'get_file_contents', {
           owner: input.owner,
           repo: input.repo,
@@ -373,7 +394,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Get details of a specific issue in a GitHub repository.',
       }),
       input: GetIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GetIssueInput) => {
         return callToolJson(ctx, 'get_issue', {
           owner: input.owner,
           repo: input.repo,
@@ -388,7 +409,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage: 'Get comments for a specific issue in a GitHub repository.',
       }),
       input: GetIssueCommentsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GetIssueCommentsInput) => {
         return callToolJson(ctx, 'get_issue_comments', {
           owner: input.owner,
           repo: input.repo,
@@ -403,7 +424,7 @@ export const GithubConnector: ConnectorSpec = {
         defaultMessage:
           'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
       }),
-      input: z.object({}),
+      input: ListToolsInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
           const { tools } = await mcp.listTools();
@@ -419,7 +440,7 @@ export const GithubConnector: ConnectorSpec = {
           'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       }),
       input: CallToolInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
       },
     },

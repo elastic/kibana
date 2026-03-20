@@ -35,6 +35,13 @@ export const withMcpClient = async <T>(
   try {
     await mcpClient.connect();
     return await fn(mcpClient);
+  } catch (error) {
+    ctx.log.error(
+      `MCP operation failed for ${serverUrl}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    throw error;
   } finally {
     await mcpClient.disconnect();
   }
