@@ -166,10 +166,13 @@ export function convertJsonExtractProcessorToESQL(
       const targetColumn = Builder.expression.column(extraction.target_field);
       const extractionExpr = buildExtractionExpression(fromColumn, extraction);
 
+      const elseExpression =
+        extraction.target_field === field ? fromColumn : Builder.expression.literal.nil();
+
       const caseExpression = Builder.expression.func.call('CASE', [
         conditionExpression,
         extractionExpr,
-        Builder.expression.literal.nil(),
+        elseExpression,
       ]);
 
       return Builder.expression.func.binary('=', [targetColumn, caseExpression]);
