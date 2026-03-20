@@ -1454,6 +1454,120 @@ describe('NotificationPolicyClient', () => {
       expect(res.errors).toHaveLength(1);
       expect(res.errors[0].id).toBe('missing-policy');
     });
+
+    it('handles delete actions via bulkDelete and update actions via bulkUpdate', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzMsMV0=',
+          },
+        ],
+      });
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-1', action: 'enable' },
+          { id: 'policy-2', action: 'delete' },
+        ],
+      });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: {
+            enabled: true,
+            updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2' },
+      ]);
+
+      expect(res).toEqual({ processed: 2, total: 2, errors: [] });
+    });
+
+    it('handles delete-only bulk actions without calling bulkUpdate', async () => {
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'policy-1', action: 'delete' }],
+      });
+
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+
+      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+    });
+
+    it('collects errors from both bulkUpdate and bulkDelete', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Not found',
+            },
+          },
+        ],
+      });
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: false,
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-1', action: 'enable' },
+          { id: 'policy-2', action: 'delete' },
+        ],
+      });
+
+      expect(res.processed).toBe(0);
+      expect(res.total).toBe(2);
+      expect(res.errors).toHaveLength(2);
+    });
   });
 
   describe('deleteNotificationPolicy', () => {

@@ -35,6 +35,10 @@ export type NotificationPolicySavedObjectBulkUpdateItem =
   | { id: string; version?: string }
   | { id: string; error: SavedObjectError };
 
+export type NotificationPolicySavedObjectBulkDeleteItem =
+  | { id: string }
+  | { id: string; error: SavedObjectError };
+
 export interface NotificationPolicySavedObjectServiceContract {
   create(params: {
     attrs: NotificationPolicySavedObjectAttributes;
@@ -61,6 +65,7 @@ export interface NotificationPolicySavedObjectServiceContract {
   }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
   findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   delete(params: { id: string }): Promise<void>;
+  bulkDelete(params: { ids: string[] }): Promise<NotificationPolicySavedObjectBulkDeleteItem[]>;
   find(params: {
     page: number;
     perPage: number;
@@ -227,6 +232,27 @@ export class NotificationPolicySavedObjectService
 
   public async delete({ id }: { id: string }): Promise<void> {
     await this.client.delete(NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id);
+  }
+
+  public async bulkDelete({
+    ids,
+  }: {
+    ids: string[];
+  }): Promise<NotificationPolicySavedObjectBulkDeleteItem[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkDelete(
+      ids.map((id) => ({ type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id }))
+    );
+
+    return result.statuses.map((status) => {
+      if (status.error) {
+        return { id: status.id, error: status.error };
+      }
+      return { id: status.id };
+    });
   }
 
   public async find({

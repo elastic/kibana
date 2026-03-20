@@ -36,6 +36,7 @@ interface NotificationPolicyActionsCellProps {
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
   isStateLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export const NotificationPolicyActionsCell = ({
@@ -48,6 +49,7 @@ export const NotificationPolicyActionsCell = ({
   onSnooze,
   onCancelSnooze,
   isStateLoading,
+  isDisabled = false,
 }: NotificationPolicyActionsCellProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -184,6 +186,7 @@ export const NotificationPolicyActionsCell = ({
             { defaultMessage: 'Edit this notification policy' }
           )}
           onClick={() => onEdit(policy.id)}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -195,6 +198,7 @@ export const NotificationPolicyActionsCell = ({
             { defaultMessage: 'Delete this notification policy' }
           )}
           onClick={() => onDelete(policy)}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -206,6 +210,7 @@ export const NotificationPolicyActionsCell = ({
                 defaultMessage: 'More actions',
               })}
               onClick={togglePopover}
+              isDisabled={isDisabled}
             />
           }
           isOpen={isPopoverOpen}

@@ -49,7 +49,7 @@ import {
 } from './utils';
 
 const resolveActionAttrs = (
-  action: NotificationPolicyBulkAction
+  action: Exclude<NotificationPolicyBulkAction, { action: 'delete' }>
 ): Partial<NotificationPolicySavedObjectAttributes> => {
   switch (action.action) {
     case 'enable':
@@ -302,26 +302,47 @@ export class NotificationPolicyClient {
     const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
-    const objects = actions.map((action) => ({
-      id: action.id,
-      attrs: {
-        ...resolveActionAttrs(action),
-        updatedBy: userProfile.uid,
-        updatedByUsername: userProfile.username,
-        updatedAt: now,
-      },
-    }));
-
-    const results = await this.notificationPolicySavedObjectService.bulkUpdate({ objects });
+    const deleteActions = actions.filter((a) => a.action === 'delete');
+    const updateActions = actions.filter((a) => a.action !== 'delete');
 
     const errors: Array<{ id: string; message: string }> = [];
     let processed = 0;
 
-    for (const result of results) {
-      if ('error' in result) {
-        errors.push({ id: result.id, message: result.error.message });
-      } else {
-        processed++;
+    if (updateActions.length > 0) {
+      const objects = updateActions.map((action) => ({
+        id: action.id,
+        attrs: {
+          ...resolveActionAttrs(action),
+          updatedBy: userProfile.uid,
+          updatedByUsername: userProfile.username,
+          updatedAt: now,
+        },
+      }));
+
+      const updateResults = await this.notificationPolicySavedObjectService.bulkUpdate({
+        objects,
+      });
+
+      for (const result of updateResults) {
+        if ('error' in result) {
+          errors.push({ id: result.id, message: result.error.message });
+        } else {
+          processed++;
+        }
+      }
+    }
+
+    if (deleteActions.length > 0) {
+      const deleteResults = await this.notificationPolicySavedObjectService.bulkDelete({
+        ids: deleteActions.map((a) => a.id),
+      });
+
+      for (const result of deleteResults) {
+        if ('error' in result) {
+          errors.push({ id: result.id, message: result.error.message });
+        } else {
+          processed++;
+        }
       }
     }
 

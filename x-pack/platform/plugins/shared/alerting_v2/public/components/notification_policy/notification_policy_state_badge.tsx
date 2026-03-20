@@ -23,6 +23,7 @@ interface NotificationPolicyStateBadgeProps {
   onEnable: (id: string) => void;
   onDisable: (id: string) => void;
   isLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export const NotificationPolicyStateBadge = ({
@@ -30,10 +31,15 @@ export const NotificationPolicyStateBadge = ({
   onEnable,
   onDisable,
   isLoading,
+  isDisabled = false,
 }: NotificationPolicyStateBadgeProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+  const togglePopover = () => {
+    if (!isDisabled) {
+      setIsPopoverOpen((prev) => !prev);
+    }
+  };
   const closePopover = () => setIsPopoverOpen(false);
 
   const trailingIcon = isLoading ? (
