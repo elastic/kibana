@@ -168,6 +168,7 @@ export const RulesList = ({
     actionTypeRegistry,
     application: { capabilities, navigateToApp },
     http,
+    cps,
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
@@ -1028,6 +1029,7 @@ export const RulesList = ({
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
+            cps={cps}
           />
         )}
       </EuiPageTemplate.Section>
