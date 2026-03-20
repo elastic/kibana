@@ -10,7 +10,7 @@ import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { RulesListPage } from './rules_list_page';
+import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
 
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
@@ -264,7 +264,7 @@ describe('RulesListPage', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
     });
 
     await waitFor(() => {
@@ -275,7 +275,6 @@ describe('RulesListPage', () => {
       });
     });
 
-    jest.useRealTimers();
   });
 
   it('clearing the search resets the fetch back to an unfiltered list', async () => {
@@ -296,7 +295,7 @@ describe('RulesListPage', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
     });
 
     await waitFor(() => {
@@ -312,7 +311,7 @@ describe('RulesListPage', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
     });
 
     await waitFor(() => {
@@ -323,7 +322,6 @@ describe('RulesListPage', () => {
       });
     });
 
-    jest.useRealTimers();
   });
 
   it('resets pagination to the first page after a new search', async () => {
@@ -352,7 +350,7 @@ describe('RulesListPage', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
     });
 
     await waitFor(() => {
