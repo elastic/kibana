@@ -47,21 +47,20 @@ inputs:
     required: false
     description: "Number of results per page"
 steps:
-  - name: if-search-code
-    type: if
-    condition: "${{ inputs.search_type == 'searchCode' }}"
-    steps:
-      - name: search-code
-        type: github.searchCode
-        connector-id: <%= github-stack-connector-id %>
-        with:
-          query: "${{inputs.query}}"
-          page: ${{inputs.page}}
-          perPage: ${{inputs.per_page}}
-    else:
-      - name: if-search-repositories
-        type: if
-        condition: "${{ inputs.search_type == 'searchRepositories' }}"
+  - name: route-search
+    type: switch
+    expression: "{{ inputs.search_type }}"
+    cases:
+      - match: searchCode
+        steps:
+          - name: search-code
+            type: github.searchCode
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchRepositories
         steps:
           - name: search-repositories
             type: github.searchRepositories
@@ -70,39 +69,34 @@ steps:
               query: "${{inputs.query}}"
               page: ${{inputs.page}}
               perPage: ${{inputs.per_page}}
-        else:
-          - name: if-search-issues
-            type: if
-            condition: "${{ inputs.search_type == 'searchIssues' }}"
-            steps:
-              - name: search-issues
-                type: github.searchIssues
-                connector-id: <%= github-stack-connector-id %>
-                with:
-                  query: "${{inputs.query}}"
-                  order: "${{inputs.order}}"
-                  sort: "${{inputs.sort}}"
-                  page: ${{inputs.page}}
-                  perPage: ${{inputs.per_page}}
-            else:
-              - name: if-search-pull-requests
-                type: if
-                condition: "${{ inputs.search_type == 'searchPullRequests' }}"
-                steps:
-                  - name: search-pull-requests
-                    type: github.searchPullRequests
-                    connector-id: <%= github-stack-connector-id %>
-                    with:
-                      query: "${{inputs.query}}"
-                      order: "${{inputs.order}}"
-                      sort: "${{inputs.sort}}"
-                      page: ${{inputs.page}}
-                      perPage: ${{inputs.per_page}}
-                else:
-                  - name: search-users
-                    type: github.searchUsers
-                    connector-id: <%= github-stack-connector-id %>
-                    with:
-                      query: "${{inputs.query}}"
-                      page: ${{inputs.page}}
-                      perPage: ${{inputs.per_page}}
+      - match: searchIssues
+        steps:
+          - name: search-issues
+            type: github.searchIssues
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              order: "${{inputs.order}}"
+              sort: "${{inputs.sort}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchPullRequests
+        steps:
+          - name: search-pull-requests
+            type: github.searchPullRequests
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              order: "${{inputs.order}}"
+              sort: "${{inputs.sort}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchUsers
+        steps:
+          - name: search-users
+            type: github.searchUsers
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
