@@ -28,6 +28,7 @@ export const assetCriticalityPublicCSVUploadRoute = ({
   router,
   logger,
   config,
+  docLinks,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
   router.versioned
@@ -57,6 +58,17 @@ export const assetCriticalityPublicCSVUploadRoute = ({
             }),
           },
         },
+        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       async (
         context,
