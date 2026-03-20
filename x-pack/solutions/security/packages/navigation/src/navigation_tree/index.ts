@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { createDashboardsNavigationTree } from './dashboards_navigation_tree';
 import { createRulesNavigationTree } from './rules_navigation_tree';
 import { createCasesNavigationTree } from './cases_navigation_tree';
 import { createInvestigationsNavigationTree } from './investigations_navigation_tree';
 import { createExploreNavigationTree } from './explore_navigation_tree';
-import type { CoreStart } from '@kbn/core/public';
 import {
   createAssetsNavigationTree,
   type AssetsNavigationTreeOptions,
