@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "248495"
+- https://github.com/elastic/kibana/pull/248495
 issues:
 - https://github.com/elastic/kibana/issues/246006
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Discover
+- Discover and ES|QL
 title: Fix "Search entire time range" for date nanos

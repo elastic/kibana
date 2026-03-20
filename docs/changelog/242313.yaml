@@ -82,14 +82,11 @@
 #   - other
 
 prs:
-- "242313"
+- https://github.com/elastic/kibana/pull/242313
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
-- Elastic Security solution
+- Threat hunting
 - Investigations
 title: Fix rule link in timeline's flyout

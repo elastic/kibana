@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "245423"
+- https://github.com/elastic/kibana/pull/245423
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Alerting
+- Alerting, connectors, and reporting
 title: Slack connector can be configured to send messages to any channel using channel names.

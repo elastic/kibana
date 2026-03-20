@@ -82,9 +82,8 @@
 #   - other
 
 prs:
-- "247252"
+- https://github.com/elastic/kibana/pull/247252
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
+- product: observability
 title: Minor cleanup in trace waterfall tests

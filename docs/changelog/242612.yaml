@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "242612"
+- https://github.com/elastic/kibana/pull/242612
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Add fleet policy revisions cleanup task

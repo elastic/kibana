@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "248203"
+- https://github.com/elastic/kibana/pull/248203
 issues:
 - https://github.com/elastic/kibana/issues/248047
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Discover
+- Discover and ES|QL
 title: Prevent loss of UI state in signal-specific Discover fly-out tabs when refreshing a query

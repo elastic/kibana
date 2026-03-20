@@ -82,13 +82,8 @@
 #   - other
 
 prs:
-- "240420"
+- https://github.com/elastic/kibana/pull/240420
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
-areas:
-- Elastic Security solution
 title: review of action response codes

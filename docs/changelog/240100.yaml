@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "240100"
+- https://github.com/elastic/kibana/pull/240100
 issues:
 - https://github.com/elastic/kibana/issues/136392
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: Enable alerts filtering with KQL bar

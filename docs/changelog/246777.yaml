@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "246777"
+- https://github.com/elastic/kibana/pull/246777
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
+- product: elasticsearch
 areas:
-- Elasticsearch solution
+- Search
 title: Search Homepage design is updated.

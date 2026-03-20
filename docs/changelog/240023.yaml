@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "240023"
+- https://github.com/elastic/kibana/pull/240023
 issues:
 - https://github.com/elastic/streams-program/issues/498
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Support convert processor for stream data processing

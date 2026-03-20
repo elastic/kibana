@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "235372"
+- https://github.com/elastic/kibana/pull/235372
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Dashboards and Visualizations
 title: Display layers as tabs instead of vertically stacked panels

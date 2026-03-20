@@ -82,11 +82,11 @@
 #   - other
 
 prs:
-- "241195"
+- https://github.com/elastic/kibana/pull/241195
 issues:
 - https://github.com/elastic/kibana/issues/241159
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Update Metrics Experience routes to delegate authorization to Elasticsearch

@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "241908"
+- https://github.com/elastic/kibana/pull/241908
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Make 'sampling_rate' agent central config options available to …

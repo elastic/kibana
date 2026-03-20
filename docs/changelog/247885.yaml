@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "247885"
+- https://github.com/elastic/kibana/pull/247885
 issues:
 - https://github.com/elastic/kibana/issues/247882
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Fixes the icon in the "Elastic documentation not available" callout in AI Assistant Settings.

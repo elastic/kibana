@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "240778"
+- https://github.com/elastic/kibana/pull/240778
 issues:
 - https://github.com/elastic/kibana/issues/237454
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Provides a better message feedback into the collapsed Processors/Conditions for the user

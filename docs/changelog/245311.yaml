@@ -82,16 +82,15 @@
 #   - other
 
 prs:
-- "245311"
+- https://github.com/elastic/kibana/pull/245311
 issues:
 - https://github.com/elastic/kibana/issues/244961
 - https://github.com/elastic/kibana/issues/244715
 - https://github.com/elastic/kibana/issues/244716
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
+- product: elasticsearch
 areas:
-- Elasticsearch solution
+- Search
 title: Deprecate feature flag (part 1 of 2)
 description: Adds a new getting started page within the Elasticsearch solution which offers hands on feature tutorials. This page defaults as the initial destination for users creating a new Elasticsearch project.

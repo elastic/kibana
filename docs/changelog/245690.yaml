@@ -82,16 +82,12 @@
 #   - other
 
 prs:
-- "245690"
+- https://github.com/elastic/kibana/pull/245690
 issues:
 - https://github.com/elastic/kibana/issues/242919
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Alerting
-- Elastic Observability solution
+- Actionable Observability
 title: Ability to bulk mute/unmute alerts

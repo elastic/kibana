@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "226849"
+- https://github.com/elastic/kibana/pull/226849
 issues:
 - https://github.com/elastic/kibana/issues/202507
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: 'Alerting: Escape URL-like string from being displayed as links'

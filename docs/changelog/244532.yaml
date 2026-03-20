@@ -82,14 +82,10 @@
 #   - other
 
 prs:
-- "244532"
+- https://github.com/elastic/kibana/pull/244532
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
 - Machine learning
-- Elastic Observability solution
 title: 'Agent Builder: Opt-in flow'

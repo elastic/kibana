@@ -82,13 +82,11 @@
 #   - other
 
 prs:
-- "242761"
+- https://github.com/elastic/kibana/pull/242761
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: Fixed an issue where the SLOs page could potentially cause inconsistent browser back button behavior.

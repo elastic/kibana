@@ -82,13 +82,9 @@
 #   - other
 
 prs:
-- "242377"
+- https://github.com/elastic/kibana/pull/242377
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: "\U0001F30A Dissect suggestions"

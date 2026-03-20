@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "238849"
+- https://github.com/elastic/kibana/pull/238849
 issues:
 - https://github.com/elastic/kibana/issues/238846
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
+areas:
+- Actionable Observability
 title: Rule condition chart parser replaces metric names inside filter values (e.g., A in "Accounts")

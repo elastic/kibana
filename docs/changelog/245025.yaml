@@ -82,15 +82,13 @@
 #   - other
 
 prs:
-- "245025"
+- https://github.com/elastic/kibana/pull/245025
 issues:
 - https://github.com/elastic/kibana/issues/244386
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: Custom global ingest pipeline can be configured on SLO rollup data.

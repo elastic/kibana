@@ -82,15 +82,12 @@
 #   - other
 
 prs:
-- "243266"
+- https://github.com/elastic/kibana/pull/243266
 issues:
 - https://github.com/elastic/kibana/issues/243268
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- AI for observability
 title: Update system prompt title for generic deployments

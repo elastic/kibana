@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "246945"
+- https://github.com/elastic/kibana/pull/246945
 issues:
 - https://github.com/elastic/kibana/issues/152319
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
+- product: observability
 title: Metric explorer search bar issue on some screen sizes

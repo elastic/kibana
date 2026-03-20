@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "248939"
+- https://github.com/elastic/kibana/pull/248939
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Fixes broken links from View In Context Modal to Discover which was not respecting the DateRange

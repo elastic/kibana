@@ -41,6 +41,8 @@ extract:
   # Auto-extract issues from PR body (default: true)
   # Looks for patterns like "Fixes #123", "Closes #456", etc.
   issues: true
+  # strip_title_prefix: true
+
 
 # Available lifecycle values (strongly typed: preview, beta, ga)
 # Accepts string or list: "preview, beta, ga" or a YAML list

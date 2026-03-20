@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "242441"
+- https://github.com/elastic/kibana/pull/242441
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Endpoint security
 title: Show user readable output for MDE runscript response action

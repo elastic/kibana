@@ -82,12 +82,11 @@
 #   - other
 
 prs:
-- "238555"
+- https://github.com/elastic/kibana/pull/238555
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
+- product: security
 areas:
-- Alerting
+- Alerting, connectors, and reporting
 - Investigations
 title: '- Enable cases numerical id service'

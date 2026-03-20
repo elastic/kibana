@@ -82,13 +82,11 @@
 #   - other
 
 prs:
-- "245736"
+- https://github.com/elastic/kibana/pull/245736
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: Edit default alerts flow breaks if default rules are not defined

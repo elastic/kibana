@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "247152"
+- https://github.com/elastic/kibana/pull/247152
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Kibana platform
+- Global experience
 title: Fix createAuditEvents always returning failure as outcome

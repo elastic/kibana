@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "244134"
+- https://github.com/elastic/kibana/pull/244134
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Global experience
 title: Add managed field to dataViewSpecSchema

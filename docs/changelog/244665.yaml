@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "244665"
+- https://github.com/elastic/kibana/pull/244665
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: New "Similar errors" section with Occurrences chart

@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "243423"
+- https://github.com/elastic/kibana/pull/243423
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Add refusal field to assistant conversations

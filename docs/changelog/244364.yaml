@@ -82,10 +82,10 @@
 #   - other
 
 prs:
-- "244364"
+- https://github.com/elastic/kibana/pull/244364
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Serialize meta.error if it is an instance of Error in JSON layout
 description: 'Fixes serialization of meta.error in JSON layouts: if the error is an Error instance, only message, name, and stack will be included — additional fields will no longer pollute the logs.'

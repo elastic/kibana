@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "242467"
+- https://github.com/elastic/kibana/pull/242467
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Kibana platform
+- Global experience
 title: Add cross-tab syncing to PersistedLog

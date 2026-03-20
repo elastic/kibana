@@ -82,12 +82,11 @@
 #   - other
 
 prs:
-- "242487"
+- https://github.com/elastic/kibana/pull/242487
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
+- product: elasticsearch
 areas:
-- Elasticsearch solution
+- Search
 title: Export as x language
 description: Improves the Console UI to make key actions more intuitive. The Play button is now more prominent, a new "Copy to language" button provides quick access to export the selected command in the user's preferred coding language, and the context menu has been updated to allow users to set a default language preference. These enhancements improve the discoverability of both query execution and export.

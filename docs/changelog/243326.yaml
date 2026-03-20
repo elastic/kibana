@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "243326"
+- https://github.com/elastic/kibana/pull/243326
 issues:
 - https://github.com/elastic/ingest-dev/issues/6421
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: fix retrying stuck agents in auto upgrade logic

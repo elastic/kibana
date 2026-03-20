@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "239450"
+- https://github.com/elastic/kibana/pull/239450
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Add kibana.alert.index_pattern to all alerts

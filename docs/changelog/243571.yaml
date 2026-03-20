@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "243571"
+- https://github.com/elastic/kibana/pull/243571
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Investigations
 title: save selected threat intelligence time to local storage

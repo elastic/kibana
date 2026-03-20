@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "238355"
+- https://github.com/elastic/kibana/pull/238355
 issues:
 - https://github.com/elastic/kibana/issues/238351
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Dashboards and Visualizations
 title: Improve list error handling

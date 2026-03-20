@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "241212"
+- https://github.com/elastic/kibana/pull/241212
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: 'Anthropic endpoint creation: ensures max tokens parameter is passed as expected'

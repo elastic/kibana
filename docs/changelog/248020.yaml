@@ -82,15 +82,10 @@
 #   - other
 
 prs:
-- "248020"
+- https://github.com/elastic/kibana/pull/248020
 issues:
 - https://github.com/elastic/kibana/issues/229386
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
-areas:
-- Elastic Security solution
 title: "Fix API doesn't use an associated conversation's system prompt "

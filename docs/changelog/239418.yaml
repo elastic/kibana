@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "239418"
+- https://github.com/elastic/kibana/pull/239418
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
+areas:
+- Actionable Observability
 title: Fix layout of SLO management page combo box filter

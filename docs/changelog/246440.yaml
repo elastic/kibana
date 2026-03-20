@@ -82,15 +82,13 @@
 #   - other
 
 prs:
-- "246440"
+- https://github.com/elastic/kibana/pull/246440
 issues:
 - https://github.com/elastic/kibana/issues/246436
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: Alert workflow tags will be viewable on the overview tab of the alert details flyout

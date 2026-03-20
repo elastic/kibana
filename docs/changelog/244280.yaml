@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "244280"
+- https://github.com/elastic/kibana/pull/244280
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- ES|QL editor
+- Discover and ES|QL
 title: Precise validation and autocomplete for CASE

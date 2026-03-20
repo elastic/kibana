@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "241402"
+- https://github.com/elastic/kibana/pull/241402
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- ES|QL editor
+- Discover and ES|QL
 title: Fixes the autocomplete of timeseries sources after comma

@@ -82,7 +82,7 @@
 #   - other
 
 prs:
-- "242581"
+- https://github.com/elastic/kibana/pull/242581
 issues:
 - https://github.com/elastic/kibana/issues/243566
 - https://github.com/elastic/streams-program/issues/623
@@ -92,9 +92,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Child stream input validation

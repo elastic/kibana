@@ -82,13 +82,13 @@
 #   - other
 
 prs:
-- "239366"
+- https://github.com/elastic/kibana/pull/239366
 issues:
 - https://github.com/elastic/kibana/issues/205689
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
+- product: security
 areas:
+- Alerting, connectors, and reporting
 - Investigations
 title: Remove `autoFocus` to preserve proper focus when modal closed

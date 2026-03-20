@@ -82,13 +82,8 @@
 #   - other
 
 prs:
-- "244719"
+- https://github.com/elastic/kibana/pull/244719
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
-areas:
-- Elastic Security solution
 title: Gap auto fill scheduler UI and API

@@ -82,14 +82,10 @@
 #   - other
 
 prs:
-- "241022"
+- https://github.com/elastic/kibana/pull/241022
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
-- Elastic Security solution
 - Detection rules and alerts
 title: Fix threshold rule logic with no group by fields defined

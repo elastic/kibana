@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "243802"
+- https://github.com/elastic/kibana/pull/243802
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
+- product: elasticsearch
 areas:
-- Elasticsearch solution
+- Search
 title: Fixes a case on Index management page where screen reader text was different than visible one.

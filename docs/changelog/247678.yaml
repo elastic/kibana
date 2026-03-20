@@ -82,14 +82,10 @@
 #   - other
 
 prs:
-- "247678"
+- https://github.com/elastic/kibana/pull/247678
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
-- Elastic Security solution
 - Detection rules and alerts
 title: fixes "Rule settings pop-up remain open on clicking 'Save' button after enabling/ disabling auto gap fill."

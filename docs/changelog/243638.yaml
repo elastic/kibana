@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "243638"
+- https://github.com/elastic/kibana/pull/243638
 issues:
 - https://github.com/elastic/kibana/issues/213347
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: 'Handle missing `error.id` '

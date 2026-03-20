@@ -82,17 +82,16 @@
 #   - other
 
 prs:
-- "244251"
+- https://github.com/elastic/kibana/pull/244251
 issues:
 - https://github.com/elastic/kibana/issues/240377
 - https://github.com/elastic/kibana/issues/240376
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Alerting
-- Elastic Observability solution
+- Alerting, connectors, and reporting
+- Actionable Observability
+- Global experience
 title: Users can now view and filter by workflow tags manually added to alerts

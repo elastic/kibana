@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "237494"
+- https://github.com/elastic/kibana/pull/237494
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
+areas:
+- Actionable Observability
 title: Add Background Search nav item to ECH o11y nav

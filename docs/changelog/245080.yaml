@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "245080"
+- https://github.com/elastic/kibana/pull/245080
 issues:
 - https://github.com/elastic/ingest-dev/issues/6276
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Add integration knowledge opt out UI setting and enable feature flag

@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "238901"
+- https://github.com/elastic/kibana/pull/238901
 issues:
 - https://github.com/elastic/kibana/issues/238885
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Dashboards and Visualizations
 title: Fix metric color assignment when breakdown and a max dimension are defined

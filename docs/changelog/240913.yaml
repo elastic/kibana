@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "240913"
+- https://github.com/elastic/kibana/pull/240913
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: Ensures all auth fields show up correctly

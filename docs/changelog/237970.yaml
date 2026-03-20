@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "237970"
+- https://github.com/elastic/kibana/pull/237970
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
+areas:
+- Actionable Observability
 title: Fixing colors of icons for sidenav

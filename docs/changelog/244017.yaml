@@ -82,13 +82,9 @@
 #   - other
 
 prs:
-- "244017"
+- https://github.com/elastic/kibana/pull/244017
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: 'kibana tool: Add auth header to request'

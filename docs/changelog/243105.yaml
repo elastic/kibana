@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "243105"
+- https://github.com/elastic/kibana/pull/243105
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: '* Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered.'

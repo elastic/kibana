@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "238078"
+- https://github.com/elastic/kibana/pull/238078
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Kibana platform
+- Global experience
 title: Add deployment name to breadcrumbs in ECH

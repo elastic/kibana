@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "239436"
+- https://github.com/elastic/kibana/pull/239436
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Endpoint security
 title: Add free-text popup to `runscript` argument that provides input to the selected script

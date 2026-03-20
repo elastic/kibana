@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "241227"
+- https://github.com/elastic/kibana/pull/241227
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- ES|QL editor
+- Discover and ES|QL
 title: Support subqueries in AST

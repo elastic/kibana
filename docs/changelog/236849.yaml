@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "236849"
+- https://github.com/elastic/kibana/pull/236849
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: Adds Security ML modules for GCP Audit and Azure Activity Logs

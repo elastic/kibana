@@ -82,14 +82,10 @@
 #   - other
 
 prs:
-- "246005"
+- https://github.com/elastic/kibana/pull/246005
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Endpoint security
-- Investigations
 title: Upgrade osquery manager schemas to ecs 9.2.0 and osquery 5.19.0

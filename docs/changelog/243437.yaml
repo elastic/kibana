@@ -82,11 +82,11 @@
 #   - other
 
 prs:
-- "243437"
+- https://github.com/elastic/kibana/pull/243437
 issues:
 - https://github.com/elastic/kibana/issues/243436
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Show AI log assistant with fallback message fields

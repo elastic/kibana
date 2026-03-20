@@ -82,13 +82,11 @@
 #   - other
 
 prs:
-- "244880"
+- https://github.com/elastic/kibana/pull/244880
 issues:
 - https://github.com/elastic/kibana/issues/243751
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Improve attachments feature with details flyout and better UX

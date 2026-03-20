@@ -82,14 +82,13 @@
 #   - other
 
 prs:
-- "237477"
+- https://github.com/elastic/kibana/pull/237477
 issues:
 - https://github.com/elastic/kibana/issues/237472
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Dashboards and Visualizations
-- Discover
+- Discover and ES|QL
 title: Soften validation on filter schema

@@ -82,12 +82,11 @@
 #   - other
 
 prs:
-- "237877"
+- https://github.com/elastic/kibana/pull/237877
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
+- product: elasticsearch
 areas:
-- Elasticsearch solution
+- Search
 title: Announce changes when resetting terms in synonyms panel
 description: Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset.

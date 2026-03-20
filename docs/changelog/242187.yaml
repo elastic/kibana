@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "242187"
+- https://github.com/elastic/kibana/pull/242187
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: 'Inference endpoints creation: adds custom header support'

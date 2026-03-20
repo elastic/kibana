@@ -82,17 +82,12 @@
 #   - other
 
 prs:
-- "242105"
+- https://github.com/elastic/kibana/pull/242105
 issues:
 - https://github.com/elastic/kibana/issues/236543
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
-- Elasticsearch solution
-- Discover
-- Elastic Observability solution
+- Discover and ES|QL
 title: Enable by default

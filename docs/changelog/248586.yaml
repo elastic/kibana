@@ -82,11 +82,12 @@
 #   - other
 
 prs:
-- "248586"
+- https://github.com/elastic/kibana/pull/248586
 issues:
 - https://github.com/elastic/kibana/issues/248524
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+areas:
+- Data management
 title: Cloned managed ilm policies shouldn't be marked as managed

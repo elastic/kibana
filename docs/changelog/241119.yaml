@@ -82,12 +82,10 @@
 #   - other
 
 prs:
-- "241119"
+- https://github.com/elastic/kibana/pull/241119
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: "\U0001F30A [Streams]: Adding autocomplete for values"
 description: In Streams, value autocomplete is now available in the Partitioning and Processing tabs. This means when users are configuring stream partitions or processing rules, typing in a field value will trigger suggestions, helping them find matching values more quickly and with less manual lookup.

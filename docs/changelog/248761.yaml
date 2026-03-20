@@ -82,17 +82,15 @@
 #   - other
 
 prs:
-- "248761"
+- https://github.com/elastic/kibana/pull/248761
 issues:
 - https://github.com/elastic/sdh-synthetics/issues/254
 - https://github.com/elastic/kibana/issues/248754
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: Fix duplicate test result hit on monitor status heatmap
 description: Fixes issue where synthetics test results show up duplicated on the monitor status heat map (for higher granularity columns)

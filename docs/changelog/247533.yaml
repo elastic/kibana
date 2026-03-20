@@ -82,7 +82,7 @@
 #   - other
 
 prs:
-- "247533"
+- https://github.com/elastic/kibana/pull/247533
 issues:
 - https://github.com/elastic/kibana/issues/246370
 - https://github.com/elastic/kibana/issues/246371
@@ -91,5 +91,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: 'unskip flaky test: retrieve_elastic_doc '

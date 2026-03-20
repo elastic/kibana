@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "237046"
+- https://github.com/elastic/kibana/pull/237046
 issues:
 - https://github.com/elastic/kibana/issues/236819
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: 'Single Metric Viewer: fixes partition field settings errors in the dashboard panel '

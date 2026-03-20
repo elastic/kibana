@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "240472"
+- https://github.com/elastic/kibana/pull/240472
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Fixed infinite loop bug in investigation guide editor

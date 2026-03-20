@@ -82,11 +82,11 @@
 #   - other
 
 prs:
-- "237509"
+- https://github.com/elastic/kibana/pull/237509
 issues:
 - https://github.com/elastic/kibana/issues/196663
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings.

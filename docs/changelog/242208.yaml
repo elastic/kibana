@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "242208"
+- https://github.com/elastic/kibana/pull/242208
 issues:
 - https://github.com/elastic/kibana/issues/239815
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
+areas:
+- Actionable Observability
 title: Add unified rules list

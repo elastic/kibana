@@ -82,9 +82,8 @@
 #   - other
 
 prs:
-- "244151"
+- https://github.com/elastic/kibana/pull/244151
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
+- product: observability
 title: avoid JVM metric conflicts with explicit cast

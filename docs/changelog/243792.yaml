@@ -82,14 +82,13 @@
 #   - other
 
 prs:
-- "243792"
+- https://github.com/elastic/kibana/pull/243792
 issues:
 - https://github.com/elastic/kibana/issues/240376
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
+areas:
+- Actionable Observability
 title: Edit tags UI
 description: Users can now manually add workflow tags directly to alerts (see [this PR as well](https://github.com/elastic/kibana/pull/244251))

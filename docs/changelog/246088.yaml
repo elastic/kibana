@@ -82,16 +82,13 @@
 #   - other
 
 prs:
-- "246088"
+- https://github.com/elastic/kibana/pull/246088
 issues:
 - https://github.com/elastic/kibana/issues/245866
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Global experience
 title: Only update relevant monitors where maintenance windows exists
 description: Only update Synthetics package policies that use maintenance windows when maintenance windows are updated or deleted. Prevents extra Synthetics package policies from being updated when maintenance windows are updated or deleted, even if the monitor itself does not use maintenance windows.

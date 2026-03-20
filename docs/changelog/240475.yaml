@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "240475"
+- https://github.com/elastic/kibana/pull/240475
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
+- product: elasticsearch
 areas:
-- Elasticsearch solution
+- Search
 title: Fixes Agents & Playground icons in the solution side navigation to render correctly when using dark mode

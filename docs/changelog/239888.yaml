@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "239888"
+- https://github.com/elastic/kibana/pull/239888
 issues:
 - https://github.com/elastic/kibana/issues/239331
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Kibana platform
+- Global experience
 title: 'Reduce re-renders on resize and items change '

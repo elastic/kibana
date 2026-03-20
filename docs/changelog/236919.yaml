@@ -82,11 +82,9 @@
 #   - other
 
 prs:
-- "236919"
+- https://github.com/elastic/kibana/pull/236919
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: add ingest pipeline processor template suggestions to manual ingest pipeline processor editor

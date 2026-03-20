@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "247617"
+- https://github.com/elastic/kibana/pull/247617
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Investigations
 title: disable delete for read-only users and improve error message

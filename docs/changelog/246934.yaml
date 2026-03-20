@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "246934"
+- https://github.com/elastic/kibana/pull/246934
 issues:
 - https://github.com/elastic/kibana/issues/246680
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Fix Processing, field name autocomplete not working on new fields

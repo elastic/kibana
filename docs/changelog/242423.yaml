@@ -82,16 +82,14 @@
 #   - other
 
 prs:
-- "242423"
+- https://github.com/elastic/kibana/pull/242423
 issues:
 - https://github.com/elastic/obs-ai-assistant-team/issues/384
 - https://github.com/elastic/obs-ai-team/issues/449
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- AI for observability
+- Global experience
 title: " [Obs Agent] Add observability tools for log and metric change point analysis"

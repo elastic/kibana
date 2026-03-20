@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "244481"
+- https://github.com/elastic/kibana/pull/244481
 issues:
 - https://github.com/elastic/kibana/issues/237319
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
+- product: observability
 title: Ensure Infra Inventory UIs reflect supported schemas

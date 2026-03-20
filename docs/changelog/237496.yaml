@@ -82,14 +82,10 @@
 #   - other
 
 prs:
-- "237496"
+- https://github.com/elastic/kibana/pull/237496
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Detection rules and alerts
-- Elastic Security solution
 title: Allow partial matches on rule name when searching installed rules.

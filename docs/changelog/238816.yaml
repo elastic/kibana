@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "238816"
+- https://github.com/elastic/kibana/pull/238816
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Alerting
+- Alerting, connectors, and reporting
 title: Update `nodemailer`

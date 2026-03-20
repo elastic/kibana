@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "241390"
+- https://github.com/elastic/kibana/pull/241390
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
-- product: security
-  target: 9.3.0
+- product: cloud-serverless
 areas:
 - Cloud security
 title: 'Fix Agent-Based Failing to produce data '

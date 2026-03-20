@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "245253"
+- https://github.com/elastic/kibana/pull/245253
 issues:
 - https://github.com/elastic/kibana/issues/245257
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Alerting
+- Alerting, connectors, and reporting
 title: Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode

@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "243827"
+- https://github.com/elastic/kibana/pull/243827
 issues:
 - https://github.com/elastic/kibana/issues/243822
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: Removes median line length categorization check

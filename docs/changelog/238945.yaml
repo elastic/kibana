@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "238945"
+- https://github.com/elastic/kibana/pull/238945
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Discover
+- Discover and ES|QL
 title: Fix missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting

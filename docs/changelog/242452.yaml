@@ -82,15 +82,12 @@
 #   - other
 
 prs:
-- "242452"
+- https://github.com/elastic/kibana/pull/242452
 issues:
 - https://github.com/elastic/kibana/issues/242234
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Fix squished Apple icon on Auto Detect flow cards

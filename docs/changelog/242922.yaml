@@ -82,14 +82,13 @@
 #   - other
 
 prs:
-- "242922"
+- https://github.com/elastic/kibana/pull/242922
 issues:
 - https://github.com/elastic/kibana-team/issues/2084
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Alerting
+- Alerting, connectors, and reporting
 title: Add email cc, bcc, subject and message fields to scheduled reports email
 description: 'Adds new fields to the schedule export form email notification section:  cc and bcc recipients, subject and message with Mustache templating support'

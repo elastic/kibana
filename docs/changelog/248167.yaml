@@ -82,14 +82,12 @@
 #   - other
 
 prs:
-- "248167"
+- https://github.com/elastic/kibana/pull/248167
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
 - Machine learning
-- Elastic Observability solution
+- Global experience
 title: Fixes broken Data Visualizer & AIOps navigation breadcrumbs / sidebar in solutions

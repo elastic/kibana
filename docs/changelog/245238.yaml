@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "245238"
+- https://github.com/elastic/kibana/pull/245238
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: 'fix(security,uiam): bump UIAM containers health check timeouts and populate UIAM shared secret for Elasticsearch'

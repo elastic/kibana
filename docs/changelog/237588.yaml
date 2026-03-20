@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "237588"
+- https://github.com/elastic/kibana/pull/237588
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Kibana platform
+- Global experience
 title: Fix files management flyout crashing

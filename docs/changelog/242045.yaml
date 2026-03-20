@@ -82,13 +82,11 @@
 #   - other
 
 prs:
-- "242045"
+- https://github.com/elastic/kibana/pull/242045
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Investigations
+- Alerting, connectors, and reporting
 title: Fix top n popover overlapping new case flyout

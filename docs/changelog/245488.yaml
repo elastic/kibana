@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "245488"
+- https://github.com/elastic/kibana/pull/245488
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - Endpoint security
 title: Enable process descendants for trusted apps feature flag

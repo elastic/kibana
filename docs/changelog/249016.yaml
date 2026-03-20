@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "249016"
+- https://github.com/elastic/kibana/pull/249016
 issues:
 - https://github.com/elastic/kibana/issues/120292
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Kibana platform
+- Global experience
 title: Fix Stack Monitoring Recent Log Entries timestamps to respect Kibana's time zone setting (`dateFormat:tz`).

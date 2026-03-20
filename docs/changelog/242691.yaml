@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "242691"
+- https://github.com/elastic/kibana/pull/242691
 issues:
 - https://github.com/elastic/kibana/issues/242560
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: fix docker image in Add agent k8s manifest

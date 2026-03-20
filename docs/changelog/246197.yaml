@@ -82,9 +82,9 @@
 #   - other
 
 prs:
-- "246197"
+- https://github.com/elastic/kibana/pull/246197
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
+  lifecycle: ga
 title: Linux now supports populate_file_data advanced option which enables entropy and header_bytes fields in file events.

@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "242791"
+- https://github.com/elastic/kibana/pull/242791
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
 - Machine learning
 - Data ingestion and Fleet
-- Elastic Observability solution
 title: 'Preconfigured Connectors: adds new connectors and updates existing one'

@@ -82,7 +82,7 @@
 #   - other
 
 prs:
-- "246208"
+- https://github.com/elastic/kibana/pull/246208
 issues:
 - https://github.com/elastic/observability-error-backlog/issues/393
 - https://github.com/elastic/observability-error-backlog/issues/394
@@ -91,7 +91,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
+  lifecycle: ga
 title: Small fixes for onboarding

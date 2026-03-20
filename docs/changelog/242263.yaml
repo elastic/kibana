@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "242263"
+- https://github.com/elastic/kibana/pull/242263
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Machine learning
 title: Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs

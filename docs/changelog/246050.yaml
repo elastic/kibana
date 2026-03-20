@@ -82,11 +82,9 @@
 #   - other
 
 prs:
-- "246050"
+- https://github.com/elastic/kibana/pull/246050
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
+  lifecycle: ga
 title: Math Processor

@@ -82,9 +82,8 @@
 #   - other
 
 prs:
-- "245161"
+- https://github.com/elastic/kibana/pull/245161
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
+- product: observability
 title: Adding error marks to unified trace waterfall

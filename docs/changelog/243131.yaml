@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "243131"
+- https://github.com/elastic/kibana/pull/243131
 issues:
 - https://github.com/elastic/streams-program/issues/613
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Drop processor UI

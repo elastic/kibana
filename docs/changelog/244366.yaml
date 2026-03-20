@@ -82,15 +82,11 @@
 #   - other
 
 prs:
-- "244366"
+- https://github.com/elastic/kibana/pull/244366
 issues:
 - https://github.com/elastic/kibana/issues/243344
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
-- product: observability
-  target: 9.3.0
-areas:
-- Elastic Observability solution
+  lifecycle: ga
 title: Better handling of missing stream

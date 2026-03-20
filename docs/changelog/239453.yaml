@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "239453"
+- https://github.com/elastic/kibana/pull/239453
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
 - AI for security
 title: Fix Index Entry form field suggestions for nested and multi-fields

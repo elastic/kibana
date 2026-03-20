@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "242369"
+- https://github.com/elastic/kibana/pull/242369
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- ES|QL editor
+- Discover and ES|QL
 title: Wrap the fork subcommands inside the parens node

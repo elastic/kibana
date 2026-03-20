@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "239063"
+- https://github.com/elastic/kibana/pull/239063
 issues:
 - https://github.com/elastic/kibana/issues/232427
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Discover
+- Discover and ES|QL
 title: Fix KEEP behavior in ESQL when a query initially returns no results

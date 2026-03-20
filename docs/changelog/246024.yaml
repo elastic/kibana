@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "246024"
+- https://github.com/elastic/kibana/pull/246024
 issues:
 - https://github.com/elastic/kibana/issues/238802
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Discover
+- Discover and ES|QL
 title: Toggle Icon type for add/remove field column

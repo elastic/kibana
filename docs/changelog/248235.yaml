@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "248235"
+- https://github.com/elastic/kibana/pull/248235
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Improves memory usage in Fleet setup by deferring package reinstalls to async tasks.

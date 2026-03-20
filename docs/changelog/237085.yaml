@@ -82,15 +82,12 @@
 #   - other
 
 prs:
-- "237085"
+- https://github.com/elastic/kibana/pull/237085
 issues:
 - https://github.com/elastic/obs-ai-assistant-team/issues/357
 type: enhancement
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- AI for observability
 title: aware of new .integration_knowledge* system index

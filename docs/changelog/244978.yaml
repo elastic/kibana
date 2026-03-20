@@ -82,17 +82,15 @@
 #   - other
 
 prs:
-- "244978"
+- https://github.com/elastic/kibana/pull/244978
 issues:
 - https://github.com/elastic/kibana/issues/244697
 - https://github.com/elastic/kibana/issues/244678
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: 'feat(slo): Add index sorting on SLI and split per day'
 description: SLI rolled-up data for SLO is split daily instead of monthly by default. Override is possible through a global custom pipeline.

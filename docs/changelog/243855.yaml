@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "243855"
+- https://github.com/elastic/kibana/pull/243855
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- Alerting
+- Alerting, connectors, and reporting
 title: Disable flapping per rule - schema only changes

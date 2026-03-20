@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "240804"
+- https://github.com/elastic/kibana/pull/240804
 issues:
 - https://github.com/elastic/kibana/issues/238794
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Dashboards and Visualizations
 title: 'Use flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings'

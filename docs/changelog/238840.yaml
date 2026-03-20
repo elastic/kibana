@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "238840"
+- https://github.com/elastic/kibana/pull/238840
 type: enhancement
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Add `xpack.fleet.experimentalFeatures` config setting

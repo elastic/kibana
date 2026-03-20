@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "239709"
+- https://github.com/elastic/kibana/pull/239709
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
-- Elastic Security solution
+- Threat hunting
 title: Onboarding Integrations list is not fetched for all pages

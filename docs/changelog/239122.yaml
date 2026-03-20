@@ -82,14 +82,10 @@
 #   - other
 
 prs:
-- "239122"
+- https://github.com/elastic/kibana/pull/239122
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: security
-  target: 9.3.0
 areas:
-- Elastic Security solution
 - Entity analytics
 title: Check for integrations permissions before loading component

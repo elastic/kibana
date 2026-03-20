@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "238890"
+- https://github.com/elastic/kibana/pull/238890
 issues:
 - https://github.com/elastic/kibana/issues/223245
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Fixes `ignore_above` mapping for `flattened` fields

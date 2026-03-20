@@ -82,15 +82,13 @@
 #   - other
 
 prs:
-- "245441"
+- https://github.com/elastic/kibana/pull/245441
 issues:
 - https://github.com/elastic/kibana/issues/241396
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Actionable Observability
+- Global experience
 title: Default Rule creation

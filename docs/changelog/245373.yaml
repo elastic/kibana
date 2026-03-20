@@ -82,16 +82,13 @@
 #   - other
 
 prs:
-- "245373"
+- https://github.com/elastic/kibana/pull/245373
 issues:
 - https://github.com/elastic/kibana-team/issues/2417
 - https://github.com/elastic/kibana-team/issues/2104
 type: feature
 products:
-- product: kibana
-  target: 9.3.0
 - product: observability
-  target: 9.3.0
 areas:
-- Elastic Observability solution
+- Global experience
 title: Add a 'Find Alert Rule Templates' API and use it to power showing installed templates in the create rule modal.

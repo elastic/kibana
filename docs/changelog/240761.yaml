@@ -82,13 +82,12 @@
 #   - other
 
 prs:
-- "240761"
+- https://github.com/elastic/kibana/pull/240761
 issues:
 - https://github.com/elastic/ingest-dev/issues/6183
 type: feature
 products:
 - product: kibana
-  target: 9.3.0
 areas:
 - Data ingestion and Fleet
 title: Support integrations rollback to previous versions

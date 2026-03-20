@@ -82,13 +82,10 @@
 #   - other
 
 prs:
-- "238038"
+- https://github.com/elastic/kibana/pull/238038
 type: bug-fix
 products:
-- product: kibana
-  target: 9.3.0
-- product: security
-  target: 9.3.0
+- product: cloud-serverless
 areas:
 - Cloud security
 title: fix graph not rendering when switching tabs or refreshing the page

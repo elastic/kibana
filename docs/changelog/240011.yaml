@@ -82,11 +82,10 @@
 #   - other
 
 prs:
-- "240011"
+- https://github.com/elastic/kibana/pull/240011
 type: bug-fix
 products:
 - product: kibana
-  target: 9.3.0
 areas:
-- ES|QL editor
+- Discover and ES|QL
 title: Add FORK with KEEP/STATS in the transformational commands
