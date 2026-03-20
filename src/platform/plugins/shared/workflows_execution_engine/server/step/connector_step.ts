@@ -62,7 +62,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console') {
-        const consoleMessage = (withInputs?.message as string) ?? '';
+        const consoleMessage = withInputs?.message ?? '';
 
         this.workflowLogger.logInfo(`Log from step ${step.name}: \n${consoleMessage}`, {
           workflow: { step_id: step.name },

@@ -127,7 +127,9 @@ export async function catchError(
         }
       }
 
-      workflowScopeStack = newWorkflowScopeStack;
+      workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+        params.workflowExecutionState.getWorkflowExecution().scopeStack
+      );
 
       const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
 
