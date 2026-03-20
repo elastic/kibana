@@ -77,9 +77,14 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', `/${ruleId}`, '?', {
-      ensureCurrentUrl: false,
-    });
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'rules',
+      `rule/${encodeURIComponent(ruleId)}`,
+      '?',
+      {
+        ensureCurrentUrl: false,
+      }
+    );
   };
 
   const navigateWithoutFilter = async () => {
