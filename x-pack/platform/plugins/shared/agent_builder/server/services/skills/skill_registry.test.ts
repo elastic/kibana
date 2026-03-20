@@ -22,7 +22,6 @@ const createMockInternalSkillDefinition = (
   basePath: 'skills/platform',
   getRegistryTools: () => [],
   referencedContentCount: 0,
-  experimental: false,
   ...overrides,
 });
 
