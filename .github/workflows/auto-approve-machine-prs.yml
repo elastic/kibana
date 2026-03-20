@@ -26,7 +26,7 @@ jobs:
               // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/ },
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/ },
               { user: 'kibanamachine', branchPrefix: 'scout_metadata_update' },
-              // { user: 'elasticmachine', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
+              { user: 'kibanamachine', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
             ];
 
             // Fetch the list of changed files in the PR
