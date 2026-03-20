@@ -92,13 +92,6 @@ export const AllTemplatesPage: React.FC = () => {
     setQueryParams({ search: '', tags: [], author: [], page: 1 });
   }, [setQueryParams]);
 
-  const handleShowOnlyDisabledChange = useCallback(() => {
-    setQueryParams({
-      isEnabled: queryParams.isEnabled === false ? undefined : false,
-      page: 1,
-    });
-  }, [queryParams.isEnabled, setQueryParams]);
-
   const totalTemplates = pagination.totalItemCount;
   const rangeStart = totalTemplates > 0 ? pagination.pageIndex * pagination.pageSize + 1 : 0;
   const rangeEnd = Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalTemplates);
@@ -129,8 +122,6 @@ export const AllTemplatesPage: React.FC = () => {
             onBulkActionSuccess={handleBulkActionSuccess}
             hasFilters={hasFilters}
             onClearFilters={handleClearFilters}
-            showOnlyDisabled={queryParams.isEnabled === false}
-            onShowOnlyDisabledChange={handleShowOnlyDisabledChange}
           />
           <EuiBasicTable
             columns={columns}

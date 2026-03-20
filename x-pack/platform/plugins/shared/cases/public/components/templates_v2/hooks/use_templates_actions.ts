@@ -107,7 +107,7 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
       updateTemplate(
         {
           templateId: template.templateId,
-          template: { isEnabled: !template.isEnabled },
+          template: { isEnabled: template.isEnabled === false },
         },
         {
           onSuccess: () => {

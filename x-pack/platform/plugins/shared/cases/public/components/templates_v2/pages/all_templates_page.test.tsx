@@ -324,46 +324,6 @@ describe('AllTemplatesPage', () => {
     });
   });
 
-  it('renders the disabled filter link', async () => {
-    const queryClient = createTestQueryClient();
-
-    renderWithTestingProviders(<AllTemplatesPage />, {
-      wrapperProps: { queryClient },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
-    });
-
-    expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
-  });
-
-  it('shows "Show only disabled" and calls API with isEnabled: false when clicked', async () => {
-    const queryClient = createTestQueryClient();
-
-    renderWithTestingProviders(<AllTemplatesPage />, {
-      wrapperProps: { queryClient },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Show only disabled')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId('templates-disabled-filter-link'));
-
-    await waitFor(() => {
-      expect(apiMock.getTemplates).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queryParams: expect.objectContaining({
-            isEnabled: false,
-          }),
-        })
-      );
-    });
-  });
-
   it('selects and deselects templates via table checkboxes', async () => {
     const queryClient = createTestQueryClient();
     const user = userEvent.setup({ pointerEventsCheck: 0 });
