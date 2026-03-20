@@ -181,6 +181,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       '--xpack.profiling.enabled=true',
+      // Plugin defaults to disabled; Scout tests for automatic_import_v2 need API routes registered
+      '--xpack.automatic_import_v2.enabled=true',
       // Fleet configuration
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
