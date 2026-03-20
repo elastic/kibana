@@ -15,6 +15,20 @@ import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
+jest.mock('./components/matcher_input', () => ({
+  MatcherInput: (props: {
+    value: string;
+    onChange: (v: string) => void;
+    'data-test-subj'?: string;
+  }) => (
+    <input
+      data-test-subj={props['data-test-subj']}
+      value={props.value}
+      onChange={(e) => props.onChange(e.target.value)}
+    />
+  ),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: { results: [], total: 0, page: 1, size: 100 },

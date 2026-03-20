@@ -12,6 +12,20 @@ import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NotificationPolicyFormFlyout } from './notification_policy_form_flyout';
 
+jest.mock('../form/components/matcher_input', () => ({
+  MatcherInput: (props: {
+    value: string;
+    onChange: (v: string) => void;
+    'data-test-subj'?: string;
+  }) => (
+    <input
+      data-test-subj={props['data-test-subj']}
+      value={props.value}
+      onChange={(e) => props.onChange(e.target.value)}
+    />
+  ),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {

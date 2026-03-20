@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MatcherInput } from './matcher_input';
+export { MatcherInput } from './matcher_kql_input';

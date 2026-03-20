@@ -130,7 +130,7 @@ export const NotificationPolicyForm = () => {
           <Controller
             name="matcher"
             control={control}
-            render={({ field: { ref, ...field } }) => (
+            render={({ field }) => (
               <EuiFormRow
                 label={i18n.translate('xpack.alertingV2.notificationPolicy.form.matcher', {
                   defaultMessage: 'Matcher',
@@ -140,7 +140,6 @@ export const NotificationPolicyForm = () => {
                 <MatcherInput
                   value={field.value}
                   onChange={field.onChange}
-                  inputRef={ref}
                   fullWidth
                   data-test-subj="matcherInput"
                   placeholder={i18n.translate(
