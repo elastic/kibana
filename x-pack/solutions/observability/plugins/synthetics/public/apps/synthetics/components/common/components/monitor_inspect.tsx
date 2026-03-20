@@ -33,7 +33,10 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import yaml from 'js-yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import type { SyntheticsMonitor, SyntheticsMonitorWithId } from '../../../../../../common/runtime_types';
+import type {
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import type {
   MonitorInspectResponse,
@@ -175,8 +178,12 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
   );
 };
 
-const stripServerFields = ({ created_at: _ca, updated_at: _ua, spaceId: _si, ...savedMonitor }: SyntheticsMonitorWithId & { spaceId?: string }): SyntheticsMonitor =>
-  savedMonitor;
+const stripServerFields = ({
+  created_at: _ca,
+  updated_at: _ua,
+  spaceId: _si,
+  ...savedMonitor
+}: SyntheticsMonitorWithId & { spaceId?: string }): SyntheticsMonitor => savedMonitor;
 
 const PackagePolicyLinksTable = ({
   links,
