@@ -171,5 +171,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(400);
     });
+
+    it('should create with only required fields and return defaults', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'minimal-policy',
+          description: 'minimal-policy description',
+          destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.name).to.be('minimal-policy');
+      expect(response.body.description).to.be('minimal-policy description');
+      expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'minimal-workflow-id' }]);
+      expect(response.body.enabled).to.be(true);
+      expect(response.body.snoozedUntil).to.be(null);
+      expect(response.body.matcher).to.be(null);
+      expect(response.body.groupBy).to.be(null);
+      expect(response.body.throttle).to.be(null);
+    });
+
+    it('should return 400 when destinations is an empty array', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'empty-dest-policy',
+          description: 'empty-dest-policy description',
+          destinations: [],
+        });
+
+      expect(response.status).to.be(400);
+    });
   });
 }

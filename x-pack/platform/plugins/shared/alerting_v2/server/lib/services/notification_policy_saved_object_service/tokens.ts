@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ServiceIdentifier } from 'inversify';
-import type { NotificationPolicySavedObjectServiceContract } from './notification_policy_saved_object_service';
+import type { NotificationPolicySavedObjectServiceContract } from './types';
 
 /**
  * Pre-configured SavedObjects client with hidden types for notification policies
