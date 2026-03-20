@@ -19,7 +19,6 @@ const createSkill = (id: string, readonly = false): InternalSkillDefinition => (
   basePath: 'skills/platform',
   getRegistryTools: () => [],
   referencedContentCount: 0,
-  experimental: false,
 });
 
 const createConfig = (overrides: Partial<AgentConfiguration> = {}): AgentConfiguration => ({

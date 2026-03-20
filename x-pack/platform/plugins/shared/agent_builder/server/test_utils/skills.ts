@@ -51,7 +51,6 @@ export const createMockedInternalSkill = (
   basePath: '/skills',
   getRegistryTools: () => [],
   referencedContentCount: 0,
-  experimental: false,
   ...parts,
 });
 

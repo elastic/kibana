@@ -29,7 +29,6 @@ describe('skills utils', () => {
     readonly: true,
     getRegistryTools: () => [],
     referencedContentCount: 0,
-    experimental: false,
     ...overrides,
   });
 
