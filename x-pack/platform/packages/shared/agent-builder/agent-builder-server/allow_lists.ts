@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
@@ -15,6 +15,8 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
+  // Streams / Significant Events
+  ...Object.values(platformStreamsSigEventsTools),
 
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
@@ -81,6 +83,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform
   'data-exploration',
   'visualization-creation',
+  'graph-creation',
 
   // Platform – Dashboard
   'dashboard-management',
