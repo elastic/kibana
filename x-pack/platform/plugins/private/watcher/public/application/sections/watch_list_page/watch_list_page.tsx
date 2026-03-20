@@ -172,7 +172,7 @@ export const WatchListPage = () => {
         <EuiButton
           fill
           data-test-subj="createWatchButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen(!isPopoverOpen)}
         >

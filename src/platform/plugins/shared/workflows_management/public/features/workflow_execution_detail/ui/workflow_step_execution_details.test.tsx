@@ -22,6 +22,10 @@ jest.mock('./workflow_execution_overview', () => ({
   WorkflowExecutionOverview: () => <div data-test-subj="workflow-execution-overview" />,
 }));
 
+jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
+  useNavigateToExecution: () => ({ navigate: jest.fn(), href: '' }),
+}));
+
 const createTriggerStep = (
   overrides: Partial<WorkflowStepExecutionDto> = {}
 ): WorkflowStepExecutionDto => ({
