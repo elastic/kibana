@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates to new conversation page and shows initial state', async () => {
-      await agentBuilder.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp();
 
       // Assert the welcome page is displayed
       await testSubjects.existOrFail('agentBuilderWelcomePage');

@@ -46,7 +46,9 @@ export const LegacyConversationRedirect: React.FC = () => {
         { replace: true }
       );
     } else if (isError && conversationId) {
-      navigate(appPaths.agent.root({ agentId: lastAgentId }), { replace: true });
+      navigate(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }), {
+        replace: true,
+      });
     }
   }, [conversation, conversationId, isError, lastAgentId, navigate]);
 

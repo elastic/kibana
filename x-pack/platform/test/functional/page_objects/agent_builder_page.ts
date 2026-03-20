@@ -6,6 +6,7 @@
  */
 
 import type { ToolType } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { subj } from '@kbn/test-subj-selector';
 import { AGENT_BUILDER_APP_ID } from '../../agent_builder/common/constants';
 import type { LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
@@ -31,7 +32,7 @@ export class AgentBuilderPageObject extends FtrService {
   /**
    * Navigate to the AgentBuilder app
    */
-  async navigateToApp(path: string = 'conversations/new') {
+  async navigateToApp(path: string = `agents/${agentBuilderDefaultAgentId}/conversations/new`) {
     await this.common.navigateToApp(AGENT_BUILDER_APP_ID, { path });
   }
 
@@ -58,7 +59,7 @@ export class AgentBuilderPageObject extends FtrService {
   async getCurrentConversationIdFromUrl(): Promise<string> {
     return await this.retry.try(async () => {
       const url = await this.browser.getCurrentUrl();
-      // URL should be something like: /app/agent_builder/conversations/{conversationId}
+      // URL should be something like: /app/agent_builder/agents/{agentId}/conversations/{conversationId}
       const match = url.match(/\/conversations\/([^\/\?]+)/);
       if (!match) {
         throw new Error('Could not extract conversation ID from URL');
@@ -78,7 +79,7 @@ export class AgentBuilderPageObject extends FtrService {
     withToolCall: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
-    await this.navigateToApp('conversations/new');
+    await this.navigateToApp();
 
     await (withToolCall
       ? setupAgentCallSearchToolWithNoIndexSelectedThenAnswer({
@@ -160,7 +161,9 @@ export class AgentBuilderPageObject extends FtrService {
    * Navigate to an existing conversation using the conversation ID in the URL
    */
   async navigateToConversationById(conversationId: string) {
-    await this.navigateToApp(`conversations/${conversationId}`);
+    await this.navigateToApp(
+      `agents/${agentBuilderDefaultAgentId}/conversations/${conversationId}`
+    );
   }
 
   /**
