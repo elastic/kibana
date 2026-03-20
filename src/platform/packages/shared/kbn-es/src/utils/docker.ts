@@ -909,6 +909,7 @@ export async function setupServerlessVolumes(
     ...serverlessResources,
     ...(await getOperatorVolume(
       esProjectTypeFromKbn.get(projectType)!,
+      ssl,
       overrides?.projectId,
       overrides?.operatorPath
     )),
@@ -1341,11 +1342,13 @@ export async function runDockerContainer(
  * A volume mount for the operator folder, that contains operator specific configuration files like settings.json.
  * We mount entire folder since Elasticsearch cannot properly watch changes in bind-mounted files.
  * @param projectType Type of the serverless project.
+ * @param ssl Whether SSL is enabled (determines which secrets file to embed).
  * @param projectId Override for the project ID (defaults to MOCK_IDP_UIAM_PROJECT_ID).
  * @param operatorPath Override for the operator directory path on the host.
  */
 async function getOperatorVolume(
   projectType: string,
+  ssl: boolean = false,
   projectId: string = MOCK_IDP_UIAM_PROJECT_ID,
   operatorPath: string = SERVERLESS_OPERATOR_PATH
 ) {
@@ -1368,7 +1371,17 @@ async function getOperatorVolume(
     JSON.stringify(
       {
         metadata: { version: '100', compatibility: '' },
-        state: { project: { ...projectInfo, tags: projectTags } },
+        state: {
+          project: { ...projectInfo, tags: projectTags },
+          cluster_secrets: {
+            string_secrets: JSON.parse(
+              await Fsp.readFile(
+                ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH,
+                'utf-8'
+              )
+            ).string_secrets,
+          },
+        },
       },
       null,
       2
