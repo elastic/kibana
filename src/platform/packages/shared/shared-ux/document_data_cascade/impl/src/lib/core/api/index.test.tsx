@@ -23,7 +23,9 @@ describe('useExposePublicApi', () => {
       () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
       {
         wrapper: ({ children }) => (
-          <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+          <DataCascadeProvider data={[]} cascadeGroups={[]}>
+            {children}
+          </DataCascadeProvider>
         ),
       }
     );
@@ -43,7 +45,9 @@ describe('useExposePublicApi', () => {
         () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
         {
           wrapper: ({ children }) => (
-            <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+            <DataCascadeProvider data={[]} cascadeGroups={[]}>
+              {children}
+            </DataCascadeProvider>
           ),
         }
       );
@@ -75,7 +79,9 @@ describe('useExposePublicApi', () => {
         () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
         {
           wrapper: ({ children }) => (
-            <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+            <DataCascadeProvider data={[]} cascadeGroups={[]}>
+              {children}
+            </DataCascadeProvider>
           ),
         }
       );
@@ -133,7 +139,9 @@ describe('useExposePublicApi', () => {
         () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
         {
           wrapper: ({ children }) => (
-            <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+            <DataCascadeProvider data={[]} cascadeGroups={[]}>
+              {children}
+            </DataCascadeProvider>
           ),
         }
       );

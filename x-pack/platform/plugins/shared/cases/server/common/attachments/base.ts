@@ -62,13 +62,13 @@ export const passThroughTransformer: AttachmentTypeTransformer<
   toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload {
     return attachment as UnifiedAttachmentPayload;
   },
-  toLegacyPayload(attachment: AttachmentRequestV2, _owner?: string): AttachmentRequest {
+  toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest {
     return attachment as AttachmentRequest;
   },
   toUnifiedSchema(attributes: unknown): UnifiedAttachmentAttributes {
     return attributes as UnifiedAttachmentAttributes;
   },
-  toLegacySchema(attributes: unknown, _owner?: string): AttachmentPersistedAttributes {
+  toLegacySchema(attributes: unknown): AttachmentPersistedAttributes {
     return attributes as AttachmentPersistedAttributes;
   },
   isType(_attributes: AttachmentAttributesV2): boolean {

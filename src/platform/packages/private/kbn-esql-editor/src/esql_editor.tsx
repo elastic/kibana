@@ -372,12 +372,18 @@ const ESQLEditorInternal = function ESQLEditor({
   const onPrettifyQuery = useCallback(() => {
     const qs = editorRef.current?.getValue();
     if (qs) {
-      const prettyCode = prettifyQuery(qs);
+      const editor = editorRef.current;
+      const layoutInfo = editor?.getLayoutInfo();
+      const widthForWrap = layoutInfo?.contentWidth ?? measuredEditorWidth;
+      const charWidth =
+        editor?.getOption(monaco.editor.EditorOption.fontInfo).typicalHalfwidthCharacterWidth ?? 8;
+      const lineWidthChars = widthForWrap > 0 ? Math.floor(widthForWrap / charWidth) : undefined;
+      const prettyCode = prettifyQuery(qs, lineWidthChars);
       if (qs !== prettyCode) {
         onQueryUpdate(prettyCode);
       }
     }
-  }, [onQueryUpdate]);
+  }, [onQueryUpdate, measuredEditorWidth]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editorRef?.current?.getSelection();
@@ -977,6 +983,8 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
+  const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
+
   const codeEditorHoverProvider = useMemo(
     () => ({
       provideHover: (
@@ -1176,6 +1184,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 hoverProvider={codeEditorHoverProvider}
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
+                documentHighlightProvider={documentHighlightProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
