@@ -21,7 +21,8 @@ export function registerGetChildrenExecutionsRoute({ router, api, spaces }: Rout
       access: 'public',
       security: WORKFLOW_EXECUTION_READ_SECURITY,
       summary: 'Get child executions',
-      description: 'Retrieve child workflow executions for a parent execution.',
+      description:
+        'Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

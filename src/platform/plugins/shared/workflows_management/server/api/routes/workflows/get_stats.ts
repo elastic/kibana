@@ -20,7 +20,8 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
       access: 'public',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Get workflow statistics',
-      description: 'Retrieve aggregate statistics about workflows.',
+      description:
+        'Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

@@ -24,7 +24,8 @@ export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteD
       access: 'public',
       security: WORKFLOW_EXECUTE_SECURITY,
       summary: 'Run a workflow',
-      description: 'Execute a workflow by its ID with the provided inputs.',
+      description:
+        'Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

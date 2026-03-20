@@ -23,7 +23,7 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
       security: WORKFLOW_EXECUTE_SECURITY,
       summary: 'Test a workflow',
       description:
-        'Execute a workflow in test mode. Provide either a workflow ID, YAML definition, or both.',
+        'Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

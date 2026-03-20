@@ -21,7 +21,8 @@ export function registerCreateWorkflowRoute({ router, api, spaces }: RouteDepend
       access: 'public',
       security: WORKFLOW_CREATE_SECURITY,
       summary: 'Create a workflow',
-      description: 'Create a new workflow definition.',
+      description:
+        'Create a new workflow from a YAML definition. The YAML is validated and parsed before the workflow is saved. An optional custom ID can be provided.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

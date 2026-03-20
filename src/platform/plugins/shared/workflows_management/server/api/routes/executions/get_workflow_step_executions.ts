@@ -23,7 +23,8 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
       access: 'public',
       security: WORKFLOW_EXECUTION_READ_SECURITY,
       summary: 'Get workflow step executions',
-      description: 'Retrieve step execution data for a specific workflow.',
+      description:
+        'Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

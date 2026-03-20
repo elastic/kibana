@@ -226,7 +226,7 @@ export class WorkflowsService {
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,
-    source: string[]
+    source?: string[]
   ): Promise<WorkflowPartialDetailDto[]> {
     if (!this.workflowStorage || ids.length === 0) {
       return [];
@@ -239,28 +239,14 @@ export class WorkflowsService {
           must_not: [{ exists: { field: 'deleted_at' } }],
         },
       },
-      _source: source,
+      _source: source ?? true,
       size: ids.length,
       track_total_hits: false,
     });
 
-    const entries = response.hits.hits.reduce<WorkflowPartialDetailDto[]>((acc, hit) => {
-      if (!hit._id || !hit._source) {
-        return acc;
-      }
-      const hitSource: WorkflowProperties = hit._source;
-      const entry: Record<string, unknown> = { id: hit._id };
-      for (const field of source) {
-        if (field in hit._source) {
-          entry[field] = hitSource[field as keyof WorkflowProperties];
-        }
-      }
-
-      acc.push(entry as unknown as WorkflowPartialDetailDto);
-      return acc;
-    }, []);
-
-    return entries;
+    return response.hits.hits.map((hit) =>
+      this.transformStorageDocumentToWorkflowDto(hit._id, hit._source)
+    );
   }
 
   /**

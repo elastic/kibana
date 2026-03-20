@@ -151,7 +151,7 @@ export class WorkflowsManagementApi {
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,
-    source: string[]
+    source?: string[]
   ): Promise<WorkflowPartialDetailDto[]> {
     return this.workflowsService.getWorkflowsSourceByIds(ids, spaceId, source);
   }

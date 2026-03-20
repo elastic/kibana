@@ -22,7 +22,8 @@ export function registerUpdateWorkflowRoute({ router, api, spaces }: RouteDepend
       access: 'public',
       security: WORKFLOW_UPDATE_SECURITY,
       summary: 'Update a workflow',
-      description: 'Update an existing workflow by its ID.',
+      description:
+        'Partially update an existing workflow. You can update individual fields such as name, description, enabled state, tags, or the YAML definition without providing all fields.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

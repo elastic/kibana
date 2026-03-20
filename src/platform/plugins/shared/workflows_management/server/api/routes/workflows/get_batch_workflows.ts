@@ -22,7 +22,7 @@ export function registerGetBatchWorkflowsRoute({ router, api, spaces }: RouteDep
       security: WORKFLOW_READ_SECURITY,
       summary: 'Get workflows by IDs',
       description:
-        'Retrieve a batch of workflows by their IDs. Used for conflict checking and bulk lookups.',
+        'Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -42,13 +42,15 @@ export function registerGetBatchWorkflowsRoute({ router, api, spaces }: RouteDep
                   meta: { description: 'Array of workflow IDs to look up.' },
                 }
               ),
-              source: schema.arrayOf(
-                schema.string({ maxLength: 255, meta: { description: 'Source field.' } }),
-                {
-                  minSize: 1,
-                  maxSize: 10,
-                  meta: { description: 'Array of source fields to include.' },
-                }
+              source: schema.maybe(
+                schema.arrayOf(
+                  schema.string({ maxLength: 255, meta: { description: 'Source field.' } }),
+                  {
+                    minSize: 1,
+                    maxSize: 10,
+                    meta: { description: 'Array of source fields to include.' },
+                  }
+                )
               ),
             }),
           },

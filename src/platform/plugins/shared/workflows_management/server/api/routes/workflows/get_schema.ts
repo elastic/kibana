@@ -21,7 +21,8 @@ export function registerGetSchemaRoute({ router, api, spaces }: RouteDependencie
       access: 'public',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Get workflow JSON schema',
-      description: 'Retrieve the JSON schema used to validate workflow definitions.',
+      description:
+        'Retrieve the JSON schema used to validate workflow YAML definitions. The schema includes available step types based on the configured connectors in the current space.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -34,7 +35,10 @@ export function registerGetSchemaRoute({ router, api, spaces }: RouteDependencie
           request: {
             query: schema.object({
               loose: schema.boolean({
-                meta: { description: 'Whether to return the loose schema variant.' },
+                meta: {
+                  description:
+                    'When true, returns a permissive schema that allows additional properties. When false, returns a strict schema for full validation.',
+                },
               }),
             }),
           },

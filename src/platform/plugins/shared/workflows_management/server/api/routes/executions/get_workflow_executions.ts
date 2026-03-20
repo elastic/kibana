@@ -54,7 +54,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                       )
                     ),
                   ],
-                  { defaultValue: [] }
+                  {
+                    defaultValue: [],
+                    meta: { description: 'Filter by execution status.' },
+                  }
                 )
               ),
               executionTypes: schema.maybe(
@@ -73,17 +76,33 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                       )
                     ),
                   ],
-                  { defaultValue: [] }
+                  {
+                    defaultValue: [],
+                    meta: { description: 'Filter by execution type.' },
+                  }
                 )
               ),
               executedBy: schema.maybe(
                 schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
                   defaultValue: [],
+                  meta: { description: 'Filter by the user who triggered the execution.' },
                 })
               ),
-              omitStepRuns: schema.maybe(schema.boolean()),
-              page: schema.maybe(schema.number({ min: 1 })),
-              size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+              omitStepRuns: schema.maybe(
+                schema.boolean({
+                  meta: { description: 'Whether to exclude step-level execution data.' },
+                })
+              ),
+              page: schema.maybe(
+                schema.number({ min: 1, meta: { description: 'Page number.' } })
+              ),
+              size: schema.maybe(
+                schema.number({
+                  min: 1,
+                  max: MAX_PAGE_SIZE,
+                  meta: { description: 'Number of results per page.' },
+                })
+              ),
             }),
           },
         },

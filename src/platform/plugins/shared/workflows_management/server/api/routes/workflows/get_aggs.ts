@@ -23,7 +23,8 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
       access: 'public',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Get workflow aggregations',
-      description: 'Retrieve aggregation data for the specified workflow fields.',
+      description:
+        'Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
