@@ -29,7 +29,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     private workflowLogger: IWorkflowEventLogger
   ) {
     const step = {
-      name: node.id,
+      name: node.stepId,
       type: node.stepType,
       stepId: node.stepId,
       'max-step-size': node.configuration['max-step-size'],

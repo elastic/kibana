@@ -39,7 +39,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     private workflowLogger: IWorkflowEventLogger
   ) {
     const step = {
-      name: node.id,
+      name: node.stepId,
       type: node.stepType,
       stepId: node.stepId,
       'max-step-size': node.configuration['max-step-size'],
