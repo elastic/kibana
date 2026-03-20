@@ -68,7 +68,12 @@ describe('AutomaticImportService Integration Tests', () => {
   beforeEach(async () => {
     const internalRepo = coreStart.savedObjects.createInternalRepository();
     const savedObjectsClient = internalRepo as unknown as SavedObjectsClient;
-    await automaticImportService.initialize(savedObjectsClient, taskManagerStartStub);
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    await automaticImportService.initialize(
+      savedObjectsClient,
+      taskManagerStartStub,
+      internalEsClient
+    );
   });
 
   it('getDataStreamResults returns results only when status is completed', async () => {
