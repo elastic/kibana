@@ -10,9 +10,13 @@ import type { ExecutionResult, IRuleMonitoringService } from '../../../rule_moni
 export interface IPreviewRuleExecutionLogger {
   factory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   getExecutionResult: () => ExecutionResult | undefined;
+  getErrors: () => string[];
+  getWarnings: () => string[];
 }
 
 export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
   let executionResult: ExecutionResult | undefined;
 
   return {
@@ -23,8 +27,12 @@ export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger 
         trace: () => {},
         debug: () => {},
         info: () => {},
-        warn: () => {},
-        error: () => {},
+        warn: (message: string) => {
+          warnings.push(message);
+        },
+        error: (message: string) => {
+          errors.push(message);
+        },
         logMetric: () => {},
         logMetrics: () => {},
         logExecutionResult: (result: ExecutionResult): void => {
@@ -40,5 +48,7 @@ export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger 
     getExecutionResult: () => {
       return executionResult;
     },
+    getErrors: () => errors,
+    getWarnings: () => warnings,
   };
 };

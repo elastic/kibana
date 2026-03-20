@@ -802,8 +802,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
       total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
       execution_gap_duration_s: consumerMetrics.gap_duration_s,
-      // Event Log schema doesn't expect null for gap_range
-      gap_range: consumerMetrics.gap_range ?? undefined,
+      gap_range: consumerMetrics.gap_range,
     });
   }
 

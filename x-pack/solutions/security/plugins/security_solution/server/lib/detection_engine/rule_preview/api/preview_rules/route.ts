@@ -321,12 +321,12 @@ export const previewRulesRoute = (
               logs.push({
                 errors:
                   executionResult?.status === RuleExecutionStatusEnum.failed
-                    ? [executionResult?.message]
-                    : [],
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getErrors()]
+                    : previewRuleExecutionLogger.getErrors(),
                 warnings:
                   executionResult?.status === RuleExecutionStatusEnum['partial failure']
-                    ? [executionResult?.message]
-                    : [],
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getWarnings()]
+                    : previewRuleExecutionLogger.getWarnings(),
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
                 ...(loggedRequests ? { requests: loggedRequests } : {}),

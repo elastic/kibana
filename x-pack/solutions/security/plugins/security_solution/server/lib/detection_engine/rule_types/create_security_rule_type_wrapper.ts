@@ -460,12 +460,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
 
             ruleExecutionLogger.logMetrics({
-              total_search_duration_ms: Math.round(sum(result.searchAfterTimes.map(Number))),
-              total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
-              total_enrichment_duration_ms: Math.round(sum(result.enrichmentTimes.map(Number))),
+              total_search_duration_ms:
+                result.searchAfterTimes.length > 0
+                  ? Math.round(sum(result.searchAfterTimes.map(Number)))
+                  : undefined,
+              total_indexing_duration_ms:
+                result.bulkCreateTimes.length > 0
+                  ? Math.round(sum(result.bulkCreateTimes.map(Number)))
+                  : undefined,
+              total_enrichment_duration_ms:
+                result.enrichmentTimes.length > 0
+                  ? Math.round(sum(result.enrichmentTimes.map(Number)))
+                  : undefined,
               frozen_indices_queried_count: frozenIndicesQueriedCount,
               alerts_suppressed_count: suppressedAlertsCount,
-              gap_duration_s: remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
+              gap_duration_s:
+                gap && remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
               gap_range: gap,
             });
 
@@ -487,20 +497,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const hasWarnings = result.warningMessages.length > 0;
             const hasErrors = result.errors.length > 0;
 
-            if (hasWarnings || wrapperWarnings.length > 0) {
+            if (hasErrors || wrapperErrors.length > 0) {
+              status = RuleExecutionStatusEnum.failed;
+              statusMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
+            } else if (hasWarnings || wrapperWarnings.length > 0) {
               status = RuleExecutionStatusEnum['partial failure'];
               statusMessage = truncateList(result.warningMessages.concat(wrapperWarnings)).join(
                 '\n\n'
               );
-            } else if (hasErrors || wrapperErrors.length > 0) {
-              status = RuleExecutionStatusEnum.failed;
-              statusMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
             }
 
             ruleExecutionLogger.logExecutionResult({
               status,
               message: statusMessage,
-              userError: result.userError,
+              userError:
+                result.userError ||
+                result.errors.every((err) => checkErrorDetails(err).isUserError),
             });
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
