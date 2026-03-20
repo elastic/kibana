@@ -300,15 +300,15 @@ export class NotificationPolicyClient {
   public async bulkActionNotificationPolicies({
     actions,
   }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
-    const userProfile = await this.getUserProfile();
-    const now = new Date().toISOString();
-
     const [deleteActions, updateActions] = partition(actions, (a) => a.action === 'delete');
 
     const errors: Array<{ id: string; message: string }> = [];
     let processed = 0;
 
     if (updateActions.length > 0) {
+      const userProfile = await this.getUserProfile();
+      const now = new Date().toISOString();
+
       const objects = updateActions.map((action) => ({
         id: action.id,
         attrs: {
