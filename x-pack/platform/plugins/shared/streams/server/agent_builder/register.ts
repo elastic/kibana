@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import type { GetScopedClients } from '../routes/types';
 import type { StreamsServer } from '../types';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const registerStreamsAgentBuilder = ({
   agentBuilder,
@@ -24,5 +23,5 @@ export const registerStreamsAgentBuilder = ({
   logger: Logger;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  registerAgentBuilderSkills({ agentBuilder, server, logger });
+  // TODO: Register skills here
 };
