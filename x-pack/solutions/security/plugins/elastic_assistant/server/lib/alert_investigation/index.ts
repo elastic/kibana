@@ -11,9 +11,8 @@ export { extractEntitiesFromAlerts } from './entity_extraction';
 export { matchAlertsToCases } from './case_matching';
 export { triggerCaseAttackDiscovery } from './case_integration';
 export { getIncrementalDelta, markAlertsProcessed } from './incremental';
-export { EnrichmentRegistry } from './enrichment';
-export type { EnrichmentStrategy, EnrichedEntity, EnrichmentResult } from './enrichment';
-// Enrichment strategies removed - were exploratory, not used in spike
+// Enrichment removed - was exploratory, not used in spike
+// TODO: Re-add enrichment system in Phase 2 if needed
 export type {
   PipelineConfig,
   PipelineExecutionResult,
