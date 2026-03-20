@@ -60,7 +60,6 @@ else
     AFFECTED_MODULES_FILE=".scout/affected_modules.json"
     .buildkite/pipeline-utils/affected-packages/list_affected \
       --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
-      --ignore '**/test/scout/.meta/**' \
       > "$AFFECTED_MODULES_FILE"
   fi
 
