@@ -9,9 +9,10 @@
 
 import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
-import { useSideNavCollapsed } from '@kbn/core-chrome-browser-hooks';
+import { useSideNavCollapsed, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { Navigation } from './navigation';
+import { useAutoCollapse } from './use_auto_collapse';
 
 function useSideNavSetWidth(): (width: number) => void {
   const chrome = useChromeService();
@@ -21,7 +22,8 @@ function useSideNavSetWidth(): (width: number) => void {
 export const GridLayoutProjectSideNav = () => {
   const { isCollapsed, setIsCollapsed: onToggleCollapsed } = useSideNavCollapsed();
   const setWidth = useSideNavSetWidth();
-  const isAutoCollapsed = false;
+  const sidebarWidth = useSidebarWidth();
+  const isAutoCollapsed = useAutoCollapse(sidebarWidth);
 
   return (
     <>
