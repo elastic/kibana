@@ -31,7 +31,6 @@ export interface UseStaleAttachmentsCheckResult {
  * Stale checks are triggered when:
  * - the user visits a conversation (conversationId changes)
  * - the window regains focus
- * - the message input is focused (via scheduleStaleCheck from ConversationInput)
  */
 export const useStaleAttachments = (
   conversationId: string | undefined

@@ -182,7 +182,10 @@ export const Conversation: React.FC<{}> = () => {
               onDismiss={() => setDismissStaleAttachments(true)}
             />
           )}
-          <ConversationInput onSubmit={scrollToMostRecentRoundTop} onFocus={scheduleStaleCheck} />
+          <ConversationInput
+            onSubmit={scrollToMostRecentRoundTop}
+            onEditorFocus={scheduleStaleCheck}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />
