@@ -602,11 +602,13 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_enabled",
     "monitoring_output_id",
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -655,6 +657,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -741,6 +744,7 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_diagnostics",
     "monitoring_enabled",
     "monitoring_http",
@@ -749,6 +753,7 @@
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -847,6 +852,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -966,6 +972,11 @@
   ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
+  ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
   ],
   "observability-onboarding-state": [
     "progress",
@@ -1393,6 +1404,11 @@
   ],
   "usage-counters": [
     "domainId"
+  ],
+  "user_connector_token": [
+    "connectorId",
+    "credentialType",
+    "profileUid"
   ],
   "visualization": [
     "description",

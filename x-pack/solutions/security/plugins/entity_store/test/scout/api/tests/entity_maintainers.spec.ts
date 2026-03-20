@@ -14,7 +14,7 @@ import {
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
 } from '../../../../server/domain/constants';
-import { getLatestEntitiesIndexName } from '../../../../server/domain/asset_manager/latest_index';
+import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';

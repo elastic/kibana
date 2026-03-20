@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*"],
+  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*", "scripts/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/agent-builder-common",

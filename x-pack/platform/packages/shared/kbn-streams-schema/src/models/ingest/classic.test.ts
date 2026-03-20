@@ -89,7 +89,11 @@ describe('ClassicStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(() => ClassicStream.Definition.asserts(val as any)).toThrow();
+      expect(() =>
+        ClassicStream.Definition.asserts(
+          val as Parameters<typeof ClassicStream.Definition.asserts>[0]
+        )
+      ).toThrow();
     });
   });
 
@@ -162,10 +166,15 @@ describe('ClassicStream', () => {
         },
         data_stream_exists: true,
         dashboards: [],
+        rules: [],
         queries: [],
       },
     ])('is not valid', (val) => {
-      expect(ClassicStream.GetResponse.is(val as any)).toBe(false);
+      expect(
+        ClassicStream.GetResponse.is(
+          val as unknown as Parameters<typeof ClassicStream.GetResponse.is>[0]
+        )
+      ).toBe(false);
     });
   });
 
@@ -236,7 +245,9 @@ describe('ClassicStream', () => {
         ...emptyAssets,
       },
     ])('is not valid', (val) => {
-      expect(ClassicStream.UpsertRequest.is(val as any)).toBe(false);
+      expect(
+        ClassicStream.UpsertRequest.is(val as Parameters<typeof ClassicStream.UpsertRequest.is>[0])
+      ).toBe(false);
     });
   });
 
@@ -281,7 +292,11 @@ describe('ClassicStream', () => {
         classic: {},
       },
     ])('is not valid', (val) => {
-      expect(ClassicIngestUpsertRequest.is(val as any)).toBe(false);
+      expect(
+        ClassicIngestUpsertRequest.is(
+          val as unknown as Parameters<typeof ClassicIngestUpsertRequest.is>[0]
+        )
+      ).toBe(false);
     });
   });
 });
