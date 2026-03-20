@@ -44,3 +44,5 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+
+export { ExecutionStatus } from './services/execution';
