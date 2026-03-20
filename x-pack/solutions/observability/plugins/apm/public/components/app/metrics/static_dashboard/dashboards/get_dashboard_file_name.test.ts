@@ -13,76 +13,76 @@ const apmAgent = [
     agentName: 'java',
     telemetrySdkName: undefined,
     telemetrySdkLanguage: undefined,
-    expected: 'classic_apm-apm-java',
+    fileName: 'classic_apm-apm-java',
   },
   {
     agentName: 'iOS/swift',
     telemetrySdkName: undefined,
     telemetrySdkLanguage: undefined,
-    expected: undefined,
+    fileName: undefined,
   },
   {
     agentName: 'java',
     telemetrySdkName: 'opentelemetry',
-    expected: undefined,
+    fileName: undefined,
   },
 ];
 const edotSdk = [
   {
     agentName: 'opentelemetry/java/test/elastic',
-    expected: 'classic_apm-edot-java',
+    fileName: 'classic_apm-edot-java',
   },
   {
     agentName: 'opentelemetry/java/elastic',
-    expected: 'classic_apm-edot-java',
+    fileName: 'classic_apm-edot-java',
   },
   {
     agentName: 'opentelemetry/java/elastic',
     telemetrySdkName: 'opentelemetry',
     telemetrySdkLanguage: 'java',
-    expected: 'otel_native-edot-java',
+    fileName: 'otel_native-edot-java',
   },
   {
     agentName: 'opentelemetry/nodejs/nodejs-agent/elastic',
     telemetrySdkName: 'opentelemetry',
     telemetrySdkLanguage: 'nodejs',
-    expected: 'otel_native-edot-nodejs',
+    fileName: 'otel_native-edot-nodejs',
   },
 ];
 const vanillaOtelSdk = [
   {
     agentName: 'opentelemetry/java',
-    expected: 'classic_apm-otel_other-java',
+    fileName: 'classic_apm-otel_other-java',
   },
   {
     agentName: 'opentelemetry/nodejs/test/nodejs-agent',
     telemetrySdkName: 'opentelemetry',
     telemetrySdkLanguage: 'nodejs',
-    expected: 'otel_native-otel_other-nodejs',
+    fileName: 'otel_native-otel_other-nodejs',
   },
   {
     agentName: 'opentelemetry/java/test/something-else/',
     telemetrySdkName: 'opentelemetry',
     telemetrySdkLanguage: 'java',
-    expected: 'otel_native-otel_other-java',
+    fileName: 'otel_native-otel_other-java',
   },
   {
     agentName: 'otlp/nodejs',
     telemetrySdkName: 'opentelemetry',
     telemetrySdkLanguage: 'nodejs',
-    expected: 'otel_native-otel_other-nodejs',
+    fileName: 'otel_native-otel_other-nodejs',
   },
   {
     agentName: 'otlp/Android',
     telemetrySdkName: 'opentelemetry',
     telemetrySdkLanguage: 'android',
-    expected: undefined,
+    fileName: undefined,
   },
   {
     agentName: 'opentelemetry/go',
     telemetrySdkName: undefined,
     telemetrySdkLanguage: undefined,
-    expected: 'classic_apm-otel_other-go',
+    fileName: 'classic_apm-otel_other-go',
   },
 ];
 const noFilenameCases = [
@@ -90,20 +90,20 @@ const noFilenameCases = [
     agentName: 'test/java/test/something-else/',
     telemetrySdkName: undefined,
     telemetrySdkLanguage: undefined,
-    expected: undefined,
+    fileName: undefined,
   },
   {
     agentName: 'otlp',
-    expected: undefined,
+    fileName: undefined,
   },
   {
     agentName: 'elastic',
-    expected: undefined,
+    fileName: undefined,
   },
   {
     agentName: 'my-awesome-agent/otel',
     telemetrySdkName: 'opentelemetry',
-    expected: undefined,
+    fileName: undefined,
   },
 ];
 
@@ -111,9 +111,9 @@ describe('getDashboardFileName', () => {
   describe('apmAgent', () => {
     it.each(apmAgent)(
       'for agent $agentName with sdk $telemetrySdkName returns correct filename',
-      ({ agentName, telemetrySdkName, telemetrySdkLanguage, expected }) => {
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, fileName }) => {
         expect(getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })).toBe(
-          expected
+          fileName
         );
       }
     );
@@ -122,9 +122,9 @@ describe('getDashboardFileName', () => {
   describe('vanillaOtelSdk', () => {
     it.each(vanillaOtelSdk)(
       'for agent $agentName with sdk $telemetrySdkName returns correct filename',
-      ({ agentName, telemetrySdkName, telemetrySdkLanguage, expected }) => {
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, fileName }) => {
         expect(getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })).toBe(
-          expected
+          fileName
         );
       }
     );
@@ -133,9 +133,9 @@ describe('getDashboardFileName', () => {
   describe('edotSdk', () => {
     it.each(edotSdk)(
       'for agent $agentName with sdk $telemetrySdkName returns correct filename',
-      ({ agentName, telemetrySdkName, telemetrySdkLanguage, expected }) => {
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, fileName }) => {
         expect(getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })).toBe(
-          expected
+          fileName
         );
       }
     );
@@ -144,9 +144,9 @@ describe('getDashboardFileName', () => {
   describe('noFilenameCases', () => {
     it.each(noFilenameCases)(
       'for agent $agentName returns undefined',
-      ({ agentName, telemetrySdkName, telemetrySdkLanguage, expected }) => {
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, fileName }) => {
         expect(getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage })).toBe(
-          expected
+          fileName
         );
       }
     );

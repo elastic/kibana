@@ -16,6 +16,8 @@ interface DashboardFileNamePartsProps {
   runtimeVersion?: string;
 }
 
+// We use the language name in the filename so we want to have a valid filename
+// Example swift/iOS -> swift_ios : lowercased and '/' is replaces by '_'
 const standardizeLanguageName = (languageName?: string) =>
   languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
 
