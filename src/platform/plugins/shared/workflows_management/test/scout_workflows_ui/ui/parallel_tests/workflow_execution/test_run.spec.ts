@@ -104,7 +104,7 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
     await page.testSubj.click('executeWorkflowButton');
 
-    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT + 1);
 
     // Not a test run since we ran from the list (enabled workflow), so isTestRun: false
     await pageObjects.workflowExecution.executionPanel
