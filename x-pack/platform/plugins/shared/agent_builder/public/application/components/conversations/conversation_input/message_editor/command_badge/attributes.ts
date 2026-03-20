@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { MessageEditor } from './message_editor';
-export { useMessageEditor } from './use_message_editor';
-export { CommandBadgeSerializationError } from './command_badge';
+export const COMMAND_BADGE_ATTRIBUTE = 'data-command-badge';
+export const COMMAND_ID_ATTRIBUTE = 'data-command-id';
+export const COMMAND_METADATA_ATTRIBUTE = 'data-command-metadata';

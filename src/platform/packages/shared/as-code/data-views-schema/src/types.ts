@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { TypeOf } from '@kbn/config-schema';
+import type { runtimeFieldSchema } from './schema_runtime_field';
 
-export { runtimeFieldSchema } from './src/schema_runtime_field';
-export type { AsCodeRuntimeField } from './src/types';
+export type AsCodeRuntimeField = TypeOf<typeof runtimeFieldSchema>;

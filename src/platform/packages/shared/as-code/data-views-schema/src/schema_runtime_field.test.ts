@@ -14,8 +14,8 @@ import {
 import type {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
-} from './schema_runtime_fields';
-import { runtimeFieldsSchema } from './schema_runtime_fields';
+} from './schema_runtime_field';
+import { runtimeFieldSchema } from './schema_runtime_field';
 import type { TypeOf } from '@kbn/config-schema';
 
 const buildPrimitiveRuntimeField = (
@@ -45,7 +45,7 @@ describe('schema_runtime_fields', () => {
       };
 
       // When/Then
-      expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/\[type/i);
+      expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/\[type/i);
     });
   });
 
@@ -58,7 +58,7 @@ describe('schema_runtime_fields', () => {
       };
 
       // When/Then
-      expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+      expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
     });
   });
 
@@ -72,7 +72,7 @@ describe('schema_runtime_fields', () => {
       };
 
       // When/Then
-      expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+      expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
     });
 
     describe('when it does NOT have fields', () => {
@@ -84,7 +84,7 @@ describe('schema_runtime_fields', () => {
         };
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[fields\]: expected value of type/
         );
       });
@@ -99,7 +99,7 @@ describe('schema_runtime_fields', () => {
         });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[fields\]: expected value of type/
         );
       });
@@ -116,7 +116,7 @@ describe('schema_runtime_fields', () => {
         });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/array size is/);
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/array size is/);
       });
     });
 
@@ -135,7 +135,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/\[fields.0/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/\[fields.0/);
         });
       });
 
@@ -153,7 +153,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/\[fields.0/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/\[fields.0/);
         });
       });
 
@@ -166,7 +166,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/\[fields.0.name\]/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/\[fields.0.name\]/);
         });
       });
 
@@ -178,7 +178,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/\[fields.0.name\]/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/\[fields.0.name\]/);
         });
       });
 
@@ -190,7 +190,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/\[fields.0.name\]/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/\[fields.0.name\]/);
         });
       });
 
@@ -202,7 +202,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+          expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
         });
       });
     });
@@ -216,7 +216,7 @@ describe('schema_runtime_fields', () => {
         });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /definition for this key is missing/
         );
       });
@@ -232,7 +232,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
             /definition for this key is missing/
           );
         });
@@ -263,7 +263,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ name: undefined });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[name\]: expected value of type/
         );
       });
@@ -275,7 +275,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ name: '' });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[name\]: value has length/
         );
       });
@@ -287,7 +287,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ name: 'a'.repeat(1001) });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[name\]: value has length/
         );
       });
@@ -299,7 +299,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ name: 'my_runtime_field' });
 
         // When/Then
-        expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
     });
 
@@ -309,7 +309,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ script: undefined });
 
         // When/Then
-        expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
     });
 
@@ -319,7 +319,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ script: '' });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[script\]: value has length/
         );
       });
@@ -332,7 +332,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ script: { source: 'some script' } });
 
         // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
           /\[script\]: expected value of type/
         );
       });
@@ -344,7 +344,7 @@ describe('schema_runtime_fields', () => {
         const runtimeField = build({ script: 'some script' });
 
         // When/Then
-        expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
     });
 
@@ -356,7 +356,7 @@ describe('schema_runtime_fields', () => {
           const runtimeField = buildWithFields({ format: { type: 1, params: 1 } });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/format/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/format/);
         });
       });
 
@@ -367,7 +367,7 @@ describe('schema_runtime_fields', () => {
             const runtimeField = buildWithFields({ format: { type: 'number', params: undefined } });
 
             // When/Then
-            expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/params/);
+            expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/params/);
           });
         });
       });
@@ -380,7 +380,7 @@ describe('schema_runtime_fields', () => {
           });
 
           // When/Then
-          expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+          expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
         });
       });
     });
@@ -392,7 +392,7 @@ describe('schema_runtime_fields', () => {
           const runtimeField = buildWithFields({ [field]: undefined });
 
           // When/Then
-          expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+          expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
         });
       });
 
@@ -402,7 +402,7 @@ describe('schema_runtime_fields', () => {
           const runtimeField = buildWithFields({ [field]: 1 });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(new RegExp(field));
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(new RegExp(field));
         });
       });
 
@@ -413,7 +413,7 @@ describe('schema_runtime_fields', () => {
             const runtimeField = buildWithFields({ [field]: '' });
 
             // When/Then
-            expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(new RegExp(field));
+            expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(new RegExp(field));
           });
         });
 
@@ -423,7 +423,7 @@ describe('schema_runtime_fields', () => {
             const runtimeField = buildWithFields({ [field]: 'my_runtime_field' });
 
             // When/Then
-            expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+            expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
           });
         });
       });
@@ -437,7 +437,7 @@ describe('schema_runtime_fields', () => {
           const runtimeField = buildWithFields({ popularity: 'a' });
 
           // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(/popularity/);
+          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/popularity/);
         });
       });
 
@@ -448,7 +448,7 @@ describe('schema_runtime_fields', () => {
             const runtimeField = buildWithFields({ popularity: -1 });
 
             // When/Then
-            expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow(
+            expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
               /equal to or greater than/
             );
           });
@@ -460,7 +460,7 @@ describe('schema_runtime_fields', () => {
             const runtimeField = buildWithFields({ popularity: 0 });
 
             // When/Then
-            expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+            expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
           });
         });
 
@@ -470,7 +470,7 @@ describe('schema_runtime_fields', () => {
             const runtimeField = buildWithFields({ popularity: 1 });
 
             // When/Then
-            expect(runtimeFieldsSchema.validate(runtimeField)).toEqual(runtimeField);
+            expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
           });
         });
       });

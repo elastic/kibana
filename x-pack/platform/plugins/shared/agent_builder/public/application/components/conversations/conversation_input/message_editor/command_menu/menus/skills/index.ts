@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { MessageEditor } from './message_editor';
-export { useMessageEditor } from './use_message_editor';
-export { CommandBadgeSerializationError } from './command_badge';
+export { Skills } from './skills';
