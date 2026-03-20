@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }) {
           ],
           layout: { visibility: 'visible' },
           paint: {
-            'line-color': '#98c0ff',
+            'line-color': '#9bc2ff',
             'line-width': 3,
             'line-dasharray': [2, 1],
             'line-opacity': 1,
