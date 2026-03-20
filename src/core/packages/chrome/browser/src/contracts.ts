@@ -305,7 +305,6 @@ export interface ChromeStart {
      * Get the current width of the side nav synchronously.
      */
     getWidth(): number;
-
   };
 
   /**
