@@ -27,9 +27,20 @@ export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
   }
 );
 
+export const ELASTIC_INFERENCE_SERVICE_APP_ID = 'elastic_inference_service';
+
+export const ELASTIC_INFERENCE_SERVICE_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticInferenceServiceTitle',
+  {
+    defaultMessage: 'Elastic Inference Service',
+  }
+);
+
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
 export const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
+export const ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID =
+  'searchInferenceEndpoints:elasticInferenceServiceEnabled';
 
 export const INFERENCE_SETTINGS_SO_TYPE = 'inference-settings';
 export const INFERENCE_SETTINGS_NAMESPACE_TYPE = 'single';
