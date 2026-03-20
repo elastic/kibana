@@ -201,6 +201,7 @@ export {
   isDuplicateFeature,
   hasSameFingerprint,
   mergeFeature,
+  toBaseFeature,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,

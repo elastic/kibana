@@ -20,6 +20,7 @@ import {
   isComputedFeature,
   isDuplicateFeature,
   mergeFeature,
+  toBaseFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures, sumTokens } from '@kbn/streams-ai';
@@ -105,14 +106,15 @@ export async function identifyStreamFeatures({
     }
 
     const batch = batches[i];
-    const previousFeatures = knownFeatures
+    const previousFeatures = [...knownFeatures]
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
 
     logger.debug(
-      `Iteration ${i + 1}/${effectiveMaxIterations}: processing ${batch.length} documents, ${
-        knownFeatures.length
-      } features known`
+      () =>
+        `Iteration ${i + 1}/${effectiveMaxIterations}: processing ${batch.length} documents, ${
+          knownFeatures.length
+        } features known`
     );
 
     const iterationStart = Date.now();
@@ -164,11 +166,13 @@ export async function identifyStreamFeatures({
     };
     await onIterationComplete?.(iterationEntry, changedFeatures);
 
-    const cachedTokens = tokensUsed.cached ?? 0;
     logger.debug(
-      `Iteration ${i + 1}: found ${rawFeatures.length} features ` +
+      () =>
+        `Iteration ${i + 1}: found ${rawFeatures.length} features ` +
         `(${newFeatures.length} new, ${updatedFeatures.length} updated), ${knownFeatures.length} total known, ` +
-        `tokens: prompt=${tokensUsed.prompt} completion=${tokensUsed.completion} cached=${cachedTokens}`
+        `tokens: prompt=${tokensUsed.prompt} completion=${tokensUsed.completion} cached=${
+          tokensUsed.cached ?? 0
+        }`
     );
 
     if (newFeatures.length === 0) {
@@ -263,13 +267,17 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { hits: sampleDocuments } = await getDiverseSampleDocuments({
-                  esClient,
-                  index: stream.name,
-                  start,
-                  end,
-                  size: 100,
-                });
+                const [{ hits: sampleDocuments }, { hits: allExistingFeatures }] =
+                  await Promise.all([
+                    getDiverseSampleDocuments({
+                      esClient,
+                      index: stream.name,
+                      start,
+                      end,
+                      size: 100,
+                    }),
+                    featureClient.getFeatures(stream.name),
+                  ]);
 
                 if (sampleDocuments.length === 0) {
                   taskContext.logger.debug(
@@ -279,7 +287,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   return getDeleteTaskRunResult();
                 }
 
-                const { hits: allExistingFeatures } = await featureClient.getFeatures(stream.name);
                 const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
 
                 const [{ features: inferredFeatures }, computedFeatures] = await Promise.all([
@@ -425,8 +432,7 @@ function reconcileFeatures({
 
     if (existing) {
       const merged = mergeFeature(existing, raw);
-      const { uuid: _u, status: _s, last_seen: _l, expires_at: _e, ...existingBase } = existing;
-      if (!isEqual(merged, existingBase)) {
+      if (!isEqual(merged, toBaseFeature(existing))) {
         updatedFeatures.push({ ...merged, ...metadata, uuid: existing.uuid });
       }
     } else {

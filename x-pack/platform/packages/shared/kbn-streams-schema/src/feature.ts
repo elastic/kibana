@@ -76,6 +76,24 @@ export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): bo
 
 const mergeArrays = (a: string[] = [], b: string[] = []) => uniq([...a, ...b]);
 
+export function toBaseFeature(feature: Feature): BaseFeature {
+  return {
+    id: feature.id,
+    stream_name: feature.stream_name,
+    type: feature.type,
+    subtype: feature.subtype,
+    title: feature.title,
+    description: feature.description,
+    properties: feature.properties,
+    confidence: feature.confidence,
+    evidence: feature.evidence,
+    evidence_doc_ids: feature.evidence_doc_ids,
+    tags: feature.tags,
+    filter: feature.filter,
+    meta: feature.meta,
+  };
+}
+
 export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): BaseFeature {
   const mergedEvidence = mergeArrays(existing.evidence, incoming.evidence);
   const mergedEvidenceDocIds = mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids);
@@ -98,6 +116,6 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
     evidence_doc_ids: mergedEvidenceDocIds.length > 0 ? mergedEvidenceDocIds : undefined,
     tags: mergedTags.length > 0 ? mergedTags : undefined,
     filter,
-    meta: mergedMeta,
+    meta: Object.keys(mergedMeta).length > 0 ? mergedMeta : undefined,
   };
 }

@@ -55,13 +55,13 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
 }
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-const areFeaturesUpToDate = async ({
+async function areFeaturesUpToDate({
   taskClient,
   featuresTaskId,
 }: {
   taskClient: TaskClient<StreamsTaskType>;
   featuresTaskId: string;
-}) => {
+}) {
   const featuresTask = await taskClient.get<
     FeaturesIdentificationTaskParams,
     IdentifyFeaturesResult
@@ -72,7 +72,7 @@ const areFeaturesUpToDate = async ({
     Date.now() - new Date(featuresTask.last_completed_at).getTime() <
       FEATURES_IDENTIFICATION_RECENCY_MS
   );
-};
+}
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
