@@ -179,7 +179,6 @@ export const optionsSchema = schema.object(
 
 export const accessControlSchema = schema.maybe(
   schema.object({
-    owner: schema.maybe(schema.string()),
     access_mode: schema.maybe(
       schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
     ),
