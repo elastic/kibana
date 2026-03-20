@@ -57,6 +57,25 @@ steps:
       teamId: "${{ inputs.team_id }}"
       channelId: "${{ inputs.channel_id }}"
       top: ${{ inputs.top }}
+  - name: map-channel-messages
+    type: data.map
+    if: "${{ inputs.list_action == 'listChannelMessages' and inputs.team_id and inputs.channel_id }}"
+    items: ${{ steps.list-channel-messages.output }}
+    with:
+      fields:
+        value:
+          $map: { items: "${{ item.value }}", item: "msg" }
+          id: "${{ msg.id }}"
+          messageType: "${{ msg.messageType }}"
+          createdDateTime: "${{ msg.createdDateTime }}"
+          sender: "${{ msg.from.user.displayName }}"
+          bodyContent: "${{ msg.body.content }}"
+          bodyContentType: "${{ msg.body.contentType }}"
+          webUrl: "${{ msg.webUrl }}"
+          # importance: "${{ msg.importance }}"
+          # mentions: "${{ msg.mentions }}"
+          # attachments: "${{ msg.attachments }}"
+        '@odata.nextLink': "${{ item['@odata.nextLink'] }}"
   - name: list-chats
     type: microsoft-teams.listChats
     if: "${{ inputs.list_action == 'listChats' }}"
@@ -71,6 +90,25 @@ steps:
     with:
       chatId: "${{ inputs.chat_id }}"
       top: ${{ inputs.top }}
+  - name: map-chat-messages
+    type: data.map
+    if: "${{ inputs.list_action == 'listChatMessages' and inputs.chat_id }}"
+    items: ${{ steps.list-chat-messages.output }}
+    with:
+      fields:
+        value:
+          $map: { items: "${{ item.value }}", item: "msg" }
+          id: "${{ msg.id }}"
+          messageType: "${{ msg.messageType }}"
+          createdDateTime: "${{ msg.createdDateTime }}"
+          sender: "${{ msg.from.user.displayName }}"
+          bodyContent: "${{ msg.body.content }}"
+          bodyContentType: "${{ msg.body.contentType }}"
+          webUrl: "${{ msg.webUrl }}"
+          # importance: "${{ msg.importance }}"
+          # mentions: "${{ msg.mentions }}"
+          # attachments: "${{ msg.attachments }}"
+        '@odata.nextLink': "${{ item['@odata.nextLink'] }}"
   - name: route-output
     type: if
     condition: "${{ inputs.list_action == 'listJoinedTeams' }}"
@@ -96,7 +134,7 @@ steps:
               - name: set-channel-messages-output
                 type: data.set
                 with:
-                  result: "${{ steps.list-channel-messages.output }}"
+                  result: "${{ steps.map-channel-messages.output }}"
             else:
               - name: check-chats
                 type: if
@@ -110,4 +148,4 @@ steps:
                   - name: set-chat-messages-output
                     type: data.set
                     with:
-                      result: "${{ steps.list-chat-messages.output }}"
+                      result: "${{ steps.map-chat-messages.output }}"
