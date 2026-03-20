@@ -17,6 +17,7 @@ export const convertPersistedSkill = (
   description: skill.description,
   content: skill.content,
   readonly: !!skill.plugin_id,
+  experimental: false,
   referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,
