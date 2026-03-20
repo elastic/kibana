@@ -306,11 +306,6 @@ export interface ChromeStart {
      */
     getWidth(): number;
 
-    /**
-     * Set the width of the side nav.
-     * @param width The width of the side nav in pixels.
-     */
-    setWidth(width: number): void;
   };
 
   /**
