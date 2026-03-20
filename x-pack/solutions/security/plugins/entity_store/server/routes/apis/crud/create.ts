@@ -5,32 +5,26 @@
  * 2.0.
  */
 
-import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
+import { ALL_ENTITY_TYPES, ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BadCRUDRequestError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const ENTITY_TYPES = ['user', 'host', 'service', 'generic'] as const;
-
 const paramsSchema = z
   .object({
-    entityType: z.enum(ENTITY_TYPES),
+    entityType: z.enum(ALL_ENTITY_TYPES),
   })
   .required();
 
-const querySchema = z.object({
-  force: BooleanFromString.optional().default(false),
-});
-
-export function registerCRUDUpsert(router: EntityStorePluginRouter) {
+export function registerCRUDCreate(router: EntityStorePluginRouter) {
   router.versioned
-    .put({
-      path: ENTITY_STORE_ROUTES.CRUD_UPSERT,
+    .post({
+      path: ENTITY_STORE_ROUTES.CRUD_CREATE,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -44,7 +38,6 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
           request: {
             body: buildRouteValidationWithZod(Entity),
             params: buildRouteValidationWithZod(paramsSchema),
-            query: buildRouteValidationWithZod(querySchema),
           },
         },
       },
@@ -52,10 +45,10 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, crudClient } = entityStoreCtx;
 
-        logger.debug('CRUD Upsert api called');
+        logger.debug('CRUD Create api called');
 
         try {
-          await crudClient.upsertEntity(req.params.entityType, req.body, req.query.force);
+          await crudClient.createEntity(req.params.entityType, req.body);
         } catch (error) {
           if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
