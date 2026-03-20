@@ -88,13 +88,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       } else {
         expect(await discover.isChartVisible()).to.be(false);
         await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
+        await testSubjects.existOrFail('dscPanelsToggleInPage');
+
         await testSubjects.missingOrFail('dscHideHistogramButton');
         await testSubjects.missingOrFail('dscShowHistogramButton');
 
         if (shouldSidebarBeOpen) {
-          await testSubjects.missingOrFail('dscPanelsToggleInPage');
+          await testSubjects.existOrFail('dscHideSidebarButton');
+          await testSubjects.missingOrFail('dscShowSidebarButton');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInPage');
+          await testSubjects.missingOrFail('dscHideSidebarButton');
+          await testSubjects.existOrFail('dscShowSidebarButton');
         }
       }
     }
