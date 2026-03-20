@@ -862,16 +862,15 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Enrich a field with a policy',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.enrich.usage', {
-      defaultMessage: 'Provide a `policy_name` and `field` to enrich the field with the policy.',
+      defaultMessage: 'Provide a `policy_name` to enrich data with the policy.',
     }),
     examples: [
       {
         description: i18n.translate('xpack.streamlang.actionMetadata.enrich.examples.simple', {
-          defaultMessage: 'Enrich a field with a policy',
+          defaultMessage: 'Enrich data with a policy',
         }),
         yaml: `- action: enrich
   policy_name: my_policy
-  field: match_field
   to: my_enriched_field`,
       },
     ],
