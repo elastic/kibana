@@ -116,6 +116,10 @@
     "updatedByUsername"
   ],
   "alerting_rule": [
+    "artifacts",
+    "artifacts.id",
+    "artifacts.type",
+    "artifacts.value",
     "createdAt",
     "createdBy",
     "enabled",
