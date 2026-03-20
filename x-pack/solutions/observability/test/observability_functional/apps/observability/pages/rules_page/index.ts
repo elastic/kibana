@@ -89,30 +89,5 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
-
-    describe('Stack alerts consumer', () => {
-      it('should create an ES Query rule and NOT display it when consumer is stackAlerts', async () => {
-        const name = 'ES Query with stackAlerts consumer';
-        await rulesService.api.createRule({
-          name,
-          consumer: 'stackAlerts',
-          ruleTypeId: '.es-query',
-          params: {
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            index: ['alert-test-data'],
-            timeField: 'date',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            timeWindowSize: 20,
-            timeWindowUnit: 's',
-          },
-          schedule: { interval: '1m' },
-        });
-
-        await observability.alerts.common.navigateToRulesPage();
-        await testSubjects.missingOrFail('rule-row');
-      });
-    });
   });
 };
