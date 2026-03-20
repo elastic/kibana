@@ -4,22 +4,19 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-synthetics-test-data'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-synthetics-test-data'
+  title: '@kbn/observability-synthetics-test-data'
   description: Moon project for @kbn/observability-synthetics-test-data
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/packages/synthetics-test-data
+  sourceRoot: x-pack/solutions/observability/packages/synthetics-test-data
 dependsOn:
-  - '@kbn/apm-plugin'
-  - '@kbn/es-archiver'
   - '@kbn/repo-info'
 tags:
   - shared-common
@@ -35,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

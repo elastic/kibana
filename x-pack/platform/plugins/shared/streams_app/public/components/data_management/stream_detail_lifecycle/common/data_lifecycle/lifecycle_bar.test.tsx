@@ -89,7 +89,7 @@ describe('LifecycleBar', () => {
           phases={phases}
           gridTemplateColumns="5fr 3fr"
           phaseColumnSpans={[1, 1]}
-          isIlm
+          showPhaseActions
           onRemovePhase={jest.fn()}
           canManageLifecycle
         />

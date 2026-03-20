@@ -242,7 +242,9 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "/** the jsonc to modify */"
+            ],
             "signature": [
               "string"
             ],
@@ -259,7 +261,9 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": [],
+            "description": [
+              "/** The key to set */"
+            ],
             "signature": [
               "string"
             ],
@@ -560,7 +564,9 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "/** the jsonc to modify */"
+            ],
             "signature": [
               "string"
             ],
@@ -577,7 +583,9 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": [],
+            "description": [
+              "/** The key to set */"
+            ],
             "signature": [
               "string"
             ],
@@ -594,7 +602,9 @@
             "type": "Any",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "/** the value of the key */"
+            ],
             "signature": [
               "any"
             ],

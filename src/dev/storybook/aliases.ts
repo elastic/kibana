@@ -71,7 +71,6 @@ export const storybookAliases = {
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
-  ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
   ['unified-chart-section-viewer']:
     'src/platform/packages/shared/kbn-unified-chart-section-viewer/.storybook',
   unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',

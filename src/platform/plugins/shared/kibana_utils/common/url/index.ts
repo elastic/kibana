@@ -8,9 +8,11 @@
  */
 
 import { encodeUriQuery, encodeQuery, addQueryParam } from './encode_uri_query';
+import { validateUrl } from './validate_url';
 
 export const url = {
   encodeQuery,
   encodeUriQuery,
   addQueryParam,
+  validate: validateUrl,
 };

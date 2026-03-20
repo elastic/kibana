@@ -53,6 +53,7 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
+  StepStabilityLevel,
   HttpMethod,
   StepPropertyHandler,
   PropertySelectionHandler,
@@ -75,4 +76,7 @@ export {
   NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
+  // shared constants
+  MAX_WORKFLOW_YAML_LENGTH,
+  WORKFLOW_ID_PATTERN,
 } from './v1';

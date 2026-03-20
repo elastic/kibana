@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 

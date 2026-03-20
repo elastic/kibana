@@ -23,6 +23,7 @@ import type { PreviewTableMode } from './preview_table';
 
 const emptyCell = <>&nbsp;</>;
 const EMPTY_IGNORED_FIELDS: IgnoredField[] = [];
+const preserveWhitespaceStyle: React.CSSProperties = { whiteSpace: 'pre' };
 
 export function isDocumentWithIgnoredFields(
   doc: SampleDocument | DocumentWithIgnoredFields
@@ -118,6 +119,7 @@ const PreviewTableCellContent = memo(function PreviewTableCellContent({
         core={core}
         share={share}
         fieldFormats={fieldFormats}
+        columnsMeta={undefined}
       />
     );
   }
@@ -134,9 +136,10 @@ const PreviewTableCellContent = memo(function PreviewTableCellContent({
     return emptyCell;
   }
   if (typeof value === 'object') {
-    return JSON.stringify(value);
+    return <span style={preserveWhitespaceStyle}>{JSON.stringify(value)}</span>;
   }
-  return String(value) || emptyCell;
+  const stringValue = String(value);
+  return stringValue ? <span style={preserveWhitespaceStyle}>{stringValue}</span> : emptyCell;
 });
 
 interface PreviewTableCellProps extends CellRenderBaseProps {

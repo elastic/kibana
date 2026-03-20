@@ -10,7 +10,7 @@ import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_PANEL_TRIGGER,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
@@ -73,8 +73,8 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addSwimlanePanelAction);
   uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAnomalyChartsPanelAction);
 
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInSingleMetricViewerAction.id);
+  uiActions.addTriggerAction(ON_OPEN_PANEL_MENU, openInExplorerAction);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, openInSingleMetricViewerAction.id);
 
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyTimeRangeSelectionAction);
@@ -86,7 +86,7 @@ export function registerMlUiActions(
     SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
     smvApplyEntityFieldFilterAction
   );
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
+  uiActions.addTriggerAction(ON_OPEN_PANEL_MENU, visToAdJobAction);
   uiActions.addTriggerAction(
     CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
     categorizationADJobAction

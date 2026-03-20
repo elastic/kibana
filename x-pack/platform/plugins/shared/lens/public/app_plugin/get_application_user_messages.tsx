@@ -26,7 +26,7 @@ import type {
   Visualization,
   LensPublicCallbacks,
 } from '@kbn/lens-common';
-import { updateDatasourceState } from '../state_management';
+import { updateDatasourceState, updateVisualizationState } from '../state_management';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 import {
   EDITOR_MISSING_DATAVIEW,
@@ -311,6 +311,17 @@ export const useApplicationUserMessages = ({
       ...(visualizationState?.activeId && visualizationState.state
         ? visualization?.getUserMessages?.(visualizationState.state, {
             frame: framePublicAPI,
+            setState: (newStateOrUpdater) => {
+              dispatch(
+                updateVisualizationState({
+                  visualizationId: visualizationState.activeId!,
+                  newState:
+                    typeof newStateOrUpdater === 'function'
+                      ? newStateOrUpdater(visualizationState.state)
+                      : newStateOrUpdater,
+                })
+              );
+            },
           }) ?? []
         : []),
       ...getApplicationUserMessages({

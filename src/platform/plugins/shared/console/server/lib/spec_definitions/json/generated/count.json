@@ -38,6 +38,7 @@
       "{index}/_count"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-count",
     "availability": {
       "stack": true,
       "serverless": true

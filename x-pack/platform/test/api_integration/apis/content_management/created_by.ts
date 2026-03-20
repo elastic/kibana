@@ -21,12 +21,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'Sample dashboard',
-            },
+            title: 'Sample dashboard',
           });
 
-        expect(status).to.be(200);
+        expect(status).to.be(201);
         expect(body.data).to.be.ok();
         expect(body.meta).to.not.have.key('created_by');
       });
@@ -52,12 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'Sample dashboard',
-            },
+            title: 'Sample dashboard',
           });
 
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.have.key('created_by');
         expect(createResponse.body.meta.created_by).to.be(interactiveUser.uid);

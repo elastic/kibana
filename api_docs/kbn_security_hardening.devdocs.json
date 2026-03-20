@@ -50,7 +50,26 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-hardening",
+                "id": "def-common.unsafeConsole.debug.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "../../../../../../../node_modules/typescript/lib/lib.dom.d.ts",
+                "lineNumber": 2,
+                "columnNumber": 487612,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-hardening",
@@ -66,7 +85,26 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-hardening",
+                "id": "def-common.unsafeConsole.error.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "../../../../../../../node_modules/typescript/lib/lib.dom.d.ts",
+                "lineNumber": 2,
+                "columnNumber": 487698,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-hardening",
@@ -82,7 +120,26 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-hardening",
+                "id": "def-common.unsafeConsole.info.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "../../../../../../../node_modules/typescript/lib/lib.dom.d.ts",
+                "lineNumber": 2,
+                "columnNumber": 487800,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-hardening",
@@ -98,7 +155,26 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-hardening",
+                "id": "def-common.unsafeConsole.log.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "../../../../../../../node_modules/typescript/lib/lib.dom.d.ts",
+                "lineNumber": 2,
+                "columnNumber": 487824,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-hardening",
@@ -114,7 +190,26 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-hardening",
+                "id": "def-common.unsafeConsole.trace.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "../../../../../../../node_modules/typescript/lib/lib.dom.d.ts",
+                "lineNumber": 2,
+                "columnNumber": 488025,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-hardening",
@@ -130,7 +225,26 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-hardening",
+                "id": "def-common.unsafeConsole.warn.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "../../../../../../../node_modules/typescript/lib/lib.dom.d.ts",
+                "lineNumber": 2,
+                "columnNumber": 488050,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

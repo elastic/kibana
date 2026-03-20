@@ -147,10 +147,10 @@ export const createAgentGraph = ({
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const action = processToolNodeResponse(toolNodeResult);
+    const actions = processToolNodeResponse(toolNodeResult, { logger });
 
     return {
-      mainActions: [action],
+      mainActions: actions,
     };
   };
 

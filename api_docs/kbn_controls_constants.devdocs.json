@@ -75,40 +75,6 @@
       },
       {
         "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROL_HOVER_TRIGGER_ID",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROL_HOVER_TRIGGER_ID",
-        "description": [],
-        "signature": [
-          "\"CONTROL_HOVER_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROL_MENU_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROL_MENU_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CONTROL_MENU_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
         "id": "def-common.CONTROL_WIDTH_LARGE",
         "type": "string",
         "tags": [],
@@ -255,7 +221,7 @@
         "label": "DEFAULT_SEARCH_TECHNIQUE",
         "description": [],
         "signature": [
-          "\"prefix\""
+          "\"wildcard\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
         "lineNumber": 15,
@@ -289,10 +255,10 @@
         "label": "ESQL_CONTROL",
         "description": [],
         "signature": [
-          "\"esqlControl\""
+          "\"esql_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -306,10 +272,10 @@
         "label": "OPTIONS_LIST_CONTROL",
         "description": [],
         "signature": [
-          "\"optionsListControl\""
+          "\"options_list_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -323,10 +289,10 @@
         "label": "RANGE_SLIDER_CONTROL",
         "description": [],
         "signature": [
-          "\"rangeSliderControl\""
+          "\"range_slider_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -340,10 +306,10 @@
         "label": "TIME_SLIDER_CONTROL",
         "description": [],
         "signature": [
-          "\"timeSlider\""
+          "\"time_slider_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

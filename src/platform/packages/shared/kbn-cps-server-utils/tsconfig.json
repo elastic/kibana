@@ -8,7 +8,6 @@
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
-    "@kbn/core-http-server",
     "@kbn/spaces-utils",
   ],
   "exclude": [

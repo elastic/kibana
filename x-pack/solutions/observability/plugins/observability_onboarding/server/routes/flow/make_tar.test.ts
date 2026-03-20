@@ -8,8 +8,21 @@
 import { makeTar, type Entry } from './make_tar';
 import * as tar from 'tar';
 import expect from 'expect';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 describe('makeTar', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'make-tar-test-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
   it('creates a valid tar archive that can be extracted', () => {
     const archive = makeTar([
       {
@@ -35,6 +48,7 @@ describe('makeTar', () => {
     tar
       .extract({
         sync: true,
+        cwd: tempDir,
         onReadEntry: (readEntry) => {
           const entry: Entry = readEntry;
           readEntry.on('data', (buffer) => {

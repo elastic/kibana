@@ -9,9 +9,21 @@
 
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
-import { useContentListItems, type ContentListItem } from '@kbn/content-list-provider';
-import { Column as BaseColumn, NameColumn, UpdatedAtColumn, ActionsColumn } from './column';
+import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
+import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
+import {
+  useContentListConfig,
+  useContentListItems,
+  useDeleteConfirmation,
+  type ContentListItem,
+} from '@kbn/content-list-provider';
+import {
+  Column as BaseColumn,
+  NameColumn,
+  UpdatedAtColumn,
+  ActionsColumn,
+  StarredColumn,
+} from './column';
 import { Action as BaseAction, EditAction, DeleteAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
 import { EmptyState } from './empty_state';
@@ -113,12 +125,20 @@ const ContentListTableComponent = ({
   filter,
   'data-test-subj': dataTestSubj = 'content-list-table',
 }: ContentListTableProps) => {
+  const { supports } = useContentListConfig();
+  const { euiTheme } = useEuiTheme();
   const { items: rawItems, isLoading: loading, error } = useContentListItems();
   const items = useMemo(() => (filter ? rawItems.filter(filter) : rawItems), [rawItems, filter]);
 
-  const columns = useColumns(children);
+  const { requestDelete, deleteModal } = useDeleteConfirmation();
+
+  const columns = useColumns(children, requestDelete);
   const { sorting, onChange } = useSorting();
   const { selection } = useSelection();
+
+  const starredHoverCss = supports.starred
+    ? cssFavoriteHoverWithinEuiTableRow(euiTheme)
+    : undefined;
 
   const isTableEmpty = !loading && !error && items.length === 0;
 
@@ -128,20 +148,24 @@ const ContentListTableComponent = ({
   }
 
   return (
-    <EuiBasicTable
-      tableCaption={title}
-      columns={columns}
-      compressed={compressed}
-      error={error?.message}
-      itemId={(item) => getRowId(item.id)}
-      items={items}
-      loading={loading}
-      onChange={onChange}
-      sorting={sorting}
-      selection={selection}
-      tableLayout={tableLayout}
-      data-test-subj={dataTestSubj}
-    />
+    <>
+      <EuiBasicTable
+        tableCaption={title}
+        columns={columns}
+        compressed={compressed}
+        css={starredHoverCss}
+        error={error?.message}
+        itemId={(item) => getRowId(item.id)}
+        items={items}
+        loading={loading}
+        onChange={onChange}
+        sorting={sorting}
+        selection={selection}
+        tableLayout={tableLayout}
+        data-test-subj={dataTestSubj}
+      />
+      {deleteModal}
+    </>
   );
 };
 
@@ -150,6 +174,7 @@ export const Column = Object.assign(BaseColumn, {
   Name: NameColumn,
   UpdatedAt: UpdatedAtColumn,
   Actions: ActionsColumn,
+  Starred: StarredColumn,
 });
 
 // Create Action namespace with sub-components.

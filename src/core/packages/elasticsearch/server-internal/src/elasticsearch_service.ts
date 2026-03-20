@@ -24,9 +24,15 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  ClusterClient,
+  AgentManager,
+  getRequestHandlerFactory,
+  type OnRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
 
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -43,13 +49,13 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
-import { CpsRequestHandler } from './cps_request_handler';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
   security: InternalSecurityServiceSetup;
+  loggingSystem: Pick<ILoggingSystem, 'setGlobalContext'>;
 }
 
 /** @internal */
@@ -59,7 +65,7 @@ export class ElasticsearchService
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private readonly isServerless: boolean;
-  private cpsRequestHandler!: CpsRequestHandler;
+  private onRequestHandlerFactory: OnRequestHandlerFactory;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -78,6 +84,8 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
+    // cli / preboot / interactive startup => non-CPS mode (strip project_routing params)
+    this.onRequestHandlerFactory = getRequestHandlerFactory(false);
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -109,7 +117,7 @@ export class ElasticsearchService
           ).catch(() => ({ cpsEnabled: false }))
         ).cpsEnabled ?? false
       : false;
-    this.cpsRequestHandler = new CpsRequestHandler(cpsEnabled);
+    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled);
 
     const agentManager = this.getAgentManager(config);
 
@@ -139,6 +147,9 @@ export class ElasticsearchService
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
     this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser).pipe(takeUntil(this.stop$));
+    this.clusterInfo$.subscribe(({ cluster_uuid }) =>
+      deps.loggingSystem.setGlobalContext({ service: { id: cluster_uuid } })
+    );
     registerAnalyticsContextProvider(deps.analytics, this.clusterInfo$);
 
     return {
@@ -252,7 +263,7 @@ export class ElasticsearchService
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
-      onRequest: this.cpsRequestHandler?.onRequest,
+      onRequestHandlerFactory: this.onRequestHandlerFactory,
     });
   }
 

@@ -21,6 +21,9 @@ import { getMvExpandFields } from '@kbn/securitysolution-utils';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+jest.mock('./utils/validate_esql_query', () => ({
+  validateEsqlQuery: jest.fn().mockResolvedValue(true),
+}));
 jest.mock('@kbn/securitysolution-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-utils'),
   getMvExpandFields: jest.fn().mockReturnValue([]),
@@ -61,7 +64,9 @@ describe('esqlExecutor', () => {
 
   describe('errors', () => {
     it('should return result with user error equal true when request fails with data verification exception', async () => {
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
+      (
+        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+      ).mockRejectedValue(
         new KbnServerError(
           'verification_exception: Found 1 problem\nline 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [standard] mode',
           400,
@@ -91,7 +96,9 @@ describe('esqlExecutor', () => {
     });
 
     it('should return result without user error when request fails with non-categorized error', async () => {
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
+      (
+        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+      ).mockRejectedValue(
         new KbnServerError('Unknown Error', 500, {
           error: {
             root_cause: [
@@ -138,9 +145,7 @@ describe('esqlExecutor', () => {
       expect(result.warningMessages).toContain(
         'Excluded documents exceeded the limit of 100000, some alerts might not have been created. Consider reducing the lookback time for the rule.'
       );
-      expect(
-        ruleServices.scopedClusterClient.asCurrentUser.transport.request
-      ).not.toHaveBeenCalled();
+      expect(ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery).not.toHaveBeenCalled();
     });
 
     it('should include documents ids from state in ES|QL request', async () => {
@@ -159,15 +164,16 @@ describe('esqlExecutor', () => {
       };
 
       await esqlExecutor(mockedArguments);
-      const transportRequestArgs =
-        ruleServices.scopedClusterClient.asCurrentUser.transport.request.mock.calls[0][0];
+      const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
+        .asyncQuery as unknown as jest.Mock;
+      const asyncQueryArgs = asyncQueryMock.mock.calls[0][0];
 
-      expect(transportRequestArgs).toHaveProperty(
-        'body.filter.bool.must_not.0.bool.filter.0.ids.values',
-        ['doc1', 'doc2']
-      );
-      expect(transportRequestArgs).toHaveProperty(
-        'body.filter.bool.must_not.0.bool.filter.1.term._index',
+      expect(asyncQueryArgs).toHaveProperty('filter.bool.must_not.0.bool.filter.0.ids.values', [
+        'doc1',
+        'doc2',
+      ]);
+      expect(asyncQueryArgs).toHaveProperty(
+        'filter.bool.must_not.0.bool.filter.1.term._index',
         'test_index_1'
       );
     });
@@ -190,13 +196,20 @@ describe('esqlExecutor', () => {
       };
 
       await esqlExecutor(mockedArguments);
-      const transportRequestArgs =
-        ruleServices.scopedClusterClient.asCurrentUser.transport.request.mock.calls[0][0];
+      const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
+        .asyncQuery as unknown as jest.Mock;
+      const asyncQueryArgs = asyncQueryMock.mock.calls[0][0];
 
-      expect(transportRequestArgs).toHaveProperty(
-        'body.filter.bool.must_not.0.bool.filter.0.ids.values',
-        ['doc1', 'doc2']
-      );
+      expect(asyncQueryArgs).toHaveProperty('filter.bool.must_not.0.bool.filter.0.ids.values', [
+        'doc1',
+        'doc2',
+      ]);
+    });
+
+    it('should store lastQuery in returned state', async () => {
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.state).toHaveProperty('lastQuery', params.query);
     });
   });
 });

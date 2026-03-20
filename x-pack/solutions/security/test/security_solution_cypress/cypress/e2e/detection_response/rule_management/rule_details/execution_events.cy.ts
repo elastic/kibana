@@ -31,8 +31,8 @@ import {
   EXECUTION_EVENTS_DATE_PICKER,
   EXECUTION_EVENTS_TIMESTAMP_COLUMN,
 } from '../../../../screens/execution_events';
-import { enableExtendedRuleExecutionLogging } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { setEndDate, setStartDate, showStartEndDate } from '../../../../tasks/date_picker';
+import { setExtendedRuleExecutionLoggingMinLevel } from '../../../../tasks/api_calls/kibana_advanced_settings';
 
 describe(
   'Execution events table',
@@ -56,7 +56,6 @@ describe(
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      enableExtendedRuleExecutionLogging();
 
       createRule({
         ...getCustomQueryRuleParams({
@@ -89,8 +88,19 @@ describe(
       });
 
       it('should filter by log level', function () {
+        setExtendedRuleExecutionLoggingMinLevel('debug');
+        createRule({
+          ...getCustomQueryRuleParams({
+            enabled: true,
+          }),
+        }).then((rule) => {
+          visit(ruleDetailsUrl(rule.body.id, 'execution_events'));
+        });
+        waitForTheRuleToBeExecuted();
+
         filterExecutionEventsByLogLevel('DEBUG');
         assertAllEventsHaveLogLevel('DEBUG');
+        setExtendedRuleExecutionLoggingMinLevel('info');
       });
 
       it('should filter by event type', function () {

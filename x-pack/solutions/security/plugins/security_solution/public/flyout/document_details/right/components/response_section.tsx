@@ -9,14 +9,14 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ResponseButton } from './response_button';
-import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'response';
 

@@ -9,6 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -26,18 +27,41 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import {
+  HIGHLIGHTED_STEP_TRIGGER,
+  setHighlightedStepId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
+
+const PSEUDO_STEP_OVERVIEW = '__overview';
+const PSEUDO_STEP_TRIGGER = 'trigger';
+
 export interface WorkflowExecutionDetailProps {
   executionId: string;
   onClose: () => void;
 }
 
+function assignSelectedStepId(
+  selectedStepExecutionId: string | undefined,
+  executionIdToStepId: Map<string, string>
+) {
+  if (!selectedStepExecutionId || selectedStepExecutionId === PSEUDO_STEP_OVERVIEW) {
+    return undefined;
+  }
+  if (selectedStepExecutionId === PSEUDO_STEP_TRIGGER) {
+    return HIGHLIGHTED_STEP_TRIGGER;
+  }
+  return executionIdToStepId.get(selectedStepExecutionId);
+}
+
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
   ({ executionId, onClose }) => {
+    const dispatch = useDispatch();
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
@@ -61,7 +85,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         executionId === workflowExecution?.id && // execution id matches (not stale execution used)
         workflowExecution?.stepExecutions?.length // step executions are loaded
       ) {
-        setSelectedStepExecution('__overview');
+        setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -79,35 +103,113 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return null;
     }, [workflowExecution]);
 
+    const { childExecutions, isLoading: isLoadingChildExecutions } =
+      useChildWorkflowExecutions(workflowExecution);
+
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
-      selectedStepExecutionId === '__overview' || selectedStepExecutionId === 'trigger';
+      selectedStepExecutionId &&
+      [PSEUDO_STEP_OVERVIEW, PSEUDO_STEP_TRIGGER].includes(selectedStepExecutionId);
 
-    // Find the lightweight step from the polled execution (has status/duration but no I/O)
-    const lightweightStep = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) {
-        return undefined;
+    // Stable map: step-execution-id → workflow step-id (new ref only when entries change)
+    const executionIdToStepId = useMemo(() => {
+      const map = new Map<string, string>();
+      for (const step of workflowExecution?.stepExecutions ?? []) {
+        map.set(step.id, step.stepId);
       }
-      return workflowExecution?.stepExecutions?.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution?.stepExecutions, selectedStepExecutionId, isPseudoStep]);
+      return map;
+    }, [workflowExecution?.stepExecutions]);
+
+    // Sync selected step execution → Redux highlightedStepId for editor scroll & decorations.
+    useEffect(() => {
+      dispatch(
+        setHighlightedStepId({
+          stepId: assignSelectedStepId(selectedStepExecutionId, executionIdToStepId),
+        })
+      );
+    }, [selectedStepExecutionId, executionIdToStepId, dispatch]);
+
+    // Clear highlighted step when execution detail unmounts
+    useEffect(() => {
+      return () => {
+        dispatch(setHighlightedStepId({ stepId: undefined }));
+      };
+    }, [dispatch]);
+
+    // Find the lightweight step from the polled execution (has status/duration but no I/O).
+    // If not found in root steps, check child workflow execution steps.
+    const {
+      lightweightStep,
+      stepExecutionId: resolvedExecutionId,
+      parentWorkflowExecution,
+    } = useMemo(() => {
+      if (!selectedStepExecutionId || isPseudoStep) {
+        return {
+          lightweightStep: undefined,
+          stepExecutionId: executionId,
+          parentWorkflowExecution: undefined,
+        };
+      }
+
+      const parentStep = workflowExecution?.stepExecutions?.find(
+        (step) => step.id === selectedStepExecutionId
+      );
+      if (parentStep) {
+        return {
+          lightweightStep: parentStep,
+          stepExecutionId: executionId,
+          parentWorkflowExecution: undefined,
+        };
+      }
+
+      for (const childWorkflowExecution of childExecutions.values()) {
+        const childStep = childWorkflowExecution.stepExecutions.find(
+          (step) => step.id === selectedStepExecutionId
+        );
+        if (childStep) {
+          return {
+            lightweightStep: childStep,
+            stepExecutionId: childWorkflowExecution.executionId,
+            parentWorkflowExecution: childWorkflowExecution,
+          };
+        }
+      }
+
+      return {
+        lightweightStep: undefined,
+        stepExecutionId: executionId,
+        parentWorkflowExecution: undefined,
+      };
+    }, [
+      workflowExecution?.stepExecutions,
+      selectedStepExecutionId,
+      isPseudoStep,
+      executionId,
+      childExecutions,
+    ]);
 
     // Lazy-load full step data (with input/output) for real steps
     const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
-      executionId,
+      resolvedExecutionId,
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       lightweightStep?.status
     );
+
+    const selectedStepChildExecution = useMemo(() => {
+      if (!selectedStepExecutionId || isPseudoStep) return undefined;
+      return childExecutions.get(selectedStepExecutionId);
+    }, [selectedStepExecutionId, isPseudoStep, childExecutions]);
 
     const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
       if (!selectedStepExecutionId) {
         return undefined;
       }
 
-      if (selectedStepExecutionId === '__overview' && workflowExecution) {
+      if (selectedStepExecutionId === PSEUDO_STEP_OVERVIEW && workflowExecution) {
         return buildOverviewStepExecutionFromContext(workflowExecution);
       }
 
-      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+      if (selectedStepExecutionId === PSEUDO_STEP_TRIGGER && workflowExecution?.context) {
         return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
       }
 
@@ -135,6 +237,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               onClose={onClose}
               onStepExecutionClick={setSelectedStepExecutionId}
               selectedId={selectedStepExecutionId ?? null}
+              childExecutionsMap={childExecutions}
+              isLoadingChildExecutions={isLoadingChildExecutions}
             />
           }
           fixedPanelSize={sidebarWidth}
@@ -147,6 +251,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
+              childWorkflowExecution={selectedStepChildExecution}
+              parentWorkflowExecution={parentWorkflowExecution}
             />
           }
           minFlexPanelSize={200}

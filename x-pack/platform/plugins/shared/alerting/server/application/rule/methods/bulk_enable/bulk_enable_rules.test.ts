@@ -8,6 +8,7 @@
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
+  coreFeatureFlagsMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
@@ -94,6 +95,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -177,12 +180,14 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
@@ -449,11 +454,16 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
       { overwrite: true }
     );
+
+    const bulkCreateArgs = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const alreadyEnabledRule = bulkCreateArgs.find((so: { id?: string }) => so.id === 'id2');
+    expect(alreadyEnabledRule?.attributes).not.toHaveProperty('lastEnabledAt');
 
     expect(result).toStrictEqual({
       errors: [],
@@ -487,11 +497,16 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
       { overwrite: true }
     );
+
+    const bulkCreateArgs = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const alreadyEnabledRule = bulkCreateArgs.find((so: { id?: string }) => so.id === 'id2');
+    expect(alreadyEnabledRule?.attributes).not.toHaveProperty('lastEnabledAt');
 
     expect(result).toStrictEqual({
       errors: [],
@@ -1000,7 +1015,7 @@ describe('bulkEnableRules', () => {
     });
 
     test('logs audit event when authentication failed', async () => {
-      authorization.ensureAuthorized.mockImplementation(() => {
+      authorization.bulkEnsureAuthorized.mockImplementation(() => {
         throw new Error('Unauthorized');
       });
 

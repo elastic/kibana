@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 const CLASSIC_STREAM = 'logs-classic-license-test';
-const WIRED_STREAM = 'logs';
+const WIRED_STREAM = 'logs.otel';
 
 /**
  * Tests that verify enterprise-only features are hidden on the Advanced tab
@@ -20,7 +21,7 @@ const WIRED_STREAM = 'logs';
  * The StreamDescription and StreamDiscoveryConfiguration components should not
  * render when the license doesn't support significant events features.
  */
-test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
+test.describe('Advanced tab with basic license', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     // Generate logs to create a classic stream
     await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM });
@@ -64,9 +65,8 @@ test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
     // StreamDescription panel should be hidden
     await expect(page.getByText('Stream description')).toBeHidden();
 
-    // StreamDiscoveryConfiguration features/systems should be hidden
+    // StreamDiscoveryConfiguration features should be hidden
     await expect(page.getByText('Feature identification')).toBeHidden();
-    await expect(page.getByText('System identification')).toBeHidden();
 
     // Verify basic components ARE still visible
     // Index Configuration should be visible for wired streams
@@ -108,9 +108,8 @@ test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
     // StreamDescription panel should be hidden
     await expect(page.getByText('Stream description')).toBeHidden();
 
-    // StreamDiscoveryConfiguration features/systems should be hidden
+    // StreamDiscoveryConfiguration features should be hidden
     await expect(page.getByText('Feature identification')).toBeHidden();
-    await expect(page.getByText('System identification')).toBeHidden();
 
     // Verify basic components ARE still visible
     // Delete stream panel should be visible for classic streams

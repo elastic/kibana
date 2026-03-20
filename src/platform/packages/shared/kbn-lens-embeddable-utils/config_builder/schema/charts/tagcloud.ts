@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
@@ -67,7 +67,7 @@ const tagcloudStateSharedOptionsSchema = {
 
 export const tagcloudStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('tagcloud'),
+    type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
@@ -84,12 +84,12 @@ export const tagcloudStateSchemaNoESQL = schema.object(
      */
     tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
   },
-  { meta: { id: 'tagcloudNoESQL' } }
+  { meta: { id: 'tagcloudNoESQL', title: 'Tag Cloud Chart (DSL)' } }
 );
 
 export const tagcloudStateSchemaESQL = schema.object(
   {
-    type: schema.literal('tagcloud'),
+    type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
@@ -97,19 +97,19 @@ export const tagcloudStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(tagcloudStateMetricOptionsSchema),
+    metric: esqlColumnWithFormatSchema.extends(tagcloudStateMetricOptionsSchema),
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: esqlColumnSchema.extends(tagcloudStateTagsByOptionsSchema),
+    tag_by: esqlColumnWithFormatSchema.extends(tagcloudStateTagsByOptionsSchema),
   },
-  { meta: { id: 'tagcloudESQL' } }
+  { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
 );
 
 export const tagcloudStateSchema = schema.oneOf(
   [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
   {
-    meta: { id: 'tagcloudChartSchema' },
+    meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },
   }
 );
 

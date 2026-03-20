@@ -19,6 +19,14 @@ export const WORKFLOW_READ_SECURITY: RouteSecurity = {
 export const WORKFLOW_CREATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.create] },
 };
+export const WORKFLOW_BULK_CREATE_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [
+      WorkflowsManagementApiActions.create,
+      WorkflowsManagementApiActions.update,
+    ],
+  },
+};
 export const WORKFLOW_UPDATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.update] },
 };
@@ -33,4 +41,7 @@ export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
 };
 export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.cancelExecution] },
+};
+export const WORKFLOW_EXECUTION_RESUME_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.execute] },
 };

@@ -41,7 +41,6 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-        allowExpensiveQueries: true,
       };
       expect(
         validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
@@ -53,7 +52,7 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-        allowExpensiveQueries: true,
+
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -93,7 +92,7 @@ describe('options list queries', () => {
           type: 'string',
           subType: { nested: { path: 'path.to.nested' } },
         } as unknown as FieldSpec,
-        allowExpensiveQueries: true,
+
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -151,7 +150,7 @@ describe('options list queries', () => {
         validationAggBuilder.parse(rawSearchResponseMock, {
           size: 10,
           fieldName: 'coolTestField',
-          allowExpensiveQueries: true,
+
           fieldSpec: { type: 'string' } as FieldSpec,
         })
       ).toMatchInlineSnapshot(`
@@ -187,7 +186,6 @@ describe('options list queries', () => {
             subType: { nested: { path: 'path.to.nested' } },
           } as unknown as FieldSpec,
           fieldName: 'coolTestField',
-          allowExpensiveQueries: true,
         })
       ).toMatchInlineSnapshot(`
         Array [

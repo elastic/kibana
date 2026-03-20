@@ -7,7 +7,7 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
-export type ElasticsearchProcessorType = keyof IngestProcessorContainer;
+export type ElasticsearchProcessorType = keyof NonNullable<IngestProcessorContainer>;
 
 const ensureFullProcessorTypeList = <T extends readonly ElasticsearchProcessorType[]>(
   types: ElasticsearchProcessorType extends T[number]
@@ -19,6 +19,7 @@ export const elasticsearchProcessorTypes = ensureFullProcessorTypeList([
   'append',
   'attachment',
   'bytes',
+  'cef',
   'circle',
   'community_id',
   'convert',

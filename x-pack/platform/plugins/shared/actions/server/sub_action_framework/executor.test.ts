@@ -255,9 +255,10 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Request validation failed (Field \\"id\\": Required)"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Request validation failed (✖ Invalid input: expected string, received undefined
+        → at id)"
+    `);
   });
 
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {

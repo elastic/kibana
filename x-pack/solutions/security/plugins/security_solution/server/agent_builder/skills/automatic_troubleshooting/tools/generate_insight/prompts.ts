@@ -9,12 +9,14 @@ import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 export function getPrompts(insightType: DefendInsightType) {
   switch (insightType) {
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return PROMPTS.POLICY_RESPONSE_FAILURE;
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return PROMPTS.INCOMPATIBLE_ANTIVIRUS;
-    case DefendInsightType.Enum.custom:
+    case DefendInsightType.enum.custom:
       return PROMPTS.CUSTOM;
+    default:
+      throw new Error(`Unsupported insight type: ${insightType}`);
   }
 }
 

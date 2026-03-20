@@ -85,11 +85,11 @@ export const TargetFieldSelector = () => {
     <EuiFormRow
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldLabel',
-        { defaultMessage: 'Target field' }
+        { defaultMessage: 'Output field' }
       )}
       helpText={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldHelpText',
-        { defaultMessage: 'Output field. If empty, the input field is updated in place.' }
+        { defaultMessage: 'If empty, the input field is updated in place.' }
       )}
       isInvalid={Boolean(errors.to)}
       error={errors.to?.message}

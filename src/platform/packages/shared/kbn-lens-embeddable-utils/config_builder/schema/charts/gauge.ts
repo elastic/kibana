@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
@@ -30,17 +30,29 @@ const gaugeStateSharedOptionsSchema = {
               defaultValue: 'horizontal',
             }),
           },
-          { meta: { id: 'gaugeShapeBullet', description: 'Bullet gauge shape' } }
+          {
+            meta: {
+              id: 'gaugeShapeBullet',
+              title: 'Shape (Bullet)',
+              description: 'Bullet gauge shape',
+            },
+          }
         ),
         schema.object(
           {
             type: schema.oneOf([
               schema.literal('circle'),
-              schema.literal('semiCircle'),
+              schema.literal('semi_circle'),
               schema.literal('arc'),
             ]),
           },
-          { meta: { id: 'gaugeShapeCircular', description: 'Circular gauge shape' } }
+          {
+            meta: {
+              id: 'gaugeShapeCircular',
+              title: 'Shape (Circular)',
+              description: 'Circular gauge shape',
+            },
+          }
         ),
       ],
       { defaultValue: { type: 'bullet', direction: 'horizontal' } }
@@ -69,17 +81,14 @@ const gaugeStateMetricInnerNoESQLOpsSchema = {
 const gaugeStateMetricInnerESQLOpsSchema = {
   /**
    * Minimum value for the gauge
-   * Note: label, format and other visual options are ignored
    */
   min: schema.maybe(esqlColumnSchema),
   /**
    * Maximum value for the gauge
-   * Note: label, format and other visual options are ignored
    */
   max: schema.maybe(esqlColumnSchema),
   /**
    * Goal value for the gauge
-   * Note: label, format and other visual options are ignored
    */
   goal: schema.maybe(esqlColumnSchema),
 };
@@ -129,7 +138,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
       ...gaugeStateMetricInnerNoESQLOpsSchema,
     }),
   },
-  { meta: { id: 'gaugeNoESQL' } }
+  { meta: { id: 'gaugeNoESQL', title: 'Gauge Chart (DSL)' } }
 );
 
 export const gaugeStateSchemaESQL = schema.object(
@@ -142,16 +151,16 @@ export const gaugeStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends({
+    metric: esqlColumnWithFormatSchema.extends({
       ...gaugeStateMetricOptionsSchema,
       ...gaugeStateMetricInnerESQLOpsSchema,
     }),
   },
-  { meta: { id: 'gaugeESQL' } }
+  { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
 );
 
 export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
-  meta: { id: 'gaugeChartSchema' },
+  meta: { id: 'gaugeChart', title: 'Gauge Chart' },
 });
 
 export type GaugeState = TypeOf<typeof gaugeStateSchema>;

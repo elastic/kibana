@@ -77,14 +77,22 @@ export interface DownsamplingBarProps {
   segments?: DownsamplingSegment[] | null;
   gridTemplateColumns: string;
   onRemoveStep?: (stepNumber: number) => void;
+  onEditStep?: (stepNumber: number, phaseName?: string) => void;
+  editedPhaseName?: string;
+  editedDownsampleStepIndex?: number;
   canManageLifecycle: boolean;
+  isEditLifecycleFlyoutOpen?: boolean;
 }
 
 export const DownsamplingBar = ({
   segments,
   gridTemplateColumns,
   onRemoveStep,
+  onEditStep,
+  editedPhaseName,
+  editedDownsampleStepIndex,
   canManageLifecycle,
+  isEditLifecycleFlyoutOpen,
 }: DownsamplingBarProps) => {
   const { euiTheme } = useEuiTheme();
   const { getDownsamplingColor } = useDownsamplingColors();
@@ -117,7 +125,7 @@ export const DownsamplingBar = ({
           responsive={false}
           css={{
             gridTemplateColumns,
-            paddingRight: euiTheme.size.xs,
+            paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
           }}
         >
@@ -148,7 +156,16 @@ export const DownsamplingBar = ({
                     phaseName={segment.phaseName}
                     color={getDownsamplingColor(segment.stepIndex ?? index)}
                     onRemoveStep={onRemoveStep}
+                    onEditStep={onEditStep}
+                    isBeingEdited={Boolean(
+                      (editedPhaseName &&
+                        segment.phaseName &&
+                        segment.phaseName === editedPhaseName) ||
+                        (editedDownsampleStepIndex !== undefined &&
+                          segment.stepIndex === editedDownsampleStepIndex)
+                    )}
                     canManageLifecycle={canManageLifecycle}
+                    isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
                   />
                 ) : segment.isDelete ? (
                   <EuiPanel

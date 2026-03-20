@@ -53,6 +53,9 @@ export class CustomLinksPage {
   }
 
   async clickDelete() {
+    await expect(this.page.getByTestId('apmDeleteButtonDeleteButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
   }
 
@@ -78,6 +81,9 @@ export class CustomLinksPage {
     const editButton = row.getByTestId('editCustomLink');
     await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
+    await expect(this.page.getByTestId('apmCustomLinkFlyoutFooterCloseButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   /**

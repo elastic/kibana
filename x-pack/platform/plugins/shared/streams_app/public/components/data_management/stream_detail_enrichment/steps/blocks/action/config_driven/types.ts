@@ -23,7 +23,7 @@ export interface FieldOptions {
   includeIgnoreFailures: boolean;
   includeIgnoreMissing: boolean;
   includeCondition: boolean;
-  fieldHelpText: string;
+  fieldHelpText?: string;
   fieldKey: string;
 }
 
@@ -32,7 +32,7 @@ export interface FieldConfiguration {
   type: 'string' | 'array' | 'boolean';
   required: boolean;
   label: string;
-  helpText: React.ReactNode;
+  helpText?: React.ReactNode;
 }
 
 export type ConfigDrivenProcessors = typeof configDrivenProcessors;

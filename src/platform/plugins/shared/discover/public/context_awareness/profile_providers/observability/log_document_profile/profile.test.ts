@@ -19,7 +19,7 @@ import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { RESOLUTION_MATCH } from './__mocks__';
+import { RESOLUTION_MATCH } from './__mocks__/log_document_resolution_match';
 
 const mockServices = createProfileProviderSharedServicesMock();
 

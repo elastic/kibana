@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../types/api';
+import type { AttachmentRequest, AttachmentRequestV2 } from '../types/api';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
@@ -33,11 +33,16 @@ export const isCommentRequestTypePersistableState = (
   return context.type === AttachmentType.persistableState;
 };
 
+export const isLegacyAttachmentRequest = (
+  context: AttachmentRequestV2
+): context is AttachmentRequest => {
+  return Object.values(AttachmentType).includes(context.type as AttachmentType);
+};
 /**
  * A type narrowing function for  reference-based unified attachment.
  */
 export const isUnifiedReferenceAttachmentRequest = (
-  context: AttachmentRequest | UnifiedAttachmentPayload
+  context: AttachmentRequestV2
 ): context is UnifiedReferenceAttachmentPayload => {
   return 'attachmentId' in context && typeof context.attachmentId === 'string';
 };
@@ -46,7 +51,7 @@ export const isUnifiedReferenceAttachmentRequest = (
  * A type narrowing function for value-based unified attachment.
  */
 export const isUnifiedValueAttachmentRequest = (
-  context: AttachmentRequest | UnifiedAttachmentPayload
+  context: AttachmentRequestV2
 ): context is UnifiedValueAttachmentPayload => {
   return 'data' in context && context.data !== null && typeof context.data === 'object';
 };
@@ -55,7 +60,7 @@ export const isUnifiedValueAttachmentRequest = (
  * A type narrowing function for unified attachment (either reference or value-based).
  */
 export const isUnifiedAttachmentRequest = (
-  context: AttachmentRequest | UnifiedAttachmentPayload
+  context: AttachmentRequestV2
 ): context is UnifiedAttachmentPayload => {
   return isUnifiedReferenceAttachmentRequest(context) || isUnifiedValueAttachmentRequest(context);
 };

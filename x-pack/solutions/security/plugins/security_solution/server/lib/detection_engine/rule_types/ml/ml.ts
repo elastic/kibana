@@ -29,6 +29,7 @@ import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppres
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 
 interface MachineLearningRuleExecutorParams {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
@@ -97,6 +98,10 @@ export const mlExecutor = async ({
       result.warning = true;
     }
 
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
+
     let anomalyResults: AnomalyResults;
     try {
       const searchResults = await findMlSignals({
@@ -111,9 +116,11 @@ export const mlExecutor = async ({
         to: tuple.to.toISOString(),
         maxSignals: tuple.maxSignals,
         exceptionFilter,
+        additionalFilters: dataStreamNamespaceFilters,
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      result.totalEventsFound = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       result.errors.push(error.message);
@@ -139,7 +146,7 @@ export const mlExecutor = async ({
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      ruleExecutionLogger.info(`Alerts from ML anomalies: ${anomalyCount}`);
+      ruleExecutionLogger.debug(`Alerts from ML anomalies: ${anomalyCount}`);
     }
 
     if (

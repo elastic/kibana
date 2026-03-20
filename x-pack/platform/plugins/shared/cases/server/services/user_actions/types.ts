@@ -35,7 +35,7 @@ import type {
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
@@ -366,7 +366,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

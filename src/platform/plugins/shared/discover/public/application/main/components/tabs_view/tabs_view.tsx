@@ -37,15 +37,8 @@ export const TabsView = (props: SingleTabViewProps) => {
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const currentDataView = useCurrentTabRuntimeState(
-    props.runtimeStateManager,
-    (tab) => tab.currentDataView$
-  );
-
-  const scopedEbtManager = useCurrentTabRuntimeState(
-    props.runtimeStateManager,
-    (state) => state.scopedEbtManager$
-  );
+  const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
 
   const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
     useAppMenuData({ currentDataView });
@@ -84,7 +77,7 @@ export const TabsView = (props: SingleTabViewProps) => {
      */
     <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
-        <div ref={resizeRef}>
+        <div ref={resizeRef} className="eui-fullHeight">
           <UnifiedTabs
             services={services}
             items={items}

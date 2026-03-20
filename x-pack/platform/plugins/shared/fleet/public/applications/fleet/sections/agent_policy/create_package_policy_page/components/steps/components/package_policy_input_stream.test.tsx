@@ -19,6 +19,8 @@ import type {
   RegistryVarGroup,
 } from '../../../../../../types';
 
+import { ExperimentalFeaturesService } from '../../../../../../services';
+
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
 jest.mock('../../../../../../../../hooks', () => ({
@@ -179,6 +181,9 @@ describe('PackagePolicyInputStreamConfig', () => {
   let mockUpdatePackagePolicyInputStream: jest.Mock;
 
   beforeEach(() => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableVarGroups: true,
+    } as any);
     testRenderer = createFleetTestRendererMock();
     mockUpdatePackagePolicyInputStream = jest.fn();
 
@@ -186,7 +191,9 @@ describe('PackagePolicyInputStreamConfig', () => {
       isAgentlessEnabled: false,
       isAgentlessDefault: false,
       isAgentlessAgentPolicy: jest.fn(),
-      isAgentlessIntegration: jest.fn(),
+      getAgentlessStatusForPackage: jest
+        .fn()
+        .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
       isServerless: false,
       isCloud: false,
     });
@@ -336,7 +343,9 @@ describe('PackagePolicyInputStreamConfig', () => {
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: true,
       });
@@ -357,7 +366,9 @@ describe('PackagePolicyInputStreamConfig', () => {
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: false,
       });

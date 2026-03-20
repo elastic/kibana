@@ -37,7 +37,6 @@ import {
 } from '../../app_plugin/show_underlying_data';
 
 import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { isTextBasedLanguage } from '../helper';
 import type { LensEmbeddableStartServices } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
 
@@ -259,7 +258,7 @@ export function initializeActionApi(
 } {
   return {
     api: {
-      ...(isTextBasedLanguage(initialState) ? {} : drilldownsManager.api),
+      ...(drilldownsManager?.api ?? {}),
       ...createViewUnderlyingDataApis(
         getLatestState,
         internalApi,

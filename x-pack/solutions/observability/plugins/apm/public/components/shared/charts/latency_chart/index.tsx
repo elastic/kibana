@@ -62,7 +62,7 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const transactionName = 'transactionName' in query ? query.transactionName : null;
+  const transactionName = 'transactionName' in query ? query.transactionName ?? null : null;
 
   const { latencyChartsData, latencyChartsStatus, bucketSizeInSeconds, start, end } =
     useTransactionLatencyChartsFetcher({
@@ -154,6 +154,7 @@ export function LatencyChart({ height, kuery }: Props) {
                     environment,
                     transactionName: transactionName ?? undefined,
                     transactionType,
+                    sortDirection: 'DESC',
                   }}
                 />
               </EuiFlexItem>

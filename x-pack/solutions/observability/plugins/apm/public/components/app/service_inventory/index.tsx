@@ -10,6 +10,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
 import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -30,6 +31,7 @@ import { isTimeComparison } from '../../shared/time_comparison/get_comparison_op
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
 import { TracesInDiscoverCallout } from './traces_in_discover_callout';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -179,6 +181,9 @@ export function ServiceInventory() {
   const {
     query: { rangeFrom, rangeTo, sortField },
   } = useApmParams('/services');
+  const {
+    services: { telemetry },
+  } = useKibana<ApmPluginStartDeps & ApmServices>();
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -289,6 +294,13 @@ export function ServiceInventory() {
       });
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, rangeFrom, rangeTo]);
+
+  useEffect(() => {
+    if (hasSlos) {
+      telemetry.reportSloInfoShown();
+    }
+  }, [hasSlos, telemetry]);
+
   return (
     <>
       <SearchBar showTimeComparison />

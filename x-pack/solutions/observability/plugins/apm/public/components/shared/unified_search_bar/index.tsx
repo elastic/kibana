@@ -143,7 +143,7 @@ export function UnifiedSearchBar({
   const { kuery, serviceName, environment, groupId, refreshPausedFromUrl, refreshIntervalFromUrl } =
     useSearchBarParams(value);
   const { onPageRefreshStart } = usePerformanceContext();
-  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+  const timePickerTimeDefaults = core?.uiSettings?.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
   const urlTimeRange = useUrlTimeRange(timePickerTimeDefaults);

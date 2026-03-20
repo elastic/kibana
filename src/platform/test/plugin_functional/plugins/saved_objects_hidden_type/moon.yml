@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-objects-hidden-type-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-objects-hidden-type-plugin'
+  title: '@kbn/saved-objects-hidden-type-plugin'
   description: Moon project for @kbn/saved-objects-hidden-type-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/saved_objects_hidden_type
+  sourceRoot: src/platform/test/plugin_functional/plugins/saved_objects_hidden_type
 dependsOn:
   - '@kbn/core'
 tags:

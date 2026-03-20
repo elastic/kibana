@@ -209,7 +209,7 @@ exports[`Both modes should render the side navigation 1`] = `
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     color="inherit"
-                    data-euiicon-type="launch"
+                    data-euiicon-type="rocket"
                   />
                 </a>
               </div>
@@ -321,7 +321,7 @@ exports[`Both modes should render the side navigation 1`] = `
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     color="inherit"
-                    data-euiicon-type="launch"
+                    data-euiicon-type="rocket"
                   />
                 </a>
               </div>

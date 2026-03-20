@@ -6,12 +6,12 @@
  */
 
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createFileHashTransform, createEsFileClient } from '@kbn/files-plugin/server';
+import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
 import type {
   ElasticsearchClient,
   Logger,
-  SavedObjectsClientContract,
   SavedObject,
+  SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -20,11 +20,15 @@ import assert from 'assert';
 import type { KueryNode } from '@kbn/es-query';
 import * as esKuery from '@kbn/es-query';
 import type { File } from '@kbn/files-plugin/common';
-import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
+import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/script_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
+  SUPPORTED_HOST_OS_TYPE,
 } from '../../../../common/endpoint/constants';
 import type { HapiReadableStream } from '../../../types';
 import {
@@ -52,6 +56,11 @@ export interface ScriptsLibraryClientOptions {
   spaceId: string;
   username: string;
   endpointService: EndpointAppContextService;
+  /**
+   * Rules client is used only by certain methods (ex. delete) so its optional, but the methods
+   * that depend on it will fail if the client is not initialized with it
+   */
+  rulesClient?: RulesClient;
 }
 
 export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
@@ -60,11 +69,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   protected readonly esClient: ElasticsearchClient;
   protected readonly soClient: SavedObjectsClientContract;
   protected readonly username: string;
+  protected readonly rulesClient: RulesClient | undefined;
 
   constructor(options: ScriptsLibraryClientOptions) {
     this.logger = options.endpointService.createLogger('ScriptsLibraryClient');
     this.username = options.username;
     this.esClient = options.endpointService.getInternalEsClient();
+    this.rulesClient = options.rulesClient;
     this.soClient = options.endpointService.savedObjects.createInternalScopedSoClient({
       spaceId: options.spaceId,
       readonly: false,
@@ -84,6 +95,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     example,
     description,
     instructions,
+    fileType,
     requiresInput,
     pathToExecutable,
     tags,
@@ -102,6 +114,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       file_size: 0,
       file_name: '',
       file_hash_sha256: '',
+      file_type: fileType,
       requires_input: requiresInput,
       path_to_executable: pathToExecutable,
       created_by: '',
@@ -121,12 +134,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       requires_input: requiresInput = false,
-      path_to_executable: pathToExecutable = undefined,
+      path_to_executable: pathToExecutable,
       tags = [],
       file_id: fileId,
       file_name: fileName,
       file_size: fileSize,
       file_hash_sha256: fileHash,
+      file_type: fileType,
       created_by: createdBy,
       updated_by: updatedBy,
       created_at: createdAt,
@@ -143,12 +157,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       fileName,
       fileSize,
       fileHash,
+      fileType,
+      pathToExecutable: fileType === 'archive' ? pathToExecutable : undefined,
       downloadUri,
       requiresInput,
       description,
       instructions,
       example,
-      pathToExecutable,
       tags: tags as EndpointScript['tags'],
       createdBy,
       updatedBy,
@@ -215,10 +230,14 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       .get<ScriptsLibrarySavedObjectAttributes>(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)
       .catch((error) => {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          throw new ScriptLibraryError(`Script with id ${scriptId} not found`, 404, error);
+          throw new ScriptLibraryError(`Script with id [${scriptId}] not found`, 404, error);
         }
 
-        throw new ScriptLibraryError(`Failed to retrieve script with id: ${scriptId}`, 500, error);
+        throw new ScriptLibraryError(
+          `Failed to retrieve script with id: [${scriptId}]`,
+          500,
+          error
+        );
       });
   }
 
@@ -297,10 +316,81 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     return fileStorage;
   }
 
+  protected async findRulesUsingScripts(
+    scriptIds: string | string[],
+    /** List of OS types to check usage for. Defaults to checking all supported OS types */
+    osType?: SupportedHostOsType[]
+  ): ReturnType<typeof findRules> {
+    if (!this.rulesClient) {
+      throw new ScriptLibraryError('Unable to query for rules - no Rules client available!');
+    }
+
+    const scriptList = (Array.isArray(scriptIds) ? scriptIds : [scriptIds])
+      .map((id) => `"${id}"`)
+      .join(' OR ');
+
+    const kuery = `alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (${(
+      osType ?? SUPPORTED_HOST_OS_TYPE
+    )
+      .map(
+        (os) =>
+          `alert.attributes.params.responseActions.params.config.${os}.scriptId:(${scriptList})`
+      )
+      .join(' OR ')})`;
+
+    this.logger.debug(() => `Searching for rules using scripts with KQL: ${kuery}`);
+
+    try {
+      const rulesResults = await findRules({
+        rulesClient: this.rulesClient,
+        filter: kuery,
+        perPage: 1000,
+        page: undefined,
+        fields: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+        hasReference: undefined,
+      });
+
+      this.logger.debug(
+        () =>
+          `Found ${rulesResults.total} rules referencing scripts IDs [${scriptList}]: ${stringify(
+            rulesResults
+          )}`
+      );
+
+      return rulesResults;
+    } catch (err) {
+      const error = new ScriptLibraryError(
+        `Error while attempting to find rules using script ID(s) [${scriptList}]: ${err.message}`,
+        500,
+        err
+      );
+
+      this.logger.error(error);
+
+      throw error;
+    }
+  }
+
   public async create({
     file: _file,
     ...scriptDefinition
   }: CreateScriptRequestBody): Promise<EndpointScript> {
+    if (scriptDefinition.fileType === 'archive' && !scriptDefinition.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".',
+        400
+      );
+    }
+
+    if (scriptDefinition.fileType === 'script' && scriptDefinition.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
+        400
+      );
+    }
+
     const logger = this.logger.get('create');
     const scriptId = uuidV4();
     const fileStream = _file as HapiReadableStream;
@@ -367,6 +457,42 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       );
     }
 
+    if (scriptUpdates.fileType === 'archive' && !scriptUpdates.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".',
+        400
+      );
+    }
+
+    if (scriptUpdates.fileType === 'script' && scriptUpdates.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
+        400
+      );
+    }
+
+    // if OS types were removed in the update, then check/validate that rules are not using it
+    if (scriptUpdates.platform) {
+      const osTypesToRemove = currentScriptSoItem.attributes.platform.filter(
+        (osType) => !scriptUpdates.platform?.includes(osType as SupportedHostOsType)
+      ) as SupportedHostOsType[];
+
+      if (osTypesToRemove.length > 0) {
+        const rulesResults = await this.findRulesUsingScripts(id, osTypesToRemove);
+
+        if (rulesResults.total > 0) {
+          throw new ScriptLibraryError(
+            `Cannot remove platform(s) [${osTypesToRemove.join(
+              ', '
+            )}] from script. The following detection rules currently have 'runscript' configurations that reference their use:\n${rulesResults.data
+              .map((rule) => `${rule.name} (ID: ${rule.id})`)
+              .join('\n')}`,
+            409
+          );
+        }
+      }
+    }
+
     if (file) {
       newFileStorage = await this.storeFile({ scriptId: id, file: file as HapiReadableStream });
 
@@ -382,6 +508,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
           fieldName as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP
         ] ?? fieldName) as keyof ScriptsLibrarySavedObjectAttributes;
 
+        // force path_to_executable to be empty string
+        if (fieldName === 'fileType' && value === 'script') {
+          acc.path_to_executable = '';
+        }
         // @ts-expect-error: TS2322 - caused by the fact that `scriptUpdates` is a subset of fields
         acc[soFieldName] = value;
 
@@ -494,6 +624,16 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
   public async delete(scriptId: string): Promise<void> {
     const scriptSo = await this.getScriptSavedObject(scriptId);
+    const rulesUsingScript = await this.findRulesUsingScripts(scriptId);
+
+    if (rulesUsingScript.total > 0) {
+      throw new ScriptLibraryError(
+        `Cannot delete script [${scriptId}]. The following detection rules have 'runscript' configurations that reference it:\n${rulesUsingScript.data
+          .map((rule) => `${rule.name} (ID: ${rule.id})`)
+          .join('\n')}`,
+        409
+      );
+    }
 
     await this.soClient
       .delete(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)

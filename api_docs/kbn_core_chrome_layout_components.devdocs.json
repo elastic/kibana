@@ -178,21 +178,19 @@
         ],
         "label": "useLayoutUpdate",
         "description": [
-          "\nHook to access and update the layout configuration."
+          "\nHook to get the layout update function. Does not cause re-renders when config changes."
         ],
         "signature": [
-          "() => (updates: Partial<",
-          "LayoutConfig",
-          ">) => void"
+          "() => LayoutUpdateFn"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-        "lineNumber": 138,
+        "lineNumber": 146,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
         "returnComment": [
-          "a function to update it"
+          "a function to update the layout config"
         ],
         "initialIsOpen": false
       }
@@ -241,7 +239,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
             "lineNumber": 77,
@@ -278,14 +276,18 @@
         "parentPluginId": "@kbn/core-chrome-layout-components",
         "id": "def-public.ChromeStyle",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "todo"
+        ],
         "label": "ChromeStyle",
-        "description": [],
+        "description": [
+          "\nChrome style variants.\n"
+        ],
         "signature": [
           "\"project\" | \"classic\""
         ],
-        "path": "src/core/packages/chrome/browser/src/types.ts",
-        "lineNumber": 33,
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.types.ts",
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -22,20 +22,18 @@ interface ChartSectionActions {
 
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
+  /**
+   * Breakdown field from Discover's app state, synced from sidebar "Add Breakdown" action
+   */
+  breakdownField?: string;
+  /**
+   * Optional callback used to push toolbar breakdown selections back to Discover app state.
+   */
+  onBreakdownFieldChange?: (fieldName?: string) => void;
 }
 
 export interface Dimension {
   name: string;
-  type: ES_FIELD_TYPES;
-}
-
-export interface MetricField {
-  name: string;
-  index: string;
-  type: ES_FIELD_TYPES;
-  instrument?: MappingTimeSeriesMetricType;
-  unit?: MetricUnit;
-  dimensions: Dimension[];
 }
 
 export type MetricUnit =
@@ -50,3 +48,33 @@ export type MetricUnit =
   | 'bytes'
   | 'count'
   | `{${string}}`; // otel special units of count
+
+export interface MetricsESQLResponse {
+  metric_name: string;
+  data_stream: string[] | string;
+  unit: MetricUnit[] | null;
+  metric_type: MappingTimeSeriesMetricType[] | MappingTimeSeriesMetricType;
+  field_type: ES_FIELD_TYPES[] | ES_FIELD_TYPES;
+  dimension_fields: string[] | string;
+}
+
+export interface ParsedMetricItem {
+  metricName: string;
+  dataStream: string;
+  readonly units: MetricUnit[];
+  readonly metricTypes: MappingTimeSeriesMetricType[];
+  readonly fieldTypes: ES_FIELD_TYPES[];
+  readonly dimensionFields: Dimension[];
+}
+
+export interface ParsedMetricsResult {
+  metricItems: ParsedMetricItem[];
+  allDimensions: Dimension[];
+}
+
+export interface MetricsInfoResponse {
+  loading: boolean;
+  error: Error | null;
+  metricItems: ParsedMetricItem[];
+  allDimensions: Dimension[];
+}

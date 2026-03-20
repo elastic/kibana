@@ -21,6 +21,8 @@ import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
+import { getTransaction } from '../../routes/transactions/get_transaction';
+import { getTransactionByName } from '../../routes/transactions/get_transaction_by_name';
 
 export function registerDataProviders({
   core,
@@ -209,6 +211,58 @@ export function registerDataProviders({
           metrics,
         };
       });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmTransactionDetails',
+    async ({ request, serviceName, transactionName, transactionId, traceId, start, end }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
+
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end, { roundUp: true });
+
+      if (!startMs || !endMs) {
+        throw new Error('Invalid date range provided.');
+      }
+
+      let resolvedTransactionId = transactionId;
+      let resolvedTraceId = traceId;
+
+      if (!resolvedTransactionId) {
+        const redirectInfo = await getTransactionByName({
+          transactionName,
+          serviceName,
+          apmEventClient,
+          start: startMs,
+          end: endMs,
+        });
+
+        resolvedTransactionId = redirectInfo?.transaction?.id;
+        resolvedTraceId = redirectInfo?.trace?.id;
+      }
+
+      if (!resolvedTransactionId) {
+        return {
+          transaction: undefined,
+          transactionId: resolvedTransactionId,
+          traceId: resolvedTraceId,
+        };
+      }
+
+      const transaction = await getTransaction({
+        transactionId: resolvedTransactionId,
+        traceId: resolvedTraceId,
+        apmEventClient,
+        start: startMs,
+        end: endMs,
+      });
+
+      return {
+        transaction,
+        transactionId: resolvedTransactionId,
+        traceId: resolvedTraceId,
+      };
     }
   );
 }

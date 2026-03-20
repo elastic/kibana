@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { urlDrilldownGlobalScopeProvider } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { URL_DRILLDOWN_TYPE } from '../common/constants';
 
@@ -36,7 +35,9 @@ export class UrlDrilldownPlugin
       const { getUrlDrilldown } = await import('./lib/get_url_drilldown');
       return getUrlDrilldown({
         externalUrl: core.http.externalUrl,
-        getGlobalScope: urlDrilldownGlobalScopeProvider({ core }),
+        getGlobalScope: () => ({
+          kibanaUrl: window.location.origin + core.http.basePath.get(),
+        }),
         navigateToUrl: (url: string) =>
           core.getStartServices().then(([{ application }]) => application.navigateToUrl(url)),
         getSyntaxHelpDocsLink: () =>

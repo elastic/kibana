@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import { comment, actionComment } from '../../mocks';
+import { comment, actionComment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_USER_ACTIONS_PER_CASE,
+  SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { bulkCreate } from './bulk_create';
-import { createUserActionServiceMock } from '../../services/mocks';
+import {
+  createAttachmentServiceMock,
+  createCaseServiceMock,
+  createUserActionServiceMock,
+} from '../../services/mocks';
+import { commentAttachmentType } from '../../attachment_framework/attachments';
 
 describe('bulkCreate', () => {
   const caseId = 'test-case';
 
   const clientArgs = createCasesClientMockArgs();
   const userActionService = createUserActionServiceMock();
+  const caseService = createCaseServiceMock();
+  const attachmentService = createAttachmentServiceMock();
 
   clientArgs.services.userActionService = userActionService;
+  clientArgs.services.caseService = caseService;
+  clientArgs.services.attachmentService = attachmentService;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -115,5 +125,46 @@ describe('bulkCreate', () => {
         'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
       );
     });
+  });
+
+  it('accepts unified type (v2) attachments without owner and uses case owner', async () => {
+    clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 2,
+      per_page: 2,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        mockCaseUnifiedAttachments[0],
+        { ...mockCaseUnifiedAttachments[0], id: 'comment-2' },
+      ],
+    });
+
+    const unifiedAttachments = [
+      { type: 'comment' as const, data: { content: 'first' }, owner: SECURITY_SOLUTION_OWNER },
+      { type: 'comment' as const, data: { content: 'second' }, owner: SECURITY_SOLUTION_OWNER },
+    ];
+
+    await expect(
+      bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs)
+    ).resolves.toBeDefined();
+
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entities: expect.arrayContaining([
+          expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
+        ]),
+      })
+    );
   });
 });

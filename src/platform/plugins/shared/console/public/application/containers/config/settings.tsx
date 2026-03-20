@@ -19,10 +19,11 @@ const getAutocompleteDiff = (
   newSettings: DevToolsSettings,
   prevSettings: DevToolsSettings
 ): AutocompleteOptions[] => {
-  return Object.keys(newSettings.autocomplete).filter((key) => {
-    // @ts-ignore
+  const keys = Object.keys(newSettings.autocomplete) as AutocompleteOptions[];
+
+  return keys.filter((key) => {
     return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
-  }) as AutocompleteOptions[];
+  });
 };
 
 export function Settings() {

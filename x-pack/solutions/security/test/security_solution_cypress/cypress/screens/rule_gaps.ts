@@ -6,6 +6,11 @@
  */
 
 export const RULE_GAPS_OVERVIEW_PANEL = '[data-test-subj="rule-with-gaps_overview-panel"]';
+export const RULE_MONITORING_EXPAND_BUTTON = '[data-test-subj="rule-monitoring-expand-button"]';
+export const LAST_RESPONSE_SUMMARY_CHART = '[data-test-subj="last-response-summary-chart"]';
+export const LAST_RESPONSE_SUMMARY_TABLE = '[data-test-subj="last-response-summary-table"]';
+export const RULE_GAP_SUMMARY_CHART = '[data-test-subj="rule-gap-summary-chart"]';
+export const RULE_GAP_SUMMARY_TABLE = '[data-test-subj="rule-gap-summary-table"]';
 export const GAP_AUTO_FILL_STATUS_BADGE = '[data-test-subj="gap-auto-fill-status-badge"]';
 export const RULE_SETTINGS_MODAL = '[data-test-subj="rule-settings-modal"]';
 export const RULE_SETTINGS_ENABLE_SWITCH = '[data-test-subj="rule-settings-enable-switch"]';

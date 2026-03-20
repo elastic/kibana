@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { integrationSchemaV1 } from './schemas/integration_schema';
+import { integrationSchemaV1, integrationSchemaV2 } from './schemas/integration_schema';
 import { INTEGRATION_SAVED_OBJECT_TYPE } from './constants';
 
 export const integrationSavedObjectType: SavedObjectsType = {
@@ -20,6 +20,8 @@ export const integrationSavedObjectType: SavedObjectsType = {
       // Deprecated: kept for backwards compatibility with existing saved objects.
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
+      created_by_profile_uid: { type: 'keyword' },
+      // Deprecated: status is now derived from data streams. Kept for backward compatibility.
       status: { type: 'keyword' },
       metadata: {
         properties: {
@@ -42,6 +44,24 @@ export const integrationSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: integrationSchemaV1.extends({}, { unknowns: 'ignore' }),
         create: integrationSchemaV1,
+      },
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            created_by_profile_uid: { type: 'keyword' },
+          },
+        },
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: ['data_stream_count', 'status'],
+        },
+      ],
+      schemas: {
+        forwardCompatibility: integrationSchemaV2.extends({}, { unknowns: 'ignore' }),
+        create: integrationSchemaV2,
       },
     },
   },

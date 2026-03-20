@@ -18,16 +18,7 @@ import type {
 
 export interface Field {
   name: string;
-  type: string;
-}
-
-export interface FieldMapping {
-  enabled?: boolean;
-  path?: string;
-  properties?: Record<string, FieldMapping>;
-  type?: string;
-  index_name?: string;
-  fields?: FieldMapping[];
+  type: string | undefined;
 }
 
 export interface AutoCompleteEntitiesApiResponse {

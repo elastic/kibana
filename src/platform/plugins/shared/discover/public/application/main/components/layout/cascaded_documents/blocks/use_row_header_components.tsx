@@ -22,7 +22,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiTextTruncate,
   EuiWrappingPopover,
   copyToClipboard,
 } from '@elastic/eui';
@@ -361,6 +360,10 @@ const rowHeaderTitleStyles = {
   textInner: css({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 2,
+    lineClamp: 2,
   }),
 };
 
@@ -400,19 +403,12 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
       return (
         <EuiText size="s">
-          <EuiTextTruncate
-            truncation="end"
-            text={
-              rowData.groupValue ||
+          <h4 css={rowHeaderTitleStyles.textInner}>
+            {rowData.groupValue ||
               i18n.translate('discover.dataCascade.row.action.noValue', {
                 defaultMessage: '(blank)',
-              })
-            }
-          >
-            {(truncatedText) => {
-              return <h4 css={rowHeaderTitleStyles.textInner}>{truncatedText}</h4>;
-            }}
-          </EuiTextTruncate>
+              })}
+          </h4>
         </EuiText>
       );
     },

@@ -7,43 +7,56 @@
 
 import type { StreamQuery } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression } from '@kbn/es-query';
+import { Parser } from '@elastic/esql';
 
-export function validateQuery(query: Partial<StreamQuery>): {
-  title: { isInvalid: boolean; error?: string };
-  kql: { isInvalid: boolean; error?: string };
-} {
-  const { title = '', kql: { query: kqlQuery } = { query: '' } } = query;
+export interface FieldValidation {
+  isInvalid: boolean;
+  error?: string;
+}
 
-  const isEmptyTitle = title.length === 0;
-  const titleErrorMessage = isEmptyTitle
-    ? i18n.translate('xpack.streams.significantEventFlyout.formFieldTitleRequiredError', {
-        defaultMessage: 'Required',
-      })
-    : undefined;
+const REQUIRED_MESSAGE = i18n.translate(
+  'xpack.streams.significantEventFlyout.formFieldRequiredError',
+  { defaultMessage: 'Required' }
+);
 
-  const isEmptyKql = kqlQuery.length === 0;
-  let kqlSyntaxError = false;
-  if (!isEmptyKql) {
-    try {
-      fromKueryExpression(kqlQuery);
-    } catch (error) {
-      kqlSyntaxError = true;
-    }
+const INVALID_SYNTAX_MESSAGE = i18n.translate(
+  'xpack.streams.significantEventFlyout.formFieldQuerySyntaxError',
+  { defaultMessage: 'Invalid syntax' }
+);
+
+export function validateTitle(title: string): FieldValidation {
+  const isEmpty = title.length === 0;
+  return {
+    isInvalid: isEmpty,
+    error: isEmpty ? REQUIRED_MESSAGE : undefined,
+  };
+}
+
+export function validateEsqlQuery(esqlQuery: string): FieldValidation {
+  if (!esqlQuery.trim()) {
+    return { isInvalid: true, error: REQUIRED_MESSAGE };
   }
 
-  const kqlErrorMessage = kqlSyntaxError
-    ? i18n.translate('xpack.streams.significantEventFlyout.formFieldQuerySyntaxError', {
-        defaultMessage: 'Invalid syntax',
-      })
-    : isEmptyKql
-    ? i18n.translate('xpack.streams.significantEventFlyout.formFieldQueryRequiredError', {
-        defaultMessage: 'Required',
-      })
-    : undefined;
+  let hasSyntaxError = false;
+  try {
+    const { errors } = Parser.parse(esqlQuery);
+    hasSyntaxError = errors.length > 0;
+  } catch {
+    hasSyntaxError = true;
+  }
 
   return {
-    title: { isInvalid: Boolean(titleErrorMessage), error: titleErrorMessage },
-    kql: { isInvalid: Boolean(kqlErrorMessage), error: kqlErrorMessage },
+    isInvalid: hasSyntaxError,
+    error: hasSyntaxError ? INVALID_SYNTAX_MESSAGE : undefined,
+  };
+}
+
+export function validateQuery(query: Pick<StreamQuery, 'title' | 'esql'>): {
+  title: FieldValidation;
+  esql: FieldValidation;
+} {
+  return {
+    title: validateTitle(query.title ?? ''),
+    esql: validateEsqlQuery(query.esql?.query ?? ''),
   };
 }

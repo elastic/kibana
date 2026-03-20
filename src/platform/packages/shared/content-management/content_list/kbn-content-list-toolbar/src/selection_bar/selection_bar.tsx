@@ -10,7 +10,11 @@
 import React, { useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useContentListConfig, useContentListSelection } from '@kbn/content-list-provider';
+import {
+  useContentListConfig,
+  useContentListSelection,
+  useDeleteConfirmation,
+} from '@kbn/content-list-provider';
 
 export interface SelectionBarProps {
   /** Optional `data-test-subj` attribute for testing. */
@@ -20,22 +24,22 @@ export interface SelectionBarProps {
 /**
  * Selection actions rendered as `toolsLeft` inside the `EuiSearchBar`.
  *
- * When items are selected, renders a danger button labelled
- * "Delete {count} {entity}" matching the existing `TableListView` pattern.
+ * When items are selected and `onDelete` is configured on the provider, renders
+ * a danger button labelled "Delete {count} {entity}" matching the existing
+ * `TableListView` pattern. Clicking the button opens a {@link DeleteConfirmationModal}
+ * that handles the delete lifecycle (confirmation, loading, error, refetch).
+ * Clears selection when the modal closes (cancel or success).
  *
- * The button currently **clears the selection** as a placeholder action.
- * Delete orchestration will be wired in a follow-up PR that adds
- * provider-level delete support.
- *
- * Returns `null` when nothing is selected.
+ * Returns `null` when nothing is selected or when `onDelete` is not configured.
  *
  * @internal Rendered automatically by {@link ContentListToolbar}.
  */
 export const SelectionBar = ({
   'data-test-subj': dataTestSubj = 'contentListSelectionBar',
 }: SelectionBarProps) => {
-  const { labels } = useContentListConfig();
-  const { selectedCount, clearSelection } = useContentListSelection();
+  const { labels, item: itemConfig } = useContentListConfig();
+  const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
+  const { requestDelete, deleteModal } = useDeleteConfirmation({ onClose: clearSelection });
 
   const buttonLabel = useMemo(
     () =>
@@ -49,19 +53,21 @@ export const SelectionBar = ({
     [selectedCount, labels.entity, labels.entityPlural]
   );
 
-  if (selectedCount === 0) {
+  if (selectedCount === 0 || typeof itemConfig?.onDelete !== 'function') {
     return null;
   }
 
   return (
-    <EuiButton
-      color="danger"
-      iconType="trash"
-      // TODO: Wire to `useDeleteAction().requestDelete` once the delete orchestration PR lands.
-      onClick={clearSelection}
-      data-test-subj={`${dataTestSubj}-deleteButton`}
-    >
-      {buttonLabel}
-    </EuiButton>
+    <>
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={() => requestDelete(selectedItems)}
+        data-test-subj={`${dataTestSubj}-deleteButton`}
+      >
+        {buttonLabel}
+      </EuiButton>
+      {deleteModal}
+    </>
   );
 };
