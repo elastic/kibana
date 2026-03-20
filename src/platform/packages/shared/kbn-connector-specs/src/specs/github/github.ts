@@ -17,7 +17,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient } from '../../lib/mcp';
 import {
   GetMeInputSchema,
@@ -42,6 +42,17 @@ import {
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
+
+const callToolContent = async (
+  ctx: ActionContext,
+  toolName: string,
+  args: Record<string, unknown> = {}
+) => {
+  return withMcpClient(ctx, async (mcp) => {
+    const result = await mcp.callTool({ name: toolName, arguments: args });
+    return result.content;
+  });
+};
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
@@ -90,10 +101,7 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetMeInputSchema,
       handler: async (ctx) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({ name: 'get_me', arguments: {} });
-          return result.content;
-        });
+        return callToolContent(ctx, 'get_me');
       },
     },
 
@@ -104,12 +112,10 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: SearchCodeInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'search_code',
-            arguments: { query: input.query, page: input.page, perPage: input.perPage },
-          });
-          return result.content;
+        return callToolContent(ctx, 'search_code', {
+          query: input.query,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -121,12 +127,10 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: SearchRepositoriesInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'search_repositories',
-            arguments: { query: input.query, page: input.page, perPage: input.perPage },
-          });
-          return result.content;
+        return callToolContent(ctx, 'search_repositories', {
+          query: input.query,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -138,18 +142,12 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: SearchIssuesInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'search_issues',
-            arguments: {
-              query: input.query,
-              order: input.order,
-              sort: input.sort,
-              page: input.page,
-              perPage: input.perPage,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'search_issues', {
+          query: input.query,
+          order: input.order,
+          sort: input.sort,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -161,18 +159,12 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: SearchPullRequestsInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'search_pull_requests',
-            arguments: {
-              query: input.query,
-              order: input.order,
-              sort: input.sort,
-              page: input.page,
-              perPage: input.perPage,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'search_pull_requests', {
+          query: input.query,
+          order: input.order,
+          sort: input.sort,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -184,12 +176,10 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: SearchUsersInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'search_users',
-            arguments: { query: input.query, page: input.page, perPage: input.perPage },
-          });
-          return result.content;
+        return callToolContent(ctx, 'search_users', {
+          query: input.query,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
@@ -201,18 +191,12 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: ListIssuesInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'list_issues',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              state: input.state,
-              first: input.first,
-              after: input.after,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'list_issues', {
+          owner: input.owner,
+          repo: input.repo,
+          state: input.state,
+          first: input.first,
+          after: input.after,
         });
       },
     },
@@ -224,18 +208,12 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'list_pull_requests',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              state: input.state,
-              first: input.first,
-              after: input.after,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'list_pull_requests', {
+          owner: input.owner,
+          repo: input.repo,
+          state: input.state,
+          first: input.first,
+          after: input.after,
         });
       },
     },
@@ -247,18 +225,12 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: ListCommitsInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'list_commits',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              sha: input.sha,
-              first: input.first,
-              after: input.after,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'list_commits', {
+          owner: input.owner,
+          repo: input.repo,
+          sha: input.sha,
+          first: input.first,
+          after: input.after,
         });
       },
     },
@@ -270,17 +242,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: ListBranchesInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'list_branches',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              first: input.first,
-              after: input.after,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'list_branches', {
+          owner: input.owner,
+          repo: input.repo,
+          first: input.first,
+          after: input.after,
         });
       },
     },
@@ -292,17 +258,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: ListReleasesInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'list_releases',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              first: input.first,
-              after: input.after,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'list_releases', {
+          owner: input.owner,
+          repo: input.repo,
+          first: input.first,
+          after: input.after,
         });
       },
     },
@@ -314,17 +274,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: ListTagsInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'list_tags',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              first: input.first,
-              after: input.after,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'list_tags', {
+          owner: input.owner,
+          repo: input.repo,
+          first: input.first,
+          after: input.after,
         });
       },
     },
@@ -336,12 +290,10 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetCommitInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'get_commit',
-            arguments: { owner: input.owner, repo: input.repo, sha: input.sha },
-          });
-          return result.content;
+        return callToolContent(ctx, 'get_commit', {
+          owner: input.owner,
+          repo: input.repo,
+          sha: input.sha,
         });
       },
     },
@@ -353,13 +305,7 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetLatestReleaseInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'get_latest_release',
-            arguments: { owner: input.owner, repo: input.repo },
-          });
-          return result.content;
-        });
+        return callToolContent(ctx, 'get_latest_release', { owner: input.owner, repo: input.repo });
       },
     },
 
@@ -370,17 +316,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: PullRequestReadInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'pull_request_read',
-            arguments: {
-              owner: input.owner,
-              repo: input.repo,
-              pullNumber: input.pullNumber,
-              method: input.method,
-            },
-          });
-          return result.content;
+        return callToolContent(ctx, 'pull_request_read', {
+          owner: input.owner,
+          repo: input.repo,
+          pullNumber: input.pullNumber,
+          method: input.method,
         });
       },
     },
@@ -392,12 +332,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetFileContentsInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'get_file_contents',
-            arguments: { owner: input.owner, repo: input.repo, path: input.path, ref: input.ref },
-          });
-          return result.content;
+        return callToolContent(ctx, 'get_file_contents', {
+          owner: input.owner,
+          repo: input.repo,
+          path: input.path,
+          ref: input.ref,
         });
       },
     },
@@ -409,12 +348,10 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetIssueInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'get_issue',
-            arguments: { owner: input.owner, repo: input.repo, issueNumber: input.issueNumber },
-          });
-          return result.content;
+        return callToolContent(ctx, 'get_issue', {
+          owner: input.owner,
+          repo: input.repo,
+          issueNumber: input.issueNumber,
         });
       },
     },
@@ -426,12 +363,10 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetIssueCommentsInputSchema,
       handler: async (ctx, input) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({
-            name: 'get_issue_comments',
-            arguments: { owner: input.owner, repo: input.repo, issueNumber: input.issueNumber },
-          });
-          return result.content;
+        return callToolContent(ctx, 'get_issue_comments', {
+          owner: input.owner,
+          repo: input.repo,
+          issueNumber: input.issueNumber,
         });
       },
     },
