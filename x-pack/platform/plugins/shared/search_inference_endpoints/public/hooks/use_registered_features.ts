@@ -5,19 +5,33 @@
  * 2.0.
  */
 
-import type { InferenceFeatureConfig } from '../components/settings/feature_metadata';
-import { MOCK_REGISTERED_FEATURES } from '../components/settings/feature_metadata';
+import { useQuery } from '@kbn/react-query';
+import type { InferenceFeatureResponse } from '../../common/types';
+import { APIRoutes } from '../../common/types';
+import { INFERENCE_FEATURES_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
+import { useKibana } from './use_kibana';
 
 /**
- * Returns registered inference features.
- *
- * TODO: replace mock with GET /internal/search_inference_endpoints/features
- * once feature registry PR (#256515) and the features route are merged.
- * The hook signature stays the same — consumers won't need changes.
+ * Returns registered inference features from GET /internal/search_inference_endpoints/features.
+ * The hook signature matches InferenceFeatureConfig for backward compatibility with consumers.
  */
 export const useRegisteredFeatures = (): {
-  features: InferenceFeatureConfig[];
+  features: InferenceFeatureResponse[];
   isLoading: boolean;
 } => {
-  return { features: MOCK_REGISTERED_FEATURES, isLoading: false };
+  const { services } = useKibana();
+
+  const { data, isLoading } = useQuery({
+    queryKey: [INFERENCE_FEATURES_QUERY_KEY],
+    queryFn: async () =>
+      services.http.get<{ features: InferenceFeatureResponse[] }>(
+        APIRoutes.GET_INFERENCE_FEATURES,
+        { version: ROUTE_VERSIONS.v1 }
+      ),
+  });
+
+  return {
+    features: data?.features ?? [],
+    isLoading,
+  };
 };

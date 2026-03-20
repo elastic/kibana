@@ -197,3 +197,17 @@ export const SETTINGS_DEFAULT_BADGE = i18n.translate(
     defaultMessage: 'Default',
   }
 );
+
+export const SETTINGS_NO_FEATURES_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noFeatures.title',
+  {
+    defaultMessage: 'No features registered',
+  }
+);
+
+export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noFeatures.description',
+  {
+    defaultMessage: 'No features have been registered for inference settings in this project.',
+  }
+);

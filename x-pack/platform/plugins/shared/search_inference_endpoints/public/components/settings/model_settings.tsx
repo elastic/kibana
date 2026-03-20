@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
@@ -105,6 +106,13 @@ export const ModelSettings: React.FC = () => {
       <EuiPageTemplate.Section data-test-subj="modelSettingsContent">
         {isLoading ? (
           <EuiLoadingSpinner size="l" />
+        ) : sections.length === 0 ? (
+          <EuiEmptyPrompt
+            iconType="gear"
+            title={<h2>{i18n.SETTINGS_NO_FEATURES_TITLE}</h2>}
+            body={<p>{i18n.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
+            data-test-subj="settings-no-features"
+          />
         ) : (
           sections.map(({ id, name, description, children }) => (
             <React.Fragment key={id}>
