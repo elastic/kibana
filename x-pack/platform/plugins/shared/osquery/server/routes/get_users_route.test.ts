@@ -75,10 +75,7 @@ describe('getPackUsersRoute', () => {
 
   it('returns unique users with profile UIDs', async () => {
     mockSavedObjectsClient.find.mockResolvedValue({
-      saved_objects: [
-        makeSO('alice', 'uid-alice'),
-        makeSO('bob', 'uid-bob'),
-      ],
+      saved_objects: [makeSO('alice', 'uid-alice'), makeSO('bob', 'uid-bob')],
       total: 2,
       page: 1,
       per_page: 10000,
@@ -150,10 +147,7 @@ describe('getPackUsersRoute', () => {
 
   it('skips saved objects without created_by', async () => {
     mockSavedObjectsClient.find.mockResolvedValue({
-      saved_objects: [
-        { id: 'so-1', attributes: {}, references: [] },
-        makeSO('alice', 'uid-alice'),
-      ],
+      saved_objects: [{ id: 'so-1', attributes: {}, references: [] }, makeSO('alice', 'uid-alice')],
       total: 2,
       page: 1,
       per_page: 10000,
