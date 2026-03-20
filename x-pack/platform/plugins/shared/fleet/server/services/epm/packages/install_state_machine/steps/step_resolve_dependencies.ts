@@ -13,7 +13,11 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { appContextService } from '../../../../app_context';
 
-import { type InstallablePackage, SO_SEARCH_LIMIT } from '../../../../../../common';
+import {
+  type InstallablePackage,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../../../common';
 import { getInstallation, getInstalledPackageSavedObjects } from '../../get';
 import { installPackage } from '../../install';
 import { removeInstallation } from '../../remove';
@@ -21,6 +25,8 @@ import type { InstallContext } from '../_state_machine_package_install';
 import { fetchList, pkgToPkgKey } from '../../../registry';
 import { withPackageSpan } from '../../utils';
 import { PackageDependencyError } from '../../../../../../common/errors';
+import { mergeIsDependencyOf } from '../../dependencies';
+import { auditLoggingService } from '../../../../audit_logging';
 
 export async function stepResolveDependencies(context: InstallContext) {
   const { logger } = context;
@@ -57,10 +63,35 @@ export async function stepResolveDependencies(context: InstallContext) {
         await pMap(
           resolvedDependencies,
           async (dependency) => {
+            const parentRef = {
+              name: context.packageInstallContext.packageInfo.name,
+              version: context.packageInstallContext.packageInfo.version,
+            };
             if (dependency.status === 'installed') {
               logger.info(
                 `stepResolveDependencies: dependency ${dependency.name}@${dependency.resolvedVersion} is already installed`
               );
+              const updatedIsDependencyOf = mergeIsDependencyOf(
+                parentRef,
+                dependency.existingIsDependencyOf
+              );
+              if (
+                updatedIsDependencyOf.length !== (dependency.existingIsDependencyOf?.length ?? 0)
+              ) {
+                auditLoggingService.writeCustomSoAuditLog({
+                  action: 'update',
+                  id: dependency.name,
+                  name: dependency.name,
+                  savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+                });
+                await context.savedObjectsClient.update(
+                  PACKAGES_SAVED_OBJECT_TYPE,
+                  dependency.name,
+                  {
+                    is_dependency_of: updatedIsDependencyOf,
+                  }
+                );
+              }
               return;
             }
             if (dependency.status === 'to_install') {
@@ -85,6 +116,7 @@ export async function stepResolveDependencies(context: InstallContext) {
                 // install dependency even if it's not the latest in the registry
                 force: true,
                 prerelease: isPrerelease,
+                installedAsDependencyOf: parentRef,
               });
               completed.push({ dependency });
             }
@@ -187,6 +219,7 @@ interface ResolvedDependency {
   status: 'installed' | 'to_update' | 'to_install';
   /** Set when status is 'to_update'; used for rollback to re-install previous version */
   previousVersion?: string;
+  existingIsDependencyOf?: { name: string; version: string }[];
 }
 
 async function buildDependencies(
@@ -271,6 +304,7 @@ async function buildDependencies(
         requiredVersion,
         resolvedVersion: installation.version,
         status: 'installed',
+        existingIsDependencyOf: installation.is_dependency_of ?? [],
       });
     }
   }
