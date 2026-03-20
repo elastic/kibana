@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
@@ -34,6 +35,9 @@ export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteD
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/run_workflow.yaml'),
+        },
         validate: {
           request: {
             params: idParamSchema,

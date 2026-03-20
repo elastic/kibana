@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { WorkflowExportEntry } from '../../../../common/lib/export';
 import { stringifyWorkflowDefinition } from '../../../../common/lib/yaml';
@@ -33,6 +34,9 @@ export function registerExportWorkflowsRoute({ router, api, logger, spaces }: Ro
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/export_workflows.yaml'),
+        },
         validate: {
           request: {
             body: schema.object({

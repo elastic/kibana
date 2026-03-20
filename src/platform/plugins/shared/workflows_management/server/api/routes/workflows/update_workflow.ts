@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { UpdateWorkflowCommandSchema } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
@@ -32,6 +33,9 @@ export function registerUpdateWorkflowRoute({ router, api, spaces }: RouteDepend
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/update_workflow.yaml'),
+        },
         validate: {
           request: {
             params: idParamSchema,

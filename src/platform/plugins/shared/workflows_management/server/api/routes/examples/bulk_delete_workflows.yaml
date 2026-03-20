@@ -1,0 +1,27 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkDeleteWorkflowsRequestExample:
+          description: "Example request for deleting multiple workflows"
+          value:
+            ids:
+            - alert-triage-workflow
+            - daily-report-workflow
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X DELETE "${KIBANA_URL}/api/workflows" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "ids": ["alert-triage-workflow", "daily-report-workflow"]
+      }'
+- lang: Console
+  source: |
+    DELETE kbn://api/workflows
+    {
+      "ids": ["alert-triage-workflow", "daily-report-workflow"]
+    }

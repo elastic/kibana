@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
 import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
@@ -34,6 +35,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, '../examples/get_workflow_executions.yaml'),
+        },
         validate: {
           request: {
             params: workflowIdParamSchema,
@@ -93,9 +98,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Whether to exclude step-level execution data.' },
                 })
               ),
-              page: schema.maybe(
-                schema.number({ min: 1, meta: { description: 'Page number.' } })
-              ),
+              page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
               size: schema.maybe(
                 schema.number({
                   min: 1,

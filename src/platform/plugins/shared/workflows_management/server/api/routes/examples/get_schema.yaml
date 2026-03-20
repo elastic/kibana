@@ -1,0 +1,9 @@
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "${KIBANA_URL}/api/workflows/schema?loose=false" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn://api/workflows/schema?loose=false

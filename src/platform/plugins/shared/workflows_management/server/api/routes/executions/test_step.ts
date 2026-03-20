@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
@@ -30,6 +31,9 @@ export function registerTestStepRoute({ router, api, spaces }: RouteDependencies
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/test_step.yaml'),
+        },
         validate: {
           request: {
             body: schema.object({

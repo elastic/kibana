@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { SearchStepExecutionsParams } from '../../workflows_management_api';
 import type { RouteDependencies } from '../types';
@@ -33,6 +34,10 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, '../examples/get_workflow_step_executions.yaml'),
+        },
         validate: {
           request: {
             params: workflowIdParamSchema,

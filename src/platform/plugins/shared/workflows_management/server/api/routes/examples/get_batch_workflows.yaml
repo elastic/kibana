@@ -1,0 +1,53 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        getBatchWorkflowsRequestExample:
+          description: "Example request to retrieve multiple workflows by their IDs"
+          value:
+            ids:
+            - example-workflow
+            - second-workflow
+        getBatchWorkflowsWithSourceRequestExample:
+          description: "Example request to retrieve only the name and enabled fields"
+          value:
+            ids:
+            - example-workflow
+            - second-workflow
+            source:
+            - name
+            - enabled
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          getBatchWorkflowsResponseExample:
+            description: "Example response returning the requested workflows with projected fields"
+            value:
+            - id: example-workflow
+              name: Example definition
+              enabled: true
+            - id: second-workflow
+              name: Second workflow
+              enabled: false
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/workflows/batch" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "ids": ["example-workflow", "second-workflow"],
+        "source": ["name", "enabled"]
+      }'
+- lang: Console
+  source: |
+    POST kbn://api/workflows/batch
+    {
+      "ids": ["example-workflow", "second-workflow"],
+      "source": ["name", "enabled"]
+    }

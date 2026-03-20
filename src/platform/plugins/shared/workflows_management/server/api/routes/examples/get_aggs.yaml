@@ -1,0 +1,30 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          getAggsResponseExample:
+            description: "Example response with tag and createdBy aggregations"
+            value:
+              tags:
+              - key: security
+                label: security
+              - key: reporting
+                label: reporting
+              - key: triage
+                label: triage
+              createdBy:
+              - key: elastic
+                label: elastic
+              - key: admin
+                label: admin
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "${KIBANA_URL}/api/workflows/aggs?fields=tags&fields=createdBy" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn://api/workflows/aggs?fields=tags&fields=createdBy

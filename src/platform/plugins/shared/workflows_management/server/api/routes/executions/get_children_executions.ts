@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -31,6 +32,10 @@ export function registerGetChildrenExecutionsRoute({ router, api, spaces }: Rout
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, '../examples/get_children_executions.yaml'),
+        },
         validate: {
           request: {
             params: executionIdParamSchema,

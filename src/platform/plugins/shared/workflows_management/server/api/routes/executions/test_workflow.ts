@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
 import type { RouteDependencies } from '../types';
@@ -32,6 +33,9 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/test_workflow.yaml'),
+        },
         validate: {
           request: {
             body: schema.object({
