@@ -25,7 +25,7 @@ import { extractEntitiesFromAlerts } from './entity_extraction';
 import { matchAlertsToCases } from './case_matching';
 import { triggerCaseAttackDiscovery } from './case_integration';
 import type { EnrichmentRegistry } from './enrichment';
-import { ALERT_INVESTIGATION_PIPELINE_ENABLED } from '../../../../common/ui_settings';
+import { ALERT_INVESTIGATION_PIPELINE_ENABLED } from '../../../common/ui_settings';
 
 type GenerateAdFn = (params: {
   actionsClient: PublicMethodsOf<ActionsClient>;

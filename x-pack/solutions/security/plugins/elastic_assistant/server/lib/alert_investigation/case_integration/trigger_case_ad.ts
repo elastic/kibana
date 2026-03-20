@@ -16,7 +16,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { getIncrementalDelta, markAlertsProcessed } from '../incremental';
-import { buildCaseAlertFilter } from '../../../../routes/attack_discovery/helpers/build_case_alert_filter';
+import { buildCaseAlertFilter } from '../../../routes/attack_discovery/helpers/build_case_alert_filter';
 import type { IncrementalAdConfig } from '../types';
 
 export interface TriggerCaseAdParams {

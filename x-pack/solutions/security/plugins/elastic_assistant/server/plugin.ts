@@ -40,7 +40,7 @@ import { createEventLogger } from './create_event_logger';
 import { PLUGIN_ID } from '../common/constants';
 import { registerEventLogProvider } from './register_event_log_provider';
 import { registerRoutes } from './routes/register_routes';
-import { registerPipelineWorkflowSteps } from './lib/attack_discovery/pipeline/workflow_steps';
+import { registerPipelineWorkflowSteps } from './lib/alert_investigation/workflow_steps';
 import type { CallbackIds } from './services/app_context';
 import { appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';

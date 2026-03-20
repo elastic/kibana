@@ -6,7 +6,7 @@
  */
 
 import { getOrCreateMetricsCollector, getPipelineConfig } from './pipeline_observability';
-import { DEFAULT_PIPELINE_CONFIG } from '../../../lib/attack_discovery/pipeline/types';
+import { DEFAULT_PIPELINE_CONFIG } from '../../lib/alert_investigation/types';
 
 describe('pipeline_observability helpers', () => {
   describe('getOrCreateMetricsCollector', () => {

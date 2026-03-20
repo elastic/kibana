@@ -9,15 +9,15 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { PLUGIN_ID } from '../../../../common/constants';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import { PLUGIN_ID } from '../../../common/constants';
 import {
   PipelineMetricsCollector,
   type PipelineMetrics,
   type PipelineHealthStatus,
-} from '../../../lib/attack_discovery/pipeline/metrics';
-import type { PipelineConfig } from '../../../lib/attack_discovery/pipeline/types';
-import { DEFAULT_PIPELINE_CONFIG } from '../../../lib/attack_discovery/pipeline/types';
+} from '../../lib/alert_investigation/metrics';
+import type { PipelineConfig } from '../../lib/alert_investigation/types';
+import { DEFAULT_PIPELINE_CONFIG } from '../../lib/alert_investigation/types';
 
 const metricsCollectorsBySpace = new Map<string, PipelineMetricsCollector>();
 
@@ -98,7 +98,7 @@ export const registerPipelineObservabilityRoutes = (
 ): void => {
   router.get(
     {
-      path: '/internal/elastic_assistant/attack_discovery/pipeline/_health',
+      path: '/internal/elastic_assistant/alert_investigation/_health',
       validate: false,
       options: {
         tags: ['access:elasticAssistant'],
@@ -129,7 +129,7 @@ export const registerPipelineObservabilityRoutes = (
 
   router.get(
     {
-      path: '/internal/elastic_assistant/attack_discovery/pipeline/_metrics',
+      path: '/internal/elastic_assistant/alert_investigation/_metrics',
       validate: false,
       options: {
         tags: ['access:elasticAssistant'],
@@ -160,7 +160,7 @@ export const registerPipelineObservabilityRoutes = (
 
   router.get(
     {
-      path: '/internal/elastic_assistant/attack_discovery/pipeline/_config',
+      path: '/internal/elastic_assistant/alert_investigation/_config',
       validate: false,
       options: {
         tags: ['access:elasticAssistant'],
@@ -190,7 +190,7 @@ export const registerPipelineObservabilityRoutes = (
 
   router.put(
     {
-      path: '/internal/elastic_assistant/attack_discovery/pipeline/_config',
+      path: '/internal/elastic_assistant/alert_investigation/_config',
       validate: {
         body: buildRouteValidationWithZod(PipelineConfigBody),
       },

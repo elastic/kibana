@@ -10,11 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { ALERT_INVESTIGATION_PIPELINE_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { PLUGIN_ID } from '../../../../common/constants';
-import { deduplicateAlerts } from '../../../lib/attack_discovery/pipeline/deduplication';
-import { extractEntitiesFromAlerts } from '../../../lib/attack_discovery/pipeline/entity_extraction';
-import { DEFAULT_PIPELINE_CONFIG } from '../../../lib/attack_discovery/pipeline/types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import { PLUGIN_ID } from '../../../common/constants';
+import { deduplicateAlerts } from '../../lib/alert_investigation/deduplication';
+import { extractEntitiesFromAlerts } from '../../lib/alert_investigation/entity_extraction';
+import { DEFAULT_PIPELINE_CONFIG } from '../../lib/alert_investigation/types';
 
 const PipelineRunRequestBody = z.object({
   dry_run: z.boolean().optional().default(false),
@@ -35,7 +35,7 @@ export const registerPipelineRoutes = (
 ): void => {
   router.post(
     {
-      path: '/internal/elastic_assistant/attack_discovery/pipeline/_run',
+      path: '/internal/elastic_assistant/alert_investigation/_run',
       validate: {
         body: buildRouteValidationWithZod(PipelineRunRequestBody),
       },
@@ -162,7 +162,7 @@ export const registerPipelineRoutes = (
 
   router.post(
     {
-      path: '/internal/elastic_assistant/attack_discovery/pipeline/case/{caseId}/_trigger_ad',
+      path: '/internal/elastic_assistant/alert_investigation/case/{caseId}/_trigger_ad',
       validate: {
         params: buildRouteValidationWithZod(CaseTriggerAdParams),
         body: buildRouteValidationWithZod(CaseTriggerAdBody),
@@ -207,7 +207,7 @@ export const registerPipelineRoutes = (
           computeDeltaAlertIds,
           updateProcessedAlertIds,
         } = await import(
-          '../../../lib/attack_discovery/pipeline/incremental/processed_alert_tracker'
+          '../../lib/alert_investigation/incremental/processed_alert_tracker'
         );
 
         await ensureTrackerIndex({ esClient, spaceId, logger });
