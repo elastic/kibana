@@ -33,6 +33,8 @@ import {
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
   ADD_NESTED_BTN,
+  ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
+  ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -53,7 +55,6 @@ describe(
     const ADDITIONAL_ENTRY = 'host.hostname';
 
     beforeEach(() => {
-      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
       deleteEndpointExceptionList();
@@ -82,8 +83,8 @@ describe(
       validateExceptionConditionField('file.Ext.code_signature');
 
       selectCloseSingleAlerts();
-      addExceptionFlyoutItemName(ITEM_NAME);
-      submitNewExceptionItem();
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
+      submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
       // Instead of immediately checking if the Opened Alert has moved to the closed tab,
       // use the waitForAlerts method to create a buffer, allowing the alerts some time to
@@ -105,7 +106,7 @@ describe(
       // As the endpoint.alerts-* is used to trigger the alert the
       // file.Ext.code_signature will be auto-populated
       validateExceptionConditionField('file.Ext.code_signature');
-      addExceptionFlyoutItemName(ITEM_NAME);
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
 
       // Add non-nested condition
       cy.get(ADD_NESTED_BTN).click();
@@ -114,13 +115,13 @@ describe(
       addExceptionEntryFieldValueValue('foo', 4);
 
       // Change the name again
-      editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+      editExceptionFlyoutItemName(ITEM_NAME_EDIT, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
 
       // validate the condition is still "agent.name" or got rest after the name is changed
       validateExceptionConditionField(ADDITIONAL_ENTRY);
 
       selectCloseSingleAlerts();
-      submitNewExceptionItem();
+      submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
       // Endpoint Exception will move to Endpoint List under Exception tab of rule
       goToEndpointExceptionsTab();
