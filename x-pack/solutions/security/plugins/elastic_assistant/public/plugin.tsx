@@ -49,8 +49,30 @@ export class ElasticAssistantPublicPlugin
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(coreSetup: CoreSetup) {
+  public setup(coreSetup: CoreSetup, dependencies: ElasticAssistantPublicPluginSetupDependencies) {
     this.telemetry.setup({ analytics: coreSetup.analytics });
+
+    // Register Alert Investigation Pipeline dashboard (SPIKE)
+    coreSetup.application.register({
+      id: 'alert-investigation-pipeline',
+      title: 'Alert Investigation Pipeline (Spike)',
+      appRoute: '/app/alert-investigation-pipeline',
+      category: {
+        id: 'security',
+        label: 'Security',
+        order: 2000,
+      },
+      mount: async (params) => {
+        const [coreStart, depsStart] = await coreSetup.getStartServices();
+        const { renderPipelineDashboard } = await import('./src/render_pipeline_dashboard');
+        return renderPipelineDashboard(
+          coreStart,
+          depsStart as ElasticAssistantPublicPluginStartDependencies,
+          params
+        );
+      },
+    });
+
     return {};
   }
 

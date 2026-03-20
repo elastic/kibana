@@ -23,6 +23,7 @@ import { deduplicateAlerts } from './deduplication';
 import { extractEntitiesFromAlerts } from './entity_extraction';
 import { matchAlertsToCases } from './case_matching';
 import { triggerCaseAttackDiscovery } from './case_integration';
+import type { EnrichmentRegistry } from './enrichment';
 
 type GenerateAdFn = (params: {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -43,6 +44,7 @@ export interface RunPipelineParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   cases: CasesServerStart;
   config?: Partial<PipelineConfig>;
+  enrichmentRegistry?: EnrichmentRegistry;
   esClient: ElasticsearchClient;
   logger: Logger;
   request: KibanaRequest;
@@ -58,6 +60,7 @@ interface CaseMatchingContext {
   config: PipelineConfig;
   logger: Logger;
   request: KibanaRequest;
+  spaceId: string;
   errors: string[];
 }
 
@@ -106,19 +109,30 @@ const runCaseMatchingAndAttachment = async (
           `Capping alert attachments for case ${caseId}: ${capped.length}/${alertIds.length}`
         );
       }
-      for (const alertId of capped) {
-        await casesClient.attachments.add({
-          caseId,
-          comment: {
-            type: AttachmentType.alert,
-            alertId,
-            index: '.alerts-security.alerts-default',
-            rule: { id: null, name: null },
-            owner: 'securitySolution',
-          },
-        });
-        alertsAttached++;
+
+      // Batch promises in chunks of 10 to avoid overwhelming the client
+      for (let i = 0; i < capped.length; i += 10) {
+        const chunk = capped.slice(i, i + 10);
+        await Promise.all(
+          chunk.map((alertId) =>
+            casesClient.attachments.add({
+              caseId,
+              comment: {
+                type: AttachmentType.alert,
+                alertId,
+                index:
+                  ctx.spaceId === 'default'
+                    ? '.alerts-security.alerts-default'
+                    : `.alerts-security.alerts-${ctx.spaceId}`,
+                rule: { id: null, name: null },
+                owner: 'securitySolution',
+              },
+            })
+          )
+        );
+        alertsAttached += chunk.length;
       }
+
       affectedCaseIds.add(caseId);
     } catch (error) {
       ctx.errors.push(
@@ -133,6 +147,7 @@ const runCaseMatchingAndAttachment = async (
     const createResult = await createCaseForUnmatched({
       casesClient,
       unmatched: matchResult.unmatched,
+      spaceId: ctx.spaceId,
       logger: ctx.logger,
       errors: ctx.errors,
     });
@@ -161,11 +176,13 @@ const runCaseMatchingAndAttachment = async (
 const createCaseForUnmatched = async ({
   casesClient,
   unmatched,
+  spaceId,
   logger: _logger,
   errors,
 }: {
   casesClient: Awaited<ReturnType<CasesServerStart['getCasesClientWithRequest']>>;
   unmatched: Array<{ alertId: string }>;
+  spaceId: string;
   logger: Logger;
   errors: string[];
 }): Promise<{
@@ -193,22 +210,30 @@ const createCaseForUnmatched = async ({
     caseIds.push(newCase.id);
     const attachedAlertIds: string[] = [];
 
-    for (const unmatchedResult of unmatched) {
+    for (let i = 0; i < unmatched.length; i += 10) {
+      const chunk = unmatched.slice(i, i + 10);
       try {
-        await casesClient.attachments.add({
-          caseId: newCase.id,
-          comment: {
-            type: AttachmentType.alert,
-            alertId: unmatchedResult.alertId,
-            index: '.alerts-security.alerts-default',
-            rule: { id: null, name: null },
-            owner: 'securitySolution',
-          },
-        });
-        alertsAttached++;
-        attachedAlertIds.push(unmatchedResult.alertId);
+        await Promise.all(
+          chunk.map((unmatchedResult) =>
+            casesClient.attachments.add({
+              caseId: newCase.id,
+              comment: {
+                type: AttachmentType.alert,
+                alertId: unmatchedResult.alertId,
+                index:
+                  spaceId === 'default'
+                    ? '.alerts-security.alerts-default'
+                    : `.alerts-security.alerts-${spaceId}`,
+                rule: { id: null, name: null },
+                owner: 'securitySolution',
+              },
+            })
+          )
+        );
+        alertsAttached += chunk.length;
+        attachedAlertIds.push(...chunk.map((u) => u.alertId));
       } catch (error) {
-        errors.push(`Failed to attach alert ${unmatchedResult.alertId} to new case: ${error}`);
+        errors.push(`Failed to attach some alerts in chunk to new case: ${error}`);
       }
     }
 
@@ -347,6 +372,7 @@ export const runInvestigationPipeline = async ({
   actionsClient,
   cases,
   config: configOverrides,
+  enrichmentRegistry,
   esClient,
   generateAttackDiscoveriesFn,
   logger,
@@ -381,6 +407,7 @@ export const runInvestigationPipeline = async ({
 
   const alertsResult = await fetchUnprocessedAlerts({
     esClient,
+    spaceId,
     lookbackMinutes: config.intervalMinutes,
     maxAlerts: 500,
   });
@@ -414,6 +441,28 @@ export const runInvestigationPipeline = async ({
     entities = extractionResult.entities;
   }
 
+  let entitiesEnriched = 0;
+  const enrichmentStats: Record<string, number> = {};
+  if (enrichmentRegistry && entities.length > 0) {
+    try {
+      const enrichResult = await enrichmentRegistry.runAll({
+        entities,
+        config,
+        logger,
+      });
+      entities = enrichResult.enrichedEntities;
+      entitiesEnriched = enrichResult.stats.totalEnriched;
+      Object.assign(enrichmentStats, enrichResult.stats.bySource);
+      logger.info(
+        `Pipeline ${executionId}: enriched ${entitiesEnriched} entities from ${
+          Object.keys(enrichmentStats).length
+        } source(s)`
+      );
+    } catch (error) {
+      errors.push(`Enrichment failed: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
   if (dryRun) {
     return buildResult({
       executionId,
@@ -421,6 +470,8 @@ export const runInvestigationPipeline = async ({
       alertsProcessed: alertsResult.alerts.length,
       alertsDeduplicated,
       entitiesExtracted: entities.length,
+      entitiesEnriched,
+      enrichmentStats,
       errors,
     });
   }
@@ -439,6 +490,7 @@ export const runInvestigationPipeline = async ({
         config,
         logger,
         request,
+        spaceId,
         errors,
       });
       casesMatched = matchOutput.casesMatched;
@@ -478,6 +530,7 @@ export const runInvestigationPipeline = async ({
     await tagAlertsAsProcessed({
       esClient,
       alertIds: alertsResult.alerts.map((a) => a._id),
+      spaceId,
       logger,
     });
   } catch (error) {
@@ -490,6 +543,8 @@ export const runInvestigationPipeline = async ({
     alertsProcessed: alertsResult.alerts.length,
     alertsDeduplicated,
     entitiesExtracted: entities.length,
+    entitiesEnriched,
+    enrichmentStats,
     casesMatched,
     casesCreated,
     alertsAttached,
@@ -500,18 +555,24 @@ export const runInvestigationPipeline = async ({
 
 const fetchUnprocessedAlerts = async ({
   esClient,
+  spaceId,
   lookbackMinutes,
   maxAlerts,
 }: {
   esClient: ElasticsearchClient;
+  spaceId: string;
   lookbackMinutes: number;
   maxAlerts: number;
 }): Promise<{ alerts: Array<{ _id: string; _source: Record<string, unknown> }> }> => {
   const now = new Date();
   const lookbackTime = new Date(now.getTime() - lookbackMinutes * 60 * 1000);
+  const index =
+    spaceId === 'default'
+      ? '.alerts-security.alerts-default'
+      : `.alerts-security.alerts-${spaceId}`;
 
   const result = await esClient.search({
-    index: '.alerts-security.alerts-default',
+    index,
     query: {
       bool: {
         filter: [
@@ -545,16 +606,22 @@ const fetchUnprocessedAlerts = async ({
 const tagAlertsAsProcessed = async ({
   esClient,
   alertIds,
+  spaceId,
   logger,
 }: {
   esClient: ElasticsearchClient;
   alertIds: string[];
+  spaceId: string;
   logger: Logger;
 }): Promise<void> => {
   if (alertIds.length === 0) return;
 
+  const index =
+    spaceId === 'default'
+      ? '.alerts-security.alerts-default'
+      : `.alerts-security.alerts-${spaceId}`;
   const operations = alertIds.flatMap((id) => [
-    { update: { _id: id, _index: '.alerts-security.alerts-default' } },
+    { update: { _id: id, _index: index } },
     {
       doc: {
         kibana: {
@@ -577,6 +644,8 @@ const buildResult = ({
   alertsProcessed = 0,
   alertsDeduplicated = 0,
   entitiesExtracted = 0,
+  entitiesEnriched = 0,
+  enrichmentStats = {},
   casesMatched = 0,
   casesCreated = 0,
   alertsAttached = 0,
@@ -588,6 +657,8 @@ const buildResult = ({
   alertsProcessed?: number;
   alertsDeduplicated?: number;
   entitiesExtracted?: number;
+  entitiesEnriched?: number;
+  enrichmentStats?: Record<string, number>;
   casesMatched?: number;
   casesCreated?: number;
   alertsAttached?: number;
@@ -600,6 +671,8 @@ const buildResult = ({
   alertsProcessed,
   alertsDeduplicated,
   entitiesExtracted,
+  entitiesEnriched,
+  enrichmentStats,
   casesMatched,
   casesCreated,
   alertsAttached,

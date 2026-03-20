@@ -105,12 +105,17 @@ export const triggerCaseAttackDiscovery = async ({
   const filter = buildCaseAlertFilter(delta.deltaAlertIds);
 
   try {
+    const indexPattern =
+      spaceId === 'default'
+        ? '.alerts-security.alerts-default'
+        : `.alerts-security.alerts-${spaceId}`;
+
     const adResult = await generateAttackDiscoveriesFn({
       actionsClient,
       config: {
         filter,
         size: delta.deltaAlertIds.length,
-        alertsIndexPattern: '.alerts-security.alerts-default',
+        alertsIndexPattern: indexPattern,
       },
       esClient,
       logger,

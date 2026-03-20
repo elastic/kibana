@@ -103,7 +103,12 @@ export const PipelineDashboard: React.FC = () => {
 
       {error && (
         <>
-          <EuiCallOut title="Error fetching pipeline data" color="danger" iconType="alert">
+          <EuiCallOut
+            title="Error fetching pipeline data"
+            color="danger"
+            iconType="alert"
+            announceOnMount
+          >
             <p>{error}</p>
           </EuiCallOut>
           <EuiSpacer size="m" />

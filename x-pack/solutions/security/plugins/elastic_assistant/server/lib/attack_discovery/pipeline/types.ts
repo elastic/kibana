@@ -89,6 +89,8 @@ export interface PipelineExecutionResult {
   readonly alertsProcessed: number;
   readonly alertsDeduplicated: number;
   readonly entitiesExtracted: number;
+  readonly entitiesEnriched: number;
+  readonly enrichmentStats: Record<string, number>;
   readonly casesMatched: number;
   readonly casesCreated: number;
   readonly alertsAttached: number;

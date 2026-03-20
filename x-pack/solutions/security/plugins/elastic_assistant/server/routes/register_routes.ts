@@ -60,6 +60,7 @@ import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymiza
 import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
 import { registerPipelineRoutes } from './attack_discovery/pipeline/post_pipeline_run';
+import { registerPipelineObservabilityRoutes } from './attack_discovery/pipeline/pipeline_observability';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -168,4 +169,5 @@ export const registerRoutes = (
 
   // Alert Investigation Pipeline
   registerPipelineRoutes(router, logger);
+  registerPipelineObservabilityRoutes(router, logger);
 };

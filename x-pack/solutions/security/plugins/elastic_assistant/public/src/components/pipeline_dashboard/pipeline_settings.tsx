@@ -110,7 +110,12 @@ export const PipelineSettings: React.FC = () => {
 
   if (!localConfig) {
     return (
-      <EuiCallOut title="Unable to load pipeline configuration" color="warning" iconType="alert" />
+      <EuiCallOut
+        title="Unable to load pipeline configuration"
+        color="warning"
+        iconType="alert"
+        announceOnMount={false}
+      />
     );
   }
 
@@ -133,7 +138,7 @@ export const PipelineSettings: React.FC = () => {
 
       {error && (
         <>
-          <EuiCallOut title="Error" color="danger" iconType="alert">
+          <EuiCallOut title="Error" color="danger" iconType="alert" announceOnMount>
             <p>{error}</p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -142,7 +147,12 @@ export const PipelineSettings: React.FC = () => {
 
       {saveSuccess && (
         <>
-          <EuiCallOut title="Settings saved successfully" color="success" iconType="check" />
+          <EuiCallOut
+            title="Settings saved successfully"
+            color="success"
+            iconType="check"
+            announceOnMount
+          />
           <EuiSpacer size="m" />
         </>
       )}
