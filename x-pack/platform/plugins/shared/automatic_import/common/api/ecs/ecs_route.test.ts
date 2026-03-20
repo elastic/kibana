@@ -33,7 +33,7 @@ describe('Ecs Mapping request schema', () => {
   });
 
   test('rejects additionalProcessors exceeding max items', () => {
-    const processors = new Array(51).fill({ set: { field: 'x', value: 'y' } });
+    const processors = new Array(201).fill({ set: { field: 'x', value: 'y' } });
     expectParseError(
       EcsMappingRequestBody.safeParse({
         ...getEcsMappingRequestMock(),
