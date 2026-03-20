@@ -53,7 +53,7 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
         filter: { ...validFilter, outcome: ['success', 'failure'] },
       });
       expectParseSuccess(result);
-      expect(result.data?.filter.outcome).toEqual(['success', 'failure']);
+      expect(result.data?.filter?.outcome).toEqual(['success', 'failure']);
     });
 
     it('should reject invalid outcome values', () => {
@@ -68,7 +68,7 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
         filter: { ...validFilter, outcome: [] },
       });
       expectParseSuccess(result);
-      expect(result.data?.filter.outcome).toEqual([]);
+      expect(result.data?.filter?.outcome).toEqual([]);
     });
   });
 
@@ -78,7 +78,7 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
         filter: { ...validFilter, run_type: ['standard'] },
       });
       expectParseSuccess(result);
-      expect(result.data?.filter.run_type).toEqual(['standard']);
+      expect(result.data?.filter?.run_type).toEqual(['standard']);
     });
 
     it('should accept backfill run_type', () => {
@@ -86,7 +86,7 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
         filter: { ...validFilter, run_type: ['backfill'] },
       });
       expectParseSuccess(result);
-      expect(result.data?.filter.run_type).toEqual(['backfill']);
+      expect(result.data?.filter?.run_type).toEqual(['backfill']);
     });
   });
 

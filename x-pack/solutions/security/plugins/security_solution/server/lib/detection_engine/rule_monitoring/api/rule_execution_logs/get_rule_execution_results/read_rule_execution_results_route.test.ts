@@ -30,6 +30,7 @@ const mockUnifiedExecutionResults = {
     {
       execution_uuid: 'test-uuid-1',
       execution_start: '2026-03-11T11:00:00.000Z',
+      execution_duration_ms: 1200,
       schedule_delay_ms: null,
       backfill: null,
       outcome: { status: 'success', message: null },
@@ -38,6 +39,7 @@ const mockUnifiedExecutionResults = {
     {
       execution_uuid: 'test-uuid-2',
       execution_start: '2026-03-11T10:00:00.000Z',
+      execution_duration_ms: 800,
       schedule_delay_ms: null,
       backfill: null,
       outcome: { status: 'warning', message: 'Missing index pattern' },
@@ -168,15 +170,15 @@ describe('readRuleExecutionResultsRoute', () => {
 
     const [[args]] = clients.ruleExecutionLog.getUnifiedExecutionResults.mock.calls;
     expect(args.ruleId).toBe('04128c15-0d1b-4716-a4c5-46997ac7f3bd');
-    expect(args.filter.outcome).toEqual([]);
-    expect(args.filter.run_type).toEqual([]);
+    expect(args.filter?.outcome).toEqual([]);
+    expect(args.filter?.run_type).toEqual([]);
     expect(args.sort).toBeUndefined();
     expect(args.page).toBe(1);
     expect(args.perPage).toBe(20);
 
     // Default filter window: last 2 hours
-    const toMs = new Date(args.filter.to).getTime();
-    const fromMs = new Date(args.filter.from).getTime();
+    const toMs = new Date(args.filter?.to ?? '').getTime();
+    const fromMs = new Date(args.filter?.from ?? '').getTime();
     expect(toMs).toBeGreaterThanOrEqual(before);
     expect(toMs).toBeLessThanOrEqual(after);
     expect(toMs - fromMs).toBe(2 * 60 * 60 * 1000);
