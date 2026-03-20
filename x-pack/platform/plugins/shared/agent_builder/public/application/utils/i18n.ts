@@ -623,6 +623,9 @@ export const labels = {
     toolIdsHelpText: i18n.translate('xpack.agentBuilder.skills.toolIdsHelpText', {
       defaultMessage: 'Select tools that this skill can use.',
     }),
+    experimentalLabel: i18n.translate('xpack.agentBuilder.skills.experimentalLabel', {
+      defaultMessage: 'Experimental',
+    }),
   },
   plugins: {
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),

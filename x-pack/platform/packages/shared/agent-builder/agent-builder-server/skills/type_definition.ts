@@ -85,6 +85,11 @@ export interface SkillDefinition<
    */
   description: string;
   /**
+   * When true, this skill is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
+  /**
    * Content of the skill.
    */
   content: string;

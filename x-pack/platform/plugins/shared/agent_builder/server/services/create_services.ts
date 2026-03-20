@@ -133,6 +133,8 @@ export class ServiceManager {
       spaces,
       logger: logger.get('skills'),
       getToolRegistry: tools.getRegistry,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({

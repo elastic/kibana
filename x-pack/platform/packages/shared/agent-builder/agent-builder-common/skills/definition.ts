@@ -55,6 +55,10 @@ export interface PublicSkillDefinition {
    * If this skill was installed from a plugin, the plugin name.
    */
   plugin_id?: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
 }
 
 /**
