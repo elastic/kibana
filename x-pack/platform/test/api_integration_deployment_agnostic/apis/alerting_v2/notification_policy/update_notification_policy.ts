@@ -189,6 +189,141 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.throttle).to.eql({ interval: '15m' });
     });
 
+    it('should return 409 when version is stale', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'conflict-policy',
+          description: 'conflict-policy description',
+          destinations: [{ type: 'workflow', id: 'conflict-workflow-id' }],
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const staleVersion = createResponse.body.version as string;
+
+      const firstUpdate = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ name: 'first-update', version: staleVersion });
+
+      expect(firstUpdate.status).to.be(200);
+
+      const secondUpdate = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ name: 'second-update', version: staleVersion });
+
+      expect(secondUpdate.status).to.be(409);
+    });
+
+    it('should clear nullable fields when set to null', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'nullable-policy',
+          description: 'nullable-policy description',
+          destinations: [{ type: 'workflow', id: 'nullable-workflow-id' }],
+          matcher: "env == 'production'",
+          groupBy: ['service.name'],
+          throttle: { interval: '5m' },
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          matcher: null,
+          groupBy: null,
+          throttle: null,
+          version: currentVersion,
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.matcher).to.be(null);
+      expect(response.body.groupBy).to.be(null);
+      expect(response.body.throttle).to.be(null);
+      expect(response.body.name).to.be('nullable-policy');
+      expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'nullable-workflow-id' }]);
+    });
+
+    it('should update only destinations while preserving other fields', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'dest-policy',
+          description: 'dest-policy description',
+          destinations: [{ type: 'workflow', id: 'original-dest-workflow' }],
+          matcher: "env == 'staging'",
+          groupBy: ['host.name'],
+          throttle: { interval: '2m' },
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          destinations: [{ type: 'workflow', id: 'updated-dest-workflow' }],
+          version: currentVersion,
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.destinations).to.eql([
+        { type: 'workflow', id: 'updated-dest-workflow' },
+      ]);
+      expect(response.body.name).to.be('dest-policy');
+      expect(response.body.description).to.be('dest-policy description');
+      expect(response.body.matcher).to.be("env == 'staging'");
+      expect(response.body.groupBy).to.eql(['host.name']);
+      expect(response.body.throttle).to.eql({ interval: '2m' });
+    });
+
+    it('should return 400 when destinations is an empty array', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'empty-dest-policy',
+          description: 'empty-dest-policy description',
+          destinations: [{ type: 'workflow', id: 'some-workflow' }],
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ destinations: [], version: currentVersion });
+
+      expect(response.status).to.be(400);
+    });
+
     it('should return 404 when updating a non-existent notification policy', async () => {
       const response = await supertestWithoutAuth
         .put(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id`)
