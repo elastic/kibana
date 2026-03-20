@@ -25,6 +25,7 @@ export interface GenerationContext {
   imports: ImportsMap;
   circularRefs: Set<string>;
   config: Pick<GeneratorConfig, 'schemaNameTransform'>;
+  /** True when generated code will reference helpers from @kbn/zod-helpers/v4 */
   useZodHelpers: boolean;
 }
 
@@ -38,8 +39,8 @@ export interface BundleGenerationContext {
 /**
  * Returns true when the document contains schema features that require helpers
  * from @kbn/zod-helpers/v4 in generated code:
- * - query parameters (need ArrayFromString / BooleanFromString)
- * - string formats 'date-math' or 'nonempty' (need isValidDateMath / isNonEmptyString)
+ *   - query parameters (need ArrayFromString / BooleanFromString)
+ *   - string formats 'date-math' or 'nonempty' (need isValidDateMath / isNonEmptyString)
  */
 function computeUseZodHelpers(
   operations: NormalizedOperation[],
