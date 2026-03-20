@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -88,8 +88,12 @@ export function useMonitorListColumns({
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <MonitorDetailsLink monitor={monitor} />
-            <UnhealthyTooltip configId={configId} />
+            <EuiFlexItem grow={false}>
+              <MonitorDetailsLink monitor={monitor} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <UnhealthyTooltip configId={configId} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         );
       },

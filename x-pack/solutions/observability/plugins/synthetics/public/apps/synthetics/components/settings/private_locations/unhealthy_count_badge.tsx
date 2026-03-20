@@ -24,7 +24,8 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string } }) => {
       <EuiToolTip content={UNHEALTHY_MONITORS_TOOLTIP}>
         <EuiBadge color="warning" data-test-subj="syntheticsLocationMissingIntegrationBadge">
           {i18n.translate('xpack.synthetics.privateLocations.missingIntegrations.count', {
-            defaultMessage: '{count} {count, plural, one {unhealthy} other {unhealthy}}',
+            defaultMessage:
+              '{count, plural, one {# unhealthy monitor} other {# unhealthy monitors}}',
             values: { count: unhealthyMonitorCount },
           })}
         </EuiBadge>
