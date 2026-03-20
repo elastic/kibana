@@ -52,7 +52,7 @@ const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.l
 });
 
 const heatmapSharedStateSchema = {
-  type: schema.literal('heat_map'),
+  type: schema.literal('heatmap'),
   legend: schema.maybe(
     schema.object(legendSchemaProps, {
       meta: {
