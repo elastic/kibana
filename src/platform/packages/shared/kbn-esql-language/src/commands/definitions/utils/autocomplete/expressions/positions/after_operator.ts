@@ -20,7 +20,7 @@ import {
   hasVariadicSignature,
 } from '../../../signatures';
 import { getFunctionDefinition } from '../../../functions';
-import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
+import { removeFinalUnknownIdentiferArg } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
 import type { ExpressionContext } from '../types';
@@ -90,7 +90,7 @@ function handleCompleteOperator(
   operator: ESQLFunction,
   getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
 ): ISuggestionItem[] {
-  const { innerText, location, options } = ctx;
+  const { location, options } = ctx;
 
   const operatorReturnType = getExprType(operator);
   const builder = new SuggestionBuilder(ctx);
@@ -139,16 +139,7 @@ function handleCompleteOperator(
     });
   }
 
-  const suggestions = builder.build();
-
-  return suggestions.map<ISuggestionItem>((suggestion) => {
-    const overlap = getOverlapRange(innerText, suggestion.text);
-
-    return {
-      ...suggestion,
-      rangeToReplace: overlap,
-    };
-  });
+  return builder.build();
 }
 
 /**
@@ -161,7 +152,7 @@ async function handleIncompleteOperator(
   getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
   reason?: IncompleteOperatorReason
 ): Promise<ISuggestionItem[]> {
-  const { innerText, options } = ctx;
+  const { options } = ctx;
   const builder = new SuggestionBuilder(ctx);
 
   const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExprType);
@@ -227,14 +218,7 @@ async function handleIncompleteOperator(
     }
   }
 
-  return builder.build().map<ISuggestionItem>((suggestion) => {
-    const overlap = getOverlapRange(innerText, suggestion.text);
-
-    return {
-      ...suggestion,
-      rangeToReplace: overlap,
-    };
-  });
+  return builder.build();
 }
 
 /**

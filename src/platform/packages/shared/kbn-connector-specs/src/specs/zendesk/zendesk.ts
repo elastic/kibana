@@ -19,12 +19,11 @@ export const ZendeskConnector: ConnectorSpec = {
     id: '.zendesk',
     displayName: 'Zendesk',
     description: i18n.translate('core.kibanaConnectorSpecs.zendesk.metadata.description', {
-      defaultMessage:
-        'Connect to Zendesk to search and retrieve tickets, users, and Help Center content.',
+      defaultMessage: 'Search and retrieve tickets, users, and Help Center content in Zendesk',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

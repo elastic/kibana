@@ -36,7 +36,6 @@ export class NotificationPoliciesApi {
     page?: number;
     perPage?: number;
     search?: string;
-    destinationType?: string;
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -48,7 +47,6 @@ export class NotificationPoliciesApi {
           page: params.page,
           perPage: params.perPage,
           search: params.search || undefined,
-          destinationType: params.destinationType || undefined,
           enabled: params.enabled,
           sortField: params.sortField,
           sortOrder: params.sortOrder,
@@ -90,7 +88,7 @@ export class NotificationPoliciesApi {
   public async snoozeNotificationPolicy(id: string, snoozedUntil: string) {
     return this.http.post<NotificationPolicyResponse>(
       `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`,
-      { body: JSON.stringify({ snoozed_until: snoozedUntil }) }
+      { body: JSON.stringify({ snoozedUntil }) }
     );
   }
 

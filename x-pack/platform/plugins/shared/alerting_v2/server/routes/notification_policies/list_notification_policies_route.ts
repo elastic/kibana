@@ -18,8 +18,9 @@ import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants'
 const sortFieldSchema = schema.oneOf([
   schema.literal('name'),
   schema.literal('createdAt'),
-  schema.literal('createdBy'),
   schema.literal('updatedAt'),
+  schema.literal('createdByUsername'),
+  schema.literal('updatedByUsername'),
 ]);
 
 const listNotificationPoliciesQuerySchema = schema.object({
