@@ -7,9 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ModelSettings } from '../../../../lib/saved_objects/significant_events/model_settings_config_service';
+import { getConfiguredIndexPatterns } from '../../../../lib/significant_events/helpers/get_configured_index_patterns';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+
+export type SignificantEventsSettingsResponse = ModelSettings & {
+  /** Resolved index patterns (with server default applied). Use this for filtering; do not duplicate default on the client. */
+  indexPatternsResolved: string[];
+};
 
 export const getSignificantEventsSettingsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_significant_events/settings',
@@ -23,12 +29,18 @@ export const getSignificantEventsSettingsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients, server }): Promise<ModelSettings> => {
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsSettingsResponse> => {
     const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    return modelSettingsClient.getSettings();
+    const settings = await modelSettingsClient.getSettings();
+    const indexPatternsResolved = await getConfiguredIndexPatterns(settings);
+    return { ...settings, indexPatternsResolved };
   },
 });
 
@@ -36,6 +48,7 @@ const putSignificantEventsSettingsBodySchema = z.object({
   connectorIdKnowledgeIndicatorExtraction: z.string().optional(),
   connectorIdRuleGeneration: z.string().optional(),
   connectorIdDiscovery: z.string().optional(),
+  indexPatterns: z.string().optional(),
 });
 
 export const putSignificantEventsSettingsRoute = createServerRoute({

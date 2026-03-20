@@ -34,4 +34,9 @@ simple-statistics
 monaco-promql
 oxlint
 react-element-to-jsx-string
+@swc/core
+lightningcss
+tar-fs
+browserslist
 react-day-picker
+jszip

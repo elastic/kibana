@@ -31,7 +31,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       defaultMessage: 'Internet scanning noise detection and classification',
     }),
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

@@ -12471,12 +12471,12 @@
             "tags": [],
             "label": "template",
             "description": [
-              "\nThe index template definition for the data stream.\n\nThis template definition corresponds to types from ES:\n - api.IndicesPutIndexTemplateRequest\n - api.IndicesIndexTemplate\n - api.IndicesIndexTemplateSummary"
+              "\nThe index template definition for the data stream.\n\nThis template definition corresponds to types from ES:\n - api.IndicesPutIndexTemplateRequest\n - api.IndicesIndexTemplate\n - api.IndicesIndexTemplateSummary\n\nLifecycle behavior:\n - `template.lifecycle` is optional.\n - If omitted, no lifecycle policy is configured by this definition.\n - If you add, remove, or change `template.lifecycle`, increment `version` so the\n   updated template is applied."
             ],
             "signature": [
               "Pick<",
               "IndicesIndexTemplateSummary",
-              ", \"aliases\"> & { priority?: number | undefined; _meta?: { [key: string]: unknown; } | undefined; mappings?: (",
+              ", \"aliases\" | \"lifecycle\"> & { priority?: number | undefined; _meta?: { [key: string]: unknown; } | undefined; mappings?: (",
               {
                 "pluginId": "@kbn/es-mappings",
                 "scope": "common",
