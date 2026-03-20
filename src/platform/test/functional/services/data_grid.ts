@@ -723,8 +723,10 @@ export class DataGridService extends FtrService {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
-    const cell = await this.testSubjects.find(cellSelector);
-    await this.activateWithKeyboard(cell);
+    await this.retry.waitFor('grid cell actions to appear', async () => {
+      await this.activateByTestSubject(cellSelector);
+      return this.testSubjects.exists(`${actionName}-${fieldName}`);
+    });
 
     if (!(await this.testSubjects.exists(`${actionName}-${fieldName}`))) {
       throw new Error(`Unable to show flyout action ${actionName} for ${fieldName}`);
@@ -735,14 +737,22 @@ export class DataGridService extends FtrService {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
 
     const actionSelector = `${actionName}-${fieldName}`;
-    const action = await this.testSubjects.find(actionSelector);
-    await this.activateWithKeyboard(action);
+    await this.retry.try(async () => {
+      await this.activateByTestSubject(actionSelector);
+    });
   }
 
-  private async activateWithKeyboard(element: WebElementWrapper): Promise<void> {
+  private async activateByTestSubject(testSubject: string): Promise<void> {
     await this.browser.execute(
-      'arguments[0].setAttribute("tabindex", "-1"); arguments[0].focus();',
-      element._webElement
+      `
+      const selector = '[data-test-subj="' + arguments[0] + '"]';
+      const element = document.querySelector(selector);
+      if (element) {
+        element.setAttribute('tabindex', '-1');
+        element.focus();
+      }
+      `,
+      testSubject
     );
     await this.browser.pressKeys(this.browser.keys.ENTER);
   }
