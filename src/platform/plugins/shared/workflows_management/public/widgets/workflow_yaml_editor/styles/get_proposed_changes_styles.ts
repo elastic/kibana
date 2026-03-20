@@ -116,7 +116,7 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
     .wfDiffDeclineBtn {
       display: flex;
       align-items: center;
-      gap: ${euiTheme.size.xs};
+      gap: ${euiTheme.size.s};
       height: ${euiTheme.size.xl};
       padding: 0 ${euiTheme.size.s};
       border-radius: ${euiTheme.border.radius.small};
@@ -155,7 +155,7 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
       border-radius: ${euiTheme.border.radius.small};
       font-family: ${euiTheme.font.family};
       font-weight: ${euiTheme.font.weight.medium};
-      font-size: ${euiTheme.size.s};
+      font-size: 10px;
       color: ${euiTheme.colors.textSuccess};
       line-height: ${euiTheme.size.s};
     }
@@ -183,7 +183,7 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
       border-radius: ${euiTheme.border.radius.small};
       font-family: ${euiTheme.font.family};
       font-weight: ${euiTheme.font.weight.medium};
-      font-size: ${euiTheme.size.s};
+      font-size: 10px;
       color: ${euiTheme.colors.textDanger};
       line-height: ${euiTheme.size.s};
     }

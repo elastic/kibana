@@ -12,6 +12,9 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 
+/** Matches ProposalManager: always Ctrl in scout tests */
+const CHORD_MODIFIER = 'Control';
+
 const INITIAL_YAML = `name: Proposed Changes Test
 description: A test workflow for proposed changes
 enabled: true
@@ -157,7 +160,10 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
     expect(normalizeYaml(value)).toBe(normalizeYaml(expected));
   });
 
-  test('Tab key accepts the focused proposal', async ({ pageObjects, page }) => {
+  test('Modifier+Shift+A accepts pending proposals when pointer is over editor', async ({
+    pageObjects,
+    page,
+  }) => {
     const afterYaml = INITIAL_YAML.replace(
       'message: "Hello from step one"',
       'message: "Modified step one"'
@@ -166,13 +172,17 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
     await pageObjects.workflowEditor.simulateProposedChanges(afterYaml);
     await pageObjects.workflowEditor.revealNextProposal();
     await pageObjects.workflowEditor.focusYamlEditor();
-    await page.keyboard.press('Tab');
+    await pageObjects.workflowEditor.hoverYamlEditorSurface();
+    await page.keyboard.press(`${CHORD_MODIFIER}+Shift+A`);
 
     const value = await pageObjects.workflowEditor.getYamlEditorValue();
     expect(normalizeYaml(value)).toBe(normalizeYaml(afterYaml));
   });
 
-  test('Escape key rejects the focused proposal', async ({ pageObjects, page }) => {
+  test('Modifier+Backspace rejects pending proposals when pointer is over editor', async ({
+    pageObjects,
+    page,
+  }) => {
     const afterYaml = INITIAL_YAML.replace(
       'message: "Hello from step one"',
       'message: "Modified step one"'
@@ -181,7 +191,8 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
     await pageObjects.workflowEditor.simulateProposedChanges(afterYaml);
     await pageObjects.workflowEditor.revealNextProposal();
     await pageObjects.workflowEditor.focusYamlEditor();
-    await page.keyboard.press('Escape');
+    await pageObjects.workflowEditor.hoverYamlEditorSurface();
+    await page.keyboard.press(`${CHORD_MODIFIER}+Backspace`);
 
     const value = await pageObjects.workflowEditor.getYamlEditorValue();
     expect(normalizeYaml(value)).toBe(normalizeYaml(INITIAL_YAML));

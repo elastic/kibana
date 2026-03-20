@@ -10,15 +10,20 @@
 import { diffLines } from 'diff';
 import { getUndoRedoService, monaco } from '@kbn/monaco';
 import type { UndoRedoService } from '@kbn/monaco';
+import { isMac } from '@kbn/shared-ux-utility';
 
+// EUI: check
 const ICON_SVG_CHECK =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8.5l3 3 5-6.5"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M15.354 4.354 6.5 13.207 1.646 8.354l.708-.708L6.5 11.793l8.146-8.147.708.708Z" clip-rule="evenodd"></path></svg>';
+// EUI: cross
 const ICON_SVG_CROSS =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M7.293 8 2.646 3.354l.708-.708L8 7.293l4.646-4.647.708.708L8.707 8l4.647 4.646-.707.708L8 8.707l-4.646 4.647-.708-.707L7.293 8Z" clip-rule="evenodd"></path></svg>';
+// EUI: chevronSingleUp
 const ICON_SVG_ARROW_UP =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12V4M4 7l4-4 4 4"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="m8 5.707 5.646 5.647.708-.708L8 4.293l-6.354 6.353.708.707L8 5.708Z" clip-rule="evenodd"></path></svg>';
+// EUI: chevronSingleDown
 const ICON_SVG_ARROW_DOWN =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 4v8M4 9l4 4 4-4"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="m8 10.293 5.646-5.647.708.708L8 11.707 1.646 5.354l.708-.708L8 10.293Z" clip-rule="evenodd"></path></svg>';
 
 const parseSvgIcon = (svgMarkup: string): Node =>
   new DOMParser().parseFromString(svgMarkup, 'image/svg+xml').documentElement;
@@ -58,7 +63,37 @@ export class ProposalManager {
   private bulkBarSpacerZoneId: string | null = null;
   private focusedHunkIndex = -1;
 
-  private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  /** True while the pointer is over the Monaco surface or the bulk-action bar (no editor focus required). */
+  private pointerInsideHotkeySurface = false;
+  private editorSurfaceElement: HTMLElement | null = null;
+  private proposalHotkeyHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  private readonly onEditorSurfaceEnter = (): void => {
+    this.pointerInsideHotkeySurface = true;
+  };
+
+  private readonly onEditorSurfaceLeave = (e: MouseEvent): void => {
+    this.updatePointerInsideHotkeySurfaceFromLeave(e.relatedTarget);
+  };
+
+  private readonly onBulkBarSurfaceEnter = (): void => {
+    this.pointerInsideHotkeySurface = true;
+  };
+
+  private readonly onBulkBarSurfaceLeave = (e: MouseEvent): void => {
+    this.updatePointerInsideHotkeySurfaceFromLeave(e.relatedTarget);
+  };
+
+  private updatePointerInsideHotkeySurfaceFromLeave(relatedTarget: EventTarget | null): void {
+    const editorDom = this.editorSurfaceElement;
+    const bar = this.bulkBar;
+    if (relatedTarget instanceof Node) {
+      if (editorDom?.contains(relatedTarget)) return;
+      if (bar?.contains(relatedTarget)) return;
+    }
+    this.pointerInsideHotkeySurface = false;
+  }
+
   private mouseMoveDisposable: monaco.IDisposable | null = null;
   private cursorPositionDisposable: monaco.IDisposable | null = null;
   private contentChangeDisposable: monaco.IDisposable | null = null;
@@ -70,29 +105,6 @@ export class ProposalManager {
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
     this.editor = editor;
     this.options = options ?? {};
-
-    const domNode = editor.getDomNode();
-    if (domNode) {
-      this.keydownHandler = (e: KeyboardEvent) => {
-        if (!this.hasPendingProposals()) return;
-
-        if (e.key === 'Tab' || e.key === 'Enter') {
-          e.preventDefault();
-          e.stopPropagation();
-          if (this.focusedHunkIndex >= 0) {
-            this.acceptHunk(this.focusedHunkIndex);
-          }
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          e.stopPropagation();
-          if (this.focusedHunkIndex >= 0) {
-            this.rejectHunk(this.focusedHunkIndex);
-          }
-        }
-      };
-
-      domNode.addEventListener('keydown', this.keydownHandler, true);
-    }
 
     this.mouseMoveDisposable = editor.onMouseMove((e) => {
       if (!this.hasPendingProposals()) return;
@@ -116,6 +128,36 @@ export class ProposalManager {
         this.focusHunk(idx);
       }
     });
+
+    const domNode = editor.getDomNode();
+    if (domNode) {
+      this.editorSurfaceElement = domNode;
+      domNode.addEventListener('mouseenter', this.onEditorSurfaceEnter);
+      domNode.addEventListener('mouseleave', this.onEditorSurfaceLeave);
+    }
+
+    this.proposalHotkeyHandler = (e: KeyboardEvent) => {
+      if (!this.hasPendingProposals() || !this.pointerInsideHotkeySurface) return;
+
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+      if (!mod || e.altKey) return;
+
+      // Accept all: Cmd/Ctrl + Shift + A
+      if (e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.acceptAll();
+        return;
+      }
+
+      // Decline all: Cmd/Ctrl + Backspace (no Shift)
+      if (!e.shiftKey && e.key === 'Backspace') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.rejectAll();
+      }
+    };
+    document.addEventListener('keydown', this.proposalHotkeyHandler, true);
 
     this.undoRedoService = getUndoRedoService();
 
@@ -318,16 +360,19 @@ export class ProposalManager {
     this.contentChangeDisposable?.dispose();
     this.contentChangeDisposable = null;
 
-    if (this.editor && this.keydownHandler) {
-      const domNode = this.editor.getDomNode();
-      if (domNode) {
-        domNode.removeEventListener('keydown', this.keydownHandler, true);
-      }
+    if (this.editorSurfaceElement) {
+      this.editorSurfaceElement.removeEventListener('mouseenter', this.onEditorSurfaceEnter);
+      this.editorSurfaceElement.removeEventListener('mouseleave', this.onEditorSurfaceLeave);
+      this.editorSurfaceElement = null;
+    }
+
+    if (this.proposalHotkeyHandler) {
+      document.removeEventListener('keydown', this.proposalHotkeyHandler, true);
+      this.proposalHotkeyHandler = null;
     }
 
     this.clearAllHunkUI();
 
-    this.keydownHandler = null;
     this.editor = null;
   }
 
@@ -536,9 +581,6 @@ export class ProposalManager {
     const acceptLabel = document.createElement('span');
     acceptLabel.textContent = 'Accept';
     acceptButton.appendChild(acceptLabel);
-    const acceptKbd = document.createElement('kbd');
-    acceptKbd.textContent = 'Tab';
-    acceptButton.appendChild(acceptKbd);
     acceptButton.addEventListener('mousedown', (e) => e.stopPropagation());
     acceptButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -554,9 +596,6 @@ export class ProposalManager {
     const declineLabel = document.createElement('span');
     declineLabel.textContent = 'Decline';
     declineButton.appendChild(declineLabel);
-    const declineKbd = document.createElement('kbd');
-    declineKbd.textContent = 'Esc';
-    declineButton.appendChild(declineKbd);
     declineButton.addEventListener('mousedown', (e) => e.stopPropagation());
     declineButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -733,10 +772,10 @@ export class ProposalManager {
     acceptAllBtn.setAttribute('data-test-subj', 'wfDiffAcceptAllButton');
     acceptAllBtn.appendChild(parseSvgIcon(ICON_SVG_CHECK));
     const acceptAllLabel = document.createElement('span');
-    acceptAllLabel.textContent = 'Accept all';
+    acceptAllLabel.textContent = 'Accept All';
     acceptAllBtn.appendChild(acceptAllLabel);
     const acceptKbd = document.createElement('kbd');
-    acceptKbd.textContent = 'Tab';
+    acceptKbd.textContent = isMac ? '⌘⇧A' : 'Ctrl+Shift+A';
     acceptAllBtn.appendChild(acceptKbd);
     acceptAllBtn.addEventListener('mousedown', (e) => e.stopPropagation());
     acceptAllBtn.addEventListener('click', (e) => {
@@ -751,10 +790,10 @@ export class ProposalManager {
     rejectAllBtn.setAttribute('data-test-subj', 'wfDiffDeclineAllButton');
     rejectAllBtn.appendChild(parseSvgIcon(ICON_SVG_CROSS));
     const rejectAllLabel = document.createElement('span');
-    rejectAllLabel.textContent = 'Decline all';
+    rejectAllLabel.textContent = 'Decline All';
     rejectAllBtn.appendChild(rejectAllLabel);
     const rejectKbd = document.createElement('kbd');
-    rejectKbd.textContent = 'Esc';
+    rejectKbd.textContent = isMac ? '⌘⌫' : 'Ctrl+Bksp';
     rejectAllBtn.appendChild(rejectKbd);
     rejectAllBtn.addEventListener('mousedown', (e) => e.stopPropagation());
     rejectAllBtn.addEventListener('click', (e) => {
@@ -763,6 +802,9 @@ export class ProposalManager {
       this.rejectAll();
     });
     bar.appendChild(rejectAllBtn);
+
+    bar.addEventListener('mouseenter', this.onBulkBarSurfaceEnter);
+    bar.addEventListener('mouseleave', this.onBulkBarSurfaceLeave);
 
     container.appendChild(bar);
     this.bulkBar = bar;
@@ -783,6 +825,8 @@ export class ProposalManager {
 
   private removeBulkBar(): void {
     if (this.bulkBar) {
+      this.bulkBar.removeEventListener('mouseenter', this.onBulkBarSurfaceEnter);
+      this.bulkBar.removeEventListener('mouseleave', this.onBulkBarSurfaceLeave);
       this.bulkBar.remove();
       this.bulkBar = null;
 

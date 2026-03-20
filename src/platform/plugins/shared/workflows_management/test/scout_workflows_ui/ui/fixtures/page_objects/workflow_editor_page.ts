@@ -486,6 +486,14 @@ export class WorkflowEditorPage {
     }, uri);
   }
 
+  /**
+   * Move the pointer over the Monaco surface. Proposal bulk hotkeys (accept all / decline all)
+   * only run while the pointer is inside the editor or bulk bar.
+   */
+  async hoverYamlEditorSurface(): Promise<void> {
+    await this.yamlEditor.locator('.monaco-editor').hover();
+  }
+
   async triggerUndoInYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {

@@ -220,21 +220,129 @@ describe('ProposalManager', () => {
     manager.dispose();
   });
 
-  it('initialize attaches keydown handler to editor DOM', () => {
+  it('initialize registers document hotkeys and editor hover targets', () => {
+    const addDocSpy = jest.spyOn(document, 'addEventListener');
     const editor = createRealisticMockEditor('line1\nline2\nline3');
     manager.initialize(editor);
 
     const domNode = editor.getDomNode();
-    expect(domNode.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), true);
+    expect(domNode.addEventListener).toHaveBeenCalledWith('mouseenter', expect.any(Function));
+    expect(domNode.addEventListener).toHaveBeenCalledWith('mouseleave', expect.any(Function));
+
+    expect(addDocSpy).toHaveBeenCalledWith('keydown', expect.any(Function), true);
+
+    addDocSpy.mockRestore();
   });
 
-  it('dispose cleans up keydown handler', () => {
+  it('dispose removes document hotkeys and editor hover listeners', () => {
+    const addDocSpy = jest.spyOn(document, 'addEventListener');
+    const removeDocSpy = jest.spyOn(document, 'removeEventListener');
+
     const editor = createRealisticMockEditor('line1\nline2\nline3');
     manager.initialize(editor);
-    manager.dispose();
 
     const domNode = editor.getDomNode();
-    expect(domNode.removeEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), true);
+    const enterHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+      (c: unknown[]) => c[0] === 'mouseenter'
+    )?.[1];
+    const leaveHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+      (c: unknown[]) => c[0] === 'mouseleave'
+    )?.[1];
+    const keyHandler = addDocSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'keydown' && c[2] === true
+    )?.[1];
+
+    expect(enterHandler).toBeDefined();
+    expect(leaveHandler).toBeDefined();
+    expect(keyHandler).toBeDefined();
+
+    manager.dispose();
+
+    expect(domNode.removeEventListener).toHaveBeenCalledWith('mouseenter', enterHandler);
+    expect(domNode.removeEventListener).toHaveBeenCalledWith('mouseleave', leaveHandler);
+    expect(removeDocSpy).toHaveBeenCalledWith('keydown', keyHandler, true);
+
+    addDocSpy.mockRestore();
+    removeDocSpy.mockRestore();
+  });
+
+  it('accept-all hotkey runs only while pointer is over editor surface', () => {
+    const addDocSpy = jest.spyOn(document, 'addEventListener');
+    const onAccept = jest.fn();
+    const editor = createRealisticMockEditor('line1\nline2\nline3');
+    manager.initialize(editor, { onAccept });
+
+    manager.applyAfterYaml('line1\nchanged\nline3\n');
+    const keyHandler = addDocSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'keydown' && c[2] === true
+    )![1] as (e: KeyboardEvent) => void;
+
+    const domNode = editor.getDomNode();
+    const enterHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+      (c: unknown[]) => c[0] === 'mouseenter'
+    )![1] as () => void;
+
+    keyHandler({
+      key: 'a',
+      ctrlKey: true,
+      shiftKey: true,
+      metaKey: true,
+      altKey: false,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as KeyboardEvent);
+    expect(manager.hasPendingProposals()).toBe(true);
+
+    enterHandler();
+    keyHandler({
+      key: 'a',
+      ctrlKey: true,
+      shiftKey: true,
+      metaKey: true,
+      altKey: false,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as KeyboardEvent);
+
+    expect(manager.hasPendingProposals()).toBe(false);
+    expect(onAccept).toHaveBeenCalledWith('all');
+
+    addDocSpy.mockRestore();
+  });
+
+  it('decline-all hotkey runs only while pointer is over editor surface', () => {
+    const addDocSpy = jest.spyOn(document, 'addEventListener');
+    const onReject = jest.fn();
+    const original = 'line1\nline2\nline3\n';
+    const editor = createRealisticMockEditor(original);
+    manager.initialize(editor, { onReject });
+
+    manager.applyAfterYaml('line1\nchanged\nline3\n');
+    const keyHandler = addDocSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'keydown' && c[2] === true
+    )![1] as (e: KeyboardEvent) => void;
+
+    const domNode = editor.getDomNode();
+    const enterHandler = (domNode.addEventListener as jest.Mock).mock.calls.find(
+      (c: unknown[]) => c[0] === 'mouseenter'
+    )![1] as () => void;
+
+    enterHandler();
+    keyHandler({
+      key: 'Backspace',
+      ctrlKey: true,
+      shiftKey: false,
+      metaKey: true,
+      altKey: false,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as KeyboardEvent);
+
+    expect(editor.getModel().getValue()).toBe(original);
+    expect(manager.hasPendingProposals()).toBe(false);
+    expect(onReject).toHaveBeenCalledWith('all');
+
+    addDocSpy.mockRestore();
   });
 
   describe('applyAfterYaml', () => {
