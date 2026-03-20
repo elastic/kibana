@@ -442,3 +442,78 @@ export const cleanupAgentPolicy = (agentPolicyId: string) =>
     },
     url: '/api/fleet/agent_policies/delete',
   });
+
+export const addTagsToLiveQuery = (actionId: string, tags: string[]) =>
+  request({
+    method: 'PUT',
+    body: { tags },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    url: `/api/osquery/history/${actionId}/tags`,
+  });
+
+/**
+ * Reads the raw pack saved object to get schedule_id values (which are stripped
+ * from the public REST API response).
+ */
+export const getPackSavedObject = (packId: string) =>
+  request<{
+    id: string;
+    attributes: {
+      name: string;
+      queries: Array<{ schedule_id: string; name: string; query: string; interval: number }>;
+    };
+  }>({
+    method: 'GET',
+    url: `/api/saved_objects/osquery-pack/${packId}`,
+  }).then((response) => response.body);
+
+/**
+ * Creates a mock scheduled query response document in the action responses data stream.
+ * This simulates a pack query execution result from an agent, which shows up as
+ * "Scheduled" source type in the unified history table.
+ *
+ * Requires a pack with a matching schedule_id to exist for the history table
+ * to resolve the query name and pack context.
+ */
+export const loadScheduledResponse = ({
+  scheduleId,
+  executionCount = 1,
+  agentId = 'mock-agent-001',
+  packId,
+  resultCount = 5,
+}: {
+  scheduleId: string;
+  executionCount?: number;
+  agentId?: string;
+  packId: string;
+  resultCount?: number;
+}) => {
+  const esUrl =
+    Cypress.env('ELASTICSEARCH_URL') || `http://localhost:${Cypress.env('configport') || 9220}`;
+  const esUser = Cypress.env('ELASTICSEARCH_USERNAME') || 'elastic';
+  const esPass = Cypress.env('ELASTICSEARCH_PASSWORD') || 'changeme';
+  const now = new Date().toISOString();
+
+  return cy.request({
+    method: 'POST',
+    url: `${esUrl}/logs-osquery_manager.action.responses-default/_doc`,
+    auth: { user: esUser, pass: esPass },
+    headers: { 'Content-Type': 'application/json' },
+    body: {
+      '@timestamp': now,
+      agent_id: agentId,
+      schedule_id: scheduleId,
+      schedule_execution_count: executionCount,
+      planned_schedule_time: now,
+      pack_id: packId,
+      action_response: {
+        osquery: {
+          count: resultCount,
+        },
+      },
+    },
+    failOnStatusCode: false,
+  });
+};
