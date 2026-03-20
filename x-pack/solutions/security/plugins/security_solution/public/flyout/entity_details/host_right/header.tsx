@@ -38,10 +38,7 @@ const urlParamOverride = { timeline: { isOpen: false } };
 
 export const HostPanelHeader = ({ identityFields, lastSeen, entity }: HostPanelHeaderProps) => {
   const hostName = useMemo(
-    () =>
-      identityFields[EntityIdentifierFields.hostName] ||
-      Object.values(identityFields)[0] ||
-      '',
+    () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
     [identityFields]
   );
 

@@ -313,9 +313,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   ],
                 }}
               >
-                <EuiLink
-                  onClick={() => handleClick({ hostName, severity: 'low', identityFields })}
-                >
+                <EuiLink onClick={() => handleClick({ hostName, severity: 'low', identityFields })}>
                   <FormattedCount count={count} />
                 </EuiLink>
               </SecurityCellActions>

@@ -48,9 +48,7 @@ const UserNameComponent: React.FC<Props> = ({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const { entityRecord } = useEntityFromStore({
-    identityFields:
-      identityFields ??
-      (userName ? { 'user.name': userName } : undefined),
+    identityFields: identityFields ?? (userName ? { 'user.name': userName } : undefined),
     entityType: 'user',
     skip: !entityStoreV2Enabled,
   });

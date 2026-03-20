@@ -64,9 +64,7 @@ export const useNavigateEntityInsight = ({
 
   const entityFromStore = useEntityFromStore({
     entityId:
-      entityType === 'host'
-        ? identityFields['host.entity.id']
-        : identityFields['user.entity.id'],
+      entityType === 'host' ? identityFields['host.entity.id'] : identityFields['user.entity.id'],
     identityFields,
     entityType,
     skip: !entityStoreV2Enabled,

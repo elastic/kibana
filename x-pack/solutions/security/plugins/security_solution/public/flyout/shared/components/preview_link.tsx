@@ -96,18 +96,13 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   const entityType = primaryField === HOST_NAME_FIELD_NAME ? 'host' : 'user';
 
   const docEntityId =
-    entityType === 'host'
-      ? identityFields['host.entity.id']
-      : identityFields['user.entity.id'];
+    entityType === 'host' ? identityFields['host.entity.id'] : identityFields['user.entity.id'];
 
   const { entityRecord } = useEntityFromStore({
     entityId: docEntityId,
     identityFields,
     entityType,
-    skip:
-      !entityStoreV2Enabled ||
-      !isHostOrUser ||
-      Object.keys(identityFields).length === 0,
+    skip: !entityStoreV2Enabled || !isHostOrUser || Object.keys(identityFields).length === 0,
   });
 
   const resolvedEntityId = entityRecord?.entity?.id;

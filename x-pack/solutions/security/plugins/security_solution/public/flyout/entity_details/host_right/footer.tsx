@@ -21,10 +21,7 @@ export const HostPanelFooter = ({
   entity?: EntityStoreRecord;
 }) => {
   const hostName = useMemo(
-    () =>
-      identityFields[EntityIdentifierFields.hostName] ||
-      Object.values(identityFields)[0] ||
-      '',
+    () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
     [identityFields]
   );
 

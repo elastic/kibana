@@ -99,10 +99,7 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
     entityId: docEntityId,
     identityFields: resolutionIdentifiers,
     entityType,
-    skip:
-      !entityStoreV2Enabled ||
-      !isHostOrUser ||
-      Object.keys(resolutionIdentifiers).length === 0,
+    skip: !entityStoreV2Enabled || !isHostOrUser || Object.keys(resolutionIdentifiers).length === 0,
   });
 
   const resolvedEntityId = entityRecord?.entity?.id;

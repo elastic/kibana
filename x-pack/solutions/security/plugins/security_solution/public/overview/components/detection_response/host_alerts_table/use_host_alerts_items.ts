@@ -336,8 +336,7 @@ function parseHostsData(
     const hostName = firstNonNullValue(currentHost.key) ?? '-';
     const hostSource = currentHost.host_sample?.hits?.hits?.[0]?._source?.host;
     const identityFields =
-      getHostIdentityFieldsFromEsHit(hostSource) ??
-      ({ 'host.name': hostName } as IdentityFields);
+      getHostIdentityFieldsFromEsHit(hostSource) ?? ({ 'host.name': hostName } as IdentityFields);
 
     accumalatedAlertsByHost.push({
       hostName,

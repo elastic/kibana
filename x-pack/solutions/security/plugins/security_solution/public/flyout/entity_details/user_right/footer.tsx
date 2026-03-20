@@ -10,11 +10,7 @@ import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { TakeAction } from '../shared/components/take_action';
 import type { IdentityFields } from '../../document_details/shared/utils';
 
-export const UserPanelFooter = ({
-  identityFields,
-}: {
-  identityFields: IdentityFields;
-}) => {
+export const UserPanelFooter = ({ identityFields }: { identityFields: IdentityFields }) => {
   const userName = useMemo(
     () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
     [identityFields]
