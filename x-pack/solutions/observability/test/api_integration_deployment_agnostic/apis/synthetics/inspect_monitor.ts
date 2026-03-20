@@ -127,6 +127,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           privateConfig: null,
         },
         decodedCode: '',
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
       });
     });
 
