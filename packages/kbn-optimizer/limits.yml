@@ -50,6 +50,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
+  elasticConsole: 4451
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37566
@@ -101,7 +102,7 @@ pageLoadAssetSize:
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 70490
+  lens: 85000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
