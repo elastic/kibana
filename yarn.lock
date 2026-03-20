@@ -5428,10 +5428,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core-chrome-layout-feature-flags":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-chrome-layout-utils@link:src/core/packages/chrome/layout/core-chrome-layout-utils":
   version "0.0.0"
   uid ""
