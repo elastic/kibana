@@ -28,7 +28,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { isDataViewSource } from '../../../../../common/data_sources';
-import { AggregateRequestAdapter } from '../../utils/aggregate_request_adapter';
+import { getInspectorRequestAdapters } from '../../hooks/use_inspector';
 
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
@@ -93,16 +93,14 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
               return;
             }
 
-            const { inspectorAdapters } = dataStateContainer;
             const cascadedDocumentsFetcher = tabRuntimeState.cascadedDocumentsFetcher$.getValue();
-            const requestAdapters = [
-              inspectorAdapters.requests,
-              inspectorAdapters.lensRequests,
-              cascadedDocumentsFetcher?.getRequestAdapter(),
-            ].filter((adapter) => !!adapter);
+            const requestAdapters = getInspectorRequestAdapters(
+              dataStateContainer,
+              cascadedDocumentsFetcher
+            );
 
             services.inspector.open(
-              { requests: new AggregateRequestAdapter(requestAdapters) },
+              { requests: requestAdapters },
               { title: persistedDiscoverSession?.title }
             );
           },

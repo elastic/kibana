@@ -121,9 +121,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should return focus to the share button when dismissing the share popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
 
-      // Inspector is now in the tab context menu, not the app menu
-      // Focus management for tab menu items is handled by the unified tabs component
-
       it('should return focus to the save button when dismissing the save modal', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));
     });
