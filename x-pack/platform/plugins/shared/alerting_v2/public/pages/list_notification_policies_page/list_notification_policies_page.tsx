@@ -335,6 +335,7 @@ export const ListNotificationPoliciesPage = () => {
             onEnabledChange={handleEnabledChange}
           />
         </EuiFlexItem>
+        <EuiSpacer size="m" />
         {errorMessage ? (
           <>
             <EuiCallOut
