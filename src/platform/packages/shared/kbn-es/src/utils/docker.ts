@@ -38,6 +38,7 @@ import {
 
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
+import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
@@ -1338,6 +1339,8 @@ export async function runDockerContainer(
   });
 }
 
+export { readStringSecrets };
+
 /**
  * A volume mount for the operator folder, that contains operator specific configuration files like settings.json.
  * We mount entire folder since Elasticsearch cannot properly watch changes in bind-mounted files.
@@ -1366,6 +1369,10 @@ async function getOperatorVolume(
     env: 'local',
   };
 
+  const stringSecrets = await readStringSecrets(
+    ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+  );
+
   await Fsp.writeFile(
     join(operatorPath, 'settings.json'),
     JSON.stringify(
@@ -1373,14 +1380,7 @@ async function getOperatorVolume(
         metadata: { version: '100', compatibility: '' },
         state: {
           project: { ...projectInfo, tags: projectTags },
-          cluster_secrets: {
-            string_secrets: JSON.parse(
-              await Fsp.readFile(
-                ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH,
-                'utf-8'
-              )
-            ).string_secrets,
-          },
+          cluster_secrets: { string_secrets: stringSecrets },
         },
       },
       null,
