@@ -398,6 +398,7 @@ describe('Case View Page activity tab', () => {
       expect(replaceCustomField).toHaveBeenCalledWith({
         caseId: caseData.id,
         caseVersion: caseData.version,
+        caseData,
         customFieldId: customFieldsMock[1].key,
         customFieldValue: false,
       });

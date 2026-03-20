@@ -57,6 +57,7 @@ export const useStatusAction = ({
         {
           cases: casesToUpdate,
           successToasterTitle: getStatusToasterMessage(status, selectedCases),
+          originalCases: selectedCases,
         },
         { onSuccess: onActionSuccess }
       );
