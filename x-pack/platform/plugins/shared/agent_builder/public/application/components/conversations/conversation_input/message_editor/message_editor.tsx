@@ -99,6 +99,7 @@ interface MessageEditorProps {
   onSubmit: () => void;
   disabled?: boolean;
   placeholder?: string;
+  ariaLabel?: string;
   'data-test-subj'?: string;
 }
 
@@ -107,6 +108,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   onSubmit,
   disabled = false,
   placeholder = '',
+  ariaLabel,
   'data-test-subj': dataTestSubj,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
@@ -163,7 +165,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         contentEditable={disabled ? 'false' : 'true'}
         role="textbox"
         aria-multiline="true"
-        aria-label={editorAriaLabel}
+        aria-label={ariaLabel ?? editorAriaLabel}
         aria-disabled={disabled}
         aria-haspopup="dialog"
         tabIndex={0}
