@@ -16,13 +16,17 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN } from './constants';
+import { MatcherInput } from './components/matcher_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { NotificationPolicyFormState } from './types';
+
+const groupByOptions = MATCHER_CONTEXT_FIELDS.map((f) => ({ label: f.path }));
 
 export const NotificationPolicyForm = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
@@ -136,14 +140,15 @@ export const NotificationPolicyForm = () => {
                 })}
                 fullWidth
               >
-                <EuiFieldText
-                  {...field}
+                <MatcherInput
+                  value={field.value}
+                  onChange={field.onChange}
                   inputRef={ref}
                   fullWidth
                   data-test-subj="matcherInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.matcher.placeholder',
-                    { defaultMessage: 'e.g. data.severity : "critical" and data.env : "prod"' }
+                    { defaultMessage: 'e.g. episode_status : "active" and rule.name : "my-rule"' }
                   )}
                 />
               </EuiFormRow>
@@ -187,16 +192,16 @@ export const NotificationPolicyForm = () => {
                   data-test-subj="groupByInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
-                    { defaultMessage: 'Add field name (ex: host.name, service)' }
+                    { defaultMessage: 'Select or type a field name' }
                   )}
                   selectedOptions={field.value.map((g: string) => ({ label: g }))}
-                  onCreateOption={(value) => {
-                    field.onChange([...field.value, value]);
+                  options={groupByOptions}
+                  onCreateOption={(val) => {
+                    field.onChange([...field.value, val]);
                   }}
                   onChange={(options) => {
                     field.onChange(options.map((o) => o.label));
                   }}
-                  noSuggestions
                 />
               </EuiFormRow>
             )}
