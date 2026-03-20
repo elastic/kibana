@@ -172,6 +172,9 @@ export function registerAttachmentRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_stale.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService, attachments: attachmentsService } =
