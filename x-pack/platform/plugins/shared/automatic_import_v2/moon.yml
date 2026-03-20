@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -70,6 +71,7 @@ fileGroups:
     - public/**/*
     - server/**/*.ts
     - common/**/*.ts
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
