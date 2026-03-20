@@ -2732,7 +2732,7 @@ paths:
             application/json:
               examples:
                 checkStaleAttachmentsResponseExample:
-                  description: 'Mixed conversation: attachments without a stale source return only id and is_stale. When a staleness check fails for one attachment, is_stale is false and error explains why. When an origin-backed attachment is out of date, the response includes type, origin, and resolved data (here a simple text body) for resync.'
+                  description: 'Mixed conversation: attachments without a stale source return only id and is_stale. When a staleness check fails for one attachment, is_stale is false and an error explains why. When an origin-backed attachment is out of date, the response includes type, origin, and resolved data (here a simple text body) for resync.'
                   value:
                     attachments:
                       - id: att-text-meeting-notes
