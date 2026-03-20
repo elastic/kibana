@@ -173,7 +173,8 @@ export const warningExecuteEvent = {
  */
 export const failedExecuteEvent = {
   '@timestamp': '2026-03-11T09:00:00.000Z',
-  message: 'siem.queryRule:PLACEHOLDER_RULE_ID: execution failed',
+  message:
+    'siem.queryRule:PLACEHOLDER_RULE_ID: execution failed - An unrecoverable error occurred during rule execution.',
   error: {
     message: 'An unrecoverable error occurred during rule execution.',
   },

@@ -13,6 +13,7 @@ import type {
   GetRuleExecutionResultsResponse,
   ReadRuleExecutionResultsResponse,
   RuleExecutionEvent,
+  UnifiedExecutionResultSortField,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   RuleRunTypeEnum,
@@ -21,6 +22,7 @@ import {
   RuleExecutionEventType,
   RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import {
   RUN_TYPE_FILTERS,
   STATUS_FILTERS,
@@ -49,10 +51,7 @@ import {
   RULE_SAVED_OBJECT_TYPE,
 } from '../../event_log/event_log_constants';
 import * as f from '../../event_log/event_log_fields';
-import {
-  buildUnifiedExecutionEventFilter,
-  UNIFIED_EVENT_SO_TYPE,
-} from './unified_execution_event_source';
+import { buildUnifiedExecutionEventFilter } from './build_unified_execution_event_filter';
 import { mapEventToUnifiedResult } from './map_event_to_unified_result';
 
 export interface IEventLogReader {
@@ -226,14 +225,12 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       const sortField = sort?.field ?? 'execution_start';
       const sortOrder = sort?.order ?? 'desc';
 
-      const kqlFilter = buildUnifiedExecutionEventFilter({ outcome, runType });
-
       const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
-        return eventLog.findEventsBySavedObjectIds(UNIFIED_EVENT_SO_TYPE, [ruleId], {
-          filter: kqlFilter,
+        return eventLog.findEventsBySavedObjectIds(RULE_SAVED_OBJECT_TYPE, [ruleId], {
+          filter: buildUnifiedExecutionEventFilter({ outcome, runType }),
           sort: [{ sort_field: mapUnifiedSortField(sortField), sort_order: sortOrder }],
-          page: page ?? 1,
-          per_page: perPage ?? 20,
+          page,
+          per_page: perPage,
           start: from,
           end: to,
         });
@@ -242,8 +239,8 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       return {
         executions: findResult.data.map(mapEventToUnifiedResult),
         total: findResult.total,
-        page: page ?? 1,
-        per_page: perPage ?? 20,
+        page: findResult.page,
+        per_page: findResult.per_page,
       };
     },
   };
@@ -370,14 +367,14 @@ const buildEventLogKqlFilter = ({
   return kqlAnd(filters);
 };
 
-const mapUnifiedSortField = (sortField: string): string => {
+const mapUnifiedSortField = (sortField: UnifiedExecutionResultSortField): string => {
   switch (sortField) {
     case 'execution_start':
       return 'event.start';
     case 'execution_duration_ms':
       return 'event.duration';
     default:
-      return 'event.start';
+      return assertUnreachable(sortField);
   }
 };
 

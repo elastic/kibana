@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -55,11 +56,10 @@ export const readRuleExecutionResultsRoute = (router: SecuritySolutionPluginRout
           const executionLog = ctx.securitySolution.getRuleExecutionLog();
 
           // Default to the last 2 hours when no filter is provided
-          const now = new Date();
           const effectiveFilter: NonNullable<ReadRuleExecutionResultsRequestBody['filter']> =
             filter ?? {
-              from: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
-              to: now.toISOString(),
+              from: moment().subtract(2, 'hours').toISOString(),
+              to: moment().toISOString(),
               outcome: [],
               run_type: [],
             };

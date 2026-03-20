@@ -96,11 +96,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body.total).to.eql(1);
         expect(response.body.executions[0].execution_uuid).to.eql(executionId);
         expect(response.body.executions[0].outcome.status).to.eql('success');
-        expect(response.body.executions[0].metrics.duration_ms).to.greaterThan(0);
-        expect(response.body.executions[0].metrics.indices_found_count).to.eql(10);
-        expect(response.body.executions[0].metrics.alerts.candidate_count).to.eql(10);
-        expect(response.body.executions[0].metrics.search_duration_ms).to.be.a('number');
-        expect(response.body.executions[0].metrics.scheduling_delay).to.be.a('number');
+        expect(response.body.executions[0].execution_duration_ms).to.greaterThan(0);
+        expect(response.body.executions[0].metrics.matched_indices_count).to.eql(null);
+        expect(response.body.executions[0].metrics.alerts_candidate_count).to.eql(null);
+        expect(response.body.executions[0].metrics.total_search_duration_ms).to.be.a('number');
+        expect(response.body.executions[0].schedule_delay_ms).to.be.a('number');
       });
 
       it('should return execution results with errors for failed executions', async () => {
@@ -266,7 +266,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.executions).to.have.length(3);
-        const resultTimestamps = response.body.executions.map((e: any) => e.timestamp);
+        const resultTimestamps = response.body.executions.map((e: any) => e.execution_start);
         expect(resultTimestamps).to.eql([...resultTimestamps].sort().reverse());
       });
     });
@@ -298,7 +298,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'true')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .send({ filter: { from, to, status: ['failure'] } });
+          .send({ filter: { from, to, outcome: ['failure'] } });
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
@@ -423,7 +423,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
-        expect(response.body.executions[0].timestamp).to.eql(insideTs);
+        expect(response.body.executions[0].execution_start).to.eql(insideTs);
       });
     });
   });
