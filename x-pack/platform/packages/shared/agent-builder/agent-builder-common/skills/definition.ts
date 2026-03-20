@@ -55,6 +55,10 @@ export interface PublicSkillDefinition {
    * If this skill was installed from a plugin, the plugin name.
    */
   plugin_id?: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
 }
 
 /**
@@ -77,6 +81,10 @@ export interface PersistedSkillCreateRequest {
    * Name of the skill.
    */
   name: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Description of what the skill does.
    */
@@ -107,6 +115,10 @@ export interface PersistedSkillUpdateRequest {
    * Updated name.
    */
   name?: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Updated description.
    */

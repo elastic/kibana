@@ -45,6 +45,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       : `${ELASTIC_DOCS}get-started`,
     apiReference: `${API_DOCS}`,
     serverlessReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-serverless`,
+    hostedCloudReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-hosted`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
@@ -826,6 +827,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       registerUrl: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/read-only-url-repository#read-only-url-repository-settings`,
       restoreSnapshot: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/restore-snapshot`,
       restoreSnapshotApi: `${ELASTICSEARCH_APIS}operation/operation-snapshot-restore`,
+      searchableSnapshot: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/searchable-snapshots`,
       searchableSnapshotSharedCache: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/searchable-snapshots#searchable-snapshots-shared-cache`,
       slmStart: `${ELASTICSEARCH_APIS}operation/operation-slm-start`,
     },

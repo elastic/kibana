@@ -11,7 +11,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 export interface StepListTreeItem {
   stepId: string;
@@ -24,6 +25,7 @@ export interface StepExecutionTreeItem extends StepListTreeItem {
   status: ExecutionStatus | null;
   stepExecutionId: string | null;
   isTriggerPseudoStep?: boolean;
+  isChildWorkflowStep?: boolean;
   children: StepExecutionTreeItem[];
 }
 
@@ -207,4 +209,75 @@ export function buildStepExecutionsTree(
   }
 
   return [...pseudoSteps, ...regularSteps];
+}
+
+/**
+ * Injects child workflow execution steps into the tree as children of `workflow.execute` nodes.
+ * For steps where child data is still loading, adds a loading placeholder to show the expand arrow.
+ */
+export function injectChildWorkflowSteps(
+  tree: StepExecutionTreeItem[],
+  childExecutionsMap: ChildWorkflowExecutionsMap,
+  isLoadingChildData: boolean
+): { tree: StepExecutionTreeItem[]; childStepExecutions: WorkflowStepExecutionDto[] } {
+  const childStepExecutions: WorkflowStepExecutionDto[] = [];
+
+  function processNode(node: StepExecutionTreeItem): StepExecutionTreeItem {
+    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && node.stepExecutionId;
+
+    if (!isWorkflowExecuteStep) {
+      return {
+        ...node,
+        children: node.children.map(processNode),
+      };
+    }
+
+    if (childExecutionsMap.has(node.stepExecutionId!)) {
+      const childExecution = childExecutionsMap.get(node.stepExecutionId!)!;
+      const visibleSteps = childExecution.stepExecutions.filter((step) =>
+        isVisibleStepType(step.stepType ?? '')
+      );
+      childStepExecutions.push(...visibleSteps);
+      const childItems: StepExecutionTreeItem[] = visibleSteps.map((step) => ({
+        stepId: step.stepId,
+        stepType: step.stepType ?? 'unknown',
+        executionIndex: step.stepExecutionIndex,
+        stepExecutionId: step.id,
+        status: step.status,
+        isChildWorkflowStep: true,
+        children: [],
+      }));
+
+      return {
+        ...node,
+        children: [...childItems, ...node.children.map(processNode)],
+      };
+    }
+
+    if (isLoadingChildData && node.status && isTerminalStatus(node.status)) {
+      return {
+        ...node,
+        children: [
+          {
+            stepId: 'Loading...',
+            stepType: '__loading',
+            executionIndex: 0,
+            stepExecutionId: `__loading_${node.stepExecutionId}`,
+            status: ExecutionStatus.RUNNING,
+            isChildWorkflowStep: true,
+            children: [],
+          },
+          ...node.children.map(processNode),
+        ],
+      };
+    }
+
+    return {
+      ...node,
+      children: node.children.map(processNode),
+    };
+  }
+
+  const processedTree = tree.map(processNode);
+  return { tree: processedTree, childStepExecutions };
 }

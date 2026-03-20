@@ -18,7 +18,8 @@ value:
       "description": "A case description.",
       "tags": [ "tag-1" ],
       "settings": {
-        "syncAlerts": true
+        "syncAlerts": true,
+        "extractObservables": false
       },
       "customFields": [
         {

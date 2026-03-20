@@ -13,7 +13,6 @@ import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
-import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
@@ -36,16 +35,10 @@ export interface ChromeApiDeps {
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
   };
-  componentDeps: ChromeComponentsDeps;
   sidebar: SidebarStart;
 }
 
-export function createChromeApi({
-  state,
-  services,
-  componentDeps,
-  sidebar,
-}: ChromeApiDeps): InternalChromeStart {
+export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
 
   const validateProjectStyle = () => {
@@ -78,8 +71,6 @@ export function createChromeApi({
   };
 
   const chromeStart: InternalChromeStart = {
-    componentDeps,
-    getConfig: () => componentDeps.config,
     withProvider: (children: ReactNode) => {
       return (
         <ChromeServiceProvider value={{ chrome: chromeStart }}>

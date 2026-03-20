@@ -13,8 +13,9 @@ import type {
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-  SupportedDatasourceId,
+  LensDatasourceId,
 } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { isTextBasedLanguage } from '../helper';
@@ -71,7 +72,7 @@ export function prepareInlineEditPanel(
       saveUserChartTypeToSessionStorage(attributes.visualizationType);
     }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
-      'formBased') as SupportedDatasourceId;
+      LENS_DATASOURCE_ID.FORM_BASED) as LensDatasourceId;
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,
@@ -87,8 +88,11 @@ export function prepareInlineEditPanel(
       startDependencies.data.query.filterManager.extract
     );
 
-    const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
-      updateState({ attributes, savedObjectId });
+    const updateByRefInput = (
+      savedObjectId: LensRuntimeState['savedObjectId'],
+      attrs: TypedLensSerializedState['attributes']
+    ) => {
+      updateState({ attributes: attrs, savedObjectId });
     };
 
     if (attributes?.visualizationType == null) {

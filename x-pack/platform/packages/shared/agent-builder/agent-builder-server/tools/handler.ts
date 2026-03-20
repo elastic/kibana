@@ -21,6 +21,7 @@ import type {
   ToolPromptManager,
   ToolStateManager,
   ToolManager,
+  RunContext,
 } from '../runner';
 import type { IToolFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -67,10 +68,10 @@ export const isToolHandlerStandardReturn = (
 /**
  * Tool handler function for {@link BuiltinToolDefinition} handlers.
  */
-export type ToolHandlerFn<TParams extends Record<string, unknown> = Record<string, unknown>> = (
-  args: TParams,
-  context: ToolHandlerContext
-) => MaybePromise<ToolHandlerReturn>;
+export type ToolHandlerFn<
+  TParams extends Record<string, unknown> = Record<string, unknown>,
+  TResult extends ToolResult = ToolResult
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<TResult>>;
 
 /**
  * Scoped context which can be used during tool execution to access
@@ -145,4 +146,8 @@ export interface ToolHandlerContext {
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
+  /**
+   * The current execution context, including the agent/tool call stack.
+   */
+  runContext: RunContext;
 }

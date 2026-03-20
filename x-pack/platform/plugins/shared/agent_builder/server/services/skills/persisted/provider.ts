@@ -40,6 +40,15 @@ export const createPersistedSkillProvider = ({
         throw e;
       }
     },
+    async bulkGet(ids) {
+      const skills = await skillClient.bulkGet(ids);
+      const result = new Map<string, ReturnType<typeof convertPersistedSkill>>();
+      for (const skill of skills) {
+        const converted = convertPersistedSkill(skill);
+        result.set(converted.id, converted);
+      }
+      return result;
+    },
     async list(options) {
       const skills = await skillClient.list(options);
       return skills.map(convertPersistedSkill);
