@@ -16,7 +16,7 @@ export const OTEL_DEMO_GCS_BASE_PATH_PREFIX = OTEL_DEMO_NAMESPACE;
 // Wait times
 export const BASELINE_WAIT_MS = 3 * 60 * 1000;
 export const FAILURE_WAIT_MS = 5 * 60 * 1000;
-export const FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
-export const FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
+export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
+export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };

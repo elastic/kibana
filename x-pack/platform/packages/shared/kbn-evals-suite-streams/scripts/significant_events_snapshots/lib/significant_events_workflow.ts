@@ -11,8 +11,8 @@ import type { Feature } from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import {
-  FEATURE_EXTRACTION_POLL_INTERVAL_MS,
-  FEATURE_EXTRACTION_TIMEOUT_MS,
+  KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
+  KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   DEFAULT_LOGS_INDEX,
 } from './constants';
 import {
@@ -102,7 +102,7 @@ export async function waitForSigEventsKIFeatureExtraction(
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
   log.info('Polling feature extraction status...');
-  const deadline = Date.now() + FEATURE_EXTRACTION_TIMEOUT_MS;
+  const deadline = Date.now() + KI_FEATURE_EXTRACTION_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
     const { data } = await kibanaRequest(
@@ -125,11 +125,11 @@ export async function waitForSigEventsKIFeatureExtraction(
     }
 
     log.debug(`  status: ${taskStatus}`);
-    await new Promise((resolve) => setTimeout(resolve, FEATURE_EXTRACTION_POLL_INTERVAL_MS));
+    await new Promise((resolve) => setTimeout(resolve, KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS));
   }
 
   throw new Error(
-    `KI feature extraction did not complete within ${FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
+    `KI feature extraction did not complete within ${KI_FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
   );
 }
 
