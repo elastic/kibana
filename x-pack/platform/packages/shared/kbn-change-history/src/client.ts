@@ -108,7 +108,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     }
     // Step 1: Create data stream definition
     // TODO: What about ILM policy (defaults to none = keep forever)
-    const definition: DataStreamDefinition<typeof changeHistoryMappings.v1> = {
+    const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> = {
       name: DATA_STREAM_NAME,
       version: 1,
       hidden: true,
@@ -125,7 +125,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         elasticsearchClient,
         logger: this.logger,
         lazyCreation: false,
-      })) as ChangeHistoryDataStreamClient;
+      }));
     } catch (error) {
       const err = new Error(
         `Unable to initialize change history data stream for: module [${this.module}] and dataset [${this.dataset}]: ${error}`,
@@ -215,8 +215,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         tags,
         metadata,
         service: { type: 'kibana', version: kibanaVersion },
+        transaction: correlationId ? { id: correlationId } : undefined,
       };
-      if (correlationId) document.transaction = { id: correlationId };
       // Do we have "before" state?
       // Perform diff using registered calculation, defaulting to defaultDiffCalculation().
       if (change.before) {
