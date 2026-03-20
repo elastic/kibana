@@ -8,7 +8,7 @@
 import crypto from 'node:crypto';
 import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
 import type {
-  ChangeHistoryDataMaskingFields,
+  ChangeHistoryFieldsToHash,
   ChangeHistoryDiff,
   ChangeHistoryDiffOptions,
 } from './types';
@@ -22,13 +22,13 @@ export const sha256 = (text: string) => crypto.createHash('sha256').update(text)
  * @param opts - The arguments for the diff calculation.
  * @param opts.a - The first JSON object.
  * @param opts.b - The second JSON object.
- * @param opts.ignoreFields - The fields to ignore in the diff calculation.
+ * @param opts.fieldsToIgnore - The fields to ignore in the diff calculation.
  * @returns a [Diff] that helps convert one object into the other.
  * @example
  *   const a = { user: { email: 'bob@example.com' }, status: 'active' };
  *   const b = { user: { email: 'bobby@example.com' }, status: 'inactive' };
- *   const ignoreFields = { status: true };
- *   const result = defaultDiffCalculation({ a, b, ignoreFields });
+ *   const fieldsToIgnore = { status: true };
+ *   const result = defaultDiffCalculation({ a, b, fieldsToIgnore });
  *   console.log(result);
  *   // {
  *   //  stats: { total: 1, additions: 0, deletions: 0, updates: 1 },
@@ -54,12 +54,12 @@ export function defaultDiffCalculation(opts: ChangeHistoryDiffOptions): ChangeHi
   };
 
   // Flatten both objects and work out diff
-  const { a, b, ignoreFields } = opts;
+  const { a, b, fieldsToIgnore } = opts;
   const stats = result.stats;
   const flatA = flatten(a ?? {});
   const flatB = flatten(b ?? {});
   const allKeys = new Set([...Object.keys(flatA), ...Object.keys(flatB)]);
-  const flatFilter = (ignoreFields && flatten(ignoreFields)) || undefined;
+  const flatFilter = (fieldsToIgnore && flatten(fieldsToIgnore)) || undefined;
   // TODO: Might need better array comparison here though this works for now
   const arrayDeepEquals = (a1: any[] | ArrayBufferView, a2: any[] | ArrayBufferView) =>
     JSON.stringify(a1) === JSON.stringify(a2);
@@ -79,8 +79,8 @@ export function defaultDiffCalculation(opts: ChangeHistoryDiffOptions): ChangeHi
       case 'bigint': default: throw new TypeError('Please use JSON-compatible types');
     }
   };
-  // We ignore fields when the key (or an ancestor) is in ignoreFields with a truthy value.
-  // I.e. ignoreFields = { type: true, status: true } ignores type and status from the diff.
+  // We ignore fields when the key (or an ancestor) is in fieldsToIgnore with a truthy value.
+  // I.e. fieldsToIgnore = { type: true, status: true } ignores type and status from the diff.
   const ignore = (key: string) =>
     !!flatFilter &&
     // TODO: should be tested for performance with a set of v large objects and a lot of ignored fields
@@ -116,41 +116,46 @@ export function defaultDiffCalculation(opts: ChangeHistoryDiffOptions): ChangeHi
   // Gather stats, list of changed fields and return.
   result.stats.total = stats.additions + stats.deletions + stats.updates;
   result.fields = Object.keys(result.after); // <-- We do not need both. Keys are available for `undefined` items.
+  result.after = unflatten(result.after);
+  result.before = unflatten(result.before);
   return result;
 }
 
 /**
- * Masks sensitive data in a snapshot of an object.
- * @param snapshot - The snapshot of the object to mask sensitive data from.
- * @param maskFields - The fields to mask in the snapshot.
- * @returns The masked keys and the snapshot with the masked fields.
+ * Hashes certain key fields in a snapshot of an object (Sensitive data etc)
+ * @param snapshot - The snapshot to process (a new updated object is returned when hashing applies).
+ * @param fieldsToHash - Nested map of field paths to hash.
+ * @returns The list of flattened paths that were hashed and the snapshot with those string values replaced.
  * @example
- *   const snapshot = { user: { email: 'bob@example.com' } };
- *   const maskFields = { user: { email: true } };
- *   const result = maskSensitiveFields(snapshot, maskFields);
+ *   const snapshot = { user: { name: 'bob', email: 'bob@example.com' } };
+ *   const pathsToHash = { user: { email: true } };
+ *   const result = hashFields(snapshot, pathsToHash);
  *   // {
  *   //  fields: ['user.email'],
- *   //  snapshot: { user: { email: '****************1af4e7be90' } }
+ *   //  snapshot: { user: { name: 'bob', email: '5ff860bf1190596c7188ab851db691f0f3169c453936e9e1eba2f9a47f7a0018' } }
  *   // }
  */
-export function maskSensitiveFields(
+export function hashFields(
   snapshot: Record<string, any>,
-  maskFields?: ChangeHistoryDataMaskingFields
+  fieldsToHash?: ChangeHistoryFieldsToHash
 ): { fields: Array<string>; snapshot: Record<string, any> } {
   const fields: string[] = [];
-  if (!maskFields || Object.keys(maskFields).length === 0) {
+  if (!fieldsToHash || Object.keys(fieldsToHash).length === 0) {
     return { fields, snapshot };
   }
   const flatSnapshot = flatten(snapshot);
-  const flatMaskings = flatten(maskFields);
-  const isMasked = (key: string) =>
-    Object.entries(flatMaskings).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
+  const flatFieldsToHash = flatten(fieldsToHash);
+  const shouldBeHashed = (key: string) =>
+    Object.entries(flatFieldsToHash).some(
+      ([k, v]) => !!v && (key === k || key.startsWith(k + '.'))
+    );
 
   for (const key of Object.keys(flatSnapshot)) {
     const value = flatSnapshot[key];
-    if (isMasked(key) && typeof value === 'string') {
+    // TODO: We might need to expand this for binary blobs.
+    if (typeof value === 'string' && shouldBeHashed(key)) {
       fields.push(key);
-      flatSnapshot[key] = `****************${sha256(value).slice(-12)}`;
+      flatSnapshot[key] = sha256(value);
     }
   }
 

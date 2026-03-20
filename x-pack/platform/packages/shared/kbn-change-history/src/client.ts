@@ -30,7 +30,7 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, defaultDiffCalculation, maskSensitiveFields } from './utils';
+import { sha256, defaultDiffCalculation, hashFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -158,8 +158,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.spaceId - The ID of the space that the change belongs to.
    * @param opts.correlationId - Optional correlation ID for the bulk change.
    * @param opts.data - Optional data to merge into the change history document.
-   * @param opts.ignoreFields - Optional fields to ignore in the diff calculation.
-   * @param opts.maskFields - Optional "sensitive data" fields to mask instead of store in plain form.
+   * @param opts.fieldsToIgnore - Optional fields to exclude from the diff calculation.
+   * @param opts.fieldsToHash - Optional fields whose string values are replaced with full SHA-256 digests in the stored snapshot.
    * @param opts.refresh - Optional indicator to force an ES refresh after changes (affects performance)
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
@@ -185,7 +185,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       // Create document and populate
       const { objectType, objectId, index, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.after));
-      const masked = maskSensitiveFields(change.after, opts.maskFields);
+      const hashed = hashFields(change.after, opts.fieldsToHash);
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
       const document: ChangeHistoryDocument = {
@@ -207,8 +207,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           index,
           hash,
           sequence,
-          maskedfields: masked.fields,
-          snapshot: masked.snapshot,
+          fields: { hashed: hashed.fields },
+          snapshot: hashed.snapshot,
         },
         tags,
         metadata,
@@ -220,15 +220,15 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       if (change.before) {
         const diffCalc = defaultDiffCalculation;
         try {
-          const maskedBefore = maskSensitiveFields(change.before, opts.maskFields);
+          const hashedBefore = hashFields(change.before, opts.fieldsToHash);
           const { type, fields, before } = diffCalc({
-            a: maskedBefore.snapshot,
-            b: masked.snapshot,
-            ignoreFields: opts.ignoreFields,
+            a: hashedBefore.snapshot,
+            b: hashed.snapshot,
+            fieldsToIgnore: opts.fieldsToIgnore,
           });
           document.object.diff = { type, fields, before };
-          document.object.maskedfields = Array.from(
-            new Set([...maskedBefore.fields, ...masked.fields])
+          document.object.fields.hashed = Array.from(
+            new Set([...hashedBefore.fields, ...hashed.fields])
           );
         } catch (err) {
           // Uncalculated diff should not be fatal, just log and continue

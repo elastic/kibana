@@ -78,8 +78,8 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
     - `userProfileId` [user profile](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) from auth realm,
     - `correlationId` to groups bulk events in a common transaction when set,
     - change `data` overrides (partial `event`, `tags`, and `metadata` to merge into the document),
-    - `ignoreFields` a nested key/value map of fields to ignore in the diff calculation,
-    - `maskFields` a nested key/value map of “sensitive” fields to mask instead of storing data in plain form,
+    - `fieldsToIgnore` a nested key/value map of fields to exclude from the diff calculation,
+    - `fieldsToHash` a nested key/value map of fields to hash in the stored snapshot (PII, secrets, large base64 blobs, etc. — only string values are hashed),
     - `refresh` an optional indicator to force ES shard refresh after changes (affects performance).
 
 - **`getHistory(spaceId, objectType, objectId, opts?)`**
@@ -145,7 +145,8 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `object.diff.type`      | `keyword`   | Diff calculation type (e.g. `default`).                                    |
 | `object.diff.fields`    | `keyword`   | List of field names that changed (full paths). (Optional)                  |
 | `object.diff.before`    | (unmapped)  | Previous values for changed fields. (Optional)                              |
-| `object.maskedfields`   | `keyword`   | List of sensitive fields that were masked. (Optional)                       |
+| `object.fields`         | `object`    | Field data for the stored snapshot.                                     |
+| `object.fields.hashed`  | `keyword`   | List of fields (full paths) whose values were replaced with hashes (SHA-256).  |
 | `object.snapshot`       | (unmapped)  | Full snapshot after the change.                                             |
 | `tags`                  | `keyword`   | Optional list of tags for the event.                                       |
 | `metadata`              | `flattened` | Optional structured metadata; does not form part of the diff or ECS schema. |
@@ -268,9 +269,9 @@ await client.log(
 );
 ```
 
-### Ignored and masked fields
+### Ignored and hashed fields
 
-Dealing with domain-specific data that should be ignored in the diff or masked in the stored snapshot.
+Dealing with domain-specific data that should be ignored in the diff or hashed in the stored snapshot (Sensitive data or binary blobs).
 
 ```ts
 await client.log(change, {
@@ -278,13 +279,13 @@ await client.log(change, {
   username,
   spaceId,
   // Fields that should not participate in the diff (e.g. volatile or system fields)
-  ignoreFields: {
+  fieldsToIgnore: {
     updatedAt: true,
     monitoringData: true,
     params: { isUpdated: true },
   },
   // Fields containing sensitive data that should be masked
-  maskFields: {
+  fieldsToHash: {
     user: { email: true },
     apiKey: true,
   },

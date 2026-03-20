@@ -72,8 +72,10 @@ export interface ChangeHistoryDocument {
       /** Previous state for changed fields. */
       before: Record<string, unknown>;
     };
-    /** List of "sensitive data" fields masked in snapshot */
-    maskedfields?: string[];
+    fields: {
+      /** Full paths of fields stored as hashes (sensitive fields or blob binaries). */
+      hashed: string[];
+    };
     /** Full snapshot after the change. */
     snapshot: Record<string, unknown>;
   };
@@ -130,9 +132,9 @@ export interface LogChangeHistoryOptions {
    */
   data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;
   /** List of fields to ignore in change calculation */
-  ignoreFields?: ChangeHistoryIgnoreFields;
-  /** List of sensitive fields to mask in the saved change history (secret keys, PII etc) */
-  maskFields?: ChangeHistoryDataMaskingFields;
+  fieldsToIgnore?: ChangeHistoryFieldsToIgnore;
+  /** List of fields to hash in the saved change history (secret keys, PII, base64 etc) */
+  fieldsToHash?: ChangeHistoryFieldsToHash;
   /** Optional indicator to force an ES refresh after changes (affects performance) */
   refresh?: Refresh;
 }
@@ -155,15 +157,15 @@ export interface GetHistoryResult {
 /**
  * Fields excluded from diff calculation
  */
-export interface ChangeHistoryIgnoreFields {
-  [Key: string]: boolean | ChangeHistoryIgnoreFields;
+export interface ChangeHistoryFieldsToIgnore {
+  [Key: string]: boolean | ChangeHistoryFieldsToIgnore;
 }
 
 /**
- * Fields hashed due to sensitive nature (PII, Secret keys, etc)
+ * Fields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)
  */
-export interface ChangeHistoryDataMaskingFields {
-  [Key: string]: boolean | ChangeHistoryDataMaskingFields;
+export interface ChangeHistoryFieldsToHash {
+  [Key: string]: boolean | ChangeHistoryFieldsToHash;
 }
 
 /**
@@ -172,7 +174,7 @@ export interface ChangeHistoryDataMaskingFields {
 export interface ChangeHistoryDiffOptions {
   a?: Record<string, any>;
   b?: Record<string, any>;
-  ignoreFields?: ChangeHistoryIgnoreFields;
+  fieldsToIgnore?: ChangeHistoryFieldsToIgnore;
 }
 
 /**

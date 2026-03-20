@@ -167,7 +167,7 @@ describe('ChangeHistoryClient', () => {
           id: 'id-1',
           hash,
           sequence: 1,
-          maskedfields: [],
+          fields: { hashed: [] },
           snapshot: { name: 'Rule 1', enabled: true },
         },
         service: {
@@ -298,7 +298,7 @@ describe('ChangeHistoryClient', () => {
       await client.initialize(esServer.getClient());
     });
 
-    it('should populate object.fields.changed and object.oldvalues when "before" is provided', async () => {
+    it('should populate object.diff when "before" is provided', async () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'diff-id',
@@ -308,7 +308,7 @@ describe('ChangeHistoryClient', () => {
       await client.log(change, {
         ...defaultLogOpts,
         spaceId: 'default',
-        ignoreFields: { status: true },
+        fieldsToIgnore: { status: true },
       });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'diff-id');
@@ -323,7 +323,7 @@ describe('ChangeHistoryClient', () => {
     });
   });
 
-  describe('masking sensitive fields', () => {
+  describe('hashing selected fields', () => {
     let client: ChangeHistoryClient;
 
     beforeEach(async () => {
@@ -331,7 +331,7 @@ describe('ChangeHistoryClient', () => {
       await client.initialize(esServer.getClient());
     });
 
-    it('should mask sensitive fields in snapshot and list them in object.fields.masked', async () => {
+    it('should hash sensitive fields in snapshot and list paths in object.fields.hashed', async () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'masked-id',
@@ -341,14 +341,14 @@ describe('ChangeHistoryClient', () => {
           apiKey: 'sk-secret-key-12345',
         },
       };
-      const maskFields = {
+      const fieldsToHash = {
         user: { email: true },
         apiKey: true,
       };
       await client.log(change, {
         ...defaultLogOpts,
         spaceId: 'default',
-        maskFields,
+        fieldsToHash,
       });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'masked-id');
@@ -359,18 +359,16 @@ describe('ChangeHistoryClient', () => {
       const hash = sha256(JSON.stringify(change.after));
       expect(doc.object.hash).toEqual(hash);
 
-      // Check masked fields
-      expect(doc.object.maskedfields).toEqual(['user.email', 'apiKey']);
+      // Check hashed field paths
+      expect(doc.object.fields.hashed.sort()).toEqual(['apiKey', 'user.email'].sort());
       const snapshot = doc.object.snapshot as Record<string, unknown>;
-      const maskedApiKey = `****************${sha256('sk-secret-key-12345').slice(-12)}`;
-      const maskedEmail = `****************${sha256('secret@example.com').slice(-12)}`;
       expect(snapshot).toEqual({
         name: 'My Rule',
         user: {
-          email: maskedEmail,
+          email: sha256('secret@example.com'),
           name: 'Alice',
         },
-        apiKey: maskedApiKey,
+        apiKey: sha256('sk-secret-key-12345'),
       });
     });
   });

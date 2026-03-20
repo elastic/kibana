@@ -64,7 +64,11 @@ export const changeHistoryMappings = {
               // before: mappings.object(), // <- unmapped field, please keep me commented out.
             },
           }),
-          maskedfields: mappings.keyword(),
+          fields: mappings.object({
+            properties: {
+              hashed: mappings.keyword(),
+            },
+          }),
           // snapshot: mappings.object(), // <- unmapped field, please keep me commented out.
         },
       }),
