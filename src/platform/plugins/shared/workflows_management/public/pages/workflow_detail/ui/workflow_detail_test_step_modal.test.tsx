@@ -12,12 +12,12 @@ import React from 'react';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
+  _setComputedDataInternal,
+  setExecution,
   setReplayStepExecutionId,
   setTestStepModalOpenStepId,
-  _setComputedDataInternal,
   setWorkflow,
   setYamlString,
-  setExecution,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { TestWrapper } from '../../../shared/test_utils';
 
@@ -42,10 +42,6 @@ jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
 jest.mock('./use_context_override_data', () => ({
   useContextOverrideData: () => mockUseContextOverrideData,
 }));
-
-// Mock StepExecuteModal
-const mockOnSubmit = jest.fn();
-const mockOnClose = jest.fn();
 
 const StepExecuteModalMock = ({
   onSubmit,
@@ -72,7 +68,7 @@ const StepExecuteModalMock = ({
       onClick={() => onSubmit({ stepInputs: { test: 'value' } })}
       type="button"
     >
-      Submit without executionContext
+      {'Submit without executionContext'}
     </button>
     <button
       data-test-subj="step-execute-modal-submit-with-context"
@@ -84,10 +80,10 @@ const StepExecuteModalMock = ({
       }
       type="button"
     >
-      Submit with executionContext
+      {'Submit with executionContext'}
     </button>
     <button data-test-subj="step-execute-modal-close" onClick={onClose} type="button">
-      Close
+      {'Close'}
     </button>
   </div>
 );
@@ -141,7 +137,7 @@ describe('WorkflowDetailTestStepModal', () => {
     workflowGraph?: any;
   }) => {
     const store = createMockStore();
-    
+
     // Set up initial state
     if (initialState?.workflowId) {
       store.dispatch(
@@ -152,23 +148,23 @@ describe('WorkflowDetailTestStepModal', () => {
         } as any)
       );
     }
-    
+
     if (initialState?.testStepModalOpenStepId) {
       store.dispatch(setTestStepModalOpenStepId(initialState.testStepModalOpenStepId));
     }
-    
+
     if (initialState?.replayStepExecutionId !== undefined) {
       store.dispatch(setReplayStepExecutionId(initialState.replayStepExecutionId));
     }
-    
+
     if (initialState?.execution) {
       store.dispatch(setExecution(initialState.execution));
     }
-    
+
     if (initialState?.editorYaml) {
       store.dispatch(setYamlString(initialState.editorYaml));
     }
-    
+
     if (initialState?.workflowGraph) {
       store.dispatch(
         _setComputedDataInternal({
@@ -176,7 +172,7 @@ describe('WorkflowDetailTestStepModal', () => {
         } as any)
       );
     }
-    
+
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return <TestWrapper store={store}>{children}</TestWrapper>;
     };
@@ -222,9 +218,7 @@ describe('WorkflowDetailTestStepModal', () => {
         workflowGraph: mockWorkflowGraph,
       });
       expect(getByTestId('step-execute-modal-step-id')).toHaveTextContent('test-step-id');
-      expect(getByTestId('step-execute-modal-initial-step-execution-id')).toHaveTextContent(
-        'none'
-      );
+      expect(getByTestId('step-execute-modal-initial-step-execution-id')).toHaveTextContent('none');
       expect(getByTestId('step-execute-modal-initial-workflow-run-id')).toHaveTextContent(
         'execution-1'
       );

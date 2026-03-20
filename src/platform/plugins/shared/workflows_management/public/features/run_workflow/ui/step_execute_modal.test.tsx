@@ -151,7 +151,6 @@ describe('StepExecuteModal', () => {
       renderWithProviders({
         ...defaultProps,
         initialStepExecutionId: 'exec-1',
-        initialTab: 'manual',
       });
       expect(screen.getByTestId('mockManualForm')).toBeInTheDocument();
       expect(screen.queryByTestId('mockHistoricalForm')).not.toBeInTheDocument();
