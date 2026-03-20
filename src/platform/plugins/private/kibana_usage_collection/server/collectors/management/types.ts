@@ -196,4 +196,5 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
+  'elasticConsole:enabled': boolean;
 }
