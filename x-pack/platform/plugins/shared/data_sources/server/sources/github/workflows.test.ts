@@ -68,11 +68,16 @@ describe('github workflows', () => {
     }
   });
 
-  describe('search_code workflow', () => {
-    it('forwards search parameters to the connector', async () => {
+  describe('search workflow', () => {
+    it('routes to searchCode and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.search_code'),
-        inputs: { query: 'handleError language:typescript', page: 2, per_page: 5 },
+        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
+        inputs: {
+          search_type: 'searchCode',
+          query: 'handleError language:typescript',
+          page: 2,
+          per_page: 5,
+        },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -91,13 +96,12 @@ describe('github workflows', () => {
         })
       );
     });
-  });
 
-  describe('search_issues workflow', () => {
-    it('forwards search parameters to the connector', async () => {
+    it('routes to searchIssues and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.search_issues'),
+        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
         inputs: {
+          search_type: 'searchIssues',
           query: 'is:open label:bug',
           order: 'asc',
           sort: 'updated',
@@ -126,88 +130,11 @@ describe('github workflows', () => {
     });
   });
 
-  describe('search_pull_requests workflow', () => {
-    it('forwards search parameters to the connector', async () => {
+  describe('list workflow', () => {
+    it('routes to listIssues and forwards repository and pagination parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.search_pull_requests'),
-        inputs: { query: 'fix memory leak', order: 'desc', sort: 'created', page: 1, per_page: 10 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-pull-requests')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'searchPullRequests',
-            subActionParams: {
-              query: 'fix memory leak',
-              order: 'desc',
-              sort: 'created',
-              page: 1,
-              perPage: 10,
-            },
-          }),
-        })
-      );
-    });
-  });
-
-  describe('search_repositories workflow', () => {
-    it('forwards search parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.search_repositories'),
-        inputs: { query: 'kibana stars:>1000', page: 1, per_page: 10 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-repositories')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'searchRepositories',
-            subActionParams: {
-              query: 'kibana stars:>1000',
-              page: 1,
-              perPage: 10,
-            },
-          }),
-        })
-      );
-    });
-  });
-
-  describe('search_users workflow', () => {
-    it('forwards search parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.search_users'),
-        inputs: { query: 'torvalds', page: 1, per_page: 10 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-users')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'searchUsers',
-            subActionParams: {
-              query: 'torvalds',
-              page: 1,
-              perPage: 10,
-            },
-          }),
-        })
-      );
-    });
-  });
-
-  describe('list_issues workflow', () => {
-    it('forwards repository and pagination parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.list_issues'),
-        inputs: { owner: 'elastic', repo: 'kibana', state: 'open', first: 10 },
+        workflowYaml: getWorkflowYaml(workflows, 'source.list'),
+        inputs: { list_type: 'listIssues', owner: 'elastic', repo: 'kibana', state: 'open', first: 10 },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -228,13 +155,17 @@ describe('github workflows', () => {
         })
       );
     });
-  });
 
-  describe('list_pull_requests workflow', () => {
-    it('forwards repository and pagination parameters to the connector', async () => {
+    it('routes to listPullRequests and forwards repository and pagination parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'sources.github.list_pull_requests'),
-        inputs: { owner: 'elastic', repo: 'kibana', state: 'open', first: 10 },
+        workflowYaml: getWorkflowYaml(workflows, 'source.list'),
+        inputs: {
+          list_type: 'listPullRequests',
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'open',
+          first: 10,
+        },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
