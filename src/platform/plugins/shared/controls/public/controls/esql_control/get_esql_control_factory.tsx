@@ -119,7 +119,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
       });
 
       const componentApi: ESQLOptionsListComponentApi = {
-        ...pick(api, ['dataLoading$', 'label$']),
+        ...pick(api, ['dataLoading$', 'label$', 'type']),
         ...selections.internalApi,
         uuid,
         setDataLoading,
