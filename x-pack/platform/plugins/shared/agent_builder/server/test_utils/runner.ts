@@ -163,7 +163,6 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
     getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
     registerSkill: jest.fn().mockResolvedValue(undefined),
-    unregisterSkill: jest.fn().mockResolvedValue(false),
   };
 };
 
@@ -327,6 +326,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
+    runContext: { runId: 'mock-run-id', stack: [] },
   };
 };
 
