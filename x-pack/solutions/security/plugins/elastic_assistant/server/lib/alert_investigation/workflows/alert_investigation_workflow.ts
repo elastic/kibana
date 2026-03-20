@@ -16,9 +16,6 @@
  * Steps: 6 stages (fetch, dedup, extract, match, AD, tag)
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-
 export const ALERT_INVESTIGATION_WORKFLOW_ID = 'elastic_assistant.alert_investigation_pipeline';
 
 /**
