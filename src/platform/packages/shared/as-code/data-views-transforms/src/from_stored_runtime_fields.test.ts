@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
-import { fromStoredRuntimeFields } from './from_stored_runtime_field';
+import { fromStoredRuntimeFields } from './from_stored_runtime_fields';
 
 describe('fromStoredRuntimeFields', () => {
   describe('default arguments', () => {

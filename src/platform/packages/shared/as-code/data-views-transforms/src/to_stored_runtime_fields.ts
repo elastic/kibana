@@ -21,7 +21,6 @@ const DEFAULT_POPULARITY = 0;
 export function toStoredRuntimeFields(
   runtimeFields: AsCodeRuntimeField[] = []
 ): DataViewSpec['runtimeFieldMap'] {
-  if (runtimeFields.length === 0) return {};
   const runtimeFieldMap: DataViewSpec['runtimeFieldMap'] = {};
 
   for (const runtimeField of runtimeFields) {
@@ -31,10 +30,13 @@ export function toStoredRuntimeFields(
     };
 
     if (runtimeField.type === RUNTIME_FIELD_COMPOSITE_TYPE) {
-      parsedField.fields = runtimeField.fields.reduce((acc, field) => {
-        acc[field.name] = { type: field.type as RuntimePrimitiveTypes };
-        return acc;
-      }, {} as Record<string, { type: RuntimePrimitiveTypes }>);
+      parsedField.fields = runtimeField.fields.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field.name]: { type: field.type as RuntimePrimitiveTypes },
+        }),
+        {} as Record<string, { type: RuntimePrimitiveTypes }>
+      );
     }
 
     runtimeFieldMap[runtimeField.name] = parsedField;
@@ -46,7 +48,6 @@ export function toStoredRuntimeFields(
 export function toStoredFieldFormats(
   runtimeFields: AsCodeRuntimeField[] = []
 ): DataViewSpec['fieldFormats'] {
-  if (runtimeFields.length === 0) return undefined;
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
 
   for (const runtimeField of runtimeFields) {
@@ -73,7 +74,6 @@ export function toStoredFieldFormats(
 export function toStoredFieldAttributes(
   runtimeFields: AsCodeRuntimeField[] = []
 ): DataViewSpec['fieldAttrs'] {
-  if (!runtimeFields.length) return undefined;
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
 
   for (const runtimeField of runtimeFields) {

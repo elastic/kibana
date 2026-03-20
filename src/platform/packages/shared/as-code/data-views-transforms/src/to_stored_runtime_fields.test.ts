@@ -11,7 +11,7 @@ import {
   toStoredRuntimeFields,
   toStoredFieldFormats,
   toStoredFieldAttributes,
-} from './to_stored_runtime_field';
+} from './to_stored_runtime_fields';
 
 describe('toStoredRuntimeFields', () => {
   describe('default / empty input', () => {
