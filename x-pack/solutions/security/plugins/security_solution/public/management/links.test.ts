@@ -12,7 +12,16 @@ import { SecurityPageName } from '../app/types';
 
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { StartPlugins } from '../types';
-import { getManagementFilteredLinks, links } from './links';
+import {
+  getFirstAllowedArtifactPath,
+  getManagementFilteredLinks,
+  links,
+} from './links';
+import {
+  getEndpointExceptionsListPath,
+  getEventFiltersListPath,
+  getTrustedAppsListPath,
+} from './common/routing';
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
@@ -75,6 +84,112 @@ describe('links', () => {
     Object.assign(licenseServiceMock, createLicenseServiceMock());
   });
 
+  describe('Endpoints category structure', () => {
+    it('should order Endpoints section links as Endpoints, Policies, Artifacts, Response actions history, Script library', () => {
+      const endpointsCategory = links.categories?.find((category) =>
+        category.linkIds?.includes(SecurityPageName.endpoints)
+      );
+      expect(endpointsCategory).toBeDefined();
+      expect(endpointsCategory?.linkIds).toEqual([
+        SecurityPageName.endpoints,
+        SecurityPageName.policies,
+        SecurityPageName.artifacts,
+        SecurityPageName.responseActionsHistory,
+        SecurityPageName.scriptLibrary,
+      ]);
+    });
+  });
+
+  describe('getFirstAllowedArtifactPath', () => {
+    const experimentalDefaults = {
+      endpointExceptionsMovedUnderManagement: true,
+      trustedDevices: true,
+    } as const;
+
+    it('should return endpoint exceptions path when FF is on and user can read endpoint exceptions', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: true,
+            canReadTrustedApplications: true,
+            canReadTrustedDevices: true,
+            canReadEventFilters: true,
+            canReadHostIsolationExceptions: true,
+            canReadBlocklist: true,
+          },
+          experimentalDefaults
+        )
+      ).toBe(getEndpointExceptionsListPath());
+    });
+
+    it('should return trusted apps path when endpoint exceptions not allowed but trusted apps are', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: false,
+            canReadTrustedApplications: true,
+            canReadTrustedDevices: false,
+            canReadEventFilters: false,
+            canReadHostIsolationExceptions: false,
+            canReadBlocklist: false,
+          },
+          experimentalDefaults
+        )
+      ).toBe(getTrustedAppsListPath());
+    });
+
+    it('should return event filters path when only event filters are readable', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: false,
+            canReadTrustedApplications: false,
+            canReadTrustedDevices: false,
+            canReadEventFilters: true,
+            canReadHostIsolationExceptions: false,
+            canReadBlocklist: false,
+          },
+          experimentalDefaults
+        )
+      ).toBe(getEventFiltersListPath());
+    });
+
+    it('should return trusted apps path when endpoint exceptions FF is off even if user can read them', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: true,
+            canReadTrustedApplications: true,
+            canReadTrustedDevices: false,
+            canReadEventFilters: false,
+            canReadHostIsolationExceptions: false,
+            canReadBlocklist: false,
+          },
+          {
+            endpointExceptionsMovedUnderManagement: false,
+            trustedDevices: true,
+          }
+        )
+      ).toBe(getTrustedAppsListPath());
+    });
+
+    it('should fall back to trusted apps path when no artifact read privilege matches', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: false,
+            canReadTrustedApplications: false,
+            canReadTrustedDevices: false,
+            canReadEventFilters: false,
+            canReadHostIsolationExceptions: false,
+            canReadBlocklist: false,
+          },
+          experimentalDefaults
+        )
+      ).toBe(getTrustedAppsListPath());
+    });
+  });
+
   it('should return all links for user with all sub-feature privileges', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
@@ -93,6 +208,7 @@ describe('links', () => {
         SecurityPageName.artifacts,
         SecurityPageName.endpoints,
         SecurityPageName.policies,
+        SecurityPageName.responseActionsHistory,
         SecurityPageName.cloudDefendPolicies,
         SecurityPageName.scriptLibrary
       )
@@ -116,7 +232,7 @@ describe('links', () => {
     });
   });
 
-  describe('Artifacts (single link, canReadAnyArtifact)', () => {
+  describe('Artifacts', () => {
     it('should hide Artifacts when user has no artifact privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
@@ -151,6 +267,26 @@ describe('links', () => {
       const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
       expect(artifactsLink).toBeDefined();
       expect(artifactsLink?.path).toBeDefined();
+    });
+
+    it('should set Artifacts link path to first allowed artifact tab (event filters only)', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointExceptions: false,
+          canReadTrustedApplications: false,
+          canReadTrustedDevices: false,
+          canReadEventFilters: true,
+          canReadHostIsolationExceptions: false,
+          canReadBlocklist: false,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        experimentalFeatures: { ...allowedExperimentalValues },
+      });
+
+      const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
+      expect(artifactsLink?.path).toBe(getEventFiltersListPath());
     });
   });
 

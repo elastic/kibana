@@ -135,7 +135,7 @@ export const links: LinkItem = {
       title: ARTIFACTS,
       description: i18n.translate('xpack.securitySolution.appLinks.artifactsDescription', {
         defaultMessage:
-          'Manage endpoint exceptions, trusted applications, event filters, host isolation exceptions, and blocklist.',
+          'Manage the rules, exceptions, and trust settings that control how endpoints are protected and respond to activity.',
       }),
       landingIcon: IconArtifacts,
       path: TRUSTED_APPS_PATH,
