@@ -8,3 +8,4 @@
  */
 
 export const ENABLE_ESQL = 'enableESQL';
+export const ENABLE_ESQL_DATA_INSIGHTS = 'esql:dataInsightsEnabled';

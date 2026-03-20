@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { UiSettingsParams } from '@kbn/core/server';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL, ENABLE_ESQL_DATA_INSIGHTS } from '@kbn/esql-utils';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [ENABLE_ESQL]: {
@@ -24,6 +24,18 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL based Discover sessions, visualizations, etc.',
     }),
     requiresPageReload: true,
+    schema: schema.boolean(),
+  },
+  [ENABLE_ESQL_DATA_INSIGHTS]: {
+    name: i18n.translate('esql.advancedSettings.enableDataInsightsTitle', {
+      defaultMessage: 'Enable ES|QL AI Data Insights',
+    }),
+    value: false,
+    description: i18n.translate('esql.advancedSettings.enableDataInsightsDescription', {
+      defaultMessage:
+        'When enabled, a "Summarize with AI" button appears in Discover ES|QL mode. Clicking it sends a sample of your query results to a configured AI connector and displays a summary of patterns, outliers, and suggested follow-up queries.',
+    }),
+    requiresPageReload: false,
     schema: schema.boolean(),
   },
 });

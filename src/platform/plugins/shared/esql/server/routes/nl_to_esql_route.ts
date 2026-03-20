@@ -9,22 +9,13 @@
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreSetup,
-  IRouter,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { EsqlService } from '../services/esql_service';
 
 import type { EsqlServerPluginStart } from '../types';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+import { resolveConnectorId } from './resolve_connector';
 
 const MAX_FIELDS = 1000;
 
@@ -56,34 +47,6 @@ const getFieldsForSource = async (client: ElasticsearchClient, source: string): 
   }
 
   return result;
-};
-
-const resolveConnectorId = async ({
-  uiSettingsClient,
-  inference,
-  request,
-}: {
-  uiSettingsClient: IUiSettingsClient;
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-}): Promise<string | undefined> => {
-  try {
-    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
-      return defaultSetting;
-    }
-  } catch {
-    // UI setting may not be registered, fall through
-  }
-
-  try {
-    const connector = await inference.getDefaultConnector(request);
-    return connector?.connectorId;
-  } catch {
-    // no connectors available
-  }
-
-  return undefined;
 };
 
 const buildSystemPrompt = (sourceNames: string[], fieldsContext?: string): string => {

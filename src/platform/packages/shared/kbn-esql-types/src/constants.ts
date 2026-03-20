@@ -12,6 +12,7 @@ export const SOURCES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/sources/'
 export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield/';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
+export const DATA_INSIGHTS_ROUTE = '/internal/esql/data_insights';
 
 const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';
 export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;

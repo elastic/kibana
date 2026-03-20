@@ -72,4 +72,4 @@ export {
   type ESQLStatsQueryMeta,
 } from './src';
 
-export { ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL, ENABLE_ESQL_DATA_INSIGHTS } from './constants';

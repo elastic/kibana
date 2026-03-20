@@ -26,6 +26,7 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { DataInsightsButton } from './data_insights_button';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -157,6 +158,11 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
+          {isEsqlMode && (
+            <EuiFlexItem grow={false}>
+              <DataInsightsButton />
+            </EuiFlexItem>
+          )}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}

@@ -15,6 +15,7 @@ export enum DiscoverFlyouts {
   esqlControls = 'esqlControls',
   lensAlertRule = 'lensAlertRule',
   inspectorPanel = 'inspectorPanel',
+  dataInsights = 'dataInsights',
 }
 
 const AllDiscoverFlyouts = Object.values(DiscoverFlyouts);
@@ -69,6 +70,13 @@ const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLE
         () =>
           document.querySelector(
             '[data-test-subj="inspectorPanel"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
+    case DiscoverFlyouts.dataInsights:
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="dataInsightsFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
           ),
       ];
   }
