@@ -67,7 +67,7 @@ describe('getActionOptions', () => {
   it('should return all base action groups', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
 
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(7);
     expect(result[0].id).toBe('triggers');
     expect(result[1].id).toBe('elasticsearch');
     expect(result[2].id).toBe('kibana');
