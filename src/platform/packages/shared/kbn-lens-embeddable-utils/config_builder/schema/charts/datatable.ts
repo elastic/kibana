@@ -201,7 +201,7 @@ const datatableStateSharedOptionsSchema = {
 
 const datatableStateCommonOptionsSchema = {
   /**
-   * Where to apply the color (background or value)
+   * Where to apply the color (background, value or badge)
    */
   apply_color_to: schema.maybe(applyColorToDatatableSchema),
   /**
