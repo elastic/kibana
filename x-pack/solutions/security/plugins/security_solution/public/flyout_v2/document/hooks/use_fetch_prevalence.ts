@@ -10,12 +10,12 @@ import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@kbn/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useSelector } from 'react-redux';
-import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../common/constants';
 import { createFetchData } from '../utils/fetch_data';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
+import { useKibana } from '../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../sourcerer/store';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
