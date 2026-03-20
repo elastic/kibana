@@ -517,7 +517,7 @@ groups:
 
       - setting: xpack.fleet.autoUpgrades.taskInterval
         description: |
-          Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
+          Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}.
         datatype: string
         default: "30m"
         applies_to:
@@ -547,7 +547,7 @@ groups:
 
       - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions
         description: |
-          The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+          The maximum number of revisions to maintain for a Fleet agent policy.
         datatype: int
         default: 10
         applies_to:
@@ -557,7 +557,7 @@ groups:
 
       - setting: xpack.fleet.fleetPolicyRevisionsCleanup.interval
         description: |
-          The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+          The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`).
         datatype: string
         default: "1h"
         applies_to:
@@ -567,7 +567,7 @@ groups:
 
       - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run
         description: |
-          The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
+          The maximum number of Fleet agent policies to clean up revisions from per interval.
         datatype: int
         default: 100
         applies_to:
