@@ -35,10 +35,10 @@ const getSidebarButton = ({
 }) => ({
   label: isHidden
     ? i18n.translate('discover.panelsToggle.showSidebarButton', {
-        defaultMessage: 'Show sidebar',
+        defaultMessage: 'Expand field list',
       })
     : i18n.translate('discover.panelsToggle.hideSidebarButton', {
-        defaultMessage: 'Hide sidebar',
+        defaultMessage: 'Collapse field list',
       }),
   iconType: isHidden ? 'transitionLeftIn' : 'transitionLeftOut',
   'data-test-subj': isHidden ? 'dscShowSidebarButton' : 'dscHideSidebarButton',
@@ -56,10 +56,10 @@ const getChartButton = ({
 }) => ({
   label: isHidden
     ? i18n.translate('discover.panelsToggle.showChartButton', {
-        defaultMessage: 'Show chart',
+        defaultMessage: 'Expand visualization',
       })
     : i18n.translate('discover.panelsToggle.hideChartButton', {
-        defaultMessage: 'Hide chart',
+        defaultMessage: 'Collapse visualization',
       }),
   iconType: isHidden ? 'transitionTopIn' : 'transitionTopOut',
   'data-test-subj': isHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
