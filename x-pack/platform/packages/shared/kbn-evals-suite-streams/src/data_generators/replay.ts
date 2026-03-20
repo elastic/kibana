@@ -20,6 +20,6 @@ export {
 export type { ReplayStats } from './replay_into_managed_stream';
 export { replayIntoManagedStream } from './replay_into_managed_stream';
 
-export { loadKIsFromSnapshot } from './load_kis_from_snapshot';
+export { loadKIFeaturesFromSnapshot } from './load_ki_features_from_snapshot';
 
-export { canonicalKIsFromExpectedGroundTruth } from './canonical_kis';
+export { canonicalKIFeaturesFromExpectedGroundTruth } from './canonical_ki_features';
