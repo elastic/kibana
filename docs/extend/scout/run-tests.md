@@ -237,7 +237,7 @@ curl -XPOST \
 
 - `API_KEY`: create in the Elastic Cloud UI (Organization → API keys)
 - `CLOUD_ENV_URL`: base URL of your Cloud environment (for example `https://console.qa.cld.elstc.co`)
-- `PROJECT_TYPE`: must match your serverless project type — one of `elasticsearch`, `security`, or `observability`
+- `PROJECT_TYPE`: serverless project type (`elasticsearch`, `security`, or `observability`)
 - `PROJECT_ID`: serverless project ID from the Cloud UI
 
 :::::::
