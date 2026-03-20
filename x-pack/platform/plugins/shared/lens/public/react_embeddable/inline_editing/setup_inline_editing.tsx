@@ -88,8 +88,11 @@ export function prepareInlineEditPanel(
       startDependencies.data.query.filterManager.extract
     );
 
-    const updateByRefInput = (refId: LensRuntimeState['ref_id']) => {
-      updateState({ attributes, ref_id: refId });
+    const updateByRefInput = (
+      refId: LensRuntimeState['ref_id'],
+      attrs: TypedLensSerializedState['attributes']
+    ) => {
+      updateState({ attributes: attrs, ref_id: refId });
     };
 
     if (attributes?.visualizationType == null) {
