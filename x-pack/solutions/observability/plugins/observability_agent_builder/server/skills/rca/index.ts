@@ -199,11 +199,19 @@ function buildRcaSkillContent(): string {
     For each hypothesis, execute its test query. Stop when one is confirmed (returns evidence).
 
     **Testing Query KI hypotheses:**
-    Execute the KI's \`query.esql.query\` verbatim using \`execute_esql\`.
+    Start from the KI's \`query.esql.query\`, apply **time scoping** and **row caps** (below), then call \`execute_esql\`.
     Pass the investigation time window in the \`time_range\` parameter — this injects
     \`?_tstart\` / \`?_tend\` named parameters, so queries that use them are automatically scoped.
     If the query does not use named parameters and has no \`@timestamp\` filter, prepend
     \`| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend\` after the FROM clause.
+
+    **LIMIT / row cap (required):** Unbounded ES|QL can return huge row sets and **exceed the conversation context limit**.
+    Before each \`execute_esql\` on a Query KI:
+    - Inspect the ES|QL for an existing \`LIMIT\` clause (\`LIMIT n\` or \`| LIMIT n\`, case-insensitive).
+    - If \`LIMIT\` is **already** present, keep the query (aside from time filters above).
+    - If **no** \`LIMIT\` is present **and** the pipeline can emit **one row per matching document** (e.g. raw \`FROM\` / \`WHERE\` / \`KEEP\` / \`SORT\` without a reducing \`STATS\` that collapses to a handful of rows), **append** \`| LIMIT 20\` at the **end** of the pipeline. Use **10** (or lower) if projected fields include very large text (long \`message\`, stack traces).
+    - If the query **already** returns a **tiny** aggregated result (e.g. one \`STATS\` / \`COUNT(*)\` summary row), you do **not** need an extra \`LIMIT\` for context safety.
+    - When checking whether a condition is "firing", prefer **counts or small aggregates** over pulling many raw documents; only adapt the KI query if the adaptation preserves the same filter semantics.
 
     Interpretation:
     - Returns rows → the condition is firing. Count and content confirm the severity.
@@ -217,7 +225,8 @@ function buildRcaSkillContent(): string {
     - Set \`context\` to include the feature's \`description\`, key values from \`properties\`,
       and the \`filter\` condition (so the generated query scopes correctly)
     - Describe what you want to confirm: "count occurrences of [error pattern] matching [filter] per 5-minute bucket"
-    - \`generate_esql\` executes the query by default — you get both the query and results in one call
+    - Ask for **bounded** results: prefer \`STATS\` / aggregates; if the generated query returns raw events, it must include \`| LIMIT 20\` (or lower).
+    - Run \`generate_esql\` so you obtain executable ES|QL and rows (enable execution if the tool allows draft-only vs run).
 
     **After each query result:**
     - Write down what the result tells you: how many events? Which time range? Which services?
@@ -232,12 +241,12 @@ function buildRcaSkillContent(): string {
 
     **Onset** — when did it start?
     Use \`generate_esql\` to find the earliest occurrence of the error pattern within a wider
-    window (e.g. now-24h). Look for MIN(@timestamp). Cross-reference with the Feature KI's
+    window (e.g. now-24h). Use **MIN(@timestamp) inside a \`STATS\`** (or similar) so the tool returns **one row**, not every matching document. Cross-reference with the Feature KI's
     \`last_seen\` field (when the feature was last observed) as a sanity check.
 
     **Blast radius** — what else is affected?
     Use \`generate_esql\` to count affected services/hosts by grouping on \`service.name\` or
-    \`host.name\`. Compare with the Feature KI's \`filter\` condition — if it scopes to a single
+    \`host.name\` (**aggregate** output). If you must list raw events, include \`LIMIT\`. Compare with the Feature KI's \`filter\` condition — if it scopes to a single
     service, the failure may be contained; if the filter is broad, the blast radius is wider.
 
     ### Step A-6: Synthesize and Report
@@ -322,8 +331,9 @@ function buildRcaSkillContent(): string {
     4. **Validate stale KIs.** \`status: "stale"\` or \`status: "expired"\` = historical — always confirm with a live query.
     5. **Apply the KI's \`filter\` in derived queries.** Omitting it means operating on a different data slice.
     6. **Always scope queries to the investigation time window.** Pass \`time_range\` to \`execute_esql\` / \`generate_esql\`.
-    7. **0 rows = refuted. Move on.** Do not retry a refuted hypothesis with the same parameters.
-    8. **Do not fabricate.** Never invent scores, IDs, query names, or ES|QL results.
+    7. **Cap ES|QL row volume on KI queries.** If a Query KI's ES|QL has no \`LIMIT\` and can return many raw rows, append \`| LIMIT 20\` (or **10** for very wide fields). Prefer aggregates over document dumps.
+    8. **0 rows = refuted. Move on.** Do not retry a refuted hypothesis with the same parameters.
+    9. **Do not fabricate.** Never invent scores, IDs, query names, or ES|QL results.
 
     ${getKqlInstructions()}
 
@@ -335,6 +345,7 @@ function buildRcaSkillContent(): string {
 
     ## Tips
 
+    - **ES|QL + context:** \`FROM\` without \`STATS\` / tight aggregation can return huge row sets; add \`| LIMIT 20\` (or lower) before executing unless the query already has \`LIMIT\` or returns a small aggregate.
     - \`log.level\` is often unreliable (mixed casing, missing on OTel events). Prefer filtering by message content.
     - Use \`get_index_info(operation="get-field-values", fields=["log.level"], ...)\` to discover actual keyword values before filtering.
     - To inspect a specific document: \`get_logs(kqlFilter="_id: \\"<doc_id>\\"", fields=["message","error.stack_trace"])\`.
@@ -371,6 +382,7 @@ function buildRcaSkillContent(): string {
 
     **A-4 — Test H1:**
     execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)", time_range={from:"2026-03-20T14:00:00Z", to:"now"})
+    (Single \`STATS\` row — no extra \`LIMIT\` needed; raw-row KI queries would need \`| LIMIT 20\` when unstated.)
     → Returns: count=1,847 — the condition is actively firing.
     → H1 = Confirmed.
 
