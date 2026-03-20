@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { runInvestigationPipeline } from './orchestrator';
-export type { RunPipelineParams } from './orchestrator';
 export { registerPipelineWorkflowSteps } from './workflow_steps';
 export { deduplicateAlerts } from './deduplication';
 export { extractEntitiesFromAlerts } from './entity_extraction';
