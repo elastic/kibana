@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { EventKind } from '../constants/event_kinds';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -45,7 +46,10 @@ export interface AlertReasonProps {
 }
 
 export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
 
   const viewPreview = useMemo(

@@ -188,10 +188,6 @@ export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
 export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
   `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
 
-/* Insights Prevalence */
-
-export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
-
 /* Visualizations section */
 
 export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
