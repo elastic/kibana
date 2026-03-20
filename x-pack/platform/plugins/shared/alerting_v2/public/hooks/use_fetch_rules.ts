@@ -33,6 +33,7 @@ export const useFetchRules = ({
         })
       );
     },
-    keepPreviousData: true,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };

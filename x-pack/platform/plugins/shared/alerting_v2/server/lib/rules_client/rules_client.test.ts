@@ -732,7 +732,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('forwards search parameter with supported search fields', async () => {
+    it('translates search into name and label prefix query', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -750,9 +750,42 @@ describe('RulesClient', () => {
         perPage: 10,
         sortField: 'updatedAt',
         sortOrder: 'desc',
-        search: 'prod alerts',
-        searchFields: ['metadata.name', 'metadata.labels'],
+        filter: expect.any(String),
       });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.labels: alerts*'
+          ),
+        })
+      );
+    });
+
+    it('combines explicit filters with the search query', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ filter: 'enabled: true', search: 'prod' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining('alerting_rule.attributes.enabled: true'),
+        })
+      );
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.labels: prod*'
+          ),
+        })
+      );
     });
 
     it('does not pass filter when it is undefined', async () => {

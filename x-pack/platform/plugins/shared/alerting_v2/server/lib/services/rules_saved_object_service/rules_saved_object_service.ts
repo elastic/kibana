@@ -191,7 +191,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       perPage,
       sortField: 'updatedAt',
       sortOrder: 'desc',
-      ...(search ? { search, searchFields: ['metadata.name', 'metadata.labels'] } : {}),
+      ...(search ? { search, searchFields: ['metadata.name'] } : {}),
       ...(filter ? { filter } : {}),
     });
   }

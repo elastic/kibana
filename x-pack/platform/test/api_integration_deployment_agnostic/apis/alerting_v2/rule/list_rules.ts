@@ -206,6 +206,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.savedObjects.clean({ types: [RULE_SO_TYPE] });
       });
 
+      it('should search rules by a name prefix', async () => {
+        const prefixMatch = await createRule(roleAuthc, 'Limit120');
+        expect(prefixMatch.status).to.be(200);
+
+        const searchResponse = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'lim' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(searchResponse.status).to.be(200);
+        expect(searchResponse.body.items.length).to.be(1);
+        expect(searchResponse.body.items[0].metadata.name).to.be('Limit120');
+      });
+
       it('should search rules by name and labels', async () => {
         const nameMatch = await createRule(roleAuthc, 'cpu threshold');
         expect(nameMatch.status).to.be(200);
