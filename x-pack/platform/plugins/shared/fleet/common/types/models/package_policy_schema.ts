@@ -260,6 +260,7 @@ export const PackagePolicyBaseSchema = {
       }),
     ])
   ),
+  package_agent_version_condition: schema.maybe(schema.string()),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -267,6 +268,21 @@ export const NewPackagePolicySchema = schema.object({
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
 });
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.22.0.
+ * Permissive on enabled, inputs, and package so the SO layer can store internal
+ * shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema gains
+ * new fields, create PackagePolicySchemaV{next} that extends this one.
+ */
+export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
+  {
+    enabled: schema.maybe(schema.boolean()),
+    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
+    package: schema.maybe(schema.any()),
+  },
+  { unknowns: 'ignore' }
+);
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
