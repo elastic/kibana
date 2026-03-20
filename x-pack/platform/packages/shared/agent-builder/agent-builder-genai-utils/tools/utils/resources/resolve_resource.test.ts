@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { resolveResource, resolveResourceForEsql } from './resolve_resource';
@@ -222,6 +223,86 @@ describe('resolveResource', () => {
           expect.objectContaining({ path: '@timestamp', type: 'date' }),
         ]),
       });
+    });
+
+    it('throws when resolveIndex finds no matching resources', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'no-match-*', esClient })
+      ).rejects.toThrow('No resource found for pattern no-match-*');
+    });
+
+    it('maps not_found from resolveIndex to a clear error', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'missing-index', esClient })
+      ).rejects.toThrow("No resource found for 'missing-index'");
+    });
+
+    it('uses field caps with alias type when multiple aliases match and no indices', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [
+          { name: 'alias-a', indices: ['idx-1'] },
+          { name: 'alias-b', indices: ['idx-2'] },
+        ],
+        data_streams: [],
+      });
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['idx-1', 'idx-2'],
+        fields: {
+          host: { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: 'alias-a,alias-b', esClient });
+
+      expect(esClient.fieldCaps).toHaveBeenCalledWith({
+        index: 'alias-a,alias-b',
+        fields: ['*'],
+      });
+      expect(result).toEqual({
+        name: 'alias-a,alias-b',
+        type: EsResourceType.alias,
+        fields: expect.arrayContaining([
+          expect.objectContaining({ path: 'host', type: 'keyword' }),
+        ]),
+      });
+    });
+
+    it('uses field caps with data stream type when multiple data streams match', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          { name: 'logs-ds-1', backing_indices: [], timestamp_field: '@timestamp' },
+          { name: 'logs-ds-2', backing_indices: [], timestamp_field: '@timestamp' },
+        ],
+      });
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-logs-ds-1', '.ds-logs-ds-2'],
+        fields: {
+          '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: 'logs-*', esClient });
+
+      expect(result.type).toBe(EsResourceType.dataStream);
+      expect(result.name).toBe('logs-*');
+      expect(result.fields).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: '@timestamp', type: 'date' })])
+      );
     });
   });
 });

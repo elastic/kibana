@@ -27,4 +27,8 @@ describe('isIndexPattern', () => {
   it('returns false for concrete single targets', () => {
     expect(isIndexPattern('kibana_sample_data_logs')).toBe(false);
   });
+
+  it('returns false for empty target', () => {
+    expect(isIndexPattern('')).toBe(false);
+  });
 });
