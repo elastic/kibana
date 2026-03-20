@@ -29,18 +29,22 @@ paths:
               properties:
                 filter:
                   type: object
-                  description: Filtering criteria for execution results.
+                  description: >-
+                    Filtering criteria for execution results.
+                    If omitted, defaults to the last 2 hours (from: now-2h, to: now).
                   properties:
-                    status:
+                    outcome:
                       type: array
                       items:
-                        $ref: '../../model/execution_status.schema.yaml#/components/schemas/RuleExecutionStatus'
+                        $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionStatus'
+                      maxItems: 3
                       default: []
-                      description: Filter by execution status (succeeded, warning, failed). Empty = all statuses.
+                      description: Filter by execution outcome (success, warning, failure). Empty = all outcomes.
                     run_type:
                       type: array
                       items:
                         $ref: '../../model/execution_run_type.schema.yaml#/components/schemas/RuleRunType'
+                      maxItems: 2
                       default: []
                       description: Filter by run type (standard, backfill). Empty = all run types.
                     from:
@@ -60,7 +64,7 @@ paths:
                   properties:
                     field:
                       $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResultSortField'
-                      default: timestamp
+                      default: execution_start
                       description: Field to sort results by.
                     order:
                       $ref: '../../../model/sorting.schema.yaml#/components/schemas/SortOrder'
@@ -68,14 +72,16 @@ paths:
                       description: Sort order (asc or desc).
                 page:
                   type: integer
+                  minimum: 1
                   default: 1
                   description: Page number to return.
                 per_page:
                   type: integer
+                  minimum: 1
+                  maximum: 1000
                   default: 20
                   description: Number of results per page.
-              required:
-                - filter
+              required: []
       responses:
         200:
           description: Indicates a successful call
@@ -84,7 +90,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  events:
+                  executions:
                     type: array
                     items:
                       $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResult'
@@ -98,7 +104,7 @@ paths:
                     type: integer
                     description: Number of results per page (echoed from request).
                 required:
-                  - events
+                  - executions
                   - total
                   - page
                   - per_page

@@ -222,11 +222,11 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       args: GetUnifiedExecutionResultsArgs
     ): Promise<ReadRuleExecutionResultsResponse> {
       const { ruleId, filter: filterParams, sort, page, perPage } = args;
-      const { from, to, status, run_type: runType } = filterParams;
-      const sortField = sort?.field ?? 'timestamp';
+      const { from, to, outcome, run_type: runType } = filterParams ?? {};
+      const sortField = sort?.field ?? 'execution_start';
       const sortOrder = sort?.order ?? 'desc';
 
-      const kqlFilter = buildUnifiedExecutionEventFilter({ status, runType });
+      const kqlFilter = buildUnifiedExecutionEventFilter({ outcome, runType });
 
       const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
         return eventLog.findEventsBySavedObjectIds(UNIFIED_EVENT_SO_TYPE, [ruleId], {
@@ -240,7 +240,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       });
 
       return {
-        events: findResult.data.map(mapEventToUnifiedResult),
+        executions: findResult.data.map(mapEventToUnifiedResult),
         total: findResult.total,
         page: page ?? 1,
         per_page: perPage ?? 20,
@@ -372,12 +372,12 @@ const buildEventLogKqlFilter = ({
 
 const mapUnifiedSortField = (sortField: string): string => {
   switch (sortField) {
-    case 'timestamp':
-      return '@timestamp';
-    case 'duration_ms':
+    case 'execution_start':
+      return 'event.start';
+    case 'execution_duration_ms':
       return 'event.duration';
     default:
-      return '@timestamp';
+      return 'event.start';
   }
 };
 

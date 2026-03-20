@@ -15,36 +15,33 @@ import type {
 } from '../../../../routes/__mocks__/request_context';
 
 const mockMetrics = {
-  duration_ms: null,
-  candidate_alerts_count: null,
-  scheduling_delay: null,
-  search_duration: null,
-  backfill: null,
-  indices_found: null,
-  indexed_alerts_count: null,
-  alerts_created_count: null,
-  gap_duration: null,
-  index_duration: null,
-  matched_indices: null,
+  total_search_duration_ms: null,
+  total_indexing_duration_ms: null,
+  execution_gap_duration_s: null,
+  alerts_candidate_count: null,
+  alert_counts: null,
+  matched_indices_count: null,
+  frozen_indices_queried_count: null,
+  index_duration_ms: null,
 };
 
 const mockUnifiedExecutionResults = {
-  events: [
+  executions: [
     {
       execution_uuid: 'test-uuid-1',
-      timestamp: '2026-03-11T11:00:00.000Z',
-      status: 'succeeded',
-      metrics: { ...mockMetrics, duration_ms: 500, indices_found: 5 },
-      errors: [],
-      warnings: [],
+      execution_start: '2026-03-11T11:00:00.000Z',
+      schedule_delay_ms: null,
+      backfill: null,
+      outcome: { status: 'success', message: null },
+      metrics: { ...mockMetrics, matched_indices_count: 5 },
     },
     {
       execution_uuid: 'test-uuid-2',
-      timestamp: '2026-03-11T10:00:00.000Z',
-      status: 'warning',
-      metrics: { ...mockMetrics, duration_ms: 300 },
-      errors: [],
-      warnings: [{ message: 'Missing index pattern' }],
+      execution_start: '2026-03-11T10:00:00.000Z',
+      schedule_delay_ms: null,
+      backfill: null,
+      outcome: { status: 'warning', message: 'Missing index pattern' },
+      metrics: { ...mockMetrics },
     },
   ],
   total: 2,
@@ -57,10 +54,12 @@ describe('readRuleExecutionResultsRoute', () => {
   let clients: MockClients;
   let context: SecuritySolutionRequestHandlerContextMock;
 
-  const getReadRuleExecutionResultsRequest = (overrides: {
-    ruleId?: string;
-    body?: Record<string, unknown>;
-  } = {}) =>
+  const getReadRuleExecutionResultsRequest = (
+    overrides: {
+      ruleId?: string;
+      body?: Record<string, unknown>;
+    } = {}
+  ) =>
     requestMock.create({
       method: 'post',
       path: READ_RULE_EXECUTION_RESULTS_URL,
@@ -125,10 +124,10 @@ describe('readRuleExecutionResultsRoute', () => {
       filter: {
         from: '2026-03-11T00:00:00.000Z',
         to: '2026-03-12T00:00:00.000Z',
-        status: ['failed'],
+        outcome: ['failure'],
         run_type: ['backfill'],
       },
-      sort: { field: 'duration_ms', order: 'asc' },
+      sort: { field: 'execution_duration_ms', order: 'asc' },
       page: 2,
       per_page: 10,
     };
@@ -143,10 +142,10 @@ describe('readRuleExecutionResultsRoute', () => {
       filter: {
         from: '2026-03-11T00:00:00.000Z',
         to: '2026-03-12T00:00:00.000Z',
-        status: ['failed'],
+        outcome: ['failure'],
         run_type: ['backfill'],
       },
-      sort: { field: 'duration_ms', order: 'asc' },
+      sort: { field: 'execution_duration_ms', order: 'asc' },
       page: 2,
       perPage: 10,
     });
@@ -154,28 +153,32 @@ describe('readRuleExecutionResultsRoute', () => {
 
   it('should use default values for optional parameters', async () => {
     clients.ruleExecutionLog.getUnifiedExecutionResults.mockResolvedValue({
-      events: [],
+      executions: [],
       total: 0,
       page: 1,
       per_page: 20,
     });
 
+    const before = Date.now();
     await server.inject(
-      getReadRuleExecutionResultsRequest(),
+      getReadRuleExecutionResultsRequest({ body: {} }),
       requestContextMock.convertContext(context)
     );
+    const after = Date.now();
 
-    expect(clients.ruleExecutionLog.getUnifiedExecutionResults).toHaveBeenCalledWith({
-      ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      filter: {
-        from: '2026-03-11T00:00:00.000Z',
-        to: '2026-03-12T00:00:00.000Z',
-        status: [],
-        run_type: [],
-      },
-      sort: undefined,
-      page: 1,
-      perPage: 20,
-    });
+    const [[args]] = clients.ruleExecutionLog.getUnifiedExecutionResults.mock.calls;
+    expect(args.ruleId).toBe('04128c15-0d1b-4716-a4c5-46997ac7f3bd');
+    expect(args.filter.outcome).toEqual([]);
+    expect(args.filter.run_type).toEqual([]);
+    expect(args.sort).toBeUndefined();
+    expect(args.page).toBe(1);
+    expect(args.perPage).toBe(20);
+
+    // Default filter window: last 2 hours
+    const toMs = new Date(args.filter.to).getTime();
+    const fromMs = new Date(args.filter.from).getTime();
+    expect(toMs).toBeGreaterThanOrEqual(before);
+    expect(toMs).toBeLessThanOrEqual(after);
+    expect(toMs - fromMs).toBe(2 * 60 * 60 * 1000);
   });
 });

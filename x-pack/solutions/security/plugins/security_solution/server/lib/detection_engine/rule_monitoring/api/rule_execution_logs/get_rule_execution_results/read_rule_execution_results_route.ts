@@ -53,9 +53,20 @@ export const readRuleExecutionResultsRoute = (router: SecuritySolutionPluginRout
         try {
           const ctx = await context.resolve(['securitySolution']);
           const executionLog = ctx.securitySolution.getRuleExecutionLog();
+
+          // Default to the last 2 hours when no filter is provided
+          const now = new Date();
+          const effectiveFilter: NonNullable<ReadRuleExecutionResultsRequestBody['filter']> =
+            filter ?? {
+              from: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
+              to: now.toISOString(),
+              outcome: [],
+              run_type: [],
+            };
+
           const executionResultsResponse = await executionLog.getUnifiedExecutionResults({
             ruleId,
-            filter,
+            filter: effectiveFilter,
             sort,
             page,
             perPage,

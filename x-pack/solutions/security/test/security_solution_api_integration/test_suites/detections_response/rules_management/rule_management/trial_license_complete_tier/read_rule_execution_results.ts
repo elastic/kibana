@@ -94,15 +94,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
-        expect(response.body.events[0].execution_uuid).to.eql(executionId);
-        expect(response.body.events[0].status).to.eql('succeeded');
-        expect(response.body.events[0].metrics.duration_ms).to.greaterThan(0);
-        expect(response.body.events[0].metrics.indices_found).to.eql(10);
-        expect(response.body.events[0].metrics.candidate_alerts_count).to.eql(10);
-        expect(response.body.events[0].metrics.search_duration).to.be.a('number');
-        expect(response.body.events[0].metrics.scheduling_delay).to.be.a('number');
-        expect(response.body.events[0].errors).to.eql([]);
-        expect(response.body.events[0].warnings).to.eql([]);
+        expect(response.body.executions[0].execution_uuid).to.eql(executionId);
+        expect(response.body.executions[0].outcome.status).to.eql('success');
+        expect(response.body.executions[0].metrics.duration_ms).to.greaterThan(0);
+        expect(response.body.executions[0].metrics.indices_found_count).to.eql(10);
+        expect(response.body.executions[0].metrics.alerts.candidate_count).to.eql(10);
+        expect(response.body.executions[0].metrics.search_duration_ms).to.be.a('number');
+        expect(response.body.executions[0].metrics.scheduling_delay).to.be.a('number');
       });
 
       it('should return execution results with errors for failed executions', async () => {
@@ -132,10 +130,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
-        expect(response.body.events[0].status).to.eql('failed');
-        expect(response.body.events[0].errors).to.have.length(1);
-        expect(response.body.events[0].errors[0].message).to.contain('unrecoverable error');
-        expect(response.body.events[0].warnings).to.eql([]);
+        expect(response.body.executions[0].outcome.status).to.eql('failure');
+        expect(response.body.executions[0].outcome.message).to.contain('unrecoverable error');
       });
 
       it('should return execution results with warnings', async () => {
@@ -164,10 +160,8 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ filter: { from, to } });
 
         expect(response.status).to.eql(200);
-        expect(response.body.events[0].status).to.eql('warning');
-        expect(response.body.events[0].warnings).to.have.length(1);
-        expect(response.body.events[0].warnings[0].message).to.contain('matching indices');
-        expect(response.body.events[0].errors).to.eql([]);
+        expect(response.body.executions[0].outcome.status).to.eql('warning');
+        expect(response.body.executions[0].outcome.message).to.contain('matching indices');
       });
 
       it('should return empty results when no events match', async () => {
@@ -185,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(0);
-        expect(response.body.events).to.eql([]);
+        expect(response.body.executions).to.eql([]);
       });
 
       it('should support pagination', async () => {
@@ -218,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(page1.status).to.eql(200);
         expect(page1.body.total).to.eql(3);
-        expect(page1.body.events).to.have.length(2);
+        expect(page1.body.executions).to.have.length(2);
         expect(page1.body.page).to.eql(1);
         expect(page1.body.per_page).to.eql(2);
 
@@ -231,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(page2.status).to.eql(200);
         expect(page2.body.total).to.eql(3);
-        expect(page2.body.events).to.have.length(1);
+        expect(page2.body.executions).to.have.length(1);
         expect(page2.body.page).to.eql(2);
         expect(page2.body.per_page).to.eql(2);
       });
@@ -271,9 +265,8 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ filter: { from, to } });
 
         expect(response.status).to.eql(200);
-        expect(response.body.events).to.have.length(3);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const resultTimestamps = response.body.events.map((e: any) => e.timestamp);
+        expect(response.body.executions).to.have.length(3);
+        const resultTimestamps = response.body.executions.map((e: any) => e.timestamp);
         expect(resultTimestamps).to.eql([...resultTimestamps].sort().reverse());
       });
     });
@@ -305,11 +298,11 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'true')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .send({ filter: { from, to, status: ['failed'] } });
+          .send({ filter: { from, to, status: ['failure'] } });
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
-        expect(response.body.events[0].status).to.eql('failed');
+        expect(response.body.executions[0].outcome.status).to.eql('failure');
       });
 
       it('by run type: scheduled', async () => {
@@ -390,7 +383,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
-        expect(response.body.events[0].metrics).to.be.ok();
+        expect(response.body.executions[0].metrics).to.be.ok();
       });
 
       it('by time range: only returns events within the specified window', async () => {
@@ -430,7 +423,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.eql(1);
-        expect(response.body.events[0].timestamp).to.eql(insideTs);
+        expect(response.body.executions[0].timestamp).to.eql(insideTs);
       });
     });
   });

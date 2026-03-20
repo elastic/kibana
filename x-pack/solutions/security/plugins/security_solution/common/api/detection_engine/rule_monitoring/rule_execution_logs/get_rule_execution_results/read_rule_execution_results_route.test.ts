@@ -15,9 +15,9 @@ const validFilter = {
 
 describe('ReadRuleExecutionResultsRequestBody', () => {
   describe('Required fields', () => {
-    it('should fail when body is empty', () => {
+    it('should succeed when body is empty (filter is optional)', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({});
-      expectParseError(result);
+      expectParseSuccess(result);
     });
 
     it('should fail when filter is empty object (missing from/to)', () => {
@@ -38,7 +38,7 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
       expect(result.data).toEqual({
         filter: {
           ...validFilter,
-          status: [],
+          outcome: [],
           run_type: [],
         },
         page: 1,
@@ -47,28 +47,28 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
     });
   });
 
-  describe('filter.status', () => {
-    it('should accept valid status values', () => {
+  describe('filter.outcome', () => {
+    it('should accept valid outcome values', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({
-        filter: { ...validFilter, status: ['succeeded', 'failed'] },
+        filter: { ...validFilter, outcome: ['success', 'failure'] },
       });
       expectParseSuccess(result);
-      expect(result.data?.filter.status).toEqual(['succeeded', 'failed']);
+      expect(result.data?.filter.outcome).toEqual(['success', 'failure']);
     });
 
-    it('should reject invalid status values', () => {
+    it('should reject invalid outcome values', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({
-        filter: { ...validFilter, status: ['invalid'] },
+        filter: { ...validFilter, outcome: ['invalid'] },
       });
       expectParseError(result);
     });
 
-    it('should accept empty status array', () => {
+    it('should accept empty outcome array', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({
-        filter: { ...validFilter, status: [] },
+        filter: { ...validFilter, outcome: [] },
       });
       expectParseSuccess(result);
-      expect(result.data?.filter.status).toEqual([]);
+      expect(result.data?.filter.outcome).toEqual([]);
     });
   });
 
@@ -92,7 +92,7 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
 
   describe('sort.field', () => {
     it('should accept valid sort field values', () => {
-      const cases = ['timestamp', 'duration_ms'];
+      const cases = ['execution_start', 'execution_duration_ms'];
       cases.forEach((field) => {
         const result = ReadRuleExecutionResultsRequestBody.safeParse({
           filter: validFilter,
@@ -110,17 +110,17 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
       });
       expectParseError(result);
       expect(stringifyZodError(result.error)).toContain(
-        'Invalid option: expected one of "timestamp"|"duration_ms"'
+        'Invalid option: expected one of "execution_start"|"execution_duration_ms"'
       );
     });
 
-    it('should default sort field to timestamp', () => {
+    it('should default sort field to execution_start', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({
         filter: validFilter,
         sort: {},
       });
       expectParseSuccess(result);
-      expect(result.data?.sort?.field).toEqual('timestamp');
+      expect(result.data?.sort?.field).toEqual('execution_start');
     });
   });
 

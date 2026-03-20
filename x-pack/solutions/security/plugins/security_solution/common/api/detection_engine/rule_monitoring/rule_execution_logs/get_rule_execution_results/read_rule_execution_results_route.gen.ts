@@ -16,12 +16,12 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { RuleExecutionStatus } from '../../model/execution_status.gen';
-import { RuleRunType } from '../../model/execution_run_type.gen';
 import {
+  UnifiedExecutionStatus,
   UnifiedExecutionResultSortField,
   UnifiedExecutionResult,
 } from '../../model/unified_execution_result.gen';
+import { RuleRunType } from '../../model/execution_run_type.gen';
 import { SortOrder } from '../../../model/sorting.gen';
 
 export type ReadRuleExecutionResultsRequestParams = z.infer<
@@ -42,26 +42,28 @@ export type ReadRuleExecutionResultsRequestBody = z.infer<
 >;
 export const ReadRuleExecutionResultsRequestBody = z.object({
   /**
-   * Filtering criteria for execution results.
+   * Filtering criteria for execution results. If omitted, defaults to the last 2 hours (from: now-2h, to: now).
    */
-  filter: z.object({
-    /**
-     * Filter by execution status (succeeded, warning, failed). Empty = all statuses.
-     */
-    status: z.array(RuleExecutionStatus).optional().default([]),
-    /**
-     * Filter by run type (standard, backfill). Empty = all run types.
-     */
-    run_type: z.array(RuleRunType).optional().default([]),
-    /**
-     * Start of the time range (executions that started within this range).
-     */
-    from: z.string().datetime(),
-    /**
-     * End of the time range (executions that started within this range).
-     */
-    to: z.string().datetime(),
-  }),
+  filter: z
+    .object({
+      /**
+       * Filter by execution outcome (success, warning, failure). Empty = all outcomes.
+       */
+      outcome: z.array(UnifiedExecutionStatus).max(3).optional().default([]),
+      /**
+       * Filter by run type (standard, backfill). Empty = all run types.
+       */
+      run_type: z.array(RuleRunType).max(2).optional().default([]),
+      /**
+       * Start of the time range (executions that started within this range).
+       */
+      from: z.string().datetime(),
+      /**
+       * End of the time range (executions that started within this range).
+       */
+      to: z.string().datetime(),
+    })
+    .optional(),
   /**
    * Sorting configuration for execution results.
    */
@@ -70,7 +72,7 @@ export const ReadRuleExecutionResultsRequestBody = z.object({
       /**
        * Field to sort results by.
        */
-      field: UnifiedExecutionResultSortField.optional().default('timestamp'),
+      field: UnifiedExecutionResultSortField.optional().default('execution_start'),
       /**
        * Sort order (asc or desc).
        */
@@ -80,11 +82,11 @@ export const ReadRuleExecutionResultsRequestBody = z.object({
   /**
    * Page number to return.
    */
-  page: z.number().int().optional().default(1),
+  page: z.number().int().min(1).optional().default(1),
   /**
    * Number of results per page.
    */
-  per_page: z.number().int().optional().default(20),
+  per_page: z.number().int().min(1).max(1000).optional().default(20),
 });
 export type ReadRuleExecutionResultsRequestBodyInput = z.input<
   typeof ReadRuleExecutionResultsRequestBody
@@ -92,7 +94,7 @@ export type ReadRuleExecutionResultsRequestBodyInput = z.input<
 
 export type ReadRuleExecutionResultsResponse = z.infer<typeof ReadRuleExecutionResultsResponse>;
 export const ReadRuleExecutionResultsResponse = z.object({
-  events: z.array(UnifiedExecutionResult),
+  executions: z.array(UnifiedExecutionResult),
   /**
    * Total number of results matching the filter.
    */

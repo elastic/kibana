@@ -111,7 +111,7 @@ export interface GetUnifiedExecutionResultsArgs {
   ruleId: RuleObjectId;
 
   /** Filtering criteria for execution results. */
-  filter: ReadRuleExecutionResultsRequestBody['filter'];
+  filter?: ReadRuleExecutionResultsRequestBody['filter'];
 
   /** Sorting configuration. */
   sort?: ReadRuleExecutionResultsRequestBody['sort'];

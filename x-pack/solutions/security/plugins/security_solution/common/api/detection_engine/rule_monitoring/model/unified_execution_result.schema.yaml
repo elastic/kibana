@@ -6,128 +6,126 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+    UnifiedExecutionStatus:
+      type: string
+      description: Final execution outcome as reported by the Alerting Framework (event.outcome).
+      enum:
+        - success
+        - warning
+        - failure
+
     UnifiedExecutionResult:
       type: object
       description: |-
         A single unified rule execution result read from the Alerting Framework's "execute" event
-        in the event log. Contains execution metadata,
-        structured metrics, and any errors or warnings that occurred during execution.
+        in the event log. Contains execution metadata and structured metrics.
       properties:
         execution_uuid:
           type: string
           description: Unique identifier of this execution.
-        timestamp:
+        execution_start:
           type: string
           format: date-time
-          description: Timestamp of the execution event.
-        status:
-          type: string
-          description: |-
-            Final execution status.
-            Values: succeeded, warning, failed.
+          description: Start time of the execution (event.start from the Alerting Framework execute event).
+        execution_duration_ms:
+          type: integer
+          description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
+        schedule_delay_ms:
+          type: integer
+          nullable: true
+          description: Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).
+        backfill:
+          nullable: true
+          type: object
+          description: Source event time range for backfill (manual) executions, computed from start and interval.
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+          required:
+            - from
+            - to
+        outcome:
+          type: object
+          description: Execution outcome information.
+          properties:
+            status:
+              $ref: '#/components/schemas/UnifiedExecutionStatus'
+            message:
+              type: string
+              nullable: true
+              description: Outcome message from the source event (event.message).
+          required:
+            - status
+            - message
         metrics:
           type: object
-          description: Structured execution metrics extracted from the event log.
+          description: >-
+            Execution metrics from kibana.alert.rule.execution.metrics in the
+            Alerting Framework execute event.
           properties:
-            duration_ms:
-              type: integer
-              nullable: true
-              description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
-            candidate_alerts_count:
-              type: integer
-              nullable: true
-              description: Number of candidate alerts evaluated during execution.
-            scheduling_delay:
-              type: integer
-              nullable: true
-              description: Scheduling delay in nanoseconds (kibana.task.schedule_delay).
-            search_duration:
+            total_search_duration_ms:
               type: integer
               nullable: true
               description: Total search duration in milliseconds.
-            backfill:
+            total_indexing_duration_ms:
+              type: integer
               nullable: true
+              description: Total indexing duration in milliseconds.
+            execution_gap_duration_s:
+              type: integer
+              nullable: true
+              description: Gap duration in seconds.
+            alerts_candidate_count:
+              type: integer
+              nullable: true
+              description: Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).
+            alert_counts:
               type: object
-              description: Source event time range for backfill (manual) executions, computed from start and interval.
+              nullable: true
+              description: Alert counts for this execution.
               properties:
-                from:
-                  type: string
-                  format: date-time
-                to:
-                  type: string
-                  format: date-time
+                new:
+                  type: integer
+                  nullable: true
               required:
-                - from
-                - to
-            indices_found:
+                - new
+            matched_indices_count:
               type: integer
               nullable: true
-              description: Number of indices found during execution.
-            indexed_alerts_count:
+              description: Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).
+            frozen_indices_queried_count:
               type: integer
               nullable: true
-              description: Number of alerts indexed. Not populated from the execute event currently.
-            alerts_created_count:
-              type: integer
-              nullable: true
-              description: Number of alerts created. Not populated from the execute event currently.
-            gap_duration:
-              type: integer
-              nullable: true
-              description: Gap duration. Not populated from the execute event currently.
-            index_duration:
+              description: Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
+            index_duration_ms:
               type: integer
               nullable: true
               description: Indexing duration in milliseconds. Not populated from the execute event currently.
-            matched_indices:
-              type: array
-              nullable: true
-              items:
-                type: string
-              description: List of matched index names. Not populated from the execute event currently.
           required:
-            - duration_ms
-            - candidate_alerts_count
-            - scheduling_delay
-            - search_duration
-            - backfill
-            - indices_found
-            - indexed_alerts_count
-            - alerts_created_count
-            - gap_duration
-            - index_duration
-            - matched_indices
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              message:
-                type: string
-            required:
-              - message
-          description: Errors that occurred during execution.
-        warnings:
-          type: array
-          items:
-            type: object
-            properties:
-              message:
-                type: string
-            required:
-              - message
-          description: Warnings that occurred during execution.
+            - total_search_duration_ms
+            - total_indexing_duration_ms
+            - execution_gap_duration_s
+            - alerts_candidate_count
+            - alert_counts
+            - matched_indices_count
+            - frozen_indices_queried_count
+            - index_duration_ms
       required:
         - execution_uuid
-        - timestamp
-        - status
+        - execution_start
+        - execution_duration_ms
+        - schedule_delay_ms
+        - backfill
+        - outcome
         - metrics
-        - errors
-        - warnings
 
     UnifiedExecutionResultSortField:
       type: string
       description: Fields available for sorting unified execution results.
       enum:
-        - timestamp
-        - duration_ms
+        - execution_start
+        - execution_duration_ms

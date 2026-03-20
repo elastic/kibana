@@ -17,10 +17,10 @@ export const UNIFIED_EVENT_SO_TYPE = RULE_SAVED_OBJECT_TYPE;
  * Builds a KQL filter for querying unified execution events.
  */
 export const buildUnifiedExecutionEventFilter = (filter: {
-  status?: string[];
+  outcome?: string[];
   runType?: string[];
 }): string => {
-  const { status: statusFilters, runType: runTypeFilters } = filter;
+  const { outcome: statusFilters, runType: runTypeFilters } = filter;
   const filters: string[] = [];
 
   filters.push(`${f.EVENT_PROVIDER}:${UNIFIED_EVENT_PROVIDER}`);

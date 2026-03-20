@@ -25,50 +25,43 @@ export const mapEventToUnifiedResult = (event: IValidatedEvent): UnifiedExecutio
 
   return {
     execution_uuid: execution?.uuid ?? '',
-    timestamp: event?.['@timestamp'] ?? '',
-    status: mapAlertingOutcomeToStatus(outcome),
+    execution_start: event?.event?.start ?? '',
+    execution_duration_ms: extractDurationMs(event),
+    schedule_delay_ms: extractScheduleDelayMs(event),
+    backfill: extractBackfill(event),
+    outcome: {
+      status: outcome ?? 'unknown',
+      message: event?.message ?? null,
+    },
     metrics: extractMetrics(event),
-    errors: extractErrors(event, outcome),
-    warnings: extractWarnings(event, outcome),
   };
-};
-
-const mapAlertingOutcomeToStatus = (outcome?: string): string => {
-  switch (outcome) {
-    case 'success':
-      return 'succeeded';
-    case 'warning':
-      return 'warning';
-    case 'failure':
-      return 'failed';
-    default:
-      return outcome ?? 'unknown';
-  }
 };
 
 const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics'] => {
   const execution = event?.kibana?.alert?.rule?.execution;
   const rawMetrics = execution?.metrics as Record<string, unknown> | undefined;
+  const rawAlertCounts = rawMetrics?.alert_counts as Record<string, unknown> | undefined;
 
   return {
-    duration_ms: extractDurationMs(event),
-    candidate_alerts_count: toOptionalInt(rawMetrics?.candidate_alerts_count),
-    scheduling_delay: extractSchedulingDelay(event),
-    search_duration: toOptionalInt(rawMetrics?.total_search_duration_ms),
-    backfill: extractBackfill(event),
-    indices_found: toOptionalInt(rawMetrics?.indices_found),
-    indexed_alerts_count: null,
-    alerts_created_count: null,
-    gap_duration: null,
-    index_duration: null,
-    matched_indices: null,
+    total_search_duration_ms: toOptionalInt(rawMetrics?.total_search_duration_ms),
+    total_indexing_duration_ms: toOptionalInt(rawMetrics?.total_indexing_duration_ms),
+    execution_gap_duration_s: toOptionalInt(rawMetrics?.execution_gap_duration_s),
+    alerts_candidate_count: toOptionalInt(rawMetrics?.alerts_candidate_count),
+    alert_counts: rawAlertCounts
+      ? {
+          new: toOptionalInt(rawAlertCounts.new),
+        }
+      : null,
+    matched_indices_count: toOptionalInt(rawMetrics?.matched_indices_count),
+    frozen_indices_queried_count: toOptionalInt(rawMetrics?.frozen_indices_queried_count),
+    index_duration_ms: null,
   };
 };
 
 /**
  * The Alerting Framework stores event.duration in nanoseconds.
  */
-const extractDurationMs = (event: IValidatedEvent): number | null => {
+const extractDurationMs = (event: IValidatedEvent): number => {
   const durationNs = event?.event?.duration;
   if (typeof durationNs === 'number') {
     return Math.round(durationNs / ONE_MILLISECOND_AS_NANOSECONDS);
@@ -76,22 +69,30 @@ const extractDurationMs = (event: IValidatedEvent): number | null => {
   if (typeof durationNs === 'string') {
     return Math.round(Number(durationNs) / ONE_MILLISECOND_AS_NANOSECONDS);
   }
-  return null;
+  return 0;
 };
 
-const extractSchedulingDelay = (event: IValidatedEvent): number | null => {
+/**
+ * The Alerting Framework stores kibana.task.schedule_delay in nanoseconds.
+ */
+const extractScheduleDelayMs = (event: IValidatedEvent): number | null => {
   const kibanaTask = (event?.kibana as Record<string, unknown> | undefined)?.task as
     | Record<string, unknown>
     | undefined;
-  return toOptionalInt(kibanaTask?.schedule_delay);
+  const delayNs = kibanaTask?.schedule_delay;
+  if (typeof delayNs === 'number') {
+    return Math.round(delayNs / ONE_MILLISECOND_AS_NANOSECONDS);
+  }
+  if (typeof delayNs === 'string') {
+    return Math.round(Number(delayNs) / ONE_MILLISECOND_AS_NANOSECONDS);
+  }
+  return null;
 };
 
 /**
  * Converts a backfill event field (start + interval) to a { from, to } time range.
  */
-const extractBackfill = (
-  event: IValidatedEvent
-): { from: string; to: string } | null => {
+const extractBackfill = (event: IValidatedEvent): { from: string; to: string } | null => {
   const execution = event?.kibana?.alert?.rule?.execution;
   const backfill = (execution as Record<string, unknown> | undefined)?.backfill as
     | Record<string, unknown>
@@ -140,39 +141,4 @@ const toOptionalInt = (value: unknown): number | null => {
     return Number.isFinite(n) ? Math.round(n) : null;
   }
   return null;
-};
-
-/**
- * Extracts errors from error.message when kibana.alerting.outcome is 'failure'.
- * The Alerting Framework stores a single error string, not an array.
- */
-const extractErrors = (
-  event: IValidatedEvent,
-  alertingOutcome?: string
-): Array<{ message: string }> => {
-  if (alertingOutcome !== 'failure') {
-    return [];
-  }
-  const errorMessage = event?.error?.message;
-  if (errorMessage) {
-    return [{ message: errorMessage }];
-  }
-  return [];
-};
-
-/**
- * Extracts warnings from top-level message when kibana.alerting.outcome is 'warning'.
- */
-const extractWarnings = (
-  event: IValidatedEvent,
-  alertingOutcome?: string
-): Array<{ message: string }> => {
-  if (alertingOutcome !== 'warning') {
-    return [];
-  }
-  const warningMessage = event?.message;
-  if (warningMessage) {
-    return [{ message: warningMessage }];
-  }
-  return [];
 };
