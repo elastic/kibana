@@ -14,6 +14,7 @@ import {
   cleanupPack,
   getPackSavedObject,
   loadScheduledResponse,
+  cleanupScheduledResponse,
 } from '../../tasks/api_fixtures';
 import {
   UNIFIED_HISTORY_TABLE,
@@ -43,6 +44,7 @@ describe(
   },
   () => {
     let packId: string;
+    let scheduledResponseDocId: string;
 
     before(() => {
       cy.login(ServerlessRoleName.SOC_MANAGER);
@@ -98,6 +100,8 @@ describe(
               executionCount: 1,
               agentId: 'mock-agent-001',
               resultCount: 10,
+            }).then((response) => {
+              scheduledResponseDocId = response.body._id;
             });
           }
         });
@@ -105,6 +109,10 @@ describe(
     });
 
     after(() => {
+      if (scheduledResponseDocId) {
+        cleanupScheduledResponse(scheduledResponseDocId);
+      }
+
       if (packId) {
         cleanupPack(packId);
       }

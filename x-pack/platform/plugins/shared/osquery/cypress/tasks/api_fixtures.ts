@@ -17,7 +17,7 @@ import type { LiveQueryDetailsItem } from '@kbn/osquery-plugin/public/actions/us
 import type { PackSavedObject, PackItem } from '@kbn/osquery-plugin/public/packs/types';
 import type { SavedQuerySO } from '@kbn/osquery-plugin/public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
-import { request } from './common';
+import { request, esRequest } from './common';
 import { ServerlessRoleName } from '../support/roles';
 
 // Minimal type definitions to avoid direct import from security-solution
@@ -477,6 +477,8 @@ export const getPackSavedObject = (packId: string) =>
  * Requires a pack with a matching schedule_id to exist for the history table
  * to resolve the query name and pack context.
  */
+const ACTION_RESPONSES_INDEX = 'logs-osquery_manager.action.responses-default';
+
 export const loadScheduledResponse = ({
   scheduleId,
   executionCount = 1,
@@ -490,17 +492,11 @@ export const loadScheduledResponse = ({
   packId: string;
   resultCount?: number;
 }) => {
-  const esUrl =
-    Cypress.env('ELASTICSEARCH_URL') || `http://localhost:${Cypress.env('configport') || 9220}`;
-  const esUser = Cypress.env('ELASTICSEARCH_USERNAME') || 'elastic';
-  const esPass = Cypress.env('ELASTICSEARCH_PASSWORD') || 'changeme';
   const now = new Date().toISOString();
 
-  return cy.request({
+  return esRequest<{ _id: string }>({
     method: 'POST',
-    url: `${esUrl}/logs-osquery_manager.action.responses-default/_doc`,
-    auth: { user: esUser, pass: esPass },
-    headers: { 'Content-Type': 'application/json' },
+    url: `/${ACTION_RESPONSES_INDEX}/_doc`,
     body: {
       '@timestamp': now,
       agent_id: agentId,
@@ -517,3 +513,10 @@ export const loadScheduledResponse = ({
     failOnStatusCode: false,
   });
 };
+
+export const cleanupScheduledResponse = (docId: string) =>
+  esRequest({
+    method: 'DELETE',
+    url: `/${ACTION_RESPONSES_INDEX}/_doc/${docId}`,
+    failOnStatusCode: false,
+  });
