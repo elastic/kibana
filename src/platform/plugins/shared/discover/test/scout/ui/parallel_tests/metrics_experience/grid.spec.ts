@@ -39,11 +39,24 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should render metrics grid with cards', async ({ pageObjects }) => {
+    spaceTest('should render metrics grid with cards', async ({ pageObjects, page }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+
+      await spaceTest.step('grid has no a11y violations', async () => {
+        // The ARIA grid structure (role="grid" / role="gridcell") has known
+        // aria-required-children and aria-required-parent violations because
+        // there is no role="row" wrapper between them. Exclude the grid
+        // subtree and scan the surrounding metrics experience chrome instead.
+        // Tracked in https://github.com/elastic/kibana/issues/258447
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="metricsExperienceRendered"]'],
+          exclude: ['[data-test-subj="unifiedMetricsExperienceGrid"]'],
+        });
+        expect(violations).toHaveLength(0);
+      });
     });
 
     spaceTest('should render grid with WHERE filter', async ({ pageObjects }) => {
