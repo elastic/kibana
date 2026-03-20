@@ -253,7 +253,7 @@ export default function (providerContext: FtrProviderContext) {
               name: sharedName,
               space_ids: [TEST_SPACE_1],
             }),
-          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+          /409 "?Conflict"? Agent Policy\s.* already exists with name\s.*$/
         );
       });
     });
