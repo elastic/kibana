@@ -46,10 +46,10 @@ const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
-    displayName: 'GitHub',
-    description: i18n.translate('connectorSpecs.github.metadata.description', {
+    displayName: 'Github',
+    description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
       defaultMessage:
-        'Connect to GitHub via the Copilot MCP server to search and read repositories, issues, pull requests, and more.',
+        'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
