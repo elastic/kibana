@@ -76,4 +76,48 @@ describe('POST /api/workflows/_check-conflicts', () => {
     expect(body.conflicts).toHaveLength(1);
     expect(body.conflicts[0]).toEqual({ id: 'w-1', existingName: 'Existing Workflow One' });
   });
+
+  it('should handle API errors gracefully', async () => {
+    const handler = getRouteHandler();
+    workflowsApi.checkWorkflowConflicts = jest
+      .fn()
+      .mockRejectedValue(new Error('ES connection failed'));
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1']), mockResponse);
+
+    expect(mockResponse.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: expect.stringContaining('ES connection failed') },
+    });
+  });
+
+  it('should respect space context', async () => {
+    const handler = getRouteHandler();
+    workflowsApi.checkWorkflowConflicts = jest.fn().mockResolvedValue([]);
+    mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1']), mockResponse);
+
+    expect(workflowsApi.checkWorkflowConflicts).toHaveBeenCalledWith(['w-1'], 'custom-space');
+  });
+
+  it('should return all IDs as conflicting when all exist', async () => {
+    const handler = getRouteHandler();
+    workflowsApi.checkWorkflowConflicts = jest.fn().mockResolvedValue([
+      { id: 'w-1', name: 'Workflow One' },
+      { id: 'w-2', name: 'Workflow Two' },
+    ]);
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1', 'w-2']), mockResponse);
+
+    const body = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+    expect(body.conflicts).toHaveLength(2);
+    expect(body.conflicts).toEqual([
+      { id: 'w-1', existingName: 'Workflow One' },
+      { id: 'w-2', existingName: 'Workflow Two' },
+    ]);
+  });
 });

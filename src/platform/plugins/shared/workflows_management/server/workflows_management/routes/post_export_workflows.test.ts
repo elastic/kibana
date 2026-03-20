@@ -8,6 +8,7 @@
  */
 
 import AdmZip from 'adm-zip';
+import YAML from 'yaml';
 import { registerPostExportWorkflowsRoute } from './post_export_workflows';
 import {
   createMockResponse,
@@ -135,5 +136,78 @@ describe('POST /api/workflows/_export', () => {
       statusCode: 500,
       body: { message: expect.stringContaining('ES down') },
     });
+  });
+
+  it('should use stringifyWorkflowDefinition when definition is a non-null object', async () => {
+    const handler = getRouteHandler();
+
+    workflowsApi.getWorkflowsByIds = jest.fn().mockResolvedValue([
+      {
+        id: 'w-1',
+        name: 'With Def',
+        yaml: 'name: stale-yaml',
+        definition: { steps: [{ name: 's1', type: 'console' }] },
+      },
+    ]);
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1']), mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    const { body } = (mockResponse.ok as jest.Mock).mock.calls[0][0];
+    const zip = new AdmZip(body);
+    const entry = zip.getEntries().find((e) => e.entryName.includes('w-1.yml'));
+    // Should use stringified definition, not the stale yaml field
+    expect(entry!.getData().toString('utf-8')).not.toBe('name: stale-yaml');
+  });
+
+  it('should respect space context', async () => {
+    const handler = getRouteHandler();
+    workflowsApi.getWorkflowsByIds = jest
+      .fn()
+      .mockResolvedValue([{ id: 'w-1', name: 'Test', yaml: 'name: test', definition: null }]);
+    mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1']), mockResponse);
+
+    expect(workflowsApi.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'custom-space');
+  });
+
+  it('should include correct manifest metadata in the ZIP', async () => {
+    const handler = getRouteHandler();
+
+    workflowsApi.getWorkflowsByIds = jest.fn().mockResolvedValue([
+      { id: 'w-1', name: 'One', yaml: 'name: One', definition: null },
+      { id: 'w-2', name: 'Two', yaml: 'name: Two', definition: null },
+      { id: 'w-3', name: 'Three', yaml: 'name: Three', definition: null },
+    ]);
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1', 'w-2', 'w-3']), mockResponse);
+
+    const { body } = (mockResponse.ok as jest.Mock).mock.calls[0][0];
+    const zip = new AdmZip(body);
+    const manifestEntry = zip.getEntries().find((e) => e.entryName === 'manifest.yml');
+    expect(manifestEntry).toBeDefined();
+
+    const manifest = YAML.parse(manifestEntry!.getData().toString('utf-8'));
+    expect(manifest.exportedCount).toBe(3);
+    expect(manifest.version).toBe('1');
+    expect(manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('should log a warning when some workflow IDs are missing', async () => {
+    const handler = getRouteHandler();
+
+    workflowsApi.getWorkflowsByIds = jest
+      .fn()
+      .mockResolvedValue([{ id: 'w-1', name: 'Found', yaml: 'name: Found', definition: null }]);
+
+    const mockResponse = createMockResponse();
+    await handler({}, createRequest(['w-1', 'w-missing-1', 'w-missing-2']), mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('w-missing-1'));
   });
 });
