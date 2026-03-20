@@ -11,6 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -97,17 +99,21 @@ export const NotificationPoliciesBulkActions = ({
       ],
     },
   ];
-
+  const popoverTitleId = useGeneratedHtmlId();
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.alertingV2.notificationPolicy.bulkAction.selectedCount',
+              { defaultMessage: '{count} Selected', values: { count } }
+            )}
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             button={
               <EuiButtonEmpty
-                size="s"
+                size="xs"
                 iconType="arrowDown"
                 iconSide="right"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -127,7 +133,7 @@ export const NotificationPoliciesBulkActions = ({
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={onClearSelection} disabled={isLoading}>
+          <EuiButtonEmpty size="xs" onClick={onClearSelection} disabled={isLoading}>
             <FormattedMessage
               id="xpack.alertingV2.notificationPolicy.bulkAction.clearSelection"
               defaultMessage="Clear selection"

@@ -224,13 +224,10 @@ export const ListNotificationPoliciesPage = () => {
       render: (_enabled: boolean, policy: NotificationPolicyResponse) => (
         <NotificationPolicyStateBadge
           policy={policy}
-          onEnable={(id) => enablePolicy(id)}
-          onDisable={(id) => disablePolicy(id)}
           isLoading={
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
           }
-          isDisabled={hasSelection}
         />
       ),
     },
@@ -320,7 +317,7 @@ export const ListNotificationPoliciesPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton key="create-policy" onClick={navigateToCreate}>
+          <EuiButton key="create-policy" onClick={navigateToCreate} fill>
             <FormattedMessage
               id="xpack.alertingV2.notificationPoliciesList.createPolicyButton"
               defaultMessage="Create policy"
@@ -328,7 +325,7 @@ export const ListNotificationPoliciesPage = () => {
           </EuiButton>,
         ]}
       />
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
         <EuiSpacer size="m" />
         <EuiFlexItem grow={false}>
           <NotificationPoliciesSearchBar
@@ -359,7 +356,7 @@ export const ListNotificationPoliciesPage = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">
+                <EuiText size="xs">
                   <FormattedMessage
                     id="xpack.alertingV2.notificationPoliciesList.showingLabel"
                     defaultMessage="Showing {rangeBold} of {totalBold}"
@@ -396,27 +393,26 @@ export const ListNotificationPoliciesPage = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiBasicTable
-            items={items}
-            columns={columns}
-            itemId="id"
-            selection={selection}
-            responsiveBreakpoint={false}
-            loading={isLoading}
-            pagination={pagination}
-            sorting={{
-              sort: {
-                field: sortField,
-                direction: sortDirection,
-              },
-            }}
-            onChange={onTableChange}
-            tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
-              defaultMessage: 'Notification Policies',
-            })}
-          />
-        </EuiFlexItem>
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+          itemId="id"
+          selection={selection}
+          loading={isLoading}
+          pagination={pagination}
+          tableLayout="fixed"
+          responsiveBreakpoint={false}
+          sorting={{
+            sort: {
+              field: sortField,
+              direction: sortDirection,
+            },
+          }}
+          onChange={onTableChange}
+          tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
+            defaultMessage: 'Notification Policies',
+          })}
+        />
       </EuiFlexGroup>
 
       {policyToDelete && (
