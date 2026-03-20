@@ -18,6 +18,7 @@ import {
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   CreateNotificationPolicyData,
   NotificationPolicyBulkAction,
@@ -325,7 +326,7 @@ export const ListNotificationPoliciesPage = () => {
           </EuiButton>,
         ]}
       />
-      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiSpacer size="m" />
         <EuiFlexItem grow={false}>
           <NotificationPoliciesSearchBar
@@ -400,8 +401,12 @@ export const ListNotificationPoliciesPage = () => {
           selection={selection}
           loading={isLoading}
           pagination={pagination}
-          tableLayout="fixed"
           responsiveBreakpoint={false}
+          css={css`
+            .euiTableHeaderMobile .euiCheckbox {
+              display: none;
+            }
+          `}
           sorting={{
             sort: {
               field: sortField,
