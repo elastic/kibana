@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { sortBy } from 'lodash';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
@@ -64,6 +65,11 @@ export function useStreamFeaturesTable({
     core: { notifications },
   } = useKibana();
   const { deleteFeature, deleteFeaturesInBulk } = useStreamFeaturesApi(definition);
+
+  const sortedFeatures = useMemo(
+    () => sortBy(features, (f) => (f.title ?? f.id).toLowerCase()),
+    [features]
+  );
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
@@ -216,7 +222,7 @@ export function useStreamFeaturesTable({
     isBulkDeleting,
     // Table config
     columns,
-    items: features,
+    items: sortedFeatures,
     noItemsMessage: NO_FEATURES_MESSAGE,
   };
 }

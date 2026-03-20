@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isEqual } from 'lodash';
+import { isEqual, uniq } from 'lodash';
 import { conditionSchema } from '@kbn/streamlang';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
@@ -72,4 +72,32 @@ export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): bo
 
 export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): boolean {
   return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
+}
+
+const mergeArrays = (a: string[] = [], b: string[] = []) => uniq([...a, ...b]);
+
+export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): BaseFeature {
+  const mergedEvidence = mergeArrays(existing.evidence, incoming.evidence);
+  const mergedEvidenceDocIds = mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids);
+  const mergedTags = mergeArrays(existing.tags, incoming.tags);
+  const mergedMeta = { ...(existing.meta ?? {}), ...(incoming.meta ?? {}) };
+  const mergedProperties = { ...(existing.properties ?? {}), ...(incoming.properties ?? {}) };
+  const confidence = Math.round((existing.confidence + incoming.confidence) / 2);
+  const filter = incoming.filter ?? existing.filter;
+
+  return {
+    id: existing.id,
+    stream_name: existing.stream_name,
+    type: existing.type,
+    subtype: existing.subtype,
+    title: incoming.title,
+    description: incoming.description,
+    properties: mergedProperties,
+    confidence,
+    evidence: mergedEvidence.length > 0 ? mergedEvidence : undefined,
+    evidence_doc_ids: mergedEvidenceDocIds.length > 0 ? mergedEvidenceDocIds : undefined,
+    tags: mergedTags.length > 0 ? mergedTags : undefined,
+    filter,
+    meta: mergedMeta,
+  };
 }
