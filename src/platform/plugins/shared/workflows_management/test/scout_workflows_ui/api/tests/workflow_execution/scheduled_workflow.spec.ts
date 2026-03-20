@@ -66,7 +66,8 @@ steps:
       duration: ${SCHEDULED_WORKFLOW_INTERVAL_SECONDS + 1}s
 `;
 
-spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/258885
+spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 
