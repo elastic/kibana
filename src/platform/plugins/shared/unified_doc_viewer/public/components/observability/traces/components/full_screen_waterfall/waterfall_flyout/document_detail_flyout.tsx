@@ -14,7 +14,7 @@ import { WaterfallFlyout } from '.';
 import { FlyoutContentId } from '../../../../../../analytics/flyout_viewed_event';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { spanFlyoutId, SpanFlyoutContent } from './span_flyout';
-import { logsFlyoutId, LogFlyoutContent } from './logs_flyout';
+import { LogFlyoutContent } from './logs_flyout';
 import {
   useDocumentFlyoutData,
   type DocumentType,
@@ -34,33 +34,29 @@ interface FlyoutConfig {
   render: (params: FlyoutContentProps) => React.ReactNode;
 }
 
-const getFlyoutConfig = (type: DocumentType): FlyoutConfig | undefined => {
-  switch (type) {
-    case spanFlyoutId:
-      return {
-        contentId: FlyoutContentId.SPAN_DETAIL,
-        render: ({ data, dataView, activeSection }) => {
-          if (!data.hit) return null;
+const getFlyoutConfig = (type: DocumentType): FlyoutConfig => {
+  if (type === spanFlyoutId) {
+    return {
+      contentId: FlyoutContentId.SPAN_DETAIL,
+      render: ({ data, dataView, activeSection }) => {
+        if (!data.hit) return null;
 
-          return (
-            <SpanFlyoutContent hit={data.hit} dataView={dataView} activeSection={activeSection} />
-          );
-        },
-      };
-
-    case logsFlyoutId:
-      return {
-        contentId: FlyoutContentId.LOG_DETAIL,
-        render: ({ data }) => {
-          if (!data.hit || !data.logDataView) return null;
-
-          return <LogFlyoutContent hit={data.hit} logDataView={data.logDataView} />;
-        },
-      };
-
-    default:
-      return undefined;
+        return (
+          <SpanFlyoutContent hit={data.hit} dataView={dataView} activeSection={activeSection} />
+        );
+      },
+    };
   }
+
+  // if it's not a span flyout, it's a logs flyout
+  return {
+    contentId: FlyoutContentId.LOG_DETAIL,
+    render: ({ data }) => {
+      if (!data.hit || !data.logDataView) return null;
+
+      return <LogFlyoutContent hit={data.hit} logDataView={data.logDataView} />;
+    },
+  };
 };
 
 export interface DocumentDetailFlyoutProps {
@@ -96,10 +92,10 @@ export function DocumentDetailFlyout({
       loading={data.loading}
       title={data.title}
       dataTestSubj={dataTestSubj}
-      flyoutContentId={flyoutConfig?.contentId}
+      flyoutContentId={flyoutConfig.contentId}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
-      {flyoutConfig?.render({ data, dataView, activeSection })}
+      {flyoutConfig.render({ data, dataView, activeSection })}
     </WaterfallFlyout>
   );
 }

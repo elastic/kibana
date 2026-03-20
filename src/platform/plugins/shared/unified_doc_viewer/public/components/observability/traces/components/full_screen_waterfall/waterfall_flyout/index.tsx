@@ -78,7 +78,7 @@ export interface Props {
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
-  flyoutContentId?: FlyoutContentId;
+  flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
 }
 
