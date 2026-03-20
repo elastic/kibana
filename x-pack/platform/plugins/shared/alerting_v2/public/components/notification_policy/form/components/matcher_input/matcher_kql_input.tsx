@@ -54,6 +54,7 @@ export const MatcherInput = ({
       indexPatterns={syntheticDataView}
       query={query}
       onChange={handleChange}
+      disableAutoFocus
       disableLanguageSwitcher={true}
       bubbleSubmitEvent={false}
       isClearable
