@@ -107,10 +107,6 @@ interface Range {
   endColumn: number;
 }
 
-interface IDisposable {
-  dispose: () => void;
-}
-
 const theme = {
   base: 'vs' as const,
   inherit: false,
