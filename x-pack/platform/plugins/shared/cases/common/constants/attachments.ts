@@ -21,14 +21,6 @@ export const LEGACY_ATTACHMENT_TYPES = new Set([
 export const UNIFIED_ATTACHMENT_TYPES = new Set([COMMENT_ATTACHMENT_TYPE]);
 
 /**
- * Valid attachment types (legacy and unified).
- */
-export const VALID_ATTACHMENT_TYPES = new Set([
-  ...LEGACY_ATTACHMENT_TYPES,
-  ...UNIFIED_ATTACHMENT_TYPES,
-]);
-
-/**
  * Mapping from legacy attachment type names to unified names.
  */
 export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
@@ -46,7 +38,4 @@ export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
  * Attachment type identifiers that are migrated to unified read/write behavior.
  * Include both legacy and unified names while migration is in progress.
  */
-export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
-  AttachmentType.user,
-  COMMENT_ATTACHMENT_TYPE,
-]);
+export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([COMMENT_ATTACHMENT_TYPE]);

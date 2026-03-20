@@ -12,11 +12,8 @@ import {
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
 
-export const isMigratedAttachmentType = (type?: string): boolean => {
-  if (typeof type !== 'string') {
-    return false;
-  }
-  return MIGRATED_ATTACHMENT_TYPES.has(type);
+export const isMigratedAttachmentType = (type: string): boolean => {
+  return MIGRATED_ATTACHMENT_TYPES.has(toUnifiedAttachmentType(type));
 };
 
 export const toLegacyAttachmentType = (type?: string): string | undefined => {
