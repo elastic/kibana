@@ -89,7 +89,7 @@ export const TableFieldValueCell = memo(
                 <OverflowField value={value} />
               ) : isFlyoutLink({ field: data.field, ruleId, scopeId }) ? (
                 <PreviewLink
-                  entityIdentifiers={{ [data.field]: value }}
+                  identityFields={{ [data.field]: value }}
                   scopeId={scopeId}
                   ruleId={ruleId}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}

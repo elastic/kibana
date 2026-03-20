@@ -18,7 +18,7 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from './use_non_closed_alerts';
 import { useHasRiskScore } from './use_risk_score_data';
-import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../flyout/document_details/shared/utils';
 import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../common/lib/kibana';
@@ -26,44 +26,48 @@ import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use
 import { getRiskFromEntityRecord } from '../../flyout/entity_details/shared/entity_store_risk_utils';
 
 export const useNavigateEntityInsight = ({
-  entityIdentifiers,
+  identityFields,
   subTab,
   queryIdExtension,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   subTab: string;
   queryIdExtension: string;
 }) => {
-  const isHostNameField = 'host.name' in entityIdentifiers;
+  const isHostNameField = 'host.name' in identityFields;
   const { to, from } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    identityFields,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,
   });
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
 
   const primaryField = useMemo(() => {
-    if (entityIdentifiers['host.name']) return 'host.name';
-    if (entityIdentifiers['user.name']) return 'user.name';
-    return Object.keys(entityIdentifiers)[0] || '';
-  }, [entityIdentifiers]);
+    if (identityFields['host.name']) return 'host.name';
+    if (identityFields['user.name']) return 'user.name';
+    return Object.keys(identityFields)[0] || '';
+  }, [identityFields]);
 
   const value = useMemo(() => {
-    return entityIdentifiers[primaryField] || Object.values(entityIdentifiers)[0] || '';
-  }, [entityIdentifiers, primaryField]);
+    return identityFields[primaryField] || Object.values(identityFields)[0] || '';
+  }, [identityFields, primaryField]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const entityType = primaryField === 'host.name' ? 'host' : 'user';
 
   const entityFromStore = useEntityFromStore({
-    entityIdentifiers,
+    entityId:
+      entityType === 'host'
+        ? identityFields['host.entity.id']
+        : identityFields['user.entity.id'],
+    identityFields,
     entityType,
     skip: !entityStoreV2Enabled,
   });
@@ -81,7 +85,7 @@ export const useNavigateEntityInsight = ({
 
   const hasRiskScore = entityStoreV2Enabled ? hasRiskScoreFromStore : hasRiskScoreFromSearch;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
   const { openLeftPanel } = useExpandableFlyoutApi();
 

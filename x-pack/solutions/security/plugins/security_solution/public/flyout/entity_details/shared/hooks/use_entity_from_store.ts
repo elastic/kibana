@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import {
@@ -23,10 +24,25 @@ import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 
 const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
-const getStableEntityIdentifiersKey = (identifiers: Record<string, string>): string =>
-  JSON.stringify(
-    Object.fromEntries(Object.entries(identifiers).sort(([a], [b]) => a.localeCompare(b)))
+const entityIdFilter = (id: string) =>
+  JSON.stringify({
+    bool: { filter: [{ term: { 'entity.id': id } }] },
+  });
+
+function serializeIdentityFieldsForQueryKey(
+  fields: Record<string, string> | null | undefined
+): string {
+  if (fields == null || Object.keys(fields).length === 0) {
+    return '';
+  }
+  const sortedKeys = Object.keys(fields).sort();
+  return JSON.stringify(
+    sortedKeys.reduce<Record<string, string>>((acc, key) => {
+      acc[key] = fields[key];
+      return acc;
+    }, {})
   );
+}
 
 export function mapHostEntityToHostItem(entity: HostEntity): HostItem {
   const hostData = entity.host;
@@ -63,8 +79,15 @@ export function mapUserEntityToUserItem(entity: UserEntity): UserItem {
 }
 
 export interface UseEntityFromStoreParams {
-  entityIdentifiers: Record<string, string>;
-  entityType: 'host' | 'user';
+  /**
+   * Canonical entity store v2 id (`entity.id` on unified latest index). When set, the hook queries by this id.
+   */
+  entityId?: string;
+  /**
+   * When `entityId` is not set, identity field–value pairs for legacy EUID / v1 resolution (e.g. `host.name`, `user.name`, `service.name`).
+   */
+  identityFields?: Record<string, string> | null;
+  entityType: 'host' | 'user' | 'service';
   skip: boolean;
 }
 
@@ -85,7 +108,7 @@ export interface EntityFromStoreResult<T> {
 export function useEntityFromStore(
   params: UseEntityFromStoreParams
 ): EntityFromStoreResult<HostItem | UserItem> {
-  const { entityIdentifiers, entityType, skip } = params;
+  const { entityId, identityFields, entityType, skip } = params;
   const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesList } = useEntityAnalyticsRoutes();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -93,27 +116,48 @@ export function useEntityFromStore(
     services: { http },
   } = useKibana();
 
-  const hasValidIdentifiers = Object.keys(entityIdentifiers).length > 0;
-  const filter = euidApi?.euid
-    ? euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers)
-    : undefined;
+  const identityDocument = useMemo(() => {
+    if (identityFields == null || Object.keys(identityFields).length === 0) {
+      return {};
+    }
+    return { ...identityFields };
+  }, [identityFields]);
 
-  const stableIdentifiersKey = getStableEntityIdentifiersKey(entityIdentifiers);
+  const documentFilter = useMemo(
+    () =>
+      euidApi?.euid
+        ? euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, identityDocument)
+        : undefined,
+    [euidApi?.euid, entityType, identityDocument]
+  );
+
+  const stableQueryKey = useMemo(
+    () => entityId ?? serializeIdentityFieldsForQueryKey(identityFields),
+    [entityId, identityFields]
+  );
+
   const queryResult = useQuery({
     queryKey: [
       ENTITY_FROM_STORE_QUERY_KEY,
       entityType,
-      stableIdentifiersKey,
+      stableQueryKey,
       skip,
       entityStoreV2Enabled,
+      entityId ?? '',
     ],
     queryFn: async ({ signal }) => {
       if (entityStoreV2Enabled) {
+        let filterQuery: string | undefined;
+        if (entityId) {
+          filterQuery = entityIdFilter(entityId);
+        } else if (documentFilter) {
+          filterQuery = JSON.stringify(documentFilter);
+        }
         return searchEntitiesFromEntityStore(
           http,
           {
             entityTypes: [entityType],
-            filterQuery: filter ? JSON.stringify(filter) : undefined,
+            filterQuery,
             page: 1,
             perPage: 1,
             sortField: '@timestamp',
@@ -126,13 +170,13 @@ export function useEntityFromStore(
         signal,
         params: {
           entityTypes: [entityType],
-          filterQuery: filter ? JSON.stringify(filter) : undefined,
+          filterQuery: documentFilter ? JSON.stringify(documentFilter) : undefined,
           page: 1,
           perPage: 1,
         },
       });
     },
-    enabled: !skip && hasValidIdentifiers && !!filter,
+    enabled: !skip && (Boolean(entityId) || Boolean(documentFilter)),
   });
 
   const { data, isLoading, error, refetch } = queryResult;

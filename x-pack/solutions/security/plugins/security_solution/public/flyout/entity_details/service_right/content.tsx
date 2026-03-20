@@ -18,12 +18,12 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
 interface ServicePanelContentProps {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   serviceName: string;
   observedService: ObservedEntityData<ServiceItem>;
   riskScoreState: RiskScoreState<EntityType.service>;
@@ -36,7 +36,7 @@ interface ServicePanelContentProps {
 
 export const ServicePanelContent = ({
   serviceName,
-  entityIdentifiers,
+  identityFields,
   observedService,
   riskScoreState,
   recalculatingScore,
@@ -63,7 +63,7 @@ export const ServicePanelContent = ({
         </>
       )}
       <AssetCriticalityAccordion
-        entity={{ identifiers: entityIdentifiers, name: serviceName, type: EntityType.service }}
+        entity={{ identifiers: identityFields, name: serviceName, type: EntityType.service }}
         onChange={onAssetCriticalityChange}
       />
       <ObservedEntity

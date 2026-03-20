@@ -29,7 +29,7 @@ const UserNameComponent: React.FC<Props> = ({ userName, scopeId, contextId }) =>
         right: {
           id: UserPanelKey,
           params: {
-            entityIdentifiers: { 'user.name': userName },
+            userName,
             contextID: contextId,
             scopeId,
           },

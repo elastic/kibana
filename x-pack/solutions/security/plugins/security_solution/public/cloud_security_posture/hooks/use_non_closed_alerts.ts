@@ -9,15 +9,15 @@ import { FILTER_CLOSED } from '@kbn/securitysolution-data-table/common/types';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
-import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../flyout/document_details/shared/utils';
 
 export const useNonClosedAlerts = ({
-  entityIdentifiers,
+  identityFields,
   to,
   from,
   queryId,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   to: string;
   from: string;
   queryId: string;
@@ -25,7 +25,7 @@ export const useNonClosedAlerts = ({
   const { signalIndexName } = useSignalIndex();
 
   const { items: alertsData } = useAlertsByStatus({
-    entityIdentifiers,
+    identityFields,
     signalIndexName,
     queryId,
     to,

@@ -11,7 +11,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';
@@ -29,19 +28,20 @@ import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../inspect';
 import { LastUpdatedAt } from '../last_updated_at';
 import { SecuritySolutionLinkAnchor } from '../links';
 import { useLocalStorage } from '../local_storage';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
+interface EntityFilter {
+  field: string;
+  value: string;
+  entityType?: string;
+}
 interface AlertCountByStatusProps {
-  entityIdentifiers?: EntityIdentifiers;
+  entityFilter: EntityFilter;
   additionalFilters?: ESBoolQuery[];
   signalIndexName: string | null;
-  entityFilter?: Filter;
-  /** When true (e.g. from explore pages), entity store filters are not applied; only user.name or host.name term filter is used */
-  isExploreContext?: boolean;
 }
 
 interface StatusSelection {
@@ -56,78 +56,6 @@ const STATUSES = ['open', 'acknowledged', 'closed'] as const;
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
 const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
 
-/**
- * Builds Filter[] from entityIdentifiers for timeline navigation following entity store EUID priority logic.
- * Pass api from useEntityStoreEuidApi(); when null, returns [].
- */
-const buildTimelineFiltersFromEntityIdentifiers = (
-  entityIdentifiers: EntityIdentifiers,
-  api: {
-    buildEntityFiltersFromEntityIdentifiers: (ids: Record<string, string>) => unknown[];
-  } | null
-): Filter[] => {
-  if (!api) return [];
-  const esFilters = api.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
-  // Convert ES query filters to timeline Filter format
-  return esFilters
-    .filter(
-      (filter): filter is { term: Record<string, string> } =>
-        typeof filter === 'object' &&
-        filter !== null &&
-        'term' in filter &&
-        filter.term !== undefined
-    )
-    .flatMap((filter) => {
-      return Object.entries(filter.term).map(([field, value]) => ({
-        field,
-        value: String(value),
-      }));
-    });
-};
-
-/**
- * Normalizes entityIdentifiers or legacy entityFilter into a single EntityIdentifiers record.
- * Prefers entityIdentifiers when both are provided.
- */
-const resolveEntityIdentifiers = (
-  entityIdentifiers?: EntityIdentifiers | null,
-  entityFilter?: Filter | null
-): EntityIdentifiers => {
-  if (entityFilter != null) {
-    const value =
-      typeof entityFilter.value === 'string'
-        ? entityFilter.value
-        : Array.isArray(entityFilter.value)
-        ? entityFilter.value[0]
-        : '';
-    return { [entityFilter.field]: String(value) };
-  }
-  if (entityIdentifiers != null && Object.keys(entityIdentifiers).length > 0) {
-    return entityIdentifiers;
-  }
-  return {};
-};
-
-/**
- * Gets a unique key from entityIdentifiers for use in localStorage and queryId.
- * Uses the highest priority field available.
- */
-const getEntityKey = (entityIdentifiers: EntityIdentifiers): string => {
-  if (entityIdentifiers['host.entity.id']) return 'host.entity.id';
-  if (entityIdentifiers['host.id']) return 'host.id';
-  if (entityIdentifiers['host.name']) return 'host.name';
-  if (entityIdentifiers['host.hostname']) return 'host.hostname';
-  if (entityIdentifiers['user.entity.id']) return 'user.entity.id';
-  if (entityIdentifiers['user.id']) return 'user.id';
-  if (entityIdentifiers['user.email']) return 'user.email';
-  if (entityIdentifiers['user.name']) return 'user.name';
-  if (entityIdentifiers['source.ip']) return 'source.ip';
-  if (entityIdentifiers['destination.ip']) return 'destination.ip';
-  // Fallback: use the first key
-  const keys = Object.keys(entityIdentifiers);
-  return keys.length > 0 ? keys[0] : 'unknown';
-};
-
 const StyledEuiPanel = euiStyled(EuiPanel)`
   display: flex;
   flex-direction: column;
@@ -137,27 +65,17 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
-  ({
-    entityIdentifiers,
-    signalIndexName,
-    additionalFilters,
-    entityFilter,
-    isExploreContext = false,
-  }: AlertCountByStatusProps) => {
-    const entityIdentifiersResolved = useMemo(
-      () => resolveEntityIdentifiers(entityIdentifiers, entityFilter),
-      [entityIdentifiers, entityFilter]
-    );
-    const euidApi = useEntityStoreEuidApi();
-    const entityKey = getEntityKey(entityIdentifiersResolved);
-    const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${entityKey}`;
+  ({ entityFilter, signalIndexName, additionalFilters }: AlertCountByStatusProps) => {
+    const { field, value, entityType } = entityFilter;
+
+    const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
     const { openTimelineWithFilters } = useNavigateToTimeline();
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
-        [entityKey]: ['open'],
+        [field]: ['open'],
       },
       key: LOCAL_STORAGE_KEY,
       isInvalidDefault: (valueFromStorage) => {
@@ -165,18 +83,13 @@ export const AlertCountByRuleByStatus = React.memo(
       },
     });
 
-    const entityTimelineFilters = useMemo(
-      () => buildTimelineFiltersFromEntityIdentifiers(entityIdentifiersResolved, euidApi),
-      [entityIdentifiersResolved, euidApi]
-    );
-
     const columns = useMemo(() => {
       return getTableColumns((ruleName: string) => {
         const timelineFilters: Filter[][] = [];
 
-        for (const status of selectedStatusesByField[entityKey] || ['open']) {
+        for (const status of selectedStatusesByField[field]) {
           timelineFilters.push([
-            ...entityTimelineFilters,
+            entityFilter,
             { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
             {
               field: SIGNAL_STATUS_FIELD_NAME,
@@ -186,26 +99,27 @@ export const AlertCountByRuleByStatus = React.memo(
         }
         openTimelineWithFilters(timelineFilters);
       });
-    }, [entityTimelineFilters, entityKey, openTimelineWithFilters, selectedStatusesByField]);
+    }, [entityFilter, field, openTimelineWithFilters, selectedStatusesByField]);
 
     const updateSelection = useCallback(
       (selection: Status[]) => {
         setSelectedStatusesByField({
           ...selectedStatusesByField,
-          [entityKey]: selection,
+          [field]: selection,
         });
       },
-      [entityKey, selectedStatusesByField, setSelectedStatusesByField]
+      [field, selectedStatusesByField, setSelectedStatusesByField]
     );
 
     const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
       additionalFilters,
-      entityIdentifiers: entityIdentifiersResolved,
+      field,
+      value,
+      entityType,
       queryId,
-      statuses: (selectedStatusesByField[entityKey] || ['open']) as Status[],
+      statuses: selectedStatusesByField[field] as Status[],
       skip: !toggleStatus,
       signalIndexName,
-      isExploreContext,
     });
 
     return (
@@ -223,7 +137,7 @@ export const AlertCountByRuleByStatus = React.memo(
               <MultiSelectPopover
                 title={i18n.Status}
                 allItems={STATUSES}
-                selectedItems={selectedStatusesByField[entityKey] || ['open']}
+                selectedItems={selectedStatusesByField[field] || ['open']}
                 onSelectedItemsChange={(selectedItems) =>
                   updateSelection(selectedItems as Status[])
                 }
@@ -235,10 +149,10 @@ export const AlertCountByRuleByStatus = React.memo(
                 <EuiBasicTable
                   className="eui-yScroll"
                   data-test-subj="alertCountByRuleTable"
-                  tableCaption={i18n.ALERTS_BY_RULE}
                   columns={columns}
                   items={items}
                   loading={isLoading}
+                  tableCaption={i18n.ALERTS_BY_RULE}
                   noItemsMessage={
                     <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
                   }

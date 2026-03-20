@@ -16,11 +16,11 @@ import type {
 } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   path?: PanelPath;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
@@ -34,7 +34,7 @@ export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'use
 
 export const UserDetailsPanel = ({
   isRiskScoreExist,
-  entityIdentifiers,
+  identityFields,
   path,
   scopeId,
   hasMisconfigurationFindings,
@@ -42,11 +42,11 @@ export const UserDetailsPanel = ({
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser();
 
-  // Extract name from entityIdentifiers
-  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  // Extract name from identityFields
+  // Priority: identityFields['user.name'] > identityFields[first key]
   const name = useMemo(() => {
-    return entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '';
-  }, [entityIdentifiers]);
+    return identityFields['user.name'] || Object.values(identityFields)[0] || '';
+  }, [identityFields]);
 
   const tabs = useTabs(
     managedUser.data,
@@ -55,12 +55,12 @@ export const UserDetailsPanel = ({
     scopeId,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    entityIdentifiers
+    identityFields
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
-    entityIdentifiers,
+    identityFields,
     tabs,
     path,
     scopeId,
@@ -87,7 +87,7 @@ export const UserDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  entityIdentifiers: EntityIdentifiers,
+  identityFields: IdentityFields,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
   scopeId: string,
@@ -107,7 +107,7 @@ const useSelectedTab = (
     openLeftPanel({
       id: UserDetailsPanelKey,
       params: {
-        entityIdentifiers,
+        identityFields,
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasNonClosedAlerts,

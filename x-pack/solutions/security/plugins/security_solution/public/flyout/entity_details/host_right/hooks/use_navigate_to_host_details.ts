@@ -15,7 +15,8 @@ import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
-  entityIdentifiers: Record<string, string>;
+  hostName: string;
+  entityId?: string;
   scopeId: string;
   isRiskScoreExist: boolean;
   hasMisconfigurationFindings: boolean;
@@ -26,7 +27,8 @@ interface UseNavigateToHostDetailsParams {
 }
 
 export const useNavigateToHostDetails = ({
-  entityIdentifiers,
+  hostName,
+  entityId,
   scopeId,
   isRiskScoreExist,
   hasMisconfigurationFindings,
@@ -47,7 +49,8 @@ export const useNavigateToHostDetails = ({
       const left = {
         id: HostDetailsPanelKey,
         params: {
-          entityIdentifiers,
+          entityId,
+          hostName,
           scopeId,
           isRiskScoreExist,
           path,
@@ -62,7 +65,8 @@ export const useNavigateToHostDetails = ({
         params: {
           contextID,
           scopeId,
-          entityIdentifiers,
+          hostName,
+          entityId,
         },
       };
 
@@ -76,7 +80,8 @@ export const useNavigateToHostDetails = ({
       isPreviewMode,
       openFlyout,
       openLeftPanel,
-      entityIdentifiers,
+      hostName,
+      entityId,
       scopeId,
       isRiskScoreExist,
       hasMisconfigurationFindings,

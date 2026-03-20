@@ -6,19 +6,19 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityIdentifiers } from '../utils';
+import type { IdentityFields } from '../utils';
 import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
-import { getHostEntityIdentifiers, getUserEntityIdentifiers } from '../utils';
+import { getHostIdentityFields, getUserIdentityFields } from '../utils';
 import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 const filterEntityIdentifiersByPrefix = (
-  identifiers: EntityIdentifiers,
+  identifiers: IdentityFields,
   prefix: 'host.' | 'user.'
-): EntityIdentifiers =>
+): IdentityFields =>
   Object.fromEntries(Object.entries(identifiers).filter(([key]) => key.startsWith(prefix)));
 
 /**
@@ -47,12 +47,12 @@ export const convertHighlightedFieldsToTableRow = (
 
     const rawEntityIdentifiers =
       fieldName === HOST_NAME_FIELD_NAME
-        ? getHostEntityIdentifiers({} as never, getFieldsData)
+        ? getHostIdentityFields({} as never, getFieldsData)
         : fieldName === USER_NAME_FIELD_NAME
-        ? getUserEntityIdentifiers({} as never, getFieldsData)
+        ? getUserIdentityFields({} as never, getFieldsData)
         : null;
 
-    const entityIdentifiers =
+    const identityFields =
       rawEntityIdentifiers && fieldName === HOST_NAME_FIELD_NAME
         ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'host.')
         : rawEntityIdentifiers && fieldName === USER_NAME_FIELD_NAME
@@ -68,7 +68,7 @@ export const convertHighlightedFieldsToTableRow = (
         scopeId,
         showCellActions,
         ancestorsIndexName,
-        ...(entityIdentifiers ? { entityIdentifiers } : {}),
+        ...(identityFields ? { identityFields } : {}),
       },
     };
   });

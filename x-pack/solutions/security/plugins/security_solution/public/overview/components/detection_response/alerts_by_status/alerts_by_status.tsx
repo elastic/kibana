@@ -74,21 +74,21 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
   applyGlobalQueriesAndFilters?: boolean;
-  entityIdentifiers?: Record<string, string>;
+  identityFields?: Record<string, string>;
   entityFilter?: Filter;
   signalIndexName: string | null;
 }
 
 /**
- * Normalizes entityIdentifiers or legacy entityFilter into a single Record for queries and UI.
- * Prefers entityIdentifiers when both are provided.
+ * Normalizes identityFields or legacy entityFilter into a single Record for queries and UI.
+ * Prefers identityFields when both are provided.
  */
 const resolveEntityIdentifiers = (
-  entityIdentifiers?: Record<string, string> | null,
+  identityFields?: Record<string, string> | null,
   entityFilter?: Filter | null
 ): Record<string, string> | undefined => {
-  if (entityIdentifiers != null && Object.keys(entityIdentifiers).length > 0) {
-    return entityIdentifiers;
+  if (identityFields != null && Object.keys(identityFields).length > 0) {
+    return identityFields;
   }
   if (entityFilter != null) {
     const value =
@@ -121,13 +121,13 @@ export const AlertsByStatus = ({
   additionalFilters,
   applyGlobalQueriesAndFilters = true,
   signalIndexName,
-  entityIdentifiers,
+  identityFields,
   entityFilter,
 }: AlertsByStatusProps) => {
   const { euiTheme } = useEuiTheme();
   const entityIdentifiersResolved = useMemo(
-    () => resolveEntityIdentifiers(entityIdentifiers, entityFilter),
-    [entityIdentifiers, entityFilter]
+    () => resolveEntityIdentifiers(identityFields, entityFilter),
+    [identityFields, entityFilter]
   );
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openTimelineWithFilters } = useNavigateToTimeline();
@@ -173,7 +173,7 @@ export const AlertsByStatus = ({
     updatedAt,
   } = useAlertsByStatus({
     additionalFilters,
-    entityIdentifiers: entityIdentifiersResolved,
+    identityFields: entityIdentifiersResolved,
     signalIndexName,
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,

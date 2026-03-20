@@ -48,7 +48,7 @@ describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {
     const { getByTestId } = render(
       <HostDetailsPanel
-        entityIdentifiers={defaultEntityIdentifiers}
+        identityFields={defaultEntityIdentifiers}
         isRiskScoreExist={true}
         scopeId={'scopeId'}
       />,
@@ -62,7 +62,7 @@ describe('HostDetailsPanel', () => {
   it("doesn't render risk inputs panel when no alerts ids are provided", () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
-        entityIdentifiers={defaultEntityIdentifiers}
+        identityFields={defaultEntityIdentifiers}
         isRiskScoreExist={false}
         scopeId={'scopeId'}
       />,
@@ -76,7 +76,7 @@ describe('HostDetailsPanel', () => {
   it("doesn't render insights panel when there no misconfiguration findings", () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
-        entityIdentifiers={defaultEntityIdentifiers}
+        identityFields={defaultEntityIdentifiers}
         isRiskScoreExist={false}
         scopeId={'scopeId'}
         hasMisconfigurationFindings={false}
@@ -91,7 +91,7 @@ describe('HostDetailsPanel', () => {
   it('render insights panel when there are misconfiguration findings', () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
-        entityIdentifiers={defaultEntityIdentifiers}
+        identityFields={defaultEntityIdentifiers}
         isRiskScoreExist={false}
         scopeId={'scopeId'}
         hasMisconfigurationFindings={true}

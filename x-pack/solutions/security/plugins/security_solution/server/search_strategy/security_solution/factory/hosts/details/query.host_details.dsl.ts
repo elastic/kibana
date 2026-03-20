@@ -7,15 +7,12 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { euid } from '@kbn/entity-store/common';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
 export const buildHostDetailsQuery = ({
   hostName,
-  entityIdentifiers,
-  isExploreContext,
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
@@ -24,19 +21,8 @@ export const buildHostDetailsQuery = ({
     ...cloudFieldsMap,
   });
 
-  const hostNameValue =
-    hostName ?? entityIdentifiers?.['host.name'] ?? Object.values(entityIdentifiers ?? {})[0] ?? '';
-  const entityFilters =
-    isExploreContext && hostNameValue
-      ? { term: { 'host.name': hostNameValue } }
-      : entityIdentifiers && Object.keys(entityIdentifiers).length > 0
-      ? euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers, {
-          includeEuidSourceFilter: false,
-        })
-      : { term: { 'host.name': hostName } };
-
   const filter = [
-    ...(entityFilters ? [entityFilters] : []),
+    { term: { 'host.name': hostName } },
     {
       range: {
         '@timestamp': {

@@ -18,7 +18,7 @@ import { RulePanelKey } from '../../rule_details/right';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -28,8 +28,21 @@ jest.mock('../../../common/lib/kibana', () => {
         telemetry: mockedTelemetry,
       },
     }),
+    useUiSetting: () => false,
   };
 });
+
+jest.mock('../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -45,14 +58,14 @@ const renderFlyoutLink = (
   value: string,
   dataTestSuj?: string,
   isFlyoutOpen?: boolean,
-  entityIdentifiers?: EntityIdentifiers
+  identityFields?: IdentityFields
 ) =>
   render(
     <TestProviders>
       <FlyoutLink
         field={field}
         value={value}
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         data-test-subj={dataTestSuj}
         scopeId={'scopeId'}
         ruleId={'ruleId'}
@@ -124,10 +137,7 @@ describe('<FlyoutLink />', () => {
             contextID: 'scopeId',
             hostName: 'host',
             scopeId: 'scopeId',
-            entityIdentifiers: {
-              'host.name': 'host',
-              'host.hostname': 'hostname',
-            },
+            entityId: undefined,
           },
         },
       });
@@ -144,7 +154,7 @@ describe('<FlyoutLink />', () => {
             contextID: 'scopeId',
             userName: 'user',
             scopeId: 'scopeId',
-            entityIdentifiers: undefined,
+            entityId: undefined,
           },
         },
       });

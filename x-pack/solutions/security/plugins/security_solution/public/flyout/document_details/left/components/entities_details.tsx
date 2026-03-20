@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getField, getUserEntityIdentifiers, getHostEntityIdentifiers } from '../../shared/utils';
+import { getField, getUserIdentityFields, getHostIdentityFields } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
@@ -26,17 +26,19 @@ export const EntitiesDetails: React.FC = () => {
   const { getFieldsData, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const timestamp = getField(getFieldsData('@timestamp'));
 
-  const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
-  const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
+  const userEntityIdentifiers = getUserIdentityFields(dataAsNestedObject, getFieldsData);
+  const hostEntityIdentifiers = getHostIdentityFields(dataAsNestedObject, getFieldsData);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const userEntityFromStore = useEntityFromStore({
-    entityIdentifiers: userEntityIdentifiers ?? {},
+    entityId: userEntityIdentifiers?.['user.entity.id'],
+    identityFields: userEntityIdentifiers ?? undefined,
     entityType: 'user',
     skip: !userEntityIdentifiers || !entityStoreV2Enabled,
   });
   const hostEntityFromStore = useEntityFromStore({
-    entityIdentifiers: hostEntityIdentifiers ?? {},
+    entityId: hostEntityIdentifiers?.['host.entity.id'],
+    identityFields: hostEntityIdentifiers ?? undefined,
     entityType: 'host',
     skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
   });
@@ -67,7 +69,7 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                entityIdentifiers={userEntityIdentifiers}
+                identityFields={userEntityIdentifiers}
                 timestamp={timestamp}
                 scopeId={scopeId}
               />
@@ -86,7 +88,9 @@ export const EntitiesDetails: React.FC = () => {
               <EuiSpacer size="s" />
 
               <HostDetails
-                entityIdentifiers={hostEntityIdentifiers}
+                hostName={
+                  hostEntityIdentifiers['host.name'] ?? Object.values(hostEntityIdentifiers)[0]
+                }
                 timestamp={timestamp}
                 scopeId={scopeId}
                 hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}

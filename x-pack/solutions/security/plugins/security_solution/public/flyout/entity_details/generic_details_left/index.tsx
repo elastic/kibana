@@ -21,10 +21,10 @@ import {
   getFieldsTableTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 interface BaseGenericEntityDetailsPanelProps {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
@@ -74,7 +74,7 @@ const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelT
 
 export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
   const {
-    entityIdentifiers,
+    identityFields,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
@@ -92,7 +92,7 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
         ? [
             getInsightsInputTab({
-              entityIdentifiers: entityIdentifiers ?? {},
+              identityFields: identityFields ?? {},
               scopeId,
             }),
           ]
@@ -108,7 +108,7 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    entityIdentifiers,
+    identityFields,
     scopeId,
     source,
   ]);

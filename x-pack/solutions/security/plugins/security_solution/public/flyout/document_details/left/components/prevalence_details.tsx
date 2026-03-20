@@ -59,8 +59,8 @@ import { IS_OPERATOR } from '../../../../../common/types';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getField, getHostEntityIdentifiers, getUserEntityIdentifiers } from '../../shared/utils';
-import type { EntityIdentifiers } from '../../shared/utils';
+import { getField, getHostIdentityFields, getUserIdentityFields } from '../../shared/utils';
+import type { IdentityFields } from '../../shared/utils';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
@@ -111,12 +111,12 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    * Host entity identifiers from the current document (for EUID / entity store).
    * Used when the prevalence row value matches this document's host so the flyout gets full identifiers.
    */
-  documentHostEntityIdentifiers?: EntityIdentifiers | null;
+  documentHostEntityIdentifiers?: IdentityFields | null;
   /**
    * User entity identifiers from the current document (for EUID / entity store).
    * Used when the prevalence row value matches this document's user so the flyout gets full identifiers.
    */
-  documentUserEntityIdentifiers?: EntityIdentifiers | null;
+  documentUserEntityIdentifiers?: IdentityFields | null;
   /**
    * host.name from the current document, used to match prevalence row value for enrichment.
    */
@@ -151,7 +151,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
         {data.values.map((value) => {
-          const entityIdentifiers: EntityIdentifiers =
+          const linkIdentityFields: IdentityFields =
             data.field === 'host.name' &&
             value === data.documentHostName &&
             data.documentHostEntityIdentifiers
@@ -165,7 +165,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
             <EuiFlexItem key={value}>
               <CellActions field={data.field} value={value}>
                 <PreviewLink
-                  entityIdentifiers={entityIdentifiers}
+                  identityFields={linkIdentityFields}
                   scopeId={data.scopeId}
                   preferredField={
                     data.field === 'host.name' || data.field === 'user.name'
@@ -469,11 +469,11 @@ export const PrevalenceDetails: React.FC = () => {
   });
 
   const documentHostEntityIdentifiers = useMemo(
-    () => (dataAsNestedObject ? getHostEntityIdentifiers(dataAsNestedObject, getFieldsData) : null),
+    () => (dataAsNestedObject ? getHostIdentityFields(dataAsNestedObject, getFieldsData) : null),
     [dataAsNestedObject, getFieldsData]
   );
   const documentUserEntityIdentifiers = useMemo(
-    () => (dataAsNestedObject ? getUserEntityIdentifiers(dataAsNestedObject, getFieldsData) : null),
+    () => (dataAsNestedObject ? getUserIdentityFields(dataAsNestedObject, getFieldsData) : null),
     [dataAsNestedObject, getFieldsData]
   );
   const documentHostName = useMemo(() => getField(getFieldsData('host.name')), [getFieldsData]);

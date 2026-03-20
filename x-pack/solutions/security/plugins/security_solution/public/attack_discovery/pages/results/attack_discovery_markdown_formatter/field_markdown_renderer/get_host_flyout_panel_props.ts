@@ -13,7 +13,7 @@ const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
-  entityIdentifiers: Record<string, string>;
+  hostName: string;
 }
 
 interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -26,14 +26,14 @@ export const isHostName = (fieldName: string) =>
 
 export const getHostFlyoutPanelProps = ({
   contextId,
-  entityIdentifiers,
+  hostName,
 }: {
   contextId: string;
-  entityIdentifiers: Record<string, string>;
+  hostName: string;
 }): FlyoutPanelProps => ({
   id: HostPanelKey,
   params: {
-    entityIdentifiers,
+    hostName,
     contextID: contextId,
     scopeId: TableId.alertsOnAlertsPage,
   },

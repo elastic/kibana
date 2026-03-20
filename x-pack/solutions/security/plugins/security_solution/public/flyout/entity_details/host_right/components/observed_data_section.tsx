@@ -27,19 +27,19 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
-import type { EntityIdentifiers } from '../../../document_details/shared/utils';
+import type { IdentityFields } from '../../../document_details/shared/utils';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 export const ObservedDataSection = memo(
   ({
-    entityIdentifiers,
+    identityFields,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
-    entityIdentifiers: EntityIdentifiers;
+    identityFields: IdentityFields;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -124,7 +124,7 @@ export const ObservedDataSection = memo(
             <EuiLoadingSpinner data-test-subj="observedDataSectionLoadingSpinner" />
           ) : (
             <ObservedDataSectionContent
-              entityIdentifiers={entityIdentifiers}
+              identityFields={identityFields}
               observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
@@ -140,13 +140,13 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 
 const ObservedDataSectionContent = memo(
   ({
-    entityIdentifiers,
+    identityFields,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
-    entityIdentifiers: EntityIdentifiers;
+    identityFields: IdentityFields;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;

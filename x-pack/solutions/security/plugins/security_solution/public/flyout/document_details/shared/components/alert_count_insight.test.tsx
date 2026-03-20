@@ -68,7 +68,7 @@ const renderAlertCountInsight = () => {
   return render(
     <TestProviders>
       <AlertCountInsight
-        entityIdentifiers={{ 'host.name': name }}
+        identityFields={{ 'host.name': name }}
         data-test-subj={testId}
         openDetailsPanel={openDetailsPanel}
       />

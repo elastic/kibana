@@ -14,7 +14,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
-import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../flyout/document_details/shared/utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
@@ -33,11 +33,11 @@ export type CloudPostureEntityIdentifier =
   | 'related.entity'; // related.entity is not an entity identifier field, but it includes entity ids which we use to filter for related entities
 
 export const EntityInsight = <T,>({
-  entityIdentifiers,
+  identityFields,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
@@ -46,19 +46,19 @@ export const EntityInsight = <T,>({
   const insightContent: React.ReactElement[] = [];
 
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
 
-  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && entityIdentifiers !== undefined;
+  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && identityFields !== undefined;
 
   const { to, from } = useGlobalTime();
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
-    entityIdentifiers,
+    identityFields,
     to,
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
@@ -81,7 +81,7 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <MisconfigurationsPreview
-          entityIdentifiers={entityIdentifiers}
+          identityFields={identityFields}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />
@@ -92,7 +92,7 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <VulnerabilitiesPreview
-          entityIdentifiers={entityIdentifiers}
+          identityFields={identityFields}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />

@@ -8,16 +8,16 @@
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TakeAction } from '../shared/components/take_action';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 export const UserPanelFooter = ({
-  entityIdentifiers,
+  identityFields,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
 }) => {
   const userName = useMemo(
-    () => entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
-    [entityIdentifiers]
+    () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
+    [identityFields]
   );
 
   return (

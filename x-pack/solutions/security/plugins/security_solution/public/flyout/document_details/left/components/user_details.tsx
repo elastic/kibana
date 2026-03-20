@@ -79,7 +79,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import type { EntityIdentifiers } from '../../shared/utils';
+import type { IdentityFields } from '../../shared/utils';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
@@ -96,9 +96,9 @@ const RelatedHostsManage = manageQuery(InspectButtonContainer);
 
 export interface UserDetailsProps {
   /* 
-  EntityIdentifiers - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
+  IdentityFields - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
   */
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   /**
    * timestamp of alert or event
    */
@@ -118,18 +118,18 @@ export interface UserDetailsProps {
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
 export const UserDetails: React.FC<UserDetailsProps> = ({
-  entityIdentifiers,
+  identityFields,
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
 }) => {
   // Get the primary field value (first key in priority order, following EUID logic)
-  const primaryField = Object.keys(entityIdentifiers)[0] || 'user.name';
-  const userName = entityIdentifiers[primaryField] || '';
+  const primaryField = Object.keys(identityFields)[0] || 'user.name';
+  const userName = identityFields[primaryField] || '';
 
   // For filtering, prefer user.name if available, otherwise use the primary field
-  const filterField = 'user.name' in entityIdentifiers ? 'user.name' : primaryField;
-  const filterValue = entityIdentifiers[filterField] || userName;
+  const filterField = 'user.name' in identityFields ? 'user.name' : primaryField;
+  const filterValue = identityFields[filterField] || userName;
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -177,7 +177,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     openPreviewPanel({
       id: UserPreviewPanelKey,
       params: {
-        entityIdentifiers,
+        identityFields,
         scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -186,16 +186,19 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
+  }, [openPreviewPanel, identityFields, scopeId, telemetry]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
+  const storeUserEntityId = identityFields['user.entity.id'];
+
   const entityFromStoreResult = useEntityFromStore({
-    entityIdentifiers,
+    entityId: storeUserEntityId,
+    identityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const observedUser = useObservedUser(entityIdentifiers, scopeId);
+  const observedUser = useObservedUser(identityFields, scopeId);
 
   const filterQuery = useMemo(
     () => (filterValue ? buildUserNamesFilter([filterValue]) : undefined),
@@ -214,7 +217,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       id: userDetailsQueryId,
       startDate: from,
       endDate: to,
-      entityIdentifiers,
+      identityFields,
       userName,
       indexNames: selectedPatterns,
       skip: entityStoreV2Enabled || selectedPatterns.length === 0,
@@ -246,17 +249,19 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       : !!userRiskData?.user?.risk;
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    identityFields,
     to,
     from,
     queryId: USER_DETAILS_INSIGHTS_ID,
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    entityIdentifiers,
+    documentEntityIdentifiers: identityFields,
+    userName,
+    entityId: observedUser.entityRecord?.entity?.id,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -283,7 +288,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     totalCount,
     refetch: refetchRelatedHosts,
   } = useUserRelatedHosts({
-    entityIdentifiers,
+    identityFields,
     from: timestamp, // related hosts are hosts this user has successfully authenticated onto AFTER alert time
     skip: selectedPatterns.length === 0,
   });
@@ -302,7 +307,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           <EuiText grow={false} size="xs">
             <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
               <PreviewLink
-                entityIdentifiers={{ [HOST_NAME_FIELD_NAME]: host }}
+                identityFields={{ [HOST_NAME_FIELD_NAME]: host }}
                 scopeId={scopeId}
                 data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
               />
@@ -329,7 +334,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                   getEmptyTagValue()
                 ) : (
                   <PreviewLink
-                    entityIdentifiers={{ ...entityIdentifiers, [HOST_IP_FIELD_NAME]: ip }}
+                    identityFields={{ ...identityFields, [HOST_IP_FIELD_NAME]: ip }}
                     scopeId={scopeId}
                     data-test-subj={USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID}
                   />
@@ -358,7 +363,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           ]
         : []),
     ],
-    [entityIdentifiers, isEntityAnalyticsAuthorized, scopeId]
+    [identityFields, isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedHostsCount = useMemo(
@@ -402,7 +407,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   return (
     <ExpandablePanel
       header={{
-        title: entityIdentifiers['user.name'],
+        title: identityFields['user.name'],
         iconType: 'user',
         headerContent: relatedHostsCount,
         link: userLink,
@@ -442,7 +447,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch}
             inspect={entityStoreV2Enabled ? entityFromStoreResult?.inspect : inspect}
-            entityIdentifiers={entityIdentifiers}
+            identityFields={identityFields}
             indexPatterns={selectedPatterns}
             jobNameById={jobNameById}
             scopeId={scopeId}
@@ -461,13 +466,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
-          entityIdentifiers={entityIdentifiers}
+          identityFields={identityFields}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
-          entityIdentifiers={entityIdentifiers}
+          identityFields={identityFields}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
@@ -493,7 +498,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
                   defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
-                  values={{ userName: entityIdentifiers['user.name'] }}
+                  values={{ userName: identityFields['user.name'] }}
                 />
               }
               type="info"

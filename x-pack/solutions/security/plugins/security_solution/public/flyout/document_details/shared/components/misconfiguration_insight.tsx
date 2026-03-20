@@ -36,7 +36,7 @@ interface MisconfigurationsInsightProps {
   /**
    * Entity identifiers used to filter the misconfigurations by.
    */
-  entityIdentifiers: Record<string, string>;
+  identityFields: Record<string, string>;
   /**
    * The direction of the flex group
    */
@@ -59,7 +59,7 @@ interface MisconfigurationsInsightProps {
  * Displays a distribution bar with the count of total misconfigurations for a given entity
  */
 export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> = ({
-  entityIdentifiers,
+  identityFields,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -73,7 +73,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
       ? euidApi.buildGenericEntityFlyoutPreviewQuery
       : null;
   const { data } = useMisconfigurationPreview({
-    query: buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } },
+    query: buildPreviewQuery ? buildPreviewQuery(identityFields) : { bool: { filter: [] } },
     sort: [],
     enabled: !!buildPreviewQuery,
     pageSize: 1,

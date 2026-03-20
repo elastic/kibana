@@ -27,19 +27,19 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { UsersType } from '../../../../explore/users/store/model';
 import type { ObservedUserData } from '../content';
-import type { EntityIdentifiers } from '../../../document_details/shared/utils';
+import type { IdentityFields } from '../../../document_details/shared/utils';
 
 export const ObservedDataSection = memo(
   ({
     userName,
-    entityIdentifiers,
+    identityFields,
     observedUser,
     contextID,
     scopeId,
     queryId,
   }: {
     userName: string;
-    entityIdentifiers: EntityIdentifiers;
+    identityFields: IdentityFields;
     observedUser: ObservedUserData;
     contextID: string;
     scopeId: string;
@@ -125,7 +125,7 @@ export const ObservedDataSection = memo(
           ) : (
             <ObservedDataSectionContent
               userName={userName}
-              entityIdentifiers={entityIdentifiers}
+              identityFields={identityFields}
               observedUser={observedUser}
               contextID={contextID}
               scopeId={scopeId}
@@ -142,14 +142,14 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 const ObservedDataSectionContent = memo(
   ({
     userName,
-    entityIdentifiers,
+    identityFields,
     observedUser,
     contextID,
     scopeId,
     queryId,
   }: {
     userName: string;
-    entityIdentifiers: EntityIdentifiers;
+    identityFields: IdentityFields;
     observedUser: ObservedUserData;
     contextID: string;
     scopeId: string;

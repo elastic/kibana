@@ -42,7 +42,7 @@ interface AlertCountInsightProps {
   /**
    * Entity identifiers used to filter the alerts by.
    */
-  entityIdentifiers: Record<string, string>;
+  identityFields: Record<string, string>;
   /**
    * The direction of the flex group.
    */
@@ -96,7 +96,7 @@ export const getFormattedAlertStats = (
  * Displays a distribution bar with the total alert count for a given entity
  */
 export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
-  entityIdentifiers,
+  identityFields,
   direction,
   openDetailsPanel,
   'data-test-subj': dataTestSubj,
@@ -106,7 +106,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   const { signalIndexName } = useSignalIndex();
 
   const { items, isLoading } = useAlertsByStatus({
-    entityIdentifiers,
+    identityFields,
     signalIndexName,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     to,

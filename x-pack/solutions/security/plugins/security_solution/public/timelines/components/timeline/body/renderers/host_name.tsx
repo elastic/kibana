@@ -15,7 +15,9 @@ import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import type { EntityIdentifiers } from './entity_identifiers_utils';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 interface Props {
   contextId: string;
@@ -24,7 +26,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
-  entityIdentifiers?: EntityIdentifiers | null;
+  identityFields?: Record<string, string> | null;
 }
 
 const HostNameComponent: React.FC<Props> = ({
@@ -34,15 +36,24 @@ const HostNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
-  entityIdentifiers,
+  identityFields,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
   const isInSecurityApp = useIsInSecurityApp();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
   const isInTimelineContext = hostName && eventContext?.timelineID;
+
+  const { entityRecord } = useEntityFromStore({
+    identityFields: identityFields ?? (hostName ? { 'host.name': hostName } : undefined),
+    entityType: 'host',
+    skip: !entityStoreV2Enabled,
+  });
+
+  const resolvedEntityId = entityRecord?.entity?.id;
 
   const openHostDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent<Element, Event>) => {
@@ -61,21 +72,19 @@ const HostNameComponent: React.FC<Props> = ({
       }
 
       const { timelineID } = eventContext;
-      // Use entityIdentifiers from source event if available, otherwise fall back to host.name only
-      const finalEntityIdentifiers =
-        entityIdentifiers ?? (hostName ? { 'host.name': hostName } : undefined);
       openFlyout({
         right: {
           id: HostPanelKey,
           params: {
-            entityIdentifiers: finalEntityIdentifiers,
+            hostName,
+            entityId: resolvedEntityId,
             contextID: contextId,
             scopeId: timelineID,
           },
         },
       });
     },
-    [onClick, eventContext, isInTimelineContext, entityIdentifiers, hostName, openFlyout, contextId]
+    [onClick, eventContext, isInTimelineContext, hostName, resolvedEntityId, openFlyout, contextId]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

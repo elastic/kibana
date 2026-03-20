@@ -26,7 +26,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -62,11 +62,11 @@ const VulnerabilitiesCount = ({
 };
 
 export const VulnerabilitiesPreview = ({
-  entityIdentifiers,
+  identityFields,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
@@ -80,7 +80,7 @@ export const VulnerabilitiesPreview = ({
       ? euidApi.buildGenericEntityFlyoutPreviewQuery
       : null;
   const { data } = useVulnerabilitiesPreview({
-    query: buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } },
+    query: buildPreviewQuery ? buildPreviewQuery(identityFields) : { bool: { filter: [] } },
     sort: [],
     enabled: !!buildPreviewQuery,
     pageSize: 1,

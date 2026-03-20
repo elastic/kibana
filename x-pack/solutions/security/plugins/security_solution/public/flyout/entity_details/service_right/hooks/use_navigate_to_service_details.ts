@@ -9,25 +9,25 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback, useMemo } from 'react';
 import { EntityType } from '../../../../../common/search_strategy';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../../document_details/shared/utils';
+import type { IdentityFields } from '../../../document_details/shared/utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
 
 interface UseNavigateToServiceDetailsParams {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   scopeId: string;
   isRiskScoreExist: boolean;
 }
 
 export const useNavigateToServiceDetails = ({
-  entityIdentifiers,
+  identityFields,
   scopeId,
   isRiskScoreExist,
 }: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const safeEntityIdentifiers = useMemo(() => entityIdentifiers ?? {}, [entityIdentifiers]);
+  const safeEntityIdentifiers = useMemo(() => identityFields ?? {}, [identityFields]);
 
   return useCallback(
     (path: EntityDetailsPath) => {
@@ -40,7 +40,7 @@ export const useNavigateToServiceDetails = ({
         params: {
           isRiskScoreExist,
           scopeId,
-          entityIdentifiers: safeEntityIdentifiers,
+          identityFields: safeEntityIdentifiers,
           path,
         },
       });

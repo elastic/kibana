@@ -33,7 +33,7 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const hostName = 'host';
-const entityIdentifiers = { 'host.name': hostName };
+const identityFields = { 'host.name': hostName };
 const osFamily = 'Windows';
 const lastSeen = '2022-04-08T18:35:45.064Z';
 const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
@@ -110,7 +110,7 @@ const renderHostEntityContent = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <HostEntityOverview entityIdentifiers={entityIdentifiers} />
+        <HostEntityOverview identityFields={identityFields} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -152,7 +152,7 @@ describe('<HostEntityContent />', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview entityIdentifiers={entityIdentifiers} />
+          <HostEntityOverview identityFields={identityFields} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -166,7 +166,7 @@ describe('<HostEntityContent />', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview entityIdentifiers={entityIdentifiers} />
+          <HostEntityOverview identityFields={identityFields} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -208,7 +208,7 @@ describe('<HostEntityContent />', () => {
         id: HostPreviewPanelKey,
         params: {
           contextID: mockContextValue.scopeId,
-          entityIdentifiers,
+          identityFields,
           hostName,
           scopeId: mockContextValue.scopeId,
           banner: HOST_PREVIEW_BANNER,

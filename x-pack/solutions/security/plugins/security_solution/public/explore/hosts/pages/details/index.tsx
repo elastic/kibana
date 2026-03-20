@@ -146,7 +146,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
-    isExploreContext: true,
     skip: selectedPatterns.length === 0,
   });
 
@@ -296,7 +295,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
-                    entityIdentifiers={{ [ES_HOST_FIELD]: detailName }}
+                    hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
                     scopeId={PageScope.explore}
@@ -318,11 +317,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
-                        entityFilter={entityFilter}
+                        entityFilter={{ ...entityFilter, entityType: EntityType.host }}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
-                        entityIdentifiers={{ 'host.name': detailName }}
-                        isExploreContext
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

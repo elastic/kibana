@@ -34,10 +34,8 @@ interface GetRowItemsWithActionsParams {
   maxOverflow?: number;
 }
 
-/** Item with value and optional entityIdentifiers for entity detail links */
 export interface RowItemWithEntityIdentifiers {
   value: string;
-  entityIdentifiers?: Record<string, string>;
 }
 
 interface GetRowItemsWithActionsForEntitiesParams {
@@ -97,10 +95,6 @@ export const getRowItemsWithActions = ({
   }
 };
 
-/**
- * Renders row items with entityIdentifiers support (e.g. for HostDetailsLink).
- * Use when each item has both a display value and entityIdentifiers for URL resolution.
- */
 export const getRowItemsWithActionsForEntities = ({
   items,
   fieldName,

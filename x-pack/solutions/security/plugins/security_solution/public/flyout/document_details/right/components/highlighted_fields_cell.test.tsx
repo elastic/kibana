@@ -81,7 +81,7 @@ describe('<HighlightedFieldsCell />', () => {
       id: HostPreviewPanelKey,
       params: {
         contextID: SCOPE_ID,
-        entityIdentifiers: { 'host.name': 'test host' },
+        identityFields: { 'host.name': 'test host' },
         hostName: 'test host',
         scopeId: SCOPE_ID,
         banner: HOST_PREVIEW_BANNER,
@@ -98,7 +98,7 @@ describe('<HighlightedFieldsCell />', () => {
       id: UserPreviewPanelKey,
       params: {
         contextID: SCOPE_ID,
-        entityIdentifiers: { 'user.name': 'test user' },
+        identityFields: { 'user.name': 'test user' },
         userName: 'test user',
         scopeId: SCOPE_ID,
         banner: USER_PREVIEW_BANNER,

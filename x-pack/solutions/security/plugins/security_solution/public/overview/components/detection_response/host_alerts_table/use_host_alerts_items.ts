@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -43,7 +43,7 @@ export interface HostAlertsItem {
   high: number;
   critical: number;
   /** When provided, used for precise host resolution in links and alerts navigation */
-  entityIdentifiers?: EntityIdentifiers;
+  identityFields?: IdentityFields;
 }
 
 export type UseHostAlertsItems = (props: UseHostAlertsItemsProps) => {
@@ -267,14 +267,14 @@ function getFirst(value: string | string[] | undefined): string | undefined {
 }
 
 /**
- * Build host entityIdentifiers from an ES hit's host object (same priority as entity store EUID).
+ * Build host identityFields from an ES hit's host object (same priority as entity store EUID).
  * Priority: host.entity.id > host.id > host.name (with domain, mac) > host.hostname (with domain, mac).
  */
-function getHostEntityIdentifiersFromEsHit(
+function getHostIdentityFieldsFromEsHit(
   host: EsHostSource | undefined
-): EntityIdentifiers | undefined {
+): IdentityFields | undefined {
   if (!host) return undefined;
-  const identifiers: EntityIdentifiers = {};
+  const identifiers: IdentityFields = {};
   const entityId = getFirst(host.entity?.id);
   if (entityId) {
     identifiers['host.entity.id'] = entityId;
@@ -335,9 +335,9 @@ function parseHostsData(
   return buckets.reduce<HostAlertsItem[]>((accumalatedAlertsByHost, currentHost) => {
     const hostName = firstNonNullValue(currentHost.key) ?? '-';
     const hostSource = currentHost.host_sample?.hits?.hits?.[0]?._source?.host;
-    const entityIdentifiers =
-      getHostEntityIdentifiersFromEsHit(hostSource) ??
-      ({ 'host.name': hostName } as EntityIdentifiers);
+    const identityFields =
+      getHostIdentityFieldsFromEsHit(hostSource) ??
+      ({ 'host.name': hostName } as IdentityFields);
 
     accumalatedAlertsByHost.push({
       hostName,
@@ -346,7 +346,7 @@ function parseHostsData(
       medium: currentHost.medium.doc_count,
       high: currentHost.high.doc_count,
       critical: currentHost.critical.doc_count,
-      entityIdentifiers,
+      identityFields,
     });
 
     return accumalatedAlertsByHost;

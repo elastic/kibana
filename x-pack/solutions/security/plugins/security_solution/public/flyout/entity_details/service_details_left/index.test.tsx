@@ -19,7 +19,7 @@ describe('LeftPanel', () => {
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
         isRiskScoreExist
-        entityIdentifiers={{ 'service.name': 'test service' }}
+        identityFields={{ 'service.name': 'test service' }}
         scopeId={'scopeId'}
       />,
       {
@@ -39,7 +39,7 @@ describe('LeftPanel', () => {
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
         isRiskScoreExist={false}
-        entityIdentifiers={{ 'service.name': 'test service' }}
+        identityFields={{ 'service.name': 'test service' }}
         scopeId={'scopeId'}
       />,
       {

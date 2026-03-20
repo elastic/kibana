@@ -32,7 +32,7 @@ export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'>
 };
 
 export const useObservedUser = (
-  entityIdentifiers: Record<string, string>,
+  identityFields: Record<string, string>,
   scopeId: string
 ): ObservedUserResult => {
   const timelineTime = useDeepEqualSelector((state) =>
@@ -52,15 +52,17 @@ export const useObservedUser = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
+  const storeEntityId = identityFields['entity.id'];
   const entityFromStore = useEntityFromStore({
-    entityIdentifiers,
+    entityId: storeEntityId,
+    identityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
 
   const userName = useMemo(
-    () => entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
-    [entityIdentifiers]
+    () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
+    [identityFields]
   );
 
   const useEntityStoreData =
@@ -70,7 +72,6 @@ export const useObservedUser = (
     useObservedUserDetails({
       endDate: to,
       startDate: from,
-      entityIdentifiers,
       userName,
       indexNames: securityDefaultPatterns,
       skip: isInitializing,

@@ -11,7 +11,6 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -49,6 +48,7 @@ import { PreferenceFormattedDateFromPrimitive } from '../../../common/components
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
   scopeId: string;
+  hostName: string;
   data: HostItem;
   id: string;
   isInDetailsSidePanel: boolean;
@@ -59,7 +59,6 @@ interface HostSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  entityIdentifiers: Record<string, string>;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
@@ -95,7 +94,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     loading,
     narrowDateRange,
     startDate,
-    entityIdentifiers,
+    hostName,
     jobNameById,
     isFlyoutOpen = false,
     riskScoreState: riskScoreStateFromEntityStore,
@@ -106,26 +105,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
-    const euidApi = useEntityStoreEuidApi();
-    const effectiveHostName = useMemo(
-      () =>
-        entityIdentifiers['host.name'] ||
-        entityIdentifiers['host.hostname'] ||
-        Object.entries(entityIdentifiers).find(([k]) => k.startsWith('host.'))?.[1],
-      [entityIdentifiers]
+    const filterQuery = useMemo(
+      () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+      [hostName]
     );
-    const useEntityStoreV2AsDataSource = Boolean(riskScoreStateFromEntityStore);
-    const filterQuery = useMemo(() => {
-      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers, {
-        includeEuidSourceFilter: useEntityStoreV2AsDataSource,
-      });
-      if (euidFilter) {
-        return JSON.stringify(euidFilter);
-      }
-      return effectiveHostName
-        ? JSON.stringify(buildHostNamesFilter([effectiveHostName]))
-        : undefined;
-    }, [euidApi?.euid, entityIdentifiers, effectiveHostName, useEntityStoreV2AsDataSource]);
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
@@ -137,7 +120,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     } = useRiskScore({
       filterQuery,
       riskEntity: EntityType.host,
-      skip: !!riskScoreStateFromEntityStore || effectiveHostName == null,
+      skip: !!riskScoreStateFromEntityStore,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
@@ -232,11 +215,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description:
             firstSeenFromEntityStore != null ? (
               <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
-            ) : effectiveHostName != null ? (
+            ) : hostName != null ? (
               <FirstLastSeen
                 indexPatterns={indexNames}
                 field="host.name"
-                value={effectiveHostName}
+                value={hostName}
                 type={FirstLastSeenType.FIRST_SEEN}
               />
             ) : (
@@ -248,11 +231,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description:
             lastSeenFromEntityStore != null ? (
               <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
-            ) : effectiveHostName != null ? (
+            ) : hostName != null ? (
               <FirstLastSeen
                 indexPatterns={indexNames}
                 field="host.name"
-                value={effectiveHostName}
+                value={hostName}
                 type={FirstLastSeenType.LAST_SEEN}
               />
             ) : (
@@ -265,7 +248,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         scopeId,
         indexNames,
         isFlyoutOpen,
-        effectiveHostName,
+        hostName,
         firstSeenFromEntityStore,
         lastSeenFromEntityStore,
       ]

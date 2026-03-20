@@ -196,7 +196,7 @@ describe('PrevalenceDetails', () => {
       id: HostPreviewPanelKey,
       params: {
         contextID: panelContextValue.scopeId,
-        entityIdentifiers: { 'host.name': 'test host' },
+        identityFields: { 'host.name': 'test host' },
         hostName: 'test host',
         scopeId: panelContextValue.scopeId,
         banner: HOST_PREVIEW_BANNER,
@@ -208,7 +208,7 @@ describe('PrevalenceDetails', () => {
       id: UserPreviewPanelKey,
       params: {
         contextID: panelContextValue.scopeId,
-        entityIdentifiers: { 'user.name': 'test user' },
+        identityFields: { 'user.name': 'test user' },
         userName: 'test user',
         scopeId: panelContextValue.scopeId,
         banner: USER_PREVIEW_BANNER,

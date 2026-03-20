@@ -13,10 +13,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { UserDetailsPanelKey } from '../../user_details_left';
 import { UserPanelKey } from '../../shared/constants';
-import type { EntityIdentifiers } from '../../../document_details/shared/utils';
+import type { IdentityFields } from '../../../document_details/shared/utils';
 
 interface UseNavigateToUserDetailsParams {
-  entityIdentifiers: EntityIdentifiers;
+  documentEntityIdentifiers: IdentityFields;
+  userName: string;
+  entityId?: string;
   scopeId: string;
   contextID: string;
   isRiskScoreExist: boolean;
@@ -26,7 +28,9 @@ interface UseNavigateToUserDetailsParams {
 }
 
 export const useNavigateToUserDetails = ({
-  entityIdentifiers,
+  documentEntityIdentifiers,
+  userName,
+  entityId,
   scopeId,
   contextID,
   isRiskScoreExist,
@@ -48,7 +52,7 @@ export const useNavigateToUserDetails = ({
           isRiskScoreExist,
           scopeId,
           path,
-          entityIdentifiers,
+          identityFields: documentEntityIdentifiers,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
         },
@@ -58,7 +62,8 @@ export const useNavigateToUserDetails = ({
         id: UserPanelKey,
         params: {
           contextID,
-          entityIdentifiers,
+          userName,
+          entityId,
           scopeId,
         },
       };
@@ -79,7 +84,9 @@ export const useNavigateToUserDetails = ({
       isPreviewMode,
       openFlyout,
       contextID,
-      entityIdentifiers,
+      documentEntityIdentifiers,
+      userName,
+      entityId,
     ]
   );
 };

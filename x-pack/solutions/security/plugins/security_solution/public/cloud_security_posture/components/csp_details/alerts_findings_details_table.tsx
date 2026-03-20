@@ -47,8 +47,7 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
-import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
   SEVERITY = 'kibana.alert.severity',
@@ -86,17 +85,8 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ entityIdentifiers }: { entityIdentifiers: EntityIdentifiers }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     const { euiTheme } = useEuiTheme();
-
-    // Extract primary field and value from entityIdentifiers
-    // Priority: host.name > user.name > first available field
-    const field = entityIdentifiers[EntityIdentifierFields.hostName]
-      ? EntityIdentifierFields.hostName
-      : entityIdentifiers[EntityIdentifierFields.userName]
-      ? EntityIdentifierFields.userName
-      : Object.keys(entityIdentifiers)[0];
-    const value = entityIdentifiers[field] || '';
 
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -164,7 +154,7 @@ export const AlertsDetailsTable = memo(
     });
 
     const { filteredAlertsData: alertsData } = useNonClosedAlerts({
-      entityIdentifiers,
+      identityFields: { [field]: value },
       to,
       from,
       queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}`,
@@ -293,7 +283,7 @@ export const AlertsDetailsTable = memo(
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
           <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
-            <EuiIcon type={'expand'} aria-hidden={true} />
+            <EuiIcon type={'expand'} />
           </EuiLink>
         ),
       },
@@ -373,7 +363,7 @@ export const AlertsDetailsTable = memo(
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
-              <EuiIcon type={'popout'} aria-hidden={true} />
+              <EuiIcon type={'popout'} />
             </h1>
           </EuiLink>
 

@@ -127,7 +127,7 @@ const mockAlertData = {
 const timestamp = '2022-07-25T08:20:18.966Z';
 
 const defaultProps = {
-  entityIdentifiers: { 'host.name': 'test host' },
+  hostName: 'test host',
   timestamp,
   scopeId: 'scopeId',
 };
@@ -199,7 +199,7 @@ describe('<HostDetails />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
-        entityIdentifiers: defaultProps.entityIdentifiers,
+        hostName: defaultProps.hostName,
         scopeId: defaultProps.scopeId,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -245,7 +245,7 @@ describe('<HostDetails />', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
         from: timestamp,
-        entityIdentifiers: defaultProps.entityIdentifiers,
+        hostName: defaultProps.hostName,
         indexNames: ['index'],
         skip: false,
       });
@@ -304,7 +304,7 @@ describe('<HostDetails />', () => {
         id: UserPreviewPanelKey,
         params: {
           contextID: defaultProps.scopeId,
-          entityIdentifiers: { 'user.name': 'test user' },
+          identityFields: { 'user.name': 'test user' },
           userName: 'test user',
           scopeId: defaultProps.scopeId,
           banner: USER_PREVIEW_BANNER,
@@ -316,8 +316,8 @@ describe('<HostDetails />', () => {
         id: HostPreviewPanelKey,
         params: {
           contextID: defaultProps.scopeId,
-          entityIdentifiers: {
-            ...defaultProps.entityIdentifiers,
+          identityFields: {
+            hostName: defaultProps.hostName,
             'host.ip': '100.XXX.XXX',
           },
           hostName: 'test host',

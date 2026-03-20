@@ -9,11 +9,7 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  buildEntityFlyoutPreviewQueryWithStatus,
-  VULNERABILITY_QUERY_FIELD,
-} from '@kbn/cloud-security-posture-common';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
   VulnerabilitiesFindingDetailFields,
@@ -48,11 +44,13 @@ import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { get } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 
 type VulnerabilitySortFieldType =
   | 'score'
@@ -68,9 +66,16 @@ type VulnerabilitySortFieldType =
 const EMPTY_VALUE = '-';
 
 export const VulnerabilitiesFindingsDetailsTable = memo(
-  ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
+  ({
+    identityField,
+    value,
+    scopeId,
+  }: {
+    identityField: CloudPostureEntityIdentifier;
+    value: string;
+    scopeId: string;
+  }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
-    const euidApi = useEntityStoreEuidApi();
 
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -99,18 +104,15 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     };
 
     const { data } = useVulnerabilitiesFindings({
-      query: buildEntityFlyoutPreviewQueryWithStatus(
-        euidApi?.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers) ?? [],
-        currentFilter || undefined,
-        VULNERABILITY_QUERY_FIELD
-      ),
+      query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
       sort: [sortFieldDirection],
-      enabled: !!euidApi,
+      enabled: true,
       pageSize: 1,
     });
 
+    const euidApi = useEntityStoreEuidApi();
     const { counts } = useHasVulnerabilities(
-      buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+      buildEntityFlyoutPreviewCspOptions({ [identityField]: value }, euidApi)
     );
 
     const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
@@ -162,8 +164,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     const getNavUrlParams: ReturnType<typeof useGetNavigationUrlParams> =
       useGetNavigationUrlParams();
 
-    const getVulnerabilityUrl = (identifiers: EntityIdentifiers) => {
-      return getNavUrlParams(identifiers, 'vulnerabilities');
+    const getVulnerabilityUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
+      return getNavUrlParams({ [queryField]: name }, 'vulnerabilities');
     };
 
     const vulnerabilityStats = getVulnerabilityStats(
@@ -353,7 +355,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getVulnerabilityUrl(entityIdentifiers)}`}
+            path={`${getVulnerabilityUrl(value, EntityIdentifierFields.hostName)}`}
             target={'_blank'}
             external={false}
             onClick={() => {
@@ -369,7 +371,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                 defaultMessage: 'Vulnerability ',
               }
             )}
-            <EuiIcon type={'popout'} />
+            <EuiIcon type={'popout'} aria-hidden={true} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={vulnerabilityStats} />
@@ -383,9 +385,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.table.caption',
+              'xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption',
               {
-                defaultMessage: 'Vulnerabilities findings table',
+                defaultMessage: 'List of vulnerability findings',
               }
             )}
           />

@@ -29,7 +29,7 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HostDetailsLink } from '../../../../common/components/links';
-import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 import * as i18n from '../translations';
@@ -48,7 +48,7 @@ type GetTableColumns = (
   handleClick: (params: {
     hostName: string;
     severity?: string;
-    entityIdentifiers?: EntityIdentifiers;
+    identityFields?: IdentityFields;
   }) => void
 ) => Array<EuiBasicTableColumn<HostAlertsItem>>;
 
@@ -62,11 +62,11 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     ({
       hostName,
       severity,
-      entityIdentifiers: _entityIdentifiers,
+      lookupFields: _entityIdentifiers,
     }: {
       hostName: string;
       severity?: string;
-      entityIdentifiers?: EntityIdentifiers;
+      identityFields?: IdentityFields;
     }) =>
       openAlertsPageWithFilters([
         {
@@ -166,7 +166,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
         field: 'totalAlerts',
         name: i18n.ALERTS_TEXT,
         'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
-        render: (totalAlerts: number, { hostName, entityIdentifiers }) => (
+        render: (totalAlerts: number, { hostName, identityFields }) => (
           <SecurityCellActions
             data={{
               value: hostName,
@@ -182,7 +182,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
             <EuiLink
               data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
               disabled={totalAlerts === 0}
-              onClick={() => handleClick({ hostName, entityIdentifiers })}
+              onClick={() => handleClick({ hostName, identityFields })}
             >
               <FormattedCount count={totalAlerts} />
             </EuiLink>
@@ -192,7 +192,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
       {
         field: 'critical',
         name: i18n.STATUS_CRITICAL_LABEL,
-        render: (count: number, { hostName, entityIdentifiers }) => (
+        render: (count: number, { hostName, identityFields }) => (
           <EuiHealth
             data-test-subj="hostSeverityAlertsTable-critical"
             color={severityColors.critical}
@@ -215,7 +215,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
               >
                 <EuiLink
                   data-test-subj="hostSeverityAlertsTable-criticalLink"
-                  onClick={() => handleClick({ hostName, severity: 'critical', entityIdentifiers })}
+                  onClick={() => handleClick({ hostName, severity: 'critical', identityFields })}
                 >
                   <FormattedCount count={count} />
                 </EuiLink>
@@ -229,7 +229,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
       {
         field: 'high',
         name: i18n.STATUS_HIGH_LABEL,
-        render: (count: number, { hostName, entityIdentifiers }) => (
+        render: (count: number, { hostName, identityFields }) => (
           <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={severityColors.high}>
             {count > 0 ? (
               <SecurityCellActions
@@ -248,7 +248,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
               >
                 <EuiLink
-                  onClick={() => handleClick({ hostName, severity: 'high', entityIdentifiers })}
+                  onClick={() => handleClick({ hostName, severity: 'high', identityFields })}
                 >
                   <FormattedCount count={count} />
                 </EuiLink>
@@ -262,7 +262,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
       {
         field: 'medium',
         name: i18n.STATUS_MEDIUM_LABEL,
-        render: (count: number, { hostName, entityIdentifiers }) => (
+        render: (count: number, { hostName, identityFields }) => (
           <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={severityColors.medium}>
             {count > 0 ? (
               <SecurityCellActions
@@ -281,7 +281,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
               >
                 <EuiLink
-                  onClick={() => handleClick({ hostName, severity: 'medium', entityIdentifiers })}
+                  onClick={() => handleClick({ hostName, severity: 'medium', identityFields })}
                 >
                   <FormattedCount count={count} />
                 </EuiLink>
@@ -295,7 +295,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
       {
         field: 'low',
         name: i18n.STATUS_LOW_LABEL,
-        render: (count: number, { hostName, entityIdentifiers }) => (
+        render: (count: number, { hostName, identityFields }) => (
           <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={severityColors.low}>
             {count > 0 ? (
               <SecurityCellActions
@@ -314,7 +314,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
               >
                 <EuiLink
-                  onClick={() => handleClick({ hostName, severity: 'low', entityIdentifiers })}
+                  onClick={() => handleClick({ hostName, severity: 'low', identityFields })}
                 >
                   <FormattedCount count={count} />
                 </EuiLink>

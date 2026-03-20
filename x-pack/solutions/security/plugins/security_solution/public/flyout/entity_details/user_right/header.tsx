@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
@@ -31,8 +31,8 @@ import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 interface UserPanelHeaderProps {
   userName: string;
   managedUser: ManagedUserData;
-  /** When provided, used to build the user details page URL with entityIdentifiers segment */
-  entityIdentifiers?: EntityIdentifiers;
+  /** When provided, used to build the user details page URL with identityFields segment */
+  identityFields?: IdentityFields;
   lastSeen: FirstLastSeenData;
 }
 
@@ -42,7 +42,7 @@ const urlParamOverride = { timeline: { isOpen: false } };
 export const UserPanelHeader = ({
   userName,
   managedUser,
-  entityIdentifiers,
+  identityFields,
   lastSeen,
 }: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[

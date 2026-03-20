@@ -34,7 +34,7 @@ export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'>
 };
 
 export const useObservedHost = (
-  entityIdentifiers: Record<string, string>,
+  hostName: string,
   scopeId: string,
   entityFromStore?: EntityFromStoreResult<HostItem> | null
 ): ObservedHostResult => {
@@ -55,15 +55,9 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const hostName = useMemo(
-    () => entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0] || '',
-    [entityIdentifiers]
-  );
-
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,
     startDate: from,
-    entityIdentifiers,
     hostName,
     indexNames: securityDefaultPatterns,
     id: HOST_PANEL_RISK_SCORE_QUERY_ID,

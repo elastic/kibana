@@ -84,14 +84,24 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     lastOpen: Date.now(),
     panel: {
       id: HostPanelKey,
-      params: { entityIdentifiers: { 'host.name': 'host name' } },
+      params: {
+        contextID: 'history-test',
+        scopeId: 'history-test',
+        isPreviewMode: false,
+        hostName: 'host name',
+      },
     },
   },
   user: {
     lastOpen: Date.now(),
     panel: {
       id: UserPanelKey,
-      params: { entityIdentifiers: { 'user.name': 'user name' } },
+      params: {
+        contextID: 'history-test',
+        scopeId: 'history-test',
+        isPreviewMode: false,
+        userName: 'user name',
+      },
     },
   },
   network: {

@@ -92,7 +92,7 @@ const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
 };
 
 export interface UserEntityOverviewProps {
-  entityIdentifiers: Record<string, string>;
+  identityFields: Record<string, string>;
   /**
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
    * so Overview section uses the same entity store data used to decide visibility.
@@ -112,7 +112,7 @@ export const USER_PREVIEW_BANNER = {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
-  entityIdentifiers,
+  identityFields,
   entityRecord: entityRecordProp,
 }) => {
   const { scopeId } = useDocumentDetailsContext();
@@ -136,18 +136,18 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [from, to]
   );
 
-  // Stabilize entityIdentifiers by content so hooks (useRiskScore, useObservedUserDetails, etc.)
+  // Stabilize identityFields by content so hooks (useRiskScore, useObservedUserDetails, etc.)
   // don't receive a new reference every render and trigger effect loops (max update depth).
   const entityIdentifiersStableKey = useMemo(
     () =>
-      entityIdentifiers != null && Object.keys(entityIdentifiers).length > 0
+      identityFields != null && Object.keys(identityFields).length > 0
         ? JSON.stringify(
             Object.fromEntries(
-              Object.entries(entityIdentifiers).sort(([a], [b]) => a.localeCompare(b))
+              Object.entries(identityFields).sort(([a], [b]) => a.localeCompare(b))
             )
           )
         : '',
-    [entityIdentifiers]
+    [identityFields]
   );
   const entityIdentifiersRef = useRef<{ key: string; value: Record<string, string> }>({
     key: '',
@@ -157,11 +157,11 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     if (entityIdentifiersRef.current.key !== entityIdentifiersStableKey) {
       entityIdentifiersRef.current = {
         key: entityIdentifiersStableKey,
-        value: entityIdentifiers ?? {},
+        value: identityFields ?? {},
       };
     }
     return entityIdentifiersRef.current.value;
-  }, [entityIdentifiersStableKey, entityIdentifiers]);
+  }, [entityIdentifiersStableKey, identityFields]);
 
   const userName =
     stableEntityIdentifiers['user.name'] ||
@@ -174,8 +174,11 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [userName]
   );
 
+  const storeUserEntityId = stableEntityIdentifiers['user.entity.id'];
+
   const entityFromStore = useEntityFromStore({
-    entityIdentifiers: stableEntityIdentifiers,
+    entityId: storeUserEntityId,
+    identityFields: stableEntityIdentifiers,
     entityType: 'user',
     skip: !entityStoreV2Enabled,
   });
@@ -187,7 +190,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   );
 
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
-    entityIdentifiers: stableEntityIdentifiers,
+    identityFields: stableEntityIdentifiers,
     userName,
     endDate: to,
     indexNames: selectedPatterns,
@@ -233,14 +236,16 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     buildEntityFlyoutPreviewCspOptions(stableEntityIdentifiers, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers: stableEntityIdentifiers,
+    identityFields: stableEntityIdentifiers,
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    entityIdentifiers: stableEntityIdentifiers,
+    documentEntityIdentifiers: stableEntityIdentifiers,
+    userName,
+    entityId: entityRecord?.entity?.id,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -345,7 +350,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              entityIdentifiers={stableEntityIdentifiers}
+              identityFields={stableEntityIdentifiers}
               scopeId={scopeId}
               preferredField="user.name"
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
@@ -396,12 +401,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        entityIdentifiers={stableEntityIdentifiers}
+        identityFields={stableEntityIdentifiers}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
-        entityIdentifiers={stableEntityIdentifiers}
+        identityFields={stableEntityIdentifiers}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}

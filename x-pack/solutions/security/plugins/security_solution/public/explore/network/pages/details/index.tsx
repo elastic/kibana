@@ -279,11 +279,9 @@ const NetworkDetailsComponent: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityIdentifiers={{ 'destination.ip': ip }}
-                      entityFilter={entityFilter}
+                      entityFilter={{ ...entityFilter, field: 'destination.ip', value: ip }}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
-                      isExploreContext
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

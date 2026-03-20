@@ -49,42 +49,42 @@ jest.mock('../../hooks/use_attack_entities_lists', () => ({
 
 jest.mock('../../../document_details/left/components/user_details', () => ({
   UserDetails: ({
-    entityIdentifiers,
+    identityFields,
     timestamp,
     scopeId,
   }: {
-    entityIdentifiers: Record<string, string>;
+    identityFields: Record<string, string>;
     timestamp: string;
     scopeId: string;
   }) => (
     <div
       data-test-subj="user-details"
-      data-user-name={entityIdentifiers['user.name'] ?? Object.values(entityIdentifiers)[0]}
+      data-user-name={identityFields['user.name'] ?? Object.values(identityFields)[0]}
       data-timestamp={timestamp}
       data-scope-id={scopeId}
     >
-      {'UserDetails:'} {entityIdentifiers['user.name'] ?? Object.values(entityIdentifiers)[0]}
+      {'UserDetails:'} {identityFields['user.name'] ?? Object.values(identityFields)[0]}
     </div>
   ),
 }));
 
 jest.mock('../../../document_details/left/components/host_details', () => ({
   HostDetails: ({
-    entityIdentifiers,
+    identityFields,
     timestamp,
     scopeId,
   }: {
-    entityIdentifiers: Record<string, string>;
+    identityFields: Record<string, string>;
     timestamp: string;
     scopeId: string;
   }) => (
     <div
       data-test-subj="host-details"
-      data-host-name={entityIdentifiers['host.name'] ?? Object.values(entityIdentifiers)[0]}
+      data-host-name={identityFields['host.name'] ?? Object.values(identityFields)[0]}
       data-timestamp={timestamp}
       data-scope-id={scopeId}
     >
-      {'HostDetails:'} {entityIdentifiers['host.name'] ?? Object.values(entityIdentifiers)[0]}
+      {'HostDetails:'} {identityFields['host.name'] ?? Object.values(identityFields)[0]}
     </div>
   ),
 }));

@@ -21,7 +21,7 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
 
@@ -33,7 +33,7 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
@@ -52,7 +52,7 @@ interface HostPanelContentProps {
 }
 
 export const HostPanelContent = ({
-  entityIdentifiers,
+  identityFields,
   observedHost,
   riskScoreState,
   recalculatingScore,
@@ -72,10 +72,10 @@ export const HostPanelContent = ({
     'entityDetailsHighlightsEnabled'
   );
 
-  // Extract hostName from entityIdentifiers for components that need a string
-  // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
+  // Extract hostName from identityFields for components that need a string
+  // Priority: identityFields['host.name'] > identityFields[first key]
   const hostName =
-    entityIdentifiers[EntityIdentifierFields.hostName] || Object.values(entityIdentifiers)[0] || '';
+    identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '';
 
   return (
     <FlyoutBody>
@@ -100,7 +100,7 @@ export const HostPanelContent = ({
         )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
-          entity={{ identifiers: entityIdentifiers, name: hostName, type: EntityType.host }}
+          entity={{ identifiers: identityFields, name: hostName, type: EntityType.host }}
           onChange={onAssetCriticalityChange}
           entityRecord={entityRecord}
           criticalityFromEntityStore={criticalityFromEntityStore}
@@ -108,14 +108,14 @@ export const HostPanelContent = ({
         />
       )}
       <EntityInsight
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
         observedHost={observedHost}
         contextID={contextID}
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />

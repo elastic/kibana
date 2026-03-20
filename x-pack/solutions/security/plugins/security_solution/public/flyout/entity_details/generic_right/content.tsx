@@ -22,7 +22,7 @@ import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
@@ -50,18 +50,18 @@ const defaultPinnedFields = [
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
 }
 
 export const GenericEntityFlyoutContent = ({
   source,
   openGenericEntityDetailsPanelByPath,
-  entityIdentifiers,
+  identityFields,
   onAssetCriticalityChange,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
-  const entityDisplayValue = Object.values(entityIdentifiers)[0] ?? '';
+  const entityDisplayValue = Object.values(identityFields)[0] ?? '';
 
   const fieldsSectionExpandedState = useExpandSection({
     title: 'fields',
@@ -93,7 +93,7 @@ export const GenericEntityFlyoutContent = ({
     <FlyoutBody>
       <AssetCriticalityAccordion
         entity={{
-          identifiers: entityIdentifiers,
+          identifiers: identityFields,
           name: entityDisplayValue as string,
           type: EntityType.generic,
         }}
@@ -107,7 +107,7 @@ export const GenericEntityFlyoutContent = ({
         }}
       />
       <EntityInsight
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         isPreviewMode={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
       />

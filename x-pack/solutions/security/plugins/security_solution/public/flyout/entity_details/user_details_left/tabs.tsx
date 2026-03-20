@@ -24,7 +24,7 @@ import { DocumentDetailsProvider } from '../../document_details/shared/context';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -33,7 +33,7 @@ export const useTabs = (
   scopeId: string,
   hasMisconfigurationFindings?: boolean,
   hasNonClosedAlerts?: boolean,
-  entityIdentifiers?: EntityIdentifiers
+  identityFields?: IdentityFields
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -58,8 +58,8 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
-    if ((hasMisconfigurationFindings || hasNonClosedAlerts) && entityIdentifiers) {
-      tabs.push(getInsightsInputTab({ entityIdentifiers, scopeId }));
+    if ((hasMisconfigurationFindings || hasNonClosedAlerts) && identityFields) {
+      tabs.push(getInsightsInputTab({ identityFields, scopeId }));
     }
 
     return tabs;
@@ -70,7 +70,7 @@ export const useTabs = (
     managedUser,
     name,
     scopeId,
-    entityIdentifiers,
+    identityFields,
   ]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({

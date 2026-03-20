@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
@@ -96,11 +96,11 @@ export const HostIdRenderer = ({
 }: HostIdRendererTypes): React.ReactElement => {
   const euidApi = useEntityStoreEuidApi();
   const hostName = host.name && host.name[0];
-  const entityIdentifiers = euidApi?.euid
+  const identityFields = euidApi?.euid
     ? euidApi.euid.getEuidSourceFields('host').identitySourceFields.reduce((acc, field) => {
         acc[field] = host[field as keyof HostEcs] as string;
         return acc;
-      }, {} as EntityIdentifiers)
+      }, {} as IdentityFields)
     : hostName != null
     ? { 'host.name': hostName }
     : {};
@@ -119,7 +119,7 @@ export const HostIdRenderer = ({
               <FlyoutLink
                 field={'host.name'}
                 value={hostName}
-                entityIdentifiers={entityIdentifiers}
+                identityFields={identityFields}
                 scopeId={scopeId}
                 isFlyoutOpen={isFlyoutOpen}
               >
@@ -150,11 +150,11 @@ export const HostNameRenderer = ({
   isFlyoutOpen,
 }: HostNameRendererTypes): React.ReactElement => {
   const euidApi = useEntityStoreEuidApi();
-  const entityIdentifiers = euidApi?.euid
+  const identityFields = euidApi?.euid
     ? euidApi.euid.getEuidSourceFields('host').identitySourceFields.reduce((acc, field) => {
         acc[field] = host[field as keyof HostEcs] as string;
         return acc;
-      }, {} as EntityIdentifiers)
+      }, {} as IdentityFields)
     : host.name?.[0] != null
     ? { 'host.name': host.name[0] }
     : {};
@@ -166,7 +166,7 @@ export const HostNameRenderer = ({
       <FlyoutLink
         field={'host.name'}
         value={host.name[0]}
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         scopeId={scopeId}
         isFlyoutOpen={isFlyoutOpen}
       />

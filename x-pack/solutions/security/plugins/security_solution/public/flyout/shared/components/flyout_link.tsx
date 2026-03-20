@@ -8,13 +8,19 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { FLYOUT_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { PreviewLink } from './preview_link';
 import { getRightPanelParams } from '../utils/link_utils';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
+import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
+import {
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 
 interface FlyoutLinkProps {
   /**
@@ -28,7 +34,7 @@ interface FlyoutLinkProps {
   /**
    * Entity identifiers - key-value pairs of field names and their values
    */
-  entityIdentifiers?: EntityIdentifiers;
+  identityFields?: IdentityFields;
   /**
    * Scope id to use for the preview panel
    */
@@ -63,7 +69,7 @@ interface FlyoutLinkProps {
 export const FlyoutLink: FC<FlyoutLinkProps> = ({
   field,
   value,
-  entityIdentifiers,
+  identityFields,
   scopeId,
   isFlyoutOpen = false,
   ruleId,
@@ -74,17 +80,44 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const { telemetry } = useKibana().services;
   const whichFlyout = useWhichFlyout();
   const renderPreview = isFlyoutOpen || whichFlyout !== null;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const resolutionIdentifiers: IdentityFields = useMemo(
+    () => identityFields ?? { [field]: value },
+    [identityFields, field, value]
+  );
+
+  const isHostOrUser = field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME;
+  const entityType = field === HOST_NAME_FIELD_NAME ? 'host' : 'user';
+
+  const docEntityId =
+    entityType === 'host'
+      ? resolutionIdentifiers['host.entity.id']
+      : resolutionIdentifiers['user.entity.id'];
+
+  const { entityRecord } = useEntityFromStore({
+    entityId: docEntityId,
+    identityFields: resolutionIdentifiers,
+    entityType,
+    skip:
+      !entityStoreV2Enabled ||
+      !isHostOrUser ||
+      Object.keys(resolutionIdentifiers).length === 0,
+  });
+
+  const resolvedEntityId = entityRecord?.entity?.id;
 
   const rightPanelParams = useMemo(
     () =>
       getRightPanelParams({
-        entityIdentifiers,
+        identityFields,
+        entityId: resolvedEntityId,
         field,
         value,
         scopeId,
         ruleId,
       }),
-    [entityIdentifiers, field, value, scopeId, ruleId]
+    [identityFields, resolvedEntityId, field, value, scopeId, ruleId]
   );
 
   const onClick = useCallback(() => {
@@ -106,7 +139,7 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   if (renderPreview) {
     return (
       <PreviewLink
-        entityIdentifiers={entityIdentifiers ?? { [field]: value }}
+        identityFields={identityFields ?? { [field]: value }}
         scopeId={scopeId}
         data-test-subj={dataTestSubj}
       >

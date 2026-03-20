@@ -15,7 +15,10 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import type { EntityIdentifiers } from './entity_identifiers_utils';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { IdentityFields } from './entity_identifiers_utils';
 
 interface Props {
   contextId: string;
@@ -24,7 +27,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
-  entityIdentifiers?: EntityIdentifiers | null;
+  identityFields?: IdentityFields | null;
 }
 
 const UserNameComponent: React.FC<Props> = ({
@@ -34,7 +37,7 @@ const UserNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
-  entityIdentifiers,
+  identityFields,
 }) => {
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
@@ -42,6 +45,17 @@ const UserNameComponent: React.FC<Props> = ({
   const { openFlyout } = useExpandableFlyoutApi();
 
   const isInSecurityApp = useIsInSecurityApp();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const { entityRecord } = useEntityFromStore({
+    identityFields:
+      identityFields ??
+      (userName ? { 'user.name': userName } : undefined),
+    entityType: 'user',
+    skip: !entityStoreV2Enabled,
+  });
+
+  const resolvedEntityId = entityRecord?.entity?.id;
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -56,20 +70,19 @@ const UserNameComponent: React.FC<Props> = ({
       }
 
       const { timelineID } = eventContext;
-      // Use entityIdentifiers from source event if available, otherwise fall back to user.name only
-      const finalEntityIdentifiers = entityIdentifiers || { 'user.name': userName };
       openFlyout({
         right: {
           id: UserPanelKey,
           params: {
-            entityIdentifiers: finalEntityIdentifiers,
+            userName,
+            entityId: resolvedEntityId,
             contextID: contextId,
             scopeId: timelineID,
           },
         },
       });
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName, entityIdentifiers]
+    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName, resolvedEntityId]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

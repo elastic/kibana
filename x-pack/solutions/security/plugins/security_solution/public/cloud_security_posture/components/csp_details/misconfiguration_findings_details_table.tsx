@@ -17,10 +17,8 @@ import { i18n } from '@kbn/i18n';
 import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_STATUS,
-  buildEntityFlyoutPreviewQueryWithStatus,
-  MISCONFIGURATION_QUERY_FIELD,
+  buildMisconfigurationEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsMisconfigurationPanelExpandableFlyoutPropsPreview } from '@kbn/cloud-security-posture';
@@ -37,10 +35,11 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 
 type MisconfigurationSortFieldType =
   | MISCONFIGURATION.RESULT_EVALUATION
@@ -120,9 +119,15 @@ const useGetFindingsStats = () => {
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
-    const euidApi = useEntityStoreEuidApi();
-
+  ({
+    field,
+    value,
+    scopeId,
+  }: {
+    field: CloudPostureEntityIdentifier;
+    value: string;
+    scopeId: string;
+  }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -141,18 +146,15 @@ export const MisconfigurationFindingsDetailsTable = memo(
     sortFieldDirection[sortField] = sortDirection;
 
     const { data, isLoading } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQueryWithStatus(
-        euidApi?.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers) ?? [],
-        currentFilter || undefined,
-        MISCONFIGURATION_QUERY_FIELD
-      ),
+      query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
       sort: [sortFieldDirection],
-      enabled: !!euidApi,
+      enabled: true,
       pageSize: 1,
     });
 
+    const euidApi = useEntityStoreEuidApi();
     const { passedFindings, failedFindings } = useHasMisconfigurations(
-      buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+      buildEntityFlyoutPreviewCspOptions({ [field]: value }, euidApi)
     );
 
     const [pageIndex, setPageIndex] = useState(0);
@@ -210,8 +212,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const getNavUrlParams = useGetNavigationUrlParams();
 
-    const getFindingsPageUrl = (identifiers: EntityIdentifiers) => {
-      return getNavUrlParams(identifiers, 'configurations', ['rule.name']);
+    const getFindingsPageUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
+      return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 
     const linkWidth = 40;
@@ -307,7 +309,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getFindingsPageUrl(entityIdentifiers)}`}
+            path={`${getFindingsPageUrl(value, field)}`}
             target={'_blank'}
             external={false}
             onClick={() => {
@@ -323,7 +325,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Misconfigurations ',
               }
             )}
-            <EuiIcon type={'popout'} />
+            <EuiIcon type={'popout'} aria-hidden={true} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={misconfigurationStats} />

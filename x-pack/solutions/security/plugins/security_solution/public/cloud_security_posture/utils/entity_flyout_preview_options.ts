@@ -10,7 +10,7 @@ import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/fin
 /** API shape needed (from useEntityStoreEuidApi()). */
 export interface EntityFlyoutPreviewApi {
   buildGenericEntityFlyoutPreviewQuery: (
-    entityIdentifiers: Record<string, string>,
+    identityFields: Record<string, string>,
     status?: string,
     queryField?: string
   ) => NonNullable<UseCspOptions['query']>;
@@ -22,12 +22,12 @@ export interface EntityFlyoutPreviewApi {
  * Pass api from useEntityStoreEuidApi(); when null, returns options with enabled: false.
  */
 export const buildEntityFlyoutPreviewCspOptions = (
-  entityIdentifiers: Record<string, string>,
+  identityFields: Record<string, string>,
   api?: EntityFlyoutPreviewApi | null
 ): UseCspOptions =>
   api
     ? {
-        query: api.buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
+        query: api.buildGenericEntityFlyoutPreviewQuery(identityFields),
         sort: [],
         enabled: true,
         pageSize: 1,

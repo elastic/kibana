@@ -24,7 +24,7 @@ import { mockObservedService } from './mocks';
 import { mockServiceRiskScoreState } from '../mocks';
 
 const mockProps: ServicePanelProps = {
-  entityIdentifiers: { 'service.name': 'test' },
+  identityFields: { 'service.name': 'test' },
   contextID: 'test-service-panel',
   scopeId: 'test-scope-id',
 };

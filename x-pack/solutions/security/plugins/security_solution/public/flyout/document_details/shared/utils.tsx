@@ -109,19 +109,19 @@ export const getEventTitle = ({
 };
 
 /**
- * EntityIdentifiers - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
+ * IdentityFields - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
  */
-export type EntityIdentifiers = Record<string, string>;
+export type IdentityFields = Record<string, string>;
 
 /**
- * Helper function to extract user entityIdentifiers as key-value pairs following entity store EUID logic
+ * Helper function to extract user identityFields as key-value pairs following entity store EUID logic
  * Priority: user.entity.id > user.id > user.email > user.name (with related fields)
  */
-export const getUserEntityIdentifiers = (
+export const getUserIdentityFields = (
   dataAsNestedObject: Ecs,
   getFieldsData: GetFieldsData
-): EntityIdentifiers | null => {
-  const identifiers: EntityIdentifiers = {};
+): IdentityFields | null => {
+  const identifiers: IdentityFields = {};
 
   // Check fields in priority order (same as entity store EUID logic)
   const userEntityId = getField(getFieldsData('user.entity.id'));
@@ -169,14 +169,14 @@ export const getUserEntityIdentifiers = (
 };
 
 /**
- * Helper function to extract host entityIdentifiers as key-value pairs following entity store EUID logic
+ * Helper function to extract host identityFields as key-value pairs following entity store EUID logic
  * Priority: host.entity.id > host.id > host.name/hostname (with related fields)
  */
-export const getHostEntityIdentifiers = (
+export const getHostIdentityFields = (
   dataAsNestedObject: Ecs,
   getFieldsData: GetFieldsData
-): EntityIdentifiers | null => {
-  const identifiers: EntityIdentifiers = {};
+): IdentityFields | null => {
+  const identifiers: IdentityFields = {};
 
   // Check fields in priority order (same as entity store EUID logic)
   const hostEntityId = getField(getFieldsData('host.entity.id'));

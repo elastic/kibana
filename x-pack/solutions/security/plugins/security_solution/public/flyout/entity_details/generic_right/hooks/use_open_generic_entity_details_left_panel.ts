@@ -10,7 +10,7 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
-import type { EntityIdentifiers } from '../../../document_details/shared/utils';
+import type { IdentityFields } from '../../../document_details/shared/utils';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -21,22 +21,22 @@ import { type UseGetGenericEntityParams } from './use_get_generic_entity';
 
 export const useOpenGenericEntityDetailsLeftPanel = (
   params: {
-    entityIdentifiers: EntityIdentifiers;
+    identityFields: IdentityFields;
     scopeId: string;
   } & UseGetGenericEntityParams
 ) => {
-  const { entityIdentifiers, entityDocId, entityId, scopeId } = params;
+  const { identityFields, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const euidApi = useEntityStoreEuidApi();
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    identityFields,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
@@ -48,7 +48,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
       params: {
         entityDocId,
         entityId,
-        entityIdentifiers,
+        identityFields,
         scopeId,
         isRiskScoreExist: false,
         hasMisconfigurationFindings,

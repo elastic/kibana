@@ -32,7 +32,7 @@ describe('VulnerabilitiesPreview', () => {
     const { getByTestId } = render(
       <TestProviders>
         <VulnerabilitiesPreview
-          entityIdentifiers={{ 'host.name': 'host1' }}
+          identityFields={{ 'host.name': 'host1' }}
           isPreviewMode={false}
           openDetailsPanel={mockOpenLeftPanel}
         />

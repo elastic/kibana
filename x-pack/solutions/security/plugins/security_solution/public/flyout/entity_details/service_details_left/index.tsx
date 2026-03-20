@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { useTabs } from './tabs';
 import type {
   EntityDetailsLeftPanelTab,
@@ -17,12 +17,12 @@ import type {
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
-const getServiceNameFromEntityIdentifiers = (entityIdentifiers: EntityIdentifiers): string =>
-  entityIdentifiers['service.name'] || Object.values(entityIdentifiers)[0] || '';
+const getServiceNameFromEntityIdentifiers = (identityFields: IdentityFields): string =>
+  identityFields['service.name'] || Object.values(identityFields)[0] || '';
 
 export interface ServiceDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   path?: PanelPath;
   scopeId: string;
 }
@@ -34,19 +34,19 @@ export const ServiceDetailsPanelKey: ServiceDetailsExpandableFlyoutProps['key'] 
 
 export const ServiceDetailsPanel = ({
   isRiskScoreExist,
-  entityIdentifiers,
+  identityFields,
   path,
   scopeId,
 }: ServiceDetailsPanelProps) => {
   const serviceName = useMemo(
-    () => getServiceNameFromEntityIdentifiers(entityIdentifiers ?? {}),
-    [entityIdentifiers]
+    () => getServiceNameFromEntityIdentifiers(identityFields ?? {}),
+    [identityFields]
   );
   const tabs = useTabs(serviceName, scopeId);
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
-    entityIdentifiers ?? {},
+    identityFields ?? {},
     scopeId,
     tabs,
     path
@@ -70,7 +70,7 @@ export const ServiceDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  entityIdentifiers: EntityIdentifiers,
+  identityFields: IdentityFields,
   scopeId: string,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
@@ -88,7 +88,7 @@ const useSelectedTab = (
     openLeftPanel({
       id: ServiceDetailsPanelKey,
       params: {
-        entityIdentifiers,
+        identityFields,
         isRiskScoreExist,
         scopeId,
         path: {

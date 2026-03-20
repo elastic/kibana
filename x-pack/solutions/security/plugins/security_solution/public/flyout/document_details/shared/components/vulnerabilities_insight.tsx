@@ -32,13 +32,13 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../utils';
+import type { IdentityFields } from '../utils';
 
 interface VulnerabilitiesInsightProps {
   /**
    * Entity identifiers used to filter the vulnerabilities by.
    */
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   /**
    * The direction of the flex group
    */
@@ -61,7 +61,7 @@ interface VulnerabilitiesInsightProps {
  * Displays a distribution bar and the total vulnerabilities count for a given entity
  */
 export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
-  entityIdentifiers,
+  identityFields,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -75,7 +75,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     euidApi && typeof euidApi.buildGenericEntityFlyoutPreviewQuery === 'function'
       ? euidApi.buildGenericEntityFlyoutPreviewQuery
       : null;
-  const query = buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } };
+  const query = buildPreviewQuery ? buildPreviewQuery(identityFields) : { bool: { filter: [] } };
   const { data } = useVulnerabilitiesPreview({
     query: query as Parameters<typeof useVulnerabilitiesPreview>[0]['query'],
     sort: [],

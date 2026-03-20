@@ -32,7 +32,7 @@ describe('MisconfigurationsPreview', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MisconfigurationsPreview
-          entityIdentifiers={{ 'host.name': 'host1' }}
+          identityFields={{ 'host.name': 'host1' }}
           isPreviewMode={false}
           openDetailsPanel={mockOpenLeftPanel}
         />

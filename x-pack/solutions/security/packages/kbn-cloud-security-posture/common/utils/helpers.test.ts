@@ -10,9 +10,9 @@ import {
   defaultErrorMessage,
   buildMutedRulesFilter,
   buildEntityAlertsQuery,
-  buildEntityFlyoutPreviewQueryWithStatus,
-  MISCONFIGURATION_QUERY_FIELD,
-  VULNERABILITY_QUERY_FIELD,
+  buildGenericEntityFlyoutPreviewQuery,
+  buildMisconfigurationEntityFlyoutPreviewQuery,
+  buildVulnerabilityEntityFlyoutPreviewQuery,
   getEnrichPolicyId,
   getEntitiesLatestIndexName,
 } from './helpers';
@@ -149,30 +149,105 @@ describe('test helper methods', () => {
     });
   });
 
-  describe('buildEntityFlyoutPreviewQueryWithStatus', () => {
-    const entityFilters = [
-      {
+  describe('buildGenericEntityFlyoutPreviewQuery', () => {
+    it('should return the correct query when given field and query', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const expectedQuery = {
         bool: {
-          should: [{ term: { 'host.name': 'exampleHost' } }],
-          minimum_should_match: 1,
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
-      },
-    ];
+      };
 
-    it('should return the correct query with misconfiguration status filter', () => {
+      expect(buildGenericEntityFlyoutPreviewQuery(field, query)).toEqual(expectedQuery);
+    });
+
+    it('should return the correct query when given field and empty query and empty status', () => {
+      const field = 'host.name';
+      const expectedQuery = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': '' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      expect(buildGenericEntityFlyoutPreviewQuery(field)).toEqual(expectedQuery);
+    });
+
+    it('should return the correct query when given field and queryValue and status but empty queryField', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
       const status = 'pass';
       const expectedQuery = {
         bool: {
           filter: [
-            ...entityFilters,
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      expect(buildGenericEntityFlyoutPreviewQuery(field, query, status)).toEqual(expectedQuery);
+    });
+
+    it('should return the correct query when given field and queryValue and queryField but empty status', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const emptyStatus = undefined;
+      const queryField = 'some.field';
+      const expectedQuery = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      expect(buildGenericEntityFlyoutPreviewQuery(field, query, emptyStatus, queryField)).toEqual(
+        expectedQuery
+      );
+    });
+
+    it('should return the correct query when given all the parameters', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const emptyStatus = 'some.status';
+      const queryField = 'some.field';
+      const expectedQuery = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
             {
               bool: {
                 should: [
-                  {
-                    term: {
-                      [MISCONFIGURATION_QUERY_FIELD]: { value: 'pass', case_insensitive: true },
-                    },
-                  },
+                  { term: { 'some.field': { value: 'some.status', case_insensitive: true } } },
                 ],
                 minimum_should_match: 1,
               },
@@ -181,25 +256,61 @@ describe('test helper methods', () => {
         },
       };
 
-      expect(
-        buildEntityFlyoutPreviewQueryWithStatus(entityFilters, status, MISCONFIGURATION_QUERY_FIELD)
-      ).toEqual(expectedQuery);
+      expect(buildGenericEntityFlyoutPreviewQuery(field, query, emptyStatus, queryField)).toEqual(
+        expectedQuery
+      );
     });
+  });
 
-    it('should return the correct query with vulnerability status filter', () => {
+  describe('buildMisconfigurationEntityFlyoutPreviewQuery', () => {
+    it('should return the correct query when given field, queryValue, status and queryType Misconfiguration', () => {
+      const field = 'host.name';
+      const queryValue = 'exampleHost';
+      const status = 'pass';
+      const expectedQuery = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { term: { 'result.evaluation': { value: 'pass', case_insensitive: true } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      expect(buildMisconfigurationEntityFlyoutPreviewQuery(field, queryValue, status)).toEqual(
+        expectedQuery
+      );
+    });
+  });
+  describe('buildVulnerabilityEntityFlyoutPreviewQuery', () => {
+    it('should return the correct query when given field, queryValue, status and queryType Vulnerability', () => {
+      const field = 'host.name';
+      const queryValue = 'exampleHost';
       const status = 'low';
       const expectedQuery = {
         bool: {
           filter: [
-            ...entityFilters,
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
             {
               bool: {
                 should: [
-                  {
-                    term: {
-                      [VULNERABILITY_QUERY_FIELD]: { value: 'low', case_insensitive: true },
-                    },
-                  },
+                  { term: { 'vulnerability.severity': { value: 'low', case_insensitive: true } } },
                 ],
                 minimum_should_match: 1,
               },
@@ -208,18 +319,9 @@ describe('test helper methods', () => {
         },
       };
 
-      expect(
-        buildEntityFlyoutPreviewQueryWithStatus(entityFilters, status, VULNERABILITY_QUERY_FIELD)
-      ).toEqual(expectedQuery);
-    });
-
-    it('should return only entity filters when status or queryField is omitted', () => {
-      expect(buildEntityFlyoutPreviewQueryWithStatus(entityFilters)).toEqual({
-        bool: { filter: entityFilters },
-      });
-      expect(buildEntityFlyoutPreviewQueryWithStatus(entityFilters, 'pass')).toEqual({
-        bool: { filter: entityFilters },
-      });
+      expect(buildVulnerabilityEntityFlyoutPreviewQuery(field, queryValue, status)).toEqual(
+        expectedQuery
+      );
     });
   });
 

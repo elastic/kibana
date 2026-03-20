@@ -18,11 +18,7 @@ describe('helpers', () => {
 
       expect(flyoutPanelProps).toEqual({
         id: 'host-panel',
-        params: {
-          contextID: contextId,
-          entityIdentifiers: { [fieldName]: value },
-          scopeId: 'alerts-page',
-        },
+        params: { contextID: contextId, hostName: value, scopeId: 'alerts-page' },
       });
     });
 
@@ -35,11 +31,7 @@ describe('helpers', () => {
 
       expect(flyoutPanelProps).toEqual({
         id: 'user-panel',
-        params: {
-          contextID: contextId,
-          entityIdentifiers: { [fieldName]: value },
-          scopeId: 'alerts-page',
-        },
+        params: { contextID: contextId, userName: value, scopeId: 'alerts-page' },
       });
     });
 

@@ -33,8 +33,12 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+const documentEntityIdentifiers = { 'user.name': 'testUser', 'user.email': 'test@test.com' };
+
 const mockProps = {
-  entityIdentifiers: { 'user.name': 'testUser', 'user.email': 'test@test.com' },
+  documentEntityIdentifiers,
+  userName: 'testUser',
+  entityId: 'resolved-entity-id',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
   hasMisconfigurationFindings: false,
@@ -66,7 +70,7 @@ describe('useNavigateToUserDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: UserDetailsPanelKey,
       params: {
-        entityIdentifiers: mockProps.entityIdentifiers,
+        identityFields: mockProps.documentEntityIdentifiers,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },
@@ -89,13 +93,14 @@ describe('useNavigateToUserDetails', () => {
         params: {
           contextID: mockProps.contextID,
           scopeId: mockProps.scopeId,
-          entityIdentifiers: mockProps.entityIdentifiers,
+          userName: mockProps.userName,
+          entityId: mockProps.entityId,
         },
       },
       left: {
         id: UserDetailsPanelKey,
         params: {
-          entityIdentifiers: mockProps.entityIdentifiers,
+          identityFields: mockProps.documentEntityIdentifiers,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,
           path: { tab, subTab },

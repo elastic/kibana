@@ -51,8 +51,12 @@ import { EntityIconByType, getEntityType, sourceFieldToText } from '../entity_st
 import { CRITICALITY_LEVEL_TITLE } from '../asset_criticality/translations';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreLevel } from '../severity/common';
-import { EntityPanelKeyByType } from '../../../flyout/entity_details/shared/constants';
-import { buildEntityIdentifiers } from '../entity_store/hooks/use_entities_list_columns';
+import {
+  EntityPanelKeyByType,
+  HostPanelKey,
+  UserPanelKey,
+} from '../../../flyout/entity_details/shared/constants';
+import { buildIdentityFields } from '../entity_store/hooks/use_entities_list_columns';
 
 const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
 
@@ -149,18 +153,46 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
           const id = EntityPanelKeyByType[entityType];
 
           if (id) {
-            // Build entityIdentifiers following EUID priority logic
-            const entityIdentifiers = buildEntityIdentifiers(record);
+            // Build identityFields following EUID priority logic
+            const identityFields = buildIdentityFields(record);
 
-            if (entityIdentifiers) {
-              openRightPanel({
-                id,
-                params: {
-                  entityIdentifiers,
-                  contextID: THREAT_HUNTING_TABLE_ID,
-                  scopeId: THREAT_HUNTING_TABLE_ID,
-                },
-              });
+            if (identityFields) {
+              const storeEntityId = record.entity?.id;
+
+              if (id === UserPanelKey) {
+                openRightPanel({
+                  id,
+                  params: {
+                    userName: identityFields['user.name'] || entityName || '',
+                    entityId: storeEntityId,
+                    contextID: THREAT_HUNTING_TABLE_ID,
+                    scopeId: THREAT_HUNTING_TABLE_ID,
+                  },
+                });
+              } else if (id === HostPanelKey) {
+                openRightPanel({
+                  id,
+                  params: {
+                    hostName:
+                      identityFields['host.name'] ||
+                      identityFields['host.hostname'] ||
+                      entityName ||
+                      '',
+                    entityId: storeEntityId,
+                    contextID: THREAT_HUNTING_TABLE_ID,
+                    scopeId: THREAT_HUNTING_TABLE_ID,
+                  },
+                });
+              } else {
+                openRightPanel({
+                  id,
+                  params: {
+                    identityFields,
+                    contextID: THREAT_HUNTING_TABLE_ID,
+                    scopeId: THREAT_HUNTING_TABLE_ID,
+                  },
+                });
+              }
             }
           }
         };

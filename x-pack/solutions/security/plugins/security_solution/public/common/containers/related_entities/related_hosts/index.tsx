@@ -12,7 +12,6 @@ import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/se
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import { useSearchStrategy } from '../../use_search_strategy';
 import { FAIL_RELATED_HOSTS } from './translations';
-import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 import { useSpaceId } from '../../../hooks/use_space_id';
 
 export interface UseUserRelatedHostsResult {
@@ -24,13 +23,15 @@ export interface UseUserRelatedHostsResult {
 }
 
 interface UseUserRelatedHostsParam {
-  entityIdentifiers: EntityIdentifiers;
+  userName: string;
+  entityId?: string;
   from: string;
   skip?: boolean;
 }
 
 export const useUserRelatedHosts = ({
-  entityIdentifiers,
+  userName,
+  entityId,
   from,
   skip = false,
 }: UseUserRelatedHostsParam): UseUserRelatedHostsResult => {
@@ -72,10 +73,17 @@ export const useUserRelatedHosts = ({
     () => ({
       defaultIndex: entityStoreIndexPattern,
       factoryQueryType: RelatedEntitiesQueries.relatedHosts,
-      entityIdentifiers,
+      userName,
+      filter: entityId
+        ? {
+            term: {
+              'entity.id': entityId,
+            },
+          }
+        : undefined,
       from,
     }),
-    [entityStoreIndexPattern, from, entityIdentifiers]
+    [entityStoreIndexPattern, from, userName, entityId]
   );
 
   useEffect(() => {

@@ -27,7 +27,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -107,17 +107,17 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  entityIdentifiers,
+  identityFields,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const euidApi = useEntityStoreEuidApi();
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
   );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 

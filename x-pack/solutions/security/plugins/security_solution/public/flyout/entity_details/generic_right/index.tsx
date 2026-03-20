@@ -84,7 +84,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   });
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    entityIdentifiers: { 'related.entity': genericInsightsValue || '' },
+    identityFields: { 'related.entity': genericInsightsValue || '' },
     ...params,
   });
 
@@ -213,7 +213,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
       <GenericEntityFlyoutContent
         source={source}
         openGenericEntityDetailsPanelByPath={openGenericEntityDetailsPanelByPath}
-        entityIdentifiers={{ 'related.entity': source.entity.id }}
+        identityFields={{ 'related.entity': source.entity.id }}
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
       <GenericEntityFlyoutFooter

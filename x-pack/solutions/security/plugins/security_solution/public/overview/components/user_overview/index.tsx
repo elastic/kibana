@@ -43,7 +43,6 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreDocTooltip } from '../common';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 
@@ -59,7 +58,7 @@ export interface UserSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  entityIdentifiers: EntityIdentifiers;
+  userName: string;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
@@ -69,7 +68,7 @@ export interface UserSummaryProps {
   firstSeenFromEntityStore?: string;
   /** When using Entity Store v2: last seen from entity lifecycle. */
   lastSeenFromEntityStore?: string;
-  /** When true (e.g. from explore pages), only user.name from entityIdentifiers is used with a terms filter; entityIdentifiers filter is not applied. */
+  /** When true (e.g. from explore pages), only user.name from identityFields is used with a terms filter; identityFields filter is not applied. */
   isExploreContext?: boolean;
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
@@ -97,7 +96,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     narrowDateRange,
     startDate,
     endDate,
-    entityIdentifiers,
+    userName,
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
@@ -110,22 +109,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
-
-    // Extract user name: when isExploreContext only use user.name and apply terms filter;
-    // otherwise use entityIdentifiers with priority fallback for buildUserNamesFilter (terms).
-    const userName = useMemo(() => {
-      if (isExploreContext) {
-        return entityIdentifiers['user.name'] ?? '';
-      }
-      return (
-        entityIdentifiers['user.name'] ||
-        entityIdentifiers['user.id'] ||
-        entityIdentifiers['user.email'] ||
-        entityIdentifiers['user.entity.id'] ||
-        Object.values(entityIdentifiers)[0] ||
-        ''
-      );
-    }, [entityIdentifiers, isExploreContext]);
 
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -141,8 +124,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      skip:
-        !!riskScoreStateFromEntityStore || !userName || Object.keys(entityIdentifiers).length === 0,
+      skip: !!riskScoreStateFromEntityStore || !userName,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,

@@ -28,7 +28,7 @@ import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../ru
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
@@ -53,7 +53,12 @@ interface GetFlyoutParams {
   scopeId: string;
   ruleId?: string;
   ancestorsIndexName?: string;
-  entityIdentifiers?: EntityIdentifiers;
+  /**
+   * Fields from the source document used to resolve the entity when `entityId` is not known.
+   */
+  identityFields?: IdentityFields;
+  /** Entity Store v2 canonical id when already resolved (e.g. from table cell prefetch). */
+  entityId?: string;
 }
 
 const FLYOUT_FIELDS = [
@@ -67,7 +72,8 @@ const FLYOUT_FIELDS = [
 // If flyout is currently open, preview panel params are returned
 // If flyout is not currently open, flyout rightpanel params are returned
 export const getRightPanelParams = ({
-  entityIdentifiers,
+  identityFields,
+  entityId,
   value,
   field,
   scopeId,
@@ -98,7 +104,7 @@ export const getRightPanelParams = ({
           hostName: value,
           scopeId,
           contextID: scopeId,
-          entityIdentifiers,
+          entityId,
         },
       };
     case USER_NAME_FIELD_NAME:
@@ -108,7 +114,7 @@ export const getRightPanelParams = ({
           userName: value,
           scopeId,
           contextID: scopeId,
-          entityIdentifiers,
+          entityId,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:
@@ -129,7 +135,8 @@ export const getPreviewPanelParams = ({
   scopeId,
   ruleId,
   ancestorsIndexName,
-  entityIdentifiers,
+  identityFields,
+  entityId,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
   if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
@@ -158,7 +165,7 @@ export const getPreviewPanelParams = ({
           scopeId,
           banner: HOST_PREVIEW_BANNER,
           contextID: scopeId || 'highlighted-fields-host-preview',
-          entityIdentifiers,
+          entityId,
         },
       };
     case USER_NAME_FIELD_NAME:
@@ -169,7 +176,7 @@ export const getPreviewPanelParams = ({
           scopeId,
           banner: USER_PREVIEW_BANNER,
           contextID: scopeId || 'highlighted-fields-user-preview',
-          entityIdentifiers,
+          entityId,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:

@@ -77,10 +77,12 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           item={item}
           index={index}
           title={String(
-            (item.panel.params?.entityIdentifiers as Record<string, string>)?.['host.name'] ||
+            item.panel.params?.hostName ??
+              (item.panel.params?.identityFields as Record<string, string>)?.['host.name'] ??
               Object.values(
-                (item.panel.params?.entityIdentifiers as Record<string, string>) || {}
-              )[0]
+                (item.panel.params?.identityFields as Record<string, string>) || {}
+              )[0] ??
+              ''
           )}
           icon={'storage'}
           name={'Host'}
@@ -93,10 +95,12 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           item={item}
           index={index}
           title={String(
-            (item.panel.params?.entityIdentifiers as Record<string, string>)?.['user.name'] ||
+            item.panel.params?.userName ??
+              (item.panel.params?.identityFields as Record<string, string>)?.['user.name'] ??
               Object.values(
-                (item.panel.params?.entityIdentifiers as Record<string, string>) || {}
-              )[0]
+                (item.panel.params?.identityFields as Record<string, string>) || {}
+              )[0] ??
+              ''
           )}
           icon={'user'}
           name={'User'}

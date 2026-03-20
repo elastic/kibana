@@ -29,8 +29,21 @@ jest.mock('../../../common/lib/kibana', () => {
         telemetry: mockedTelemetry,
       },
     }),
+    useUiSetting: () => false,
   };
 });
+
+jest.mock('../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -38,14 +51,14 @@ jest.mock('@kbn/expandable-flyout', () => ({
 }));
 
 const renderPreviewLink = (
-  entityIdentifiers: Record<string, string>,
+  identityFields: Record<string, string>,
   dataTestSubj?: string,
   preferredField?: 'host.name' | 'user.name'
 ) =>
   render(
     <TestProviders>
       <PreviewLink
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         data-test-subj={dataTestSubj}
         scopeId={'scopeId'}
         ruleId={'ruleId'}
@@ -59,15 +72,15 @@ describe('<PreviewLink />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
-  it('should not render a link if entityIdentifiers do not have preview', () => {
+  it('should not render a link if identityFields do not have preview', () => {
     const { queryByTestId } = renderPreviewLink({ field: 'value' });
     expect(queryByTestId(FLYOUT_PREVIEW_LINK_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render children without link if entityIdentifiers do not have preview', () => {
+  it('should render children without link if identityFields do not have preview', () => {
     const { queryByTestId, getByTestId } = render(
       <TestProviders>
-        <PreviewLink entityIdentifiers={{ field: 'value' }} scopeId={'scopeId'}>
+        <PreviewLink identityFields={{ field: 'value' }} scopeId={'scopeId'}>
           <div data-test-subj="children">{'children'}</div>
         </PreviewLink>
       </TestProviders>
@@ -85,10 +98,10 @@ describe('<PreviewLink />', () => {
       id: HostPreviewPanelKey,
       params: {
         contextID: 'scopeId',
-        entityIdentifiers: { 'host.name': 'host' },
         hostName: 'host',
         scopeId: 'scopeId',
         banner: HOST_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });
@@ -101,22 +114,22 @@ describe('<PreviewLink />', () => {
       id: UserPreviewPanelKey,
       params: {
         contextID: 'scopeId',
-        entityIdentifiers: { 'user.name': 'user' },
         userName: 'user',
         scopeId: 'scopeId',
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });
 
-  it('should open user preview when preferredField is user.name and entityIdentifiers include both host and user', () => {
-    const entityIdentifiers = {
+  it('should open user preview when preferredField is user.name and identityFields include both host and user', () => {
+    const identityFields = {
       'user.name': 'alice',
       'user.domain': 'domain',
       'host.name': 'host-1',
     };
     const { getByTestId } = renderPreviewLink(
-      entityIdentifiers,
+      identityFields,
       'user-link-with-preferred',
       'user.name'
     );
@@ -126,10 +139,10 @@ describe('<PreviewLink />', () => {
       id: UserPreviewPanelKey,
       params: {
         contextID: 'scopeId',
-        entityIdentifiers,
         userName: 'alice',
         scopeId: 'scopeId',
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });
@@ -167,7 +180,7 @@ describe('<PreviewLink />', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <PreviewLink
-          entityIdentifiers={{ 'kibana.alert.rule.name': 'rule' }}
+          identityFields={{ 'kibana.alert.rule.name': 'rule' }}
           data-test-subj={'rule-link'}
           scopeId={'scopeId'}
         />
@@ -180,7 +193,7 @@ describe('<PreviewLink />', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <PreviewLink
-          entityIdentifiers={{ 'kibana.alert.rule.name': 'rule' }}
+          identityFields={{ 'kibana.alert.rule.name': 'rule' }}
           data-test-subj={'rule-link'}
           scopeId={TableId.rulePreview}
         />

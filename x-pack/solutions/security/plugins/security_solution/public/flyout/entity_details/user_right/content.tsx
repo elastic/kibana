@@ -21,7 +21,7 @@ import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
@@ -32,7 +32,7 @@ export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> &
 };
 
 interface UserPanelContentProps {
-  entityIdentifiers: EntityIdentifiers;
+  lookupFields: IdentityFields;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
@@ -51,7 +51,7 @@ interface UserPanelContentProps {
 }
 
 export const UserPanelContent = ({
-  entityIdentifiers,
+  identityFields,
   observedUser,
   riskScoreState,
   recalculatingScore,
@@ -70,10 +70,10 @@ export const UserPanelContent = ({
     'entityDetailsHighlightsEnabled'
   );
 
-  // Extract userName from entityIdentifiers for components that need a string
-  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  // Extract userName from identityFields for components that need a string
+  // Priority: identityFields['user.name'] > identityFields[first key]
   const userName =
-    entityIdentifiers[EntityIdentifierFields.userName] || Object.values(entityIdentifiers)[0] || '';
+    identityFields[EntityIdentifierFields.userName] || Object.values(identityFields)[0] || '';
 
   return (
     <FlyoutBody>
@@ -98,7 +98,7 @@ export const UserPanelContent = ({
         )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
-          entity={{ identifiers: entityIdentifiers, name: userName, type: EntityType.user }}
+          entity={{ identifiers: identityFields, name: userName, type: EntityType.user }}
           onChange={onAssetCriticalityChange}
           entityRecord={entityRecord}
           criticalityFromEntityStore={criticalityFromEntityStore}
@@ -106,12 +106,12 @@ export const UserPanelContent = ({
         />
       )}
       <EntityInsight
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
-        entityIdentifiers={entityIdentifiers}
+        identityFields={identityFields}
         userName={userName}
         observedUser={observedUser}
         contextID={contextID}

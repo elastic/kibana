@@ -42,17 +42,23 @@ import {
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
+import { getHostIdentityFieldsFromStoreRecord } from '../shared/entity_record_to_identifiers';
+import type { HostEntity } from '../../../../common/api/entity_analytics';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   isPreviewMode: boolean;
   /**
-   * Entity identifiers for the host (following entity store EUID logic)
+   * Display name from the source row / document (typically `host.name`).
    */
-  entityIdentifiers: EntityIdentifiers;
+  hostName: string;
+  /**
+   * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
+   */
+  entityId?: string;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -73,7 +79,8 @@ export const HostPanel = ({
   contextID,
   scopeId,
   isPreviewMode = false,
-  entityIdentifiers,
+  hostName,
+  entityId: entityIdProp,
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
@@ -81,30 +88,56 @@ export const HostPanel = ({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const hasValidIdentifiers = entityIdentifiers && Object.keys(entityIdentifiers).length > 0;
 
-  // Extract hostName from entityIdentifiers
-  // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
-  const effectiveHostName = useMemo<string>(() => {
-    if (!hasValidIdentifiers) return '';
-    const hostNameFromIdentifiers =
-      entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0];
-    return (hostNameFromIdentifiers as string) ?? '';
-  }, [entityIdentifiers, hasValidIdentifiers]);
+  const resolutionSeedIdentifiers = useMemo(() => {
+    const next: IdentityFields = {};
+    if (hostName) {
+      next['host.name'] = hostName;
+    }
+    if (entityIdProp) {
+      next['host.entity.id'] = entityIdProp;
+    }
+    return next;
+  }, [hostName, entityIdProp]);
 
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
   const entityFromStoreResult = useEntityFromStore({
-    entityIdentifiers,
+    entityId: entityIdProp,
+    identityFields: Object.keys(resolutionSeedIdentifiers).length
+      ? resolutionSeedIdentifiers
+      : undefined,
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
   });
+
+  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const record = entityFromStoreResult.entityRecord;
+    if (record && 'host' in record) {
+      return getHostIdentityFieldsFromStoreRecord(record as HostEntity);
+    }
+    return resolutionSeedIdentifiers;
+  }, [entityFromStoreResult.entityRecord, resolutionSeedIdentifiers]);
+
+  const resolvedEntityId = entityFromStoreResult.entityRecord?.entity?.id ?? entityIdProp;
+
+  const effectiveHostName = useMemo<string>(
+    () =>
+      hostName ||
+      documentEntityIdentifiers['host.name'] ||
+      Object.values(documentEntityIdentifiers)[0] ||
+      '',
+    [hostName, documentEntityIdentifiers]
+  );
+
+  const hasResolutionInput = Boolean(entityIdProp || hostName);
+
   const hostFilterQuery = useMemo(
     () =>
-      (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers, {
+      (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', documentEntityIdentifiers, {
         includeEuidSourceFilter: entityStoreV2Enabled,
       }) as ESQuery | undefined) ??
       (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [euidApi?.euid, entityIdentifiers, effectiveHostName, entityStoreV2Enabled]
+    [euidApi?.euid, documentEntityIdentifiers, effectiveHostName, entityStoreV2Enabled]
   );
 
   // Risk score index is keyed by host.name; use host name filter so the API finds the host
@@ -140,22 +173,22 @@ export const HostPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(documentEntityIdentifiers, euidApi)
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    buildEntityFlyoutPreviewCspOptions(documentEntityIdentifiers, euidApi)
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    identityFields: documentEntityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
   });
 
   const observedHost = useObservedHost(
-    entityIdentifiers,
+    effectiveHostName,
     scopeId,
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
@@ -173,7 +206,7 @@ export const HostPanel = ({
     setQuery,
   });
 
-  // When entity store v2 is enabled, use the first entity from the store that matches entityIdentifiers
+  // When entity store v2 is enabled, use the first entity from the store that matches identityFields
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
     ? observedHost.entityRecord ?? undefined
     : undefined;
@@ -205,7 +238,8 @@ export const HostPanel = ({
   );
 
   const openDetailsPanel = useNavigateToHostDetails({
-    entityIdentifiers,
+    hostName: effectiveHostName,
+    entityId: resolvedEntityId,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -227,7 +261,7 @@ export const HostPanel = ({
 
   const noEntityInStore =
     entityStoreV2Enabled &&
-    hasValidIdentifiers &&
+    hasResolutionInput &&
     !entityFromStoreResult.isLoading &&
     !observedHost.entityRecord;
 
@@ -245,7 +279,7 @@ export const HostPanel = ({
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <HostPanelHeader
-        entityIdentifiers={entityIdentifiers}
+        identityFields={documentEntityIdentifiers}
         lastSeen={observedHost.lastSeen}
         entity={entityFromStore}
       />
@@ -259,7 +293,7 @@ export const HostPanel = ({
         />
       )}
       <HostPanelContent
-        entityIdentifiers={entityIdentifiers}
+        identityFields={documentEntityIdentifiers}
         observedHost={observedHost}
         riskScoreState={effectiveRiskScoreState}
         contextID={safeContextID}
@@ -285,14 +319,15 @@ export const HostPanel = ({
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter
-          entityIdentifiers={entityIdentifiers}
+          hostName={effectiveHostName}
+          entityId={resolvedEntityId}
           contextID={safeContextID}
           scopeId={scopeId}
           entity={entityFromStore}
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (
-        <HostPanelFooter entityIdentifiers={entityIdentifiers} entity={entityFromStore} />
+        <HostPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
       )}
     </>
   );

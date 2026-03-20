@@ -5,19 +5,37 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
-import type { ESBoolQuery } from '../../../../common/typed_json';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { GenericBuckets } from '../../../../common/search_strategy';
+import type { ESBoolQuery, ESQuery, ESTermQuery } from '../../../../common/typed_json';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  getHostIdentityFieldsFromStoreRecord,
+  getUserIdentityFieldsFromStoreRecord,
+} from '../../../flyout/entity_details/shared/entity_record_to_identifiers';
 import { useGlobalTime } from '../../containers/use_global_time';
+import { useUiSetting } from '../../lib/kibana';
 import { useQueryInspector } from '../page/manage_query';
-import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+
+const ENTITY_ID_FIELD = 'entity.id';
+
+const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
+  if (type === EntityType.host || type === 'host') {
+    return 'host';
+  }
+  if (type === EntityType.user || type === 'user') {
+    return 'user';
+  }
+  return undefined;
+};
 
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;
@@ -27,13 +45,13 @@ export interface AlertCountByRuleByStatusItem {
 
 export interface UseAlertCountByRuleByStatusProps {
   additionalFilters?: ESBoolQuery[];
-  entityIdentifiers: EntityIdentifiers;
+  field: string;
+  value: string;
+  entityType?: string;
   queryId: string;
   statuses: Status[];
   skip?: boolean;
   signalIndexName: string | null;
-  /** When true (e.g. from explore pages), entity store filters are not applied; only user.name or host.name term filter from entityIdentifiers is used */
-  isExploreContext?: boolean;
 }
 export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusProps) => {
   items: AlertCountByRuleByStatusItem[];
@@ -43,38 +61,65 @@ export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusPro
 
 const ALERTS_BY_RULE_AGG = 'alertsByRuleAggregation';
 
-/**
- * Builds a single term filter from entityIdentifiers for explore context:
- * uses user.name or host.name (or host.hostname value on host.name) as the filter field.
- */
-const getExploreEntityNameFilter = (
-  entityIdentifiers: EntityIdentifiers
-): QueryDslQueryContainer[] => {
-  const userName = entityIdentifiers['user.name'];
-  if (userName != null && userName !== '') {
-    return [{ term: { 'user.name': userName } }];
-  }
-  const hostName = entityIdentifiers['host.name'] ?? entityIdentifiers['host.hostname'];
-  if (hostName != null && hostName !== '') {
-    return [{ term: { 'host.name': hostName } }];
-  }
-  return [];
-};
-
 export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   additionalFilters,
-  entityIdentifiers,
+  field,
+  value,
+  entityType,
   queryId,
   statuses,
   skip = false,
   signalIndexName,
-  isExploreContext = false,
 }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
-  const euidApi = useEntityStoreEuidApi();
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const isEntityIdField = field === ENTITY_ID_FIELD;
+  const storeEntityType = toStoreEntityType(entityType);
+
+  const shouldFetchFromEntityStore =
+    isEntityIdField && entityStoreV2Enabled && storeEntityType != null;
+
+  const entityFromStore = useEntityFromStore({
+    entityId: value,
+    entityType: storeEntityType ?? 'host',
+    skip: skip || !shouldFetchFromEntityStore,
+  });
+
+  const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
+
+  const identityFieldsForQuery = useMemo(() => {
+    if (!isEntityIdField || !shouldFetchFromEntityStore) {
+      return undefined;
+    }
+    if (entityFromStoreLoading) {
+      return undefined;
+    }
+    if (!entityRecord) {
+      return { [ENTITY_ID_FIELD]: value };
+    }
+    if (storeEntityType === 'host' && 'host' in entityRecord) {
+      return getHostIdentityFieldsFromStoreRecord(entityRecord);
+    }
+    if (storeEntityType === 'user' && 'user' in entityRecord) {
+      return getUserIdentityFieldsFromStoreRecord(entityRecord);
+    }
+    return { [ENTITY_ID_FIELD]: value };
+  }, [
+    entityRecord,
+    entityFromStoreLoading,
+    isEntityIdField,
+    shouldFetchFromEntityStore,
+    storeEntityType,
+    value,
+  ]);
+
+  const skipAlertsQuery =
+    skip ||
+    (shouldFetchFromEntityStore && (entityFromStoreLoading || identityFieldsForQuery == null));
 
   const {
     loading: isLoading,
@@ -88,49 +133,29 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       additionalFilters,
       from,
       to,
-      entityIdentifiers,
+      field,
+      value,
       statuses,
-      isExploreContext,
-      buildEntityFiltersFromEntityIdentifiers: euidApi?.buildEntityFiltersFromEntityIdentifiers,
+      identityFields: identityFieldsForQuery,
     }),
-    skip,
+    skip: skipAlertsQuery,
     queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
     indexName: signalIndexName,
   });
 
-  const entityIdentifiersKey = JSON.stringify(entityIdentifiers);
-  const additionalFiltersKey = JSON.stringify(additionalFilters ?? []);
-  const statusesKey = JSON.stringify(statuses);
-
-  const entityIdentifiersRef = useRef(entityIdentifiers);
-  const additionalFiltersRef = useRef(additionalFilters);
-  const statusesRef = useRef(statuses);
-  entityIdentifiersRef.current = entityIdentifiers;
-  additionalFiltersRef.current = additionalFilters;
-  statusesRef.current = statuses;
-
   useEffect(() => {
     setAlertsQuery(
       buildRuleAlertsByEntityQuery({
-        additionalFilters: additionalFiltersRef.current ?? [],
+        additionalFilters,
         from,
         to,
-        entityIdentifiers: entityIdentifiersRef.current,
-        statuses: statusesRef.current,
-        isExploreContext,
-        buildEntityFiltersFromEntityIdentifiers: euidApi?.buildEntityFiltersFromEntityIdentifiers,
+        field,
+        value,
+        statuses,
+        identityFields: identityFieldsForQuery,
       })
     );
-  }, [
-    setAlertsQuery,
-    from,
-    to,
-    entityIdentifiersKey,
-    statusesKey,
-    additionalFiltersKey,
-    isExploreContext,
-    euidApi,
-  ]);
+  }, [setAlertsQuery, from, to, field, value, statuses, additionalFilters, identityFieldsForQuery]);
 
   useEffect(() => {
     if (!data) {
@@ -168,53 +193,63 @@ export const buildRuleAlertsByEntityQuery = ({
   additionalFilters = [],
   from,
   to,
-  entityIdentifiers,
+  field,
+  value,
   statuses,
-  isExploreContext = false,
-  buildEntityFiltersFromEntityIdentifiers: buildEntityFilters,
+  identityFields,
 }: {
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
   statuses: string[];
-  entityIdentifiers: EntityIdentifiers;
-  isExploreContext?: boolean;
-  buildEntityFiltersFromEntityIdentifiers?: (
-    ids: Record<string, string>
-  ) => QueryDslQueryContainer[];
+  field: string;
+  value: string;
+  identityFields?: Record<string, string>;
 }) => {
-  const entityFilters = isExploreContext
-    ? getExploreEntityNameFilter(entityIdentifiers)
-    : buildEntityFilters
-    ? buildEntityFilters(entityIdentifiers)
-    : getExploreEntityNameFilter(entityIdentifiers);
+  const entityTermFilters: ESTermQuery[] =
+    identityFields != null && Object.keys(identityFields).length > 0
+      ? Object.entries(identityFields).map(([entityField, entityValue]) => ({
+          term: {
+            [entityField]: entityValue,
+          },
+        }))
+      : [
+          {
+            term: {
+              [field]: value,
+            },
+          },
+        ];
+
+  const filterClauses: Array<ESBoolQuery | ESQuery> = [
+    ...additionalFilters,
+    {
+      range: {
+        '@timestamp': {
+          gte: from,
+          lte: to,
+        },
+      },
+    },
+    ...(statuses?.length > 0
+      ? [
+          {
+            terms: {
+              'kibana.alert.workflow_status': statuses,
+            },
+          },
+        ]
+      : []),
+    ...entityTermFilters,
+  ];
+
   return {
     size: 0,
     _source: false,
     fields: [KIBANA_RULE_ID],
     query: {
       bool: {
-        filter: [
-          ...additionalFilters,
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-              },
-            },
-          },
-          ...(statuses?.length > 0
-            ? [
-                {
-                  terms: {
-                    'kibana.alert.workflow_status': statuses,
-                  },
-                },
-              ]
-            : []),
-          ...entityFilters,
-        ],
+        filter: filterClauses,
       },
     },
     aggs: {

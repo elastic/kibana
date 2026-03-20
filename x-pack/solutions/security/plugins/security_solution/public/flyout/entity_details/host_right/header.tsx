@@ -22,12 +22,12 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 interface HostPanelHeaderProps {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   lastSeen: FirstLastSeenData;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
@@ -36,13 +36,13 @@ interface HostPanelHeaderProps {
 const linkTitleCSS = { width: 'fit-content' };
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ entityIdentifiers, lastSeen, entity }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ identityFields, lastSeen, entity }: HostPanelHeaderProps) => {
   const hostName = useMemo(
     () =>
-      entityIdentifiers[EntityIdentifierFields.hostName] ||
-      Object.values(entityIdentifiers)[0] ||
+      identityFields[EntityIdentifierFields.hostName] ||
+      Object.values(identityFields)[0] ||
       '',
-    [entityIdentifiers]
+    [identityFields]
   );
 
   const lastSeenDate = lastSeen?.date;

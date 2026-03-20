@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getHostEntityIdentifiers, getUserEntityIdentifiers } from '../../shared/utils';
+import { getHostIdentityFields, getUserIdentityFields } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
 import { LeftPanelInsightsTab } from '../../left';
@@ -26,17 +26,19 @@ import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_ent
  */
 export const EntitiesOverview: React.FC = () => {
   const { getFieldsData, dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
-  const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
-  const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
+  const hostEntityIdentifiers = getHostIdentityFields(dataAsNestedObject, getFieldsData);
+  const userEntityIdentifiers = getUserIdentityFields(dataAsNestedObject, getFieldsData);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const userEntityFromStore = useEntityFromStore({
-    entityIdentifiers: userEntityIdentifiers ?? {},
+    entityId: userEntityIdentifiers?.['user.entity.id'],
+    identityFields: userEntityIdentifiers ?? undefined,
     entityType: 'user',
     skip: !userEntityIdentifiers || !entityStoreV2Enabled,
   });
   const hostEntityFromStore = useEntityFromStore({
-    entityIdentifiers: hostEntityIdentifiers ?? {},
+    entityId: hostEntityIdentifiers?.['host.entity.id'],
+    identityFields: hostEntityIdentifiers ?? undefined,
     entityType: 'host',
     skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
   });
@@ -86,7 +88,7 @@ export const EntitiesOverview: React.FC = () => {
               <>
                 <EuiFlexItem>
                   <UserEntityOverview
-                    entityIdentifiers={userEntityIdentifiers}
+                    identityFields={userEntityIdentifiers}
                     entityRecord={
                       entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined
                     }
@@ -98,7 +100,7 @@ export const EntitiesOverview: React.FC = () => {
             {showHostOverview && hostEntityIdentifiers && (
               <EuiFlexItem>
                 <HostEntityOverview
-                  entityIdentifiers={hostEntityIdentifiers}
+                  identityFields={hostEntityIdentifiers}
                   entityRecord={entityStoreV2Enabled ? hostEntityFromStore.entityRecord : undefined}
                 />
               </EuiFlexItem>

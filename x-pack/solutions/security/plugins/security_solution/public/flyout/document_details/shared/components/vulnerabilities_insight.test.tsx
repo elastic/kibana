@@ -16,7 +16,7 @@ import { mockContextValue } from '../mocks/mock_context';
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
 const hostName = 'test host';
-const entityIdentifiers = { 'host.name': hostName };
+const identityFields = { 'host.name': hostName };
 const testId = 'test';
 const openDetailsPanel = jest.fn();
 
@@ -25,7 +25,7 @@ const renderVulnerabilitiesInsight = () => {
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
         <VulnerabilitiesInsight
-          entityIdentifiers={entityIdentifiers}
+          identityFields={identityFields}
           data-test-subj={testId}
           openDetailsPanel={openDetailsPanel}
         />

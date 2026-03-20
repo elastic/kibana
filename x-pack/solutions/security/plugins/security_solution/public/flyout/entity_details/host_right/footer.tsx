@@ -9,23 +9,23 @@ import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TakeAction } from '../shared/components/take_action';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 export const HostPanelFooter = ({
-  entityIdentifiers,
+  identityFields,
   entity,
 }: {
-  entityIdentifiers: EntityIdentifiers;
+  identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
 }) => {
   const hostName = useMemo(
     () =>
-      entityIdentifiers[EntityIdentifierFields.hostName] ||
-      Object.values(entityIdentifiers)[0] ||
+      identityFields[EntityIdentifierFields.hostName] ||
+      Object.values(identityFields)[0] ||
       '',
-    [entityIdentifiers]
+    [identityFields]
   );
 
   return (

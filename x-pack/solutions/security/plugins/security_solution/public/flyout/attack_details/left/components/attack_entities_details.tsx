@@ -76,7 +76,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             key={`user-${index}-${identifiers['user.name'] ?? Object.values(identifiers)[0]}`}
           >
             <UserDetails
-              entityIdentifiers={identifiers}
+              identityFields={identifiers}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
@@ -101,7 +101,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             key={`host-${index}-${identifiers['host.name'] ?? Object.values(identifiers)[0]}`}
           >
             <HostDetails
-              entityIdentifiers={identifiers}
+              hostName={identifiers['host.name'] ?? Object.values(identifiers)[0]}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}

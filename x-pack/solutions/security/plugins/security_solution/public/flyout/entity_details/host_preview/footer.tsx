@@ -16,7 +16,8 @@ import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 export interface HostPreviewPanelFooterProps {
   contextID: string;
   scopeId: string;
-  entityIdentifiers: Record<string, string>;
+  hostName: string;
+  entityId?: string;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
 }
@@ -24,8 +25,8 @@ export interface HostPreviewPanelFooterProps {
 export const HostPreviewPanelFooter = ({
   contextID,
   scopeId,
-  entityIdentifiers,
-  entity,
+  hostName,
+  entityId,
 }: HostPreviewPanelFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -35,12 +36,13 @@ export const HostPreviewPanelFooter = ({
         id: HostPanelKey,
         params: {
           contextID,
-          entityIdentifiers,
+          hostName,
+          entityId,
           scopeId,
         },
       },
     });
-  }, [openFlyout, entityIdentifiers, contextID, scopeId]);
+  }, [openFlyout, hostName, entityId, contextID, scopeId]);
 
   return (
     <FlyoutFooter data-test-subj={'host-preview-footer'}>
