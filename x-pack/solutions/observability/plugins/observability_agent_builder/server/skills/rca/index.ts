@@ -217,6 +217,19 @@ function buildRcaSkillContent(): string {
 
     For each hypothesis, execute its test query. Stop when one is confirmed (returns evidence).
 
+    **Execution priority — existing Query KI ES|QL before \`generate_esql\`:**
+    - When a hypothesis cites a **Query KI**, its \`query.esql.query\` is the **primary** test: call
+      \`execute_esql\` (with time scoping and LIMIT rules below) **before** any \`generate_esql\` for
+      that hypothesis. Use \`generate_esql\` for the same hypothesis only if \`execute_esql\` still
+      fails after you adapt the KI query (time filter, field fixes) or the stored ES|QL is missing or unusable.
+    - When a hypothesis is **Feature-only** (no query KI in the citation), scan **every Query KI**
+      returned in Step A-2: if any query's title, description, evidence, or \`esql.query\` clearly
+      tests the **same mechanism or pattern** (same error signature, component, or condition), run
+      **that** \`esql.query\` via \`execute_esql\` **first**. Prefer backed queries and higher
+      \`severity_score\` when multiple queries match.
+    - Call \`generate_esql\` only when **no** loaded Query KI supplies a suitable ES|QL to execute —
+      e.g. the pattern exists only as a feature, or you need a genuinely new aggregate that no query KI encodes.
+
     **Testing Query KI hypotheses:**
     Start from the KI's \`query.esql.query\`, apply **time scoping** and **row caps** (below), then call \`execute_esql\`.
     Pass the investigation time window in the \`time_range\` parameter — this injects
@@ -238,7 +251,8 @@ function buildRcaSkillContent(): string {
     - Returns an error → try adapting the query (add missing time filter, fix field name). If still failing, skip.
 
     **Testing Feature KI hypotheses:**
-    Feature KIs do not carry a pre-built query. Construct one using \`generate_esql\`:
+    Feature KIs do not carry a pre-built query. **First** apply the priority above: reuse a matching
+    Query KI's \`esql.query\` with \`execute_esql\` if any. Only if none apply, construct a new query using \`generate_esql\`:
     - Set \`index\` to the stream name (\`feature.stream_name\`)
     - Set \`time_range\` to the investigation window
     - Set \`context\` to include the feature's \`description\`, key values from \`properties\`,
@@ -259,13 +273,16 @@ function buildRcaSkillContent(): string {
     Once a hypothesis is confirmed, run two additional queries:
 
     **Onset** — when did it start?
-    Use \`generate_esql\` to find the earliest occurrence of the error pattern within a wider
+    If you confirmed the issue using a Query KI's ES|QL, prefer adapting that same query (e.g. add a
+    \`STATS\` with \`MIN(@timestamp)\` in one row) and \`execute_esql\` **before** \`generate_esql\`.
+    Otherwise use \`generate_esql\` to find the earliest occurrence of the error pattern within a wider
     window (e.g. now-24h). Use **MIN(@timestamp) inside a \`STATS\`** (or similar) so the tool returns **one row**, not every matching document. Cross-reference with the Feature KI's
     \`last_seen\` field (when the feature was last observed) as a sanity check.
 
     **Blast radius** — what else is affected?
-    Use \`generate_esql\` to count affected services/hosts by grouping on \`service.name\` or
-    \`host.name\` (**aggregate** output). If you must list raw events, include \`LIMIT\`. Compare with the Feature KI's \`filter\` condition — if it scopes to a single
+    Prefer extending the **confirmed** Query KI pipeline with a grouping \`STATS\` (e.g. by \`service.name\` or
+    \`host.name\`) and \`execute_esql\` when filters stay aligned with the KI. If no Query KI pipeline fits,
+    use \`generate_esql\` for the same aggregate shape (**aggregate** output, not raw dumps). If you must list raw events, include \`LIMIT\`. Compare with the Feature KI's \`filter\` condition — if it scopes to a single
     service, the failure may be contained; if the filter is broad, the blast radius is wider.
 
     ### Step A-6: Synthesize and Report
@@ -350,7 +367,7 @@ function buildRcaSkillContent(): string {
     4. **Validate stale KIs.** \`status: "stale"\` or \`status: "expired"\` = historical — always confirm with a live query.
     5. **Apply the KI's \`filter\` in derived queries.** Omitting it means operating on a different data slice.
     6. **Always scope queries to the investigation time window.** Pass \`time_range\` to \`execute_esql\` / \`generate_esql\`.
-    7. **Cap ES|QL row volume on KI queries.** If a Query KI's ES|QL has no \`LIMIT\` and can return many raw rows, append \`| LIMIT 20\` (or **10** for very wide fields). Prefer aggregates over document dumps.
+    7. **Cap ES|QL row volume on KI queries.** If a Query KI's ES|QL has no \`LIMIT\` and can return many raw rows, append \`| LIMIT 20\` (or **10** for very wide fields). Prefer aggregates over document dumps. **Run existing Query KI ES|QL via \`execute_esql\` before \`generate_esql\`** when any returned query tests the hypothesis (including Feature-only hypotheses matched to a related Query KI).
     8. **0 rows = refuted. Move on.** Do not retry a refuted hypothesis with the same parameters.
     9. **Do not fabricate.** Never invent scores, IDs, query names, or ES|QL results.
 
