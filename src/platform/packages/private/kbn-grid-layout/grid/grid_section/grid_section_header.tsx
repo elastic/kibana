@@ -81,13 +81,20 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     return Boolean(target.closest('[data-no-drag]'));
   };
 
+  const handleHeaderClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (shouldIgnoreHeaderClick(e.target)) return;
+      toggleIsCollapsed();
+    },
+    [toggleIsCollapsed]
+  );
+
   const handleSectionDragStart = useCallback(
     (e: UserInteractionEvent) => {
       if (shouldIgnoreHeaderClick(e.target)) return;
-      if (readOnly) toggleIsCollapsed(); // if the layout is read-only, allow click to toggle collapse instead of starting drag
       startDrag(e);
     },
-    [startDrag, toggleIsCollapsed, readOnly]
+    [startDrag]
   );
 
   useEffect(() => {
@@ -251,9 +258,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
-        onMouseDown={handleSectionDragStart}
-        onTouchStart={handleSectionDragStart}
-        onKeyDown={handleSectionDragStart}
+        onMouseDown={readOnly ? undefined : handleSectionDragStart}
+        onTouchStart={readOnly ? undefined : handleSectionDragStart}
+        onKeyDown={readOnly ? undefined : handleSectionDragStart}
+        onClick={readOnly ? handleHeaderClick : undefined}
       >
         <GridSectionTitle
           sectionId={sectionId}
