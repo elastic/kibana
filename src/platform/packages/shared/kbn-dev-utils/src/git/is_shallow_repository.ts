@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getRemoteDefaultBranchRefs } from './get_remote_default_branch_refs';
-export { countCommitsBetweenRefs } from './count_commits_between_refs';
-export { hasStagedChanges } from './has_staged_changes';
-export { isShallowRepository } from './is_shallow_repository';
-export { resolveNearestMergeBase } from './resolve_nearest_merge_base';
-export type { NearestMergeBaseCandidate } from './resolve_nearest_merge_base';
+import execa from 'execa';
+
+import { REPO_ROOT } from '@kbn/repo-info';
+
+/** Returns true when the current repository is a shallow Git checkout. */
+export const isShallowRepository = async (): Promise<boolean> => {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', '--is-shallow-repository'], {
+      cwd: REPO_ROOT,
+      stdin: 'ignore',
+    });
+
+    return stdout.trim() === 'true';
+  } catch {
+    return false;
+  }
+};
