@@ -64,6 +64,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: '/review'
           claude_args: '--max-turns 5'
+
+          # TODO: limit tools / internet access?
         env:
           ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
           ANTHROPIC_MODEL: 'llm-gateway/claude-opus-4-5'
