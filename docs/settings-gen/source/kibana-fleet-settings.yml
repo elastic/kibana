@@ -331,7 +331,7 @@ groups:
 
           - setting: "[n].hosts"
             description: |
-              Optional.Array that contains the list of host for that output.
+              Optional. Array that contains the list of host for that output.
             datatype: string
 
           - setting: "[n].is_default"
