@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiPageHeader, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,10 @@ export const RulesListPage = () => {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const { data, isLoading, isError, error } = useFetchRules({
     page,
@@ -94,10 +98,7 @@ export const RulesListPage = () => {
               }),
               'data-test-subj': 'rulesListSearchBar',
             }}
-            onChange={({ queryText }) => {
-              setPage(1);
-              setSearchInput(queryText ?? '');
-            }}
+            onChange={({ queryText }) => setSearchInput(queryText ?? '')}
           />
           <EuiSpacer size="m" />
           <RulesListTableContainer

@@ -274,7 +274,6 @@ describe('RulesListPage', () => {
         search: 'Rule One',
       });
     });
-
   });
 
   it('clearing the search resets the fetch back to an unfiltered list', async () => {
@@ -321,7 +320,6 @@ describe('RulesListPage', () => {
         search: undefined,
       });
     });
-
   });
 
   it('resets pagination to the first page after a new search', async () => {
@@ -347,6 +345,12 @@ describe('RulesListPage', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Search rules'), {
       target: { value: 'Rule' },
+    });
+
+    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+      page: 2,
+      perPage: 20,
+      search: undefined,
     });
 
     act(() => {
