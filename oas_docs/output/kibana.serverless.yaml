@@ -410,6 +410,81 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/actions/connector/_oauth_callback:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/_oauth_callback</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.
+      operationId: get-actions-connector-oauth-callback
+      parameters:
+        - description: The authorization code returned by the OAuth provider.
+          in: query
+          name: code
+          required: false
+          schema:
+            type: string
+        - description: The state parameter for CSRF protection.
+          in: query
+          name: state
+          required: false
+          schema:
+            type: string
+        - description: Error code if the authorization failed.
+          in: query
+          name: error
+          required: false
+          schema:
+            type: string
+        - description: Human-readable error description.
+          in: query
+          name: error_description
+          required: false
+          schema:
+            type: string
+        - description: Session state from the OAuth provider (e.g., Microsoft).
+          in: query
+          name: session_state
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns an HTML callback page.
+        '302':
+          description: Redirects to the return URL with authorization result query parameters.
+        '401':
+          description: User is not authenticated.
+      summary: Handle OAuth callback
+      tags:
+        - connectors
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/actions/connector/_oauth_callback_script:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/_oauth_callback_script</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the OAuth callback script
+      operationId: get-actions-connector-oauth-callback-script
+      parameters: []
+      responses:
+        '200':
+          description: Returns the OAuth callback script
+      summary: ''
+      tags: []
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/actions/connector/{id}:
     delete:
       description: |-
@@ -463,6 +538,12 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
+                  auth_mode:
+                    description: The authentication mode used for the connector.
+                    enum:
+                      - shared
+                      - per-user
+                    type: string
                   config:
                     additionalProperties: {}
                     type: object
@@ -620,6 +701,12 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
+                  auth_mode:
+                    description: The authentication mode used for the connector.
+                    enum:
+                      - shared
+                      - per-user
+                    type: string
                   config:
                     additionalProperties: {}
                     type: object
@@ -772,6 +859,12 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
+                  auth_mode:
+                    description: The authentication mode used for the connector.
+                    enum:
+                      - shared
+                      - per-user
+                    type: string
                   config:
                     additionalProperties: {}
                     type: object
@@ -900,6 +993,12 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
+                  auth_mode:
+                    description: The authentication mode used for the connector.
+                    enum:
+                      - shared
+                      - per-user
+                    type: string
                   config:
                     additionalProperties: {}
                     type: object
@@ -970,6 +1069,12 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    auth_mode:
+                      description: The authentication mode used for the connector.
+                      enum:
+                        - shared
+                        - per-user
+                      type: string
                     config:
                       additionalProperties: {}
                       type: object
@@ -2202,7 +2307,7 @@ paths:
                   description: Optional custom ID for the attachment.
                   type: string
                 origin:
-                  description: Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
@@ -24252,6 +24357,9 @@ paths:
                           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                           nullable: true
                           type: boolean
+                        min_agent_version:
+                          nullable: true
+                          type: string
                         monitoring_diagnostics:
                           additionalProperties: false
                           type: object
@@ -24318,6 +24426,24 @@ paths:
                           description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                           nullable: true
                           type: object
+                        package_agent_version_conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              title:
+                                type: string
+                              version_condition:
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - version_condition
+                          maxItems: 1000
+                          nullable: true
+                          type: array
                         package_policies:
                           anyOf:
                             - items:
@@ -24709,6 +24835,8 @@ paths:
                                     required:
                                       - name
                                       - version
+                                  package_agent_version_condition:
+                                    type: string
                                   policy_id:
                                     deprecated: true
                                     description: ID of the agent policy which the package policy will be added to.
@@ -25324,6 +25452,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -25390,6 +25521,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -25781,6 +25930,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -26178,6 +26329,9 @@ paths:
                           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                           nullable: true
                           type: boolean
+                        min_agent_version:
+                          nullable: true
+                          type: string
                         monitoring_diagnostics:
                           additionalProperties: false
                           type: object
@@ -26244,6 +26398,24 @@ paths:
                           description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                           nullable: true
                           type: object
+                        package_agent_version_conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              title:
+                                type: string
+                              version_condition:
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - version_condition
+                          maxItems: 1000
+                          nullable: true
+                          type: array
                         package_policies:
                           anyOf:
                             - items:
@@ -26635,6 +26807,8 @@ paths:
                                     required:
                                       - name
                                       - version
+                                  package_agent_version_condition:
+                                    type: string
                                   policy_id:
                                     deprecated: true
                                     description: ID of the agent policy which the package policy will be added to.
@@ -27011,6 +27185,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -27077,6 +27254,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -27468,6 +27663,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -28082,6 +28279,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -28148,6 +28348,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -28539,6 +28757,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -29028,6 +29248,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -29094,6 +29317,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -29485,6 +29726,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -31811,6 +32054,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -48371,6 +48616,8 @@ paths:
                           required:
                             - name
                             - version
+                        package_agent_version_condition:
+                          type: string
                         policy_id:
                           deprecated: true
                           description: ID of the agent policy which the package policy will be added to.
@@ -48801,6 +49048,8 @@ paths:
                       required:
                         - name
                         - version
+                    package_agent_version_condition:
+                      type: string
                     policy_id:
                       deprecated: true
                       description: ID of the agent policy which the package policy will be added to.
@@ -49473,6 +49722,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -50064,6 +50315,8 @@ paths:
                           required:
                             - name
                             - version
+                        package_agent_version_condition:
+                          type: string
                         policy_id:
                           deprecated: true
                           description: ID of the agent policy which the package policy will be added to.
@@ -50704,6 +50957,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -51137,6 +51392,8 @@ paths:
                       required:
                         - name
                         - version
+                    package_agent_version_condition:
+                      type: string
                     policy_id:
                       deprecated: true
                       description: ID of the agent policy which the package policy will be added to.
@@ -51806,6 +52063,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -52741,6 +53000,8 @@ paths:
                                 required:
                                   - name
                                   - version
+                              package_agent_version_condition:
+                                type: string
                               policy_id:
                                 deprecated: true
                                 description: ID of the agent policy which the package policy will be added to.
@@ -53136,6 +53397,8 @@ paths:
                                 required:
                                   - name
                                   - version
+                              package_agent_version_condition:
+                                type: string
                               policy_id:
                                 deprecated: true
                                 description: ID of the agent policy which the package policy will be added to.
