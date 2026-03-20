@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { DSLOptionsListComponentApi } from './data_controls/options_list_control/types';
 import type { OptionsListComponentApi } from './types';
 
 export const isDSLOptionsListApi = (
   api: OptionsListComponentApi
 ): api is DSLOptionsListComponentApi => {
-  return 'field$' in api;
+  return api.type === OPTIONS_LIST_CONTROL;
 };

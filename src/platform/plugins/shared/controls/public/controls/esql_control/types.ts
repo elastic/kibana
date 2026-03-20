@@ -14,6 +14,7 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
+  HasType,
   HasUniqueId,
   PublishesDataLoading,
   PublishingSubject,
@@ -40,7 +41,8 @@ export type ESQLOptionsListComponentState = Pick<
   label: string;
 } & Omit<TemporaryState<string>, 'requestSize'>;
 
-export type ESQLOptionsListComponentApi = HasUniqueId &
+export type ESQLOptionsListComponentApi = HasType &
+  HasUniqueId &
   OptionsListPublishesOptions<string> &
   SubjectsOf<ESQLOptionsListComponentState> &
   SettersOf<

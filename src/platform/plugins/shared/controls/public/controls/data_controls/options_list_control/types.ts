@@ -16,7 +16,7 @@ import type {
   DataControlState,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
+import type { HasType, HasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
 import type { EditorState } from './editor_state_manager';
@@ -52,7 +52,8 @@ type PublishesDSLOptionsListComponentState = SubjectsOf<
 >;
 type DSLOptionsListComponentStateSetters = SettersOf<OptionsListComponentState>;
 
-export type DSLOptionsListComponentApi = HasUniqueId &
+export type DSLOptionsListComponentApi = HasType &
+  HasUniqueId &
   PublishesField &
   OptionsListPublishesOptions<OptionsListSelection> &
   PublishesDSLOptionsListComponentState &
