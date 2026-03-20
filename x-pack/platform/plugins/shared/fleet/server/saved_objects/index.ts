@@ -36,11 +36,14 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  AgentPolicySchemaV4,
   EpmPackagesSchemaV6,
+  EpmPackagesSchemaV7,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
+  PackagePolicySchemaV22,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -347,6 +350,8 @@ export const getSavedObjectTypes = (
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
+          package_agent_version_conditions: { dynamic: false, properties: {} },
         },
       },
       migrations: {
@@ -448,6 +453,21 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+                package_agent_version_conditions: { dynamic: false, properties: {} },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -498,6 +518,8 @@ export const getSavedObjectTypes = (
           },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
+          package_agent_version_conditions: { dynamic: false, properties: {} },
         },
       },
       modelVersions: {
@@ -531,6 +553,21 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+                package_agent_version_conditions: { dynamic: false, properties: {} },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -818,6 +855,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          package_agent_version_condition: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1031,6 +1069,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '22': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package_agent_version_condition: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1097,6 +1149,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          package_agent_version_condition: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1169,6 +1222,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package_agent_version_condition: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -1185,6 +1252,13 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           internal: { type: 'boolean' },
+          dependencies: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           keep_policies_up_to_date: { type: 'boolean', index: false },
           es_index_patterns: {
             dynamic: false,
@@ -1306,6 +1380,26 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                dependencies: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
           },
         },
       },

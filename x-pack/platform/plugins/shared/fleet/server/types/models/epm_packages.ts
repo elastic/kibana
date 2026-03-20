@@ -60,3 +60,15 @@ export const EpmPackagesSchemaV6 = schema.object({
   previous_version: schema.maybe(schema.string()),
   pending_upgrade_review: schema.maybe(schema.any()),
 });
+
+export const EpmPackagesSchemaV7 = EpmPackagesSchemaV6.extends({
+  dependencies: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+});

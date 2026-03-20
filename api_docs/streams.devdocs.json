@@ -1339,6 +1339,28 @@
               "section": "def-common.ProcessorSuggestionsResponse",
               "text": "ProcessorSuggestionsResponse"
             },
+            ", undefined>; \"PUT /internal/streams/_significant_events/settings\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"PUT /internal/streams/_significant_events/settings\", any, ",
+            "StreamsRouteHandlerResources",
+            ", { success: true; }, undefined>; \"GET /internal/streams/_significant_events/settings\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/_significant_events/settings\", undefined, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "ModelSettings",
             ", undefined>; \"GET /internal/streams/_significant_events\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -2685,6 +2707,28 @@
             "section": "def-common.ProcessorSuggestionsResponse",
             "text": "ProcessorSuggestionsResponse"
           },
+          ", undefined>; \"PUT /internal/streams/_significant_events/settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /internal/streams/_significant_events/settings\", any, ",
+          "StreamsRouteHandlerResources",
+          ", { success: true; }, undefined>; \"GET /internal/streams/_significant_events/settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/_significant_events/settings\", undefined, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "ModelSettings",
           ", undefined>; \"GET /internal/streams/_significant_events\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -3056,7 +3100,7 @@
           "[]; canReadFailureStore: boolean; }, undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3072,7 +3116,7 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 59,
+      "lineNumber": 60,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3088,7 +3132,7 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 61,
+      "lineNumber": 62,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

@@ -63,6 +63,7 @@ export async function generateSignificantEventDefinitions(
   return {
     queries: queries.map((query) => ({
       title: query.title,
+      description: query.description,
       esql: { query: ensureMetadata(query.esql) },
       severity_score: query.severity_score,
       evidence: query.evidence,
