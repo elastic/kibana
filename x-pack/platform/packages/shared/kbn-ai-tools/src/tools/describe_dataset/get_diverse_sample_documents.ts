@@ -107,7 +107,14 @@ export async function getDiverseSampleDocuments({
     return { hits: categoryHits.slice(0, size) };
   }
 
-  const randomSamples = await getSampleDocuments({ esClient, index, start, end, size: remaining });
+  // Over-fetch to compensate for duplicates that will be removed during dedup
+  const randomSamples = await getSampleDocuments({
+    esClient,
+    index,
+    start,
+    end,
+    size: remaining + categoryHits.length,
+  });
 
   const categoryIdSet = new Set(categoryHits.map((hit) => hit._id));
   const dedupedRandomHits = randomSamples.hits.filter(

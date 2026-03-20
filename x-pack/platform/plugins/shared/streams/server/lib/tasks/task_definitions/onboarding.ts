@@ -67,6 +67,13 @@ async function areFeaturesUpToDate({
     IdentifyFeaturesResult
   >(featuresTaskId);
 
+  if (
+    featuresTask.status === TaskStatus.InProgress ||
+    featuresTask.status === TaskStatus.NotStarted
+  ) {
+    return false;
+  }
+
   return (
     featuresTask.last_completed_at &&
     Date.now() - new Date(featuresTask.last_completed_at).getTime() <
