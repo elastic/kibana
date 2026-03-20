@@ -176,7 +176,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
   filterBar?: React.ReactNode;
-  filterBarExpandablePillsId?: string;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   /**

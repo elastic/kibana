@@ -52,10 +52,10 @@ export const FilterBarContextProvider: React.FC<
    *   (If the user has not yet added at least 1 filter, we never want to immediately collapse
    *    the filter bar the moment they add enough filters to make it collapsible. It should only
    *    collapse in response to the user manually closing it. If the user then refreshes the page,
-   *    localStorage may initialize the filter bar as collasped, which is acceptable)
+   *    localStorage may initialize the filter bar as collapsed, which is acceptable)
    */
   const [isCollapsed, setIsCollapsed] = useState(
-    isCollapsible ? storage.get(FILTER_BAR_COLLAPSED_SETTING) ?? false : false
+    isCollapsible ? Boolean(storage.get(FILTER_BAR_COLLAPSED_SETTING)) : false
   );
   const onToggleCollapse = useCallback(() => {
     setIsCollapsed(!isCollapsed);
