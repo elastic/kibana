@@ -163,7 +163,9 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     expect(createdByUser).toBeDefined();
 
     const createdByResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=${encodeURIComponent(createdByUser!)}&pageSize=100`,
+      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=${encodeURIComponent(
+        createdByUser!
+      )}&pageSize=100`,
       {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
         responseType: 'json',
