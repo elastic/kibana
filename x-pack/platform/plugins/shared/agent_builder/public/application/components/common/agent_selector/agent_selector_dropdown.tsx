@@ -21,15 +21,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 
-import { useUiPrivileges } from '../../hooks/use_ui_privileges';
-import { useNavigation } from '../../hooks/use_navigation';
-import { appPaths } from '../../utils/app_paths';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
   useSelectorListStyles,
-} from '../conversations/conversation_input/input_actions/input_actions.styles';
-import { useAgentOptions } from '../conversations/conversation_input/input_actions/agent_selector/use_agent_options';
+} from '../../conversations/conversation_input/input_actions/input_actions.styles';
+import { useAgentOptions } from './use_agent_options';
 
 const AGENT_OPTION_ROW_HEIGHT = 44;
 
@@ -132,6 +132,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       flush="both"
       color="text"
       onClick={() => setIsPopoverOpen((v) => !v)}
+      data-test-subj="agentBuilderAgentSelectorButton"
     >
       {selectedAgent?.name ?? fallbackLabel}
     </EuiButtonEmpty>

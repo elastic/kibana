@@ -11,8 +11,8 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { AgentAvatar } from '../../../../common/agent_avatar';
-import { OptionText } from '../option_text';
+import { AgentAvatar } from '../agent_avatar';
+import { OptionText } from '../../conversations/conversation_input/input_actions/option_text';
 
 type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
 

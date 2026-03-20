@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
 import { storageKeys } from '../../../../storage_keys';
-import { AgentSelectorDropdown } from '../../../common/agent_selector_dropdown';
+import { AgentSelectorDropdown } from '../../../common/agent_selector/agent_selector_dropdown';
 
 const deletedAgentLabel = i18n.translate('xpack.agentBuilder.sidebar.agentSelector.deletedAgent', {
   defaultMessage: '(Deleted agent)',

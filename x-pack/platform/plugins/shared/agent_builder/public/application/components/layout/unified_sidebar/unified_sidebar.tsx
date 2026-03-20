@@ -31,7 +31,10 @@ interface UnifiedSidebarProps {
   onToggleCondensed: () => void;
 }
 
-export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isCondensed, onToggleCondensed }) => {
+export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
+  isCondensed,
+  onToggleCondensed,
+}) => {
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
   const agentIdFromPath = getAgentIdFromPath(location.pathname) ?? agentBuilderDefaultAgentId;
