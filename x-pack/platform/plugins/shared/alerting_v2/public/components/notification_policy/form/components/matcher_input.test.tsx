@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import { MatcherInput } from './matcher_input';
