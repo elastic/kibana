@@ -4981,7 +4981,6 @@ Object {
       "type": "string",
     },
     "subActionParams": Object {
-      "additionalProperties": false,
       "properties": Object {
         "alertStates": Object {
           "additionalProperties": false,
