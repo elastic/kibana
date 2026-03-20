@@ -55,6 +55,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
@@ -95,6 +96,7 @@ export interface DiscoverFeatureFlags {
 }
 
 export interface DiscoverServices {
+  agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
@@ -189,6 +191,7 @@ export const buildServices = ({
   const storage = new Storage(localStorage);
 
   return {
+    agentBuilder: plugins.agentBuilder,
     aiops: plugins.aiops,
     application: core.application,
     addBasePath: core.http.basePath.prepend,

@@ -32,6 +32,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "dataVisualizer",
       "home",
       "share",
