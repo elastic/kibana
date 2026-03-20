@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*.ts",
     "common/**/*.ts",
+    "test/scout/**/*",
     "../../../../typings/**/*"
   ],
   "exclude": [
@@ -54,6 +55,7 @@
     "@kbn/ingest-pipelines-plugin",
     "@kbn/utility-types",
     "@kbn/code-editor",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/scout"
   ]
 }
