@@ -12,6 +12,8 @@ import type {
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { getFlattenedObject } from '@kbn/std';
+import { omit } from 'lodash';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
@@ -23,8 +25,6 @@ import {
   validateUpdateDocIdentification,
 } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
-import {getFlattenedObject} from '@kbn/std';
-import {omit} from 'lodash';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -46,7 +46,7 @@ export interface BulkObjectResponse {
   reason: string;
 }
 
-interface UpsertEntitiesBulkParams {
+interface BulkUpdateEntityParams {
   objects: BulkObject[];
   force?: boolean;
 }
@@ -66,46 +66,64 @@ export class CRUDClient {
   private initWithTracing(): void {
     const namespace = this.namespace;
 
-    const baseUpsertEntity = this.upsertEntity.bind(this);
-    const tracedUpsertEntity = (
+    const baseCreateEntity = this.createEntity.bind(this);
+    const tracedCreateEntity = (entityType: EntityType, doc: Entity): Promise<void> =>
+      runWithSpan({
+        name: 'entityStore.crud.create_entity',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'create_entity',
+          'entity_store.entity.type': entityType,
+        },
+        cb: () => baseCreateEntity(entityType, doc),
+      });
+
+    Object.defineProperty(this, 'createEntity', {
+      value: tracedCreateEntity,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseUpdateEntity = this.updateEntity.bind(this);
+    const tracedUpdateEntity = (
       entityType: EntityType,
       doc: Entity,
       force: boolean
     ): Promise<void> =>
       runWithSpan({
-        name: 'entityStore.crud.upsert_entity',
+        name: 'entityStore.crud.update_entity',
         namespace,
         attributes: {
-          'entity_store.crud.operation': 'upsert_entity',
+          'entity_store.crud.operation': 'update_entity',
           'entity_store.entity.type': entityType,
           'entity_store.force': force,
         },
-        cb: () => baseUpsertEntity(entityType, doc, force),
+        cb: () => baseUpdateEntity(entityType, doc, force),
       });
 
-    Object.defineProperty(this, 'upsertEntity', {
-      value: tracedUpsertEntity,
+    Object.defineProperty(this, 'updateEntity', {
+      value: tracedUpdateEntity,
       configurable: true,
       writable: true,
     });
 
-    const baseUpsertEntitiesBulk = this.upsertEntitiesBulk.bind(this);
-    const tracedUpsertEntitiesBulk = (
-      params: UpsertEntitiesBulkParams
+    const baseBulkUpdateEntity = this.bulkUpdateEntity.bind(this);
+    const tracedBulkUpdateEntity = (
+      params: BulkUpdateEntityParams
     ): Promise<BulkObjectResponse[]> =>
       runWithSpan({
-        name: 'entityStore.crud.upsert_entities_bulk',
+        name: 'entityStore.crud.bulk_update_entity',
         namespace,
         attributes: {
-          'entity_store.crud.operation': 'upsert_entities_bulk',
+          'entity_store.crud.operation': 'bulk_update_entity',
           'entity_store.objects.count': params.objects.length,
           'entity_store.force': params.force ?? false,
         },
-        cb: () => baseUpsertEntitiesBulk(params),
+        cb: () => baseBulkUpdateEntity(params),
       });
 
-    Object.defineProperty(this, 'upsertEntitiesBulk', {
-      value: tracedUpsertEntitiesBulk,
+    Object.defineProperty(this, 'bulkUpdateEntity', {
+      value: tracedBulkUpdateEntity,
       configurable: true,
       writable: true,
     });
@@ -192,12 +210,12 @@ export class CRUDClient {
     return;
   }
 
-  public async bulkUpsertEntity({
+  public async bulkUpdateEntity({
     objects,
     force = false,
-  }: UpsertEntitiesBulkParams): Promise<BulkObjectResponse[]> {
+  }: BulkUpdateEntityParams): Promise<BulkObjectResponse[]> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
-    this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
+    this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
       const generatedId = getEuidFromObject(entityType, doc);
       const flatDoc = getFlattenedObject(doc);
@@ -214,7 +232,7 @@ export class CRUDClient {
         valid.doc
       );
     }
-    this.logger.debug(`Bulk upserting ${objects.length} entities`);
+    this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
       index: getLatestEntitiesIndexName(this.namespace),
       operations,
@@ -222,10 +240,10 @@ export class CRUDClient {
     });
 
     if (!resp.errors) {
-      this.logger.debug(`Successfully bulk upserted ${objects.length} entities`);
+      this.logger.debug(`Successfully bulk updated ${objects.length} entities`);
       return [];
     }
-    this.logger.debug(`Bulk upserted ${objects.length} entities with errors`);
+    this.logger.debug(`Bulk updated ${objects.length} entities with errors`);
     return resp.items
       .map((item) => Object.entries(item)[0][1])
       .filter((value) => value.error !== undefined || value.status >= 400)
