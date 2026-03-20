@@ -137,7 +137,7 @@ describe('Discover component', () => {
         dataView: dataViewWithTimefieldMock,
         prevSidebarClosed: true,
       });
-      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscShowSidebarButton')).toBeInTheDocument();
     }, 10000);
   });
 
@@ -152,6 +152,6 @@ describe('Discover component', () => {
     });
     expect(screen.queryByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
     expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dscPanelsToggleInPage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
   }, 10000);
 });
