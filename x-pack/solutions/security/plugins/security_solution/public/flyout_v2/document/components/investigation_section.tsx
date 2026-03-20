@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
@@ -48,10 +49,10 @@ export const InvestigationSection = memo(({ hit }: InvestigationSectionProps) =>
   const store = useStore();
   const history = useHistory();
 
-  const isAlert = useMemo(() => {
-    const eventKind = getFieldValue(hit, 'event.kind') as string;
-    return eventKind === 'signal';
-  }, [hit]);
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, 'event.kind') as string) === EventKind.signal,
+    [hit]
+  );
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,

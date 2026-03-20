@@ -14,16 +14,17 @@ import {
   INSIGHTS_ENTITIES_TEST_ID,
   INSIGHTS_HEADER_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-  PREVALENCE_TEST_ID,
 } from './test_ids';
+import { PREVALENCE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { usePrevalence } from '../../../../flyout_v2/document/hooks/use_prevalence';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../shared/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -101,7 +102,7 @@ jest.mock('../../../../explore/hosts/containers/hosts/details');
 
 jest.mock('../hooks/use_fetch_threat_intelligence');
 
-jest.mock('../../shared/hooks/use_prevalence');
+jest.mock('../../../../flyout_v2/document/hooks/use_prevalence');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
@@ -159,6 +160,7 @@ describe('<InsightsSection />', () => {
 
   it('should render insights component', async () => {
     const contextValue = {
+      ...mockContextValue,
       eventId: 'some_Id',
       getFieldsData: mockGetFieldsData,
     } as unknown as DocumentDetailsContext;
@@ -175,6 +177,7 @@ describe('<InsightsSection />', () => {
     mockUseExpandSection.mockReturnValue(false);
 
     const contextValue = {
+      ...mockContextValue,
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
@@ -189,6 +192,7 @@ describe('<InsightsSection />', () => {
 
   it('should render the component expanded if value is true in local storage', async () => {
     const contextValue = {
+      ...mockContextValue,
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
@@ -209,6 +213,7 @@ describe('<InsightsSection />', () => {
       }
     };
     const contextValue = {
+      ...mockContextValue,
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: true,
@@ -232,6 +237,7 @@ describe('<InsightsSection />', () => {
       }
     };
     const contextValue = {
+      ...mockContextValue,
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: false,

@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
@@ -94,7 +93,6 @@ export const VisualizationsSection = memo(
           disableNavigation={true}
           showIcon={false}
         />
-        <EuiSpacer />
         <AnalyzerPreviewContainer
           hit={hit}
           onShowAnalyzer={onShowAnalyzer}
