@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
 import { useHighlightedFields } from './use_highlighted_fields';
 import { convertHighlightedFieldsToPrevalenceFilters } from '../utils/highlighted_fields_helpers';
@@ -35,9 +35,9 @@ export interface UsePrevalenceParams {
    */
   interval: { from: string; to: string };
   /**
-   * An array of field objects with category and value
+   * Document record to extract prevalence data from
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
   /**
    * User defined fields to highlight (defined on the rule)
    */
@@ -65,11 +65,11 @@ export interface UsePrevalenceResult {
  */
 export const usePrevalence = ({
   interval,
-  dataFormattedForFieldBrowser,
+  hit,
   investigationFields,
 }: UsePrevalenceParams): UsePrevalenceResult => {
   const highlightedFields = useHighlightedFields({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
   });
   const highlightedFieldsFilters = useMemo(

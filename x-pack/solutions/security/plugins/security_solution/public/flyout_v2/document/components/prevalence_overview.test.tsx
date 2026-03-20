@@ -6,13 +6,13 @@
  */
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
-import { DocumentDetailsContext } from '../../shared/context';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../../common/mock';
 import {
-  PREVALENCE_TEST_ID,
   SUMMARY_ROW_TEXT_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
-} from './test_ids';
+} from '../../../flyout/document_details/right/components/test_ids';
+import { PREVALENCE_TEST_ID } from './test_ids';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import {
@@ -22,17 +22,15 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { useKibana } from '../../../../common/lib/kibana';
+} from '../../shared/components/test_ids';
+import { usePrevalence } from '../hooks/use_prevalence';
+import { useKibana } from '../../../common/lib/kibana';
+import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
 
-jest.mock('../../shared/hooks/use_prevalence');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../hooks/use_prevalence');
+jest.mock('../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();
-jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 const mockUiSettingsGet = jest.fn();
 let mockServerless: unknown;
 
@@ -45,14 +43,23 @@ const RIGHT_SECTION_TEXT_TEST_ID =
 
 const NO_DATA_MESSAGE = 'No prevalence data available.';
 
-const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockContextValue) =>
-  render(
+const renderPrevalenceOverview = (
+  searchHit: EsHitRecord = mockSearchHit as EsHitRecord,
+  onShowPrevalence?: () => void,
+  showIcon?: boolean
+) => {
+  const goToPrevalence = onShowPrevalence || mockNavigateToLeftPanel;
+  return render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <PrevalenceOverview />
-      </DocumentDetailsContext.Provider>
+      <PrevalenceOverview
+        hit={buildDataTableRecord(searchHit)}
+        investigationFields={[]}
+        onShowPrevalenceDetails={goToPrevalence}
+        showIcon={showIcon}
+      />
     </TestProviders>
   );
+};
 
 describe('<PrevalenceOverview />', () => {
   beforeEach(() => {
@@ -62,7 +69,6 @@ describe('<PrevalenceOverview />', () => {
       error: false,
       data: [],
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
     mockServerless = undefined;
     (useKibana as jest.Mock).mockImplementation(() => ({
       services: {
@@ -133,11 +139,12 @@ describe('<PrevalenceOverview />', () => {
     expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
   });
 
-  it('should render link without icon if isPreviewMode is true', () => {
-    const { getByTestId, queryByTestId } = renderPrevalenceOverview({
-      ...mockContextValue,
-      isPreviewMode: true,
-    });
+  it('should render link without icon if showIcon is false', () => {
+    const { getByTestId, queryByTestId } = renderPrevalenceOverview(
+      mockSearchHit as EsHitRecord,
+      undefined,
+      false
+    );
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
   });

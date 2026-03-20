@@ -121,5 +121,7 @@ export const KbnReactKibanaContextEnv = require('@kbn/react-kibana-context-env')
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
 export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+export const KbnCoreDi = require('@kbn/core-di-browser');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
 export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');
