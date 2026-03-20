@@ -24,11 +24,14 @@ import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
+import { registerGetWorkflowStepExecutionsRoute } from './get_workflow_step_executions';
 import { registerGetWorkflowsConfigRoute } from './get_workflows_config';
 import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
+import { registerPostCheckConflictsRoute } from './post_check_conflicts';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
+import { registerPostExportWorkflowsRoute } from './post_export_workflows';
 import { registerPostResumeWorkflowExecutionRoute } from './post_resume_workflow_execution';
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
@@ -63,6 +66,8 @@ export function defineRoutes(
   registerPostSearchWorkflowsRoute(deps);
   registerPostCreateWorkflowRoute(deps);
   registerPostBulkCreateWorkflowsRoute(deps);
+  registerPostCheckConflictsRoute(deps);
+  registerPostExportWorkflowsRoute(deps);
   registerPutUpdateWorkflowRoute(deps);
   registerDeleteWorkflowByIdRoute(deps);
   registerDeleteWorkflowsBulkRoute(deps);
@@ -72,6 +77,7 @@ export function defineRoutes(
   registerPostTestStepRoute(deps);
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowExecutionByIdRoute(deps);
+  registerGetWorkflowStepExecutionsRoute(deps);
   registerGetChildWorkflowExecutionsRoute(deps);
   registerPostCancelWorkflowExecutionRoute(deps);
   registerPostResumeWorkflowExecutionRoute(deps);

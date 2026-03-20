@@ -22,6 +22,7 @@ import type {
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { Sha256 } from '@kbn/crypto-browser';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
@@ -40,7 +41,7 @@ import {
 import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
-import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { LayerTypeESQL, XScaleSchemaType } from '../schema/charts/xy';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -112,8 +113,27 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: APIAdHocDataView) {
-  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+function sha256Sync(str: string): string {
+  return new Sha256().update(str).digest('hex');
+}
+
+// Normalize whitespace and convert to lowercase to make the id more predictable and hit cache more often
+function normalizeWhitespace(str: string): string {
+  return str.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function generateAdHocDataViewId(
+  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
+) {
+  const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
+  // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
+  // at runtime we fallback to @timestamp if it exists in the index.
+  // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
+  // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
+  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
+    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
+  }
+  return base;
 }
 
 function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -129,6 +149,7 @@ function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     fieldAttrs: {},
     allowNoIndex: false,
     allowHidden: false,
+    ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
 
@@ -269,6 +290,7 @@ export function getDatasetIndex(dataset: DatasetType) {
       return {
         index: getIndexPatternFromESQLQuery(dataset.query),
         timeFieldName: getTimeFieldFromESQLQuery(dataset.query),
+        esqlQuery: dataset.query,
       };
     case 'dataView':
       return {
@@ -287,22 +309,29 @@ function buildDatasourceStatesLayer(
   layer: unknown,
   i: number,
   dataset: DatasetType,
-  datasetIndex: { index: string; timeFieldName: string | undefined },
+  datasetIndex: { index: string; timeFieldName: string | undefined; esqlQuery?: string },
   buildDataLayer: (
     config: unknown,
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (
+    layer: unknown,
+    i: number,
+    xAxisScale?: XScaleSchemaType
+  ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
+  fullConfig: LensApiState
 ): [LensDatasourceId, DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const newLayer = {
       table,
-      columns: getValueColumns(config, i),
+      columns: getValueColumns(config, i, xAxisScale),
       allColumns: table.columns.map(
         (column): TextBasedLayerColumn => ({
           fieldName: column.name,
@@ -321,12 +350,14 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(config, i);
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
+    const columns = getValueColumns(config, i, xAxisScale);
 
     return {
-      index: datasetIndex.index,
+      index: generateAdHocDataViewId({ ...datasetIndex, dataSourceType: 'esql' }),
       query: { esql: ds.query },
-      timeField: getTimeFieldFromESQLQuery(ds.query) || undefined,
+      timeField: datasetIndex.timeFieldName || undefined,
       columns,
     };
   }
@@ -358,7 +389,7 @@ export const buildDatasourceStates = (
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
+  getValueColumns: (config: any, i: number, xAxisScale?: XScaleSchemaType) => TextBasedLayerColumn[]
 ): {
   layers: LensAttributes['state']['datasourceStates'];
   usedDataviews: Record<string, APIDataView | APIAdHocDataView>;
@@ -372,24 +403,33 @@ export const buildDatasourceStates = (
   const hasMultipleLayers = 'layers' in config;
   const configLayers = hasMultipleLayers ? config.layers : [config];
 
-  for (let i = 0; i < configLayers.length; i++) {
-    const layer = configLayers[i];
-    const layerId = hasMultipleLayers && 'type' in layer ? `${layer.type}_${i}` : `layer_${i}`;
+  for (let layerPosition = 0; layerPosition < configLayers.length; layerPosition++) {
+    const layer = configLayers[layerPosition];
+    const layerId =
+      hasMultipleLayers && 'type' in layer
+        ? `${layer.type}_${layerPosition}`
+        : `layer_${layerPosition}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
       throw Error('dataset must be defined');
     }
 
-    const index = getDatasetIndex(dataset);
+    // This datasetIndex is always defined, but it can be empty if the dataset is a table
+    // TODO evaluate the table dataset type and return the correct dataset index
+    const datasetIndex = getDatasetIndex(dataset);
+    if (!datasetIndex) {
+      throw Error('dataset index must be defined');
+    }
 
     const [type, layerConfig] = buildDatasourceStatesLayer(
       layer,
-      i,
+      layerPosition,
       dataset,
-      index!,
+      datasetIndex,
       buildDataLayers,
-      getValueColumns
+      getValueColumns,
+      config
     );
     if (layerConfig) {
       layers = {
@@ -403,20 +443,21 @@ export const buildDatasourceStates = (
       };
 
       // keep record of all dataviews used by layers
-      if (index) {
-        const newLayerIds =
-          isSingleLayer(layerConfig) || Object.keys(layerConfig).length === 0
-            ? [layerId]
-            : Object.keys(layerConfig);
-        for (const id of newLayerIds) {
-          usedDataviews[id] =
-            dataset.type === 'dataView'
-              ? { type: 'dataView', id: dataset.id }
-              : {
-                  type: 'adHocDataView',
-                  ...index,
-                };
-        }
+      const newLayerIds =
+        isSingleLayer(layerConfig) || Object.keys(layerConfig).length === 0
+          ? [layerId]
+          : Object.keys(layerConfig);
+      for (const id of newLayerIds) {
+        usedDataviews[id] =
+          dataset.type === 'dataView'
+            ? { type: 'dataView', id: dataset.id }
+            : {
+                type: 'adHocDataView',
+                ...datasetIndex,
+                ...(dataset.type === 'esql'
+                  ? { dataSourceType: 'esql', esqlQuery: dataset.query }
+                  : {}),
+              };
       }
     }
   }
