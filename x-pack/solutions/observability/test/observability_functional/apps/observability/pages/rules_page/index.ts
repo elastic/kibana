@@ -14,7 +14,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const rulesService = getService('rules');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
