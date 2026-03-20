@@ -52,6 +52,7 @@ describe(
       if (duplicatedSavedQueryId) {
         cleanupSavedQuery(duplicatedSavedQueryId);
       }
+
       if (duplicatedPackId) {
         cleanupPack(duplicatedPackId);
       }
