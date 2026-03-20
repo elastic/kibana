@@ -318,6 +318,7 @@ export enum RegistryInputKeys {
   deployment_modes = 'deployment_modes',
   hide_in_var_group_options = 'hide_in_var_group_options',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -335,6 +336,7 @@ export interface RegistryInput {
   [RegistryInputKeys.deployment_modes]?: string[];
   [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
   [RegistryInputKeys.deprecated]?: DeprecationInfo;
+  [RegistryInputKeys.migrate_from]?: string;
 }
 
 export enum RegistryStreamKeys {
@@ -349,6 +351,7 @@ export enum RegistryStreamKeys {
   ingestion_method = 'ingestion_method',
   var_groups = 'var_groups',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
 }
 
 export interface RegistryStream {
@@ -363,6 +366,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.ingestion_method]?: string;
   [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
   [RegistryStreamKeys.deprecated]?: DeprecationInfo;
+  [RegistryStreamKeys.migrate_from]?: string;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };

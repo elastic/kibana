@@ -60,7 +60,8 @@ Use this contract:
     { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 5, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
     { "operation": "add_section", "title": "Section title", "grid": { "y": 16 }, "panels": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
     { "operation": "remove_section", "sectionId": "existing-section-id", "panelAction": "promote" },
-    { "operation": "remove_panels", "panelIds": ["panel-id"] }
+    { "operation": "remove_panels", "panelIds": ["panel-id"] },
+    { "operation": "update_panels_from_attachments", "attachmentIds": ["viz-attachment-id"] }
   ]
 }
 \`\`\`
@@ -85,6 +86,7 @@ If you omit metadata on a new dashboard, creation can fail.
    - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
    - \`remove_panels\` to remove by \`panelId\`
    - \`set_metadata\` for dashboard metadata updates
+   - \`update_panels_from_attachments\` to refresh dashboard panels after updating their source visualization attachment via \`create_visualization\` with \`attachment_id\`. Pass the updated attachment IDs — matching panels are re-resolved with the latest attachment data, preserving their \`panelId\` and \`grid\` position.
    - To update a markdown panel, use \`remove_panels\` to remove the old one, then \`add_markdown\` to add a new one with updated content and grid
 
 ### Step 2: Interpret results and report clearly
@@ -126,14 +128,12 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), explo
 - Panel coordinates inside a section are section-relative (\`y: 0\` is the top of that section).
 - Reorganizing existing panels between top-level and sections is not supported yet; use add/remove operations instead.
 
-## Edge Cases
-
-- **Missing \`attachment_id\` from visualization creation:** Treat that panel as failed for dashboard composition and do not include it in \`attachmentIds\`.
-
 ${gridLayoutPrompt}
 
+## Edge Cases
+- **Missing \`attachment_id\` from visualization creation:** Treat that panel as failed for dashboard composition and do not include it in \`attachmentIds\`.
 - **Missing dashboard attachment ID on updates:** If the user asks to update a dashboard but the prior \`dashboardAttachment.id\` is not available in conversation context, ask the user to clarify which dashboard they mean or offer to create a new one.
-- **User asks to update a panel in place:** Prefer ordered remove + add operations in the same call.
+- **User asks to update a panel in place:** If the panel was created from a visualization attachment, update the visualization with \`create_visualization\` (passing \`attachment_id\`), then use \`update_panels_from_attachments\` with that attachment ID. This re-resolves the panel from the latest attachment data while preserving its position and ID. For markdown panels, use ordered remove + add operations instead.
 
 See \`./examples/manage-dashboard-payloads\` for complete payload examples covering all scenarios.
 `,
@@ -263,6 +263,22 @@ Use this when the user wants to add a visualization that was already created ear
 }
 \`\`\`
 
+## Update a dashboard — refresh panels from updated attachments
+
+Use this after updating a visualization attachment via \`create_visualization\` with \`attachment_id\`. The operation re-resolves matching panels from their source attachments, preserving \`panelId\` and \`grid\`.
+
+\`\`\`json
+{
+  "dashboardAttachmentId": "abc-123",
+  "operations": [
+    {
+      "operation": "update_panels_from_attachments",
+      "attachmentIds": ["viz-attachment-456"]
+    }
+  ]
+}
+\`\`\`
+
 ## Update a dashboard — metadata only
 
 \`\`\`json
@@ -318,6 +334,7 @@ Key fields to remember:
 - \`data.dashboardAttachment.content.sections[]\` — section metadata and section-level panel lists. Use each section's \`sectionId\` for section-targeted updates.
 - \`data.version\` — increments with each update to the dashboard.
 - Panels with \`type: "generic"\` are non-visualization panels (e.g., markdown summary). Panels with \`type: "lens"\` are visualizations.
+- \`data.dashboardAttachment.content.panels[].sourceAttachmentId\` — present on Lens panels that were resolved from a visualization attachment. Use this to map panels back to their source attachment for \`update_panels_from_attachments\`.
 
 ## Successful result with partial failures
 
