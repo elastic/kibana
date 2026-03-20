@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/jest-serializers'
   - '@kbn/repo-packages'
   - '@kbn/stdio-dev-helpers'
+  - '@kbn/utils'
 tags:
   - shared-server
   - package

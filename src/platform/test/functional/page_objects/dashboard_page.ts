@@ -99,6 +99,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickFullScreenMode() {
+    await this.header.waitUntilLoadingHasFinished();
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
       await this.testSubjects.click('app-menu-overflow-button');
     }
