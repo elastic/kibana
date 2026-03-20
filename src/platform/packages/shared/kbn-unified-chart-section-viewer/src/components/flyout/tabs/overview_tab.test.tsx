@@ -257,12 +257,32 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText('Bytes')).toBeInTheDocument();
     });
 
-    it('renders null unit elements as null badges', () => {
+    it('renders null unit elements as NoValueBadge', () => {
       const metricItem = createMockMetric({ units: [null, 'ms'] });
       const { getByText } = render(<OverviewTab metricItem={metricItem} />);
 
-      expect(getByText('null')).toBeInTheDocument();
+      expect(getByText('No value')).toBeInTheDocument();
       expect(getByText('Milliseconds')).toBeInTheDocument();
+    });
+
+    it('renders null field type as NoValueBadge', () => {
+      const metricItem = createMockMetric({
+        fieldTypes: [ES_FIELD_TYPES.NULL],
+      });
+      const { getByText, queryByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('No value')).toBeInTheDocument();
+      expect(queryByText('null')).not.toBeInTheDocument();
+    });
+
+    it('renders mixed null and non-null field types correctly', () => {
+      const metricItem = createMockMetric({
+        fieldTypes: [ES_FIELD_TYPES.NULL, ES_FIELD_TYPES.DOUBLE],
+      });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('No value')).toBeInTheDocument();
+      expect(getByText('double')).toBeInTheDocument();
     });
 
     it('renders multiple metric types as badges', () => {

@@ -14,10 +14,23 @@ import { NoValueBadge } from './no_value_badge';
 interface BadgeGroupProps<T> {
   items: T[] | undefined;
   renderItem: (item: T, index: number) => React.ReactNode;
+  isNoValue?: (item: T) => boolean;
 }
 
-export const BadgeGroup = <T,>({ items, renderItem }: BadgeGroupProps<T>) => (
-  <EuiBadgeGroup gutterSize="xs">
-    {items?.length ? items.map(renderItem) : <NoValueBadge />}
-  </EuiBadgeGroup>
-);
+export const BadgeGroup = <T,>({ items, renderItem, isNoValue }: BadgeGroupProps<T>) => {
+  if (!items?.length) {
+    return (
+      <EuiBadgeGroup gutterSize="xs">
+        <NoValueBadge />
+      </EuiBadgeGroup>
+    );
+  }
+
+  return (
+    <EuiBadgeGroup gutterSize="xs">
+      {items.map((item, index) =>
+        isNoValue?.(item) ? <NoValueBadge key={`no-value-${index}`} /> : renderItem(item, index)
+      )}
+    </EuiBadgeGroup>
+  );
+};

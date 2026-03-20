@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 export const NoValueBadge = () => (
   <EuiBadge>
     {i18n.translate('metricsExperience.overviewTab.noValueLabel', {
-      defaultMessage: '-',
+      defaultMessage: 'No value',
     })}
   </EuiBadge>
 );

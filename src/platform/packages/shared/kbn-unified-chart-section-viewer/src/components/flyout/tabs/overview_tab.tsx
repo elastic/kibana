@@ -23,8 +23,9 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { getUnitLabel } from '../../../common/utils';
-import { TabTitleAndDescription, MetricTypeBadge, NoValueBadge, BadgeGroup } from '../components';
+import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 
@@ -96,6 +97,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         }),
         <BadgeGroup
           items={metricItem.fieldTypes}
+          isNoValue={(fieldType) => fieldType === ES_FIELD_TYPES.NULL}
           renderItem={(fieldType, index) => (
             <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
           )}
@@ -107,13 +109,10 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         }),
         <BadgeGroup
           items={metricItem.units}
-          renderItem={(unit, index) =>
-            unit != null ? (
-              <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
-            ) : (
-              <NoValueBadge key={`${unit}-${index}`} />
-            )
-          }
+          isNoValue={(unit) => unit == null}
+          renderItem={(unit, index) => (
+            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit: unit! })}</EuiBadge>
+          )}
         />,
         'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
       ),
