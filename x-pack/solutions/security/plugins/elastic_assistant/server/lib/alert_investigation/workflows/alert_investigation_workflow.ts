@@ -58,7 +58,7 @@ export const alertInvestigationWorkflowDefinition = {
       name: 'Deduplicate Similar Alerts',
       type: 'security.deduplicateAlerts',
       config: {
-        alert_ids: '${steps.fetch_alerts.output.alert_ids}', // State interpolation
+        alert_ids: '\${steps.fetch_alerts.output.alert_ids}', // State interpolation
         index_pattern: '.alerts-security.alerts-default',
         similarity_threshold: 0.85,
       },
