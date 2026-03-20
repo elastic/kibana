@@ -55,6 +55,7 @@ export function createTestConfig<
         defaults: {
           'accessibility:disableAnimations': true,
           'dateFormat:tz': 'UTC',
+          'timepicker:useLegacyTimePicker': true,
         },
         globalDefaults: {
           // Disable tours globally for all tests
