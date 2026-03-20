@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiFlyoutProps } from '@elastic/eui';
@@ -262,19 +262,31 @@ export function UnifiedDocViewerFlyout({
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
+  const lastReportedEventRef = useRef<string | undefined>(undefined);
+
+  // setting the selected tab id will trigger reporting the event
   const onUpdateSelectedTabIdWithTracking = useCallback(
     (tabId: string | undefined) => {
       onUpdateSelectedTabId?.(tabId);
-
-      if (!tabId || !flyoutContentId) return;
-
-      reportFlyoutViewedEvent(analytics, {
-        contentId: flyoutContentId,
-        tabId,
-      });
+      setSelectedTabId(tabId);
     },
-    [analytics, flyoutContentId, onUpdateSelectedTabId]
+    [onUpdateSelectedTabId]
   );
+
+  useEffect(() => {
+    if (!flyoutContentId || !selectedTabId) return;
+
+    const eventKey = `${flyoutContentId}|${selectedTabId}|${hit.id}`;
+    if (lastReportedEventRef.current === eventKey) return;
+
+    lastReportedEventRef.current = eventKey;
+
+    reportFlyoutViewedEvent(analytics, {
+      contentId: flyoutContentId,
+      tabId: selectedTabId,
+    });
+  }, [analytics, flyoutContentId, hit.id, selectedTabId]);
 
   return (
     <EuiPortal>
