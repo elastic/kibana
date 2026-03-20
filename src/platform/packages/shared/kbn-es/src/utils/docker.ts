@@ -1339,8 +1339,6 @@ export async function runDockerContainer(
   });
 }
 
-export { readStringSecrets };
-
 /**
  * A volume mount for the operator folder, that contains operator specific configuration files like settings.json.
  * We mount entire folder since Elasticsearch cannot properly watch changes in bind-mounted files.
