@@ -94,43 +94,6 @@ describe('ProposalTracker', () => {
     });
   });
 
-  describe('getDeclinedFingerprints', () => {
-    it('returns empty set when no declined records exist', () => {
-      tracker.setRecord(createRecord('p1'));
-      expect(tracker.getDeclinedFingerprints().size).toBe(0);
-    });
-
-    it('returns fingerprints from declined records', () => {
-      tracker.setRecord(
-        createRecord('p1', {
-          status: 'declined',
-          beforeYaml: 'name: old\n',
-          afterYaml: 'name: new\n',
-        })
-      );
-      const fps = tracker.getDeclinedFingerprints();
-      expect(fps.size).toBeGreaterThan(0);
-    });
-
-    it('caches fingerprints and invalidates on new decline', () => {
-      tracker.setRecord(
-        createRecord('p1', {
-          status: 'declined',
-          beforeYaml: 'name: old\n',
-          afterYaml: 'name: new\n',
-        })
-      );
-      const fps1 = tracker.getDeclinedFingerprints();
-      const fps2 = tracker.getDeclinedFingerprints();
-      expect(fps1).toBe(fps2); // same reference — cached
-
-      tracker.setRecord(createRecord('p2'));
-      tracker.updateStatus('p2', 'declined');
-      const fps3 = tracker.getDeclinedFingerprints();
-      expect(fps3).not.toBe(fps1); // invalidated
-    });
-  });
-
   describe('areAllResolved', () => {
     it('returns true when no records exist', () => {
       expect(tracker.areAllResolved()).toBe(true);

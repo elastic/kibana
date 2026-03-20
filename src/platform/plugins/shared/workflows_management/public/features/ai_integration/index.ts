@@ -8,7 +8,7 @@
  */
 
 export { ProposalManager } from './proposed_changes';
-export type { ProposedChange, PendingProposal, ProposalManagerOptions } from './proposed_changes';
+export type { DiffHunk, ProposalManagerOptions } from './proposed_changes';
 
 export { AttachmentBridge, baseProposalId } from './attachment_bridge';
 

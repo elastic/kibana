@@ -22,10 +22,9 @@ jest.mock('../../../../features/ai_integration', () => ({
   ProposalManager: jest.fn().mockImplementation(() => ({
     initialize: jest.fn(),
     dispose: jest.fn(),
-    getPendingProposals: jest.fn().mockReturnValue([]),
-    rejectProposal: jest.fn(),
+    getDiffHunks: jest.fn().mockReturnValue([]),
+    hasPendingProposals: jest.fn().mockReturnValue(false),
   })),
-  baseProposalId: jest.fn((id: string) => id),
 }));
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({

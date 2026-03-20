@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { changeFingerprint, computeChanges } from './attachment_bridge';
-
 export type ProposalStatus = 'pending' | 'accepted' | 'declined';
 
 export interface ProposalRecord {
@@ -28,8 +26,6 @@ export class ProposalTracker {
   private records = new Map<string, ProposalRecord>();
   private listeners = new Set<Listener>();
   private allResolvedCallbacks = new Set<AllResolvedCallback>();
-  private declinedFingerprintCache: Set<string> | null = null;
-
   private notify(): void {
     this.listeners.forEach((l) => l());
   }
@@ -58,11 +54,6 @@ export class ProposalTracker {
     if (!record) return;
 
     record.status = status;
-
-    if (status === 'declined') {
-      this.declinedFingerprintCache = null;
-    }
-
     this.notify();
     this.checkAllResolved();
   }
@@ -72,24 +63,6 @@ export class ProposalTracker {
     return () => {
       this.listeners.delete(listener);
     };
-  }
-
-  getDeclinedFingerprints(): Set<string> {
-    if (this.declinedFingerprintCache) {
-      return this.declinedFingerprintCache;
-    }
-
-    const fps = new Set<string>();
-    for (const record of this.records.values()) {
-      if (record.status === 'declined') {
-        const hunks = computeChanges(record.beforeYaml, record.afterYaml, 'declined');
-        for (const hunk of hunks) {
-          fps.add(changeFingerprint(hunk));
-        }
-      }
-    }
-    this.declinedFingerprintCache = fps;
-    return fps;
   }
 
   areAllResolved(): boolean {
@@ -117,7 +90,6 @@ export class ProposalTracker {
     if (!target) return [];
 
     target.status = 'declined';
-    this.declinedFingerprintCache = null;
 
     const cascaded: string[] = [];
 
@@ -145,7 +117,6 @@ export class ProposalTracker {
 
   clearAll(): void {
     this.records.clear();
-    this.declinedFingerprintCache = null;
     this.notify();
   }
 }

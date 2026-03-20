@@ -503,4 +503,22 @@ export class WorkflowEditorPage {
       editor.trigger('test', 'undo', null);
     }, uri);
   }
+
+  async triggerRedoInYamlEditor(): Promise<void> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    await this.page.evaluate((modelUri) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = editors.find((e: any) => e.getModel()?.uri?.toString() === modelUri);
+      if (!editor) {
+        throw new Error('No editor instance found for the YAML model');
+      }
+      editor.trigger('test', 'redo', null);
+    }, uri);
+  }
 }

@@ -239,4 +239,65 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
     await pageObjects.workflowEditor.acceptCurrentProposal();
     await expect(pageObjects.workflowEditor.bulkBar).toBeHidden();
   });
+
+  test('accept hunk then undo restores proposal and bulk bar', async ({ pageObjects }) => {
+    const afterYaml = INITIAL_YAML.replace(
+      'message: "Hello from step one"',
+      'message: "Modified step one"'
+    );
+
+    await pageObjects.workflowEditor.simulateProposedChanges(afterYaml);
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    await pageObjects.workflowEditor.acceptCurrentProposal();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeHidden();
+
+    await pageObjects.workflowEditor.triggerUndoInYamlEditor();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    const value = await pageObjects.workflowEditor.getYamlEditorValue();
+    expect(normalizeYaml(value)).toBe(normalizeYaml(afterYaml));
+  });
+
+  test('reject hunk then undo restores AI content and bulk bar', async ({ pageObjects }) => {
+    const afterYaml = INITIAL_YAML.replace(
+      'message: "Hello from step one"',
+      'message: "Modified step one"'
+    );
+
+    await pageObjects.workflowEditor.simulateProposedChanges(afterYaml);
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    await pageObjects.workflowEditor.declineCurrentProposal();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeHidden();
+
+    const rejectedValue = await pageObjects.workflowEditor.getYamlEditorValue();
+    expect(normalizeYaml(rejectedValue)).toBe(normalizeYaml(INITIAL_YAML));
+
+    await pageObjects.workflowEditor.triggerUndoInYamlEditor();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    const restoredValue = await pageObjects.workflowEditor.getYamlEditorValue();
+    expect(normalizeYaml(restoredValue)).toBe(normalizeYaml(afterYaml));
+  });
+
+  test('accept all then undo step-by-step restores hunks individually', async ({ pageObjects }) => {
+    await pageObjects.workflowEditor.simulateProposedChanges(ALL_STEPS_MODIFIED);
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    await pageObjects.workflowEditor.acceptAllProposals();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeHidden();
+
+    await pageObjects.workflowEditor.triggerUndoInYamlEditor();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    await pageObjects.workflowEditor.triggerUndoInYamlEditor();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    await pageObjects.workflowEditor.triggerUndoInYamlEditor();
+    await expect(pageObjects.workflowEditor.bulkBar).toBeVisible();
+
+    const value = await pageObjects.workflowEditor.getYamlEditorValue();
+    expect(normalizeYaml(value)).toBe(normalizeYaml(ALL_STEPS_MODIFIED));
+  });
 });

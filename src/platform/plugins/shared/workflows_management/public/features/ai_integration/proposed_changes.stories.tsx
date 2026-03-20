@@ -13,8 +13,6 @@ import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { monaco } from '@kbn/monaco';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { computeChanges } from './attachment_bridge';
-import type { ProposedChange } from './proposed_changes';
 import { ProposalManager } from './proposed_changes';
 import { kibanaReactDecorator } from '../../../.storybook/decorators';
 import {
@@ -61,34 +59,28 @@ steps:
           message: "#{{ steps.iterate_issues.item.number }} - {{ steps.iterate_issues.item.title }}"
 `;
 
-const INSERT_PROPOSAL: ProposedChange = {
-  proposalId: 'insert-step',
-  type: 'insert',
-  startLine: 32,
-  newText: `  - name: notify_slack
+const SAMPLE_YAML_WITH_INSERT = `${SAMPLE_YAML.trimEnd()}
+  - name: notify_slack
     type: slack
     connector-id: my-slack
     with:
       message: "Found {{ steps.fetch_issues.output.total_count }} open PRs for One Workflow"
-`,
-};
+`;
 
-const REPLACE_PROPOSAL: ProposedChange = {
-  proposalId: 'replace-line',
-  type: 'replace',
-  startLine: 6,
-  endLine: 6,
-  newText:
-    '  github_search_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=100"',
-};
+const SAMPLE_YAML_WITH_REPLACE = SAMPLE_YAML.replace(
+  '  github_search_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=100"',
+  '  github_api_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=50"'
+);
 
-const DELETE_PROPOSAL: ProposedChange = {
-  proposalId: 'delete-comment',
-  type: 'delete',
-  startLine: 7,
-  endLine: 7,
-  newText: '',
-};
+const SAMPLE_YAML_WITH_DELETE = SAMPLE_YAML.replace(
+  '  # slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"\n',
+  ''
+);
+
+const SAMPLE_YAML_ALL_CHANGES = SAMPLE_YAML_WITH_INSERT.replace(
+  '  github_search_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=100"',
+  '  github_api_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=50"'
+).replace('  # slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"\n', '');
 
 const PR_REPORT_YAML = `version: '1'
 name: Open PRs Report for Team One Workflow
@@ -515,8 +507,6 @@ steps:
       message: '✅ Cleaned up — deleted {{ consts.indexName }} index. Demo finished!'
 `;
 
-const LARGE_YAML_LINE_COUNT = LARGE_YAML.split('\n').length - 1;
-
 const CLEANED_UP_YAML = `version: 1
 name: 'Space Missions Demo'
 description: Demonstrates all 9 Elasticsearch step types through a space mission tracker.
@@ -680,24 +670,14 @@ steps:
       message: 'Cleaned up {{ consts.indexName }} index. Demo finished.'
 `;
 
-const LARGE_REPLACE_PROPOSAL: ProposedChange = {
-  proposalId: 'large-replace',
-  type: 'replace',
-  startLine: 1,
-  endLine: LARGE_YAML_LINE_COUNT,
-  newText: CLEANED_UP_YAML.trimEnd(),
-};
-
 interface EditorWithProposalsProps {
   yaml?: string;
-  proposals?: ProposedChange[];
   afterYaml?: string;
   onStepRun: (params: { stepId: string; actionType: string }) => void;
 }
 
 const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
   yaml = SAMPLE_YAML,
-  proposals,
   afterYaml,
   onStepRun,
 }) => {
@@ -712,7 +692,7 @@ const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
   }, [dispatch, yaml]);
 
   useEffect(() => {
-    if (proposalsApplied.current) return;
+    if (proposalsApplied.current || !afterYaml) return;
 
     const interval = setInterval(() => {
       const editor = editorRef.current;
@@ -726,17 +706,7 @@ const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
       manager.initialize(editor);
       managerRef.current = manager;
 
-      if (afterYaml) {
-        const currentContent = model.getValue();
-        const changes = computeChanges(currentContent, afterYaml, 'story-proposal');
-        for (let i = changes.length - 1; i >= 0; i--) {
-          manager.proposeChange({ ...changes[i], proposalId: `story-proposal::${i}` });
-        }
-      } else if (proposals) {
-        for (const proposal of proposals) {
-          manager.proposeChange(proposal);
-        }
-      }
+      manager.applyAfterYaml(afterYaml);
     }, 100);
 
     return () => {
@@ -745,7 +715,7 @@ const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
       managerRef.current = null;
       proposalsApplied.current = false;
     };
-  }, [proposals, afterYaml]);
+  }, [afterYaml]);
 
   return <WorkflowYAMLEditor editorRef={editorRef} onStepRun={onStepRun} />;
 };
@@ -772,35 +742,38 @@ type Story = StoryObj<typeof EditorWithProposals>;
 
 export const InsertAndReplace: Story = {
   args: {
-    proposals: [INSERT_PROPOSAL, REPLACE_PROPOSAL],
+    afterYaml: SAMPLE_YAML_WITH_INSERT.replace(
+      '  github_search_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=100"',
+      '  github_api_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22Team%3AOne+Workflow%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=50"'
+    ),
     onStepRun: () => {},
   },
 };
 
 export const InsertOnly: Story = {
   args: {
-    proposals: [INSERT_PROPOSAL],
+    afterYaml: SAMPLE_YAML_WITH_INSERT,
     onStepRun: () => {},
   },
 };
 
 export const ReplaceOnly: Story = {
   args: {
-    proposals: [REPLACE_PROPOSAL],
+    afterYaml: SAMPLE_YAML_WITH_REPLACE,
     onStepRun: () => {},
   },
 };
 
 export const DeleteLines: Story = {
   args: {
-    proposals: [DELETE_PROPOSAL],
+    afterYaml: SAMPLE_YAML_WITH_DELETE,
     onStepRun: () => {},
   },
 };
 
 export const AllTypes: Story = {
   args: {
-    proposals: [INSERT_PROPOSAL, REPLACE_PROPOSAL, DELETE_PROPOSAL],
+    afterYaml: SAMPLE_YAML_ALL_CHANGES,
     onStepRun: () => {},
   },
 };
@@ -808,7 +781,7 @@ export const AllTypes: Story = {
 export const LargeReplace: Story = {
   args: {
     yaml: LARGE_YAML,
-    proposals: [LARGE_REPLACE_PROPOSAL],
+    afterYaml: CLEANED_UP_YAML,
     onStepRun: () => {},
   },
 };

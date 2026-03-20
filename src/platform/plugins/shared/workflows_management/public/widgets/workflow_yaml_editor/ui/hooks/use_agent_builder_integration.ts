@@ -11,11 +11,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { v4 } from 'uuid';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
-import {
-  AttachmentBridge,
-  baseProposalId,
-  ProposalManager,
-} from '../../../../features/ai_integration';
+import { AttachmentBridge, ProposalManager } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -73,16 +69,17 @@ export const useAgentBuilderIntegration = ({
 
     const manager = new ProposalManager();
     manager.initialize(editor, {
-      onAccept: (hunkId) => {
-        tracker.updateStatus(baseProposalId(hunkId), 'accepted');
+      onAccept: () => {
+        for (const record of tracker.getAllRecords()) {
+          if (record.status === 'pending') {
+            tracker.updateStatus(record.proposalId, 'accepted');
+          }
+        }
       },
-      onReject: (hunkId) => {
-        const cascaded = tracker.cascadeDecline(baseProposalId(hunkId));
-        for (const cascadedBaseId of cascaded) {
-          const pending = manager.getPendingProposals();
-          const matches = pending.filter((p) => baseProposalId(p.proposalId) === cascadedBaseId);
-          for (const match of matches) {
-            manager.rejectProposal(match.proposalId);
+      onReject: () => {
+        for (const record of tracker.getAllRecords()) {
+          if (record.status === 'pending') {
+            tracker.cascadeDecline(record.proposalId);
           }
         }
       },
@@ -101,14 +98,10 @@ export const useAgentBuilderIntegration = ({
       injectYamlChange: (afterYaml: string) => bridge.injectYamlChange(afterYaml),
       getEditorValue: () => editorRef.current?.getModel()?.getValue() ?? '',
       revealNextProposal: () => {
-        const sorted = manager.getSortedProposalIds();
-        const proposal =
-          sorted.length > 0
-            ? manager.getPendingProposals().find((p) => p.proposalId === sorted[0])
-            : undefined;
-        if (proposal && editorRef.current) {
-          editorRef.current.setPosition({ lineNumber: proposal.startLine, column: 1 });
-          editorRef.current.revealLineInCenter(proposal.startLine);
+        const hunks = manager.getDiffHunks();
+        if (hunks.length > 0 && editorRef.current) {
+          editorRef.current.setPosition({ lineNumber: hunks[0].modifiedStartLine, column: 1 });
+          editorRef.current.revealLineInCenter(hunks[0].modifiedStartLine);
         }
       },
     };
