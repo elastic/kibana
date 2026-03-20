@@ -161,7 +161,7 @@ function QueryBarMenuComponent({
         onClick={onButtonClick}
         isDisabled={isDisabled}
         css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-        iconType={showFilterBar ? 'ellipsis' : 'filter'}
+        iconType="ellipsis"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
       />
