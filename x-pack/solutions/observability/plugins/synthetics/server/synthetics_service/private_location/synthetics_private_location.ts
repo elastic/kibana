@@ -589,13 +589,15 @@ export class SyntheticsPrivateLocation {
     for (const config of configs) {
       const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
       for (const privateLocation of monitorPrivateLocations) {
-        const { legacyPolicyIds } = this.getPolicyIdFormatInfo(
+        const { hasNewFormatPolicyId, legacyPolicyIds } = this.getPolicyIdFormatInfo(
           config,
           privateLocation.id,
           existingPolicies,
           allSpaces
         );
-        policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+        if (hasNewFormatPolicyId) {
+          policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+        }
         legacyPolicyIds.forEach((id) => policyIdsToDelete.add(id));
       }
     }
