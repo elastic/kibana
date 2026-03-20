@@ -61,7 +61,7 @@ export class UnifiedDocViewerPublicPlugin
     core.analytics.registerEventType({
       eventType: FLYOUT_VIEWED_EVENT_TYPE,
       schema: {
-        content: {
+        contentId: {
           type: 'keyword',
           _meta: {
             description: 'Flyout content viewed.',

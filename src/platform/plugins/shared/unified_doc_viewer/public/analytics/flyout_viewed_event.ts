@@ -13,21 +13,21 @@ import { FLYOUT_VIEWED_EVENT_TYPE } from '../plugin';
 /**
  * Identifies which flyout content is being viewed.
  */
-export enum FlyoutViewedContent {
+export enum FlyoutContentId {
   DOC_DETAIL = 'doc_detail',
   TIMELINE_WATERFALL = 'timeline_waterfall',
   SPAN_DETAIL = 'span_detail',
+  LOG_DETAIL = 'log_detail',
 }
 
 /**
  * Payload for the `flyout_viewed` event.
  *
- * @property content -Identifies which flyout content is being viewed.
- * @property tabId - Active tab identifier within the flyout. For document flyouts this is typically
- * the `DocView` id (e.g. `doc_view_table`, `doc_view_source`, `doc_view_logs_overview`).
+ * @property contentId Identifies which flyout content is being viewed.
+ * @property tabId Active tab identifier within the flyout.
  */
 export interface FlyoutViewedEvent {
-  content: FlyoutViewedContent;
+  contentId: FlyoutContentId;
   tabId?: string;
 }
 
@@ -36,12 +36,12 @@ export interface FlyoutViewedEvent {
  */
 export const reportFlyoutViewedEvent = (
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'> | undefined,
-  { content, tabId }: FlyoutViewedEvent
+  { contentId, tabId }: FlyoutViewedEvent
 ) => {
   if (!analytics) return;
 
   analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
-    content,
+    contentId,
     tabId,
   });
 };

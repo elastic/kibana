@@ -9,28 +9,28 @@
 
 import { useEffect } from 'react';
 import { getUnifiedDocViewerServices } from '../plugin';
-import { reportFlyoutViewedEvent, type FlyoutViewedContent } from './flyout_viewed_event';
+import { reportFlyoutViewedEvent, type FlyoutContentId } from './flyout_viewed_event';
 
 /**
  * Parameters used for emitting a `flyout_viewed` event from a React component.
  *
- * @property content - Flyout content being viewed.
- * @property tabId - Active tab identifier within the flyout (content-specific).
+ * @property contentId Flyout content being viewed.
+ * @property tabId Active tab identifier within the flyout (content-specific).
  */
 export interface TrackFlyoutViewedParams {
-  content?: FlyoutViewedContent;
+  contentId?: FlyoutContentId;
   tabId?: string;
 }
 
 /**
  * Reports a `flyout_viewed` event whenever `content` or `tabId` changes.
  */
-export const useTrackFlyoutViewed = ({ content, tabId }: TrackFlyoutViewedParams) => {
+export const useTrackFlyoutViewed = ({ contentId, tabId }: TrackFlyoutViewedParams) => {
   const { analytics } = getUnifiedDocViewerServices();
 
   useEffect(() => {
-    if (!content) return;
+    if (!contentId) return;
 
-    reportFlyoutViewedEvent(analytics, { content, tabId });
-  }, [analytics, content, tabId]);
+    reportFlyoutViewedEvent(analytics, { contentId, tabId });
+  }, [analytics, contentId, tabId]);
 };

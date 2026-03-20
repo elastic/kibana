@@ -26,7 +26,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState } from 'react';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
-import { type FlyoutViewedContent } from '../../../../../../analytics/flyout_viewed_event';
+import { type FlyoutContentId } from '../../../../../../analytics/flyout_viewed_event';
 import { useTrackFlyoutViewed } from '../../../../../../analytics/use_track_flyout_viewed';
 
 const tabIds = {
@@ -78,7 +78,7 @@ export interface Props {
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
-  flyoutViewedContent?: FlyoutViewedContent;
+  flyoutContentId?: FlyoutContentId;
   children: React.ReactNode;
 }
 
@@ -90,14 +90,14 @@ export function WaterfallFlyout({
   children,
   title,
   dataTestSubj,
-  flyoutViewedContent,
+  flyoutContentId,
 }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
 
   useTrackFlyoutViewed({
-    content: flyoutViewedContent,
+    contentId: flyoutContentId,
     tabId: selectedTabId,
   });
 

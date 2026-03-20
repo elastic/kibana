@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
-import { FlyoutViewedContent } from '../../../../../../analytics/flyout_viewed_event';
+import { FlyoutContentId } from '../../../../../../analytics/flyout_viewed_event';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { spanFlyoutId, SpanFlyoutContent } from './span_flyout';
 import { logsFlyoutId, LogFlyoutContent } from './logs_flyout';
@@ -29,23 +29,39 @@ interface FlyoutContentProps {
   activeSection?: TraceOverviewSections;
 }
 
-function FlyoutContent({ data, dataView, activeSection }: FlyoutContentProps) {
-  if (!data.hit) {
-    return null;
-  }
-
-  const isSpanType = data.type === spanFlyoutId;
-  if (isSpanType) {
-    return <SpanFlyoutContent hit={data.hit} dataView={dataView} activeSection={activeSection} />;
-  }
-
-  const isLogType = data.type === logsFlyoutId;
-  if (isLogType && data.logDataView) {
-    return <LogFlyoutContent hit={data.hit} logDataView={data.logDataView} />;
-  }
-
-  return null;
+interface FlyoutConfig {
+  contentId: FlyoutContentId;
+  render: (params: FlyoutContentProps) => React.ReactNode;
 }
+
+const getFlyoutConfig = (type: DocumentType): FlyoutConfig | undefined => {
+  switch (type) {
+    case spanFlyoutId:
+      return {
+        contentId: FlyoutContentId.SPAN_DETAIL,
+        render: ({ data, dataView, activeSection }) => {
+          if (!data.hit) return null;
+
+          return (
+            <SpanFlyoutContent hit={data.hit} dataView={dataView} activeSection={activeSection} />
+          );
+        },
+      };
+
+    case logsFlyoutId:
+      return {
+        contentId: FlyoutContentId.LOG_DETAIL,
+        render: ({ data }) => {
+          if (!data.hit || !data.logDataView) return null;
+
+          return <LogFlyoutContent hit={data.hit} logDataView={data.logDataView} />;
+        },
+      };
+
+    default:
+      return undefined;
+  }
+};
 
 export interface DocumentDetailFlyoutProps {
   type: DocumentType;
@@ -70,6 +86,8 @@ export function DocumentDetailFlyout({
 }: DocumentDetailFlyoutProps) {
   const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
+  const flyoutConfig = getFlyoutConfig(type);
+
   return (
     <WaterfallFlyout
       onCloseFlyout={onCloseFlyout}
@@ -78,12 +96,10 @@ export function DocumentDetailFlyout({
       loading={data.loading}
       title={data.title}
       dataTestSubj={dataTestSubj}
-      flyoutViewedContent={type === spanFlyoutId ? FlyoutViewedContent.SPAN_DETAIL : undefined}
+      flyoutContentId={flyoutConfig?.contentId}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
-      {data.hit ? (
-        <FlyoutContent data={data} dataView={dataView} activeSection={activeSection} />
-      ) : null}
+      {flyoutConfig?.render({ data, dataView, activeSection })}
     </WaterfallFlyout>
   );
 }

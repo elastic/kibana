@@ -35,7 +35,7 @@ import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
-import { FlyoutViewedContent, reportFlyoutViewedEvent } from '../../analytics/flyout_viewed_event';
+import { FlyoutContentId, reportFlyoutViewedEvent } from '../../analytics/flyout_viewed_event';
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<
@@ -52,7 +52,7 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutActions?: React.ReactNode;
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
-  flyoutViewedContent?: FlyoutViewedContent;
+  flyoutContentId?: FlyoutContentId;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -95,7 +95,7 @@ export function UnifiedDocViewerFlyout({
   flyoutActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
-  flyoutViewedContent = FlyoutViewedContent.DOC_DETAIL,
+  flyoutContentId = FlyoutContentId.DOC_DETAIL,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -266,14 +266,14 @@ export function UnifiedDocViewerFlyout({
     (tabId: string | undefined) => {
       onUpdateSelectedTabId?.(tabId);
 
-      if (!tabId || !flyoutViewedContent) return;
+      if (!tabId || !flyoutContentId) return;
 
       reportFlyoutViewedEvent(analytics, {
-        content: flyoutViewedContent,
+        contentId: flyoutContentId,
         tabId,
       });
     },
-    [analytics, flyoutViewedContent, onUpdateSelectedTabId]
+    [analytics, flyoutContentId, onUpdateSelectedTabId]
   );
 
   return (
