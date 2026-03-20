@@ -33,7 +33,7 @@ const mockUnifiedExecutionResults = {
       execution_duration_ms: 1200,
       schedule_delay_ms: null,
       backfill: null,
-      outcome: { status: 'success', message: null },
+      outcome: { status: 'success' as const, message: null },
       metrics: { ...mockMetrics, matched_indices_count: 5 },
     },
     {
@@ -42,7 +42,7 @@ const mockUnifiedExecutionResults = {
       execution_duration_ms: 800,
       schedule_delay_ms: null,
       backfill: null,
-      outcome: { status: 'warning', message: 'Missing index pattern' },
+      outcome: { status: 'warning' as const, message: 'Missing index pattern' },
       metrics: { ...mockMetrics },
     },
   ],
