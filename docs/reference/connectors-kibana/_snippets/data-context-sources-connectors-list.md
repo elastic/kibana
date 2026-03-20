@@ -5,6 +5,7 @@
 * [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 * [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 * [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
+* [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 * [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 * [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
 * [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.

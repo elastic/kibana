@@ -183,6 +183,7 @@ const previouslyRegisteredTypes = [
   'uptime-dynamic-settings',
   'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
+  'user_connector_token',
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'

@@ -50,7 +50,16 @@ export const GoogleCalendar: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },
