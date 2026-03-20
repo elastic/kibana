@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
@@ -16,6 +17,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
+import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer/analyzer_graph';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
@@ -75,6 +77,7 @@ export const VisualizationsSection = memo(
         }
       );
     }, [history, hit, overlays, renderCellActions, services, store]);
+    const onShowSessionView = useCallback(() => {}, []);
 
     return (
       <ExpandableSection
@@ -85,6 +88,13 @@ export const VisualizationsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={VISUALIZATION_SECTION_TITLE}
       >
+        <SessionPreviewContainer
+          hit={hit}
+          onShowSessionView={onShowSessionView}
+          disableNavigation={true}
+          showIcon={false}
+        />
+        <EuiSpacer />
         <AnalyzerPreviewContainer
           hit={hit}
           onShowAnalyzer={onShowAnalyzer}

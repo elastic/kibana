@@ -32,7 +32,8 @@ import {
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
-import { MessageEditor, useMessageEditor } from './message_editor';
+import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -167,7 +168,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
-  const messageEditor = useMessageEditor();
+
+  const { messageEditor, controller: messageEditorController } = useMessageEditor();
+  const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
   const { conversation } = useConversation();
@@ -180,7 +183,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
   const isSubmitDisabled =
-    messageEditor.isEmpty || isSendingMessage || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty || isSendingMessage || !isAgentIdValid || isAwaitingPrompt;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -208,36 +211,49 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
     if (initialMessage && !autoSendInitialMessage && isNewConversation) {
-      messageEditor.setContent(initialMessage);
-      messageEditor.focus();
+      messageEditorController.setContent(initialMessage);
+      messageEditorController.focus();
       resetInitialMessage?.(); // Reset the initial message to avoid sending it again
     }
   }, [
     initialMessage,
     autoSendInitialMessage,
     isNewConversation,
-    messageEditor,
+    messageEditorController,
     resetInitialMessage,
   ]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      messageEditor.focus();
+      messageEditorController.focus();
     }, 200);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [conversationId, messageEditor]);
+  }, [conversationId, messageEditorController]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
       return;
     }
-    const content = messageEditor.getContent();
+    let content: string;
+    try {
+      content = messageEditorController.getContent();
+    } catch (contentError) {
+      if (contentError instanceof CommandBadgeSerializationError) {
+        addErrorToast(
+          i18n.translate('xpack.agentBuilder.conversationInput.invalidCommandBadge', {
+            defaultMessage:
+              'Your message contains an invalid command. Remove the command and try again.',
+          })
+        );
+      }
+      return;
+    }
     sendMessage({ message: content });
-    messageEditor.clear();
+    messageEditorController.clear();
     onSubmit?.();
   };
 
@@ -263,7 +279,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
           isSubmitDisabled={isSubmitDisabled}
           resetToPendingMessage={() => {
             if (pendingMessage) {
-              messageEditor.setContent(pendingMessage);
+              messageEditorController.setContent(pendingMessage);
             }
           }}
           agentId={agentId}
