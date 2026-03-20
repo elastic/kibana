@@ -47,7 +47,7 @@ describe('GithubConnector', () => {
     it('calls get_me tool and returns content', async () => {
       const result = await GithubConnector.actions.getMe.handler(mockContext, {});
 
-      expect(mockCallTool).toHaveBeenCalledWith({ name: 'get_me' });
+      expect(mockCallTool).toHaveBeenCalledWith({ name: 'get_me', arguments: {} });
       expect(result).toEqual(mockContent);
     });
   });
