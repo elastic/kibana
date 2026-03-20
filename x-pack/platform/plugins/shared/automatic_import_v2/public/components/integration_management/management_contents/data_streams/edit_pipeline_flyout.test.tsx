@@ -345,12 +345,7 @@ describe('EditPipelineFlyout', () => {
       const pipelineTab = screen.getByRole('tab', { name: 'Ingest pipeline' });
       await userEvent.click(pipelineTab);
 
-      expect(mockReportEditPipelineTabOpened).toHaveBeenCalledWith({
-        integrationId: 'integration-123',
-        integrationName: 'Test Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'Test Data Stream',
-      });
+      expect(mockReportEditPipelineTabOpened).toHaveBeenCalled();
     });
 
     it('should render save button and submit updated pipeline', async () => {
@@ -387,9 +382,7 @@ describe('EditPipelineFlyout', () => {
       await userEvent.click(copyButton);
 
       expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith({
-        integrationId: 'integration-123',
         integrationName: 'Test Integration',
-        dataStreamId: 'ds-1',
         dataStreamName: 'Test Data Stream',
       });
     });

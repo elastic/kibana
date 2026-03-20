@@ -103,7 +103,6 @@ const renderWithProvider = (ui: React.ReactElement) => {
 describe('DataStreamsTable', () => {
   const defaultProps = {
     integrationId: 'integration-123',
-    integrationName: 'Test Integration',
     items: [createMockDataStream()],
   };
 
@@ -146,14 +145,14 @@ describe('DataStreamsTable', () => {
       expect(screen.getByTestId('mock-status')).toBeInTheDocument();
     });
 
-    it('should pass integrationName to telemetry when data stream is expanded', async () => {
+    it('should call reportEditDataStreamFlyoutOpened when data stream is expanded', async () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const expandButton = screen.getByTestId('expandDataStreamButton');
       await userEvent.click(expandButton);
 
       expect(mockReportEditDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({ integrationName: 'Test Integration' })
+        expect.objectContaining({ integrationId: 'integration-123', dataStreamId: 'ds-1' })
       );
     });
 

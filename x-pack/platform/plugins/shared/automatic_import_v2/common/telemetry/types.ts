@@ -45,42 +45,26 @@ export interface CreateIntegrationPageLoadedPayload {
 
 export interface DataStreamFlyoutOpenedPayload {
   sessionId: string;
-  integrationId?: string;
-  integrationName?: string;
   /** Boolean flag if this is the first data stream being created for a new integration */
   isFirstDataStream: boolean;
 }
 
 export interface EditDataStreamFlyoutOpenedPayload {
   sessionId: string;
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
 }
 
 export interface AnalyzeLogsTriggeredPayload {
   sessionId: string;
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
   logsSource: LogsSource;
 }
 
 export interface EditPipelineTabOpenedPayload {
   sessionId: string;
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
 }
 
 export interface CodeEditorCopyClickedPayload {
   sessionId: string;
-  integrationId: string;
   integrationName: string;
-  dataStreamId: string;
   dataStreamName: string;
 }
 

@@ -82,8 +82,6 @@ describe('useTelemetry', () => {
 
     act(() => {
       result.current.reportDataStreamFlyoutOpened({
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
         isFirstDataStream: true,
       });
     });
@@ -92,8 +90,6 @@ describe('useTelemetry', () => {
       AIV2TelemetryEventType.DataStreamFlyoutOpened,
       expect.objectContaining({
         sessionId: expect.any(String),
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
         isFirstDataStream: true,
       })
     );
@@ -103,22 +99,13 @@ describe('useTelemetry', () => {
     const { result } = renderHook(() => useTelemetry(), { wrapper });
 
     act(() => {
-      result.current.reportEditDataStreamFlyoutOpened({
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'My DataStream',
-      });
+      result.current.reportEditDataStreamFlyoutOpened();
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.EditDataStreamFlyoutOpened,
       expect.objectContaining({
         sessionId: expect.any(String),
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'My DataStream',
       })
     );
   });
@@ -128,10 +115,6 @@ describe('useTelemetry', () => {
 
     act(() => {
       result.current.reportAnalyzeLogsTriggered({
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'My DataStream',
         logsSource: 'file',
       });
     });
@@ -140,7 +123,6 @@ describe('useTelemetry', () => {
       AIV2TelemetryEventType.AnalyzeLogsTriggered,
       expect.objectContaining({
         sessionId: expect.any(String),
-        integrationId: 'int-1',
         logsSource: 'file',
       })
     );
@@ -150,17 +132,12 @@ describe('useTelemetry', () => {
     const { result } = renderHook(() => useTelemetry(), { wrapper });
 
     act(() => {
-      result.current.reportEditPipelineTabOpened({
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'My DataStream',
-      });
+      result.current.reportEditPipelineTabOpened();
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.EditPipelineTabOpened,
-      expect.objectContaining({ sessionId: expect.any(String), integrationId: 'int-1' })
+      expect.objectContaining({ sessionId: expect.any(String) })
     );
   });
 
@@ -169,16 +146,18 @@ describe('useTelemetry', () => {
 
     act(() => {
       result.current.reportCodeEditorCopyClicked({
-        integrationId: 'int-1',
         integrationName: 'My Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'My DataStream',
+        dataStreamName: 'my-data-stream',
       });
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.CodeEditorCopyClicked,
-      expect.objectContaining({ sessionId: expect.any(String), integrationId: 'int-1' })
+      expect.objectContaining({
+        sessionId: expect.any(String),
+        integrationName: 'My Integration',
+        dataStreamName: 'my-data-stream',
+      })
     );
   });
 

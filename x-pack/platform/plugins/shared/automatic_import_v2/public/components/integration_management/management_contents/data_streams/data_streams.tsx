@@ -40,17 +40,9 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const handleOpenCreateDataStreamFlyout = useCallback(() => {
     openCreateDataStreamFlyout();
     reportDataStreamFlyoutOpened({
-      integrationId,
-      integrationName: integration?.title,
       isFirstDataStream: !hasDataStreams,
     });
-  }, [
-    integrationId,
-    integration?.title,
-    hasDataStreams,
-    reportDataStreamFlyoutOpened,
-    openCreateDataStreamFlyout,
-  ]);
+  }, [hasDataStreams, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
 
   return (
     <>
@@ -102,11 +94,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
       )}
 
       {hasDataStreams && integration?.dataStreams && integrationId && (
-        <DataStreamsTable
-          integrationId={integrationId}
-          integrationName={integration.title}
-          items={integration.dataStreams}
-        />
+        <DataStreamsTable integrationId={integrationId} items={integration.dataStreams} />
       )}
 
       {isCreateDataStreamFlyoutOpen && (

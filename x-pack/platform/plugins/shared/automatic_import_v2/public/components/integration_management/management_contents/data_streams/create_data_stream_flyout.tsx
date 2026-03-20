@@ -312,10 +312,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       });
     } finally {
       reportAnalyzeLogsTriggered({
-        integrationId,
-        integrationName: formData.title,
-        dataStreamId,
-        dataStreamName: formData.dataStreamTitle,
         logsSource: logsSourceOption,
       });
     }

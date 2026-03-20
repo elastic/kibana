@@ -25,15 +25,10 @@ import { useTelemetry } from '../../../../telemetry_context';
 
 interface DataStreamsTableProps {
   integrationId: string;
-  integrationName: string;
   items: DataStreamResponse[];
 }
 
-export const DataStreamsTable = ({
-  integrationId,
-  integrationName,
-  items,
-}: DataStreamsTableProps) => {
+export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
   const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
@@ -48,14 +43,9 @@ export const DataStreamsTable = ({
   const handleOpenEditPipelineFlyout = useCallback(
     (item: DataStreamResponse) => {
       openEditPipelineFlyout(item);
-      reportEditDataStreamFlyoutOpened({
-        integrationId,
-        integrationName,
-        dataStreamId: item.dataStreamId,
-        dataStreamName: item.title,
-      });
+      reportEditDataStreamFlyoutOpened();
     },
-    [integrationId, integrationName, reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
+    [reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
   );
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null

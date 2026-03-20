@@ -33,14 +33,6 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
         optional: false,
       },
     },
-    integrationId: {
-      type: 'keyword',
-      _meta: { description: 'Integration ID', optional: true },
-    },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: true },
-    },
     isFirstDataStream: {
       type: 'boolean',
       _meta: {
@@ -58,22 +50,6 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
         optional: false,
       },
     },
-    integrationId: {
-      type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
-    },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: false },
-    },
-    dataStreamId: {
-      type: 'keyword',
-      _meta: { description: 'Data stream ID being edited', optional: false },
-    },
-    dataStreamName: {
-      type: 'keyword',
-      _meta: { description: 'Data stream name', optional: false },
-    },
   },
 
   [AIV2TelemetryEventType.AnalyzeLogsTriggered]: {
@@ -83,22 +59,6 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
         description: 'The ID to identify all the events in the same session',
         optional: false,
       },
-    },
-    integrationId: {
-      type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
-    },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: false },
-    },
-    dataStreamId: {
-      type: 'keyword',
-      _meta: { description: 'Data stream ID', optional: false },
-    },
-    dataStreamName: {
-      type: 'keyword',
-      _meta: { description: 'Data stream name', optional: false },
     },
     logsSource: {
       type: 'keyword',
@@ -114,22 +74,6 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
         optional: false,
       },
     },
-    integrationId: {
-      type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
-    },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: false },
-    },
-    dataStreamId: {
-      type: 'keyword',
-      _meta: { description: 'Data stream ID', optional: false },
-    },
-    dataStreamName: {
-      type: 'keyword',
-      _meta: { description: 'Data stream name', optional: false },
-    },
   },
 
   // Code editor copy button clicked
@@ -141,17 +85,9 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
         optional: false,
       },
     },
-    integrationId: {
-      type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
-    },
     integrationName: {
       type: 'keyword',
       _meta: { description: 'Integration name', optional: false },
-    },
-    dataStreamId: {
-      type: 'keyword',
-      _meta: { description: 'Data stream ID', optional: false },
     },
     dataStreamName: {
       type: 'keyword',
@@ -209,31 +145,19 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
   [AIV2TelemetryEventType.PipelineEdited]: {
     integrationId: {
       type: 'keyword',
-      _meta: {
-        description: 'Integration ID',
-        optional: false,
-      },
+      _meta: { description: 'Integration ID', optional: false },
     },
     integrationName: {
       type: 'keyword',
-      _meta: {
-        description: 'Integration name',
-        optional: false,
-      },
+      _meta: { description: 'Integration name', optional: false },
     },
     dataStreamId: {
       type: 'keyword',
-      _meta: {
-        description: 'Data stream ID',
-        optional: false,
-      },
+      _meta: { description: 'Data stream ID', optional: false },
     },
     dataStreamName: {
       type: 'keyword',
-      _meta: {
-        description: 'Data stream name',
-        optional: false,
-      },
+      _meta: { description: 'Data stream name', optional: false },
     },
     linesAdded: {
       type: 'long',

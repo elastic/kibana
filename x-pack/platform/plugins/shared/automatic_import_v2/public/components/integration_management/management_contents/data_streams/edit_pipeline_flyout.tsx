@@ -216,20 +216,12 @@ export const EditPipelineFlyout = ({
         target.getAttribute('aria-label')?.toLowerCase().includes('copy')
       ) {
         reportCodeEditorCopyClicked({
-          integrationId,
           integrationName,
-          dataStreamId: dataStream.dataStreamId,
           dataStreamName: dataStream.title,
         });
       }
     },
-    [
-      reportCodeEditorCopyClicked,
-      integrationId,
-      integrationName,
-      dataStream.dataStreamId,
-      dataStream.title,
-    ]
+    [reportCodeEditorCopyClicked, integrationName, dataStream.title]
   );
 
   return (
@@ -283,12 +275,7 @@ export const EditPipelineFlyout = ({
           <EuiTab
             isSelected={selectedPipelineTab === 'pipeline'}
             onClick={() => {
-              reportEditPipelineTabOpened({
-                integrationId,
-                integrationName,
-                dataStreamId: dataStream.dataStreamId,
-                dataStreamName: dataStream.title,
-              });
+              reportEditPipelineTabOpened();
               selectPipelineTab('pipeline');
             }}
           >

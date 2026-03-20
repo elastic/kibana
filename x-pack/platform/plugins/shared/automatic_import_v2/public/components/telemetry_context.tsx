@@ -10,38 +10,16 @@ import { useKibana } from '../common/hooks/use_kibana';
 import { AIV2TelemetryEventType } from '../../common/telemetry/types';
 
 export type LogsSource = 'file' | 'index';
-type ReportDataStreamFlyoutOpened = (params: {
-  integrationId?: string;
-  integrationName?: string;
-  isFirstDataStream: boolean;
-}) => void;
+type ReportDataStreamFlyoutOpened = (params: { isFirstDataStream: boolean }) => void;
 
-type ReportEditDataStreamFlyoutOpened = (params: {
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
-}) => void;
+type ReportEditDataStreamFlyoutOpened = () => void;
 
-type ReportAnalyzeLogsTriggered = (params: {
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
-  logsSource: LogsSource;
-}) => void;
+type ReportAnalyzeLogsTriggered = (params: { logsSource: LogsSource }) => void;
 
-type ReportEditPipelineTabOpened = (params: {
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
-}) => void;
+type ReportEditPipelineTabOpened = () => void;
 
 type ReportCodeEditorCopyClicked = (params: {
-  integrationId: string;
   integrationName: string;
-  dataStreamId: string;
   dataStreamName: string;
 }) => void;
 
@@ -114,64 +92,42 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   }, [telemetry]);
 
   const reportDataStreamFlyoutOpened = useCallback<ReportDataStreamFlyoutOpened>(
-    ({ integrationId, integrationName, isFirstDataStream }) => {
+    ({ isFirstDataStream }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamFlyoutOpened, {
         sessionId: sessionData.current.sessionId,
-        integrationId,
-        integrationName,
         isFirstDataStream,
       });
     },
     [telemetry]
   );
 
-  const reportEditDataStreamFlyoutOpened = useCallback<ReportEditDataStreamFlyoutOpened>(
-    ({ integrationId, integrationName, dataStreamId, dataStreamName }) => {
-      telemetry?.reportEvent(AIV2TelemetryEventType.EditDataStreamFlyoutOpened, {
-        sessionId: sessionData.current.sessionId,
-        integrationId,
-        integrationName,
-        dataStreamId,
-        dataStreamName,
-      });
-    },
-    [telemetry]
-  );
+  const reportEditDataStreamFlyoutOpened = useCallback<ReportEditDataStreamFlyoutOpened>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.EditDataStreamFlyoutOpened, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
 
   const reportAnalyzeLogsTriggered = useCallback<ReportAnalyzeLogsTriggered>(
-    ({ integrationId, integrationName, dataStreamId, dataStreamName, logsSource }) => {
+    ({ logsSource }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.AnalyzeLogsTriggered, {
         sessionId: sessionData.current.sessionId,
-        integrationId,
-        integrationName,
-        dataStreamId,
-        dataStreamName,
         logsSource,
       });
     },
     [telemetry]
   );
 
-  const reportEditPipelineTabOpened = useCallback<ReportEditPipelineTabOpened>(
-    ({ integrationId, integrationName, dataStreamId, dataStreamName }) => {
-      telemetry?.reportEvent(AIV2TelemetryEventType.EditPipelineTabOpened, {
-        sessionId: sessionData.current.sessionId,
-        integrationId,
-        integrationName,
-        dataStreamId,
-        dataStreamName,
-      });
-    },
-    [telemetry]
-  );
+  const reportEditPipelineTabOpened = useCallback<ReportEditPipelineTabOpened>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.EditPipelineTabOpened, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
 
   const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(
-    ({ integrationId, integrationName, dataStreamId, dataStreamName }) => {
+    ({ integrationName, dataStreamName }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.CodeEditorCopyClicked, {
         sessionId: sessionData.current.sessionId,
-        integrationId,
         integrationName,
-        dataStreamId,
         dataStreamName,
       });
     },
