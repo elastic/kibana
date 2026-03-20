@@ -115,11 +115,9 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
     () => (
       <WorkflowSelector
         config={{
+          filterFunction: (workflows) => workflows.filter((w) => w.enabled),
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
-              const enabledDiff = Number(b.enabled) - Number(a.enabled);
-              if (enabledDiff !== 0) return enabledDiff;
-
               const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
               const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
               if (aHasAlert && !bHasAlert) return -1;
