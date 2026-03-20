@@ -257,11 +257,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
     }
   );
 
-  // BUG: Recovery is broken — when no groups breach, CreateAlertEventsStep yields nothing,
-  // so alertEventsBatch is never added to pipeline state. CreateRecoveryEventsStep requires
-  // alertEventsBatch and halts with state_not_ready. Recovery events are never created.
-  // See: create_alert_events_step.ts lines 44-46
-  apiTest.fixme(
+  apiTest(
     'should transition active -> recovering -> inactive when source data stops breaching',
     async ({ apiClient, esClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
@@ -331,8 +327,6 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
     }
   );
 
-  // BUG: Same recovery bug as above — partial recovery (one group recovers, another stays active)
-  // can't work because the pipeline halts when the recovered group has no breached events.
   apiTest.fixme(
     'should track multiple groups independently',
     async ({ apiClient, esClient, requestAuth }) => {
