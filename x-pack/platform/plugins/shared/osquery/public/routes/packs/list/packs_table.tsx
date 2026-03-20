@@ -26,7 +26,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_persisted_page_size';
 import { usePacks } from '../../../packs/use_packs';
-import { useGenericBulkGetUserProfiles } from '../../../common/use_bulk_get_user_profiles';
+import { usePackUsers } from '../../../common/use_saved_object_users';
 import { RunByColumn } from '../../../actions/components/run_by_column';
 import { PacksTableEmptyState } from './empty_state';
 import { TableToolbar } from '../../../components/table_toolbar';
@@ -128,14 +128,14 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
   const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchValue, setSearchValue] = useState('');
-  const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [enabledFilter, setEnabledFilter] = useState<EnabledFilter>(undefined);
   const [storedColumns, setStoredColumns] = useLocalStorage<string[]>(PACKS_COLUMNS_STORAGE_KEY, [
     ...ALL_COLUMN_IDS,
   ]);
   const visibleColumns = useMemo(() => storedColumns ?? [...ALL_COLUMN_IDS], [storedColumns]);
 
-  const createdByParam = selectedCreators.length > 0 ? selectedCreators.join(',') : undefined;
+  const selectedUsersParam = selectedUsers.length > 0 ? selectedUsers.join(',') : undefined;
 
   const { data, isLoading, isFetching } = usePacks({
     pageIndex,
@@ -143,38 +143,22 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
     sortField,
     sortOrder: sortDirection,
     search: searchValue || undefined,
-    createdBy: createdByParam,
+    createdBy: selectedUsersParam,
     enabled: enabledFilter,
   });
 
   const items = useMemo(() => data?.data ?? EMPTY_ARRAY, [data?.data]);
   const totalItemCount = data?.total ?? 0;
 
-  const profileUids = useMemo(
-    () => items.map((item) => item.created_by_profile_uid).filter(Boolean) as string[],
-    [items]
-  );
-
-  const { profilesMap, isLoading: isLoadingProfiles } = useGenericBulkGetUserProfiles(profileUids);
-
-  const creators = useMemo(() => {
-    const set = new Set<string>();
-    for (const item of items) {
-      if (item.created_by) {
-        set.add(item.created_by);
-      }
-    }
-
-    return Array.from(set);
-  }, [items]);
+  const { users, profilesMap, isLoading: isLoadingUsers } = usePackUsers();
 
   const handleSearchSubmit = useCallback((value: string) => {
     setSearchValue(value);
     setPageIndex(0);
   }, []);
 
-  const handleSelectedCreatorsChange = useCallback((newCreators: string[]) => {
-    setSelectedCreators(newCreators);
+  const handleSelectedUsersChange = useCallback((newUsers: string[]) => {
+    setSelectedUsers(newUsers);
     setPageIndex(0);
   }, []);
 
@@ -243,10 +227,10 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         userId={item.created_by}
         userProfileUid={item.created_by_profile_uid}
         profilesMap={profilesMap}
-        isLoadingProfiles={isLoadingProfiles}
+        isLoadingProfiles={isLoadingUsers}
       />
     ),
-    [profilesMap, isLoadingProfiles]
+    [profilesMap, isLoadingUsers]
   );
 
   const renderUpdatedAt = useCallback((updatedAt: string) => {
@@ -417,8 +401,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
     return <EuiSkeletonText lines={10} />;
   }
 
-  const hasActiveFilters =
-    !!searchValue || selectedCreators.length > 0 || enabledFilter !== undefined;
+  const hasActiveFilters = !!searchValue || selectedUsers.length > 0 || enabledFilter !== undefined;
 
   if (totalItemCount === 0 && !hasActiveFilters && hasAssetsToInstall) {
     return <PacksTableEmptyState />;
@@ -430,9 +413,9 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         searchPlaceholder={SEARCH_PLACEHOLDER}
         searchValue={searchValue}
         onSearchSubmit={handleSearchSubmit}
-        creators={creators}
-        selectedCreators={selectedCreators}
-        onSelectedCreatorsChange={handleSelectedCreatorsChange}
+        users={users}
+        selectedUsers={selectedUsers}
+        onSelectedUsersChange={handleSelectedUsersChange}
         profilesMap={profilesMap}
         showEnabledFilter
         enabledFilter={enabledFilter}

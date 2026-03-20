@@ -309,6 +309,63 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('users route', () => {
+      const usersPrefix = `UsersTest-${Date.now()}`;
+      const usersPackIds: string[] = [];
+
+      before(async () => {
+        for (const suffix of ['one', 'two']) {
+          const resp = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+            .send({
+              name: `${usersPrefix}-${suffix}`,
+              description: `Users test ${suffix}`,
+              enabled: true,
+              queries: { q1: { query: 'select 1;', interval: 3600 } },
+            })
+            .expect(200);
+          usersPackIds.push(resp.body.data.saved_object_id);
+        }
+      });
+
+      after(async () => {
+        for (const id of usersPackIds) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${id}`)).expect(200);
+        }
+      });
+
+      it('returns unique users with profile UIDs', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(response.body.data).to.be.an(Array);
+        expect(response.body.data.length).to.be.greaterThan(0);
+
+        const users = response.body.data.map((c: { created_by: string }) => c.created_by);
+        expect(users).to.contain('elastic');
+
+        // Verify uniqueness
+        const uniqueUsers = [...new Set(users)];
+        expect(uniqueUsers.length).to.be(users.length);
+      });
+
+      it('includes created_by_profile_uid when available', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const elastic = response.body.data.find(
+          (c: { created_by: string }) => c.created_by === 'elastic'
+        );
+        expect(elastic).to.be.ok();
+        expect(elastic).to.have.property('created_by');
+      });
+    });
+
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
       expect(packId).to.be.ok();
       const updatePackResponse = await withOsqueryHeaders(
