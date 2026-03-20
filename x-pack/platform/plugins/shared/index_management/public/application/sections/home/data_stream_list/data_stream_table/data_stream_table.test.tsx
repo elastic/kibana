@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ScopedHistory } from '@kbn/core/public';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import type { DataStream } from '../../../../../../common/types';
 import { DataStreamTable } from './data_stream_table';
+
+let mockSelectedNames = new Set<string>();
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -21,15 +23,14 @@ jest.mock('@elastic/eui', () => {
     selection,
     'data-test-subj': dataTestSubj,
   }: any) => {
-    const [selectedNames, setSelectedNames] = useState<string[]>([]);
-
     const toggleSelect = (item: any) => {
-      const nextSelectedNames = selectedNames.includes(item.name)
-        ? selectedNames.filter((n) => n !== item.name)
-        : [...selectedNames, item.name];
+      if (mockSelectedNames.has(item.name)) {
+        mockSelectedNames.delete(item.name);
+      } else {
+        mockSelectedNames.add(item.name);
+      }
 
-      setSelectedNames(nextSelectedNames);
-      const selectedItems = items.filter((i: any) => nextSelectedNames.includes(i.name));
+      const selectedItems = items.filter((i: any) => mockSelectedNames.has(i.name));
       selection?.onSelectionChange?.(selectedItems);
     };
 
@@ -178,6 +179,10 @@ const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
 const createHistory = (): ScopedHistory => ({ location: {} } as unknown as ScopedHistory);
 
 describe('DataStreamTable', () => {
+  beforeEach(() => {
+    mockSelectedNames = new Set<string>();
+  });
+
   it('shows bulk edit data retention action when selected stream is DSL-managed and has privileges', () => {
     const dataStream = createDataStream({
       name: 'ds1',
