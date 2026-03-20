@@ -15,12 +15,10 @@ export const SIMPLE_WORKFLOW_YAML = `name: ImportTest Workflow
 description: A simple test workflow for import
 enabled: false
 triggers:
-  type: manual
+  - type: manual
 steps:
-  - type: core:transform
-    id: step1
+  - type: console
     name: Step 1
-    params:
-      outputKey: result
-      expression: "'hello'"
+    with:
+      message: hello
 `;
