@@ -17,6 +17,10 @@ import {
   getOptionInputText,
   formatDateRange,
   combineDateAndTime,
+  autoRefreshIntervalFromMs,
+  autoRefreshIntervalToMs,
+  formatAutoRefreshCountdown,
+  autoRefreshTotalSecondsFromMs,
 } from './utils';
 
 describe('toLocalPreciseString', () => {
@@ -230,5 +234,64 @@ describe('combineDateAndTime', () => {
 
     expect(result.getSeconds()).toBe(59);
     expect(result.getMilliseconds()).toBe(999);
+  });
+});
+
+describe('autoRefreshIntervalFromMs (auto unit)', () => {
+  it('prefers hours when divisible by 1h', () => {
+    expect(autoRefreshIntervalFromMs(3_600_000)).toEqual({ count: 1, unit: 'h' });
+    expect(autoRefreshIntervalFromMs(7_200_000)).toEqual({ count: 2, unit: 'h' });
+  });
+
+  it('prefers minutes when not whole hours but divisible by 1m', () => {
+    expect(autoRefreshIntervalFromMs(120_000)).toEqual({ count: 2, unit: 'm' });
+    expect(autoRefreshIntervalFromMs(180_000)).toEqual({ count: 3, unit: 'm' });
+  });
+
+  it('uses seconds when not divisible by 1m (e.g. 90s)', () => {
+    expect(autoRefreshIntervalFromMs(90_000)).toEqual({ count: 90, unit: 's' });
+  });
+
+  it('round-trips through autoRefreshIntervalToMs for whole-second intervals', () => {
+    const ms = 90_000;
+    const { count, unit } = autoRefreshIntervalFromMs(ms);
+    expect(autoRefreshIntervalToMs(count, unit)).toBe(ms);
+  });
+});
+
+describe('autoRefreshIntervalFromMs (explicit unit)', () => {
+  it('rounds count to the chosen unit', () => {
+    expect(autoRefreshIntervalFromMs(90_000, 'm')).toEqual({ count: 2, unit: 'm' });
+  });
+});
+
+describe('autoRefreshTotalSecondsFromMs', () => {
+  it('ceil(seconds) and guards invalid input', () => {
+    expect(autoRefreshTotalSecondsFromMs(4000)).toBe(4);
+    expect(autoRefreshTotalSecondsFromMs(1500)).toBe(2);
+    expect(autoRefreshTotalSecondsFromMs(0)).toBe(0);
+    expect(autoRefreshTotalSecondsFromMs(-100)).toBe(0);
+    expect(autoRefreshTotalSecondsFromMs(Number.NaN)).toBe(0);
+  });
+});
+
+describe('formatAutoRefreshCountdown', () => {
+  it('uses mm:ss under one hour', () => {
+    expect(formatAutoRefreshCountdown(59)).toBe('00:59');
+    expect(formatAutoRefreshCountdown(60)).toBe('01:00');
+    expect(formatAutoRefreshCountdown(90)).toBe('01:30');
+    expect(formatAutoRefreshCountdown(299)).toBe('04:59');
+  });
+
+  it('uses hh:mm:ss when an hour or more remains', () => {
+    expect(formatAutoRefreshCountdown(3600)).toBe('01:00:00');
+    expect(formatAutoRefreshCountdown(3661)).toBe('01:01:01');
+    expect(formatAutoRefreshCountdown(4 * 3600 + 59 * 60 + 59)).toBe('04:59:59');
+  });
+
+  it('handles invalid input', () => {
+    expect(formatAutoRefreshCountdown(0)).toBe('00:00');
+    expect(formatAutoRefreshCountdown(-1)).toBe('00:00');
+    expect(formatAutoRefreshCountdown(Number.NaN)).toBe('00:00');
   });
 });
