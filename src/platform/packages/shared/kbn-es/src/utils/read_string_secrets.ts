@@ -14,6 +14,10 @@ import Fsp from 'fs/promises';
  * Returns the key-value pairs that ES expects under state.cluster_secrets.
  */
 export async function readStringSecrets(secretsFilePath: string): Promise<Record<string, string>> {
-  const contents = JSON.parse(await Fsp.readFile(secretsFilePath, 'utf-8'));
-  return contents.string_secrets;
+  try {
+    const contents = JSON.parse(await Fsp.readFile(secretsFilePath, 'utf-8'));
+    return contents.string_secrets;
+  } catch (error) {
+    throw new Error(`Failed to read string secrets from ${secretsFilePath}`, { cause: error });
+  }
 }
