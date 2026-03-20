@@ -269,7 +269,7 @@ describe('getESQLAdHocDataview', () => {
   });
 
   describe('createNewInstanceEvenIfCachedOneAvailable', () => {
-    it('should clear the dataview instance cache and refresh the cached time field lookup', async () => {
+    it('should onle clear the dataview instance cache', async () => {
       const http = createMockHttp('@timestamp');
       const query = uniqueQuery();
 
@@ -284,7 +284,7 @@ describe('getESQLAdHocDataview', () => {
       });
 
       expect(dataViewsService.clearInstanceCache).toHaveBeenCalled();
-      expect(http.get).toHaveBeenCalledTimes(2);
+      expect(http.get).toHaveBeenCalledTimes(1);
     });
   });
 });
