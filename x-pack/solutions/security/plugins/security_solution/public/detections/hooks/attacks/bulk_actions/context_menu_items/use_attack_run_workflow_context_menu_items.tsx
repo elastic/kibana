@@ -7,7 +7,7 @@
 
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import * as alertsTableI18n from '../../../../components/alerts_table/translations';
@@ -63,6 +63,8 @@ export const useAttackRunWorkflowContextMenuItems = ({
     [attacksForWorkflowRun, attackDiscoveryIndexName]
   );
 
+  const handleClose = useCallback(() => closePopover?.(), [closePopover]);
+
   const items = useMemo(
     () =>
       canRunWorkflow
@@ -89,13 +91,13 @@ export const useAttackRunWorkflowContextMenuItems = ({
               content: (
                 <AlertWorkflowsPanel
                   alertIds={attackAlertIds}
-                  onClose={closePopover ?? (() => {})}
+                  onClose={handleClose}
                 />
               ),
             },
           ]
         : [],
-    [canRunWorkflow, attackAlertIds, closePopover]
+    [canRunWorkflow, attackAlertIds, handleClose]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);

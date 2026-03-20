@@ -121,6 +121,17 @@ describe('AttacksGroupTakeActionItems', () => {
       items: [],
       panels: [],
     });
+    mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'Run workflow',
+          key: 'run-attack-workflow-action',
+          panel: 'BULK_RUN_WORKFLOW_PANEL_ID',
+          'data-test-subj': 'run-attack-workflow-action',
+        },
+      ],
+      panels: [],
+    });
   });
 
   describe('telemetry', () => {
@@ -146,17 +157,6 @@ describe('AttacksGroupTakeActionItems', () => {
       expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
         expect.objectContaining({ telemetrySource: expectedTelemetrySource })
       );
-    });
-    mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
-      items: [
-        {
-          name: 'Run workflow',
-          key: 'run-attack-workflow-action',
-          panel: 'BULK_RUN_WORKFLOW_PANEL_ID',
-          'data-test-subj': 'run-attack-workflow-action',
-        },
-      ],
-      panels: [],
     });
   });
 
@@ -261,6 +261,13 @@ describe('AttacksGroupTakeActionItems', () => {
     it('should render the `Run workflow` action item', async () => {
       const { findByText } = renderAttack(mockAttack);
       expect(await findByText('Run workflow')).toBeInTheDocument();
+    });
+
+    it('should not render the `Run workflow` action item when hook returns no items', () => {
+      mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({ items: [], panels: [] });
+
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
   });
 
