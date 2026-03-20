@@ -8,7 +8,9 @@
 import { monaco } from '@kbn/monaco';
 import { findLast, map, uniqBy } from 'lodash';
 
-// Mutable state updated by initializeOsqueryEditor when dynamic data arrives
+// Mutable module-level state updated by initializeOsqueryEditor when dynamic data arrives.
+// Note: this is a singleton — if multiple OsqueryEditor instances mount simultaneously,
+// the last one to call initializeOsqueryEditor wins. Currently only one editor is rendered per page.
 let currentTableNames: string[] = [];
 let currentTablesRecord: Record<string, { columns: Array<{ name: string }> }> = {};
 

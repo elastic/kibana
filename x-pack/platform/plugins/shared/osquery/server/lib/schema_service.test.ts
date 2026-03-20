@@ -6,11 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import { ASSETS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { v5 as uuidv5 } from 'uuid';
 import { SchemaService } from './schema_service';
 import {
   OSQUERY_INTEGRATION_NAME,
@@ -24,13 +21,6 @@ jest.mock('fs/promises', () => ({
 }));
 
 import { readFile } from 'fs/promises';
-
-// Same namespace as in the implementation
-const ASSET_PATH_UUID_NAMESPACE = '71403015-cdd5-404b-a5da-6c43f35cad84';
-
-function assetPathToObjectId(assetPath: string): string {
-  return uuidv5(assetPath, ASSET_PATH_UUID_NAMESPACE);
-}
 
 const mockOsqueryTables: OsqueryTable[] = [
   {
@@ -53,6 +43,18 @@ const mockEcsFields: EcsField[] = [
     description: 'Unique identifier of this agent',
   },
 ];
+
+function createMockAsset(data: unknown) {
+  return {
+    package_name: OSQUERY_INTEGRATION_NAME,
+    package_version: '1.5.0',
+    install_source: 'registry',
+    asset_path: '',
+    media_type: 'application/json',
+    data_utf8: JSON.stringify(data),
+    data_base64: '',
+  };
+}
 
 describe('SchemaService', () => {
   let logger: Logger;
@@ -77,6 +79,7 @@ describe('SchemaService', () => {
     packageService = {
       asInternalUser: {
         getInstallation: jest.fn(),
+        getPackageAsset: jest.fn(),
       },
     } as unknown as jest.Mocked<PackageService>;
 
@@ -91,20 +94,9 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockOsqueryTables)
+        );
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
@@ -117,20 +109,9 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockEcsFields),
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockEcsFields)
+        );
 
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
@@ -147,20 +128,9 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockOsqueryTables)
+        );
 
         // First call populates the cache
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
@@ -168,8 +138,8 @@ describe('SchemaService', () => {
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         expect(result).toEqual({ version: pkgVersion, data: mockOsqueryTables });
-        // savedObjectsClient.get should only be called once — on the first fetch
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        // getPackageAsset should only be called once — on the first fetch
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -184,20 +154,9 @@ describe('SchemaService', () => {
           version: firstVersion,
         });
 
-        const firstAssetPath = `${OSQUERY_INTEGRATION_NAME}-${firstVersion}/schemas/osquery.json`;
-        const firstObjectId = assetPathToObjectId(firstAssetPath);
-
-        savedObjectsClient.get.mockResolvedValueOnce({
-          id: firstObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: firstAssetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValueOnce(
+          createMockAsset(mockOsqueryTables)
+        );
 
         // First call with version 1.4.0
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
@@ -220,26 +179,15 @@ describe('SchemaService', () => {
           },
         ];
 
-        const secondAssetPath = `${OSQUERY_INTEGRATION_NAME}-${secondVersion}/schemas/osquery.json`;
-        const secondObjectId = assetPathToObjectId(secondAssetPath);
-
-        savedObjectsClient.get.mockResolvedValueOnce({
-          id: secondObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(updatedTables),
-            data_base64: '',
-            asset_path: secondAssetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValueOnce(
+          createMockAsset(updatedTables)
+        );
 
         // Second call with version 1.5.0 should bypass the cache
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         expect(result).toEqual({ version: secondVersion, data: updatedTables });
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
 
         dateNowSpy.mockRestore();
       });
@@ -252,53 +200,36 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockOsqueryTables)
+        );
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
-        expect(savedObjectsClient.get).toHaveBeenCalledWith(ASSETS_SAVED_OBJECT_TYPE, objectId);
+        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
+          expectedAssetPath,
+          savedObjectsClient
+        );
         expect(result).toEqual({ version: pkgVersion, data: mockOsqueryTables });
       });
 
-      it('should construct the correct asset object ID from the package version and path', async () => {
+      it('should construct the correct asset path from the package version', async () => {
         const pkgVersion = '2.0.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-        const expectedObjectId = assetPathToObjectId(expectedAssetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: expectedObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: expectedAssetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockOsqueryTables)
+        );
 
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
-        expect(savedObjectsClient.get).toHaveBeenCalledWith(
-          ASSETS_SAVED_OBJECT_TYPE,
-          expectedObjectId
+        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
+          expectedAssetPath,
+          savedObjectsClient
         );
       });
     });
@@ -310,12 +241,7 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        savedObjectsClient.get.mockRejectedValue(
-          SavedObjectsErrorHelpers.createGenericNotFoundError(
-            ASSETS_SAVED_OBJECT_TYPE,
-            'some-object-id'
-          )
-        );
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(undefined);
 
         (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
 
@@ -335,19 +261,9 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: '',
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue({
+          ...createMockAsset(mockOsqueryTables),
+          data_utf8: '',
         });
 
         (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
@@ -369,7 +285,7 @@ describe('SchemaService', () => {
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
         expect(result.data).toEqual(mockOsqueryTables);
-        expect(savedObjectsClient.get).not.toHaveBeenCalled();
+        expect(packageService.asInternalUser.getPackageAsset).not.toHaveBeenCalled();
       });
 
       it('should fall back to local JSON file when packageService is undefined', async () => {
@@ -379,7 +295,6 @@ describe('SchemaService', () => {
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
         expect(result.data).toEqual(mockOsqueryTables);
-        expect(savedObjectsClient.get).not.toHaveBeenCalled();
       });
     });
 
@@ -399,13 +314,15 @@ describe('SchemaService', () => {
         );
       });
 
-      it('should log a warning and fall back when savedObjectsClient.get throws a non-404 error', async () => {
+      it('should log a warning and fall back when getPackageAsset throws', async () => {
         const pkgVersion = '1.5.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        savedObjectsClient.get.mockRejectedValue(new Error('Elasticsearch connection refused'));
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockRejectedValue(
+          new Error('Elasticsearch connection refused')
+        );
 
         (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
 
@@ -439,20 +356,9 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockEcsFields),
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockEcsFields)
+        );
 
         // First call populates the cache
         await schemaService.getSchema('ecs', packageService, savedObjectsClient);
@@ -460,7 +366,7 @@ describe('SchemaService', () => {
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
         expect(result).toEqual({ version: pkgVersion, data: mockEcsFields });
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -471,24 +377,17 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-        const objectId = assetPathToObjectId(assetPath);
-
-        savedObjectsClient.get.mockResolvedValue({
-          id: objectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockEcsFields),
-            data_base64: '',
-            asset_path: assetPath,
-            media_type: 'application/json',
-          },
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockEcsFields)
+        );
 
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
-        expect(savedObjectsClient.get).toHaveBeenCalledWith(ASSETS_SAVED_OBJECT_TYPE, objectId);
+        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
+          expectedAssetPath,
+          savedObjectsClient
+        );
         expect(result).toEqual({ version: pkgVersion, data: mockEcsFields });
       });
     });
@@ -500,12 +399,7 @@ describe('SchemaService', () => {
           version: pkgVersion,
         });
 
-        savedObjectsClient.get.mockRejectedValue(
-          SavedObjectsErrorHelpers.createGenericNotFoundError(
-            ASSETS_SAVED_OBJECT_TYPE,
-            'some-object-id'
-          )
-        );
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(undefined);
 
         (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockEcsFields));
 
@@ -530,7 +424,7 @@ describe('SchemaService', () => {
 
         expect(result.version).toBe(FALLBACK_ECS_VERSION);
         expect(result.data).toEqual(mockEcsFields);
-        expect(savedObjectsClient.get).not.toHaveBeenCalled();
+        expect(packageService.asInternalUser.getPackageAsset).not.toHaveBeenCalled();
       });
     });
 
@@ -558,34 +452,9 @@ describe('SchemaService', () => {
         version: pkgVersion,
       });
 
-      const osqueryAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-      const ecsAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-      const osqueryObjectId = assetPathToObjectId(osqueryAssetPath);
-      const ecsObjectId = assetPathToObjectId(ecsAssetPath);
-
-      savedObjectsClient.get
-        .mockResolvedValueOnce({
-          id: osqueryObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: osqueryAssetPath,
-            media_type: 'application/json',
-          },
-        })
-        .mockResolvedValueOnce({
-          id: ecsObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockEcsFields),
-            data_base64: '',
-            asset_path: ecsAssetPath,
-            media_type: 'application/json',
-          },
-        });
+      (packageService.asInternalUser.getPackageAsset as jest.Mock)
+        .mockResolvedValueOnce(createMockAsset(mockOsqueryTables))
+        .mockResolvedValueOnce(createMockAsset(mockEcsFields));
 
       const osqueryResult = await schemaService.getSchema(
         'osquery',
@@ -598,16 +467,20 @@ describe('SchemaService', () => {
       expect(ecsResult).toEqual({ version: pkgVersion, data: mockEcsFields });
 
       // Both schemas were fetched separately
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
-      expect(savedObjectsClient.get).toHaveBeenNthCalledWith(
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
+
+      const osqueryAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
+      const ecsAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
+
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenNthCalledWith(
         1,
-        ASSETS_SAVED_OBJECT_TYPE,
-        osqueryObjectId
+        osqueryAssetPath,
+        savedObjectsClient
       );
-      expect(savedObjectsClient.get).toHaveBeenNthCalledWith(
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenNthCalledWith(
         2,
-        ASSETS_SAVED_OBJECT_TYPE,
-        ecsObjectId
+        ecsAssetPath,
+        savedObjectsClient
       );
     });
 
@@ -617,40 +490,15 @@ describe('SchemaService', () => {
         version: pkgVersion,
       });
 
-      const osqueryAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-      const ecsAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-      const osqueryObjectId = assetPathToObjectId(osqueryAssetPath);
-      const ecsObjectId = assetPathToObjectId(ecsAssetPath);
-
-      savedObjectsClient.get
-        .mockResolvedValueOnce({
-          id: osqueryObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockOsqueryTables),
-            data_base64: '',
-            asset_path: osqueryAssetPath,
-            media_type: 'application/json',
-          },
-        })
-        .mockResolvedValueOnce({
-          id: ecsObjectId,
-          type: ASSETS_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: {
-            data_utf8: JSON.stringify(mockEcsFields),
-            data_base64: '',
-            asset_path: ecsAssetPath,
-            media_type: 'application/json',
-          },
-        });
+      (packageService.asInternalUser.getPackageAsset as jest.Mock)
+        .mockResolvedValueOnce(createMockAsset(mockOsqueryTables))
+        .mockResolvedValueOnce(createMockAsset(mockEcsFields));
 
       // Populate both caches
       await schemaService.getSchema('osquery', packageService, savedObjectsClient);
       await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
-      // Second call for osquery should hit the cache (no new get calls)
+      // Second call for osquery should hit the cache (no new getPackageAsset calls)
       const osqueryCacheResult = await schemaService.getSchema(
         'osquery',
         packageService,
@@ -659,7 +507,7 @@ describe('SchemaService', () => {
 
       expect(osqueryCacheResult).toEqual({ version: pkgVersion, data: mockOsqueryTables });
       // Still only 2 total calls (both from the initial population)
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
     });
   });
 });

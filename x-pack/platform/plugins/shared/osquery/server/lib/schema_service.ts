@@ -7,10 +7,7 @@
 
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
-import { v5 as uuidv5 } from 'uuid';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { ASSETS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import {
   OSQUERY_INTEGRATION_NAME,
@@ -29,23 +26,7 @@ interface InstallationCache {
   fetchedAt: number;
 }
 
-interface PackageAssetAttributes {
-  data_utf8: string;
-  data_base64: string;
-  asset_path: string;
-  media_type: string;
-}
-
-// Same namespace UUID used by Fleet's assetPathToObjectId.
-// Source: x-pack/platform/plugins/shared/fleet/server/services/epm/archive/storage.ts
-// Keep in sync — if Fleet changes this constant, asset lookups will silently fail.
-const ASSET_PATH_UUID_NAMESPACE = '71403015-cdd5-404b-a5da-6c43f35cad84';
-
 const INSTALLATION_TTL_MS = 60_000;
-
-function assetPathToObjectId(assetPath: string): string {
-  return uuidv5(assetPath, ASSET_PATH_UUID_NAMESPACE);
-}
 
 export class SchemaService {
   private osqueryCache: CacheEntry<OsqueryTable> | null = null;
@@ -62,24 +43,26 @@ export class SchemaService {
     const pkgVersion = await this.getPackageVersion(packageService, savedObjectsClient);
 
     if (schemaType === 'osquery') {
-      return this.getOsquerySchema(pkgVersion, savedObjectsClient);
+      return this.getOsquerySchema(pkgVersion, packageService, savedObjectsClient);
     }
 
-    return this.getEcsSchema(pkgVersion, savedObjectsClient);
+    return this.getEcsSchema(pkgVersion, packageService, savedObjectsClient);
   }
 
   private async getOsquerySchema(
     pkgVersion: string | undefined,
+    packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<{ version: string; data: OsqueryTable[] }> {
     if (pkgVersion && this.osqueryCache?.version === pkgVersion) {
       return this.osqueryCache;
     }
 
-    if (pkgVersion) {
+    if (pkgVersion && packageService) {
       const data = await this.fetchAssetFromPackage<OsqueryTable>(
         pkgVersion,
         'schemas/osquery.json',
+        packageService,
         savedObjectsClient
       );
 
@@ -95,16 +78,18 @@ export class SchemaService {
 
   private async getEcsSchema(
     pkgVersion: string | undefined,
+    packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<{ version: string; data: EcsField[] }> {
     if (pkgVersion && this.ecsCache?.version === pkgVersion) {
       return this.ecsCache;
     }
 
-    if (pkgVersion) {
+    if (pkgVersion && packageService) {
       const data = await this.fetchAssetFromPackage<EcsField>(
         pkgVersion,
         'schemas/ecs.json',
+        packageService,
         savedObjectsClient
       );
 
@@ -155,18 +140,18 @@ export class SchemaService {
   private async fetchAssetFromPackage<T>(
     pkgVersion: string,
     assetRelativePath: string,
+    packageService: PackageService,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<T[] | undefined> {
     const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/${assetRelativePath}`;
-    const objectId = assetPathToObjectId(assetPath);
 
     try {
-      const assetSO = await savedObjectsClient.get<PackageAssetAttributes>(
-        ASSETS_SAVED_OBJECT_TYPE,
-        objectId
+      const asset = await packageService.asInternalUser.getPackageAsset(
+        assetPath,
+        savedObjectsClient
       );
 
-      const rawData = assetSO.attributes.data_utf8;
+      const rawData = asset?.data_utf8;
 
       if (!rawData) {
         this.logger.debug(`Asset ${assetPath} has no UTF-8 data`);
@@ -176,12 +161,6 @@ export class SchemaService {
 
       return JSON.parse(rawData) as T[];
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        this.logger.debug(`Asset ${assetPath} not found in Fleet package assets`);
-
-        return undefined;
-      }
-
       this.logger.warn(`Failed to fetch asset ${assetPath}: ${error.message}`);
 
       return undefined;

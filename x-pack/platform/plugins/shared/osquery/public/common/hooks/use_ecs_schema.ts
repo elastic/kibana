@@ -18,7 +18,7 @@ const getFallbackEcsSchema = (): EcsField[] => {
     fallbackEcsSchema = require('../schemas/ecs/v9.2.0.json');
   }
 
-  return fallbackEcsSchema!;
+  return fallbackEcsSchema as EcsField[];
 };
 
 export const useEcsSchema = () => {
