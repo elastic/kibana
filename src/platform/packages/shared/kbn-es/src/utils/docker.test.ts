@@ -52,6 +52,10 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+
+jest.mock('./read_string_secrets', () => ({
+  readStringSecrets: jest.fn().mockResolvedValue({}),
+}));
 jest.mock('@elastic/elasticsearch', () => {
   return {
     Client: jest.fn(),
