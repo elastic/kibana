@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { IdentityFields } from '../utils';
-import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
+import type { UseHighlightedFieldsResult } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
 import {
   HOST_NAME_FIELD_NAME,
@@ -78,22 +78,4 @@ export const convertHighlightedFieldsToTableRow = (
       },
     };
   });
-};
-
-/**
- * Converts the highlighted fields to a format that can be consumed by the prevalence query
- * @param highlightedFields
- */
-export const convertHighlightedFieldsToPrevalenceFilters = (
-  highlightedFields: UseHighlightedFieldsResult
-): Record<string, QueryDslQueryContainer> => {
-  const fieldNames = Object.keys(highlightedFields);
-  return fieldNames.reduce((acc, curr) => {
-    const values = highlightedFields[curr].values;
-
-    return {
-      ...acc,
-      [curr]: { terms: { [curr]: values } },
-    };
-  }, []) as unknown as Record<string, QueryDslQueryContainer>;
 };

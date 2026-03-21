@@ -10,13 +10,12 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { IdentityFields } from '../../shared/utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
 
 export interface HighlightedFieldsTableRow {
@@ -118,9 +117,9 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
 
 export interface HighlightedFieldsProps {
   /**
-   * An array of field objects with category and value
+   * Document record to extract highlighted fields from
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
   /**
    * User defined fields to highlight (defined on the rule)
    */
@@ -153,7 +152,7 @@ export interface HighlightedFieldsProps {
  */
 export const HighlightedFields = memo(
   ({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
     scopeId = '',
     showCellActions,
@@ -163,7 +162,7 @@ export const HighlightedFields = memo(
     const [isEditLoading, setIsEditLoading] = useState(false);
 
     const highlightedFields = useHighlightedFields({
-      dataFormattedForFieldBrowser,
+      hit,
       investigationFields,
     });
 
@@ -196,7 +195,7 @@ export const HighlightedFields = memo(
               <EuiFlexItem grow={false}>
                 <EditHighlightedFieldsButton
                   customHighlightedFields={investigationFields}
-                  dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+                  hit={hit}
                   setIsEditLoading={setIsEditLoading}
                 />
               </EuiFlexItem>

@@ -106,3 +106,14 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 export type { IdentitySourceFields } from './domain/euid/identity_fields';
 export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
 export type { Entity } from './domain/definitions/entity.gen';
+
+export {
+  ENTITY_LATEST,
+  ENTITY_UPDATES,
+  ENTITY_HISTORY,
+  ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+  getEntitiesAliasPattern,
+  getLatestEntitiesIndexName,
+} from './domain/entity_index';

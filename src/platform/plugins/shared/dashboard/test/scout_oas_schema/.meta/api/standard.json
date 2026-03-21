@@ -1,10 +1,10 @@
 {
-  "sha1": "abb0605293e6f3cd9d2b45ace9c02f6909e7319f",
+  "sha1": "1212aae568704fbe25c923b2312779560d8af5ee",
   "tests": [
     {
       "id": "02d80852a962c29-e415bfd276d9b51",
       "title": "dashboard REST schema Registered embeddable schemas have not changed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -17,7 +17,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/tests/schema.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 10
       }
     }

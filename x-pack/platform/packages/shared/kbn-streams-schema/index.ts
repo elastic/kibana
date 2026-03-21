@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Streams } from './src/models/streams';
+export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
@@ -111,6 +111,7 @@ export {
   type EsqlQuery,
   esqlQuerySchema,
   type StreamQuery,
+  type QueryLink,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
