@@ -1,0 +1,1 @@
+export { createPersistedProviderFn } from './provider';

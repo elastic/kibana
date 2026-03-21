@@ -1,0 +1,21 @@
+import { Observable } from 'rxjs';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConverseInput, Conversation, ChatAgentEvent, AgentCapabilities, AgentConfigurationOverrides, ConversationAction } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
+export declare const executeAgent$: ({ agentId, executionId, request, capabilities, structuredOutput, outputSchema, runAgent, conversation, nextInput, abortSignal, defaultConnectorId, browserApiTools, configurationOverrides, action, }: {
+    agentId: string;
+    executionId: string;
+    request: KibanaRequest;
+    capabilities?: AgentCapabilities;
+    structuredOutput?: boolean;
+    outputSchema?: Record<string, unknown>;
+    runAgent: RunAgentFn;
+    conversation: Conversation;
+    nextInput: ConverseInput;
+    abortSignal?: AbortSignal;
+    defaultConnectorId?: string;
+    browserApiTools?: BrowserApiToolMetadata[];
+    configurationOverrides?: AgentConfigurationOverrides;
+    action?: ConversationAction;
+}) => Observable<ChatAgentEvent>;

@@ -1,0 +1,22 @@
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowsExecutionEngineConfig } from '../config';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { NodesFactory } from '../step/nodes_factory';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
+import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+export declare function setupDependencies(workflowRunId: string, spaceId: string, logger: Logger, config: WorkflowsExecutionEngineConfig, dependencies: ContextDependencies, fakeRequest?: KibanaRequest, workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart): Promise<{
+    workflowExecutionGraph: WorkflowGraph;
+    workflowRuntime: WorkflowExecutionRuntimeManager;
+    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
+    workflowExecutionState: WorkflowExecutionState;
+    workflowLogger: import("../workflow_event_logger").IWorkflowEventLogger;
+    workflowTaskManager: WorkflowTaskManager;
+    nodesFactory: NodesFactory;
+    workflowExecutionRepository: WorkflowExecutionRepository;
+    esClient: ElasticsearchClient;
+}>;

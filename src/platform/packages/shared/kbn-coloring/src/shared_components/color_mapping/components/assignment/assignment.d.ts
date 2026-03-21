@@ -1,0 +1,21 @@
+import React from 'react';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ColorMapping } from '../../config';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+export declare function Assignment({ data, assignment, assignments, disableDelete, index, palette, palettes, colorMode, isDarkMode, specialTokens, formatter, allowCustomMatch, assignmentMatcher, }: {
+    data: ColorMappingInputData;
+    index: number;
+    colorMode: ColorMapping.Config['colorMode'];
+    assignment: ColorMapping.Assignment;
+    assignments: ColorMapping.Assignment[];
+    disableDelete: boolean;
+    palette: IKbnPalette;
+    palettes: KbnPalettes;
+    isDarkMode: boolean;
+    specialTokens: Map<string, string>;
+    formatter?: IFieldFormat;
+    allowCustomMatch?: boolean;
+    assignmentMatcher: ColorAssignmentMatcher;
+}): React.JSX.Element;

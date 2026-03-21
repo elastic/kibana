@@ -1,0 +1,27 @@
+import type { SmartFieldGridColumnOptions } from './types';
+export * from '../../field_constants';
+export declare const LOGS_EXPLORER_PROFILE_ID = "logs-explorer";
+export declare const CONTENT_FIELD = "content";
+export declare const RESOURCE_FIELD = "resource";
+export declare const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
+export declare const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
+export declare const ACTIONS_COLUMN_WIDTH = 80;
+export declare const RESOURCE_FIELD_CONFIGURATION: SmartFieldGridColumnOptions;
+export declare const CONTENT_FIELD_CONFIGURATION: SmartFieldGridColumnOptions;
+export declare const SMART_FALLBACK_FIELDS: {
+    content: SmartFieldGridColumnOptions;
+    resource: SmartFieldGridColumnOptions;
+};
+export declare const DEFAULT_COLUMNS: SmartFieldGridColumnOptions[];
+export declare const DEFAULT_ROWS_PER_PAGE = 100;
+export declare const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT: string[];
+export declare const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT: string[];
+export declare const DEFAULT_ALLOWED_DATA_VIEWS: string[];
+export declare const DEFAULT_ALLOWED_LOGS_DATA_VIEWS: string[];
+export declare const LOG_LEVEL_FIELDS: string[];
+export declare const SERVICE_NAME_FIELDS: string[];
+export declare const AGENT_NAME_FIELD = "agent.name";
+export declare const LOG_LEVEL_REGEX: RegExp;
+export declare const RESOURCE_FIELDS: readonly ["service.name", "container.name", "host.name", "orchestrator.resource.id", "orchestrator.cluster.name", "orchestrator.cluster.id", "container.id", "agent.name", "resource.attributes.telemetry.sdk.language"];
+export declare const TRACE_FIELDS: readonly ["service.name", "event.outcome", "transaction.name", "transaction.duration.us", "span.name", "span.duration.us", "agent.name"];
+export declare const DURATION_FIELDS: readonly string[];

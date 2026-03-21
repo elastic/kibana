@@ -1,0 +1,11 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { BUCKET_TYPES } from '..';
+export declare const aggSignificantTextFnName = "aggSignificantText";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.SIGNIFICANT_TEXT>;
+type Arguments = AggArgs;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggSignificantTextFnName, Input, Arguments, Output>;
+export declare const aggSignificantText: () => FunctionDefinition;
+export {};

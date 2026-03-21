@@ -1,0 +1,35 @@
+export declare const gapStatusSchema: import("@kbn/config-schema").Type<"unfilled" | "filled" | "partially_filled">;
+export declare const rangeSchema: import("@kbn/config-schema").ObjectType<{
+    lte: import("@kbn/config-schema").Type<string>;
+    gte: import("@kbn/config-schema").Type<string>;
+}>;
+export declare const rangeListSchema: import("@kbn/config-schema").Type<Readonly<{} & {
+    gte: string;
+    lte: string;
+}>[]>;
+export declare const gapBaseSchema: import("@kbn/config-schema").ObjectType<{
+    status: import("@kbn/config-schema").Type<"unfilled" | "filled" | "partially_filled">;
+    range: import("@kbn/config-schema").ObjectType<{
+        lte: import("@kbn/config-schema").Type<string>;
+        gte: import("@kbn/config-schema").Type<string>;
+    }>;
+    in_progress_intervals: import("@kbn/config-schema").Type<Readonly<{} & {
+        gte: string;
+        lte: string;
+    }>[]>;
+    filled_intervals: import("@kbn/config-schema").Type<Readonly<{} & {
+        gte: string;
+        lte: string;
+    }>[]>;
+    unfilled_intervals: import("@kbn/config-schema").Type<Readonly<{} & {
+        gte: string;
+        lte: string;
+    }>[]>;
+    total_gap_duration_ms: import("@kbn/config-schema").Type<number>;
+    filled_duration_ms: import("@kbn/config-schema").Type<number>;
+    unfilled_duration_ms: import("@kbn/config-schema").Type<number>;
+    in_progress_duration_ms: import("@kbn/config-schema").Type<number>;
+    deleted: import("@kbn/config-schema").Type<boolean | undefined>;
+    updated_at: import("@kbn/config-schema").Type<string | undefined>;
+    failed_auto_fill_attempts: import("@kbn/config-schema").Type<number | undefined>;
+}>;

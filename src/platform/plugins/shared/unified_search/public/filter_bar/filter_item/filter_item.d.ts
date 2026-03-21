@@ -1,0 +1,33 @@
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import React from 'react';
+import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { FilterPanelOption } from '../../types';
+import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
+export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
+    id: string;
+    filter: Filter;
+    indexPatterns: DataView[];
+    className?: string;
+    onUpdate: (filter: Filter) => void;
+    onRemove: () => void;
+    intl: InjectedIntl;
+    uiSettings: IUiSettingsClient;
+    docLinks: DocLinksStart;
+    hiddenPanelOptions?: FilterPanelOption[];
+    timeRangeForSuggestionsOverride?: boolean;
+    filtersForSuggestions?: Filter[];
+    readOnly?: boolean;
+    suggestionsAbstraction?: SuggestionsAbstraction;
+    filtersCount?: number;
+    dataViews?: DataViewsContract;
+}
+declare const FILTER_ITEM_OK = "";
+declare const FILTER_ITEM_WARNING = "warn";
+declare const FILTER_ITEM_ERROR = "error";
+export type FilterLabelStatus = typeof FILTER_ITEM_OK | typeof FILTER_ITEM_WARNING | typeof FILTER_ITEM_ERROR;
+export declare const FILTER_EDITOR_WIDTH = 1200;
+export declare const FilterItem: (props: Omit<FilterItemProps, keyof WithCloseFilterEditorConfirmModalProps>) => React.JSX.Element;
+export {};

@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '\n  .tool_input.file_path as $path |\n  if ($path | startswith(\"docs/superpowers/specs/\")) then\n    {\n      \"hookSpecificOutput\": {\n        \"hookEventName\": \"PreToolUse\",\n        \"permissionDecision\": \"deny\",\n        \"permissionDecisionReason\": \"⚠️ docs/superpowers/specs/ is deprecated.\\n\\nUse OpenSpec methodology instead:\\n  /openspec-new-change  # Start new change\\n  /openspec-ff-change   # Fast-forward (create all artifacts)\\n  /openspec-explore     # Exploratory mode\\n\\nSee docs/superpowers/specs/README.md for migration details.\"\n      }\n    }\n  else\n    {}\n  end\n'",
+            "statusMessage": "Checking spec directory policy..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Scan this conversation for learnings worth preserving: (1) Corrections/feedback I gave you about approach, (2) Surprising gotchas or non-obvious patterns, (3) Validated decisions that worked well. For each learning, determine memory type (user/feedback/project/reference) and create/update appropriate file in ~/.claude/projects/-Users-patrykkopycinski-Projects-kibana/memory/ with proper YAML frontmatter (name, description, type). Skip if nothing memory-worthy found. Return {\"systemMessage\": \"📝 Captured N learnings\"} or {} if none.",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

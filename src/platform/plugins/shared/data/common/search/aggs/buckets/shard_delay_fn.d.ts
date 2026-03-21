@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggConfigSerialized } from '..';
+import type { AggParamsShardDelay } from './shard_delay';
+export declare const aggShardDelayFnName = "aggShardDelay";
+type Input = any;
+type Arguments = AggParamsShardDelay & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggShardDelayFnName, Input, Arguments, Output>;
+export declare const aggShardDelay: () => FunctionDefinition;
+export {};

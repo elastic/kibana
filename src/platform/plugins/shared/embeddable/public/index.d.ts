@@ -1,0 +1,16 @@
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { EmbeddablePublicPlugin } from './plugin';
+export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
+export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_library/registry';
+export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
+export { EmbeddableStateTransfer } from './state_transfer';
+export { isMultiValueClickTriggerContext, isRangeSelectTriggerContext, isRowClickTriggerContext, isValueClickTriggerContext, } from './ui_actions/triggers';
+export type { CellValueContext, ChartActionContext, MultiValueClickContext, RangeSelectContext, ValueClickContext, } from './ui_actions/triggers';
+export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
+export type { EmbeddableSetup, EmbeddableStart } from './types';
+export { EmbeddableRenderer, type DefaultEmbeddableApi, type EmbeddableFactory, } from './react_embeddable_system';
+export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
+export declare function transformType(type: string): Promise<string>;
+export type { SerializedDrilldowns } from '../server';
+export declare function plugin(initializerContext: PluginInitializerContext): EmbeddablePublicPlugin;
+export { ADD_PANEL_ANNOTATION_GROUP, ADD_PANEL_OTHER_GROUP, ADD_PANEL_VISUALIZATION_GROUP, ADD_PANEL_LEGACY_GROUP, } from './ui_actions/add_panel_groups';

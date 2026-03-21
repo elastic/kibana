@@ -1,0 +1,11 @@
+{
+  "branch": "agent-builder-planning-mode",
+  "createdAt": "2026-02-19T14:41:25.421Z",
+  "pr": {
+    "number": 253401,
+    "url": "https://github.com/elastic/kibana/pull/253401",
+    "title": "[Agent Builder] Add planning mode with plan panel UI and real-time execution",
+    "state": "OPEN",
+    "createdAt": "2026-02-17T10:33:09Z"
+  }
+}

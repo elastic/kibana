@@ -44,4 +44,14 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
+
+  // AESOP routes (self-exploration, skill management)
+  // Note: Importing dynamically to avoid errors if AESOP files not present
+  try {
+    const { registerAESOPRoutes } = require('./aesop/register_aesop_routes');
+    registerAESOPRoutes(dependencies.router);
+    dependencies.logger.info('[AESOP] Routes registered');
+  } catch (error) {
+    dependencies.logger.debug('[AESOP] Routes not available (module not found)');
+  }
 };

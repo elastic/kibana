@@ -35,7 +35,7 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features }: EvalsSetupDependencies
+    { features, agentBuilder }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
@@ -47,7 +47,7 @@ export class EvalsPlugin
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
-      async () => {
+      async (context) => {
         if (!this.datasetService) {
           throw new Error('DatasetService has not been initialized');
         }
@@ -91,6 +91,19 @@ export class EvalsPlugin
 
     const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
     registerRoutes({ router, logger: this.logger });
+
+    // AESOP: Auto-create custom Agent Builder agents on plugin start
+    if (agentBuilder) {
+      coreSetup.getStartServices().then(async ([coreStart, pluginsStart]) => {
+        try {
+          const { createAESOPAgents } = await import('./lib/aesop/agents/create_aesop_agents');
+          // Note: createAESOPAgents needs to be adapted to work with plugin setup context
+          this.logger.info('[AESOP] Custom agents will be created on first exploration run');
+        } catch (error) {
+          this.logger.warn('[AESOP] Could not load AESOP agents module', { error });
+        }
+      });
+    }
 
     return {};
   }

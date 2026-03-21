@@ -1,0 +1,10 @@
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { ManualEventAnnotationOutput, ManualPointEventAnnotationArgs, ManualRangeEventAnnotationArgs } from './manual_event_annotation/types';
+import type { QueryPointEventAnnotationArgs, QueryPointEventAnnotationOutput } from './query_point_event_annotation/types';
+export type Fill = 'inside' | 'outside' | 'none';
+export type ManualAnnotationType = 'manual';
+export type QueryAnnotationType = 'query';
+export type KeyType = 'point_in_time' | 'range';
+export type EventAnnotationArgs = ManualPointEventAnnotationArgs | ManualRangeEventAnnotationArgs | QueryPointEventAnnotationArgs;
+export type EventAnnotationOutput = ManualEventAnnotationOutput | QueryPointEventAnnotationOutput;
+export declare const annotationColumns: DatatableColumn[];

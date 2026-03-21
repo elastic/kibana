@@ -1,0 +1,11 @@
+import type { CoreStart } from '@kbn/core/public';
+import type { PresentationPanelStartDependencies } from './plugin';
+export declare let core: CoreStart;
+export declare let uiActions: PresentationPanelStartDependencies['uiActions'];
+export declare let inspector: PresentationPanelStartDependencies['inspector'];
+export declare let usageCollection: PresentationPanelStartDependencies['usageCollection'];
+export declare let savedObjectsManagement: PresentationPanelStartDependencies['savedObjectsManagement'];
+export declare let savedObjectsTaggingOss: PresentationPanelStartDependencies['savedObjectsTaggingOss'];
+export declare let contentManagement: PresentationPanelStartDependencies['contentManagement'];
+export declare const untilPluginStartServicesReady: () => Promise<void>;
+export declare const setKibanaServices: (kibanaCore: CoreStart, deps: PresentationPanelStartDependencies) => void;
