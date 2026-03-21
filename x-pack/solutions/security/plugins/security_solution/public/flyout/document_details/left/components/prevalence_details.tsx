@@ -24,6 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
@@ -59,7 +60,7 @@ import { IS_OPERATOR } from '../../../../../common/types';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getField, getHostIdentityFields, getUserIdentityFields } from '../../shared/utils';
+import { getField } from '../../shared/utils';
 import type { IdentityFields } from '../../shared/utils';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
@@ -468,13 +469,26 @@ export const PrevalenceDetails: React.FC = () => {
     },
   });
 
+  const euidApi = useEntityStoreEuidApi();
   const documentHostEntityIdentifiers = useMemo(
-    () => (dataAsNestedObject ? getHostIdentityFields(dataAsNestedObject, getFieldsData) : null),
-    [dataAsNestedObject, getFieldsData]
+    () =>
+      dataAsNestedObject
+        ? (euidApi?.euid.getEntityIdentifiersFromDocument(
+            'host',
+            dataAsNestedObject
+          ) as IdentityFields)
+        : null,
+    [dataAsNestedObject, euidApi?.euid]
   );
   const documentUserEntityIdentifiers = useMemo(
-    () => (dataAsNestedObject ? getUserIdentityFields(dataAsNestedObject, getFieldsData) : null),
-    [dataAsNestedObject, getFieldsData]
+    () =>
+      dataAsNestedObject
+        ? (euidApi?.euid.getEntityIdentifiersFromDocument(
+            'user',
+            dataAsNestedObject
+          ) as IdentityFields)
+        : null,
+    [dataAsNestedObject, euidApi?.euid]
   );
   const documentHostName = useMemo(() => getField(getFieldsData('host.name')), [getFieldsData]);
   const documentUserName = useMemo(() => getField(getFieldsData('user.name')), [getFieldsData]);

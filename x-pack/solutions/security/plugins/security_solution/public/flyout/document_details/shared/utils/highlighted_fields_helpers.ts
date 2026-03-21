@@ -6,10 +6,10 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { IdentityFields } from '../utils';
 import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
-import { getHostIdentityFields, getUserIdentityFields } from '../utils';
 import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
@@ -34,8 +34,6 @@ export const convertHighlightedFieldsToTableRow = (
   showCellActions: boolean,
   ancestorsIndexName?: string
 ): HighlightedFieldsTableRow[] => {
-  const getFieldsData = (field: string) => highlightedFields[field]?.values;
-
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
     const overrideFieldName = highlightedFields[fieldName].overrideField?.field;
@@ -45,13 +43,21 @@ export const convertHighlightedFieldsToTableRow = (
       ? overrideFieldValues
       : highlightedFields[fieldName].values;
 
+    const euidApi = useEntityStoreEuidApi();
     const rawEntityIdentifiers =
       fieldName === HOST_NAME_FIELD_NAME
-        ? getHostIdentityFields({} as never, getFieldsData)
+        ? (euidApi?.euid.getEntityIdentifiersFromDocument(
+            'host',
+            highlightedFields
+          ) as IdentityFields)
         : fieldName === USER_NAME_FIELD_NAME
-        ? getUserIdentityFields({} as never, getFieldsData)
+        ? (euidApi?.euid.getEntityIdentifiersFromDocument(
+            'user',
+            highlightedFields
+          ) as IdentityFields)
         : null;
 
+    console.log('rawEntityIdentifiers', rawEntityIdentifiers);
     const identityFields =
       rawEntityIdentifiers && fieldName === HOST_NAME_FIELD_NAME
         ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'host.')

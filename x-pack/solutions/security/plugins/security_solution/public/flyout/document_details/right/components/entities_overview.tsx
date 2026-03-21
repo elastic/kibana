@@ -8,28 +8,35 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getHostIdentityFields, getUserIdentityFields } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import type { IdentityFields } from '../../shared/utils';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { getFieldsData, dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
-  const hostEntityIdentifiers = getHostIdentityFields(dataAsNestedObject, getFieldsData);
-  const userEntityIdentifiers = getUserIdentityFields(dataAsNestedObject, getFieldsData);
+  const { dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
+  const euidApi = useEntityStoreEuidApi();
+  const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'host',
+    dataAsNestedObject
+  ) as IdentityFields;
+  const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'user',
+    dataAsNestedObject
+  ) as IdentityFields;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
   const userEntityFromStore = useEntityFromStore({
     entityId: userEntityIdentifiers?.['user.entity.id'],
     identityFields: userEntityIdentifiers ?? undefined,

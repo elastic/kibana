@@ -172,7 +172,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     startDate: from,
     userName: detailName,
     indexNames: selectedPatterns,
-    isExploreContext: true,
     skip: selectedPatterns.length === 0,
   });
 
@@ -217,7 +216,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
-    entity: { ...entity, identifiers: { 'user.name': detailName } },
+    entity,
     enabled: canReadAssetCriticality,
     onChange: calculateEntityRiskScore,
   });
@@ -256,11 +255,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 <EuiHorizontalRule margin="m" />
                 <AssetCriticalityTitle />
                 <EuiSpacer size="s" />
-                <AssetCriticalitySelector
-                  compressed
-                  criticality={criticality}
-                  entity={{ ...entity, identifiers: { 'user.name': detailName } }}
-                />
+                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
                 <EuiHorizontalRule margin="m" />
               </>
             )}
@@ -273,8 +268,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             >
               {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
-                  id={QUERY_ID}
                   userName={detailName}
+                  id={QUERY_ID}
                   isInDetailsSidePanel={false}
                   data={userDetails}
                   anomaliesData={anomaliesData}
@@ -300,12 +295,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
                       additionalFilters={additionalFilters}
-                      identityFields={{ 'user.name': detailName }}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityFilter={{ ...entityFilter, entityType: EntityType.user }}
+                      entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />

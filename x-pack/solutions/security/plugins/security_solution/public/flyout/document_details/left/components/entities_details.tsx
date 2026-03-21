@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { IdentityFields } from '../../shared/utils';
-import { getField, getUserIdentityFields, getHostIdentityFields } from '../../shared/utils';
+import { getField } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
@@ -27,11 +27,15 @@ export const EntitiesDetails: React.FC = () => {
   const { getFieldsData, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const timestamp = getField(getFieldsData('@timestamp'));
 
-  const userEntityIdentifiers = getUserIdentityFields(
-    dataAsNestedObject,
-    getFieldsData
+  const euidApi = useEntityStoreEuidApi();
+  const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'user',
+    dataAsNestedObject
   ) as IdentityFields;
-  const hostEntityIdentifiers = getHostIdentityFields(dataAsNestedObject, getFieldsData);
+  const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'host',
+    dataAsNestedObject
+  ) as IdentityFields;
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const userEntityFromStore = useEntityFromStore({

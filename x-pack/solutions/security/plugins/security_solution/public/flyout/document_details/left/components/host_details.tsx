@@ -89,7 +89,6 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -141,7 +140,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
-  hostEntityFromStoreResult: hostEntityFromStoreResultProp,
+  hostEntityFromStoreResult,
 }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
@@ -205,28 +204,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
   const euidApi = useEntityStoreEuidApi();
 
-  const hostIdentityFieldsForStore = useMemo((): Record<string, string> | undefined => {
-    const fields: Record<string, string> = {};
-    if (hostName) {
-      fields['host.name'] = hostName;
-    }
-    if (entityId) {
-      fields['host.entity.id'] = entityId;
-    }
-    return Object.keys(fields).length > 0 ? fields : undefined;
-  }, [hostName, entityId]);
-
-  const entityFromStoreResult = useEntityFromStore({
-    entityId,
-    identityFields: hostIdentityFieldsForStore,
-    entityType: 'host',
-    skip: !entityStoreV2Enabled,
-  });
-  const effectiveHostEntityFromStore = hostEntityFromStoreResultProp ?? entityFromStoreResult;
+  const hostIdentityFieldsForStore = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'host',
+    hostEntityFromStoreResult?.entity
+  );
   const observedHost = useObservedHost(
     hostName,
     scopeId,
-    entityStoreV2Enabled ? effectiveHostEntityFromStore : undefined
+    entityStoreV2Enabled ? hostEntityFromStoreResult : undefined
   );
 
   const spaceId = useSpaceId();
@@ -270,7 +255,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             refetch: observedHost.refetchEntityStore ?? (() => {}),
             isLoading: observedHost.isLoading,
             error: null,
-            inspect: effectiveHostEntityFromStore?.inspect,
+            inspect: hostEntityFromStoreResult?.inspect,
           })
         : undefined,
     [
@@ -278,7 +263,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       observedHost.entityRecord,
       observedHost.refetchEntityStore,
       observedHost.isLoading,
-      effectiveHostEntityFromStore?.inspect,
+      hostEntityFromStoreResult?.inspect,
     ]
   );
   const effectiveRiskScoreState = useMemo(
@@ -489,7 +474,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
             inspect={
-              entityStoreV2Enabled ? effectiveHostEntityFromStore?.inspect : hostDetailsArgs.inspect
+              entityStoreV2Enabled ? hostEntityFromStoreResult?.inspect : hostDetailsArgs.inspect
             }
             deleteQuery={deleteQuery}
             scopeId={scopeId}

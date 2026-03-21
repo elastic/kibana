@@ -76,7 +76,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             key={`user-${index}-${identifiers['user.name'] ?? Object.values(identifiers)[0]}`}
           >
             <UserDetails
-              identityFields={identifiers}
+              userName={identifiers['user.name'] ?? Object.values(identifiers)[0]}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}

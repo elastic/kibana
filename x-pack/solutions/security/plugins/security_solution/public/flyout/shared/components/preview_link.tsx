@@ -8,12 +8,12 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useKibana, useUiSetting } from '../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { getPreviewPanelParams } from '../utils/link_utils';
 import type { IdentityFields } from '../../document_details/shared/utils';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
 import {
   HOST_NAME_FIELD_NAME,
@@ -69,7 +69,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
 
   // Extract primary field and value from identityFields.
   // When preferredField is set (e.g. from Prevalence tab), use it so the correct entity flyout opens
