@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { IdentityFields } from '../utils';
 import type { UseHighlightedFieldsResult } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';

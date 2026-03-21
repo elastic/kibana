@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 
 /**
