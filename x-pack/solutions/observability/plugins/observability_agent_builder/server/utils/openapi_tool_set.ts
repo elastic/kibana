@@ -6,10 +6,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type {
-  ToolSchema,
-  ToolSchemaType,
-} from '@kbn/inference-common/src/chat_complete/tool_schema';
+import type { ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 export type OperationObject = OpenAPIV3.OperationObject & {

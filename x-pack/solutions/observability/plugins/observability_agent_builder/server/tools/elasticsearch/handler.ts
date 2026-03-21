@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type {
   ModelProvider,
@@ -26,6 +26,7 @@ export const getToolHandler = async ({
   request,
   prompts,
   stateManager,
+  logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   nlQuery: string;
@@ -35,6 +36,7 @@ export const getToolHandler = async ({
   request: KibanaRequest;
   prompts: ToolPromptManager;
   stateManager: ToolStateManager;
+  logger: Logger;
 }) => {
   const toolGraph = await createElasticsearchToolGraph({
     core,
@@ -44,6 +46,7 @@ export const getToolHandler = async ({
     request,
     prompts,
     stateManager,
+    logger,
   });
 
   return withActiveInferenceSpan(

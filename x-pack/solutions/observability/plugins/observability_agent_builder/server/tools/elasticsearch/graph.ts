@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
 import {
   StateGraph,
   Annotation,
@@ -16,7 +17,7 @@ import {
 import { tool as toTool } from '@langchain/core/tools';
 import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -31,11 +32,8 @@ import {
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { z } from '@kbn/zod';
-import type {
-  ToolSchema,
-  ToolSchemaType,
-} from '@kbn/inference-common/src/chat_complete/tool_schema';
+import { z } from '@kbn/zod/v4';
+import type { ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { getElasticsearchPrompt, getRefineSearchTermPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
@@ -157,11 +155,16 @@ const toLangchainTool = (tool: Tool, esClient: IScopedClusterClient) => {
  * Checks if a tool can be successfully converted to a LangChain tool.
  * Attempts conversion via toLangchainTool; returns false if it throws.
  */
-const isValidLangchainTool = (tool: Tool, esClient: IScopedClusterClient): boolean => {
+const isValidLangchainTool = (
+  tool: Tool,
+  esClient: IScopedClusterClient,
+  logger: Logger
+): boolean => {
   try {
     toLangchainTool(tool, esClient);
     return true;
-  } catch {
+  } catch (err) {
+    logger.debug(`Skipping invalid tool "${tool.name}": ${err.message}`);
     return false;
   }
 };
@@ -233,6 +236,7 @@ export const createElasticsearchToolGraph = async ({
   request,
   prompts,
   stateManager,
+  logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   modelProvider: ModelProvider;
@@ -241,6 +245,7 @@ export const createElasticsearchToolGraph = async ({
   request: KibanaRequest;
   prompts: ToolPromptManager;
   stateManager: ToolStateManager;
+  logger: Logger;
 }) => {
   // TODO make this configurable, we need a platform level setting for the embedding model
   const inferenceId = defaultInferenceEndpoints.ELSER;
@@ -376,7 +381,7 @@ export const createElasticsearchToolGraph = async ({
   };
 
   const terminateIfInvalidTools = async (state: StateType) => {
-    const validTools = state.tools.filter((tool) => isValidLangchainTool(tool, esClient));
+    const validTools = state.tools.filter((tool) => isValidLangchainTool(tool, esClient, logger));
     return validTools.length > 0 ? NODE_NAMES.LLM_SELECT_TOOLS : END;
   };
 
@@ -391,9 +396,11 @@ export const createElasticsearchToolGraph = async ({
     const consoleRequests = aiMessage.tool_calls!.map((t) =>
       state.openApiToolSet.formatConsoleRequest(t.name, t.args)
     );
-    const confirmationMessage = `
-    Are you sure you want to call this Elasticsearch API? **${consoleRequests.join(', ')}**
-    `;
+    const confirmationMessage = dedent(`
+      Are you sure you want to call this Elasticsearch API?
+
+      **${consoleRequests.join('\n')}**
+    `);
 
     const prompt = await prompts.askForConfirmation({
       id: CONFIRMATION_IDS.EXECUTE_ACTION,

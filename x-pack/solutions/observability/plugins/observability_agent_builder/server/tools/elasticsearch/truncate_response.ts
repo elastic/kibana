@@ -152,7 +152,7 @@ const truncateObject = (
 
 const buildSummarizationPrompt = (serializedResponse: string): string =>
   [
-    'You are a data summarization assistant. Summarize the following Elasticsearch API response into a compact structured JSON.',
+    'You are a data summarization assistant. Summarize the Elasticsearch API response enclosed in <response> tags into a compact structured JSON.',
     '',
     'Rules:',
     '- Preserve all key metrics, counts, status fields, and error information.',
@@ -163,7 +163,9 @@ const buildSummarizationPrompt = (serializedResponse: string): string =>
     `- Keep the output under ${TRUNCATION_CONFIG.TIER_3_SUMMARY_BUDGET} characters.`,
     '',
     'Response to summarize:',
+    '<response>',
     serializedResponse,
+    '</response>',
   ].join('\n');
 
 const extractTextContent = (content: unknown): string => {
