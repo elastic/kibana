@@ -14,20 +14,24 @@ import type { ParsedTemplate } from '../../../../common/types/domain/template/v1
 import { getTemplate } from '../api/api';
 import { casesQueriesKeys } from '../../../containers/constants';
 
-export const useGetTemplate = (templateId?: string): UseQueryResult<ParsedTemplate> => {
+export const useGetTemplate = (
+  templateId?: string,
+  version?: number
+): UseQueryResult<ParsedTemplate> => {
   const toasts = useToasts();
 
   return useQuery(
-    casesQueriesKeys.template(templateId ?? ''),
+    casesQueriesKeys.template(templateId ?? '', version),
     ({ signal }) => {
       if (!templateId) {
         throw new Error('Template id is required');
       }
 
-      return getTemplate({ templateId, signal });
+      return getTemplate({ templateId, version, signal });
     },
     {
       enabled: Boolean(templateId),
+      staleTime: 0,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

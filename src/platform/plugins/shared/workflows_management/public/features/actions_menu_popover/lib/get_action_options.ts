@@ -10,7 +10,7 @@
 import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
-import { isDynamicConnector, StepCategory } from '@kbn/workflows';
+import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
@@ -144,7 +144,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'database',
       },
     ],
   };
@@ -171,12 +171,34 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'switch',
+        label: i18n.translate('workflows.actionsMenu.switch', {
+          defaultMessage: 'Switch',
+        }),
+        description: i18n.translate('workflows.actionsMenu.switchDescription', {
+          defaultMessage: 'Multi-way branching based on expression value matching',
+        }),
+        iconType: 'productStreamsWired',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
         id: 'foreach',
         label: i18n.translate('workflows.actionsMenu.foreach', {
           defaultMessage: 'Loop (foreach)',
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {
           defaultMessage: 'Iterate the action over a specified list',
+        }),
+        iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'while',
+        label: i18n.translate('workflows.actionsMenu.while', {
+          defaultMessage: 'While Loop',
+        }),
+        description: i18n.translate('workflows.actionsMenu.whileDescription', {
+          defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
         iconColor: euiTheme.colors.vis.euiColorVis0,
@@ -192,6 +214,17 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      ...(['workflow.execute', 'workflow.executeAsync'] as const)
+        .map((stepId) => getBuiltInStepDefinition(stepId))
+        .filter((def): def is NonNullable<typeof def> => def !== undefined)
+        .map((def) => ({
+          id: def.id,
+          label: def.label,
+          description: def.description,
+          iconType: 'nested' as const,
+          iconColor: euiTheme.colors.vis.euiColorVis0,
+          stability: def.stability,
+        })),
     ],
   };
   const elasticSearchGroup: ActionOptionData = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter } from '@kbn/esql-language';
+import { BasicPrettyPrinter } from '@elastic/esql';
 import { conditionToESQLAst } from './condition_to_esql';
 import type { Condition } from '../../../types/conditions';
 

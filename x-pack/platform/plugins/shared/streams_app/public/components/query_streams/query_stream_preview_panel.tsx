@@ -12,12 +12,15 @@ import {
   EuiFlexItem,
   EuiLoadingElastic,
   EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { MemoPreviewTable } from '../data_management/shared';
 import { AssetImage } from '../asset_image';
+import { useQueryStreamHint } from '../../hooks/use_query_stream_hint';
+import { QueryStreamHintCallout } from './query_stream_hint_callout';
 
 interface QueryStreamPreviewPanelProps {
   documents?: SampleDocument[];
@@ -31,6 +34,7 @@ export function QueryStreamPreviewPanel({
   error,
 }: QueryStreamPreviewPanelProps) {
   const hasDocuments = documents && !isEmpty(documents);
+  const queryStreamHint = useQueryStreamHint(error);
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -59,7 +63,17 @@ export function QueryStreamPreviewPanel({
             })}
           </h2>
         }
-        body={error.message}
+        body={
+          <>
+            <p>{error.message}</p>
+            {queryStreamHint && (
+              <>
+                <EuiSpacer size="s" />
+                <QueryStreamHintCallout hint={queryStreamHint} />
+              </>
+            )}
+          </>
+        }
       />
     );
   } else if (!hasDocuments) {

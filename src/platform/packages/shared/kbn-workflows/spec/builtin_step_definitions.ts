@@ -13,7 +13,9 @@ import {
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  SwitchStepConfigSchema,
   WaitStepInputSchema,
+  WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
   WorkflowExecuteStepInputSchema,
 } from './schema';
@@ -96,6 +98,95 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
+    id: 'while',
+    label: 'While Loop',
+    description:
+      'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: WhileStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: poll_api
+  type: while
+  max-iterations: 10
+  condition: "steps.poll_api.inner_http.output.status_code : 200"
+  steps:
+    - name: inner_http
+      type: http
+      with:
+        url: https://api.example.com/status`,
+      ],
+    },
+  },
+  {
+    id: 'switch',
+    label: 'Switch',
+    description:
+      'Multi-way branching. Evaluates an expression and runs the steps of the first case whose match equals the expression',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: SwitchStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: route_by_status
+  type: switch
+  expression: "{{ steps.check.output.status }}"
+  cases:
+    - match: success
+      steps:
+        - name: on_success
+          type: console
+          with:
+            message: "Operation succeeded"
+    - match: error
+      steps:
+        - name: on_error
+          type: console
+          with:
+            message: "Operation failed"
+  default:
+    - name: on_unknown
+      type: console
+      with:
+        message: "Unknown status"`,
+      ],
+    },
+  },
+  {
+    id: 'loop.break',
+    label: 'Break',
+    description: 'Exit the enclosing loop immediately. Valid only inside a foreach or while body',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: stop_on_done
+  type: loop.break
+  if: "foreach.item.status : 'done'"`,
+      ],
+    },
+  },
+  {
+    id: 'loop.continue',
+    label: 'Continue',
+    description:
+      'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: skip_processed
+  type: loop.continue
+  if: "foreach.item.processed : true"`,
+      ],
+    },
+  },
+  {
     id: 'wait',
     label: 'Wait',
     description: 'Pause execution for a specified duration',
@@ -133,6 +224,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Execute Workflow',
     description: 'Execute another workflow and wait for it to complete',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WorkflowExecuteStepInputSchema,
     outputSchema: z.unknown(),
     documentation: {
@@ -151,6 +243,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Execute Workflow (Async)',
     description: 'Start another workflow and continue without waiting for completion',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WorkflowExecuteStepInputSchema,
     outputSchema: WorkflowExecuteAsyncStepOutputSchema,
     documentation: {

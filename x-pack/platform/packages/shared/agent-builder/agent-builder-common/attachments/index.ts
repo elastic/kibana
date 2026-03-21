@@ -20,12 +20,12 @@ export {
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
-  visualizationOriginDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
+  type TimeRange,
+  screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
-  type VisualizationOriginData,
 } from './attachment_types';
 
 export type {

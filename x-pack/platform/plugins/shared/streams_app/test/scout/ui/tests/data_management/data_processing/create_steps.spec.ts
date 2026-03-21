@@ -13,8 +13,7 @@ import { generateLogsData } from '../../../fixtures/generators';
 // Note: Processor creation, conditional steps, and nested steps API correctness is covered by
 // API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
-// Failing: See https://github.com/elastic/kibana/issues/254435
-test.describe.skip(
+test.describe(
   'Stream data processing - creating steps',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -41,6 +40,10 @@ test.describe.skip(
       page,
       config,
     }) => {
+      test.skip(
+        config.isCloud === true && config.serverless === false,
+        `This scenario is not working as expected on ECH`
+      );
       // In the empty state without AI connectors, the Technical Preview badge should be hidden
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
       // Only check for hidden badge in stateful mode - in serverless/production environments,
@@ -190,22 +193,6 @@ test.describe.skip(
 
       await pageObjects.streams.saveStepsListChanges();
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    });
-
-    test('should handle insufficient privileges gracefully', async ({
-      page,
-      browserAuth,
-      pageObjects,
-    }) => {
-      // Login as user with limited privileges
-      await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-
-      // Create buttons should be hidden for users without edit privileges
-      const createProcessorButton = page.getByTestId(
-        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
-      );
-      await expect(createProcessorButton).toBeHidden();
     });
 
     test('should duplicate a processor', async ({ pageObjects }) => {

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/agent-builder-plugin'
+  title: '@kbn/agent-builder-plugin'
   description: Moon project for @kbn/agent-builder-plugin
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/agent_builder
+  sourceRoot: x-pack/platform/plugins/shared/agent_builder
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
@@ -112,6 +111,12 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/deeplinks-data-sources'
   - '@kbn/evals-plugin'
+  - '@kbn/usage-api-plugin'
+  - '@kbn/es-query'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/fs'
 tags:
   - plugin
   - prod
@@ -127,14 +132,24 @@ fileGroups:
     - '!.storybook/**/*.js'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -15,6 +15,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ADDED_EVENT,
   DASHBOARD_PANELS_REMOVED_EVENT,
+  isLensAttachmentPanel,
   type AttachmentPanel,
   type DashboardAttachmentData,
   type PanelAddedEventData,
@@ -28,7 +29,6 @@ import {
   resolvePanelsFromAttachments,
   type VisualizationFailure,
 } from './utils';
-import { buildVisualizationsFromQueriesWithLLM } from './visualization_generation';
 import { dashboardOperationSchema, executeDashboardOperations } from './operations';
 
 const manageDashboardSchema = z.object({
@@ -47,7 +47,7 @@ const createEmptyDashboardData = (): DashboardAttachmentData => ({
   panels: [],
 });
 
-export const manageDashboardTool = (): BuiltinSkillBoundedTool => {
+export const manageDashboardTool = (): BuiltinSkillBoundedTool<typeof manageDashboardSchema> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,
@@ -58,15 +58,16 @@ This tool executes ordered dashboard operations against a dashboard attachment i
 Use operations[] to:
 1. set metadata
 2. upsert markdown
-3. add generated panels in bulk
-4. add panels from attachments
+3. add panels from attachments
+4. add / remove sections
 5. remove panels
+6. update panels from attachments (re-resolve panels from updated source attachments)
 
 The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while operations run, and always returns the latest dashboard attachment state.`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
-      { logger, attachments, esClient, modelProvider, events }
+      { logger, attachments, events }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -95,22 +96,13 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           events.sendUiEvent(DASHBOARD_PANELS_REMOVED_EVENT, removedPayload);
         };
 
-        const operationResult = await executeDashboardOperations({
+        const operationResult = executeDashboardOperations({
           dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
           operations,
           logger,
-          generatePanels: (items, onPanelCreated) =>
-            buildVisualizationsFromQueriesWithLLM({
-              queries: items,
-              modelProvider,
-              esClient,
-              events,
-              onPanelCreated,
-              logger,
-            }),
-          resolvePanelsFromAttachments: (attachmentIds) =>
+          resolvePanelsFromAttachments: (attachmentInputs) =>
             resolvePanelsFromAttachments({
-              attachmentIds,
+              attachmentInputs,
               attachments,
               logger,
             }),
@@ -146,7 +138,11 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
 
         logger.info(
           `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${
-            updatedDashboardData.panels.length
+            updatedDashboardData.panels.length +
+            (updatedDashboardData.sections ?? []).reduce(
+              (count, section) => count + section.panels.length,
+              0
+            )
           } panels`
         );
 
@@ -162,13 +158,34 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                   id: attachment.id,
                   content: {
                     ...updatedDashboardData,
-                    panels: updatedDashboardData.panels.map(
-                      ({ type, panelId, title: panelTitle }) => ({
-                        type,
-                        panelId,
-                        title: panelTitle ?? '',
-                      })
-                    ),
+                    panels: updatedDashboardData.panels.map((panel) => ({
+                      type: panel.type,
+                      panelId: panel.panelId,
+                      title: panel.title ?? '',
+                      grid: panel.grid,
+                      ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
+                        ? { sourceAttachmentId: panel.sourceAttachmentId }
+                        : {}),
+                    })),
+                    ...(updatedDashboardData.sections
+                      ? {
+                          sections: updatedDashboardData.sections.map((section) => ({
+                            sectionId: section.sectionId,
+                            title: section.title,
+                            collapsed: section.collapsed,
+                            grid: section.grid,
+                            panels: section.panels.map((panel) => ({
+                              type: panel.type,
+                              panelId: panel.panelId,
+                              title: panel.title ?? '',
+                              grid: panel.grid,
+                              ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
+                                ? { sourceAttachmentId: panel.sourceAttachmentId }
+                                : {}),
+                            })),
+                          })),
+                        }
+                      : {}),
                   },
                 },
               },

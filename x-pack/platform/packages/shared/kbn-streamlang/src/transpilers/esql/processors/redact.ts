@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import type { RedactProcessor } from '../../../../types/processors';
 import { compileGrokPatternsToRegex } from '../../../../types/utils/grok_to_regex';
 import { buildIgnoreMissingFilter } from './common';

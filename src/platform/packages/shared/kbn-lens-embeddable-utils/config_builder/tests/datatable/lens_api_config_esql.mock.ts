@@ -14,7 +14,7 @@ import type { DatatableState, DatatableStateESQL } from '../../schema';
  */
 export const singleMetricESQLDatatable: DatatableState = {
   title: 'Single metric',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 100',
@@ -34,7 +34,7 @@ export const singleMetricESQLDatatable: DatatableState = {
  */
 export const multipleMetricRowSplitESQLDatatable: DatatableState = {
   title: 'Multiple metrics, rows, split by',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
@@ -78,7 +78,7 @@ export const multipleMetricRowSplitESQLDatatable: DatatableState = {
  */
 export const fullConfigESQLDatatable: DatatableState = {
   title: 'Full config',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
@@ -175,7 +175,7 @@ export const fullConfigESQLDatatable: DatatableState = {
  */
 export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
   title: 'Sorted by pivoted metric column',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
@@ -278,7 +278,7 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
  */
 export const sortedByRowColumnESQLDatatable: DatatableState = {
   title: 'Sorted by row column',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',

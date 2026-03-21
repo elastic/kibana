@@ -15,9 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-  esqlCommandRegistry,
-  TRANSFORMATIONAL_COMMANDS,
-} from '@kbn/esql-language';
+} from '@elastic/esql';
+import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -27,7 +26,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-} from '@kbn/esql-language';
+} from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
@@ -273,9 +272,17 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-export const prettifyQuery = (src: string): string => {
+/**
+ * Prettifies an ES|QL query with configurable line wrapping.
+ * @param src - The raw ES|QL query string
+ * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
+ */
+export const prettifyQuery = (src: string, lineWidth?: number): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
-  return WrappingPrettyPrinter.print(root, { multiline: true });
+  return WrappingPrettyPrinter.print(root, {
+    multiline: true,
+    ...(lineWidth !== undefined && { wrap: lineWidth }),
+  });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
@@ -611,5 +618,19 @@ export const hasOnlySourceCommand = (query: string): boolean => {
     root.commands.length > 0 &&
     root.commands.every(({ name }) => name !== 'promql') &&
     root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
+
+/**
+ * Determines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise
+ */
+export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return root.commands.some(
+    ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
 };

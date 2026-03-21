@@ -66,6 +66,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.salesforce',
+    lazy(() => import(/* webpackChunkName: "connectorIconSalesforce" */ './specs/salesforce/icon')),
+  ],
+  [
     '.abuseipdb',
     lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
   ],
@@ -88,6 +92,7 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
     '.google_drive',
     lazy(
@@ -98,6 +103,12 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+  ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
+  [
+    '.firecrawl',
+    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
+  ],
+  ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
     '.zendesk',
     lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
@@ -109,6 +120,38 @@ export const ConnectorIconsMap: Map<
         import(
           /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
         )
+    ),
+  ],
+  [
+    '.1password',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon')
+    ),
+  ],
+  [
+    '.tavily',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+  ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
+  [
+    '.aws_lambda',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
+  ],
+  [
+    '.amazon_s3',
+    lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
+  ],
+  [
+    '.microsoft-teams',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
     ),
   ],
 ]);

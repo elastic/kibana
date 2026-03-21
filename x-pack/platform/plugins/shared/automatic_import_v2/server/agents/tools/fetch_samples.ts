@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Creates a tool that allows the agent to fetch log samples on demand.

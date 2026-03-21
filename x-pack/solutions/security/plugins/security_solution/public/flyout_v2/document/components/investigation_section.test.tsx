@@ -9,15 +9,24 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 import {
   INVESTIGATION_SECTION_TEST_ID,
   INVESTIGATION_SECTION_TITLE,
   InvestigationSection,
 } from './investigation_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
+}));
+
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
 }));
 
 jest.mock('./investigation_guide', () => ({
@@ -42,9 +51,19 @@ const nonSignalMockHit = createMockHit({
 
 describe('InvestigationSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseKibana = jest.mocked(useKibana);
+  const store = createStore(() => ({}));
+  const history = createMemoryHistory();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        overlays: {
+          openSystemFlyout: jest.fn(),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   it('renders the Investigation expandable section', () => {
@@ -52,7 +71,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -66,7 +89,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -80,7 +107,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -94,7 +125,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -106,7 +141,11 @@ describe('InvestigationSection', () => {
 
     const { queryByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={nonSignalMockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={nonSignalMockHit} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 

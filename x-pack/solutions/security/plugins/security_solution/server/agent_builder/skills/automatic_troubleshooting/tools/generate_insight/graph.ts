@@ -8,7 +8,7 @@
 import type { ScopedModel, ToolHandlerResult } from '@kbn/agent-builder-server';
 import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
@@ -47,14 +47,14 @@ export const createGenerateInsightGraph = ({
 }) => {
   async function categorizeInsightType(): Promise<{ insightType: DefendInsightType }> {
     const output = await model.chatModel.withStructuredOutput(
-      z.object({ insightType: DefendInsightType.default(DefendInsightType.Enum.custom) })
+      z.object({ insightType: DefendInsightType.default(DefendInsightType.enum.custom) })
     ).invoke(`
 Categorize the following problem description into one of the following Defend Insight Types: ${DefendInsightType}. If no good match exists, use 'custom'.
 
 ## Problem Description:
 ${problemDescription}
     `);
-    return { insightType: output.insightType || DefendInsightType.Enum.custom };
+    return { insightType: output.insightType || DefendInsightType.enum.custom };
   }
 
   async function generateInsights({ insightType }: StateType): Promise<{

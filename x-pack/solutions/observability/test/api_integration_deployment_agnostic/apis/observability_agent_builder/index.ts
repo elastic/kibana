@@ -26,6 +26,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_traces.spec.ts'));
     loadTestFile(require.resolve('./tools/elasticsearch.spec.ts'));
 
+    loadTestFile(require.resolve('./tools/get_logs.spec.ts'));
     // ai insights
     loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
     loadTestFile(require.resolve('./ai_insights/alert.spec.ts'));

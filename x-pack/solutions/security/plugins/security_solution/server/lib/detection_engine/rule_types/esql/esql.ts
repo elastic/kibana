@@ -27,6 +27,8 @@ import {
   updateExcludedDocuments,
   initiateExcludedDocuments,
   getSourceDocument,
+  getTransformedQuery,
+  checkMissingIdFieldWarning,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -98,6 +100,12 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
+    const { query: transformedQuery, injectionFailureReason } = await getTransformedQuery({
+      originalQuery: ruleParams.query,
+      ruleExecutionLogger,
+      isAggregating: isRuleAggregating,
+    });
+
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
       isRuleAggregating,
@@ -131,7 +139,7 @@ export const esqlExecutor = async ({
         }
 
         const esqlRequest = buildEsqlSearchRequest({
-          query: ruleParams.query,
+          query: transformedQuery,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
@@ -168,6 +176,17 @@ export const esqlExecutor = async ({
         });
 
         logClusterShardFailuresEsql({ response, result });
+
+        if (!isRuleAggregating && iteration === 0) {
+          const missingIdWarning = checkMissingIdFieldWarning({
+            response,
+            injectionFailureReason,
+          });
+          if (missingIdWarning) {
+            result.warningMessages.push(missingIdWarning);
+          }
+        }
+
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
@@ -188,6 +207,11 @@ export const esqlExecutor = async ({
           hasLoggedRequestsReachedLimit,
           runtimeMappings: sharedParams.runtimeMappings,
           excludedDocuments,
+          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          primaryTimestamp,
+          secondaryTimestamp,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({

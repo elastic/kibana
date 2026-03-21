@@ -14,10 +14,10 @@
         "label": "MARKDOWN_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"DASHBOARD_MARKDOWN\""
+          "\"markdown\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -40,10 +40,10 @@
         "label": "MARKDOWN_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"DASHBOARD_MARKDOWN\""
+          "\"markdown\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -213,7 +213,7 @@
           "\"visText\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -227,7 +227,7 @@
         "label": "APP_NAME",
         "description": [],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -241,7 +241,7 @@
         "label": "DISPLAY_NAME",
         "description": [],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -258,7 +258,7 @@
           "\"/api/markdown\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 14,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -275,7 +275,7 @@
           "\"1\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 15,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -289,10 +289,10 @@
         "label": "MARKDOWN_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"DASHBOARD_MARKDOWN\""
+          "\"markdown\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -309,7 +309,7 @@
           "\"markdown\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
