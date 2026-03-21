@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import Fs from 'fs/promises';
 import Path from 'path';
+import { batchProcess } from '@kbn/llm-batch-processing';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type {
   AttackDiscoveryTaskInput,
@@ -18,6 +19,9 @@ import type {
   AnonymizedAlert,
 } from '../types';
 import { AttackDiscoveryGenerationPrompt } from '../prompts/attack_discovery_generation_prompt';
+
+const USE_BATCH_PROCESSING = process.env.ATTACK_DISCOVERY_USE_BATCH_PROCESSING === 'true';
+const BATCH_SIZE = Number(process.env.ATTACK_DISCOVERY_BATCH_SIZE) || 100;
 
 let defaultPromptPromise: Promise<string> | undefined;
 let continuePromptPromise: Promise<string> | undefined;
@@ -96,7 +100,7 @@ const generateInsights = async ({
     usage?.output_tokens ?? usage?.completion_tokens ?? usage?.outputTokens ?? 0;
 
   return {
-    insights: toolCall.function.arguments as AttackDiscovery[],
+    insights: (toolCall.function.arguments as { insights: AttackDiscovery[] }).insights,
     usage: { inputTokens, outputTokens },
   };
 };
@@ -119,21 +123,69 @@ export const runAttackDiscovery = async ({
   try {
     if (input.mode === 'bundledAlerts') {
       const prompt = await loadDefaultPrompt();
-      const res = await generateInsights({
-        inferenceClient,
-        log,
-        prompt,
-        alerts: toAlertStrings(input.anonymizedAlerts),
-      });
+      const alerts = toAlertStrings(input.anonymizedAlerts);
 
-      if (res.usage) {
-        inputTokens = res.usage.inputTokens;
-        outputTokens = res.usage.outputTokens;
+      let insights: AttackDiscovery[];
+
+      if (USE_BATCH_PROCESSING && alerts.length > BATCH_SIZE) {
+        log.info(
+          `Using batch processing: ${alerts.length} alerts, batch size ${BATCH_SIZE}`
+        );
+
+        // Use batch processing for large alert sets
+        const batchResult = await batchProcess({
+          input: alerts,
+          splitStrategy: 'item-based',
+          maxItemsPerBatch: BATCH_SIZE,
+          processFn: async (alertBatch: string[]) => {
+            const res = await generateInsights({
+              inferenceClient,
+              log,
+              prompt,
+              alerts: alertBatch,
+            });
+
+            if (res.usage) {
+              inputTokens += res.usage.inputTokens;
+              outputTokens += res.usage.outputTokens;
+            }
+
+            return res.insights;
+          },
+          mergeFn: async ([a, b]: [AttackDiscovery[], AttackDiscovery[]]) => {
+            // Simple concatenation merge (preserve all discoveries)
+            return [...a, ...b];
+          },
+          maxConcurrentBatches: 3,
+          onProgress: (completed: number, total: number) => {
+            log.info(`Processed batch ${completed}/${total}`);
+          },
+        });
+
+        insights = batchResult.output;
+        log.info(
+          `Batch processing complete: ${batchResult.stats.batches} batches, ${batchResult.stats.mergeRounds} merge rounds, ${batchResult.stats.durationMs}ms`
+        );
+      } else {
+        // Standard single-pass processing
+        const res = await generateInsights({
+          inferenceClient,
+          log,
+          prompt,
+          alerts,
+        });
+
+        if (res.usage) {
+          inputTokens = res.usage.inputTokens;
+          outputTokens = res.usage.outputTokens;
+        }
+
+        insights = res.insights;
       }
 
       const endTime = Date.now();
       return {
-        insights: res.insights,
+        insights,
         metadata: {
           latency: { startTime, endTime, durationMs: endTime - startTime },
           tokens: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
