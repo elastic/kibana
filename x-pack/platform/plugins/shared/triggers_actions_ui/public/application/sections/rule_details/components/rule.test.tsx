@@ -149,9 +149,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderWithProviders = (ui: React.ReactElement) => {
+const renderWithProviders = (ui: React.ReactElement, initialEntries?: string[]) => {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <IntlProvider locale="en" messages={{}}>
         <Suspense fallback={null}>
           <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
@@ -567,6 +567,64 @@ describe('disable/enable functionality', () => {
 });
 
 describe('tabbed content', () => {
+  it('defaults to alerts tab when no tabId is in the URL', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />,
+      ['/rule/123']
+    );
+
+    const alertListTab = await screen.findByRole('tab', { name: /alerts/i });
+    expect(alertListTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('defaults to history tab when tabId=history is in the URL', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />,
+      ['/rule/123?tabId=history']
+    );
+
+    const historyTab = await screen.findByRole('tab', { name: /history/i });
+    expect(historyTab).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('tabbed content renders when the event log experiment is on', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
       (feature: string) => {

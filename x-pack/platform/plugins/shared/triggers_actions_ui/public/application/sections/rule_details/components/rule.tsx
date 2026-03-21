@@ -104,7 +104,7 @@ export function RuleComponent({
   const [selectedTabId, setSelectedTabId] = useState<string>(() => {
     const params = new URLSearchParams(location.search);
     const tabId = params.get('tabId');
-    return tabId === 'alerts' ? ALERT_LIST_TAB : ALERT_LIST_TAB;
+    return tabId === 'history' ? EVENT_LOG_LIST_TAB : ALERT_LIST_TAB;
   });
 
   useEffect(() => {
@@ -252,6 +252,40 @@ export function RuleComponent({
     [renderRuleAlertList, ruleType.id]
   );
 
+  const scrollAlertsIntoView = useCallback(
+    (status?: PublicAlertStatus) => {
+      setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+      setSelectedTabId(ALERT_LIST_TAB);
+
+      const controlConfigs = DEFAULT_CONTROLS.map((control) => {
+        if (control.field_name === ALERT_STATUS) {
+          return {
+            ...control,
+            selected_options: status ? [status] : [],
+          };
+        }
+        return control;
+      });
+
+      const path = setStateToKbnUrl(
+        'searchBarParams',
+        {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          kuery: '',
+          controlConfigs,
+        },
+        { useHash: false, storeInHashQuery: false },
+        `${location.pathname}?tabId=alerts`
+      );
+
+      history.replace(path);
+
+      tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    },
+    [history, location.pathname]
+  );
+
   const tabs = useMemo(
     () => [
       {
@@ -335,37 +369,14 @@ export function RuleComponent({
           <AlertSummaryWidget
             ruleTypeIds={[rule.ruleTypeId]}
             consumers={[rule.consumer]}
-            filter={alertsSearchEsQuery}
+            filter={{
+              term: {
+                [ALERT_RULE_UUID]: rule.id,
+              },
+            }}
             timeRange={alertSummaryWidgetTimeRange}
             onClick={(status?: PublicAlertStatus) => {
-              setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
-              setSelectedTabId(ALERT_LIST_TAB);
-
-              const controlConfigs = DEFAULT_CONTROLS.map((control) => {
-                if (control.field_name === ALERT_STATUS) {
-                  return {
-                    ...control,
-                    selected_options: status ? [status] : [],
-                  };
-                }
-                return control;
-              });
-
-              const path = setStateToKbnUrl(
-                'searchBarParams',
-                {
-                  rangeFrom: 'now-15m',
-                  rangeTo: 'now',
-                  kuery: '',
-                  controlConfigs,
-                },
-                { useHash: false, storeInHashQuery: false },
-                `${location.pathname}?tabId=alerts`
-              );
-
-              history.replace(path);
-
-              tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
+              scrollAlertsIntoView(status);
             }}
             dependencies={{ charts, uiSettings }}
           />

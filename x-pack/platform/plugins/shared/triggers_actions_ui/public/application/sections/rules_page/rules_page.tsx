@@ -28,7 +28,6 @@ import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../
 import { useSetBreadcrumbs } from '../../hooks/use_set_breadcrumbs';
 import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
-import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
@@ -135,7 +134,6 @@ const RulesPage = () => {
     return (
       <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
         <RulesList
-          consumers={NON_SIEM_CONSUMERS}
           rulesListKey="rules-page"
           showCreateRuleButtonInPrompt={true}
           navigateToEditRuleForm={navigateToEditRuleForm}
