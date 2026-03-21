@@ -12,9 +12,9 @@ import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { FEATURE_EXTRACTION_POLL_INTERVAL_MS, FEATURE_EXTRACTION_TIMEOUT_MS } from './constants';
 import {
-  getSigeventsSnapshotKIsIndex,
+  getSigeventsSnapshotKIFeaturesIndex,
   SIGEVENTS_FEATURES_INDEX_PATTERN,
-} from '../../../src/data_generators/sigevents_kis_index';
+} from '../../../src/data_generators/sigevents_ki_features_index';
 
 export async function enableSignificantEvents(
   config: ConnectionConfig,
@@ -128,7 +128,7 @@ export async function persistSigEventsExtractedFeaturesForSnapshot(
   streamName: string = 'logs'
 ): Promise<{ index: string; count: number }> {
   const features = await fetchSigEventsExtractedFeatures(config, log, streamName);
-  const index = getSigeventsSnapshotKIsIndex(snapshotName);
+  const index = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
 
   await esClient.indices.delete({ index, ignore_unavailable: true });
   await esClient.indices.create({

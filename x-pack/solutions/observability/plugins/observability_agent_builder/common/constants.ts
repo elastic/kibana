@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Agent ID
+// Agent IDs
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 // Attachment type IDs

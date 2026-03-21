@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
+  HEATMAP_NAME,
   type FormBasedLayer,
   type HeatmapVisualizationState,
   type TextBasedLayer,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
+
 import { DEFAULT_LAYER_ID } from '../../../constants';
-import { getDatasourceLayers, getSharedChartLensStateToAPI, stripUndefined } from '../utils';
+import {
+  getDatasourceLayers,
+  getLegendTruncateAfterLines,
+  getSharedChartLensStateToAPI,
+  stripUndefined,
+} from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
@@ -34,7 +41,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     visible: legend.isVisible,
     position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
-      truncate_after_lines: legend.maxLines,
+      truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legend.legendSize,
     }),
   };
@@ -87,7 +94,7 @@ function reverseBuildVisualizationState(
 
   const sharedProps = {
     ...generateApiLayer(layer),
-    type: 'heat_map' as const,
+    type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
     axis: getGridConfigProps(visualization.gridConfig),
     cells: {
