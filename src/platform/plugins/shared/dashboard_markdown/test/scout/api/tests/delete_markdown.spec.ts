@@ -17,10 +17,12 @@ const TEST_MARKDOWN_ID_IN_SPACE = 'test-delete-markdown-in-space';
 
 apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
   const spaceId = `markdown-delete-space-id`;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth, apiServices }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await apiServices.spaces.create({ id: spaceId, name: spaceId });
     await kbnClient.savedObjects.create({
       type: 'markdown',
@@ -91,6 +93,22 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
       );
 
       expect(response).toHaveStatusCode(204);
+    }
+  );
+
+  apiTest(
+    'authorization - returns error when user does not have permission to delete markdown panels',
+    async ({ apiClient }) => {
+      const response = await apiClient.delete(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to delete markdown');
     }
   );
 });

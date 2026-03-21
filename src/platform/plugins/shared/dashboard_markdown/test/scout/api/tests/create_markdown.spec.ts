@@ -14,16 +14,18 @@ import { apiTest, COMMON_HEADERS, MARKDOWN_API_PATH } from '../fixtures';
 
 apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
   const spaceId = `markdown-create-space-id`;
 
   apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
     await apiServices.spaces.create({ id: spaceId, name: spaceId });
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
   });
 
   apiTest.afterAll(async ({ kbnClient, apiServices }) => {
     await apiServices.spaces.delete(spaceId);
-    await kbnClient.savedObjects.cleanStandardList();
+    await kbnClient.savedObjects.clean({ types: ['markdown'] });
   });
 
   apiTest('should create a markdown panel', async ({ apiClient }) => {
@@ -199,7 +201,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     );
   });
 
-  apiTest('validiation - returns error when id already exists', async ({ apiClient }) => {
+  apiTest('validation - returns error when id already exists', async ({ apiClient }) => {
     const id = `test-markdown-with-specific-id`;
     const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
       headers: {
@@ -217,6 +219,49 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.message).toBe(`A markdown panel with ID ${id} already exists.`);
   });
 
+  apiTest('validation - returns error when id is too long', async ({ apiClient }) => {
+    const id = `test-markdown-with-specific-id-that-is-way-more-than-one-hundred-characters-and-should-fail-validation-because-it-is-too-long`;
+    const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        content: '# Test',
+        title: 'Test title',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request params.id]: value has length [125] but it must have a maximum length of [100].'
+    );
+  });
+
+  apiTest(
+    'validation - returns error when id contains invalid characters',
+    async ({ apiClient }) => {
+      const id = `test-markdown-with-Specific-id-that.contains&invalid*characters`;
+      const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: {
+          content: '# Test',
+          title: 'Test title',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        '[request params.id]: ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+      );
+    }
+  );
+
   apiTest(
     'validation - returns error when unknown attributes are provided',
     async ({ apiClient }) => {
@@ -233,6 +278,26 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'authorization - returns error when user does not have permission to create markdown panels',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(MARKDOWN_API_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          content: '# Test',
+          title: 'Test title',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create markdown');
     }
   );
 });

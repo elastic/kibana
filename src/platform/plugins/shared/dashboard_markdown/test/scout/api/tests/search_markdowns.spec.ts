@@ -22,7 +22,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     await kbnClient.savedObjects.clean({ types: ['markdown'] });
-    viewerCredentials = await requestAuth.getApiKey('viewer');
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(MANY_MARKDOWNS_KBN_ARCHIVE_PATH);
   });
 

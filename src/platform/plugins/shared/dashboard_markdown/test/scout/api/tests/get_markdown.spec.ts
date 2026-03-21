@@ -20,7 +20,7 @@ apiTest.describe('markdown - get', { tag: tags.deploymentAgnostic }, () => {
   const spaceId = `markdown-get-space-id`;
 
   apiTest.beforeAll(async ({ apiServices, kbnClient, requestAuth }) => {
-    viewerCredentials = await requestAuth.getApiKey('viewer');
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await apiServices.spaces.create({ id: spaceId, name: spaceId });
     await kbnClient.savedObjects.create({
       type: 'markdown',
