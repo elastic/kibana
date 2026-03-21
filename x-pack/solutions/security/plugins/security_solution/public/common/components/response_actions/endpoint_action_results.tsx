@@ -7,16 +7,16 @@
 
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { memo, useEffect, useState, useMemo } from 'react';
+import { useGetActionDetails } from '../../../management/hooks/response_actions/use_get_action_details';
 import type {
   LogsEndpointActionWithHosts,
   ActionDetails,
 } from '../../../../common/endpoint/types/actions';
-import { useUserPrivileges } from '../user_privileges';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import { ENDPOINT_COMMANDS } from './translations';
-import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
+import { useUserPrivileges } from '../user_privileges';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
@@ -63,18 +63,13 @@ export const EndpointResponseActionResults = ({
       event={eventText}
       data-test-subj={'endpoint-results-comment'}
     >
-      {canAccessEndpointActionsLogManagement ? (
-        expandedAction ? (
-          <ActionsLogExpandedTray
-            action={expandedAction}
-            fromAlertWorkaround
-            data-test-subj={`response-results-${hostName}`}
-          />
-        ) : (
-          <EuiLoadingSpinner />
-        )
+      {expandedAction ? (
+        <ResponseActionDetailsWorkaround
+          actionId={expandedAction.id}
+          data-test-subj={`response-results-${hostName}`}
+        />
       ) : (
-        <ResponseActionsEmptyPrompt type="endpoint" />
+        <EuiLoadingSpinner />
       )}
     </EuiComment>
   );
@@ -93,3 +88,36 @@ const getCommentText = (action: ActionDetails): string => {
 
   return ENDPOINT_COMMANDS.tried(action.command);
 };
+
+// Tech Debt - see team internal issue #9822
+// This is a workaround to fix the issue where the action details record is missing critical fields.
+// Because Automated Response Actions started to use the same component used in the action history log
+// we need to ensure that the action details records is actually complete - thus we make an API call here
+// to retrieve it.
+// This should all be removed once issue 9822 is addressed and we have a single common `<ResponseActionDetails>`
+// component that should be used everywhere.
+const ResponseActionDetailsWorkaround = memo<{
+  actionId: string;
+  'data-test-subj'?: string;
+}>(({ actionId, 'data-test-subj': dataTestSubj }) => {
+  const {
+    endpointPrivileges: { canAccessEndpointActionsLogManagement },
+  } = useUserPrivileges();
+
+  const { data: actionDetailsApiResult, isLoading } = useGetActionDetails(actionId, {
+    enabled: canAccessEndpointActionsLogManagement,
+  });
+
+  if (isLoading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (actionDetailsApiResult?.data) {
+    return (
+      <ActionsLogExpandedTray action={actionDetailsApiResult.data} data-test-subj={dataTestSubj} />
+    );
+  }
+
+  return null;
+});
+ResponseActionDetailsWorkaround.displayName = 'ResponseActionDetailsWorkaround';

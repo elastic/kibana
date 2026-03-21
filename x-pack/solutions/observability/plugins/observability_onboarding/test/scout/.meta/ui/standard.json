@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-12T15:58:12.029Z",
-  "sha1": "7b9389dbe2dc115c38daef51bd44e1ee75fdb4fd",
+  "sha1": "81d438302f989049ded05dd45dd565b0ff3720b8",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -10,9 +9,7 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
@@ -34,7 +31,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 59,
+        "line": 55,
         "column": 7
       }
     },
@@ -52,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 94,
+        "line": 90,
         "column": 7
       }
     },
@@ -70,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 119,
+        "line": 115,
         "column": 7
       }
     },
@@ -88,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 149,
+        "line": 145,
         "column": 7
       }
     },
@@ -104,7 +101,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 178,
+        "line": 174,
         "column": 7
       }
     },
@@ -118,7 +115,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 200,
+        "line": 196,
         "column": 7
       }
     }

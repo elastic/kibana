@@ -375,7 +375,7 @@ describe('lens suggestions api helpers', () => {
         ...mockAllSuggestions[0],
         datasourceState: {
           indexPatternRefs: [
-            { id: 'new-index-id', title: 'index2' },
+            { id: 'new-index-id', title: 'index2', timeField: '@timestamp' },
             { id: 'other-index-id', title: 'index3' },
           ],
         },
@@ -393,6 +393,7 @@ describe('lens suggestions api helpers', () => {
                 layer1: {
                   query: { esql: 'from index2 | limit 15' },
                   index: 'new-index-id',
+                  timeField: '@timestamp',
                 },
               },
             },
@@ -406,6 +407,55 @@ describe('lens suggestions api helpers', () => {
         suggestionWithIndexRefs
       );
       expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+
+    it('should clear timeField when switching to an index without a time field', async () => {
+      const newQuery = {
+        esql: 'from ecommerce_index | limit 15',
+      };
+
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from logs_index | limit 10' },
+                  index: 'old-index-id',
+                  timeField: '@timestamp',
+                },
+              },
+            },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from logs_index | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const suggestionWithNoTimeField = {
+        ...mockAllSuggestions[0],
+        datasourceState: {
+          indexPatternRefs: [{ id: 'ecommerce-id', title: 'ecommerce_index' }],
+        },
+      };
+
+      const newAttributes = injectESQLQueryIntoLensLayers(
+        lensAttributes,
+        newQuery,
+        suggestionWithNoTimeField
+      );
+      const layer = (
+        newAttributes.state.datasourceStates.textBased as {
+          layers: Record<string, { timeField?: string }>;
+        }
+      ).layers.layer1;
+      expect(layer.timeField).toBeUndefined();
     });
 
     it('should keep original index when no matching indexPatternRef is found', async () => {

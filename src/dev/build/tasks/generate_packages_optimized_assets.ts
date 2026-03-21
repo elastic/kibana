@@ -8,64 +8,78 @@
  */
 
 import Path from 'path';
-
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import Fsp from 'fs/promises';
 import fs from 'fs';
+import zlib from 'zlib';
+import { cpus } from 'os';
+import { promisify } from 'util';
 
-import gulpBrotli from 'gulp-brotli';
-// @ts-expect-error
-import gulpPostCSS from 'gulp-postcss';
-// @ts-expect-error
-import gulpTerser from 'gulp-terser';
+import { minify } from '@swc/core';
+import { transform as lightningTransform, browserslistToTargets } from 'lightningcss';
+import browserslist from 'browserslist';
+import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import terser from 'terser';
-import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
-import zlib from 'zlib';
 
 import type { Task } from '../lib';
 import { write } from '../lib';
 
 const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
-const asyncPipeline = promisify(pipeline);
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
 
-async function optimizeAssets(log: ToolingLog, assetDir: string) {
+const BROTLI_QUALITY_RELEASE = zlib.constants.BROTLI_MAX_QUALITY;
+const BROTLI_QUALITY_SNAPSHOT = 9;
+const PARALLEL_CONCURRENCY = cpus().length;
+const brotliCompressAsync = promisify(zlib.brotliCompress);
+const cssTargets = browserslistToTargets(browserslist());
+
+async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: number) {
   log.info('Creating optimized assets for', assetDir);
   log.indent(4);
   try {
     log.debug('Remove Pre Minify Sourcemaps');
     await del(['**/*.map'], { cwd: assetDir });
 
-    log.debug('Minify CSS');
-    await asyncPipeline(
-      vfs.src(['**/*.css'], { cwd: assetDir }),
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
-      vfs.dest(assetDir)
-    );
+    log.debug('Minify CSS with Lightning CSS');
+    const cssFiles = await globby(['**/*.css'], { cwd: assetDir, absolute: true });
+    // lightningcss only exposes a synchronous transform() API (no async variant)
+    await asyncForEachWithLimit(cssFiles, PARALLEL_CONCURRENCY, async (file) => {
+      const code = await Fsp.readFile(file);
+      const result = lightningTransform({
+        filename: Path.basename(file),
+        code,
+        minify: true,
+        targets: cssTargets,
+      });
+      await Fsp.writeFile(file, result.code);
+    });
 
-    log.debug('Minify JS');
-    await asyncPipeline(
-      vfs.src(['**/*.js'], { cwd: assetDir }),
-      gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
-      vfs.dest(assetDir)
-    );
+    log.debug('Minify JS with SWC');
+    const jsFiles = await globby(['**/*.js'], { cwd: assetDir, absolute: true });
+    await asyncForEachWithLimit(jsFiles, PARALLEL_CONCURRENCY, async (file) => {
+      const source = await Fsp.readFile(file, 'utf8');
+      const result = await minify(source, {
+        compress: { passes: 2 },
+        mangle: true,
+        sourceMap: false,
+      });
+      await Fsp.writeFile(file, result.code);
+    });
 
     log.debug('Brotli compress');
-    await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpBrotli({
+    const compressFiles = await globby(['**/*.{js,css}'], { cwd: assetDir, absolute: true });
+    await asyncForEachWithLimit(compressFiles, PARALLEL_CONCURRENCY, async (file) => {
+      const content = await Fsp.readFile(file);
+      const compressed = await brotliCompressAsync(content, {
         params: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+          [zlib.constants.BROTLI_PARAM_QUALITY]: brotliQuality,
         },
-      }),
-      vfs.dest(assetDir)
-    );
+      });
+      await Fsp.writeFile(file + '.br', compressed);
+    });
   } finally {
     log.indent(-4);
   }
@@ -148,9 +162,11 @@ export const GeneratePackagesOptimizedAssets: Task = {
     );
     const assetDirs = [npmAssetDir, srcAssetDir];
 
+    const brotliQuality = config.isRelease ? BROTLI_QUALITY_RELEASE : BROTLI_QUALITY_SNAPSHOT;
+
     // process assets in each ui-shared-deps package
     for (const assetDir of assetDirs) {
-      await optimizeAssets(log, assetDir);
+      await optimizeAssets(log, assetDir, brotliQuality);
     }
 
     // analyze assets to produce metrics.json file

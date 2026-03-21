@@ -29,6 +29,7 @@ export interface MultiSelectFilterOption {
 
 interface UseFilterParams {
   buttonLabel?: string;
+  ariaLabel?: string;
   onChange: (newOptions: MultiSelectFilterOption[]) => void;
   options: MultiSelectFilterOption[];
   renderOption?: (option: MultiSelectFilterOption) => React.ReactNode;
@@ -38,6 +39,7 @@ interface UseFilterParams {
 
 export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   buttonLabel,
+  ariaLabel,
   onChange,
   options: rawOptions,
   selectedOptionKeys = [],
@@ -60,6 +62,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
     <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         ownFocus
+        aria-label={ariaLabel}
         button={
           <EuiFilterButton
             iconType={'arrowDown'}

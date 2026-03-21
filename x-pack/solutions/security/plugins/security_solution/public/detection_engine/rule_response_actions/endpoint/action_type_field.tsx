@@ -50,11 +50,14 @@ const ActionTypeFieldComponent = ({
   );
 
   const enabledActions = useMemo(
-    () =>
-      [
-        ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-        ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-      ] as ['isolate'],
+    () => [
+      ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.filter((command) => {
+        return !(
+          !automatedProcessActionsEnabled &&
+          (command === 'kill-process' || command === 'suspend-process')
+        );
+      }),
+    ],
     [automatedProcessActionsEnabled]
   );
 

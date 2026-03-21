@@ -49208,6 +49208,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       }
                     ]
@@ -49251,6 +49252,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       }
                     ],
