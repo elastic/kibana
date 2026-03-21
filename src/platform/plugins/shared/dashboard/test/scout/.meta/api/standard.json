@@ -1,5 +1,5 @@
 {
-  "sha1": "baaf4bbf49988c2e999604b6a02e30ec9fa1042e",
+  "sha1": "e41aa65daaa372f96f78b8f7301ddb9f04a9f197",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -184,8 +184,8 @@
       }
     },
     {
-      "id": "04c61aca5175965-82af63ae1d9919a",
-      "title": "dashboards - delete should return 200 if the dashboard is deleted",
+      "id": "04c61aca5175965-5527099b4e3130b",
+      "title": "dashboards - delete should return 204 if the dashboard is deleted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

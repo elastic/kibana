@@ -2857,6 +2857,62 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.streamMatchesIndexPatterns",
+        "type": "Function",
+        "tags": [],
+        "label": "streamMatchesIndexPatterns",
+        "description": [
+          "\nChecks if a stream name matches any of the given glob-style index patterns.\nSupports `*` (any characters) and `?` (single character) wildcards."
+        ],
+        "signature": [
+          "(streamName: string, indexPatterns: string[]) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.streamMatchesIndexPatterns.$1",
+            "type": "string",
+            "tags": [],
+            "label": "streamName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts",
+            "lineNumber": 12,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.streamMatchesIndexPatterns.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts",
+            "lineNumber": 12,
+            "columnNumber": 64,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.validateStreamName",
         "type": "Function",
         "tags": [],
@@ -4895,6 +4951,129 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.QueryLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryLink",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.asset.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "'asset.uuid'",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.asset.type",
+            "type": "string",
+            "tags": [],
+            "label": "'asset.type'",
+            "description": [],
+            "signature": [
+              "\"query\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.asset.id",
+            "type": "string",
+            "tags": [],
+            "label": "'asset.id'",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.stream_name",
+            "type": "string",
+            "tags": [],
+            "label": "stream_name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.rule_backed",
+            "type": "boolean",
+            "tags": [],
+            "label": "rule_backed",
+            "description": [
+              "Whether a Kibana rule exists for this query."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.QueryLink.rule_id",
+            "type": "string",
+            "tags": [],
+            "label": "rule_id",
+            "description": [
+              "The deterministic ID of the Kibana rule associated with this query."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.RoutingDefinition",
         "type": "Interface",
         "tags": [],
@@ -5556,6 +5735,23 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.DEFAULT_INDEX_PATTERNS",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_INDEX_PATTERNS",
+        "description": [],
+        "signature": [
+          "\"logs*\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.DetectedField",
         "type": "Type",
         "tags": [],
@@ -5687,7 +5883,7 @@
         "label": "ElasticsearchProcessorType",
         "description": [],
         "signature": [
-          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"fail\" | \"grok\" | \"reroute\" | \"convert\" | \"fingerprint\" | \"dissect\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
+          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"pipeline\" | \"fail\" | \"grok\" | \"reroute\" | \"convert\" | \"fingerprint\" | \"dissect\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/ingest_pipeline_processors.ts",
         "lineNumber": 10,
