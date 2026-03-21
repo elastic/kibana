@@ -73,6 +73,7 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
   esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 

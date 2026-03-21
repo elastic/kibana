@@ -34,6 +34,23 @@ apiTest.describe('automatic_import_v2 Integration API (reader)', { tag: tags.sta
     expect(Array.isArray(response.body)).toBe(true);
   });
 
+  apiTest(
+    'GET /integrations/{id}: returns 200 with correct shape for reader user',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${INTEGRATION_API_BASE_PATH}/${SHARED_INTEGRATION_ID}`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.integrationResponse.integrationId).toBe(SHARED_INTEGRATION_ID);
+      expect(typeof response.body.integrationResponse.title).toBe('string');
+      expect(Array.isArray(response.body.integrationResponse.dataStreams)).toBe(true);
+    }
+  );
+
   apiTest('PUT /integrations: returns 403 for reader user', async ({ apiClient }) => {
     const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },

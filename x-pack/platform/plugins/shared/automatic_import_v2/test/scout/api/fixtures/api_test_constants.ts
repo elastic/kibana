@@ -14,6 +14,11 @@ export const NON_EXISTENT_INTEGRATION_ID = 'non-existent-scout-test-id';
 
 export const DATA_STREAMS_INTEGRATION_ID = 'scout-ds-test-integration';
 
+/** Dedicated integration for manager happy-path data stream flow (upload → patch → results → delete). */
+export const MANAGER_DS_FLOW_INTEGRATION_ID = 'scout-ds-manager-flow';
+
+export const MANAGER_DS_FLOW_DATA_STREAM_ID = 'scout-ds-manager-flow-ds';
+
 export const dataStreamsApiBasePath = (integrationId: string): string =>
   `api/automatic_import_v2/integrations/${integrationId}/data_streams`;
 
