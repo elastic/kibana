@@ -46,7 +46,7 @@ spaceTest.describe(
 
     spaceTest(
       'should narrow time range when brushing a chart in the grid',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
