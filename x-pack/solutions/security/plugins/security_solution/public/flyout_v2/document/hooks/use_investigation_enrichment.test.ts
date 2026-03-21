@@ -10,7 +10,7 @@ import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
-} from '../../../../../common/cti/constants';
+} from '../../../../common/cti/constants';
 import { useEventEnrichmentComplete } from '../services/threat_intelligence';
 
 jest.mock('../services/threat_intelligence');
@@ -21,15 +21,15 @@ jest.mock('react-redux', () => {
     useDispatch: () => jest.fn(),
   };
 });
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
   }),
 }));
 
 const mockStorageGet = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
