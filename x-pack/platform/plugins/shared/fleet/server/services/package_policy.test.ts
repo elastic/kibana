@@ -138,6 +138,29 @@ const ASSETS_MAP_FIXTURES = new Map([
   {{/each}}
   `),
   ],
+  // multi-template stream fixture (second template; first reuses some_template_path.yml)
+  [
+    '/test-1.0.0/data_stream/dataset1/agent/stream/multi_tpl_stream2.yml',
+    Buffer.from(`
+processors:
+  - add_host: ~
+config:
+  b: 2
+  c: 3
+{{#if extra_field}}
+extra_field: {{extra_field}}
+{{/if}}
+`),
+  ],
+  // multi-template input fixture (second template; first reuses some_template_path.yml)
+  [
+    '/test-1.0.0/agent/input/multi_tpl_input2.yml',
+    Buffer.from(`
+hosts:
+  - remote
+timeout: 30s
+`),
+  ],
 ]) as PackagePolicyAssetsMap;
 
 async function mockedGetInstallation(params: any) {
@@ -2452,6 +2475,258 @@ describe('Package policy service', () => {
       );
 
       expect(inputs).toEqual([]);
+    });
+
+    describe('template_paths (multiple templates)', () => {
+      it('should compile and merge multiple stream templates in order', async () => {
+        // First template is the existing some_template_path.yml (type + metricset + paths list).
+        // Second template adds processors and config. Keys from both templates are preserved;
+        // the processors list comes entirely from template 2 (template 1 has none), while
+        // paths comes from template 1.
+        const inputs = await _compilePackagePolicyInputs(
+          {
+            name: 'test',
+            version: '1.0.0',
+            data_streams: [
+              {
+                type: 'logs',
+                dataset: 'package.dataset1',
+                streams: [
+                  {
+                    input: 'log',
+                    template_paths: ['some_template_path.yml', 'multi_tpl_stream2.yml'],
+                  },
+                ],
+                path: 'dataset1',
+              },
+            ],
+            policy_templates: [
+              {
+                inputs: [{ type: 'log' }],
+              },
+            ],
+          } as unknown as PackageInfo,
+          {},
+          [
+            {
+              type: 'log',
+              enabled: true,
+              streams: [
+                {
+                  id: 'datastream01',
+                  data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                  enabled: true,
+                  vars: {
+                    paths: { value: ['/var/log/app.log'] },
+                  },
+                },
+              ],
+            },
+          ],
+          ASSETS_MAP_FIXTURES
+        );
+
+        expect(inputs[0].streams[0].compiled_stream).toEqual({
+          type: 'log',
+          metricset: ['dataset1'],
+          paths: ['/var/log/app.log'],
+          processors: [{ add_host: null }],
+          config: { b: 2, c: 3 },
+        });
+      });
+
+      it('should prefer template_paths over template_path when both are present', async () => {
+        const inputs = await _compilePackagePolicyInputs(
+          {
+            name: 'test',
+            version: '1.0.0',
+            data_streams: [
+              {
+                type: 'logs',
+                dataset: 'package.dataset1',
+                streams: [
+                  {
+                    input: 'log',
+                    template_path: 'some_template_path.yml',
+                    template_paths: ['some_template_path.yml', 'multi_tpl_stream2.yml'],
+                  },
+                ],
+                path: 'dataset1',
+              },
+            ],
+            policy_templates: [
+              {
+                inputs: [{ type: 'log' }],
+              },
+            ],
+          } as unknown as PackageInfo,
+          {},
+          [
+            {
+              type: 'log',
+              enabled: true,
+              streams: [
+                {
+                  id: 'datastream01',
+                  data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                  enabled: true,
+                  vars: {
+                    paths: { value: ['/var/log/app.log'] },
+                  },
+                },
+              ],
+            },
+          ],
+          ASSETS_MAP_FIXTURES
+        );
+
+        // Result is the merge of both template_paths templates, not just template_path alone
+        expect(inputs[0].streams[0].compiled_stream).toEqual({
+          type: 'log',
+          metricset: ['dataset1'],
+          paths: ['/var/log/app.log'],
+          processors: [{ add_host: null }],
+          config: { b: 2, c: 3 },
+        });
+      });
+
+      it('should compile and merge multiple input templates in order', async () => {
+        // First template is the existing some_template_path.yml input (dynamic hosts list).
+        // Second template adds another host (list append) and a scalar timeout.
+        const inputs = await _compilePackagePolicyInputs(
+          {
+            name: 'test',
+            version: '1.0.0',
+            data_streams: [],
+            policy_templates: [
+              {
+                inputs: [
+                  {
+                    type: 'log',
+                    template_paths: ['some_template_path.yml', 'multi_tpl_input2.yml'],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo,
+          {},
+          [
+            {
+              type: 'log',
+              enabled: true,
+              streams: [],
+              vars: {
+                hosts: { value: ['localhost'] },
+              },
+            },
+          ],
+          ASSETS_MAP_FIXTURES
+        );
+
+        expect(inputs[0].compiled_input).toEqual({
+          hosts: ['localhost', 'remote'],
+          timeout: '30s',
+        });
+      });
+
+      it('should prefer input template_paths over template_path when both are present', async () => {
+        const inputs = await _compilePackagePolicyInputs(
+          {
+            name: 'test',
+            version: '1.0.0',
+            data_streams: [],
+            policy_templates: [
+              {
+                inputs: [
+                  {
+                    type: 'log',
+                    template_path: 'some_template_path.yml',
+                    template_paths: ['some_template_path.yml', 'multi_tpl_input2.yml'],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo,
+          {},
+          [
+            {
+              type: 'log',
+              enabled: true,
+              streams: [],
+              vars: {
+                hosts: { value: ['localhost'] },
+              },
+            },
+          ],
+          ASSETS_MAP_FIXTURES
+        );
+
+        // Result is the merge of both template_paths templates, not just template_path alone
+        expect(inputs[0].compiled_input).toEqual({
+          hosts: ['localhost', 'remote'],
+          timeout: '30s',
+        });
+      });
+
+      it('should resolve variables in each template before merging', async () => {
+        // First template (some_template_path.yml) uses {{paths}} via {{#each}}.
+        // Second template (multi_tpl_stream2.yml) uses {{extra_field}} conditionally.
+        // Variables are resolved independently per template, then results are merged:
+        // paths list from template 1 is preserved, processors/config/extra_field come
+        // from template 2.
+        const inputs = await _compilePackagePolicyInputs(
+          {
+            name: 'test',
+            version: '1.0.0',
+            data_streams: [
+              {
+                type: 'logs',
+                dataset: 'package.dataset1',
+                streams: [
+                  {
+                    input: 'log',
+                    template_paths: ['some_template_path.yml', 'multi_tpl_stream2.yml'],
+                  },
+                ],
+                path: 'dataset1',
+              },
+            ],
+            policy_templates: [
+              {
+                inputs: [{ type: 'log' }],
+              },
+            ],
+          } as unknown as PackageInfo,
+          {},
+          [
+            {
+              type: 'log',
+              enabled: true,
+              streams: [
+                {
+                  id: 'datastream01',
+                  data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                  enabled: true,
+                  vars: {
+                    paths: { value: ['/var/log/app.log', '/var/log/app2.log'] },
+                    extra_field: { value: 'hello' },
+                  },
+                },
+              ],
+            },
+          ],
+          ASSETS_MAP_FIXTURES
+        );
+
+        expect(inputs[0].streams[0].compiled_stream).toEqual({
+          type: 'log',
+          metricset: ['dataset1'],
+          paths: ['/var/log/app.log', '/var/log/app2.log'],
+          processors: [{ add_host: null }],
+          config: { b: 2, c: 3 },
+          extra_field: 'hello',
+        });
+      });
     });
   });
 
