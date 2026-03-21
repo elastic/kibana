@@ -10,7 +10,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   OptionsListDisplaySettings,
   OptionsListSortingType,
@@ -40,6 +40,7 @@ export const getOptionsListContextMock = () => {
   const sort$ = new BehaviorSubject<OptionsListSortingType>(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
   return {
     componentApi: {
+      type: OPTIONS_LIST_CONTROL,
       ...editorStateManager.api,
       ...selectionsManager.api,
       ...temporaryStateManager.api,
