@@ -1,0 +1,9 @@
+elasticsearch.hosts:
+  - http://localhost:9220
+elasticsearch.serviceAccountToken: AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS12dWxuLXNwaWtlOk5JbE41UENxU2Z5LTZtQ0x1TUpQb1E
+
+server.port: 5603
+server.host: localhost
+
+xpack.securitySolution.enableExperimental:
+  - vulnerabilityCheckerEnabled
