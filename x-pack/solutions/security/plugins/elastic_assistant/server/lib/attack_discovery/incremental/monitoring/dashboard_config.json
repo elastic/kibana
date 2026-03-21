@@ -1,0 +1,252 @@
+{
+  "title": "Incremental Attack Discovery Monitoring",
+  "description": "Monitor incremental attack discovery performance, context budgets, and efficiency metrics",
+  "panelsJSON": [
+    {
+      "id": "mode-distribution",
+      "type": "visualization",
+      "title": "Mode Distribution Over Time",
+      "description": "Track adoption of delta vs progressive modes",
+      "visualization": {
+        "type": "line",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_completed",
+          "language": "kuery"
+        },
+        "aggs": {
+          "date_histogram": {
+            "field": "@timestamp",
+            "interval": "1h"
+          },
+          "terms": {
+            "field": "mode",
+            "size": 10
+          }
+        }
+      }
+    },
+    {
+      "id": "context-budget-trend",
+      "type": "visualization",
+      "title": "Context Budget Trend",
+      "description": "Ensure context stays under 8K token limit",
+      "visualization": {
+        "type": "line",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_completed",
+          "language": "kuery"
+        },
+        "aggs": {
+          "date_histogram": {
+            "field": "@timestamp",
+            "interval": "1h"
+          },
+          "avg": {
+            "field": "contextBudgetPerRound"
+          },
+          "max": {
+            "field": "contextBudgetPerRound"
+          }
+        },
+        "thresholds": [
+          {
+            "value": 8000,
+            "color": "red",
+            "label": "Context Limit"
+          },
+          {
+            "value": 7000,
+            "color": "orange",
+            "label": "Warning"
+          }
+        ]
+      }
+    },
+    {
+      "id": "delta-efficiency",
+      "type": "visualization",
+      "title": "Delta Mode Efficiency",
+      "description": "Track delta size as % of total alerts (target: <20%)",
+      "visualization": {
+        "type": "gauge",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_completed AND mode:delta",
+          "language": "kuery"
+        },
+        "aggs": {
+          "avg": {
+            "script": {
+              "source": "doc['deltaSize'].value / (doc['deltaSize'].value + doc['totalAlertsProcessed'].value - doc['deltaSize'].value)"
+            }
+          }
+        },
+        "thresholds": [
+          {
+            "value": 0.2,
+            "color": "green",
+            "label": "Good"
+          },
+          {
+            "value": 0.5,
+            "color": "orange",
+            "label": "Warning"
+          },
+          {
+            "value": 0.8,
+            "color": "red",
+            "label": "Poor"
+          }
+        ]
+      }
+    },
+    {
+      "id": "success-rate",
+      "type": "visualization",
+      "title": "Success Rate by Mode and Model",
+      "description": "Track reliability across modes and models",
+      "visualization": {
+        "type": "bar",
+        "query": {
+          "query": "event.type:(incremental_attack_discovery_completed OR incremental_attack_discovery_failed)",
+          "language": "kuery"
+        },
+        "aggs": {
+          "terms": {
+            "field": "mode",
+            "size": 10
+          },
+          "nested_terms": {
+            "field": "modelId",
+            "size": 10
+          },
+          "filter": {
+            "term": {
+              "success": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "round-performance",
+      "type": "visualization",
+      "title": "Average Round Duration by Model",
+      "description": "Compare model performance",
+      "visualization": {
+        "type": "bar",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_completed",
+          "language": "kuery"
+        },
+        "aggs": {
+          "terms": {
+            "field": "modelId",
+            "size": 10
+          },
+          "avg": {
+            "field": "avgRoundDurationMs"
+          }
+        },
+        "thresholds": [
+          {
+            "value": 30000,
+            "color": "orange",
+            "label": "Slow"
+          }
+        ]
+      }
+    },
+    {
+      "id": "merge-rate",
+      "type": "visualization",
+      "title": "Insight Merge Rate",
+      "description": "Track deduplication effectiveness (target: 10-30%)",
+      "visualization": {
+        "type": "gauge",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_completed",
+          "language": "kuery"
+        },
+        "aggs": {
+          "avg": {
+            "script": {
+              "source": "doc['mergedInsightCount'].value / doc['totalInsights'].value"
+            }
+          }
+        },
+        "thresholds": [
+          {
+            "value": 0.1,
+            "color": "orange",
+            "label": "Under-merging"
+          },
+          {
+            "value": 0.3,
+            "color": "green",
+            "label": "Good"
+          },
+          {
+            "value": 0.5,
+            "color": "orange",
+            "label": "Over-merging"
+          }
+        ]
+      }
+    },
+    {
+      "id": "alerts-processed-trend",
+      "type": "visualization",
+      "title": "Alerts Processed Over Time",
+      "description": "Track volume and round distribution",
+      "visualization": {
+        "type": "area",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_completed",
+          "language": "kuery"
+        },
+        "aggs": {
+          "date_histogram": {
+            "field": "@timestamp",
+            "interval": "1h"
+          },
+          "sum": {
+            "field": "totalAlertsProcessed"
+          },
+          "avg": {
+            "field": "totalRounds"
+          }
+        }
+      }
+    },
+    {
+      "id": "error-rate",
+      "type": "visualization",
+      "title": "Error Rate by Mode",
+      "description": "Monitor failure patterns",
+      "visualization": {
+        "type": "pie",
+        "query": {
+          "query": "event.type:incremental_attack_discovery_failed",
+          "language": "kuery"
+        },
+        "aggs": {
+          "terms": {
+            "field": "mode",
+            "size": 10
+          },
+          "nested_terms": {
+            "field": "errorMessage",
+            "size": 5
+          }
+        }
+      }
+    }
+  ],
+  "timeRestore": true,
+  "timeFrom": "now-24h",
+  "timeTo": "now",
+  "refreshInterval": {
+    "pause": false,
+    "value": 60000
+  }
+}

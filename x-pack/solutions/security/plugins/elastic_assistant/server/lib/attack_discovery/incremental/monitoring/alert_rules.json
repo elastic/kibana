@@ -1,0 +1,197 @@
+{
+  "alerts": [
+    {
+      "name": "Incremental AD - Context Budget Exceeded",
+      "description": "Alert when context budget exceeds 8K tokens (OSS model compatibility risk)",
+      "enabled": true,
+      "tags": ["incremental-ad", "context-budget", "critical"],
+      "rule_type": "threshold",
+      "severity": "critical",
+      "conditions": {
+        "query": "event.type:incremental_attack_discovery_completed",
+        "threshold": {
+          "field": "contextBudgetPerRound",
+          "comparator": "greater_than",
+          "value": 8000
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "⚠️ Context budget exceeded: {{contextBudgetPerRound}} tokens > 8000 limit\nMode: {{mode}}\nModel: {{modelId}}\nAction: Reduce alertsPerRound configuration"
+        },
+        {
+          "type": "email",
+          "subject": "Incremental AD Context Budget Alert",
+          "body": "Context budget {{contextBudgetPerRound}} tokens exceeded the 8K limit.\n\nThis may cause failures with small-context models.\n\nRecommended action: Reduce alertsPerRound from current value."
+        }
+      ],
+      "schedule": {
+        "interval": "5m"
+      }
+    },
+    {
+      "name": "Incremental AD - High Failure Rate",
+      "description": "Alert when failure rate exceeds 5% (reliability issue)",
+      "enabled": true,
+      "tags": ["incremental-ad", "reliability", "high"],
+      "rule_type": "threshold",
+      "severity": "high",
+      "conditions": {
+        "query": "event.type:(incremental_attack_discovery_completed OR incremental_attack_discovery_failed)",
+        "threshold": {
+          "aggregate": "cardinality",
+          "field": "success",
+          "comparator": "less_than",
+          "value": 0.95,
+          "window": "1h"
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "⚠️ Incremental AD failure rate > 5% in last hour\nCheck error logs for: {{errorMessage}}\nMode: {{mode}}\nModel: {{modelId}}"
+        }
+      ],
+      "schedule": {
+        "interval": "15m"
+      }
+    },
+    {
+      "name": "Incremental AD - Delta Inefficiency",
+      "description": "Alert when delta mode consistently reprocesses >80% of alerts (inefficient continuous monitoring)",
+      "enabled": true,
+      "tags": ["incremental-ad", "delta-efficiency", "medium"],
+      "rule_type": "anomaly",
+      "severity": "medium",
+      "conditions": {
+        "query": "event.type:incremental_attack_discovery_completed AND mode:delta",
+        "threshold": {
+          "field": "deltaSize",
+          "aggregate": "avg",
+          "comparator": "greater_than_percentage",
+          "value": 0.8,
+          "window": "6h",
+          "consecutive_runs": 5
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "⚠️ Delta mode inefficient: {{deltaSize}} new / {{totalAlertsProcessed}} total (>80%)\nSession: {{sessionId}}\nPossible causes:\n- Schedule too infrequent\n- Alerts being deleted/rotated\n- Session state not persisting"
+        }
+      ],
+      "schedule": {
+        "interval": "30m"
+      }
+    },
+    {
+      "name": "Incremental AD - Slow Round Performance",
+      "description": "Alert when average round duration exceeds 30s (performance degradation)",
+      "enabled": true,
+      "tags": ["incremental-ad", "performance", "medium"],
+      "rule_type": "threshold",
+      "severity": "medium",
+      "conditions": {
+        "query": "event.type:incremental_attack_discovery_completed",
+        "threshold": {
+          "field": "avgRoundDurationMs",
+          "comparator": "greater_than",
+          "value": 30000
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "⚠️ Slow incremental AD performance\nAvg round: {{avgRoundDurationMs}}ms (target: <30s)\nMode: {{mode}}\nModel: {{modelId}}\nAlerts/round: {{avgAlertsPerRound}}"
+        }
+      ],
+      "schedule": {
+        "interval": "1h"
+      }
+    },
+    {
+      "name": "Incremental AD - Over-Merging Detection",
+      "description": "Alert when merge rate exceeds 50% (potentially losing distinct insights)",
+      "enabled": true,
+      "tags": ["incremental-ad", "quality", "low"],
+      "rule_type": "threshold",
+      "severity": "low",
+      "conditions": {
+        "query": "event.type:incremental_attack_discovery_completed",
+        "threshold": {
+          "aggregate": "avg",
+          "script": "doc['mergedInsightCount'].value / doc['totalInsights'].value",
+          "comparator": "greater_than",
+          "value": 0.5
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "ℹ️ High insight merge rate: {{mergedInsightCount}}/{{totalInsights}} (>50%)\nMay be over-merging distinct attacks\nConsider increasing similarityThreshold"
+        }
+      ],
+      "schedule": {
+        "interval": "4h"
+      }
+    },
+    {
+      "name": "Incremental AD - Under-Merging Detection",
+      "description": "Alert when merge rate is below 5% (potentially missing duplicates)",
+      "enabled": false,
+      "tags": ["incremental-ad", "quality", "low"],
+      "rule_type": "threshold",
+      "severity": "low",
+      "conditions": {
+        "query": "event.type:incremental_attack_discovery_completed",
+        "threshold": {
+          "aggregate": "avg",
+          "script": "doc['mergedInsightCount'].value / doc['totalInsights'].value",
+          "comparator": "less_than",
+          "value": 0.05
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "ℹ️ Low insight merge rate: {{mergedInsightCount}}/{{totalInsights}} (<5%)\nMay be missing similar attacks\nConsider decreasing similarityThreshold"
+        }
+      ],
+      "schedule": {
+        "interval": "4h"
+      }
+    },
+    {
+      "name": "Incremental AD - Max Rounds Exceeded",
+      "description": "Alert when runs consistently hit maxRounds limit (configuration issue)",
+      "enabled": true,
+      "tags": ["incremental-ad", "configuration", "medium"],
+      "rule_type": "threshold",
+      "severity": "medium",
+      "conditions": {
+        "query": "event.type:incremental_attack_discovery_completed",
+        "threshold": {
+          "aggregate": "count",
+          "filter": {
+            "script": {
+              "source": "doc['totalRounds'].value == doc['maxRounds'].value"
+            }
+          },
+          "comparator": "greater_than",
+          "value": 3,
+          "window": "1h"
+        }
+      },
+      "actions": [
+        {
+          "type": "slack",
+          "message": "⚠️ Incremental AD hitting maxRounds limit\nRounds: {{totalRounds}}\nAlerts: {{totalAlertsProcessed}}\nMode: {{mode}}\nAction: Increase maxRounds or reduce alert query size"
+        }
+      ],
+      "schedule": {
+        "interval": "30m"
+      }
+    }
+  ]
+}
