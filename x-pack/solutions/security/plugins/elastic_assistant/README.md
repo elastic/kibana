@@ -225,12 +225,17 @@ steps:
   # Use API route for full E2E execution until platform gap resolved
 ```
 
-**Platform Gap:**
-- Workflow step handlers receive only `context.contextManager.getScopedEsClient()`
-- Case attachment needs: Cases API, Request context, SavedObjects client
-- **Tracked in**: platform#XXXXX (Add Kibana service dependencies to workflow context)
+**Native Capabilities Available:**
+- ✅ `ai.agent` workflow step - Agent Builder integration (autonomous investigation)
+- ✅ `EntityStoreDataClient` - Dynamic entity risk scoring
+- ✅ Scheduled workflow execution - Built-in (not Task Manager)
+- ✅ ELSER - Deployed globally with automatic fallback
 
-**Current workaround**: Use API route `/alert_investigation/_run` for full E2E execution
+**Integration Status:**
+- Steps 1-3, 6: ✅ Fully functional
+- Steps 4-5: ⚠️ Need Cases API context (use routes until workflow context enriched)
+
+**Current Recommendation**: Use API route `/alert_investigation/_run` for full E2E execution
 
 ### Configuration
 
