@@ -93,11 +93,26 @@ const generateInsights = async ({
   }
 
   // Extract token usage with graceful fallback (multiple formats)
+  // Debug: log the full response structure to find where usage data lives
   const usage = response.usage;
+
+  if (!usage) {
+    // Check if usage is elsewhere in response
+    const responseKeys = Object.keys(response);
+    log.debug(`Response structure: ${JSON.stringify(responseKeys)}`);
+    log.debug(`Full response (first 500 chars): ${JSON.stringify(response).substring(0, 500)}`);
+  }
+
   const inputTokens =
     usage?.input_tokens ?? usage?.prompt_tokens ?? usage?.inputTokens ?? 0;
   const outputTokens =
     usage?.output_tokens ?? usage?.completion_tokens ?? usage?.outputTokens ?? 0;
+
+  if (inputTokens > 0 || outputTokens > 0) {
+    log.info(`Token usage captured: input=${inputTokens}, output=${outputTokens}`);
+  } else {
+    log.warning(`No token usage data found in response.usage`);
+  }
 
   return {
     insights: (toolCall.function.arguments as { insights: AttackDiscovery[] }).insights,
