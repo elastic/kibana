@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { extractAlertFeatures, composeFeatureText, hashFeatureText } from './feature_extraction';
+import { deduplicateWithHybridApproach } from './semantic_dedup_elser';
 
 const DEFAULT_SIMILARITY_THRESHOLD = 0.85;
 
@@ -220,23 +221,14 @@ const EMPTY_RESULT: DeduplicationResult = {
   stats: { totalAlerts: 0, uniqueClusters: 0, duplicatesRemoved: 0, deduplicationRate: 0 },
 };
 
-export const deduplicateAlerts = async ({
-  alerts,
-  esClient: _esClient,
-  logger,
-  similarityThreshold = DEFAULT_SIMILARITY_THRESHOLD,
-}: {
-  alerts: AlertWithId[];
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  similarityThreshold?: number;
-}): Promise<DeduplicationResult> => {
-  if (alerts.length === 0) {
-    return EMPTY_RESULT;
-  }
-
-  const featureMap = buildFeatureMap(alerts);
-
+/**
+ * Jaccard-based deduplication (fallback when ELSER unavailable)
+ */
+const deduplicateWithJaccard = async (
+  alerts: AlertWithId[],
+  featureMap: Map<string, AlertFeatureEntry>,
+  similarityThreshold: number
+): Promise<Map<string, string[]>> => {
   const hashGroups = groupByKey(featureMap, (entry) => entry.hash);
   const ruleHostGroups = groupByKey(
     featureMap,
@@ -251,7 +243,70 @@ export const deduplicateAlerts = async ({
   mergeByHashGroups(hashGroups, uf);
   mergeBySimilarity(ruleHostGroups, featureMap, similarityThreshold, uf);
 
-  const { clusters, leaders } = buildClusters(featureMap, uf);
+  // Build cluster map
+  const clusters = new Map<string, string[]>();
+  for (const alertId of featureMap.keys()) {
+    const root = uf.find(alertId);
+    const members = clusters.get(root) ?? [];
+    members.push(alertId);
+    clusters.set(root, members);
+  }
+
+  return clusters;
+};
+
+export const deduplicateAlerts = async ({
+  alerts,
+  esClient,
+  logger,
+  similarityThreshold = DEFAULT_SIMILARITY_THRESHOLD,
+}: {
+  alerts: AlertWithId[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  similarityThreshold?: number;
+}): Promise<DeduplicationResult> => {
+  if (alerts.length === 0) {
+    return EMPTY_RESULT;
+  }
+
+  const featureMap = buildFeatureMap(alerts);
+
+  // Try ELSER first, fallback to Jaccard if unavailable
+  const { clusters: clusterMap, method } = await deduplicateWithHybridApproach(
+    alerts,
+    esClient,
+    logger,
+    similarityThreshold,
+    async (alertsForJaccard, threshold) =>
+      deduplicateWithJaccard(alertsForJaccard, featureMap, threshold)
+  );
+
+  // Convert cluster map to cluster objects with leaders
+  const clusters: DedupCluster[] = [];
+  const leaders: AlertWithId[] = [];
+
+  for (const [root, memberIds] of clusterMap) {
+    let bestLeaderId = memberIds[0];
+    const firstEntry = featureMap.get(memberIds[0]);
+    let bestRiskScore = firstEntry?.features.riskScore ?? 0;
+
+    for (const memberId of memberIds) {
+      const entry = featureMap.get(memberId);
+      const riskScore = entry?.features.riskScore ?? 0;
+      if (riskScore > bestRiskScore) {
+        bestRiskScore = riskScore;
+        bestLeaderId = memberId;
+      }
+    }
+
+    clusters.push({ leaderId: bestLeaderId, leaderRiskScore: bestRiskScore, memberIds });
+
+    const leaderEntry = featureMap.get(bestLeaderId);
+    if (leaderEntry) {
+      leaders.push(leaderEntry.alert);
+    }
+  }
 
   const duplicatesRemoved = alerts.length - clusters.length;
   const deduplicationRate = alerts.length > 0 ? duplicatesRemoved / alerts.length : 0;

@@ -15,6 +15,7 @@ import { PLUGIN_ID } from '../../../common/constants';
 import { deduplicateAlerts } from '../../lib/alert_investigation/deduplication';
 import { extractEntitiesFromAlerts } from '../../lib/alert_investigation/entity_extraction';
 import { DEFAULT_PIPELINE_CONFIG } from '../../lib/alert_investigation/types';
+import { enrichAlertsWithEntityRisk } from '../../lib/alert_investigation/risk_scoring';
 
 const PipelineRunRequestBody = z.object({
   dry_run: z.boolean().optional().default(false),
@@ -68,6 +69,7 @@ export const registerPipelineRoutes = (
         }
 
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const securitySolution = await context.securitySolution;
         const {
           max_alerts: maxAlerts,
           lookback_minutes: lookbackMinutes,
@@ -118,8 +120,24 @@ export const registerPipelineRoutes = (
           });
         }
 
-        const dedupResult = await deduplicateAlerts({
+        // Enrich alerts with Entity Store risk scores (dynamic prioritization)
+        const entityStoreClient = securitySolution?.getEntityStoreDataClient?.() ?? null;
+        const enrichedAlerts = await enrichAlertsWithEntityRisk({
           alerts,
+          entityStoreClient,
+          logger,
+        });
+
+        // Re-sort by adjusted risk (entity-aware, not just static rule risk)
+        enrichedAlerts.sort((a, b) => b.adjustedRiskScore - a.adjustedRiskScore);
+
+        logger.info(
+          `Prioritized ${enrichedAlerts.length} alerts by entity risk. ` +
+            `${enrichedAlerts.filter((a) => a.entityRiskScores.length > 0).length} alerts have entity context.`
+        );
+
+        const dedupResult = await deduplicateAlerts({
+          alerts: enrichedAlerts,
           esClient,
           logger,
           similarityThreshold: threshold,
@@ -130,6 +148,10 @@ export const registerPipelineRoutes = (
           config: DEFAULT_PIPELINE_CONFIG.entityExtraction,
           logger,
         });
+
+        const alertsWithEntityContext = enrichedAlerts.filter(
+          (a) => a.entityRiskScores.length > 0
+        ).length;
 
         const result = {
           status: dryRun ? 'dry_run_complete' : 'complete',
@@ -146,6 +168,14 @@ export const registerPipelineRoutes = (
             leaderId: c.leaderId,
             memberCount: c.memberIds.length,
           })),
+          // Entity risk enrichment stats
+          entityRiskEnrichment: {
+            enabled: entityStoreClient !== null,
+            alertsEnriched: alertsWithEntityContext,
+            avgAdjustedRisk:
+              enrichedAlerts.reduce((sum, a) => sum + a.adjustedRiskScore, 0) /
+              enrichedAlerts.length,
+          },
         };
 
         return response.ok({ body: result });
