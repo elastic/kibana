@@ -81,10 +81,43 @@ export const invokeIncrementalAttackDiscovery = async ({
 }> => {
   logger.debug(() => `Invoking incremental attack discovery in ${mode} mode`);
 
-  // Fetch all alerts matching the query
-  // TODO: In production, this should be replaced with actual alert fetching logic
-  // For now, we'll use a placeholder that delegates to the existing implementation
-  const alerts: Alert[] = []; // Placeholder - will be populated by alert fetching logic
+  // Fetch all alerts matching the query from Elasticsearch
+  const alertsResponse = await esClient.search({
+    index: alertsIndexPattern,
+    size,
+    query: {
+      bool: {
+        must: [
+          ...(start || end
+            ? [
+                {
+                  range: {
+                    '@timestamp': {
+                      ...(start ? { gte: start } : {}),
+                      ...(end ? { lte: end } : {}),
+                    },
+                  },
+                },
+              ]
+            : []),
+          ...(filter ? [filter] : []),
+        ],
+      },
+    },
+    sort: [{ '@timestamp': 'desc' }],
+    _source: true,
+  });
+
+  const alerts: Alert[] = alertsResponse.hits.hits.map(hit => ({
+    id: hit._id as string,
+    content: JSON.stringify(hit._source),
+    timestamp: (hit._source as any)['@timestamp'] as string,
+  }));
+
+  logger.debug(() => `Fetched ${alerts.length} alerts for incremental processing`);
+
+  // Track anonymized alerts across all rounds
+  const allAnonymizedAlerts: Document[] = [];
 
   // Generate insights using the existing graph (this is the callback for each round)
   const generateInsights = async (
@@ -93,7 +126,7 @@ export const invokeIncrementalAttackDiscovery = async ({
   ): Promise<AttackDiscovery[]> => {
     // For each round, we call the existing attack discovery graph
     // with the subset of alerts for this round
-    const { attackDiscoveries } = await invokeAttackDiscoveryGraph({
+    const { anonymizedAlerts, attackDiscoveries } = await invokeAttackDiscoveryGraph({
       actionsClient,
       alertsIndexPattern,
       anonymizationFields,
@@ -111,6 +144,9 @@ export const invokeIncrementalAttackDiscovery = async ({
       size: roundAlerts.length, // Process only the alerts in this round
       start,
     });
+
+    // Collect anonymized alerts from this round
+    allAnonymizedAlerts.push(...anonymizedAlerts);
 
     return attackDiscoveries ?? [];
   };
@@ -133,7 +169,7 @@ export const invokeIncrementalAttackDiscovery = async ({
 
   // Return in the format expected by the existing code
   return {
-    anonymizedAlerts: [], // TODO: Collect from all rounds
+    anonymizedAlerts: allAnonymizedAlerts,
     attackDiscoveries: result.insights,
   };
 };

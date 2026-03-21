@@ -66,8 +66,19 @@ export const generateAndUpdateAttackDiscoveries = async ({
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
-  const { alertsIndexPattern, apiConfig, connectorName, end, filter, replacements, size, start } =
-    config;
+  const {
+    alertsIndexPattern,
+    apiConfig,
+    connectorName,
+    end,
+    filter,
+    replacements,
+    size,
+    start,
+    incrementalMode,
+    sessionId,
+    incrementalConfig,
+  } = config;
 
   let latestReplacements: Replacements = { ...replacements };
 
@@ -82,6 +93,9 @@ export const generateAndUpdateAttackDiscoveries = async ({
       esClient,
       logger,
       savedObjectsClient,
+      incrementalMode,
+      sessionId,
+      incrementalConfig,
     });
     latestReplacements = generatedReplacements;
 

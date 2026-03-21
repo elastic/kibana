@@ -12,6 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { invokeAttackDiscoveryGraph } from '../public/post/helpers/invoke_attack_discovery_graph';
+import { invokeIncrementalAttackDiscovery } from '../public/post/helpers/invoke_incremental_attack_discovery';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
@@ -23,6 +24,14 @@ export interface GenerateAttackDiscoveriesParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
+  incrementalMode?: 'delta' | 'progressive';
+  sessionId?: string;
+  incrementalConfig?: {
+    alertsPerRound?: number;
+    maxRounds?: number;
+    mergeStrategy?: 'rule-based';
+    similarityThreshold?: number;
+  };
 }
 
 export const generateAttackDiscoveries = async ({
@@ -31,6 +40,9 @@ export const generateAttackDiscoveries = async ({
   esClient,
   logger,
   savedObjectsClient,
+  incrementalMode,
+  sessionId,
+  incrementalConfig,
 }: GenerateAttackDiscoveriesParams) => {
   // get parameters from the request body
   const alertsIndexPattern = decodeURIComponent(config.alertsIndexPattern);
@@ -52,6 +64,36 @@ export const generateAttackDiscoveries = async ({
     latestReplacements = { ...latestReplacements, ...newReplacements };
   };
 
+  // Branch based on incremental mode
+  if (incrementalMode === 'delta' || incrementalMode === 'progressive') {
+    logger.info(`Using incremental attack discovery in ${incrementalMode} mode`);
+
+    const { anonymizedAlerts, attackDiscoveries } = await invokeIncrementalAttackDiscovery({
+      actionsClient,
+      alertsIndexPattern,
+      anonymizationFields,
+      apiConfig,
+      connectorTimeout: CONNECTOR_TIMEOUT,
+      end,
+      esClient,
+      filter,
+      incrementalConfig: incrementalConfig ?? {},
+      langSmithProject,
+      langSmithApiKey,
+      latestReplacements,
+      logger,
+      mode: incrementalMode,
+      onNewReplacements,
+      savedObjectsClient,
+      sessionId: sessionId ?? `ad-session-${Date.now()}`,
+      size,
+      start,
+    });
+
+    return { anonymizedAlerts, attackDiscoveries, replacements: latestReplacements };
+  }
+
+  // Standard (non-incremental) mode
   const { anonymizedAlerts, attackDiscoveries } = await invokeAttackDiscoveryGraph({
     actionsClient,
     alertsIndexPattern,
