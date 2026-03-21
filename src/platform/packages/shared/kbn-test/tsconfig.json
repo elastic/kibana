@@ -19,6 +19,7 @@
     "target/**/*",
   ],
   "kbn_references": [
+    "@kbn/kbn-client",
     "@kbn/dev-utils",
     "@kbn/std",
     "@kbn/tooling-log",
