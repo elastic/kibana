@@ -195,6 +195,18 @@ export class KbnClientSavedObjects {
     return data;
   }
 
+  private buildCreatePath(options: Pick<IndexOptions<any>, 'space' | 'id' | 'type'>) {
+    const { space, id, type } = options;
+    if (space) {
+      return id
+        ? uriencode`/s/${space}/internal/ftr/kbn_client_so/${type}/${id}`
+        : uriencode`/s/${space}/internal/ftr/kbn_client_so/${type}`;
+    }
+    return id
+      ? uriencode`/internal/ftr/kbn_client_so/${type}/${id}`
+      : uriencode`/internal/ftr/kbn_client_so/${type}`;
+  }
+
   /**
    * Create a saved object
    */
@@ -203,13 +215,7 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'create saved object',
-      path: options.space
-        ? options.id
-          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
-          : uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}`
-        : options.id
-        ? uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`
-        : uriencode`/internal/ftr/kbn_client_so/${options.type}`,
+      path: this.buildCreatePath(options),
       query: {
         overwrite: options.overwrite,
       },
