@@ -153,36 +153,11 @@ export const runAttackDiscovery = async ({
             return res.insights;
           },
           mergeFn: async ([a, b]: [AttackDiscovery[], AttackDiscovery[]]) => {
-            // Semantic merge using LLM to combine insights intelligently
-            log.info(`Merging ${a.length} and ${b.length} insights semantically`);
-
-            const mergePrompt = `You are merging attack discovery insights from two batches. Combine these insights intelligently:
-- Deduplicate similar attacks
-- Merge related insights into coherent narratives
-- Preserve all unique alert IDs
-- Maintain comprehensive coverage
-
-Batch A insights:
-${JSON.stringify(a, null, 2)}
-
-Batch B insights:
-${JSON.stringify(b, null, 2)}
-
-Return a merged list of attack discoveries that tells a coherent story while preserving all important details.`;
-
-            const mergeResponse = await generateInsights({
-              inferenceClient,
-              log,
-              prompt: mergePrompt,
-              alerts: [], // No alerts needed for merge operation
-            });
-
-            if (mergeResponse.usage) {
-              inputTokens += mergeResponse.usage.inputTokens;
-              outputTokens += mergeResponse.usage.outputTokens;
-            }
-
-            return mergeResponse.insights;
+            // Simple concatenation - Attack Discovery insights are independent observations
+            // Semantic merge would require additional LLM calls (4x merge rounds = cost/latency)
+            // For AD use case, preserving all discoveries is more important than narrative coherence
+            log.info(`Merging ${a.length} and ${b.length} insights via concatenation`);
+            return [...a, ...b];
           },
           maxConcurrentBatches: 3,
           onProgress: (completed: number, total: number) => {
