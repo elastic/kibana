@@ -64,7 +64,7 @@ export const injectESQLQueryIntoLensLayers = (
 
   const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
-  // Update each layer with the new query and index pattern if needed
+  // Update each layer with the new query, index pattern, and timeField
   if (datasourceState?.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {
       if (!isEqual(layer.query, query)) {
@@ -73,8 +73,15 @@ export const injectESQLQueryIntoLensLayers = (
         if (index) {
           layer.index = index;
         }
+        if (indexPatternRef) {
+          layer.timeField = indexPatternRef.timeField;
+        }
       }
     });
+  }
+
+  if (indexPatternRef && datasourceHasIndexPatternRefs(datasourceState)) {
+    datasourceState.indexPatternRefs = [indexPatternRef];
   }
   return {
     ...attributes,

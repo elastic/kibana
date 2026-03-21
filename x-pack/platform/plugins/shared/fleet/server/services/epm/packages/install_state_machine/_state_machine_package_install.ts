@@ -87,7 +87,6 @@ export interface InstallContext extends StateContext<StateNames> {
   // output values
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
-  isDependency?: boolean;
   skipDependencyCheck?: boolean;
 }
 /**
