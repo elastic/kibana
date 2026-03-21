@@ -81,59 +81,156 @@ Unprocessed Alerts
 - Expected +15-30% improvement in dedup rate
 - Requires ML node with ELSER deployed
 
-### Pipeline stages
+### Execution Models
 
-| Stage | Module | Description |
-|-------|--------|-------------|
-| **Fetch** | `orchestrator.ts` | Queries `.alerts-security.alerts-default` for open/acknowledged alerts within a lookback window, excluding building blocks and already-processed alerts |
-| **Deduplicate** | `deduplication/` | Groups alerts by exact feature-text hash and Jaccard token similarity (Phase 1); ELSER semantic embeddings planned for Phase 2 |
-| **Extract entities** | `entity_extraction/` | Maps 30+ ECS fields to 13 observable types (`ipv4`, `ipv6`, `hostname`, `user`, `process`, `file_hash`, `file_path`, `url`, `domain`, `email`, `agent_id`, `registry`, `service`) with per-alert deduplication |
-| **Match to cases** | `case_matching/` | Scores entity overlap between alert entities and existing case observables using configurable weights and optional temporal decay |
-| **Attach & create** | `orchestrator.ts` | Attaches alerts to matched cases or creates new cases for unmatched alerts; adds deduplicated observables via `bulkAddObservables` |
-| **Incremental AD** | `incremental/`, `case_integration/` | Computes delta alerts per case using a tracker index with optimistic concurrency control, then triggers scoped Attack Discovery |
-| **Tag processed** | `orchestrator.ts` | Marks all fetched alerts with `kibana.alert.pipeline.processed` to prevent re-processing |
+The pipeline supports **two execution paths**:
 
-### API routes
+#### 1. Direct API Route (Recommended for Phase 1)
+- **Route**: `POST /internal/elastic_assistant/alert_investigation/_run`
+- **Implements**: All 6 stages (fetch → dedup → extract → match → AD → tag)
+- **Status**: ✅ **Fully functional** (ready to use)
+- **Use when**: Immediate production use, full pipeline execution
 
-**Run pipeline (dry-run or full)**
+#### 2. Elastic Workflows (Future)
+- **Workflow ID**: `security.alertInvestigationPipeline`
+- **Steps**: 6 registered workflow steps (can be composed in Workflows UI)
+- **Status**: ⚠️ **Partial** - Steps 1-3 functional, Steps 4-6 require Kibana context not available in workflow handlers
+- **Limitation**: Workflow steps don't have access to Cases API, Request context needed for case attachment
+- **Roadmap**: Tracked in [platform#XXXXX](link) - Add Kibana services to workflow context
+- **Use when**: Workflow context platform gap is resolved
 
-```
-POST /internal/elastic_assistant/attack_discovery/pipeline/_run
+### Pipeline Stages
+
+| Stage | Module | Status | Description |
+|-------|--------|--------|-------------|
+| **1. Fetch** | `workflow_steps/` | ✅ Full | Queries `.alerts-security.alerts-default` for unprocessed alerts |
+| **2. Deduplicate** | `deduplication/` | ✅ Full | Jaccard similarity clustering (Phase 1); ELSER planned for [#16415](link) |
+| **3. Extract entities** | `entity_extraction/` | ✅ Full | Maps 30+ ECS fields → 13 observable types with validation |
+| **4. Match to cases** | `case_matching/` | ✅ Route / ⚠️ Workflow | Entity overlap scoring with inverted index (O(n×k) optimization) |
+| **5. Incremental AD** | `case_integration/` | ✅ Route / ⚠️ Workflow | Delta-based Attack Discovery per affected case |
+| **6. Tag processed** | `workflow_steps/` | ✅ Full | Marks alerts to prevent re-processing |
+
+**Status Legend:**
+- ✅ **Full** = Works in both routes and workflows
+- ✅ **Route** = Works in API routes
+- ⚠️ **Workflow** = Scaffold only (needs platform context)
+
+### API Routes (Recommended Path)
+
+#### Run Complete Pipeline
+
+```bash
+POST /internal/elastic_assistant/alert_investigation/_run
 ```
 
 Body:
 ```json
 {
-  "dry_run": true,
+  "dry_run": false,
   "max_alerts": 500,
   "lookback_minutes": 15,
   "similarity_threshold": 0.85
 }
 ```
 
-**Trigger incremental AD for a case**
-
+**Response:**
+```json
+{
+  "status": "complete",
+  "alertsProcessed": 47,
+  "alertsDeduplicated": 12,
+  "deduplicationRate": 0.26,
+  "leaderAlerts": 35,
+  "entitiesExtracted": 284,
+  "entityBreakdown": {
+    "ipv4": 89,
+    "hostname": 47,
+    "user": 35,
+    "process": 58,
+    "file_hash": 23,
+    "url": 12,
+    "domain": 20
+  },
+  "clusters": [
+    { "leaderId": "alert-1", "memberCount": 3 },
+    { "leaderId": "alert-5", "memberCount": 2 }
+  ]
+}
 ```
-POST /internal/elastic_assistant/attack_discovery/pipeline/case/{caseId}/_trigger_ad
+
+#### Trigger Incremental AD for Case
+
+```bash
+POST /internal/elastic_assistant/alert_investigation/case/{caseId}/_trigger_ad
 ```
 
 Body:
 ```json
 {
-  "alert_ids": ["alert-id-1", "alert-id-2"]
+  "alert_ids": ["alert-id-1", "alert-id-2", "alert-id-3"]
 }
 ```
 
-### Workflow steps
+**Response:**
+```json
+{
+  "caseId": "case-123",
+  "triggered": true,
+  "deltaAlerts": 3,
+  "totalAlerts": 15,
+  "previouslyProcessed": 12
+}
+```
 
-The pipeline registers 4 server-side workflow step definitions (via `workflowsExtensions` optional plugin dependency):
+### Elastic Workflows Integration
 
-| Step ID | Purpose |
-|---------|---------|
-| `security.fetchUnprocessedAlerts` | Fetch unprocessed alerts within a lookback window |
-| `security.deduplicateAlerts` | Deduplicate alerts by similarity |
-| `security.extractEntities` | Extract observable entities from alert ECS fields |
-| `security.tagProcessedAlerts` | Tag alerts as processed to prevent re-processing |
+The pipeline registers **6 workflow step definitions** that can be composed in the Elastic Workflows UI:
+
+| Step ID | Status | Description | Input | Output |
+|---------|--------|-------------|-------|--------|
+| `security.fetchUnprocessedAlerts` | ✅ Full | Fetch unprocessed alerts | `index_pattern`, `max_alerts`, `lookback_minutes` | `alert_ids[]`, `total_alerts` |
+| `security.deduplicateAlerts` | ✅ Full | Deduplicate by Jaccard similarity | `alert_ids[]`, `threshold` | `leader_alert_ids[]`, `dedup_rate` |
+| `security.extractEntities` | ✅ Full | Extract & validate entities | `alert_ids[]` | `entities[]`, `total_entities` |
+| `security.matchAndAttachAlertsToCases` | ⚠️ Scaffold | Match to cases (needs Cases API) | `entities[]`, `leader_alert_ids[]` | `affected_case_ids[]` |
+| `security.triggerIncrementalAd` | ⚠️ Scaffold | Trigger AD (needs AD function) | `affected_case_ids[]` | `ad_triggered`, `ad_results[]` |
+| `security.tagProcessedAlerts` | ✅ Full | Tag alerts as processed | `alert_ids[]` | `tagged_count` |
+
+**Workflow Execution:**
+
+```yaml
+# Example workflow definition (when platform gap resolved)
+name: Alert Investigation Pipeline
+trigger:
+  schedule: "*/15 * * * *"  # Every 15 minutes
+
+steps:
+  - id: fetch
+    type: security.fetchUnprocessedAlerts
+    config:
+      max_alerts: 500
+      lookback_minutes: 15
+
+  - id: dedup
+    type: security.deduplicateAlerts
+    config:
+      alert_ids: "${steps.fetch.output.alert_ids}"
+      similarity_threshold: 0.85
+
+  - id: extract
+    type: security.extractEntities
+    config:
+      alert_ids: "${steps.dedup.output.leader_alert_ids}"
+
+  # Steps 4-6 require Cases API context (not yet available in workflows)
+  # Use API route for full E2E execution until platform gap resolved
+```
+
+**Platform Gap:**
+- Workflow step handlers receive only `context.contextManager.getScopedEsClient()`
+- Case attachment needs: Cases API, Request context, SavedObjects client
+- **Tracked in**: platform#XXXXX (Add Kibana service dependencies to workflow context)
+
+**Current workaround**: Use API route `/alert_investigation/_run` for full E2E execution
 
 ### Configuration
 
