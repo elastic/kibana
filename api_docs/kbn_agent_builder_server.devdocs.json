@@ -679,7 +679,7 @@
         "label": "AgentEventEmitter",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 166,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -703,7 +703,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 167,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -800,7 +800,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-                "lineNumber": 164,
+                "lineNumber": 169,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
@@ -818,7 +818,7 @@
         "label": "AgentHandlerContext",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 68,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -837,7 +837,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -852,7 +852,7 @@
               "\nId of the space associated with the request"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -870,7 +870,7 @@
               "IScopedClusterClient"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -889,7 +889,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 83,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -913,7 +913,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -937,7 +937,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -961,7 +961,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 96,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -985,7 +985,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1003,7 +1003,7 @@
               "AttachmentsService"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1021,7 +1021,25 @@
               "SkillsService"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentHandlerContext.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "\nPlugins service to resolve plugin-contributed skill IDs during execution."
+            ],
+            "signature": [
+              "PluginsService"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1039,7 +1057,7 @@
               "ToolManager"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 113,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1063,7 +1081,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 117,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1081,7 +1099,7 @@
               "WritableSkillsStore"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 121,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1099,7 +1117,7 @@
               "AttachmentStateManager"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 126,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1117,7 +1135,7 @@
               "PromptManager"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 130,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1135,7 +1153,7 @@
               "ConversationStateManager"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 134,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1159,7 +1177,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 138,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1183,7 +1201,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 142,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1207,7 +1225,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 146,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1225,7 +1243,7 @@
               "IFileStore"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 150,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1249,7 +1267,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 154,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1265,7 +1283,7 @@
         "label": "AgentHandlerParams",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1283,7 +1301,7 @@
               "AgentParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1298,7 +1316,7 @@
               "ID of this run"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1316,7 +1334,7 @@
               "AbortSignal | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1332,7 +1350,7 @@
         "label": "AgentHandlerReturn",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 53,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1350,7 +1368,7 @@
               "AgentResponse"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1797,7 +1815,7 @@
           "\nExperimental features configuration for agent builder."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 58,
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1812,7 +1830,7 @@
               "Whether the filestore feature is enabled"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1827,7 +1845,7 @@
               "Whether the skills feature is enabled"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3966,7 +3984,7 @@
           "<TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-        "lineNumber": 22,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3979,7 +3997,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 26,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4001,7 +4019,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 27,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4017,7 +4035,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 28,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4033,7 +4051,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 29,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4049,7 +4067,7 @@
               "TConfig"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 30,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4558,7 +4576,51 @@
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolListParams.types",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [
+              "\nFilter tools by type. Only tools matching one of the specified types will be returned."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolType",
+                "text": "ToolType"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolListParams.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [
+              "\nFilter tools by tags. Only tools that have at least one of the specified tags will be returned."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -4988,7 +5050,7 @@
           "\nRegistry for managing tools within an agent execution context.\n\nProvides methods for CRUD operations on tools and tool execution."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-        "lineNumber": 42,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5006,7 +5068,7 @@
               "(toolId: string) => Promise<boolean>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 48,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5022,7 +5084,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 51,
+                "lineNumber": 55,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5060,7 +5122,7 @@
               ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 52,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5076,7 +5138,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 56,
+                "lineNumber": 60,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5122,7 +5184,7 @@
               ", {}, ZodObject<any>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 57,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5145,7 +5207,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 60,
+                "lineNumber": 64,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5191,7 +5253,7 @@
               ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 61,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5214,7 +5276,7 @@
                   "<{}>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 64,
+                "lineNumber": 68,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5260,7 +5322,7 @@
               ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 65,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5276,7 +5338,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 68,
+                "lineNumber": 72,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5300,7 +5362,7 @@
                   "<{}>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 68,
+                "lineNumber": 72,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5322,7 +5384,7 @@
               "(toolId: string) => Promise<boolean>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 69,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5338,7 +5400,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 72,
+                "lineNumber": 76,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5376,7 +5438,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 73,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5399,7 +5461,7 @@
                   "<TParams>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-                "lineNumber": 77,
+                "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5604,7 +5666,7 @@
           "<TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-        "lineNumber": 33,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5620,7 +5682,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 37,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5636,7 +5698,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 38,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5652,7 +5714,7 @@
               "Partial<TConfig> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
-            "lineNumber": 39,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5871,7 +5933,7 @@
           ") => void"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 161,
+        "lineNumber": 166,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5968,7 +6030,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 164,
+            "lineNumber": 169,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false
@@ -6011,7 +6073,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6034,7 +6096,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6056,7 +6118,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

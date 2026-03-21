@@ -12525,6 +12525,10 @@
               "path": "x-pack/platform/plugins/shared/osquery/public/results/unified_results_table.tsx"
             },
             {
+              "plugin": "osquery",
+              "path": "x-pack/platform/plugins/shared/osquery/public/action_results/unified_action_results_summary.tsx"
+            },
+            {
               "plugin": "expressionPartitionVis",
               "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },

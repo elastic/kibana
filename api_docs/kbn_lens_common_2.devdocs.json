@@ -28,7 +28,7 @@
         "label": "LegacyLensStateApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 69,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -55,7 +55,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -577,7 +577,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -780,7 +780,7 @@
           "[] | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -833,7 +833,7 @@
             "section": "def-common.LensApiState",
             "text": "LensApiState"
           },
-          " | undefined; }"
+          " | undefined; savedObjectId?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
         "lineNumber": 52,
@@ -1339,7 +1339,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 118,
+        "lineNumber": 119,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1551,7 +1551,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
