@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/llm-batch-processing",
   "owner": "@elastic/security-generative-ai",
   "group": "platform",
