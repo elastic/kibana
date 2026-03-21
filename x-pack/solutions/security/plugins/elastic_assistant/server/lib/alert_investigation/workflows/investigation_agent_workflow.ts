@@ -99,33 +99,21 @@ export const investigationAgentWorkflowDefinition = {
       },
       input: {
         // Structured prompt with case context
-        message: `
-You are a Security Investigation Agent analyzing case: "${input.case_title}"
-
-## New Alerts to Investigate
-${gather_context.output.hits.length} alerts with IDs: ${input.alert_ids.join(', ')}
-
-## Alert Details
-\${JSON.stringify(gather_context.output.hits, null, 2)}
-
-## Your Task
-1. Analyze these alerts for attack patterns
-2. Identify MITRE ATT&CK techniques and tactics
-3. Determine if this is part of a larger campaign
-4. Generate Attack Discovery summary
-5. Recommend response actions (contain, investigate further, escalate)
-
-## Output Format
-Provide structured JSON with:
-{
-  "attack_pattern": "Brief description of attack pattern detected",
-  "mitre_techniques": ["T1078", "T1021"],
-  "severity": "low" | "medium" | "high" | "critical",
-  "campaign_indicators": ["Indicator 1", "Indicator 2"],
-  "attack_discovery_summary": "Detailed summary for analysts",
-  "recommended_actions": ["Action 1", "Action 2"]
-}
-        `,
+        // Note: Template strings use ${} for workflow variable interpolation
+        message:
+          'You are a Security Investigation Agent analyzing case: "${input.case_title}"\n\n' +
+          '## New Alerts to Investigate\n' +
+          '${gather_context.output.hits.length} alerts\n\n' +
+          '## Alert Details\n' +
+          '${JSON.stringify(gather_context.output.hits, null, 2)}\n\n' +
+          '## Your Task\n' +
+          '1. Analyze these alerts for attack patterns\n' +
+          '2. Identify MITRE ATT&CK techniques\n' +
+          '3. Determine if this is part of a larger campaign\n' +
+          '4. Generate Attack Discovery summary\n' +
+          '5. Recommend response actions\n\n' +
+          '## Output Format\n' +
+          'Provide structured JSON matching the schema.',
         // Schema for structured output (type-safe agent response!)
         schema: {
           type: 'object',
