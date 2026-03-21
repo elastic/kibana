@@ -7,10 +7,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { useDispatch } from 'react-redux';
-import { euid } from '@kbn/entity-store/common';
 import type { ESBoolQuery, ESQuery } from '../../../../../common/typed_json';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
@@ -182,7 +181,8 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
 
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
-  const identityFieldsForQuery = euid.getEntityIdentifiersFromDocument(
+  const euidApi = useEntityStoreEuidApi();
+  const identityFieldsForQuery = euidApi?.euid?.getEntityIdentifiersFromDocument(
     storeEntityType ?? 'generic',
     entityRecord
   );

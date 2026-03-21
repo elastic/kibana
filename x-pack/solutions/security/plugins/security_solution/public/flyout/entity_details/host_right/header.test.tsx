@@ -16,7 +16,7 @@ const defaultLastSeen = {
 };
 
 const mockProps = {
-  identityFields: { 'host.name': 'test' },
+  hostName: 'test',
   scopeId: 'test-scope-id',
   lastSeen: defaultLastSeen,
 };
@@ -75,5 +75,25 @@ describe('HostPanelHeader', () => {
     expect(getByTestId('host-panel-header-lastSeen-loading')).toBeInTheDocument();
     expect(getByTestId('host-panel-header-observed-badge-loading')).toBeInTheDocument();
     expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders entity id when provided', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} entityId="host-entity-uuid-123" />
+      </TestProviders>
+    );
+
+    expect(getByTestId('host-panel-header-entity-id')).toHaveTextContent('host-entity-uuid-123');
+  });
+
+  it('does not render entity id when omitted', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('host-panel-header-entity-id')).not.toBeInTheDocument();
   });
 });

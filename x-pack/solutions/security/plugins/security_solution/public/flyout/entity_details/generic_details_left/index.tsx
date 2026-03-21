@@ -88,12 +88,28 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {
+    const fields = identityFields ?? {};
+    const field = Object.keys(fields)[0] ?? 'host.name';
+    const value =
+      fields['host.name'] ?? fields['user.name'] ?? Object.values(fields)[0] ?? '';
+    const entityIdForInsights =
+      fields['host.entity.id'] ?? fields['user.entity.id'] ?? fields['service.entity.id'] ?? '';
+    const entityType: 'host' | 'user' | 'service' =
+      field === 'user.name' || fields['user.entity.id'] !== undefined
+        ? 'user'
+        : String(field).startsWith('service.')
+          ? 'service'
+          : 'host';
+
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
         ? [
             getInsightsInputTab({
-              identityFields: identityFields ?? {},
+              field,
+              value,
+              entityId: entityIdForInsights,
               scopeId,
+              entityType,
             }),
           ]
         : [];

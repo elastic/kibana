@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { IdentityFields } from '../../shared/utils';
 import { getField, getUserIdentityFields, getHostIdentityFields } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
@@ -73,7 +73,10 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                identityFields={userEntityIdentifiers}
+                userName={
+                  userEntityIdentifiers['user.name'] ?? Object.values(userEntityIdentifiers)[0]
+                }
+                entityId={userEntityIdentifiers?.['entity.id']}
                 timestamp={timestamp}
                 scopeId={scopeId}
               />
@@ -95,6 +98,7 @@ export const EntitiesDetails: React.FC = () => {
                 hostName={
                   hostEntityIdentifiers['host.name'] ?? Object.values(hostEntityIdentifiers)[0]
                 }
+                entityId={hostEntityIdentifiers?.['entity.id']}
                 timestamp={timestamp}
                 scopeId={scopeId}
                 hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}

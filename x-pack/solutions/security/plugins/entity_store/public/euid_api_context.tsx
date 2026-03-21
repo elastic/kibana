@@ -7,7 +7,10 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { NonEcsTimelineDataRow } from '../common/domain/euid/non_ecs_timeline_data';
 import type { EntityType, IdentitySourceFields } from '../common/constants';
+
+export type { NonEcsTimelineDataRow };
 
 export interface EntityStoreEuidApi {
   euid: {
@@ -16,6 +19,10 @@ export interface EntityStoreEuidApi {
       entityType: EntityType,
       doc: unknown
     ) => Record<string, string> | undefined;
+    getEuidFromTimelineNonEcsData: (
+      entityType: EntityType,
+      rows: readonly NonEcsTimelineDataRow[] | undefined
+    ) => string | undefined;
     getEuidPainlessEvaluation: (entityType: EntityType) => string;
     getEuidPainlessRuntimeMapping: (entityType: EntityType) => {
       type: 'keyword';

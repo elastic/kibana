@@ -15,6 +15,7 @@
 import { z } from '@kbn/zod/v4';
 
 import { getEuidFromObject, getEntityIdentifiersFromDocument } from './domain/euid/memory';
+import { getEuidFromTimelineNonEcsData } from './domain/euid/non_ecs_timeline_data';
 import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './domain/euid/painless';
 import {
   getEuidDslFilterBasedOnDocument,
@@ -36,11 +37,13 @@ export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
  * import { euid, type EntityType } from '@kbn/entity-store/common';
  * euid.getEuidFromObject('host', doc);
  * euid.getEntityIdentifiersFromDocument('host', doc);
+ * euid.getEuidFromTimelineNonEcsData('host', timelineRowData);
  * euid.getEuidDslFilterBasedOnDocument('host', identifiers);
  */
 export const euid = {
   getEuidFromObject,
   getEntityIdentifiersFromDocument,
+  getEuidFromTimelineNonEcsData,
   getEuidPainlessEvaluation,
   getEuidPainlessRuntimeMapping,
   getEuidDslFilterBasedOnDocument,
@@ -101,4 +104,5 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
 export type { IdentitySourceFields } from './domain/euid/identity_fields';
+export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
 export type { Entity } from './domain/definitions/entity.gen';

@@ -21,8 +21,6 @@ import { isActiveTimeline } from '../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../shared/hooks/use_entity_from_store';
 
 export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
@@ -32,8 +30,9 @@ export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'>
 };
 
 export const useObservedUser = (
-  identityFields: Record<string, string>,
-  scopeId: string
+  userName: string,
+  scopeId: string,
+  entityId?: string
 ): ObservedUserResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
@@ -42,7 +41,7 @@ export const useObservedUser = (
   const isActiveTimelines = isActiveTimeline(scopeId);
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -52,18 +51,11 @@ export const useObservedUser = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const storeEntityId = identityFields['entity.id'];
   const entityFromStore = useEntityFromStore({
-    entityId: storeEntityId,
-    identityFields,
+    entityId,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-
-  const userName = useMemo(
-    () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
-    [identityFields]
-  );
 
   const useEntityStoreData =
     entityStoreV2Enabled && (entityFromStore.entityRecord ?? entityFromStore.entity);

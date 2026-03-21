@@ -29,7 +29,6 @@ import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-postu
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
@@ -79,7 +78,6 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import type { IdentityFields } from '../../shared/utils';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
@@ -95,10 +93,8 @@ const UserOverviewManage = manageQuery(UserOverview);
 const RelatedHostsManage = manageQuery(InspectButtonContainer);
 
 export interface UserDetailsProps {
-  /* 
-  IdentityFields - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
-  */
-  identityFields: IdentityFields;
+  userName: string;
+  entityId?: string;
   /**
    * timestamp of alert or event
    */
@@ -118,18 +114,12 @@ export interface UserDetailsProps {
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
 export const UserDetails: React.FC<UserDetailsProps> = ({
-  identityFields,
+  userName,
+  entityId,
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
 }) => {
-  // Get the primary field value (first key in priority order, following EUID logic)
-  const primaryField = Object.keys(identityFields)[0] || 'user.name';
-  const userName = identityFields[primaryField] || '';
-
-  // For filtering, prefer user.name if available, otherwise use the primary field
-  const filterField = 'user.name' in identityFields ? 'user.name' : primaryField;
-  const filterValue = identityFields[filterField] || userName;
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -173,16 +163,15 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     [dispatch]
   );
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
   const euidApi = useEntityStoreEuidApi();
-  const storeUserEntityId = identityFields['entity.id'];
 
   const openUserPreview = useCallback(() => {
     openPreviewPanel({
       id: UserPreviewPanelKey,
       params: {
         userName,
-        entityId: storeUserEntityId,
+        entityId,
         scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -191,21 +180,20 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, userName, storeUserEntityId, scopeId, telemetry]);
+  }, [openPreviewPanel, userName, entityId, scopeId, telemetry]);
 
   const entityFromStoreResult = useEntityFromStore({
-    entityId: storeUserEntityId,
-    identityFields,
+    entityId,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const observedUser = useObservedUser(identityFields, scopeId);
+  const observedUser = useObservedUser(userName, scopeId, entityId);
 
   const filterQuery = useMemo(
-    () => (filterValue ? buildUserNamesFilter([filterValue]) : undefined),
-    [filterValue]
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
   );
-
+ 
   const { data: userRisk } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.user,
@@ -248,8 +236,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
       : !!userRiskData?.user?.risk;
 
+  const userCspIdentityDoc = observedUser.entityRecord ?? identityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', identityFields, euidApi)
+    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields,

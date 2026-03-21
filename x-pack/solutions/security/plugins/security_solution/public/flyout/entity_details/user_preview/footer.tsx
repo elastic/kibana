@@ -11,11 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { UserPanelKey } from '../shared/constants';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+
 export interface UserPreviewPanelFooterProps {
   contextID: string;
   scopeId: string;
   userName: string;
   entityId?: string;
+  /** When entity store v2 is enabled: entity record from the store. */
+  entity?: EntityStoreRecord;
 }
 
 export const UserPreviewPanelFooter = ({
@@ -23,6 +27,7 @@ export const UserPreviewPanelFooter = ({
   scopeId,
   userName,
   entityId,
+  entity,
 }: UserPreviewPanelFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
 

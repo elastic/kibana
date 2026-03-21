@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
-import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
@@ -39,18 +38,18 @@ export const getRiskInputTab = <T extends EntityType>({
 });
 
 export const getInsightsInputTab = ({
-  identityFields,
+  field,
+  value,
+  entityId,
   scopeId,
+  entityType,
 }: {
-  identityFields: IdentityFields;
+  field: string;
+  value: string;
+  entityId: string;
   scopeId: string;
+  entityType: 'host' | 'user' | 'service';
 }) => {
-  const field = Object.keys(identityFields)[0] as CloudPostureEntityIdentifier;
-  const value = identityFields['host.name'] || Object.values(identityFields)[0] || '';
-  const entityId = identityFields['host.entity.id'] ?? identityFields['user.entity.id'];
-  const entityType: 'host' | 'user' =
-    field === 'user.name' || identityFields['user.entity.id'] !== undefined ? 'user' : 'host';
-
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
     'data-test-subj': INSIGHTS_TAB_TEST_ID,
@@ -63,7 +62,7 @@ export const getInsightsInputTab = ({
     content: (
       <InsightsTabCsp
         value={value}
-        field={field}
+        field={field as CloudPostureEntityIdentifier}
         scopeId={scopeId}
         entityId={entityId}
         entityType={entityType}

@@ -20,6 +20,7 @@ import * as euidModule from './domain/euid';
 export const euid = {
   getEuidFromObject: euidModule.getEuidFromObject,
   getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
+  getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
   getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
   getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,

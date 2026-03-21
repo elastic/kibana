@@ -9,16 +9,15 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import type { IdentityFields } from './entity_identifiers_utils';
 
 interface Props {
   contextId: string;
@@ -27,7 +26,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
-  identityFields?: IdentityFields | null;
+  entityId?: string;
 }
 
 const UserNameComponent: React.FC<Props> = ({
@@ -37,7 +36,7 @@ const UserNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
-  identityFields,
+  entityId,
 }) => {
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
@@ -48,7 +47,7 @@ const UserNameComponent: React.FC<Props> = ({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const { entityRecord } = useEntityFromStore({
-    identityFields: identityFields ?? (userName ? { 'user.name': userName } : undefined),
+    entityId,
     entityType: 'user',
     skip: !entityStoreV2Enabled,
   });

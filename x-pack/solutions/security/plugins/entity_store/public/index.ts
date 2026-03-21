@@ -9,7 +9,7 @@ import { EntityStorePlugin } from './plugin';
 
 export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
 export { EntityStoreEuidApiProvider, useEntityStoreEuidApi } from './euid_api_context';
-export type { EntityStoreEuidApi } from './euid_api_context';
+export type { EntityStoreEuidApi, NonEcsTimelineDataRow } from './euid_api_context';
 
 export { FF_ENABLE_ENTITY_STORE_V2, ALL_ENTITY_TYPES } from '../common/constants';
 export type { EntityType, IdentitySourceFields } from '../common/constants';
@@ -22,6 +22,9 @@ export type {
   SearchEntitiesFromEntityStoreParams,
   SearchEntitiesFromEntityStoreResponse,
 } from './search_entities_api';
+
+export { upsertEntityInEntityStore } from './upsert_entity_store_api';
+export type { UpsertEntityInEntityStoreParams } from './upsert_entity_store_api';
 
 /** Load the EUID API (euid, filter builders). Use when you need them; prefer useEntityStoreEuidApi() in React. */
 export const loadEuidApi = () =>

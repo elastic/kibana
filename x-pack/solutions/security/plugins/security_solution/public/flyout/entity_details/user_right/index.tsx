@@ -10,11 +10,13 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { euid } from '@kbn/entity-store/common';
+import {
+  FF_ENABLE_ENTITY_STORE_V2,
+  upsertEntityInEntityStore,
+  useEntityStoreEuidApi,
+} from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import type { ESQuery } from '../../../../common/typed_json';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -36,12 +38,12 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/compon
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
-import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
+import type { Entity } from '../../../../common/api/entity_analytics';
+import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
-import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
@@ -79,7 +81,7 @@ export const UserPanel = ({
   userName,
   entityId: entityIdProp,
 }: UserPanelProps) => {
-  const { uiSettings } = useKibana().services;
+  const { http, uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -108,10 +110,11 @@ export const UserPanel = ({
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    return euid.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ?? {};
-  }, [entityFromStoreResult.entityRecord]);
-
-  const resolvedEntityId = entityFromStoreResult.entityRecord?.entity?.id ?? entityIdProp;
+    return (
+      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
+      {}
+    );
+  }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
 
   const effectiveUserName = useMemo<string>(
     () =>
@@ -122,30 +125,15 @@ export const UserPanel = ({
     [userName, documentEntityIdentifiers]
   );
 
-  const hasResolutionInput = Boolean(entityIdProp || userName);
-  const hasDocumentIdentity = Object.keys(documentEntityIdentifiers).length > 0;
-
-  const userFilterQuery = useMemo((): ESQuery | undefined => {
-    if (entityStoreV2Enabled && euidApi?.euid && hasDocumentIdentity) {
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(
-        'user',
-        documentEntityIdentifiers
-      ) as unknown as ESQuery | undefined;
-    }
-    return effectiveUserName ? (buildUserNamesFilter([effectiveUserName]) as ESQuery) : undefined;
-  }, [
-    entityStoreV2Enabled,
-    euidApi?.euid,
-    documentEntityIdentifiers,
-    effectiveUserName,
-    hasDocumentIdentity,
-  ]);
-
-  const observedUser = useObservedUser(documentEntityIdentifiers, scopeId);
+  const userNameFilterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
+  const observedUser = useObservedUser(effectiveUserName, scopeId, entityIdProp);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
-    filterQuery: userFilterQuery,
+    filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled && !!observedUser?.entityRecord,
@@ -170,7 +158,7 @@ export const UserPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', documentEntityIdentifiers, euidApi)
+    buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi)
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
@@ -199,7 +187,7 @@ export const UserPanel = ({
   const openDetailsPanel = useNavigateToUserDetails({
     documentEntityIdentifiers,
     userName: effectiveUserName,
-    entityId: resolvedEntityId,
+    entityId: entityIdProp,
     scopeId,
     contextID: safeContextID,
     isRiskScoreExist,
@@ -207,8 +195,6 @@ export const UserPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
   });
-
-  const { upsertEntity } = useEntityAnalyticsRoutes();
 
   const riskScoreStateFromStore =
     entityStoreV2Enabled && observedUser.entityRecord
@@ -223,15 +209,19 @@ export const UserPanel = ({
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
   const handleSaveAssetCriticalityViaEntityStore = useCallback(
-    async (updatedRecord: Parameters<typeof upsertEntity>[0]['body']) => {
-      await upsertEntity({ entityType: 'user', body: updatedRecord, force: true });
+    async (updatedRecord: Entity) => {
+      await upsertEntityInEntityStore(http, {
+        entityType: 'user',
+        body: updatedRecord as Record<string, unknown>,
+        force: true,
+      });
       observedUser.refetchEntityStore?.();
       calculateEntityRiskScore();
     },
-    [upsertEntity, observedUser, calculateEntityRiskScore]
+    [http, observedUser, calculateEntityRiskScore]
   );
 
-  const openPanelFirstTab = useCallback(
+  const openDefaultPanel = useCallback(
     () =>
       openDetailsPanel({
         tab: isRiskScoreExist
@@ -241,9 +231,13 @@ export const UserPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
+  const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
+    ? observedUser.entityRecord ?? undefined
+    : undefined;
+
   const noEntityInStore =
     entityStoreV2Enabled &&
-    hasResolutionInput &&
+    entityIdProp &&
     !entityFromStoreResult.isLoading &&
     !observedUser.entityRecord;
 
@@ -256,15 +250,15 @@ export const UserPanel = ({
     <>
       <FlyoutNavigation
         flyoutIsExpandable={hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts}
-        expandDetails={openPanelFirstTab}
+        expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <UserPanelHeader
-        identityFields={documentEntityIdentifiers}
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
         userName={effectiveUserName}
+        entityId={entityIdProp}
       />
       {noEntityInStore && (
         <EuiCallOut
@@ -296,18 +290,19 @@ export const UserPanel = ({
             ? handleSaveAssetCriticalityViaEntityStore
             : undefined
         }
-        skipRiskAndCriticality={noEntityInStore}
+        skipRiskAndCriticality={entityStoreV2Enabled}
         useEntityStoreV2={entityStoreV2Enabled && observedUser.entityRecord != null}
       />
       {!isPreviewMode && assetInventoryEnabled && (
-        <UserPanelFooter identityFields={documentEntityIdentifiers} />
+        <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter
           userName={effectiveUserName}
-          entityId={resolvedEntityId}
+          entityId={entityIdProp}
           contextID={safeContextID}
           scopeId={scopeId}
+          entity={entityFromStore}
         />
       )}
     </>

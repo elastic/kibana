@@ -54,7 +54,7 @@ export const InsightsTabCsp = memo(
     field: CloudPostureEntityIdentifier;
     scopeId: string;
     entityId?: string;
-    entityType?: 'host' | 'user';
+    entityType: 'host' | 'user' | 'service';
   }) => {
     const panels = useExpandableFlyoutState();
 
@@ -189,12 +189,7 @@ export const InsightsTabCsp = memo(
             entityType={entityType}
           />
         ) : (
-          <AlertsDetailsTable
-            field={field}
-            value={value}
-            entityId={entityId}
-            entityType={entityType}
-          />
+          <AlertsDetailsTable field={field} value={value} entityId={entityId} />
         )}
       </>
     );

@@ -47,7 +47,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
-import { euid } from '@kbn/entity-store/common';
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
@@ -123,7 +122,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     value: string;
     scopeId: string;
     entityId?: string;
-    entityType?: 'host' | 'user';
+    entityType: 'host' | 'user' | 'service';
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -154,46 +153,23 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     };
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-    const entityTypeResolved: 'host' | 'user' =
-      entityType ?? (identityField === 'user.name' ? 'user' : 'host');
 
     const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
       entityId,
-      entityType: entityTypeResolved,
+      entityType,
       skip: !entityStoreV2Enabled || !entityId,
     });
 
-    const identityForEuidDoc = useMemo((): Record<string, string> | null => {
-      if (entityStoreV2Enabled && entityId) {
-        if (entityRecord) {
-          return euid.getEntityIdentifiersFromDocument(entityTypeResolved, entityRecord) ?? {};
-        }
-        if (isEntityRecordLoading) {
-          return null;
-        }
-        return { [identityField]: value };
-      }
-      return { [identityField]: value };
-    }, [
-      entityStoreV2Enabled,
-      entityId,
-      entityRecord,
-      entityTypeResolved,
-      identityField,
-      value,
-      isEntityRecordLoading,
-    ]);
-
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo(() => {
-      if (!euidApi?.euid || identityForEuidDoc == null) {
+      if (!euidApi?.euid || entityRecord == null) {
         return undefined;
       }
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityTypeResolved, identityForEuidDoc);
-    }, [euidApi?.euid, identityForEuidDoc, entityTypeResolved]);
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, entityRecord);
+    }, [euidApi?.euid, entityType, entityRecord]);
 
     const cspQueriesEnabled =
-      identityForEuidDoc !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
+      entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
 
     const { data, isLoading } = useVulnerabilitiesFindings(
       buildVulnerabilityCspOptions({

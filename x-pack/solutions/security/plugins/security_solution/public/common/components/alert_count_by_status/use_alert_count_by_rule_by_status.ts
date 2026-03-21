@@ -7,9 +7,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
-import { euid } from '@kbn/entity-store/common';
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -88,9 +87,12 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
 
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
+  const euidApi = useEntityStoreEuidApi();
   const identityFieldsForQuery = useMemo<Record<string, string>>(
-    () => euid.getEntityIdentifiersFromDocument(storeEntityType ?? 'generic', entityRecord) ?? {},
-    [entityRecord, storeEntityType]
+    () =>
+      euidApi?.euid?.getEntityIdentifiersFromDocument(storeEntityType ?? 'generic', entityRecord) ??
+      {},
+    [euidApi?.euid, entityRecord, storeEntityType]
   );
 
   const skipAlertsQuery =

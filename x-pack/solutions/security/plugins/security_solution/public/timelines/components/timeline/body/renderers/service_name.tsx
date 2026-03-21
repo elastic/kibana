@@ -10,6 +10,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
@@ -18,7 +19,6 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../../common/entity_analytics/entity_store/constants';
 
 interface Props {
   contextId: string;
@@ -27,7 +27,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
-  identityFields?: Record<string, string> | null;
+  entityId?: string;
 }
 
 const ServiceNameComponent: React.FC<Props> = ({
@@ -37,7 +37,7 @@ const ServiceNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
-  identityFields,
+  entityId,
 }) => {
   const eventContext = useContext(StatefulEventContext);
   const serviceName = `${value}`;
@@ -49,7 +49,7 @@ const ServiceNameComponent: React.FC<Props> = ({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const { entityRecord } = useEntityFromStore({
-    identityFields: identityFields ?? (serviceName ? { 'service.name': serviceName } : undefined),
+    entityId,
     entityType: 'service',
     skip: !entityStoreV2Enabled,
   });

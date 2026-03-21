@@ -16,41 +16,30 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import type { IdentityFields } from '../../document_details/shared/utils';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
-import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 interface HostPanelHeaderProps {
-  identityFields: IdentityFields;
+  hostName: string;
   lastSeen: FirstLastSeenData;
-  /** When entity store v2 is enabled: entity record from the store. */
-  entity?: EntityStoreRecord;
+  entityId?: string;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
+
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ identityFields, lastSeen, entity }: HostPanelHeaderProps) => {
-  const hostName = useMemo(
-    () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
-    [identityFields]
-  );
-
+export const HostPanelHeader = ({ hostName, lastSeen, entityId }: HostPanelHeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
     () => lastSeenDate && new Date(lastSeenDate),
     [lastSeenDate]
   );
-
-  const hostDetailsPath = useMemo(() => getHostDetailsUrl(hostName, undefined), [hostName]);
-
   return (
     <FlyoutHeader data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -69,16 +58,32 @@ export const HostPanelHeader = ({ identityFields, lastSeen, entity }: HostPanelH
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.hosts}
-            path={hostDetailsPath}
-            target={'_blank'}
-            external={false}
-            css={linkTitleCSS}
-            override={urlParamOverride}
+          <EuiFlexGroup
+            gutterSize="xs"
+            responsive={false}
+            direction="column"
+            alignItems="flexStart"
           >
-            <FlyoutTitle title={hostName} iconType={'storage'} isLink />
-          </SecuritySolutionLinkAnchor>
+            <EuiFlexItem grow={false}>
+              <SecuritySolutionLinkAnchor
+                deepLinkId={SecurityPageName.hosts}
+                path={getHostDetailsUrl(hostName)}
+                target={'_blank'}
+                external={false}
+                css={linkTitleCSS}
+                override={urlParamOverride}
+              >
+                <FlyoutTitle title={hostName} iconType={'storage'} isLink />
+              </SecuritySolutionLinkAnchor>
+            </EuiFlexItem>
+            {entityId ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="host-panel-header-entity-id">
+                  {entityId}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
           <EuiFlexItem grow={true}>

@@ -21,6 +21,8 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   identityFields: IdentityFields;
+  /** Canonical Entity Store v2 id (`entity.id`) when known. */
+  entityId?: string;
   path?: PanelPath;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
@@ -35,6 +37,7 @@ export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'use
 export const UserDetailsPanel = ({
   isRiskScoreExist,
   identityFields,
+  entityId,
   path,
   scopeId,
   hasMisconfigurationFindings,
@@ -55,12 +58,14 @@ export const UserDetailsPanel = ({
     scopeId,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    identityFields
+    identityFields,
+    entityId
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
     identityFields,
+    entityId,
     tabs,
     path,
     scopeId,
@@ -88,6 +93,7 @@ export const UserDetailsPanel = ({
 const useSelectedTab = (
   isRiskScoreExist: boolean,
   identityFields: IdentityFields,
+  entityId: string | undefined,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
   scopeId: string,
@@ -108,6 +114,7 @@ const useSelectedTab = (
       id: UserDetailsPanelKey,
       params: {
         identityFields,
+        entityId,
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasNonClosedAlerts,

@@ -35,7 +35,6 @@ import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
-import { euid } from '@kbn/entity-store/common';
 import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
@@ -176,7 +175,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     scopeId: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with v2 FF, identity fields are loaded from the store for EUID DSL. */
     entityId?: string;
-    entityType?: 'host' | 'user';
+    entityType: 'host' | 'user' | 'service';
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -196,30 +195,23 @@ export const MisconfigurationFindingsDetailsTable = memo(
     sortFieldDirection[sortField] = sortDirection;
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-    const entityTypeResolved: 'host' | 'user' =
-      entityType ?? (field === 'user.name' ? 'user' : 'host');
 
     const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
       entityId,
-      entityType: entityTypeResolved,
+      entityType,
       skip: !entityStoreV2Enabled || !entityId,
     });
 
-    const identityForEuidDoc = useMemo<Record<string, string>>(
-      () => euid.getEntityIdentifiersFromDocument(entityTypeResolved, entityRecord) ?? {},
-      [entityRecord, entityTypeResolved]
-    );
-
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo(() => {
-      if (!euidApi?.euid || identityForEuidDoc == null) {
+      if (!euidApi?.euid || entityRecord == null) {
         return undefined;
       }
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityTypeResolved, identityForEuidDoc);
-    }, [euidApi?.euid, identityForEuidDoc, entityTypeResolved]);
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, entityRecord);
+    }, [euidApi?.euid, entityType, entityRecord]);
 
     const cspQueriesEnabled =
-      identityForEuidDoc !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
+      entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
 
     const { data, isLoading } = useMisconfigurationFindings(
       buildMisconfigurationCspOptions({

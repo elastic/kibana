@@ -18,7 +18,6 @@ import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import type { IdentityFields } from '../../document_details/shared/utils';
 import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
@@ -31,9 +30,8 @@ import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 interface UserPanelHeaderProps {
   userName: string;
   managedUser: ManagedUserData;
-  /** When provided, used to build the user details page URL with identityFields segment */
-  identityFields?: IdentityFields;
   lastSeen: FirstLastSeenData;
+  entityId?: string;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
@@ -42,8 +40,8 @@ const urlParamOverride = { timeline: { isOpen: false } };
 export const UserPanelHeader = ({
   userName,
   managedUser,
-  identityFields,
   lastSeen,
+  entityId,
 }: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
@@ -81,16 +79,32 @@ export const UserPanelHeader = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.users}
-            path={getTabsOnUsersDetailsUrl(userName, UsersTableType.events, undefined)}
-            target={'_blank'}
-            external={false}
-            css={linkTitleCSS}
-            override={urlParamOverride}
+          <EuiFlexGroup
+            gutterSize="xs"
+            responsive={false}
+            direction="column"
+            alignItems="flexStart"
           >
-            <FlyoutTitle title={userName} iconType={'user'} isLink />
-          </SecuritySolutionLinkAnchor>
+            <EuiFlexItem grow={false}>
+              <SecuritySolutionLinkAnchor
+                deepLinkId={SecurityPageName.users}
+                path={getTabsOnUsersDetailsUrl(userName, UsersTableType.events, undefined)}
+                target={'_blank'}
+                external={false}
+                css={linkTitleCSS}
+                override={urlParamOverride}
+              >
+                <FlyoutTitle title={userName} iconType={'user'} isLink />
+              </SecuritySolutionLinkAnchor>
+            </EuiFlexItem>
+            {entityId ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="user-panel-header-entity-id">
+                  {entityId}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
           <EuiFlexItem grow={true}>

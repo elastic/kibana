@@ -53,6 +53,7 @@ export const useNavigateToUserDetails = ({
           scopeId,
           path,
           identityFields: documentEntityIdentifiers,
+          entityId,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
         },

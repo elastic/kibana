@@ -48,30 +48,38 @@ export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTab
 
 export const useTabs = ({
   isRiskScoreExist,
-  identityFields,
+  hostName,
+  entityId,
   scopeId,
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
-    // Extract name from identityFields
-    const name = identityFields['host.name'] || Object.values(identityFields)[0] || '';
-    const isRiskScoreTabAvailable = isRiskScoreExist && name;
+    const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: name, entityType: EntityType.host, scopeId })]
+      ? [getRiskInputTab({ entityName: hostName ?? '', entityType: EntityType.host, scopeId })]
       : [];
 
     // Determine if the Insights tab should be included
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
-        ? [getInsightsInputTab({ identityFields, scopeId })]
+        ? [
+            getInsightsInputTab({
+              field: 'host.name',
+              value: hostName,
+              entityId,
+              scopeId,
+              entityType: EntityType.host,
+            }),
+          ]
         : [];
 
     return [...riskScoreTab, ...insightsTab];
   }, [
     isRiskScoreExist,
-    identityFields,
+    hostName,
+    entityId,
     scopeId,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,

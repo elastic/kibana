@@ -73,7 +73,6 @@ export function getEntityIdentifiersFromDocument(
   entityType: EntityType,
   doc: unknown
 ): Record<string, string> | undefined {
-  console.log('getEntityIdentifiersFromDocument', entityType, doc);
   if (!doc) {
     return undefined;
   }

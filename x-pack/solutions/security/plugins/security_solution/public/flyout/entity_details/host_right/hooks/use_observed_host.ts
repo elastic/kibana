@@ -24,8 +24,6 @@ import type { ObservedEntityData } from '../../shared/components/observed_entity
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 
 export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -45,7 +43,6 @@ export const useObservedHost = (
   const isActiveTimelines = isActiveTimeline(scopeId);
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -61,15 +58,15 @@ export const useObservedHost = (
     hostName,
     indexNames: securityDefaultPatterns,
     id: HOST_PANEL_RISK_SCORE_QUERY_ID,
-    skip: isInitializing || entityStoreV2Enabled,
+    skip: isInitializing || !entityFromStore,
   });
 
   useQueryInspector({
     deleteQuery,
-    inspect: entityStoreV2Enabled ? entityFromStore?.inspect : inspectObservedHost,
-    loading: entityStoreV2Enabled ? entityFromStore?.isLoading ?? false : isLoading,
+    inspect: entityFromStore?.inspect ?? inspectObservedHost,
+    loading: entityFromStore?.isLoading ?? isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: entityStoreV2Enabled ? entityFromStore?.refetch ?? (() => {}) : refetch,
+    refetch: entityFromStore?.refetch ?? (() => {}),
     setQuery,
   });
 
@@ -79,7 +76,7 @@ export const useObservedHost = (
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: entityStoreV2Enabled,
+    skip: !entityFromStore,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
@@ -88,11 +85,11 @@ export const useObservedHost = (
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: entityStoreV2Enabled,
+    skip: !entityFromStore,
   });
 
   return useMemo((): ObservedHostResult => {
-    if (entityStoreV2Enabled && entityFromStore) {
+    if (entityFromStore) {
       return {
         details: (entityFromStore.entity ?? {}) as HostItem,
         isLoading: entityFromStore.isLoading,
@@ -108,16 +105,6 @@ export const useObservedHost = (
         refetchEntityStore: entityFromStore.refetch,
       };
     }
-    if (entityStoreV2Enabled) {
-      return {
-        details: {} as HostItem,
-        isLoading: true,
-        firstSeen: { date: undefined, isLoading: true },
-        lastSeen: { date: undefined, isLoading: true },
-        entityRecord: null,
-        refetchEntityStore: undefined,
-      };
-    }
     return {
       details: hostDetails,
       isLoading: isLoading || loadingLastSeen || loadingFirstSeen,
@@ -128,7 +115,6 @@ export const useObservedHost = (
       lastSeen: { date: lastSeen, isLoading: loadingLastSeen },
     };
   }, [
-    entityStoreV2Enabled,
     hostDetails,
     isLoading,
     loadingLastSeen,

@@ -71,6 +71,7 @@ describe('useNavigateToUserDetails', () => {
       id: UserDetailsPanelKey,
       params: {
         identityFields: mockProps.documentEntityIdentifiers,
+        entityId: mockProps.entityId,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },
@@ -101,6 +102,7 @@ describe('useNavigateToUserDetails', () => {
         id: UserDetailsPanelKey,
         params: {
           identityFields: mockProps.documentEntityIdentifiers,
+          entityId: mockProps.entityId,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,
           path: { tab, subTab },

@@ -136,10 +136,8 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
-    const hostEntityIdentifiers =
-      data && euidApi?.euid
-        ? euidApi.euid.getEntityIdentifiersFromDocument('host', data)
-        : undefined;
+    const entityId =
+      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('host', data) : undefined;
     return (
       <HostName
         Component={Component}
@@ -148,14 +146,12 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
-        identityFields={hostEntityIdentifiers}
+        entityId={entityId}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
-    const userEntityIdentifiers =
-      data && euidApi?.euid
-        ? euidApi.euid.getEntityIdentifiersFromDocument('user', data)
-        : undefined;
+    const entityId =
+      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('user', data) : undefined;
     return (
       <UserName
         Component={Component}
@@ -164,13 +160,13 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
-        identityFields={userEntityIdentifiers}
+        entityId={entityId}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.service) {
-    const serviceEntityIdentifiers =
+    const entityId =
       data && euidApi?.euid
-        ? euidApi.euid.getEntityIdentifiersFromDocument('service', data)
+        ? euidApi.euid.getEuidFromTimelineNonEcsData('service', data)
         : undefined;
     return (
       <ServiceName
@@ -180,7 +176,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
-        identityFields={serviceEntityIdentifiers}
+        entityId={entityId}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {
