@@ -68,12 +68,25 @@ Unprocessed Alerts
 └─────────────────┘
 ```
 
+### Deduplication Strategy
+
+**Current (Phase 1)**: Jaccard similarity (lexical matching)
+- Fast, deterministic, works in all deployments
+- No ML node required, zero cost
+- Handles exact/near-exact duplicates effectively (~85% accuracy)
+
+**Future (Phase 2)**: ELSER semantic embeddings (tracked in [security-team#16415](https://github.com/elastic/security-team/issues/16415))
+- Semantic understanding of alert content
+- Handles encoded commands, randomized filenames, different log sources
+- Expected +15-30% improvement in dedup rate
+- Requires ML node with ELSER deployed
+
 ### Pipeline stages
 
 | Stage | Module | Description |
 |-------|--------|-------------|
 | **Fetch** | `orchestrator.ts` | Queries `.alerts-security.alerts-default` for open/acknowledged alerts within a lookback window, excluding building blocks and already-processed alerts |
-| **Deduplicate** | `deduplication/` | Groups alerts by exact feature-text hash and Jaccard token similarity using Union-Find, electing the highest risk-score alert as cluster leader |
+| **Deduplicate** | `deduplication/` | Groups alerts by exact feature-text hash and Jaccard token similarity (Phase 1); ELSER semantic embeddings planned for Phase 2 |
 | **Extract entities** | `entity_extraction/` | Maps 30+ ECS fields to 13 observable types (`ipv4`, `ipv6`, `hostname`, `user`, `process`, `file_hash`, `file_path`, `url`, `domain`, `email`, `agent_id`, `registry`, `service`) with per-alert deduplication |
 | **Match to cases** | `case_matching/` | Scores entity overlap between alert entities and existing case observables using configurable weights and optional temporal decay |
 | **Attach & create** | `orchestrator.ts` | Attaches alerts to matched cases or creates new cases for unmatched alerts; adds deduplicated observables via `bulkAddObservables` |

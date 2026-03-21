@@ -10,6 +10,21 @@ import { extractAlertFeatures, composeFeatureText, hashFeatureText } from './fea
 
 const DEFAULT_SIMILARITY_THRESHOLD = 0.85;
 
+/**
+ * Deduplication Strategy:
+ *
+ * **Phase 1 (Current)**: Jaccard similarity on lexical features
+ * - Fast, deterministic, zero LLM cost
+ * - Works in all deployments (no ML node required)
+ * - ~85% accuracy for typical alert patterns
+ *
+ * **Phase 2 (Roadmap)**: ELSER semantic embeddings
+ * - GitHub Issue: #16415
+ * - Requires: ML node with ELSER deployed
+ * - Expected improvement: +15-30% dedup rate
+ * - Handles: encoded commands, randomized filenames, different log sources
+ */
+
 export interface AlertWithId {
   readonly _id: string;
   readonly _source: Record<string, unknown>;

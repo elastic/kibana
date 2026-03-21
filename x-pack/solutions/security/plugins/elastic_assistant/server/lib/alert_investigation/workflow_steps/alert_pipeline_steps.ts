@@ -13,13 +13,13 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deduplicateAlerts } from '../deduplication';
 import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { DEFAULT_PIPELINE_CONFIG } from '../types';
-
-const SAFE_ALERTS_INDEX = /^\.alerts-security\.alerts-[a-z0-9*-]+$/;
+import { fetchAlertsByIds } from '../utils';
+import { PIPELINE_LIMITS, SAFE_ALERTS_INDEX_PATTERN } from '../constants';
 
 const SafeAlertIndexPattern = z
   .string()
   .default('.alerts-security.alerts-default')
-  .refine((val) => SAFE_ALERTS_INDEX.test(val), {
+  .refine((val) => SAFE_ALERTS_INDEX_PATTERN.test(val), {
     message: 'index_pattern must target .alerts-security.alerts-* indices',
   });
 
@@ -27,8 +27,16 @@ export const FetchUnprocessedAlertsStepId = 'security.fetchUnprocessedAlerts';
 
 const FetchAlertsInputSchema = z.object({
   index_pattern: SafeAlertIndexPattern,
-  max_alerts: z.number().min(1).max(10000).default(500),
-  lookback_minutes: z.number().min(1).max(10080).default(15),
+  max_alerts: z
+    .number()
+    .min(1)
+    .max(PIPELINE_LIMITS.MAX_ALERTS_PER_RUN)
+    .default(PIPELINE_LIMITS.DEFAULT_MAX_ALERTS),
+  lookback_minutes: z
+    .number()
+    .min(1)
+    .max(PIPELINE_LIMITS.MAX_LOOKBACK_MINUTES)
+    .default(PIPELINE_LIMITS.DEFAULT_LOOKBACK_MINUTES),
 });
 
 const FetchAlertsOutputSchema = z.object({
@@ -103,7 +111,7 @@ export const DeduplicateAlertsStepId = 'security.deduplicateAlerts';
 const DedupInputSchema = z.object({
   alert_ids: z.array(z.string()),
   index_pattern: SafeAlertIndexPattern,
-  similarity_threshold: z.number().default(0.85),
+  similarity_threshold: z.number().default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
 });
 
 const DedupOutputSchema = z.object({
@@ -136,23 +144,12 @@ export const deduplicateAlertsStep = createServerStepDefinition({
       return { output: { leader_alert_ids: [], total_before: 0, total_after: 0, dedup_rate: 0 } };
     }
 
-    const alertDocs = await esClient.mget({
-      index: indexPattern,
-      ids: alertIds,
+    const alerts = await fetchAlertsByIds({
+      esClient,
+      indexPattern,
+      alertIds,
+      logger: context.logger as Logger,
     });
-
-    const alerts = alertDocs.docs
-      .filter(
-        (doc): doc is typeof doc & { found: true; _id: string; _source: Record<string, unknown> } =>
-          'found' in doc &&
-          (doc as { found?: boolean }).found === true &&
-          '_source' in doc &&
-          doc._id != null
-      )
-      .map((doc) => ({
-        _id: doc._id,
-        _source: doc._source,
-      }));
 
     const result = await deduplicateAlerts({
       alerts,
@@ -210,23 +207,12 @@ export const extractEntitiesStep = createServerStepDefinition({
       return { output: { entities: [], total_entities: 0 } };
     }
 
-    const alertDocs = await esClient.mget({
-      index: indexPattern,
-      ids: alertIds,
+    const alerts = await fetchAlertsByIds({
+      esClient,
+      indexPattern,
+      alertIds,
+      logger: context.logger as Logger,
     });
-
-    const alerts = alertDocs.docs
-      .filter(
-        (doc): doc is typeof doc & { found: true; _id: string; _source: Record<string, unknown> } =>
-          'found' in doc &&
-          (doc as { found?: boolean }).found === true &&
-          '_source' in doc &&
-          doc._id != null
-      )
-      .map((doc) => ({
-        _id: doc._id,
-        _source: doc._source,
-      }));
 
     const result = extractEntitiesFromAlerts({
       alerts,
@@ -289,14 +275,45 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
     ]);
 
     const result = await esClient.bulk({ operations: body, refresh: 'wait_for' });
-    const failedCount = result.errors
-      ? result.items.filter((item) => item.update?.error).length
-      : 0;
 
-    if (failedCount > 0) {
-      context.logger.warn(`Failed to tag ${failedCount}/${alertIds.length} alerts as processed`);
+    if (result.errors) {
+      const failures = result.items.filter((item) => item.update?.error);
+      const failureRate = failures.length / alertIds.length;
+
+      // Log first 5 failures with details
+      for (const failure of failures.slice(0, 5)) {
+        context.logger.error(
+          `Failed to tag alert ${failure.update?._id}: ${
+            failure.update?.error?.reason ?? 'Unknown error'
+          }`
+        );
+      }
+
+      // Fail fast if >50% errors (systemic issue like index readonly)
+      if (failureRate > 0.5) {
+        throw new Error(
+          `Bulk tag operation failed for ${failures.length}/${alertIds.length} alerts (${Math.round(
+            failureRate * 100
+          )}%). ` +
+            `This indicates a systemic issue (index readonly, permissions, etc.). ` +
+            `First error: ${failures[0]?.update?.error?.reason ?? 'Unknown'}. ` +
+            `Check Elasticsearch logs for details.`
+        );
+      }
+
+      // Warn on partial failures (10-50%)
+      if (failureRate > 0.1) {
+        context.logger.warn(
+          `Partial failure tagging alerts: ${failures.length}/${alertIds.length} failed (${Math.round(
+            failureRate * 100
+          )}%). ` +
+            `Pipeline will continue but these alerts may be re-processed.`
+        );
+      }
+
+      return { output: { tagged_count: alertIds.length - failures.length } };
     }
 
-    return { output: { tagged_count: alertIds.length - failedCount } };
+    return { output: { tagged_count: alertIds.length } };
   },
 });
