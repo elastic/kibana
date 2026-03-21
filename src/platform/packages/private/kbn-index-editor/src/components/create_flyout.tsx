@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { combineLatest, distinctUntilChanged, first, from, skip, takeUntil } from 'rxjs';
+import { combineLatest, first, skip } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { isPlaceholderColumn } from '../utils';
 
@@ -20,7 +20,6 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   const {
     http,
     overlays,
-    application: { currentAppId$ },
     ...startServices
   } = deps.coreStart;
 
@@ -86,12 +85,6 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     flyoutSession.close();
   });
 
-  // Close the flyout when user navigates out of the current plugin
-  currentAppId$
-    .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-    .subscribe(() => {
-      flyoutSession.close();
-    });
 }
 
 const LoadingContents: FC = () => (
