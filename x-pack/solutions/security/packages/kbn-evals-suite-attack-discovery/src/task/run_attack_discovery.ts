@@ -159,7 +159,7 @@ export const runAttackDiscovery = async ({
             log.info(`Merging ${a.length} and ${b.length} insights via concatenation`);
             return [...a, ...b];
           },
-          maxConcurrentBatches: 3,
+          maxConcurrentBatches: Number(process.env.ATTACK_DISCOVERY_MAX_CONCURRENT_BATCHES) || 10,
           onProgress: (completed: number, total: number) => {
             log.info(`Processed batch ${completed}/${total}`);
           },
