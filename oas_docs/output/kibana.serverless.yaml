@@ -1397,6 +1397,13 @@ paths:
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
+                    plugin_ids:
+                      description: Array of plugin IDs to assign to the agent.
+                      items:
+                        description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -1877,6 +1884,13 @@ paths:
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
+                    plugin_ids:
+                      description: Array of plugin IDs to assign to the agent.
+                      items:
+                        description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -3641,7 +3655,14 @@ paths:
 
         List all available skills (built-in and user-created).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-skills
-      parameters: []
+      parameters:
+        - description: Set to true to include skills from plugins.
+          in: query
+          name: include_plugins
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses: {}
       summary: List skills
       tags:
@@ -24540,6 +24561,8 @@ paths:
                                               type: string
                                             keep_enabled:
                                               type: boolean
+                                            migrate_from:
+                                              type: string
                                             policy_template:
                                               type: string
                                             streams:
@@ -24610,6 +24633,8 @@ paths:
                                                     type: string
                                                   keep_enabled:
                                                     type: boolean
+                                                  migrate_from:
+                                                    type: string
                                                   release:
                                                     enum:
                                                       - ga
@@ -25635,6 +25660,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -25705,6 +25732,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -26512,6 +26541,8 @@ paths:
                                               type: string
                                             keep_enabled:
                                               type: boolean
+                                            migrate_from:
+                                              type: string
                                             policy_template:
                                               type: string
                                             streams:
@@ -26582,6 +26613,8 @@ paths:
                                                     type: string
                                                   keep_enabled:
                                                     type: boolean
+                                                  migrate_from:
+                                                    type: string
                                                   release:
                                                     enum:
                                                       - ga
@@ -27368,6 +27401,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -27438,6 +27473,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -28462,6 +28499,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -28532,6 +28571,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -29431,6 +29472,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -29501,6 +29544,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -31759,6 +31804,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -31829,6 +31876,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -49822,6 +49871,8 @@ paths:
                                     type: string
                                   keep_enabled:
                                     type: boolean
+                                  migrate_from:
+                                    type: string
                                   policy_template:
                                     type: string
                                   streams:
@@ -49892,6 +49943,8 @@ paths:
                                           type: string
                                         keep_enabled:
                                           type: boolean
+                                        migrate_from:
+                                          type: string
                                         release:
                                           enum:
                                             - ga
@@ -50364,6 +50417,8 @@ paths:
                             type: string
                           keep_enabled:
                             type: boolean
+                          migrate_from:
+                            type: string
                           policy_template:
                             type: string
                           streams:
@@ -50434,6 +50489,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 release:
                                   enum:
                                     - ga
@@ -50928,6 +50985,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -50998,6 +51057,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -51521,6 +51582,8 @@ paths:
                                     type: string
                                   keep_enabled:
                                     type: boolean
+                                  migrate_from:
+                                    type: string
                                   policy_template:
                                     type: string
                                   streams:
@@ -51591,6 +51654,8 @@ paths:
                                           type: string
                                         keep_enabled:
                                           type: boolean
+                                        migrate_from:
+                                          type: string
                                         release:
                                           enum:
                                             - ga
@@ -52163,6 +52228,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -52233,6 +52300,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -52709,6 +52778,8 @@ paths:
                             type: string
                           keep_enabled:
                             type: boolean
+                          migrate_from:
+                            type: string
                           policy_template:
                             type: string
                           streams:
@@ -52779,6 +52850,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 release:
                                   enum:
                                     - ga
@@ -53269,6 +53342,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -53339,6 +53414,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -54206,6 +54283,8 @@ paths:
                                           type: string
                                         keep_enabled:
                                           type: boolean
+                                        migrate_from:
+                                          type: string
                                         policy_template:
                                           type: string
                                         streams:
@@ -54276,6 +54355,8 @@ paths:
                                                 type: string
                                               keep_enabled:
                                                 type: boolean
+                                              migrate_from:
+                                                type: string
                                               release:
                                                 enum:
                                                   - ga
@@ -54706,6 +54787,8 @@ paths:
                                       type: string
                                     keep_enabled:
                                       type: boolean
+                                    migrate_from:
+                                      type: string
                                     policy_template:
                                       type: string
                                     streams:
@@ -54776,6 +54859,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           release:
                                             enum:
                                               - ga
