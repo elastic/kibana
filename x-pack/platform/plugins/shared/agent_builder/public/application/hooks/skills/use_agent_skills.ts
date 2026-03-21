@@ -18,8 +18,14 @@ export const useAgentSkills = ({ agentId }: { agentId?: string } = {}) => {
   const { skillsService } = useAgentBuilderServices();
 
   const { data, isLoading, error, isError } = useQuery({
-    queryKey: agentId ? queryKeys.skills.byAgent(agentId) : queryKeys.skills.all,
-    queryFn: () => (agentId ? skillsService.listByAgent({ agentId }) : skillsService.list()),
+    enabled: Boolean(agentId),
+    queryKey: queryKeys.skills.byAgent(agentId),
+    queryFn: () => {
+      if (!agentId) {
+        throw new Error('Agent id is required');
+      }
+      return skillsService.listByAgent({ agentId });
+    },
   });
 
   useEffect(() => {
