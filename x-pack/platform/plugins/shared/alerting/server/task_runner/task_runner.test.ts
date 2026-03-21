@@ -362,6 +362,73 @@ describe('Task Runner', () => {
     ).toHaveBeenCalled();
   });
 
+  test('passes total_search_duration_ms from execution metrics into rule monitoring via addFrameworkMetrics', async () => {
+    const addFrameworkMetricsSpy = jest.spyOn(
+      RuleMonitoringService.prototype,
+      'addFrameworkMetrics'
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(addFrameworkMetricsSpy).toHaveBeenCalledWith({
+      total_search_duration_ms: 23423,
+    });
+    addFrameworkMetricsSpy.mockRestore();
+  });
+
+  test('passes consumer metrics to AlertingEventLogger', async () => {
+    const consumerMetrics = {
+      alerts_candidate_count: 42,
+      alerts_suppressed_count: 7,
+      frozen_indices_queried_count: 3,
+    };
+    ruleType.executor.mockImplementation(async ({ services: { ruleMonitoringService } }) => {
+      ruleMonitoringService?.setMetrics(consumerMetrics);
+      return { state: {} };
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(alertingEventLogger.done).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consumerMetrics,
+      })
+    );
+  });
+
   test('should update the persisted alerts', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);

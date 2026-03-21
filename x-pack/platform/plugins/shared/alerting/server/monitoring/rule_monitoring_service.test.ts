@@ -181,4 +181,66 @@ describe('RuleMonitoringService', () => {
       expect(metricsAfterClearing.gap_range).toBeNull();
     });
   });
+
+  describe('addFrameworkMetrics', () => {
+    it('exposes total_search_duration_ms via getMonitoring() for the rule saved object', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 42 });
+
+      expect(
+        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
+      ).toBe(42);
+    });
+
+    it('replaces prior framework total_search_duration_ms', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 10 });
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 20 });
+
+      expect(
+        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
+      ).toBe(20);
+    });
+
+    it('preserves executor metrics when addFrameworkMetrics sets total_search_duration_ms', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      const { setMetric } = ruleMonitoringService.getSetters();
+      setMetric('total_indexing_duration_ms', 99);
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 42 });
+
+      const { metrics } = ruleMonitoringService.getMonitoring().run.last_run;
+      expect(metrics.total_search_duration_ms).toBe(42);
+      expect(metrics.total_indexing_duration_ms).toBe(99);
+    });
+
+    it('overwrites total_search_duration_ms from setMonitoring when addFrameworkMetrics runs', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      ruleMonitoringService.setMonitoring({
+        run: {
+          history: [],
+          calculated_metrics: { success_ratio: 1, p50: 1, p95: 1, p99: 1 },
+          last_run: {
+            timestamp: mockNow,
+            metrics: {
+              duration: 1,
+              gap_duration_s: null,
+              gap_range: null,
+              total_indexing_duration_ms: null,
+              total_search_duration_ms: 100,
+            },
+          },
+        },
+      });
+
+      expect(
+        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
+      ).toBe(100);
+
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 200 });
+
+      expect(
+        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
+      ).toBe(200);
+    });
+  });
 });
