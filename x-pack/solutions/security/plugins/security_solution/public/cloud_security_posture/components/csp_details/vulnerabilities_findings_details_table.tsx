@@ -45,6 +45,7 @@ import { get } from 'lodash/fp';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import type { EntityType } from '@kbn/entity-store/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
@@ -122,7 +123,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     value: string;
     scopeId: string;
     entityId?: string;
-    entityType: 'host' | 'user' | 'service';
+    entityType?: string;
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -162,10 +163,10 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo(() => {
-      if (!euidApi?.euid || entityRecord == null) {
+      if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, entityRecord);
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityType as EntityType, entityRecord);
     }, [euidApi?.euid, entityType, entityRecord]);
 
     const cspQueriesEnabled =

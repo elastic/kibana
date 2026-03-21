@@ -33,6 +33,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { EntityType } from '@kbn/entity-store/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
@@ -175,7 +176,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     scopeId: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with v2 FF, identity fields are loaded from the store for EUID DSL. */
     entityId?: string;
-    entityType: 'host' | 'user' | 'service';
+    entityType?: string;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -204,10 +205,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo(() => {
-      if (!euidApi?.euid || entityRecord == null) {
+      if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, entityRecord);
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityType as EntityType, entityRecord);
     }, [euidApi?.euid, entityType, entityRecord]);
 
     const cspQueriesEnabled =

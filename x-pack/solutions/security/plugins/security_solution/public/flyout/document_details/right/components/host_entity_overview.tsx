@@ -31,8 +31,6 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
@@ -126,7 +124,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');

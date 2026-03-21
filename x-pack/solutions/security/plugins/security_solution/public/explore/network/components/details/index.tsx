@@ -18,8 +18,8 @@ import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
   autonomousSystemRenderer,
-  HostIdRenderer,
-  HostNameRenderer,
+  hostIdRenderer,
+  hostNameRenderer,
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
@@ -147,31 +147,27 @@ export const IpOverview = React.memo<IpOverviewProps>(
         {
           title: i18n.HOST_ID,
           description:
-            typeData && data.host ? (
-              <HostIdRenderer
-                host={data.host}
-                ipFilter={ip}
-                contextID={contextID}
-                scopeId={scopeId}
-                isFlyoutOpen={isFlyoutOpen}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
+            typeData && data.host
+              ? hostIdRenderer({
+                  host: data.host,
+                  ipFilter: ip,
+                  contextID,
+                  scopeId,
+                  isFlyoutOpen,
+                })
+              : getEmptyTagValue(),
         },
         {
           title: i18n.HOST_NAME,
           description:
-            typeData && data.host ? (
-              <HostNameRenderer
-                scopeId={scopeId}
-                host={data.host}
-                ipFilter={ip}
-                isFlyoutOpen={isFlyoutOpen}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
+            typeData && data.host
+              ? hostNameRenderer({
+                  scopeId,
+                  host: data.host,
+                  ipFilter: ip,
+                  isFlyoutOpen,
+                })
+              : getEmptyTagValue(),
         },
       ],
       [

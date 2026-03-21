@@ -54,7 +54,7 @@ export const InsightsTabCsp = memo(
     field: CloudPostureEntityIdentifier;
     scopeId: string;
     entityId?: string;
-    entityType: 'host' | 'user' | 'service';
+    entityType?: string;
   }) => {
     const panels = useExpandableFlyoutState();
 

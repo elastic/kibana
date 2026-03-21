@@ -53,10 +53,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { RiskScoreLevel } from '../severity/common';
 import {
   EntityPanelKeyByType,
-  HostPanelKey,
-  UserPanelKey,
+  EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
-import { buildIdentityFields } from '../entity_store/hooks/use_entities_list_columns';
 
 const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
 
@@ -152,48 +150,16 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
         const handleFlyoutClick = () => {
           const id = EntityPanelKeyByType[entityType];
 
-          if (id) {
-            // Build identityFields following EUID priority logic
-            const identityFields = buildIdentityFields(record);
-
-            if (identityFields) {
-              const storeEntityId = record.entity?.id;
-
-              if (id === UserPanelKey) {
-                openRightPanel({
-                  id,
-                  params: {
-                    userName: identityFields['user.name'] || entityName || '',
-                    entityId: storeEntityId,
-                    contextID: THREAT_HUNTING_TABLE_ID,
-                    scopeId: THREAT_HUNTING_TABLE_ID,
-                  },
-                });
-              } else if (id === HostPanelKey) {
-                openRightPanel({
-                  id,
-                  params: {
-                    hostName:
-                      identityFields['host.name'] ||
-                      identityFields['host.hostname'] ||
-                      entityName ||
-                      '',
-                    entityId: storeEntityId,
-                    contextID: THREAT_HUNTING_TABLE_ID,
-                    scopeId: THREAT_HUNTING_TABLE_ID,
-                  },
-                });
-              } else {
-                openRightPanel({
-                  id,
-                  params: {
-                    identityFields,
-                    contextID: THREAT_HUNTING_TABLE_ID,
-                    scopeId: THREAT_HUNTING_TABLE_ID,
-                  },
-                });
-              }
-            }
+          if (id && entityName) {
+            openRightPanel({
+              id,
+              params: {
+                [EntityPanelParamByType[entityType] ?? '']: entityName,
+                contextID: THREAT_HUNTING_TABLE_ID,
+                scopeId: THREAT_HUNTING_TABLE_ID,
+                entityId: record.entity.id,
+              },
+            });
           }
         };
 

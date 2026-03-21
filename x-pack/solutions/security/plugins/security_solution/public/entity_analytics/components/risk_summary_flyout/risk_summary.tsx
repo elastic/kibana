@@ -54,18 +54,17 @@ export interface RiskSummaryProps<T extends EntityType> {
   queryId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
-  /** When true, Risk Summary Visualization uses entity store v2 index instead of risk-score.risk-score-*. */
-  useEntityStoreV2?: boolean;
+  entityId?: string;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
   riskScoreData,
   entityType,
+  entityId,
   recalculatingScore,
   queryId,
   openDetailsPanel,
   isPreviewMode,
-  useEntityStoreV2 = false,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -76,8 +75,8 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = EntityTypeToIdentifierField[entityType];
-    const query = useEntityStoreV2
-      ? `entity.name: "${entityName}" AND entity.EngineMetadata.Type: "${entityType}"`
+    const query = entityId
+      ? `entity.id: "${entityId}" AND entity.EngineMetadata.Type: "${entityType}"`
       : `${fieldName}: "${entityName}"`;
 
     return getRiskScoreSummaryAttributes({
@@ -85,9 +84,9 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       query,
       spaceId,
       riskEntity: entityType,
-      useEntityStoreV2,
+      entityId,
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId, useEntityStoreV2]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId, entityId]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(

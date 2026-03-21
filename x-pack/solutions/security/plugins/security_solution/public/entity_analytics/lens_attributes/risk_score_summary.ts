@@ -25,20 +25,19 @@ interface GetRiskScoreSummaryAttributesProps {
   spaceId?: string;
   severity?: RiskSeverity;
   riskEntity: EntityType;
-  /** When true, visualization uses entity store v2 index and entity.risk.calculated_score_norm. */
-  useEntityStoreV2?: boolean;
+  entityId?: string;
 }
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
-) => LensAttributes = ({ spaceId, query, severity, riskEntity, useEntityStoreV2 = false }) => {
+) => LensAttributes = ({ spaceId, query, severity, riskEntity, entityId }) => {
   const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
   const internalReferenceId = `internal-reference-id-${uuidv4()}`;
   const columnIds = [`column-id1-${uuidv4()}`, `column-id2-${uuidv4()}`, `column-id3-${uuidv4()}`];
-  const sourceField = useEntityStoreV2
+  const sourceField = entityId
     ? ENTITY_STORE_V2_RISK_SCORE_FIELD
     : EntityTypeToScoreField[riskEntity];
-  const dataViewIndexPattern = useEntityStoreV2
+  const dataViewIndexPattern = entityId
     ? getEntityStoreV2IndexPattern(spaceId)
     : `risk-score.risk-score-${spaceId ?? 'default'}`;
   return {

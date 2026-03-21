@@ -58,6 +58,7 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityType={EntityType.service}
+            entityId={observedService.id}
           />
           <EuiHorizontalRule />
         </>

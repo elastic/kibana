@@ -46,9 +46,9 @@ export const getInsightsInputTab = ({
 }: {
   field: string;
   value: string;
-  entityId: string;
+  entityId?: string;
   scopeId: string;
-  entityType: 'host' | 'user' | 'service';
+  entityType?: string;
 }) => {
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,

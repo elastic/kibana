@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import type { EntityType } from '@kbn/entity-store/public';
 import {
   FF_ENABLE_ENTITY_STORE_V2,
   searchEntitiesFromEntityStore,
@@ -87,7 +88,7 @@ export interface UseEntityFromStoreParams {
    * When `entityId` is not set, identity field–value pairs for legacy EUID / v1 resolution (e.g. `host.name`, `user.name`, `service.name`).
    */
   identityFields?: Record<string, string> | null;
-  entityType: 'host' | 'user' | 'service';
+  entityType?: string;
   skip: boolean;
 }
 
@@ -126,7 +127,7 @@ export function useEntityFromStore(
   const documentFilter = useMemo(
     () =>
       euidApi?.euid
-        ? euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, identityDocument)
+        ? euidApi.euid.getEuidDslFilterBasedOnDocument(entityType as EntityType, identityDocument)
         : undefined,
     [euidApi?.euid, entityType, identityDocument]
   );
@@ -156,7 +157,7 @@ export function useEntityFromStore(
         return searchEntitiesFromEntityStore(
           http,
           {
-            entityTypes: [entityType],
+            entityTypes: [entityType as EntityType],
             filterQuery,
             page: 1,
             perPage: 1,
@@ -169,7 +170,7 @@ export function useEntityFromStore(
       return fetchEntitiesList({
         signal,
         params: {
-          entityTypes: [entityType],
+          entityTypes: [entityType as EntityType],
           filterQuery: documentFilter ? JSON.stringify(documentFilter) : undefined,
           page: 1,
           perPage: 1,

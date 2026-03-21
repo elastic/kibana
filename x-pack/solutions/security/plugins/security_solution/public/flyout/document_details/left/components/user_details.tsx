@@ -65,7 +65,7 @@ import {
   HOST_IP_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
@@ -93,7 +93,13 @@ const UserOverviewManage = manageQuery(UserOverview);
 const RelatedHostsManage = manageQuery(InspectButtonContainer);
 
 export interface UserDetailsProps {
+  /**
+   * User name
+   */
   userName: string;
+  /**
+   * Host entity id
+   */
   entityId?: string;
   /**
    * timestamp of alert or event
@@ -193,7 +199,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
- 
+
   const { data: userRisk } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.user,
@@ -396,7 +402,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   return (
     <ExpandablePanel
       header={{
-        title: identityFields['user.name'],
+        title: userName,
         iconType: 'user',
         headerContent: relatedHostsCount,
         link: userLink,

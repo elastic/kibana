@@ -28,8 +28,6 @@ import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
@@ -118,7 +116,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');

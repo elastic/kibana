@@ -91,7 +91,7 @@ export const UserPanelContent = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
-              useEntityStoreV2={useEntityStoreV2}
+              entityId={observedUser.id}
             />
             <EuiHorizontalRule />
           </>

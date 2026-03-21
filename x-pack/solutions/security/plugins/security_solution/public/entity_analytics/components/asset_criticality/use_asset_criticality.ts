@@ -155,6 +155,5 @@ export interface ModalState {
 
 export interface Entity {
   name: string;
-  identifiers: Record<string, string>;
   type: EntityType;
 }

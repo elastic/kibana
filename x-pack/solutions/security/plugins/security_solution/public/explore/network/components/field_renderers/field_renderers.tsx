@@ -86,7 +86,7 @@ interface HostIdRendererTypes {
   isFlyoutOpen: boolean;
 }
 
-export const HostIdRenderer = ({
+export const hostIdRenderer = ({
   contextID,
   host,
   ipFilter,
@@ -143,7 +143,7 @@ interface HostNameRendererTypes {
   ipFilter?: string;
   isFlyoutOpen: boolean;
 }
-export const HostNameRenderer = ({
+export const hostNameRenderer = ({
   scopeId,
   host,
   ipFilter,

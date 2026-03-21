@@ -89,7 +89,7 @@ export const HostPanelContent = ({
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
-              useEntityStoreV2={useEntityStoreV2}
+              entityId={entityId}
             />
             <EuiHorizontalRule />
           </>
