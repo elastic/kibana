@@ -128,8 +128,13 @@ export const runAttackDiscovery = async ({
       let insights: AttackDiscovery[];
 
       if (USE_BATCH_PROCESSING && alerts.length > BATCH_SIZE) {
+        // Calculate optimal batch configuration
+        const numBatches = Math.ceil(alerts.length / BATCH_SIZE);
+        const maxConcurrent = Number(process.env.ATTACK_DISCOVERY_MAX_CONCURRENT_BATCHES) ||
+                              Math.min(numBatches, 20); // Dynamic: scale with batch count, cap at 20
+
         log.info(
-          `Using batch processing: ${alerts.length} alerts, batch size ${BATCH_SIZE}`
+          `Using batch processing: ${alerts.length} alerts, batch size ${BATCH_SIZE}, ${numBatches} batches, concurrency ${maxConcurrent}`
         );
 
         // Use batch processing for large alert sets
@@ -148,6 +153,9 @@ export const runAttackDiscovery = async ({
             if (res.usage) {
               inputTokens += res.usage.inputTokens;
               outputTokens += res.usage.outputTokens;
+              log.debug(`Batch tokens: input=${res.usage.inputTokens}, output=${res.usage.outputTokens}`);
+            } else {
+              log.warning('No usage data in response - tokens will be 0');
             }
 
             return res.insights;
@@ -159,7 +167,7 @@ export const runAttackDiscovery = async ({
             log.info(`Merging ${a.length} and ${b.length} insights via concatenation`);
             return [...a, ...b];
           },
-          maxConcurrentBatches: Number(process.env.ATTACK_DISCOVERY_MAX_CONCURRENT_BATCHES) || 10,
+          maxConcurrentBatches: maxConcurrent,
           onProgress: (completed: number, total: number) => {
             log.info(`Processed batch ${completed}/${total}`);
           },
