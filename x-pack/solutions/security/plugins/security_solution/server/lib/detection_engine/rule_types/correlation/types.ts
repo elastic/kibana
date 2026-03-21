@@ -13,4 +13,6 @@ export interface CorrelationState extends RuleTypeState {
   isLoggedRequestsEnabled?: boolean;
   consecutiveTimeouts?: number;
   lastTimeoutTimestamp?: string;
+  lastProcessedTimestamp?: string;
+  incrementalCorrelationEnabled?: boolean;
 }

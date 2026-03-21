@@ -40,6 +40,7 @@ import { CorrelationInfoIcon } from './correlation_info_icon';
 import { useRemoteClusters } from './use_remote_clusters';
 import { useCorrelationTypeRecommendation } from './use_correlation_type_recommendation';
 import { CorrelationTypeRecommendationCallout } from './correlation_type_recommendation';
+import { useAlertFieldSuggestions } from './use_alert_field_suggestions';
 import * as i18n from './translations';
 
 const CORRELATION_TYPE_OPTIONS = [
@@ -81,6 +82,8 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
     isLoading: remoteClustersLoading,
     error: remoteClustersError,
   } = useRemoteClusters();
+
+  const { fieldSuggestions, isLoading: fieldSuggestionsLoading } = useAlertFieldSuggestions();
 
   const [formData] = useFormData({
     watch: [`${path}.rules`, `${path}.groupBy`, `${path}.type`],
@@ -169,15 +172,37 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           />
           <EuiSpacer size="m" />
 
-          <Field
-            field={correlationGroupBy}
-            euiFieldProps={{
-              fullWidth: true,
-              noSuggestions: false,
-              placeholder: 'host.name, user.name',
-              'data-test-subj': 'correlationGroupBy',
-            }}
-          />
+          <EuiFormRow
+            label={i18n.CORRELATION_GROUP_BY_LABEL}
+            helpText={i18n.CORRELATION_GROUP_BY_HELP_TEXT}
+            fullWidth
+            isInvalid={correlationGroupBy.errors.length > 0}
+            error={correlationGroupBy.errors}
+          >
+            <EuiComboBox
+              fullWidth
+              placeholder={
+                fieldSuggestionsLoading
+                  ? 'Loading field suggestions...'
+                  : 'Select fields or type custom field names'
+              }
+              options={fieldSuggestions}
+              selectedOptions={((correlationGroupBy.value as string[]) || []).map((v) => ({
+                label: v,
+                value: v,
+              }))}
+              onChange={(selected) => {
+                correlationGroupBy.setValue(selected.map((s) => s.label));
+              }}
+              onCreateOption={(searchValue) => {
+                const currentValues = (correlationGroupBy.value as string[]) || [];
+                correlationGroupBy.setValue([...currentValues, searchValue]);
+              }}
+              isClearable={true}
+              data-test-subj="correlationGroupBy"
+              isLoading={fieldSuggestionsLoading}
+            />
+          </EuiFormRow>
           <EuiSpacer size="m" />
 
           <EuiFormRow
@@ -307,6 +332,8 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       remoteClustersError,
       recommendation,
       isRecommendationLoading,
+      fieldSuggestions,
+      fieldSuggestionsLoading,
     ]
   );
 

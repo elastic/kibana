@@ -9,6 +9,12 @@ import type { CorrelationConfig } from '../../rule_schema';
 
 const ALERTS_INDEX_PREFIX = '.alerts-security.alerts-';
 
+// Query cache for performance optimization
+// Key: JSON.stringify({ correlation, selfRuleId, spaceId, maxGroups })
+// Value: Compiled ES|QL query string
+const queryCache = new Map<string, string>();
+const MAX_CACHE_SIZE = 1000; // Prevent unbounded growth
+
 const escapeEsqlString = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
@@ -85,8 +91,18 @@ export const compileCorrelationQuery = (
   correlation: CorrelationConfig,
   selfRuleId: string,
   spaceId: string,
-  maxGroups?: number
+  maxGroups?: number,
+  incrementalFrom?: string
 ): string => {
+  // Check cache first for performance (skip cache if incremental - timestamp changes)
+  const cacheKey = JSON.stringify({ correlation, selfRuleId, spaceId, maxGroups });
+  if (!incrementalFrom) {
+    const cachedQuery = queryCache.get(cacheKey);
+    if (cachedQuery) {
+      return cachedQuery;
+    }
+  }
+
   const { rules, type, groupBy, timespan, condition, remoteClusters, targetSpaces } = correlation;
   if (groupBy.length === 0) {
     throw new Error('Correlation rules require at least one groupBy field');
@@ -112,6 +128,7 @@ export const compileCorrelationQuery = (
         timespan,
         rules,
         fromClause,
+        incrementalFrom,
       });
       break;
     case 'temporal_ordered':
@@ -122,6 +139,7 @@ export const compileCorrelationQuery = (
         timespan,
         rules,
         fromClause,
+        incrementalFrom,
       });
       break;
     case 'event_count':
@@ -132,6 +150,7 @@ export const compileCorrelationQuery = (
         timespan,
         condition,
         fromClause,
+        incrementalFrom,
       });
       break;
     case 'value_count':
@@ -142,6 +161,7 @@ export const compileCorrelationQuery = (
         timespan,
         condition,
         fromClause,
+        incrementalFrom,
       });
       break;
     default:
@@ -151,6 +171,15 @@ export const compileCorrelationQuery = (
   if (maxGroups !== undefined) {
     const safeLimit = Math.max(1, Math.floor(maxGroups));
     query += `\n| LIMIT ${safeLimit}`;
+  }
+
+  // Cache the compiled query (skip caching incremental queries since timestamp changes)
+  if (!incrementalFrom) {
+    if (queryCache.size >= MAX_CACHE_SIZE) {
+      // Simple LRU: Clear entire cache when full (prevent unbounded growth)
+      queryCache.clear();
+    }
+    queryCache.set(cacheKey, query);
   }
 
   return query;
@@ -164,7 +193,18 @@ interface QueryParts {
   fromClause: string;
   rules?: string[];
   condition?: { operator: string; value: number; field?: string } | undefined;
+  incrementalFrom?: string;
 }
+
+const buildTimeFilter = (timespan: string, incrementalFrom?: string): string => {
+  if (incrementalFrom) {
+    // Incremental mode: Only process alerts newer than last processed timestamp
+    return `@timestamp > "${incrementalFrom}"`;
+  } else {
+    // Full window mode: Process all alerts in timespan window
+    return `@timestamp >= NOW() - ${timespan}`;
+  }
+};
 
 const compileTemporalQuery = ({
   ruleFilter,
@@ -173,12 +213,14 @@ const compileTemporalQuery = ({
   timespan,
   rules,
   fromClause,
+  incrementalFrom,
 }: QueryParts): string => {
   const minRules = rules?.length ?? 2;
+  const timeFilter = buildTimeFilter(timespan, incrementalFrom);
   return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
-  AND @timestamp >= NOW() - ${timespan}
+  AND ${timeFilter}
 | STATS
     rule_count = COUNT_DISTINCT(kibana.alert.rule.uuid),
     alert_ids = VALUES(kibana.alert.uuid),
@@ -198,12 +240,14 @@ const compileTemporalOrderedQuery = ({
   timespan,
   rules,
   fromClause,
+  incrementalFrom,
 }: QueryParts): string => {
   const minRules = rules?.length ?? 2;
+  const timeFilter = buildTimeFilter(timespan, incrementalFrom);
   return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
-  AND @timestamp >= NOW() - ${timespan}
+  AND ${timeFilter}
 | SORT @timestamp ASC
 | STATS
     rule_count = COUNT_DISTINCT(kibana.alert.rule.uuid),
@@ -224,13 +268,15 @@ const compileEventCountQuery = ({
   timespan,
   condition,
   fromClause,
+  incrementalFrom,
 }: QueryParts): string => {
   const op = condition ? mapOperator(condition.operator) : '>';
   const val = condition?.value ?? 1;
+  const timeFilter = buildTimeFilter(timespan, incrementalFrom);
   return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
-  AND @timestamp >= NOW() - ${timespan}
+  AND ${timeFilter}
 | STATS
     event_count = COUNT(*),
     alert_ids = VALUES(kibana.alert.uuid),
@@ -250,14 +296,16 @@ const compileValueCountQuery = ({
   timespan,
   condition,
   fromClause,
+  incrementalFrom,
 }: QueryParts): string => {
   const field = condition?.field ? validateFieldName(condition.field) : 'kibana.alert.uuid';
   const op = condition ? mapOperator(condition.operator) : '>';
   const val = condition?.value ?? 1;
+  const timeFilter = buildTimeFilter(timespan, incrementalFrom);
   return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
-  AND @timestamp >= NOW() - ${timespan}
+  AND ${timeFilter}
 | STATS
     distinct_values = COUNT_DISTINCT(${field}),
     alert_ids = VALUES(kibana.alert.uuid),
