@@ -14,6 +14,7 @@ import type {
   CaseMatchingConfig,
   ObservableTypeKey,
 } from '../types';
+import { CaseEntityIndex } from './entity_index';
 
 interface CaseWithObservables {
   readonly id: string;
@@ -224,32 +225,51 @@ export const matchAlertsToCases = async ({
 }): Promise<CaseMatchingResult> => {
   const openCases = await fetchOpenCasesWithObservables({ cases, request, logger });
 
+  // Build inverted index: entity → case_ids (O(m*k) - once per pipeline run)
+  const caseIndex = new CaseEntityIndex(openCases, normalizeCasesTypeKey);
+  const indexStats = caseIndex.getStats();
+
+  logger.debug(
+    () =>
+      `Built case entity index: ${indexStats.totalCases} cases, ` +
+      `${indexStats.totalUniqueEntities} unique entities, ` +
+      `avg ${indexStats.avgEntitiesPerCase.toFixed(1)} entities/case`
+  );
+
   const alertEntityGroups = groupEntitiesByAlert(entities);
   const matched: CaseMatchResult[] = [];
   const unmatched: CaseMatchResult[] = [];
   let totalScore = 0;
+  let totalCandidatesEvaluated = 0;
 
+  // Match alerts using index (O(n*k) instead of O(n*m*k))
   for (const [alertId, alertEntities] of alertEntityGroups) {
+    // Find candidate cases (only cases sharing at least one entity)
+    const candidateCaseIds = caseIndex.findCandidateCases(alertEntities);
+    totalCandidatesEvaluated += candidateCaseIds.size;
+
+    // Score only candidates (not all 100 cases!)
     const allScores: CaseMatchScore[] = [];
 
-    for (const openCase of openCases) {
-      if (openCase.observables.length > 0) {
-        const { score, matchedEntities } = scoreEntityOverlap({
-          alertEntities,
-          caseObservables: openCase.observables,
-          config,
+    for (const caseId of candidateCaseIds) {
+      const openCase = caseIndex.getCaseById(caseId);
+      if (!openCase) continue; // Should never happen
+
+      const { score, matchedEntities } = scoreEntityOverlap({
+        alertEntities,
+        caseObservables: openCase.observables,
+        config,
+        caseUpdatedAt: openCase.updatedAt,
+      });
+
+      if (score > 0) {
+        allScores.push({
+          caseId: openCase.id,
+          caseTitle: openCase.title,
+          score,
+          matchedEntities,
           caseUpdatedAt: openCase.updatedAt,
         });
-
-        if (score > 0) {
-          allScores.push({
-            caseId: openCase.id,
-            caseTitle: openCase.title,
-            score,
-            matchedEntities,
-            caseUpdatedAt: openCase.updatedAt,
-          });
-        }
       }
     }
 
@@ -273,8 +293,13 @@ export const matchAlertsToCases = async ({
     }
   }
 
+  const avgCandidatesPerAlert =
+    alertEntityGroups.size > 0 ? totalCandidatesEvaluated / alertEntityGroups.size : 0;
+
   logger.info(
-    `matchAlertsToCases: ${matched.length} alerts matched to cases, ${unmatched.length} unmatched out of ${alertEntityGroups.size} total`
+    `matchAlertsToCases: ${matched.length} matched, ${unmatched.length} unmatched. ` +
+      `Evaluated avg ${avgCandidatesPerAlert.toFixed(1)} candidate cases/alert ` +
+      `(vs ${indexStats.totalCases} total - ${Math.round((1 - avgCandidatesPerAlert / indexStats.totalCases) * 100)}% reduction via index)`
   );
 
   return {

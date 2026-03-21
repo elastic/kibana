@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ExtractedEntity, ObservableTypeKey, EntityExtractionConfig } from '../types';
 import { getEcsFieldMappings } from './ecs_field_mappings';
+import { validateEntity } from './entity_validators';
 
 const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
@@ -73,6 +74,7 @@ export const extractEntitiesFromAlerts = ({
   const allEntities: ExtractedEntity[] = [];
   let totalFields = 0;
   let fieldsWithValues = 0;
+  let invalidEntitiesFiltered = 0;
 
   for (const alert of alerts) {
     for (const mapping of mappings) {
@@ -86,6 +88,16 @@ export const extractEntitiesFromAlerts = ({
         for (const value of values) {
           const typeKey = mapping.detectIpVersion ? resolveIpType(value) : mapping.observableType;
 
+          // Validate entity before adding (prevents malformed data)
+          if (!validateEntity(typeKey, value)) {
+            invalidEntitiesFiltered++;
+            logger.debug(
+              () =>
+                `Filtered invalid ${typeKey} entity: "${value}" from ${mapping.ecsField} (alert ${alert._id})`
+            );
+            continue;
+          }
+
           if (!isExcluded(typeKey, value, config.exclusionFilters)) {
             allEntities.push({
               typeKey,
@@ -97,6 +109,10 @@ export const extractEntitiesFromAlerts = ({
         }
       }
     }
+  }
+
+  if (invalidEntitiesFiltered > 0) {
+    logger.info(`Filtered ${invalidEntitiesFiltered} invalid entities during extraction`);
   }
 
   // Deduplicate per-alert: same entity value within one alert is redundant,

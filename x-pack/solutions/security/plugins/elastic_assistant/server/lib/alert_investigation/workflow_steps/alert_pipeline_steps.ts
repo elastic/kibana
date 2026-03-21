@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -13,7 +12,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deduplicateAlerts } from '../deduplication';
 import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { DEFAULT_PIPELINE_CONFIG } from '../types';
-import { fetchAlertsByIds } from '../utils';
+import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
 import { PIPELINE_LIMITS, SAFE_ALERTS_INDEX_PATTERN } from '../constants';
 
 const SafeAlertIndexPattern = z
@@ -134,6 +133,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
   outputSchema: DedupOutputSchema,
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
+    const logger = adaptWorkflowLogger(context.logger);
     const {
       alert_ids: alertIds,
       index_pattern: indexPattern,
@@ -148,13 +148,13 @@ export const deduplicateAlertsStep = createServerStepDefinition({
       esClient,
       indexPattern,
       alertIds,
-      logger: context.logger as Logger,
+      logger,
     });
 
     const result = await deduplicateAlerts({
       alerts,
       esClient,
-      logger: context.logger as Logger,
+      logger,
       similarityThreshold: threshold,
     });
 
@@ -201,6 +201,7 @@ export const extractEntitiesStep = createServerStepDefinition({
   outputSchema: ExtractOutputSchema,
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
+    const logger = adaptWorkflowLogger(context.logger);
     const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
 
     if (alertIds.length === 0) {
@@ -211,13 +212,13 @@ export const extractEntitiesStep = createServerStepDefinition({
       esClient,
       indexPattern,
       alertIds,
-      logger: context.logger as Logger,
+      logger,
     });
 
     const result = extractEntitiesFromAlerts({
       alerts,
       config: DEFAULT_PIPELINE_CONFIG.entityExtraction,
-      logger: context.logger as Logger,
+      logger,
     });
 
     return {
