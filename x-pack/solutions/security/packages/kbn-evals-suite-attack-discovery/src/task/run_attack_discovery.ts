@@ -92,26 +92,16 @@ const generateInsights = async ({
     throw new Error('No tool call found in LLM response');
   }
 
-  // Extract token usage with graceful fallback (multiple formats)
-  // Debug: log the full response structure to find where usage data lives
-  const usage = response.usage;
-
-  if (!usage) {
-    // Check if usage is elsewhere in response
-    const responseKeys = Object.keys(response);
-    log.debug(`Response structure: ${JSON.stringify(responseKeys)}`);
-    log.debug(`Full response (first 500 chars): ${JSON.stringify(response).substring(0, 500)}`);
-  }
-
-  const inputTokens =
-    usage?.input_tokens ?? usage?.prompt_tokens ?? usage?.inputTokens ?? 0;
-  const outputTokens =
-    usage?.output_tokens ?? usage?.completion_tokens ?? usage?.outputTokens ?? 0;
+  // Extract token usage from response.tokens (not response.usage!)
+  // executeUntilValid returns tokens in response.tokens, not response.usage
+  const tokens = (response as any).tokens;
+  const inputTokens = tokens?.prompt ?? tokens?.input ?? 0;
+  const outputTokens = tokens?.completion ?? tokens?.output ?? 0;
 
   if (inputTokens > 0 || outputTokens > 0) {
-    log.info(`Token usage captured: input=${inputTokens}, output=${outputTokens}`);
+    log.info(`✅ Tokens captured: prompt=${inputTokens}, completion=${outputTokens}, total=${inputTokens + outputTokens}`);
   } else {
-    log.warning(`No token usage data found in response.usage`);
+    log.warning(`❌ No token data found (checked response.tokens and response.usage)`);
   }
 
   return {
