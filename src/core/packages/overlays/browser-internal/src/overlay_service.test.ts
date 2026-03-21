@@ -9,7 +9,6 @@
 
 import './overlay.test.mocks';
 import React from 'react';
-import { Subject } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
