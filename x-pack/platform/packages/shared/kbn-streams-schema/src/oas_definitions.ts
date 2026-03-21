@@ -6,26 +6,33 @@
  */
 
 /**
- * Registry of kbn-streams-schema Zod v4 schemas that should be emitted as
- * named OAS components (`$ref: '#/components/schemas/<key>'`) rather than
- * inlined at every use site.
- *
- * Pass this object to the OAS integration layer (e.g. call
- * `registerZodV4Component` from `@kbn/router-to-openapispec` for each entry)
- * to activate named references in the generated spec.
+ * Registry of kbn-streams-schema Zod v4 schemas emitted as named OAS components
+ * (`$ref: '#/components/schemas/<key>'`). Each schema carries `.meta({ id })`
+ * at its definition site, so the OAS generator picks it up automatically via
+ * the Zod v4 global registry — no separate registration step required.
  */
 
 import { WiredStream } from './models/ingest/wired';
 import { ClassicStream, ClassicIngest } from './models/ingest/classic';
 import { WiredIngest } from './models/ingest/wired';
+import { QueryStream } from './models/query';
+import { streamDefinitionSchema } from './models/streams';
 import { fieldDefinitionSchema } from './fields';
 import { routingDefinitionSchema } from './models/ingest/routing';
 import { ingestStreamLifecycleSchema } from './models/ingest/lifecycle';
 
 export const streamsOasDefinitions = {
-  // Complete stream definitions
+  /**
+   * Top-level discriminated union of all stream definition variants.
+   * Registered with a `discriminator` extension so OAS code generators can
+   * produce typed structs without inspecting nested properties.
+   */
+  StreamDefinition: streamDefinitionSchema,
+
+  // Individual stream definition variants
   WiredStreamDefinition: WiredStream.Definition.right,
   ClassicStreamDefinition: ClassicStream.Definition.right,
+  QueryStreamDefinition: QueryStream.Definition.right,
 
   // Ingest configs
   WiredIngest: WiredIngest.right,

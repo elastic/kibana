@@ -91,6 +91,7 @@ export namespace WiredStream {
   }
 
   export interface Definition extends IngestBaseStream.Definition {
+    type: 'wired';
     ingest: WiredIngest;
   }
 
@@ -115,9 +116,12 @@ export namespace WiredStream {
   >;
 }
 
-const wiredStreamDefinitionSchema = ingestBaseStreamDefinitionSchema.extend({
-  ingest: wiredIngestSchemaObject,
-});
+const wiredStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
+  .extend({
+    type: z.literal('wired'),
+    ingest: wiredIngestSchemaObject,
+  })
+  .meta({ id: 'WiredStreamDefinition' });
 
 const wiredStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend({
   stream: wiredStreamDefinitionSchema,
@@ -129,7 +133,10 @@ const wiredStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend({
 });
 
 const wiredStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema.extend({
-  stream: ingestBaseStreamUpsertDefinitionSchema.extend({ ingest: wiredIngestUpsertSchemaObject }),
+  stream: ingestBaseStreamUpsertDefinitionSchema.extend({
+    type: z.literal('wired'),
+    ingest: wiredIngestUpsertSchemaObject,
+  }),
 });
 
 export const WiredStream: {

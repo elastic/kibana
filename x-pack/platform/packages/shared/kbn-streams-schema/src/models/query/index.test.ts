@@ -12,6 +12,7 @@ describe('QueryStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'query' as const,
         name: 'query-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -58,6 +59,7 @@ describe('QueryStream', () => {
     it.each([
       {
         stream: {
+          type: 'query' as const,
           name: 'query-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -118,6 +120,7 @@ describe('QueryStream', () => {
     it.each([
       {
         stream: {
+          type: 'query' as const,
           description: '',
           query: {
             view: 'stream.query-stream',

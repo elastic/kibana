@@ -33,6 +33,7 @@ function createQueryStreamRequest(
 ): Streams.QueryStream.UpsertRequest {
   return {
     stream: {
+      type: 'query',
       description: '',
       query: {
         view: viewName,
@@ -259,6 +260,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const classicStreamBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
+          type: 'classic',
           description: 'Classic stream for query stream validation',
           ingest: {
             lifecycle: { inherit: {} },

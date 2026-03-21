@@ -81,3 +81,29 @@ Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.ClassicStream = nClassicStream;
 Streams.QueryStream = nQueryStream;
+
+/**
+ * Flat Zod union of all three stream definition schemas, discriminated by the
+ * `type` literal field. Registered as a named OAS component (`StreamDefinition`)
+ * with a `discriminator` extension so code generators can produce properly typed
+ * sealed-class / tagged-union structs.
+ */
+export const streamDefinitionSchema = z
+  .union([
+    nWiredStream.Definition.right,
+    nClassicStream.Definition.right,
+    nQueryStream.Definition.right,
+  ])
+  .meta({
+    id: 'StreamDefinition',
+    openapi: {
+      discriminator: {
+        propertyName: 'type',
+        mapping: {
+          wired: '#/components/schemas/WiredStreamDefinition',
+          classic: '#/components/schemas/ClassicStreamDefinition',
+          query: '#/components/schemas/QueryStreamDefinition',
+        },
+      },
+    },
+  });
