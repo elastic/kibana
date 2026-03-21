@@ -11,8 +11,6 @@ import * as i18n from './translations';
 
 export const CORRELATION_TYPE_CONFIG = {
   type: FIELD_TYPES.SELECT,
-  label: i18n.CORRELATION_TYPE_LABEL,
-  helpText: i18n.CORRELATION_TYPE_HELP_TEXT,
   defaultValue: 'temporal' as unknown,
 };
 

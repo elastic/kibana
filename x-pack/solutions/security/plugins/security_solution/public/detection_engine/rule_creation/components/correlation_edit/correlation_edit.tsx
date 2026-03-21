@@ -65,6 +65,12 @@ const TIMESPAN_COMPONENT_PROPS = {
   minValue: 1,
 };
 
+const CORRELATION_TYPE_LABEL_WITH_ICON = (
+  <>
+    {i18n.CORRELATION_TYPE_LABEL} <CorrelationInfoIcon />
+  </>
+);
+
 interface CorrelationEditProps {
   path: string;
 }
@@ -127,11 +133,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       return (
         <>
           <EuiFormRow
-            label={
-              <>
-                {i18n.CORRELATION_TYPE_LABEL} <CorrelationInfoIcon />
-              </>
-            }
+            label={CORRELATION_TYPE_LABEL_WITH_ICON}
             helpText={i18n.CORRELATION_TYPE_HELP_TEXT}
             fullWidth
           >
@@ -140,6 +142,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
               euiFieldProps={{
                 options: CORRELATION_TYPE_OPTIONS,
                 fullWidth: true,
+                hasNoInitialSelection: false,
                 'data-test-subj': 'correlationType',
               }}
             />
@@ -155,38 +158,26 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
             />
           )}
 
-          <EuiFormRow
-            label={i18n.CORRELATION_RULES_LABEL}
-            helpText={i18n.CORRELATION_RULES_HELP_TEXT}
-            fullWidth
-          >
-            <Field
-              field={correlationRules}
-              euiFieldProps={{
-                fullWidth: true,
-                noSuggestions: false,
-                placeholder: 'Enter rule IDs',
-                'data-test-subj': 'correlationRules',
-              }}
-            />
-          </EuiFormRow>
+          <Field
+            field={correlationRules}
+            euiFieldProps={{
+              fullWidth: true,
+              noSuggestions: false,
+              placeholder: 'Enter rule IDs',
+              'data-test-subj': 'correlationRules',
+            }}
+          />
           <EuiSpacer size="m" />
 
-          <EuiFormRow
-            label={i18n.CORRELATION_GROUP_BY_LABEL}
-            helpText={i18n.CORRELATION_GROUP_BY_HELP_TEXT}
-            fullWidth
-          >
-            <Field
-              field={correlationGroupBy}
-              euiFieldProps={{
-                fullWidth: true,
-                noSuggestions: false,
-                placeholder: 'host.name, user.name',
-                'data-test-subj': 'correlationGroupBy',
-              }}
-            />
-          </EuiFormRow>
+          <Field
+            field={correlationGroupBy}
+            euiFieldProps={{
+              fullWidth: true,
+              noSuggestions: false,
+              placeholder: 'host.name, user.name',
+              'data-test-subj': 'correlationGroupBy',
+            }}
+          />
           <EuiSpacer size="m" />
 
           <EuiFormRow
@@ -262,47 +253,32 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
             <>
               <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
                 <EuiFlexItem grow={2}>
-                  <EuiFormRow
-                    label={i18n.CORRELATION_CONDITION_OPERATOR_LABEL}
-                    helpText={i18n.CORRELATION_CONDITION_OPERATOR_HELP_TEXT}
-                  >
-                    <SelectField
-                      field={correlationConditionOperator}
-                      euiFieldProps={{
-                        options: CONDITION_OPERATOR_OPTIONS,
-                        'data-test-subj': 'correlationConditionOperator',
-                      }}
-                    />
-                  </EuiFormRow>
+                  <SelectField
+                    field={correlationConditionOperator}
+                    euiFieldProps={{
+                      options: CONDITION_OPERATOR_OPTIONS,
+                      'data-test-subj': 'correlationConditionOperator',
+                    }}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={1}>
-                  <EuiFormRow
-                    label={i18n.CORRELATION_CONDITION_VALUE_LABEL}
-                    helpText={i18n.CORRELATION_CONDITION_VALUE_HELP_TEXT}
-                  >
-                    <Field
-                      field={correlationConditionValue}
-                      euiFieldProps={{
-                        type: 'number',
-                        min: 1,
-                        'data-test-subj': 'correlationConditionValue',
-                      }}
-                    />
-                  </EuiFormRow>
+                  <Field
+                    field={correlationConditionValue}
+                    euiFieldProps={{
+                      type: 'number',
+                      min: 1,
+                      'data-test-subj': 'correlationConditionValue',
+                    }}
+                  />
                 </EuiFlexItem>
                 {hasConditionField && (
                   <EuiFlexItem grow={2}>
-                    <EuiFormRow
-                      label={i18n.CORRELATION_CONDITION_FIELD_LABEL}
-                      helpText={i18n.CORRELATION_CONDITION_FIELD_HELP_TEXT}
-                    >
-                      <Field
-                        field={correlationConditionField}
-                        euiFieldProps={{
-                          'data-test-subj': 'correlationConditionField',
-                        }}
-                      />
-                    </EuiFormRow>
+                    <Field
+                      field={correlationConditionField}
+                      euiFieldProps={{
+                        'data-test-subj': 'correlationConditionField',
+                      }}
+                    />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

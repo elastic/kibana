@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { IRuleExecutionLogForExecutors } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const ENRICHMENT_FIELDS = [
   'process.name',
@@ -50,10 +51,14 @@ const MGET_BATCH_SIZE = 5000;
 export const fetchContributingAlerts = async (
   esClient: ElasticsearchClient,
   alertIds: Set<string>,
-  alertsIndices: string[]
+  alertsIndices: string[],
+  logger?: IRuleExecutionLogForExecutors
 ): Promise<Map<string, Record<string, unknown>>> => {
   const results = new Map<string, Record<string, unknown>>();
   if (alertIds.size === 0) return results;
+
+  let notFoundCount = 0;
+  let errorCount = 0;
 
   const idArray = [...alertIds];
   for (let offset = 0; offset < idArray.length; offset += MGET_BATCH_SIZE) {
@@ -69,7 +74,40 @@ export const fetchContributingAlerts = async (
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._source) {
         results.set(doc._id, doc._source as Record<string, unknown>);
+      } else if ('found' in doc && !doc.found) {
+        notFoundCount++;
+        if (logger && notFoundCount <= 10) {
+          // Log first 10 missing alerts to avoid log spam
+          logger.warn(
+            `Contributing alert not found during enrichment: ${doc._id} ` +
+              `(may be deleted or in inaccessible space)`
+          );
+        }
+      } else if ('error' in doc) {
+        errorCount++;
+        if (logger && errorCount <= 10) {
+          logger.error(
+            `Error fetching contributing alert ${doc._id}: ${JSON.stringify(doc.error)}`
+          );
+        }
       }
+    }
+  }
+
+  // Log enrichment success rate
+  const successRate = (results.size / alertIds.size) * 100;
+  if (logger) {
+    logger.debug(
+      `Enrichment completed: ${results.size}/${alertIds.size} alerts fetched ` +
+        `(${successRate.toFixed(
+          1
+        )}% success rate, ${notFoundCount} not found, ${errorCount} errors)`
+    );
+    if (successRate < 90) {
+      logger.warn(
+        `Low enrichment success rate: ${successRate.toFixed(1)}% ` +
+          `(${notFoundCount} alerts not found, ${errorCount} fetch errors)`
+      );
     }
   }
 

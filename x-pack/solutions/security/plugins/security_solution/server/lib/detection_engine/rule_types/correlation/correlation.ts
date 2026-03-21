@@ -43,6 +43,7 @@ import {
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 const MAX_BUILDING_BLOCKS_PER_GROUP = 500;
+const MAX_TOTAL_ENRICHMENT = 10_000;
 
 export const correlationExecutor = async ({
   sharedParams,
@@ -74,6 +75,49 @@ export const correlationExecutor = async ({
   return withSecuritySpan('correlationExecutor', async () => {
     const result = createSearchAfterReturnType();
     const selfRuleId = completeRule.alertId;
+    const executionStart = performance.now();
+
+    // Track updated state (avoid mutation for atomic updates)
+    let updatedState = { ...state };
+
+    // Circuit breaker: Skip execution if too many consecutive timeouts
+    const consecutiveTimeouts = updatedState.consecutiveTimeouts ?? 0;
+    if (consecutiveTimeouts >= 3 && updatedState.lastTimeoutTimestamp) {
+      const hoursSinceLastTimeout =
+        (Date.now() - new Date(updatedState.lastTimeoutTimestamp).getTime()) / (1000 * 60 * 60);
+
+      if (hoursSinceLastTimeout < 1) {
+        ruleExecutionLogger.warn(
+          `Skipping execution due to circuit breaker: ${consecutiveTimeouts} consecutive ` +
+            `timeouts in last hour. Rule may need tuning (reduce time window or add filters).`
+        );
+        return {
+          ...result,
+          success: false,
+          warning: 'Circuit breaker triggered - rule execution skipped due to consecutive timeouts',
+          state: updatedState,
+          ...(isLoggedRequestsEnabled ? { loggedRequests: [] } : {}),
+        };
+      } else {
+        // Reset circuit breaker after 1 hour
+        ruleExecutionLogger.info(
+          `Resetting circuit breaker after 1 hour cooldown (had ${consecutiveTimeouts} timeouts)`
+        );
+        updatedState = {
+          ...updatedState,
+          consecutiveTimeouts: 0,
+          lastTimeoutTimestamp: undefined,
+        };
+      }
+    }
+
+    // Track phase timings for observability
+    const phaseTiming = {
+      esqlQuery: 0,
+      enrichment: 0,
+      alertConstruction: 0,
+      bulkCreate: 0,
+    };
 
     const compiledQuery = compileCorrelationQuery(
       ruleParams.correlation,
@@ -93,7 +137,7 @@ export const correlationExecutor = async ({
         primaryTimestamp,
         secondaryTimestamp,
         exceptionFilter,
-        excludedDocuments: state.excludedDocuments ?? {},
+        excludedDocuments: updatedState.excludedDocuments ?? {},
         ruleExecutionTimeout,
       });
 
@@ -109,6 +153,7 @@ export const correlationExecutor = async ({
       });
 
       const esqlSearchDuration = performance.now() - esqlSearchStart;
+      phaseTiming.esqlQuery = esqlSearchDuration;
       result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
       ruleExecutionLogger.debug(
@@ -128,8 +173,20 @@ export const correlationExecutor = async ({
 
       const allAlertIds = new Set<string>();
       for (const group of correlationGroups) {
+        if (allAlertIds.size >= MAX_TOTAL_ENRICHMENT) {
+          ruleExecutionLogger.warn(
+            `Reached global enrichment cap of ${MAX_TOTAL_ENRICHMENT} alerts. ` +
+              `Remaining ${
+                correlationGroups.length - correlationGroups.indexOf(group)
+              } groups will not be fully enriched.`
+          );
+          break;
+        }
         const ids = Array.isArray(group.alert_ids) ? group.alert_ids : [];
         for (const id of (ids as string[]).slice(0, MAX_BUILDING_BLOCKS_PER_GROUP)) {
+          if (allAlertIds.size >= MAX_TOTAL_ENRICHMENT) {
+            break;
+          }
           allAlertIds.add(id);
         }
       }
@@ -139,15 +196,14 @@ export const correlationExecutor = async ({
         ruleParams.correlation.targetSpaces
       );
 
+      const enrichmentStart = performance.now();
       const contributingAlerts = await fetchContributingAlerts(
         services.scopedClusterClient.asCurrentUser,
         allAlertIds,
-        enrichmentIndices
+        enrichmentIndices,
+        ruleExecutionLogger
       );
-
-      ruleExecutionLogger.debug(
-        `Fetched ${contributingAlerts.size} of ${allAlertIds.size} contributing alert documents for enrichment`
-      );
+      phaseTiming.enrichment = performance.now() - enrichmentStart;
 
       const wrappedAlerts: Array<{
         _id: string;
@@ -279,6 +335,7 @@ export const correlationExecutor = async ({
       }
 
       const alertConstructionDuration = performance.now() - alertConstructionStart;
+      phaseTiming.alertConstruction = alertConstructionDuration;
       ruleExecutionLogger.debug(
         `Alert construction completed in ${alertConstructionDuration.toFixed(
           1
@@ -289,12 +346,14 @@ export const correlationExecutor = async ({
         WrappedAlert<DetectionAlertLatest>
       >;
 
+      const bulkCreateStart = performance.now();
       const bulkCreateResult = await bulkCreate({
         wrappedAlerts: typedAlerts,
         services,
         sharedParams: sharedParams as SecuritySharedParams,
         maxAlerts: tuple.maxSignals,
       });
+      phaseTiming.bulkCreate = performance.now() - bulkCreateStart;
 
       addToSearchAfterReturn({ current: result, next: bulkCreateResult });
 
@@ -307,14 +366,56 @@ export const correlationExecutor = async ({
         signalsCount: result.createdSignalsCount,
         responseActions: completeRule.ruleParams.responseActions,
       });
+
+      // Log phase timing breakdown for observability
+      const totalExecutionTime = performance.now() - executionStart;
+      ruleExecutionLogger.info(
+        `Correlation execution completed in ${totalExecutionTime.toFixed(1)}ms ` +
+          `(query: ${phaseTiming.esqlQuery.toFixed(1)}ms, ` +
+          `enrichment: ${phaseTiming.enrichment.toFixed(1)}ms, ` +
+          `construction: ${phaseTiming.alertConstruction.toFixed(1)}ms, ` +
+          `bulk: ${phaseTiming.bulkCreate.toFixed(1)}ms)`
+      );
+
+      // Reset circuit breaker on successful execution
+      updatedState = {
+        ...updatedState,
+        consecutiveTimeouts: 0,
+        lastTimeoutTimestamp: undefined,
+      };
     } catch (error) {
-      result.errors.push(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      result.errors.push(errorMessage);
       result.success = false;
+
+      // Update circuit breaker state if this was a timeout
+      const isTimeout =
+        errorMessage.toLowerCase().includes('timeout') ||
+        errorMessage.toLowerCase().includes('timed out');
+      if (isTimeout) {
+        const newTimeoutCount = (updatedState.consecutiveTimeouts ?? 0) + 1;
+        updatedState = {
+          ...updatedState,
+          consecutiveTimeouts: newTimeoutCount,
+          lastTimeoutTimestamp: new Date().toISOString(),
+        };
+        ruleExecutionLogger.warn(
+          `Correlation execution timeout (${newTimeoutCount} consecutive). ` +
+            `Circuit breaker will trigger after 3 timeouts within 1 hour.`
+        );
+      } else {
+        // Reset on non-timeout errors
+        updatedState = {
+          ...updatedState,
+          consecutiveTimeouts: 0,
+          lastTimeoutTimestamp: undefined,
+        };
+      }
     }
 
     return {
       ...result,
-      state: { ...state },
+      state: updatedState,
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };
   });

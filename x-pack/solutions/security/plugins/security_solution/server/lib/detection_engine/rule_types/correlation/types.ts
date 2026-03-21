@@ -11,4 +11,6 @@ import type { ExcludedDocument } from '../esql/types';
 export interface CorrelationState extends RuleTypeState {
   excludedDocuments?: Record<string, ExcludedDocument[]>;
   isLoggedRequestsEnabled?: boolean;
+  consecutiveTimeouts?: number;
+  lastTimeoutTimestamp?: string;
 }
