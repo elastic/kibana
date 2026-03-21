@@ -41,7 +41,7 @@ export interface ApiServicesFixture {
 }
 
 /**
- * This fixture provides a helper to interact with the Kibana APIs like Alerting, Cases, Fleet, Spaces, Streams, etc.
+ * This fixture provides a helper to interact with the Kibana APIs like Alerting, Cases, Fleet, Streams, Spaces, etc.
  */
 export const apiServicesFixture = coreWorkerFixtures.extend<
   {},
