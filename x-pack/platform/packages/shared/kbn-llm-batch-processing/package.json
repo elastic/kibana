@@ -2,5 +2,8 @@
   "name": "@kbn/llm-batch-processing",
   "private": true,
   "version": "1.0.0",
-  "license": "Elastic License 2.0"
+  "description": "Hierarchical batch processing for LLM workloads",
+  "license": "Elastic License 2.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
 }
