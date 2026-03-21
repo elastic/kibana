@@ -9,6 +9,17 @@
 
 /**
  * Local shapes for the Streams HTTP API (no @kbn/streams-schema / @kbn/streamlang dependency).
+ *
+ * `getStreamDefinition` is typed narrowly (mostly `ingest` for wired/classic helpers). The HTTP
+ * payload can include full `@kbn/streams-schema` fields (`type`, `name`, `description`, etc.).
+ * When a test or package already depends on `@kbn/streams-schema` and needs a real definition type,
+ * cast at the call site, for example:
+ *
+ * ```ts
+ * import type { Streams } from '@kbn/streams-schema';
+ * const { stream } = await apiServices.streams.getStreamDefinition('logs.otel');
+ * useStream(stream as Streams.all.Definition);
+ * ```
  */
 
 export type RoutingStatus = 'enabled' | 'disabled';

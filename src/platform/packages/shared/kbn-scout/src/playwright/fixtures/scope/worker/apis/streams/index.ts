@@ -30,6 +30,7 @@ export interface StreamsApiService {
     condition: Condition,
     status?: RoutingStatus
   ) => Promise<void>;
+  /** See `./types` JSDoc for casting to `@kbn/streams-schema` definition types in tests. */
   getStreamDefinition: (streamName: string) => Promise<StreamsIngestGetResponse>;
   deleteStream: (streamName: string) => Promise<void>;
   updateStream: (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => Promise<void>;
