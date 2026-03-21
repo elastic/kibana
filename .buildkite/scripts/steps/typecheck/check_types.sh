@@ -8,4 +8,5 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check Types
 
-node scripts/type_check --with-archive
+node scripts/type_check --clean-cache
+time node scripts/type_check
