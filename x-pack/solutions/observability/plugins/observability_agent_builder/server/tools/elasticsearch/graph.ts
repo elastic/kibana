@@ -90,19 +90,20 @@ const isDangerousOperation = (
   return methods.some((method) => DANGEROUS_HTTP_METHODS.has(method));
 };
 
-const schemaTypeToZod = (prop: ToolSchemaType): z.ZodTypeAny => {
+const schemaTypeToZod = (prop: ToolSchemaType, required = false): z.ZodTypeAny => {
   const desc = prop.description ?? '';
+  const withOptional = (schema: z.ZodTypeAny) => (required ? schema : schema.optional());
   switch (prop.type) {
     case 'number':
-      return z.number().optional().describe(desc);
+      return withOptional(z.number().describe(desc));
     case 'boolean':
-      return z.boolean().optional().describe(desc);
+      return withOptional(z.boolean().describe(desc));
     case 'array':
-      return z.array(z.any()).optional().describe(desc);
+      return withOptional(z.array(z.any()).describe(desc));
     case 'object':
-      return z.record(z.any()).optional().describe(desc);
+      return withOptional(z.record(z.string(), z.any()).describe(desc));
     default:
-      return z.string().optional().describe(desc);
+      return withOptional(z.string().describe(desc));
   }
 };
 
@@ -113,8 +114,10 @@ const schemaTypeToZod = (prop: ToolSchemaType): z.ZodTypeAny => {
  * (often over-simplified) OpenAPI spec types.
  */
 const toolSchemaToZod = (schema: ToolSchema): z.ZodObject<Record<string, z.ZodTypeAny>> => {
+  const requiredFields = new Set(schema.required ?? []);
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const [key, prop] of Object.entries(schema.properties)) {
+    const isRequired = requiredFields.has(key);
     if (key === 'body' && prop.type === 'object') {
       const bodyShape: Record<string, z.ZodTypeAny> = {};
       if ('properties' in prop && prop.properties) {
@@ -131,7 +134,7 @@ const toolSchemaToZod = (schema: ToolSchema): z.ZodObject<Record<string, z.ZodTy
         .optional()
         .describe(prop.description ?? 'The request body');
     } else {
-      shape[key] = schemaTypeToZod(prop);
+      shape[key] = schemaTypeToZod(prop, isRequired);
     }
   }
   return z.object(shape);
