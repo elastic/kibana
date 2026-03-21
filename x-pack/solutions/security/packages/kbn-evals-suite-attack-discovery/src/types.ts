@@ -57,6 +57,18 @@ export interface AttackDiscoveryTaskOutput {
   insights: AttackDiscovery[] | null;
   errors?: string[];
   raw?: unknown;
+  metadata?: {
+    latency?: {
+      startTime: number;
+      endTime: number;
+      durationMs: number;
+    };
+    tokens?: {
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+    };
+  };
 }
 
 export type AttackDiscoveryDatasetMetadata = Record<string, unknown> & {

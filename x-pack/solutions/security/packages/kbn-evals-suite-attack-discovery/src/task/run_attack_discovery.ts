@@ -62,7 +62,7 @@ const generateInsights = async ({
   alerts: string[];
   combinedMaybePartialResults?: string;
   continuePrompt?: string;
-}): Promise<{ insights: AttackDiscovery[] }> => {
+}): Promise<{ insights: AttackDiscovery[]; usage?: { inputTokens: number; outputTokens: number } }> => {
   const response = await executeUntilValid({
     prompt: AttackDiscoveryGenerationPrompt,
     inferenceClient,
@@ -88,7 +88,17 @@ const generateInsights = async ({
     throw new Error('No tool call found in LLM response');
   }
 
-  return toolCall.function.arguments as { insights: AttackDiscovery[] };
+  // Extract token usage with graceful fallback (multiple formats)
+  const usage = response.usage;
+  const inputTokens =
+    usage?.input_tokens ?? usage?.prompt_tokens ?? usage?.inputTokens ?? 0;
+  const outputTokens =
+    usage?.output_tokens ?? usage?.completion_tokens ?? usage?.outputTokens ?? 0;
+
+  return {
+    insights: toolCall.function.arguments as AttackDiscovery[],
+    usage: { inputTokens, outputTokens },
+  };
 };
 
 export const runAttackDiscovery = async ({
@@ -102,6 +112,10 @@ export const runAttackDiscovery = async ({
   input: AttackDiscoveryTaskInput;
   log: ToolingLog;
 }): Promise<AttackDiscoveryTaskOutput> => {
+  const startTime = Date.now();
+  let inputTokens = 0;
+  let outputTokens = 0;
+
   try {
     if (input.mode === 'bundledAlerts') {
       const prompt = await loadDefaultPrompt();
@@ -111,7 +125,20 @@ export const runAttackDiscovery = async ({
         prompt,
         alerts: toAlertStrings(input.anonymizedAlerts),
       });
-      return { insights: res.insights };
+
+      if (res.usage) {
+        inputTokens = res.usage.inputTokens;
+        outputTokens = res.usage.outputTokens;
+      }
+
+      const endTime = Date.now();
+      return {
+        insights: res.insights,
+        metadata: {
+          latency: { startTime, endTime, durationMs: endTime - startTime },
+          tokens: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
+        },
+      };
     }
 
     if (input.mode === 'searchAlerts') {
@@ -131,7 +158,20 @@ export const runAttackDiscovery = async ({
         alerts: toAlertStrings(alerts),
       });
 
-      return { insights: res.insights, raw: { fetchedAlerts: alerts.length } };
+      if (res.usage) {
+        inputTokens = res.usage.inputTokens;
+        outputTokens = res.usage.outputTokens;
+      }
+
+      const endTime = Date.now();
+      return {
+        insights: res.insights,
+        raw: { fetchedAlerts: alerts.length },
+        metadata: {
+          latency: { startTime, endTime, durationMs: endTime - startTime },
+          tokens: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
+        },
+      };
     }
 
     const prompt = input.prompt ?? (await loadDefaultPrompt());
@@ -149,10 +189,31 @@ export const runAttackDiscovery = async ({
       continuePrompt: combinedMaybePartialResults.length > 0 ? continuePrompt : undefined,
     });
 
-    return { insights: res.insights };
+    if (res.usage) {
+      inputTokens = res.usage.inputTokens;
+      outputTokens = res.usage.outputTokens;
+    }
+
+    const endTime = Date.now();
+    return {
+      insights: res.insights,
+      metadata: {
+        latency: { startTime, endTime, durationMs: endTime - startTime },
+        tokens: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
+      },
+    };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error(new Error(`runAttackDiscovery failed: ${message}`, { cause: e as Error }));
-    return { insights: null, errors: [message] };
+
+    const endTime = Date.now();
+    return {
+      insights: null,
+      errors: [message],
+      metadata: {
+        latency: { startTime, endTime, durationMs: endTime - startTime },
+        tokens: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
+      },
+    };
   }
 };
