@@ -15,7 +15,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../../../../common_attributes.gen';
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery_api_alert.gen';

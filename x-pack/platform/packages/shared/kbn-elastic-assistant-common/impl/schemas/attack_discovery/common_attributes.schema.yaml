@@ -377,3 +377,43 @@ components:
           enum:
             - invokeAI
             - invokeStream
+        incrementalMode:
+          type: string
+          enum:
+            - delta
+            - progressive
+          description: |
+            Incremental processing mode for small-context models:
+            - delta: Process only NEW alerts since last run (continuous monitoring)
+            - progressive: Process large datasets in bounded rounds (one-time analysis)
+            If omitted, uses standard (non-incremental) processing.
+        sessionId:
+          type: string
+          description: |
+            Session identifier for tracking processed alerts (required for delta mode).
+            Use a persistent value (e.g., "monitoring-{space-id}") for continuous monitoring.
+            Auto-generated if not provided.
+        incrementalConfig:
+          type: object
+          description: Configuration for incremental processing modes
+          properties:
+            alertsPerRound:
+              type: integer
+              default: 50
+              description: Number of alerts to process per round (affects context size)
+            maxRounds:
+              type: integer
+              default: 20
+              description: Maximum number of rounds to process
+            mergeStrategy:
+              type: string
+              enum:
+                - rule-based
+              default: rule-based
+              description: Strategy for merging insights across rounds
+            similarityThreshold:
+              type: number
+              default: 0.8
+              minimum: 0
+              maximum: 1
+              description: Threshold for title similarity when merging insights (0-1)

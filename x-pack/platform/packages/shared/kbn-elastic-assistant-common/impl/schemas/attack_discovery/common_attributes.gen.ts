@@ -345,4 +345,42 @@ Example: .alerts-security.alerts-default
   size: z.number(),
   start: z.string().optional(),
   subAction: z.enum(['invokeAI', 'invokeStream']),
+  /**
+      * Incremental processing mode for small-context models:
+- delta: Process only NEW alerts since last run (continuous monitoring)
+- progressive: Process large datasets in bounded rounds (one-time analysis)
+If omitted, uses standard (non-incremental) processing.
+
+      */
+  incrementalMode: z.enum(['delta', 'progressive']).optional(),
+  /**
+      * Session identifier for tracking processed alerts (required for delta mode).
+Use a persistent value (e.g., "monitoring-{space-id}") for continuous monitoring.
+Auto-generated if not provided.
+
+      */
+  sessionId: z.string().optional(),
+  /**
+   * Configuration for incremental processing modes
+   */
+  incrementalConfig: z
+    .object({
+      /**
+       * Number of alerts to process per round (affects context size)
+       */
+      alertsPerRound: z.number().int().optional().default(50),
+      /**
+       * Maximum number of rounds to process
+       */
+      maxRounds: z.number().int().optional().default(20),
+      /**
+       * Strategy for merging insights across rounds
+       */
+      mergeStrategy: z.literal('rule-based').optional().default('rule-based'),
+      /**
+       * Threshold for title similarity when merging insights (0-1)
+       */
+      similarityThreshold: z.number().min(0).max(1).optional().default(0.8),
+    })
+    .optional(),
 });
