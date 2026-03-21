@@ -20,9 +20,11 @@ import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
+import { FlyoutContentId } from '../../common/constants';
 
 export const FULL_TRACE_WATERFALL_RENDER_DELAY_MS = 150;
 
@@ -59,11 +61,16 @@ export const FullScreenWaterfall = ({
   onCloseFlyout,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
-  const { discoverShared } = getUnifiedDocViewerServices();
+  const { analytics, discoverShared } = getUnifiedDocViewerServices();
   const FullTraceWaterfall = discoverShared.features.registry.getById(
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  useDocViewerViewedEvent({
+    reportEvent: analytics.reportEvent,
+    contentId: FlyoutContentId.TRACE_TIMELINE,
+  });
 
   /*
    * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers

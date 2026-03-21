@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DocViewer,
-  type DocViewerProps,
-  type DocViewerApi,
-  type DocViewerRestorableState,
-  DocViewsRegistry,
-  ElasticRequestState,
-  FieldName,
-  registerDocViewerAnalyticsEvents,
-  type UseDocViewerTabViewedEventParams,
-  type UseDocViewerViewedEventParams,
-  useDocViewerTabViewedEvent,
-  useDocViewerViewedEvent,
-} from './src';
+export const DOC_VIEWER_VIEWED_EVENT_TYPE = 'unified_doc_viewer_viewed';
+export const DOC_VIEWER_VIEWED_ROOT_CONTENT_ID = 'doc_detail';
