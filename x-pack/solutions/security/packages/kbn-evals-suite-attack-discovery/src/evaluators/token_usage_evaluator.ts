@@ -34,16 +34,10 @@ export const createTokenUsageEvaluator = (): Evaluator<
         };
       }
 
-      // Score based on efficiency (lower is better)
-      // <50K tokens = 1.0, 50-100K = 0.7, >100K = 0.3
-      const totalK = tokens.totalTokens / 1000;
-      let score = 1.0;
-
-      if (totalK > 50 && totalK <= 100) {
-        score = 0.7;
-      } else if (totalK > 100) {
-        score = 0.3;
-      }
+      // Use raw token count as score for accurate comparison
+      // Score = total tokens (lower is better)
+      // This allows direct comparison: baseline - treatment = tokens saved
+      const score = tokens.totalTokens;
 
       return {
         score,
@@ -52,7 +46,7 @@ export const createTokenUsageEvaluator = (): Evaluator<
           inputTokens: tokens.inputTokens,
           outputTokens: tokens.outputTokens,
           totalTokens: tokens.totalTokens,
-          totalK,
+          totalK: Math.round((tokens.totalTokens / 1000) * 10) / 10,
         },
       };
     },

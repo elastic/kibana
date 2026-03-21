@@ -34,16 +34,14 @@ export const createLatencyEvaluator = (): Evaluator<
         };
       }
 
-      // Score inversely proportional to latency
-      // Sub-10s = 1.0, 10-30s = 0.5, >30s = 0.2
+      // Use raw duration in seconds as score for accurate comparison
+      // Lower is better (but all scores are positive)
+      // Divide by 1000 to normalize to 0-1 range roughly
       const durationSec = latency.durationMs / 1000;
-      let score = 1.0;
 
-      if (durationSec > 10 && durationSec <= 30) {
-        score = 0.5;
-      } else if (durationSec > 30) {
-        score = 0.2;
-      }
+      // Score: 1.0 represents 1 second, so 50s = score 50.0
+      // This allows direct numerical comparison: lower score = faster
+      const score = durationSec;
 
       return {
         score,
@@ -51,6 +49,7 @@ export const createLatencyEvaluator = (): Evaluator<
         metadata: {
           durationMs: latency.durationMs,
           durationSec,
+          durationMin: Math.round((durationSec / 60) * 100) / 100,
         },
       };
     },
