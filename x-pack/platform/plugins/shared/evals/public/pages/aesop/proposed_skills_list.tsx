@@ -21,8 +21,10 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiToolTip,
+  EuiSteps,
 } from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
+import { useHistory } from 'react-router-dom';
 import { useEvalsApi } from '../../hooks/use_evals_api';
 import { SkillReviewFlyout } from './components/skill_review_flyout';
 
@@ -50,6 +52,7 @@ interface ProposedSkill {
 
 export const ProposedSkillsList = () => {
   const api = useEvalsApi();
+  const history = useHistory();
   const [selectedSkill, setSelectedSkill] = useState<ProposedSkill | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending_review'>('pending_review');
 
@@ -223,22 +226,60 @@ export const ProposedSkillsList = () => {
           {/* Skills table */}
           {skills.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
-              title={<h2>No proposed skills</h2>}
+              iconType="sparkles"
+              title={<h2>No Skills Discovered Yet</h2>}
               body={
-                <p>
-                  Run self-exploration to discover patterns and generate skills.
-                  <br />
-                  Go to <strong>Exploration Dashboard</strong> to start.
-                </p>
+                <>
+                  <p>
+                    AESOP hasn't discovered any skills yet. Start an exploration to automatically
+                    identify patterns in your data and generate Agent Builder skills.
+                  </p>
+                  <EuiSpacer size="m" />
+                  <EuiSteps
+                    steps={[
+                      {
+                        title: 'Navigate to Exploration Dashboard',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            Go to the exploration page to configure and start discovery
+                          </EuiText>
+                        ),
+                      },
+                      {
+                        title: 'Trigger exploration',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            Set agent role and scoped indices, then click "Start Exploration"
+                          </EuiText>
+                        ),
+                      },
+                      {
+                        title: 'Wait for discovery',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            AESOP will autonomously explore your data (~15 minutes)
+                          </EuiText>
+                        ),
+                      },
+                      {
+                        title: 'Review skills here',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            Return to this page to validate and approve discovered skills
+                          </EuiText>
+                        ),
+                      },
+                    ]}
+                  />
+                </>
               }
               actions={
                 <EuiButton
                   iconType="play"
                   fill
-                  href="/app/evals/aesop/exploration"
+                  onClick={() => history.push('/aesop/exploration')}
                 >
-                  Start Exploration
+                  Go to Exploration Dashboard
                 </EuiButton>
               }
             />
