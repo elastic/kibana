@@ -76,3 +76,14 @@ export interface IdentitySourceFields {
 }
 
 export type { Entity } from './domain/definitions/entity.gen';
+
+export {
+  ENTITY_LATEST,
+  ENTITY_UPDATES,
+  ENTITY_HISTORY,
+  ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+  getEntitiesAliasPattern,
+  getLatestEntitiesIndexName,
+} from './domain/entity_index';
