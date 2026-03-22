@@ -63,7 +63,6 @@ const resolvePanelsFromVisualizationAttachment = (
       panelId: uuidv4(),
       visualization: visualization as LensApiSchemaType,
       title,
-      ...(query ? { query } : {}),
       sourceAttachmentId: attachmentId,
     },
   ];
