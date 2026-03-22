@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { EvalsRequestHandlerContext } from '../../types';
+import { RateLimiterService, DEFAULT_RATE_LIMITS } from '../../lib/aesop/security/rate_limiter';
 
 const runSkillValidationParamsSchema = z.object({
   skillId: z.string(),
@@ -56,6 +57,25 @@ export function registerRunSkillValidationRoute(router: IRouter<EvalsRequestHand
         }
 
         try {
+          // Rate limiting check
+          const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, context.logger);
+          const userId = request.auth.credentials?.username || 'anonymous';
+          const rateLimit = await rateLimiter.checkRateLimit(userId, 'validation');
+
+          if (!rateLimit.allowed) {
+            return response.customError({
+              statusCode: 429,
+              body: {
+                message: `Rate limit exceeded. You can run 10 validations per hour. Try again in ${rateLimit.retryAfterSeconds} seconds.`,
+              },
+              headers: {
+                'Retry-After': rateLimit.retryAfterSeconds!.toString(),
+                'X-RateLimit-Limit': rateLimit.limit.toString(),
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': new Date(rateLimit.resetAt!).toISOString(),
+              },
+            });
+          }
           // 1. Load skill
           const skillDoc = await esClient.get({
             index: '.aesop-proposed-skills',
@@ -69,6 +89,8 @@ export function registerRunSkillValidationRoute(router: IRouter<EvalsRequestHand
             skill_name: skill.name,
             convergence_threshold,
             max_iterations,
+            user_id: userId,
+            rate_limit_remaining: rateLimit.remaining,
           });
 
           // 2. Update skill status to "validating"

@@ -9,6 +9,8 @@ import { z } from '@kbn/zod';
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { EvalsRequestHandlerContext } from '../../types';
+import { RateLimiterService, DEFAULT_RATE_LIMITS } from '../../lib/aesop/security/rate_limiter';
+import { sanitizeSkillMarkdown } from '../../lib/aesop/security/input_sanitization';
 
 const approveSkillParamsSchema = z.object({
   skillId: z.string(),
@@ -48,6 +50,25 @@ export function registerApproveSkillRoute(router: IRouter<EvalsRequestHandlerCon
         const { review_notes } = request.body;
 
         try {
+          // Rate limiting check
+          const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, context.logger);
+          const userId = request.auth.credentials?.username || 'anonymous';
+          const rateLimit = await rateLimiter.checkRateLimit(userId, 'approval');
+
+          if (!rateLimit.allowed) {
+            return response.customError({
+              statusCode: 429,
+              body: {
+                message: `Rate limit exceeded. You can approve 20 skills per hour. Try again in ${rateLimit.retryAfterSeconds} seconds.`,
+              },
+              headers: {
+                'Retry-After': rateLimit.retryAfterSeconds!.toString(),
+                'X-RateLimit-Limit': rateLimit.limit.toString(),
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': new Date(rateLimit.resetAt!).toISOString(),
+              },
+            });
+          }
           // 1. Load proposed skill
           const skillDoc = await esClient.get({
             index: '.aesop-proposed-skills',
@@ -56,7 +77,10 @@ export function registerApproveSkillRoute(router: IRouter<EvalsRequestHandlerCon
 
           const skill = skillDoc._source as any;
 
-          // 2. Validate skill passed evaluations
+          // 2. Sanitize skill markdown before deployment
+          const sanitizedMarkdown = sanitizeSkillMarkdown(skill.markdown);
+
+          // 3. Validate skill passed evaluations
           if (skill.validation?.status !== 'passed') {
             return response.badRequest({
               body: {
@@ -65,15 +89,19 @@ export function registerApproveSkillRoute(router: IRouter<EvalsRequestHandlerCon
             });
           }
 
-          // 3. Deploy skill to Agent Builder
-          context.logger.info('[AESOP] Deploying skill to Agent Builder', { skill_id: skillId });
+          // 4. Deploy skill to Agent Builder
+          context.logger.info('[AESOP] Deploying skill to Agent Builder', {
+            skill_id: skillId,
+            user_id: userId,
+            rate_limit_remaining: rateLimit.remaining,
+          });
 
           const agentBuilderClient = await agentBuilder.getClient(request);
 
           const createdSkill = await agentBuilderClient.createSkill({
             name: skill.name,
             description: skill.description,
-            content: skill.markdown,
+            content: sanitizedMarkdown,
             tools: skill.tools || [],
             labels: ['aesop-generated', 'auto-discovered'],
             metadata: {
@@ -91,7 +119,7 @@ export function registerApproveSkillRoute(router: IRouter<EvalsRequestHandlerCon
             agent_builder_skill_id: createdSkill.id,
           });
 
-          // 4. Update proposed skill document
+          // 5. Update proposed skill document
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
