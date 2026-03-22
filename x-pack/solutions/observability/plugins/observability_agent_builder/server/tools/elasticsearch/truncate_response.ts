@@ -16,8 +16,8 @@ const TRUNCATION_CONFIG = {
   MAX_DEPTH: 5,
   MAX_STRING_LENGTH: 500,
   /** Mechanically trim before sending to the LLM to stay within context limits. */
-  TIER_3_PRE_TRIM_BUDGET: 25000,
-  TIER_3_SUMMARY_BUDGET: 10000,
+  TIER_3_PRE_TRIM_BUDGET: 15000,
+  TIER_3_SUMMARY_BUDGET: 4000,
 } as const;
 
 const estimateSize = (value: unknown): number => JSON.stringify(value).length;

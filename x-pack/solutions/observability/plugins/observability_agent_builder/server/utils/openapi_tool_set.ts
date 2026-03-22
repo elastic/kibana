@@ -16,10 +16,12 @@ export type OperationObject = OpenAPIV3.OperationObject & {
   components: OpenAPIV3.ComponentsObject;
 };
 
+export type ConsoleRequest = string | { command: string; body: unknown };
+
 type ToolHandler = (
   args: Record<string, unknown>,
   esClient: IScopedClusterClient
-) => Promise<{ response?: unknown; consoleRequest: string; error?: string }>;
+) => Promise<{ response?: unknown; consoleRequest: ConsoleRequest; error?: string }>;
 
 export interface Tool {
   readonly name: string;
@@ -271,27 +273,27 @@ const buildHttpRequest = (
   return { path, method: operation.method, query };
 };
 
-const formatConsoleRequest = (
+const buildConsoleRequest = (
   operation: OperationObject,
   args: Record<string, unknown>
-): string => {
+): ConsoleRequest => {
   const { body, ...restArgs } = args;
   const { path, method, query } = buildHttpRequest(operation, restArgs);
   const queryString = Object.entries(query)
     .map(([k, v]) => `${k}=${v}`)
     .join('&');
-  const uriLine = `${method.toUpperCase()} ${path}${queryString ? `?${queryString}` : ''}`;
+  const command = `${method.toUpperCase()} ${path}${queryString ? `?${queryString}` : ''}`;
   if (body && typeof body === 'object' && Object.keys(body as object).length > 0) {
-    return `${uriLine}\n${JSON.stringify(body, null, 2)}`;
+    return { command, body };
   }
-  return uriLine;
+  return command;
 };
 
 const buildHandler = (operation: OperationObject): ToolHandler => {
   return async (args, esClient) => {
     const { body, ...restArgs } = args;
     const { path, method, query } = buildHttpRequest(operation, restArgs);
-    const consoleRequest = formatConsoleRequest(operation, args);
+    const consoleRequest = buildConsoleRequest(operation, args);
 
     try {
       const response = await esClient.asCurrentUser.transport.request({
@@ -339,11 +341,11 @@ export class OpenAPIToolSet {
     return this.operationsByName.get(operationId);
   }
 
-  formatConsoleRequest(operationId: string, args: Record<string, unknown>): string {
+  formatConsoleRequest(operationId: string, args: Record<string, unknown>): ConsoleRequest {
     const operation = this.operationsByName.get(operationId);
     if (!operation) {
       throw new Error(`No tool found for operationId: ${operationId}`);
     }
-    return formatConsoleRequest(operation, args);
+    return buildConsoleRequest(operation, args);
   }
 }

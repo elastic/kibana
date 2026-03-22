@@ -37,7 +37,12 @@ import type { ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { getElasticsearchPrompt, getRefineSearchTermPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
-import { OpenAPIToolSet, type OperationObject, type Tool } from '../../utils/openapi_tool_set';
+import {
+  type ConsoleRequest,
+  OpenAPIToolSet,
+  type OperationObject,
+  type Tool,
+} from '../../utils/openapi_tool_set';
 import { truncateJsonResponse } from './truncate_response';
 
 const NODE_NAMES = {
@@ -178,7 +183,7 @@ const parseToolResponse = async (
 ): Promise<{
   name: string;
   response?: unknown;
-  console_request?: string;
+  console_request?: ConsoleRequest;
   error?: string;
   statusCode?: number;
 }> => {
@@ -201,8 +206,7 @@ const parseToolResponse = async (
           : JSON.stringify(parsedContent.error),
       statusCode:
         typeof parsedContent.statusCode === 'number' ? parsedContent.statusCode : undefined,
-      console_request:
-        typeof parsedContent.consoleRequest === 'string' ? parsedContent.consoleRequest : undefined,
+      console_request: parsedContent.consoleRequest as ConsoleRequest,
     };
   }
   const truncatedContent = await truncateJsonResponse(parsedContent.response, chatModel);
@@ -210,8 +214,7 @@ const parseToolResponse = async (
   return {
     name: toolMessage.name || 'unknown',
     response: truncatedContent,
-    console_request:
-      typeof parsedContent.consoleRequest === 'string' ? parsedContent.consoleRequest : undefined,
+    console_request: parsedContent.consoleRequest as ConsoleRequest,
   };
 };
 
@@ -396,9 +399,14 @@ export const createElasticsearchToolGraph = async ({
     });
 
     const aiMessage = state.messages[state.messages.length - 1] as AIMessageChunk;
-    const consoleRequests = aiMessage.tool_calls!.map((t) =>
-      state.openApiToolSet.formatConsoleRequest(t.name, t.args)
-    );
+    const consoleRequests = aiMessage.tool_calls!.map((t) => {
+      const consoleRequest = state.openApiToolSet.formatConsoleRequest(t.name, t.args);
+      if (typeof consoleRequest === 'string') {
+        return consoleRequest;
+      }
+      return `${consoleRequest.command}\n${JSON.stringify(consoleRequest.body, null, 2)}`;
+    });
+
     const confirmationMessage = dedent(`
       Are you sure you want to call this Elasticsearch API?
 
