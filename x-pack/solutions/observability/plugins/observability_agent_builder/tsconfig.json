@@ -53,6 +53,7 @@
     "@kbn/inference-tracing",
     "@kbn/llm-tasks-plugin",
     "@kbn/calculate-auto",
+    "@kbn/agent-builder-genai-utils",
   ],
   "exclude": ["target/**/*"]
 }
