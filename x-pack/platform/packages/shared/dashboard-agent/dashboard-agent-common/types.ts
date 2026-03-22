@@ -106,7 +106,7 @@ export function isGenericAttachmentPanel(panel: AttachmentPanel): panel is Gener
 }
 
 export const sectionGridSchema = z.object({
-  y: z.number().int().min(0),
+  y: z.number().int().min(PANEL_GRID_CONSTRAINTS.y.min),
 });
 
 /**
