@@ -52,9 +52,7 @@ export const registerSkills = async ({
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
 
-  agentBuilder.skills.register(
-    createVulnerabilityDemoSkill(options.endpointAppContextService)
-  );
+  agentBuilder.skills.register(createVulnerabilityDemoSkill(options.endpointAppContextService));
 
   agentBuilder.skills.register(createVulnerabilityAnalysisSkill());
 };

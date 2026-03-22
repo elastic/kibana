@@ -72,9 +72,7 @@ export const useTabs = ({
         : [];
 
     const vulnPostureTab =
-      hasVulnerabilityPostureAlerts && name
-        ? [getVulnerabilityPostureTab({ hostName: name })]
-        : [];
+      hasVulnerabilityPostureAlerts && name ? [getVulnerabilityPostureTab({ hostName: name })] : [];
 
     return [...riskScoreTab, ...insightsTab, ...vulnPostureTab];
   }, [

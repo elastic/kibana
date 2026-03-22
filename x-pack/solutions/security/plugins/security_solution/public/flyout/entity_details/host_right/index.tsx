@@ -62,7 +62,9 @@ export const HostPanel = ({
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const vulnerabilityCheckerEnabled = useIsExperimentalFeatureEnabled('vulnerabilityCheckerEnabled');
+  const vulnerabilityCheckerEnabled = useIsExperimentalFeatureEnabled(
+    'vulnerabilityCheckerEnabled'
+  );
 
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
