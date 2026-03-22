@@ -11,7 +11,7 @@ import type { InsightImpactLevel, RoutingStatus, Streams } from '@kbn/streams-sc
 import { getImpactLevel, type Insight } from '@kbn/streams-schema';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
 
 export type { Insight };
 

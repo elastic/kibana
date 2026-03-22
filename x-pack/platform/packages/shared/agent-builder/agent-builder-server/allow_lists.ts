@@ -31,6 +31,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_service_topology`,
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
+  `${internalNamespaces.observability}.get_logs`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
@@ -70,4 +71,32 @@ export const isAllowedBuiltinTool = (toolName: string) => {
 
 export const isAllowedBuiltinAgent = (agentName: string) => {
   return (AGENT_BUILDER_BUILTIN_AGENTS as readonly string[]).includes(agentName);
+};
+
+/**
+ * This is a manually maintained list of all built-in skills registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new skill.
+ */
+export const AGENT_BUILDER_BUILTIN_SKILLS = [
+  // Platform
+  'data-exploration',
+  'visualization-creation',
+
+  // Platform – Dashboard
+  'dashboard-management',
+
+  // Security Solution
+  'find-security-ml-jobs',
+  'automatic_troubleshooting',
+  'entity-analytics',
+  'alert-analysis',
+
+  // O11Y
+  'observability.log-search',
+] as const;
+
+export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
+
+export const isAllowedBuiltinSkill = (skillId: string) => {
+  return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };
