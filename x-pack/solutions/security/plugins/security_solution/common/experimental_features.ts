@@ -117,6 +117,16 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
+   * Enables automatic MITRE ATT&CK technique attribution for security alerts using LLM.
+   * When enabled, high-risk alerts (risk_score >= 50) are automatically enriched with
+   * MITRE ATT&CK technique IDs, tactic names, and attack phases.
+   *
+   * Uses Claude Haiku for fast, cost-effective attribution with 90% caching.
+   * Release: 10.0 or 10.1 (experimental)
+   */
+  mitreAutoMapEnabled: false,
+
+  /**
    * Enables the storing of gaps in the event log
    */
   storeGapsInEventLogEnabled: true,
