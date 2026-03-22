@@ -220,7 +220,7 @@ export const executeDashboardOperations = ({
 
         if (operation.sectionId) {
           const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-            ({ sectionId }) => sectionId === operation.sectionId
+            ({ uid }) => uid === operation.sectionId
           );
           if (sectionIndex === -1) {
             throw new Error(`Section "${operation.sectionId}" not found.`);
@@ -257,7 +257,7 @@ export const executeDashboardOperations = ({
           if (result.panels.length > 0) {
             if (item.sectionId) {
               const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-                ({ sectionId }) => sectionId === item.sectionId
+                ({ uid }) => uid === item.sectionId
               );
               if (sectionIndex === -1) {
                 throw new Error(`Section "${item.sectionId}" not found.`);
@@ -302,7 +302,7 @@ export const executeDashboardOperations = ({
         }
 
         const nextSection: DashboardSection = {
-          sectionId: uuidv4(),
+          uid: uuidv4(),
           title: operation.title,
           collapsed: false,
           grid: operation.grid,
@@ -318,7 +318,7 @@ export const executeDashboardOperations = ({
 
       case 'remove_section': {
         const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-          ({ sectionId }) => sectionId === operation.sectionId
+          ({ uid }) => uid === operation.sectionId
         );
         if (sectionIndex === -1) {
           throw new Error(`Section "${operation.sectionId}" not found.`);
@@ -373,10 +373,7 @@ export const executeDashboardOperations = ({
         const attachmentIdSet = new Set(operation.attachmentIds);
 
         const updatePanel = (panel: AttachmentPanel): AttachmentPanel => {
-          if (
-            !panel.sourceAttachmentId ||
-            !attachmentIdSet.has(panel.sourceAttachmentId)
-          ) {
+          if (!panel.sourceAttachmentId || !attachmentIdSet.has(panel.sourceAttachmentId)) {
             return panel;
           }
 

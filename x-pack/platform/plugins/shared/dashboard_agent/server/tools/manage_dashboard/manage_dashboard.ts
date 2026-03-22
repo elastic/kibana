@@ -168,7 +168,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                     ...(updatedDashboardData.sections
                       ? {
                           sections: updatedDashboardData.sections.map((section) => ({
-                            sectionId: section.sectionId,
+                            sectionId: section.uid,
                             title: section.title,
                             collapsed: section.collapsed,
                             grid: section.grid,

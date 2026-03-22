@@ -156,7 +156,7 @@ describe('executeDashboardOperations', () => {
         savedObjectId: 'saved-dashboard-id',
         sections: [
           {
-            sectionId: 'section-1',
+            uid: 'section-1',
             title: 'Section 1',
             collapsed: false,
             grid: { y: 10 },
@@ -187,7 +187,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.savedObjectId).toBe('saved-dashboard-id');
     expect(result.dashboardData.sections).toEqual([
       {
-        sectionId: 'section-1',
+        uid: 'section-1',
         title: 'Section 1',
         collapsed: false,
         grid: { y: 10 },
@@ -227,7 +227,7 @@ describe('executeDashboardOperations', () => {
 
     expect(result.dashboardData.sections).toHaveLength(1);
     expect(result.dashboardData.sections?.[0]).toEqual({
-      sectionId: expect.any(String),
+      uid: expect.any(String),
       title: 'Overview',
       collapsed: false,
       grid: { y: 12 },
@@ -249,7 +249,7 @@ describe('executeDashboardOperations', () => {
         panels: [],
         sections: [
           {
-            sectionId: 'section-a',
+            uid: 'section-a',
             title: 'Section A',
             collapsed: false,
             grid: { y: 8 },
@@ -300,7 +300,7 @@ describe('executeDashboardOperations', () => {
         panels: [createLensPanel('top-1', 0)],
         sections: [
           {
-            sectionId: 'section-a',
+            uid: 'section-a',
             title: 'Section A',
             collapsed: false,
             grid: { y: 20 },
@@ -333,7 +333,7 @@ describe('executeDashboardOperations', () => {
         panels: [createLensPanel('top-1')],
         sections: [
           {
-            sectionId: 'section-a',
+            uid: 'section-a',
             title: 'Section A',
             collapsed: false,
             grid: { y: 10 },
@@ -365,7 +365,7 @@ describe('executeDashboardOperations', () => {
         panels: [createLensPanel('top-1')],
         sections: [
           {
-            sectionId: 'section-a',
+            uid: 'section-a',
             title: 'Section A',
             collapsed: false,
             grid: { y: 8 },
@@ -385,7 +385,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.panels).toEqual([]);
     expect(result.dashboardData.sections).toEqual([
       {
-        sectionId: 'section-a',
+        uid: 'section-a',
         title: 'Section A',
         collapsed: false,
         grid: { y: 8 },
@@ -405,7 +405,7 @@ describe('executeDashboardOperations', () => {
         panels: [],
         sections: [
           {
-            sectionId: 'section-a',
+            uid: 'section-a',
             title: 'Section A',
             collapsed: false,
             grid: { y: 0 },
@@ -503,7 +503,7 @@ describe('executeDashboardOperations', () => {
           panels: [],
           sections: [
             {
-              sectionId: 'section-a',
+              uid: 'section-a',
               title: 'Section A',
               collapsed: false,
               grid: { y: 0 },
