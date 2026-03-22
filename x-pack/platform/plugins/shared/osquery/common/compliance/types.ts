@@ -13,11 +13,33 @@ export interface ComplianceFrameworkMapping {
   control: string;
 }
 
+export interface ComplianceBenchmarkVersionInfo {
+  major: number;
+  minor: number;
+  patch: number;
+  release_date: string;
+  status: 'current' | 'deprecated' | 'legacy';
+  superseded_by?: string;
+  compatibility: {
+    min_platform_version?: string;
+    max_platform_version?: string;
+    compatible_platforms: string[];
+  };
+}
+
 export interface ComplianceBenchmarkMetadata {
   id: string;
   name: string;
   version: string;
+  version_info?: ComplianceBenchmarkVersionInfo;
   posture_type: 'endpoint';
+}
+
+export interface ComplianceRuleMigrationMetadata {
+  migrated_from?: string;
+  migrated_at: string;
+  migration_notes?: string;
+  compatibility_issues?: string;
 }
 
 export interface ComplianceRuleMetadata {
@@ -37,6 +59,17 @@ export interface ComplianceRuleMetadata {
   interval: number;
   prebuilt: boolean;
   resource_type: string;
+  
+  // Version management fields
+  rule_version?: string;
+  rule_schema_version?: number;
+  source_rule_id?: string;
+  migration_status?: 'pending' | 'completed' | 'failed';
+  migration_metadata?: ComplianceRuleMigrationMetadata;
+  supported_benchmark_versions?: string[];
+  deprecated_in_version?: string;
+  removed_in_version?: string;
+  replacement_rule_id?: string;
 }
 
 export interface ComplianceFinding {

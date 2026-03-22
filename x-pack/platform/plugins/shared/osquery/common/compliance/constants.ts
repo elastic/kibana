@@ -13,6 +13,7 @@ export const COMPLIANCE_SCORES_DATA_STREAM = 'logs-endpoint_compliance.scores-de
 export const COMPLIANCE_SCORES_INDEX_PATTERN = 'logs-endpoint_compliance.scores-*';
 
 export const COMPLIANCE_RULE_SO_TYPE = 'endpoint-compliance-rule';
+export const COMPLIANCE_EXCEPTION_SO_TYPE = 'endpoint-compliance-exception';
 export const COMPLIANCE_BENCHMARK_STATE_SO_TYPE = 'endpoint-compliance-benchmark-state';
 
 export const COMPLIANCE_SCHEDULE_ID_PREFIX = 'compliance-';

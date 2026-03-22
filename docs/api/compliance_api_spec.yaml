@@ -1,0 +1,822 @@
+openapi: 3.0.3
+info:
+  title: Osquery Endpoint Compliance Monitoring API
+  description: |
+    REST API for managing endpoint compliance monitoring using osquery.
+
+    ## Features
+    - Compliance rule management (CIS benchmarks, custom rules)
+    - Findings exploration and analysis
+    - Compliance score calculation
+    - Exception management
+    - Fleet pack deployment
+    - Report generation
+
+    ## Authentication
+    All endpoints require Kibana authentication with appropriate privileges.
+
+    ## Authorization
+    - **Viewer**: Read-only access to rules, findings, scores
+    - **Editor**: Full CRUD on rules, exceptions; pack deployment
+    - **Admin**: All operations including migrations and cleanup
+
+  version: 1.0.0
+  contact:
+    name: Elastic Security Team
+    email: security-team@elastic.co
+
+servers:
+  - url: http://localhost:5601
+    description: Local development
+  - url: https://your-kibana-instance.elastic.cloud
+    description: Elastic Cloud
+
+tags:
+  - name: Rules
+    description: Compliance rule management
+  - name: Findings
+    description: Compliance findings and results
+  - name: Scores
+    description: Compliance score calculations
+  - name: Exceptions
+    description: Rule exception management
+  - name: Packs
+    description: Fleet pack deployment
+  - name: Reports
+    description: Report generation
+  - name: Admin
+    description: Administrative operations
+
+paths:
+  /internal/osquery/compliance/rules:
+    get:
+      summary: List compliance rules
+      tags: [Rules]
+      operationId: listRules
+      security:
+        - kibanaAuth: [osquery:read]
+      parameters:
+        - name: benchmark_id
+          in: query
+          schema:
+            type: string
+          description: Filter by benchmark ID
+        - name: platform
+          in: query
+          schema:
+            type: string
+            enum: [linux, darwin, windows]
+          description: Filter by platform
+        - name: enabled
+          in: query
+          schema:
+            type: boolean
+          description: Filter by enabled status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 20
+      responses:
+        '200':
+          description: List of compliance rules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rules:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ComplianceRule'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /internal/osquery/compliance/rules/_create:
+    post:
+      summary: Create custom compliance rule
+      tags: [Rules]
+      operationId: createRule
+      security:
+        - kibanaAuth: [osquery:all]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceRuleInput'
+      responses:
+        '201':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceRule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /internal/osquery/compliance/rules/{rule_id}:
+    get:
+      summary: Get compliance rule by ID
+      tags: [Rules]
+      operationId: getRule
+      security:
+        - kibanaAuth: [osquery:read]
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compliance rule details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceRule'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update compliance rule
+      tags: [Rules]
+      operationId: updateRule
+      security:
+        - kibanaAuth: [osquery:all]
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceRuleUpdate'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceRule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete compliance rule
+      tags: [Rules]
+      operationId: deleteRule
+      security:
+        - kibanaAuth: [osquery:all]
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Rule deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /internal/osquery/compliance/findings:
+    get:
+      summary: List compliance findings
+      tags: [Findings]
+      operationId: listFindings
+      security:
+        - kibanaAuth: [osquery:read]
+      parameters:
+        - name: rule_id
+          in: query
+          schema:
+            type: string
+        - name: host_id
+          in: query
+          schema:
+            type: string
+        - name: evaluation
+          in: query
+          schema:
+            type: string
+            enum: [passed, failed]
+        - name: time_range
+          in: query
+          schema:
+            type: string
+          description: Time range (e.g., "7d", "30d", "now-1h")
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 1000
+      responses:
+        '200':
+          description: List of compliance findings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  findings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ComplianceFinding'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+
+  /internal/osquery/compliance/scores:
+    get:
+      summary: Get compliance scores
+      tags: [Scores]
+      operationId: getScores
+      security:
+        - kibanaAuth: [osquery:read]
+      parameters:
+        - name: host_id
+          in: query
+          schema:
+            type: string
+          description: Get score for specific host
+        - name: benchmark_id
+          in: query
+          schema:
+            type: string
+          description: Get score for specific benchmark
+        - name: include_exceptions
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Whether to apply exceptions to score calculation
+      responses:
+        '200':
+          description: Compliance scores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceScore'
+
+  /internal/osquery/compliance/exceptions:
+    get:
+      summary: List compliance exceptions
+      tags: [Exceptions]
+      operationId: listExceptions
+      security:
+        - kibanaAuth: [osquery:read]
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [host, rule, global]
+        - name: active
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of exceptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exceptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ComplianceException'
+                  total:
+                    type: integer
+
+    post:
+      summary: Create compliance exception
+      tags: [Exceptions]
+      operationId: createException
+      security:
+        - kibanaAuth: [osquery:all]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceExceptionInput'
+      responses:
+        '201':
+          description: Exception created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceException'
+
+  /internal/osquery/compliance/deploy:
+    post:
+      summary: Deploy compliance pack to Fleet
+      tags: [Packs]
+      operationId: deployPack
+      security:
+        - kibanaAuth: [osquery:all, fleet:all]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - benchmark_id
+                - agent_policy_ids
+              properties:
+                benchmark_id:
+                  type: string
+                  description: Benchmark ID to deploy
+                agent_policy_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Fleet agent policy IDs to deploy to
+                enabled:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Pack deployed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  package_policy_id:
+                    type: string
+                  deployed_queries:
+                    type: integer
+
+  /internal/osquery/compliance/reports:
+    post:
+      summary: Generate compliance report
+      tags: [Reports]
+      operationId: generateReport
+      security:
+        - kibanaAuth: [osquery:read]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format:
+                  type: string
+                  enum: [pdf, csv]
+                  default: pdf
+                scope:
+                  type: object
+                  properties:
+                    benchmark_ids:
+                      type: array
+                      items:
+                        type: string
+                    host_ids:
+                      type: array
+                      items:
+                        type: string
+                    time_range:
+                      type: string
+      responses:
+        '200':
+          description: Report generated
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    kibanaAuth:
+      type: apiKey
+      in: header
+      name: kbn-xsrf
+
+  schemas:
+    ComplianceRule:
+      type: object
+      required:
+        - rule_id
+        - name
+        - query
+        - benchmark
+        - platform
+      properties:
+        rule_id:
+          type: string
+          description: Unique rule identifier
+        name:
+          type: string
+          description: Human-readable rule name
+        description:
+          type: string
+          description: Rule description
+        query:
+          type: string
+          description: Osquery SQL query
+        remediation:
+          type: string
+          description: Remediation instructions
+        benchmark:
+          $ref: '#/components/schemas/Benchmark'
+        rule_number:
+          type: string
+          description: Rule number in benchmark (e.g., "1.1.1")
+        section:
+          type: string
+          description: Benchmark section
+        level:
+          type: integer
+          minimum: 1
+          maximum: 2
+          description: CIS level (1 = stricter, 2 = more lenient)
+        platform:
+          type: string
+          enum: [linux, darwin, windows]
+        frameworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Framework'
+        tags:
+          type: array
+          items:
+            type: string
+        enabled:
+          type: boolean
+          default: true
+        interval:
+          type: integer
+          description: Query interval in seconds
+        prebuilt:
+          type: boolean
+          default: false
+        resource_type:
+          type: string
+          description: Type of resource being checked
+
+    ComplianceRuleInput:
+      type: object
+      required:
+        - rule_id
+        - name
+        - query
+        - benchmark
+        - platform
+      properties:
+        rule_id:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        query:
+          type: string
+          minLength: 10
+        remediation:
+          type: string
+        benchmark:
+          $ref: '#/components/schemas/Benchmark'
+        rule_number:
+          type: string
+        section:
+          type: string
+        level:
+          type: integer
+          minimum: 1
+          maximum: 2
+        platform:
+          type: string
+          enum: [linux, darwin, windows]
+        tags:
+          type: array
+          items:
+            type: string
+        enabled:
+          type: boolean
+        interval:
+          type: integer
+          minimum: 60
+          maximum: 86400
+
+    ComplianceRuleUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        query:
+          type: string
+        remediation:
+          type: string
+        enabled:
+          type: boolean
+        interval:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    ComplianceFinding:
+      type: object
+      properties:
+        '@timestamp':
+          type: string
+          format: date-time
+        result:
+          type: object
+          properties:
+            evaluation:
+              type: string
+              enum: [passed, failed]
+            evidence:
+              type: object
+              description: Query result evidence
+        rule:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            benchmark:
+              $ref: '#/components/schemas/Benchmark'
+            section:
+              type: string
+            level:
+              type: integer
+        host:
+          type: object
+          properties:
+            hostname:
+              type: string
+            id:
+              type: string
+            ip:
+              type: array
+              items:
+                type: string
+            os:
+              type: object
+        agent:
+          type: object
+          properties:
+            id:
+              type: string
+            version:
+              type: string
+
+    ComplianceScore:
+      type: object
+      properties:
+        compliance_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Overall compliance percentage
+        total_findings:
+          type: integer
+          description: Total number of findings
+        passed_findings:
+          type: integer
+        failed_findings:
+          type: integer
+        benchmarks:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              score:
+                type: number
+        hosts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              hostname:
+                type: string
+              score:
+                type: number
+              failed_checks:
+                type: integer
+
+    ComplianceException:
+      type: object
+      properties:
+        exception_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        scope:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [host, rule, global]
+            target_id:
+              type: string
+              description: Host ID or Rule ID (if scoped)
+        rule_criteria:
+          type: object
+          properties:
+            rule_ids:
+              type: array
+              items:
+                type: string
+        host_criteria:
+          type: object
+          properties:
+            host_ids:
+              type: array
+              items:
+                type: string
+        time_scope:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [permanent, temporary]
+            end_date:
+              type: string
+              format: date-time
+        status:
+          type: string
+          enum: [active, expired, disabled]
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        reason:
+          type: string
+
+    ComplianceExceptionInput:
+      type: object
+      required:
+        - name
+        - scope
+        - rule_criteria
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        scope:
+          type: object
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum: [host, rule, global]
+            target_id:
+              type: string
+        rule_criteria:
+          type: object
+          required: [rule_ids]
+          properties:
+            rule_ids:
+              type: array
+              items:
+                type: string
+              minItems: 1
+        host_criteria:
+          type: object
+          properties:
+            host_ids:
+              type: array
+              items:
+                type: string
+        reason:
+          type: string
+
+    Benchmark:
+      type: object
+      required:
+        - id
+        - name
+        - version
+      properties:
+        id:
+          type: string
+          description: Benchmark identifier (e.g., "cis-linux")
+        name:
+          type: string
+        version:
+          type: string
+          description: Benchmark version (e.g., "1.0.0", "2.0.0")
+        posture_type:
+          type: string
+          enum: [endpoint, cloud]
+          default: endpoint
+
+    Framework:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Framework ID (e.g., "cis", "pci-dss")
+        version:
+          type: string
+        control:
+          type: string
+          description: Control number in framework
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: Validation error
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Resource not found
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 403
+              message:
+                type: string
+                example: Forbidden

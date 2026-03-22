@@ -54,6 +54,10 @@ import { installPrebuiltRules } from './compliance/services/install_prebuilt_rul
 import { computeAndWriteScores } from './compliance/services/compliance_scoring_service';
 import { getMutedRulesState } from './compliance/services/compliance_rules_service';
 import { FindingEvaluatorService } from './compliance/services/finding_evaluator_service';
+import { ComplianceTransformService } from './compliance/services/transform_service';
+import { ComplianceIndexManagementService } from './compliance/services/index_management_service';
+import { ComplianceTransformMonitoringService, transformMonitoringTaskDefinition } from './compliance/services/transform_monitoring_service';
+import { ComplianceTransformCleanupService } from './compliance/services/transform_cleanup_service';
 import { COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE } from '../common/compliance';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
@@ -69,6 +73,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private createActionService: ReturnType<typeof createActionService> | null = null;
   private config: ConfigType | null = null;
   private findingEvaluator: FindingEvaluatorService | null = null;
+  private complianceTransformService: ComplianceTransformService | null = null;
+  private complianceIndexManagementService: ComplianceIndexManagementService | null = null;
+  private complianceTransformMonitoringService: ComplianceTransformMonitoringService | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -173,6 +180,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             },
           }),
         },
+        // Register transform monitoring task
+        [transformMonitoringTaskDefinition.type]: transformMonitoringTaskDefinition,
       });
     }
 
@@ -221,12 +230,21 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         }
 
         if (this.config?.experimentalFeatures.endpointComplianceMonitoring) {
-          await initializeComplianceIndices(esClient, this.logger, plugins.dataViews);
-          await installPrebuiltRules(client, this.logger);
+          try {
+            // Initialize compliance infrastructure with transform deployment
+            await this.initializeComplianceInfrastructure(esClient, client, plugins);
+          } catch (error) {
+            this.logger.error('Failed to initialize compliance infrastructure:', error);
+            // Continue with basic initialization even if transform deployment fails
+            await initializeComplianceIndices(esClient, this.logger, plugins.dataViews);
+            await installPrebuiltRules(client, this.logger);
+          }
 
+          // Initialize finding evaluator
           this.findingEvaluator = new FindingEvaluatorService(esClient, client, this.logger);
           this.findingEvaluator.start();
 
+          // Schedule compliance score aggregation task
           plugins.taskManager
             ?.ensureScheduled({
               id: COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE,
@@ -319,6 +337,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.licenseSubscription?.unsubscribe();
     this.createActionService?.stop();
     this.findingEvaluator?.stop();
+    this.complianceTransformMonitoringService?.stopMonitoring().catch((err) => {
+      this.logger.warn(`Failed to stop transform monitoring: ${err.message}`);
+    });
   }
 
   async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
@@ -326,5 +347,143 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
     await createDataViews(dataViewsService);
+  }
+
+  private async initializeComplianceInfrastructure(
+    esClient: any,
+    client: any,
+    plugins: any
+  ): Promise<void> {
+    this.logger.info('Initializing compliance infrastructure with transform deployment...');
+
+    // Initialize basic compliance indices and rules first
+    await initializeComplianceIndices(esClient, this.logger, plugins.dataViews);
+    await installPrebuiltRules(client, this.logger);
+
+    // Initialize services
+    this.complianceIndexManagementService = new ComplianceIndexManagementService(
+      esClient,
+      this.logger
+    );
+    this.complianceTransformService = new ComplianceTransformService(esClient, this.logger);
+    this.complianceTransformMonitoringService = new ComplianceTransformMonitoringService(
+      esClient,
+      plugins.taskManager,
+      this.logger
+    );
+
+    try {
+      // Deploy findings_latest infrastructure (templates, policies, indices)
+      await this.complianceIndexManagementService.deployFindingsLatestInfrastructure();
+      this.logger.info('Successfully deployed findings_latest infrastructure');
+
+      // Create and start the findings_latest transform
+      await this.complianceTransformService.createFindingsLatestTransform();
+      await this.complianceTransformService.startTransform();
+      this.logger.info('Successfully deployed and started findings_latest transform');
+
+      // Validate infrastructure health
+      const infraHealth = await this.complianceIndexManagementService.validateInfrastructureHealth();
+      if (!infraHealth.isHealthy) {
+        this.logger.warn('Infrastructure health check found issues:', infraHealth.issues);
+      }
+
+      const transformHealth = await this.complianceTransformService.validateTransformHealth();
+      if (!transformHealth.isHealthy) {
+        this.logger.warn('Transform health check found issues:', transformHealth.issues);
+      }
+
+      // Start transform monitoring
+      const transformIds = ['endpoint_compliance_findings_latest'];
+      await this.complianceTransformMonitoringService.startMonitoring(transformIds);
+      this.logger.info('Successfully started transform monitoring');
+
+    } catch (error) {
+      this.logger.error('Failed to deploy compliance transform infrastructure:', error);
+
+      // Attempt cleanup on failure
+      try {
+        if (this.complianceTransformService) {
+          await this.complianceTransformService.deleteTransform();
+        }
+        if (this.complianceIndexManagementService) {
+          await this.complianceIndexManagementService.cleanupFindingsLatestInfrastructure();
+        }
+        this.logger.info('Successfully cleaned up after failed deployment');
+      } catch (cleanupError) {
+        this.logger.error('Failed to cleanup after deployment failure:', cleanupError);
+      }
+
+      // Re-throw to trigger fallback initialization
+      throw error;
+    }
+  }
+
+  /**
+   * Cleans up compliance transform infrastructure when feature is disabled.
+   * This can be called manually or automatically when the feature flag is turned off.
+   */
+  async cleanupComplianceInfrastructure(
+    esClient: any,
+    cleanupType: 'full' | 'graceful' | 'emergency' = 'graceful'
+  ): Promise<{
+    success: boolean;
+    cleanupSteps: { step: string; success: boolean; error?: string }[];
+  }> {
+    this.logger.info(`Starting ${cleanupType} cleanup of compliance transform infrastructure...`);
+
+    const cleanupService = new ComplianceTransformCleanupService(esClient, this.logger);
+
+    try {
+      let cleanupResult;
+
+      switch (cleanupType) {
+        case 'full':
+          cleanupResult = await cleanupService.performFullCleanup();
+          break;
+        case 'emergency':
+          cleanupResult = await cleanupService.performEmergencyCleanup();
+          break;
+        case 'graceful':
+        default:
+          cleanupResult = await cleanupService.performGracefulCleanup();
+          break;
+      }
+
+      // Validate cleanup was successful
+      const validationResult = await cleanupService.validateCleanup();
+      if (!validationResult.isClean) {
+        this.logger.warn('Cleanup validation found remaining resources:', validationResult.remainingResources);
+      }
+
+      // Stop local services
+      if (this.findingEvaluator) {
+        this.findingEvaluator.stop();
+        this.findingEvaluator = null;
+      }
+
+      if (this.complianceTransformMonitoringService) {
+        await this.complianceTransformMonitoringService.stopMonitoring();
+        this.complianceTransformMonitoringService = null;
+      }
+
+      // Clear service references
+      this.complianceTransformService = null;
+      this.complianceIndexManagementService = null;
+
+      return cleanupResult;
+    } catch (error) {
+      this.logger.error('Failed to cleanup compliance infrastructure:', error);
+      return {
+        success: false,
+        cleanupSteps: [
+          {
+            step: 'Cleanup service execution',
+            success: false,
+            error: error.message,
+          },
+        ],
+      };
+    }
   }
 }

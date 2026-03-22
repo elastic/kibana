@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Osquery Endpoint Compliance Monitoring</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: #388bfd33;
+      --green: #238636;
+      --green-text: #3fb950;
+      --purple: #8957e5;
+      --purple-text: #a371f7;
+      --yellow: #bf8700;
+      --yellow-text: #d4a72c;
+      --red: #da3633;
+      --red-text: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Header --- */
+    .header {
+      background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+    }
+    .header .container { padding-top: 0; padding-bottom: 0; }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0.5rem 0 0.25rem;
+      border: none;
+      padding: 0;
+    }
+    .header p {
+      color: var(--text-muted);
+      margin: 0.25rem 0 0;
+      font-size: 1rem;
+    }
+    .header .meta {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .header .meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+    /* --- Layout --- */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+
+    /* --- Badge --- */
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* --- Table of Contents --- */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .toc h2 {
+      font-size: 0.9rem;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { padding: 0.2rem 0; }
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* --- Typography --- */
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 2.5rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      color: var(--text);
+    }
+    p { margin: 0.75rem 0; color: var(--text-muted); }
+    .lead { font-size: 1.05rem; color: var(--text); }
+    strong { color: var(--text); }
+
+    /* --- Lists --- */
+    ul, ol { margin: 0.5rem 0; padding-left: 1.5rem; color: var(--text-muted); }
+    li { margin: 0.25rem 0; }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+    }
+    td { color: var(--text-muted); }
+
+    /* --- Code --- */
+    code {
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85em;
+      background: var(--surface);
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* --- Summary / Callout Box --- */
+    .summary-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+    .summary-box p { margin: 0; color: var(--text); }
+
+    /* --- Flow Diagram --- */
+    .flow-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 320px;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .flow-arrow {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      padding: 0 0.25rem;
+    }
+    .node {
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .node-start { background: var(--accent-dim); color: var(--accent); }
+    .node-process { background: rgba(35,134,54,0.2); color: var(--green-text); }
+    .node-output { background: rgba(137,87,229,0.2); color: var(--purple-text); }
+    .node-decision { background: var(--surface); color: var(--text-muted); font-style: italic; }
+    .node-end { background: rgba(139,148,158,0.2); color: var(--text-muted); }
+    .branch-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* --- Tags --- */
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(139,148,158,0.15);
+      color: var(--text-muted);
+      margin-right: 0.25rem;
+    }
+    .tag.blue { background: var(--accent-dim); color: var(--accent); }
+    .tag.green { background: rgba(35,134,54,0.2); color: var(--green-text); }
+    .tag.purple { background: rgba(137,87,229,0.2); color: var(--purple-text); }
+
+    /* --- Links --- */
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* --- Footer --- */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: #fff; color: #222; padding: 1rem; }
+      .header { background: none; border-bottom: 2px solid #222; }
+      .header h1, h2, h3, strong { color: #222; }
+      .header p, p, td, li { color: #444; }
+      h2 { color: #0055aa; }
+      .badge { background: #e8f0fe; color: #0055aa; }
+      .summary-box { border-left-color: #0055aa; background: #f8f9fa; }
+      .summary-box p { color: #222; }
+      .toc { background: #f8f9fa; border-color: #ddd; }
+      .toc a { color: #0055aa; }
+      th { background: #f0f0f0; color: #222; }
+      td { color: #444; }
+      table, th, td { border-color: #ccc; }
+      code { background: #f0f0f0; border-color: #ddd; color: #222; }
+      pre { background: #f8f9fa; border-color: #ddd; }
+      pre code { color: #222; }
+      .flow-wrap { background: #f8f9fa; border-color: #ddd; }
+      .node { border-color: #ccc; }
+      .node-start { background: #e8f0fe; color: #0055aa; }
+      .node-process { background: #e6f4ea; color: #1a7f37; }
+      .node-output { background: #f3e8ff; color: #6e40c9; }
+      footer { border-top-color: #ccc; color: #666; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container" style="padding-top:0;padding-bottom:0;">
+    <span class="badge">Spike Deep Dive</span>
+    <h1>Osquery Endpoint Compliance Monitoring</h1>
+    <p>CIS benchmark compliance posture for managed endpoints via osquery — architecture, data flow, and implementation reference</p>
+    <div class="meta">
+      <span>Repository: <strong>elastic/kibana</strong></span>
+      <span>Generated: 2026-03-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  
+
+  
+<nav class="toc">
+<h2>Contents</h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#key-files">Key Files &amp; Directories</a></li>
+<li><a href="#how-it-works">How It Works</a></li>
+<li><a href="#key-concepts">Key Concepts &amp; Types</a></li>
+<li><a href="#configuration">Configuration &amp; Setup</a></li>
+<li><a href="#api-reference">API Reference</a></li>
+<li><a href="#ui-pages">UI Pages &amp; Components</a></li>
+<li><a href="#issues-prs">Related Issues &amp; PRs</a></li>
+<li><a href="#whats-next">What&#39;s Next</a></li>
+</ul>
+</nav>
+
+<h2 id="overview">Overview</h2>
+<div class="summary-box">
+<p><strong>Endpoint Compliance Monitoring</strong> extends Kibana&#39;s Osquery plugin to evaluate managed endpoints against CIS benchmarks (macOS 15, Windows 11, Linux RHEL 9/Ubuntu 22.04) and NIST 800-53 controls. It ships 30 prebuilt compliance rules as osquery SQL queries, evaluates results into pass/fail/N/A findings, aggregates posture scores per benchmark, and renders a Security Solution&ndash;style dashboard.</p>
+</div>
+<p class="lead">The feature is gated behind the <code>endpointComplianceMonitoring</code> experimental flag, uses internal-only API routes, and aligns its data model with Cloud Security Posture (CSP) for future integration. It supports multi-vendor endpoints via a strategy pattern (Elastic Defend, SentinelOne, Microsoft Defender).</p>
+<ul>
+<li><strong>30 prebuilt CIS rules</strong> across 3 platforms with NIST 800-53 r5 framework mappings</li>
+<li><strong>Real-time evaluation</strong> polling osquery results every 30 seconds</li>
+<li><strong>Score aggregation</strong> via Task Manager on a 5-minute interval</li>
+<li><strong>12 versioned API routes</strong> with RBAC authorization</li>
+<li><strong>3 UI pages</strong>: Dashboard, Findings Explorer, Rules Management</li>
+<li><strong>Detection rule bridge</strong> generating SIEM threshold rules with MITRE ATT&amp;CK mapping</li>
+</ul>
+
+<h2 id="architecture">Architecture</h2>
+<h3>System Flow</h3>
+<div class="flow-wrap">
+<div class="flow-diagram">
+<div class="flow-row">
+<div class="node node-start">CIS Rules<br><small>Saved Objects</small></div>
+<span class="flow-arrow">&rarr;</span>
+<div class="node node-process">Pack Deploy<br><small>Fleet API</small></div>
+<span class="flow-arrow">&rarr;</span>
+<div class="node node-process">Osquery Agent<br><small>Endpoint Queries</small></div>
+</div>
+<div class="flow-row"><span class="flow-arrow">&darr;</span></div>
+<div class="flow-row">
+<div class="node node-output">Dashboard<br><small>React / EUI</small></div>
+<span class="flow-arrow">&larr;</span>
+<div class="node node-process">Score Aggregation<br><small>Task Manager 5m</small></div>
+<span class="flow-arrow">&larr;</span>
+<div class="node node-output">Findings<br><small>Data Stream</small></div>
+<span class="flow-arrow">&larr;</span>
+<div class="node node-process">Finding Evaluator<br><small>Poll 30s</small></div>
+</div>
+<div class="flow-row"><span class="flow-arrow">&darr;</span></div>
+<div class="flow-row">
+<div class="node node-end">Detection Rules<br><small>SIEM Bridge</small></div>
+</div>
+</div>
+</div>
+
+<h3>Three-Layer Design</h3>
+<table>
+<tr><th>Layer</th><th>Path</th><th>Responsibility</th></tr>
+<tr><td><span class="tag blue">Common</span></td><td><code>common/compliance/</code></td><td>Shared types, constants, helpers &mdash; used by both server and client</td></tr>
+<tr><td><span class="tag green">Server</span></td><td><code>server/compliance/</code></td><td>Routes, services, saved objects, index management, evaluation engine</td></tr>
+<tr><td><span class="tag purple">Public</span></td><td><code>public/compliance/</code></td><td>React pages, components, API hooks (React Query)</td></tr>
+</table>
+
+<h3>Data Stores</h3>
+<table>
+<tr><th>Store</th><th>Index / Pattern</th><th>Purpose</th></tr>
+<tr><td>Findings Data Stream</td><td><code>logs-endpoint_compliance.findings-default</code></td><td>Individual pass/fail/N/A check results per host+rule</td></tr>
+<tr><td>Findings Latest</td><td><code>endpoint_compliance.findings_latest-default</code></td><td>Transform: deduplicated latest per rule+host</td></tr>
+<tr><td>Scores Data Stream</td><td><code>logs-endpoint_compliance.scores-default</code></td><td>Periodic benchmark score snapshots for trend charts</td></tr>
+<tr><td>Rules (SO)</td><td><code>.kibana_security_solution</code></td><td>Compliance rule definitions as saved objects</td></tr>
+<tr><td>Benchmark State (SO)</td><td><code>.kibana_security_solution</code></td><td>Muted rules state per benchmark</td></tr>
+</table>
+
+<h2 id="key-files">Key Files &amp; Directories</h2>
+<h3>Common Layer</h3>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>common/compliance/constants.ts</code></td><td>All index names, SO types, API base path, schedule prefix, platform/evaluation enums</td></tr>
+<tr><td><code>common/compliance/types.ts</code></td><td>13 domain interfaces: ComplianceRuleMetadata, ComplianceFinding, ComplianceScore, etc.</td></tr>
+<tr><td><code>common/compliance/helpers.ts</code></td><td><code>calculatePostureScore()</code>, <code>getMutedRuleKey()</code>, <code>buildMutedRulesFilter()</code></td></tr>
+<tr><td><code>common/compliance/prebuilt_rules.ts</code></td><td>30 hardcoded CIS rules (10 macOS, 10 Windows, 10 Linux) with osquery SQL and NIST mappings</td></tr>
+<tr><td><code>common/experimental_features.ts</code></td><td>Feature flag registry &mdash; defines <code>endpointComplianceMonitoring: false</code></td></tr>
+</table>
+
+<h3>Server Layer</h3>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>server/compliance/routes/index.ts</code></td><td>12 versioned internal API routes under <code>/internal/endpoint_compliance</code></td></tr>
+<tr><td><code>server/compliance/services/compliance_rules_service.ts</code></td><td>CRUD + bulk actions for rules (SO-backed), benchmark listing via aggregation</td></tr>
+<tr><td><code>server/compliance/services/compliance_scoring_service.ts</code></td><td>Dashboard stats aggregation, score trend, findings search</td></tr>
+<tr><td><code>server/compliance/services/finding_evaluator_service.ts</code></td><td>Long-running poller: reads osquery results &rarr; evaluates &rarr; writes findings</td></tr>
+<tr><td><code>server/compliance/services/detection_rule_bridge.ts</code></td><td>Generates SIEM threshold detection rules with MITRE ATT&amp;CK mapping</td></tr>
+<tr><td><code>server/compliance/services/pack_deployment_service.ts</code></td><td>Builds osquery packs from rules, deploys to Fleet agent policies</td></tr>
+<tr><td><code>server/compliance/services/install_prebuilt_rules.ts</code></td><td>Bulk-creates 30 prebuilt rules as SOs on plugin startup</td></tr>
+<tr><td><code>server/compliance/saved_objects/</code></td><td>SO type definitions: <code>endpoint-compliance-rule</code>, <code>endpoint-compliance-benchmark-state</code></td></tr>
+<tr><td><code>server/compliance/create_indices/</code></td><td>ILM policies, index templates, continuous transform setup</td></tr>
+</table>
+
+<h3>Public Layer</h3>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>public/compliance/index.tsx</code></td><td>React Router: /dashboard, /findings, /rules</td></tr>
+<tr><td><code>public/compliance/hooks/use_compliance_api.ts</code></td><td>React Query hooks: useBenchmarks, useComplianceRules, useDashboardStats, useComplianceFindings, useBulkAction</td></tr>
+<tr><td><code>public/compliance/pages/compliance_dashboard_page.tsx</code></td><td>Score gauge, trend chart, section breakdown, worst hosts</td></tr>
+<tr><td><code>public/compliance/pages/findings_explorer_page.tsx</code></td><td>Paginated findings table with detail flyout</td></tr>
+<tr><td><code>public/compliance/pages/rules_management_page.tsx</code></td><td>Rules table with bulk actions, detail flyout</td></tr>
+</table>
+
+<h3>Scripts</h3>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>scripts/seed_compliance_data.sh</code></td><td>Seeds 800 findings + score trend across 3 benchmarks, 10 hosts, 7 days</td></tr>
+<tr><td><code>scripts/gcp/deploy_fleet_server.sh</code></td><td>Deploys Fleet Server on GCP Compute Engine</td></tr>
+<tr><td><code>scripts/gcp/deploy_osquery_agents.sh</code></td><td>Deploys osquery agent VMs on GCP</td></tr>
+</table>
+
+<h2 id="how-it-works">How It Works</h2>
+<h3>Step 1: Rule Definition</h3>
+<p>Each compliance rule is a <code>ComplianceRuleMetadata</code> saved object containing an osquery SQL query, benchmark metadata (CIS macOS 15, CIS Windows 11, CIS Linux), a section (e.g. &ldquo;2 Network&rdquo;), level (1 or 2), platform, and NIST 800-53 framework control mappings. 30 rules ship prebuilt; custom rules can be created via API.</p>
+
+<h3>Step 2: Pack Deployment</h3>
+<p><code>packDeploymentService.buildCompliancePack()</code> reads all enabled rules for a benchmark, constructs an osquery pack config with schedule IDs prefixed <code>compliance-</code>, and pushes it to Fleet agent policies via <code>deployCompliancePack()</code>. Elastic Agents with the osquery integration then execute these queries on managed endpoints.</p>
+
+<h3>Step 3: Osquery Execution</h3>
+<p>The Elastic Agent runs osquery SQL queries on each endpoint per the scheduled interval (default 300s). Results flow into <code>logs-osquery_manager.result-*</code> in Elasticsearch.</p>
+
+<h3>Step 4: Finding Evaluation</h3>
+<p>The <code>FindingEvaluatorService</code> polls <code>logs-osquery_manager.result-*</code> every 30 seconds for results matching the <code>compliance-</code> schedule ID prefix. For each result, it evaluates:</p>
+<ul>
+<li><strong>Rows returned</strong> &rarr; <code>passed</code></li>
+<li><strong>No rows</strong> &rarr; <code>failed</code></li>
+<li><strong>Query error</strong> &rarr; <code>not_applicable</code></li>
+</ul>
+<p>Findings are bulk-written to <code>logs-endpoint_compliance.findings-default</code>.</p>
+
+<h3>Step 5: Score Aggregation</h3>
+<p>A Task Manager task runs <code>computeAndWriteScores()</code> every 5 minutes. It aggregates findings per benchmark (excluding muted rules), calculates <code>score = round(passed / (passed + failed) * 100, 1)</code>, and writes snapshots to the scores data stream. The continuous transform deduplicates findings into <code>findings_latest</code>.</p>
+
+<h3>Step 6: Dashboard Rendering</h3>
+<p>The React dashboard calls <code>GET /internal/endpoint_compliance/stats/{benchmark_id}</code>, which runs a complex aggregation returning section scores (worst 5), host scores (worst 10), total counts, and the score trend. The UI renders the score gauge, trend chart, section table, and worst hosts table.</p>
+
+<h2 id="key-concepts">Key Concepts &amp; Types</h2>
+<h3>Core Interfaces</h3>
+<table>
+<tr><th>Type</th><th>Layer</th><th>Description</th></tr>
+<tr><td><code>ComplianceRuleMetadata</code></td><td>Common</td><td>Full rule definition: query, benchmark, section, level, platform, frameworks, enabled, interval, prebuilt</td></tr>
+<tr><td><code>ComplianceFinding</code></td><td>Common</td><td>ES document: result.evaluation, rule.*, host.*, agent.*, resource.*, data_stream.*</td></tr>
+<tr><td><code>ComplianceScore</code></td><td>Common</td><td>Score snapshot: score (float), counts, host_count, rule.benchmark.*</td></tr>
+<tr><td><code>ComplianceBenchmarkInfo</code></td><td>Common</td><td>Benchmark card data: id, name, version, total_rules, enabled_rules, platforms, levels</td></tr>
+<tr><td><code>ComplianceDashboardStats</code></td><td>Common</td><td>Full dashboard payload with sections[], worst_hosts[], trend[]</td></tr>
+<tr><td><code>MutedRulesState</code></td><td>Common</td><td>Dictionary keyed by &ldquo;benchmarkId;version;ruleNumber&rdquo; &rarr; {muted, muted_at, muted_by}</td></tr>
+<tr><td><code>CompliancePlatform</code></td><td>Common</td><td>Union: <code>&#39;darwin&#39; | &#39;windows&#39; | &#39;linux&#39;</code></td></tr>
+</table>
+
+<h3>Saved Object Types</h3>
+<table>
+<tr><th>SO Type</th><th>Index</th><th>Namespace</th><th>Purpose</th></tr>
+<tr><td><code>endpoint-compliance-rule</code></td><td><code>.kibana_security_solution</code></td><td>multiple-isolated</td><td>Rule definitions with full field mappings</td></tr>
+<tr><td><code>endpoint-compliance-benchmark-state</code></td><td><code>.kibana_security_solution</code></td><td>multiple-isolated</td><td>Muted rules state (hidden SO)</td></tr>
+</table>
+
+<h3>Score Calculation</h3>
+<pre><code>calculatePostureScore(passed, failed) =
+  Math.round((passed / (passed + failed)) * 1000) / 10
+  // Returns one decimal place, e.g. 72.4%
+  // N/A findings excluded from calculation</code></pre>
+
+<h2 id="configuration">Configuration &amp; Setup</h2>
+<h3>Enable the Feature Flag</h3>
+<pre><code># config/kibana.dev.yml
+xpack.osquery.enableExperimental:
+  - endpointComplianceMonitoring</code></pre>
+
+<h3>Prerequisites</h3>
+<ol>
+<li>Elasticsearch running (the plugin creates index templates and ILM policies on startup)</li>
+<li>Osquery Manager integration installed via Fleet</li>
+<li>At least one osquery package policy added to an agent policy</li>
+</ol>
+
+<h3>Seed Sample Data</h3>
+<pre><code># From the osquery plugin directory:
+bash scripts/seed_compliance_data.sh \
+  --es-url http://localhost:9200 \
+  --hosts 10 --days 7</code></pre>
+
+<h3>Run Kibana</h3>
+<pre><code>yarn start --no-base-path</code></pre>
+<p>Navigate to <strong>Osquery &rarr; Compliance</strong> in the Kibana sidebar.</p>
+
+<h2 id="api-reference">API Reference</h2>
+<p>All routes are internal (<code>access: &#39;internal&#39;</code>) and require the <code>x-elastic-internal-origin: kibana</code> header plus <code>elastic-api-version: 1</code>.</p>
+<table>
+<tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+<tr><td>GET</td><td><code>/internal/endpoint_compliance/benchmarks</code></td><td>List benchmark metadata</td></tr>
+<tr><td>GET</td><td><code>/internal/endpoint_compliance/rules/_find</code></td><td>Paginated rule search with filters</td></tr>
+<tr><td>GET</td><td><code>/internal/endpoint_compliance/rules/{id}</code></td><td>Get single rule</td></tr>
+<tr><td>POST</td><td><code>/internal/endpoint_compliance/rules</code></td><td>Create custom rule</td></tr>
+<tr><td>PUT</td><td><code>/internal/endpoint_compliance/rules/{id}</code></td><td>Update rule</td></tr>
+<tr><td>DELETE</td><td><code>/internal/endpoint_compliance/rules/{id}</code></td><td>Delete custom rule (prebuilt blocked)</td></tr>
+<tr><td>POST</td><td><code>/internal/endpoint_compliance/rules/_bulk_action</code></td><td>Enable / disable / mute / unmute</td></tr>
+<tr><td>GET</td><td><code>/internal/endpoint_compliance/stats/{benchmark_id}</code></td><td>Dashboard stats + score trend</td></tr>
+<tr><td>GET</td><td><code>/internal/endpoint_compliance/findings</code></td><td>Paginated findings search</td></tr>
+<tr><td>POST</td><td><code>/internal/endpoint_compliance/rules/{id}/_generate_detection</code></td><td>Generate SIEM detection rule</td></tr>
+<tr><td>POST</td><td><code>/internal/endpoint_compliance/rules/_generate_detection_rules</code></td><td>Bulk generate detection rules</td></tr>
+<tr><td>POST</td><td><code>/internal/endpoint_compliance/check</code></td><td>On-demand compliance queries</td></tr>
+</table>
+
+<h2 id="ui-pages">UI Pages &amp; Components</h2>
+<h3>Dashboard</h3>
+<p>Benchmark selector cards &rarr; score gauge (color-coded at 80/60% thresholds) &rarr; score trend line chart &rarr; worst 5 CIS sections &rarr; worst 10 hosts. Time range: 24h / 7d / 30d.</p>
+
+<h3>Findings Explorer</h3>
+<p>Filterable table (benchmark, evaluation, search) with paginated results. Columns: Result (color badge), Rule, Section, Level, Host, OS, Timestamp. Row click opens a detail flyout with remediation steps and evidence JSON.</p>
+
+<h3>Rules Management</h3>
+<p>30 rules with checkbox selection for bulk actions (enable/disable/mute/unmute). Columns: #, Name, OS (platform icon), Level, Section, Frameworks (NIST badges), Status, Source. Row click opens flyout with osquery SQL query, remediation, framework mappings, and interval.</p>
+
+<h3>Component Library</h3>
+<table>
+<tr><th>Component</th><th>Visual</th></tr>
+<tr><td><code>ComplianceScoreGauge</code></td><td>Large score %, EuiProgress bar, pass/fail/total counts</td></tr>
+<tr><td><code>ComplianceTrendChart</code></td><td>@elastic/charts LineSeries, Y: 0&ndash;100%, X: time</td></tr>
+<tr><td><code>ComplianceBySectionTable</code></td><td>EuiBasicTable with inline progress bars per CIS section</td></tr>
+<tr><td><code>WorstHostsTable</code></td><td>EuiBasicTable ranked by score with color badges</td></tr>
+<tr><td><code>BenchmarkCard</code></td><td>EuiCard with platform icons, score bar, enabled/total stats</td></tr>
+</table>
+
+<h2 id="issues-prs">Related Issues &amp; PRs</h2>
+<table>
+<tr><th>#</th><th>Title</th><th>State</th></tr>
+<tr><td><a href="https://github.com/elastic/kibana/pull/258480">#258480</a></td><td>[Osquery] Spike: Endpoint Compliance Monitoring (CIS/NIST)</td><td><span class="tag blue">Open (Draft)</span></td></tr>
+<tr><td><a href="https://github.com/elastic/kibana/pull/249590">#249590</a></td><td>[OnWeek] [PoC] Endpoint Posture Management powered by Osquery</td><td><span class="tag blue">Open</span></td></tr>
+<tr><td><a href="https://github.com/elastic/kibana/pull/256270">#256270</a></td><td>[Osquery] Scheduled responses infrastructure and APIs</td><td><span class="tag green">Merged</span></td></tr>
+<tr><td><a href="https://github.com/elastic/kibana/pull/258041">#258041</a></td><td>[Security Solution] Spike: Vulnerability Checker rule type</td><td><span class="tag blue">Open</span></td></tr>
+</table>
+
+<h2 id="whats-next">What&#39;s Next</h2>
+<div class="summary-box">
+<p><strong>Post-spike decomposition plan:</strong> This spike validates the full E2E flow. Next steps are to decompose into production-ready PRs with proper test coverage.</p>
+</div>
+<ul>
+<li><strong>Transform for findings_latest</strong> &mdash; Deduplicated latest finding per host+rule (currently queries raw data stream)</li>
+<li><strong>Real osquery scheduling</strong> &mdash; Wire pack deployment to actually push queries via Fleet</li>
+<li><strong>CIS benchmark versioning</strong> &mdash; Support multiple versions of the same benchmark</li>
+<li><strong>CSP integration</strong> &mdash; Merge posture data with Cloud Security Posture dashboard</li>
+<li><strong>Scout API + UI tests</strong> &mdash; Playwright-based E2E tests for all pages</li>
+<li><strong>Custom rule authoring UI</strong> &mdash; Form for creating custom compliance rules</li>
+<li><strong>Exception management</strong> &mdash; Per-rule suppression with audit trail</li>
+<li><strong>Compliance reporting</strong> &mdash; PDF/CSV export for auditors</li>
+<li><strong>Multi-vendor evaluation</strong> &mdash; Strategy implementations for SentinelOne and Defender endpoints</li>
+</ul>
+
+
+  <footer>
+    Deep-dive reference for <strong>endpoint-compliance</strong> in elastic/kibana &mdash;
+    Generated 2026-03-19 &mdash;
+    <a href="https://github.com/elastic/kibana">View repository</a>
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   COMPLIANCE_FINDINGS_DATA_STREAM,
+  COMPLIANCE_FINDINGS_LATEST_INDEX,
   COMPLIANCE_SCORES_DATA_STREAM,
 } from '../../../common/compliance';
 import type { MutedRulesState, ComplianceSectionScore, ComplianceHostScore } from '../../../common/compliance';
@@ -24,8 +25,9 @@ export const computeAndWriteScores = async (
   const mustNot = mutedFilters.length > 0 ? mutedFilters : [];
 
   try {
+    // Query the deduplicated findings_latest index which contains the latest finding per host+rule
     const response = await esClient.search({
-      index: COMPLIANCE_FINDINGS_DATA_STREAM,
+      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
       size: 0,
       query: {
         bool: {
@@ -34,13 +36,40 @@ export const computeAndWriteScores = async (
       },
       aggs: {
         benchmarks: {
-          terms: { field: 'rule.benchmark.id', size: 50 },
+          // Extract benchmark ID from the nested latest_finding structure
+          terms: { 
+            field: 'latest_finding.hits.hits._source.rule.benchmark.id', 
+            size: 50 
+          },
           aggs: {
-            benchmark_name: { terms: { field: 'rule.benchmark.name', size: 1 } },
-            benchmark_version: { terms: { field: 'rule.benchmark.version', size: 1 } },
-            passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-            failed: { filter: { term: { 'result.evaluation': 'failed' } } },
-            not_applicable: { filter: { term: { 'result.evaluation': 'not_applicable' } } },
+            benchmark_name: { 
+              terms: { 
+                field: 'latest_finding.hits.hits._source.rule.benchmark.name.keyword', 
+                size: 1 
+              } 
+            },
+            benchmark_version: { 
+              terms: { 
+                field: 'latest_finding.hits.hits._source.rule.benchmark.version', 
+                size: 1 
+              } 
+            },
+            // Count findings by evaluation from the latest finding
+            passed: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'passed' } 
+              } 
+            },
+            failed: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'failed' } 
+              } 
+            },
+            not_applicable: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'not_applicable' } 
+              } 
+            },
             hosts: { cardinality: { field: 'host.id' } },
           },
         },
@@ -97,25 +126,48 @@ export const getDashboardStats = async (
   const mutedFilters = buildMutedRulesFilter(mutedRules);
 
   try {
+    // Query the deduplicated findings_latest index for more accurate stats
     const response = await esClient.search({
-      index: COMPLIANCE_FINDINGS_DATA_STREAM,
+      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
       size: 0,
       query: {
         bool: {
-          must: [{ term: { 'rule.benchmark.id': benchmarkId } }],
+          must: [{ 
+            term: { 'latest_finding.hits.hits._source.rule.benchmark.id': benchmarkId } 
+          }],
           must_not: mutedFilters,
         },
       },
       aggs: {
-        passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-        failed: { filter: { term: { 'result.evaluation': 'failed' } } },
-        not_applicable: { filter: { term: { 'result.evaluation': 'not_applicable' } } },
+        passed: { 
+          filter: { 
+            term: { 'latest_finding.hits.hits._source.result.evaluation': 'passed' } 
+          } 
+        },
+        failed: { 
+          filter: { 
+            term: { 'latest_finding.hits.hits._source.result.evaluation': 'failed' } 
+          } 
+        },
+        not_applicable: { 
+          filter: { 
+            term: { 'latest_finding.hits.hits._source.result.evaluation': 'not_applicable' } 
+          } 
+        },
         hosts: { cardinality: { field: 'host.id' } },
         sections: {
-          terms: { field: 'rule.section', size: 20 },
+          terms: { field: 'latest_finding.hits.hits._source.rule.section', size: 20 },
           aggs: {
-            passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-            failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+            passed: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'passed' } 
+              } 
+            },
+            failed: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'failed' } 
+              } 
+            },
             score: {
               bucket_script: {
                 buckets_path: { p: 'passed._count', f: 'failed._count' },
@@ -127,11 +179,34 @@ export const getDashboardStats = async (
         worst_hosts: {
           terms: { field: 'host.id', size: 10 },
           aggs: {
-            host_name: { terms: { field: 'host.name', size: 1 } },
-            os_name: { terms: { field: 'host.os.name', size: 1 } },
-            os_version: { terms: { field: 'host.os.version', size: 1 } },
-            passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-            failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+            host_name: { 
+              terms: { 
+                field: 'latest_finding.hits.hits._source.host.name.keyword', 
+                size: 1 
+              } 
+            },
+            os_name: { 
+              terms: { 
+                field: 'latest_finding.hits.hits._source.host.os.name', 
+                size: 1 
+              } 
+            },
+            os_version: { 
+              terms: { 
+                field: 'latest_finding.hits.hits._source.host.os.version', 
+                size: 1 
+              } 
+            },
+            passed: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'passed' } 
+              } 
+            },
+            failed: { 
+              filter: { 
+                term: { 'latest_finding.hits.hits._source.result.evaluation': 'failed' } 
+              } 
+            },
             score: {
               bucket_script: {
                 buckets_path: { p: 'passed._count', f: 'failed._count' },
@@ -252,14 +327,30 @@ export const findComplianceFindings = async (
   const { page = 1, perPage = 20, ...filters } = options;
   const must: object[] = [];
 
-  if (filters.benchmarkId) must.push({ term: { 'rule.benchmark.id': filters.benchmarkId } });
-  if (filters.section) must.push({ term: { 'rule.section': filters.section } });
-  if (filters.hostId) must.push({ term: { 'host.id': filters.hostId } });
-  if (filters.evaluation) must.push({ term: { 'result.evaluation': filters.evaluation } });
+  // Build filters for the deduplicated findings_latest index structure
+  if (filters.benchmarkId) {
+    must.push({ 
+      term: { 'latest_finding.hits.hits._source.rule.benchmark.id': filters.benchmarkId } 
+    });
+  }
+  if (filters.section) {
+    must.push({ 
+      term: { 'latest_finding.hits.hits._source.rule.section': filters.section } 
+    });
+  }
+  if (filters.hostId) {
+    must.push({ term: { 'host.id': filters.hostId } });
+  }
+  if (filters.evaluation) {
+    must.push({ 
+      term: { 'latest_finding.hits.hits._source.result.evaluation': filters.evaluation } 
+    });
+  }
 
   try {
+    // Query the deduplicated findings_latest index to get only the latest findings
     const response = await esClient.search({
-      index: COMPLIANCE_FINDINGS_DATA_STREAM,
+      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
       from: (page - 1) * perPage,
       size: perPage,
       query: must.length > 0 ? { bool: { must } } : { match_all: {} },
@@ -270,7 +361,21 @@ export const findComplianceFindings = async (
       total: typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0,
       page,
       per_page: perPage,
-      findings: response.hits.hits.map((hit) => ({ id: hit._id, ...hit._source })),
+      // Extract the actual finding from the transform structure
+      findings: response.hits.hits.map((hit) => {
+        const source = hit._source as any;
+        const latestFinding = source.latest_finding?.hits?.hits?.[0]?._source;
+        return { 
+          id: hit._id, 
+          ...latestFinding,
+          // Keep the transform metadata for reference
+          _transform_metadata: {
+            rule_id: source['rule.id'],
+            host_id: source['host.id'],
+            last_updated: source['@timestamp'],
+          }
+        };
+      }),
     };
   } catch (error) {
     return { total: 0, page, per_page: perPage, findings: [] };

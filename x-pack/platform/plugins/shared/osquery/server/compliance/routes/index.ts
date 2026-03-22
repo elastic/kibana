@@ -26,6 +26,7 @@ import {
   generateBulkDetectionRules,
   runComplianceCheck,
 } from '../services';
+import { complianceCleanupRoutes } from './cleanup';
 
 const ROUTE_SECURITY_READ = {
   authz: { requiredPrivileges: ['osquery'] },
@@ -424,4 +425,279 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
         return res.ok({ body: result });
       }
     );
+
+  // --- Health & Validation ---
+  router.versioned
+    .get({
+      path: `${COMPLIANCE_API_BASE}/health`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion({ version: '1', validate: false }, async (context, _req, res) => {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const fleet = context.fleet;
+      const logger = context.osquery.logger.get('compliance.health');
+
+      const { ComplianceHealthChecks } = await import('../lib/deployment/health_checks');
+      const healthService = new ComplianceHealthChecks(esClient, fleet, logger);
+
+      const health = await healthService.runAll();
+
+      return res.ok({ body: health });
+    });
+
+  router.versioned
+    .post({
+      path: `${COMPLIANCE_API_BASE}/validate/deployment`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              benchmark_id: schema.string(),
+              agent_policy_ids: schema.arrayOf(schema.string()),
+            }),
+          },
+        },
+      },
+      async (context, req, res) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const soClient = (await context.core).savedObjects.client;
+        const fleet = context.fleet;
+        const logger = context.osquery.logger.get('compliance.validation');
+
+        const { PreDeploymentValidation } = await import(
+          '../lib/deployment/pre_deployment_validation'
+        );
+        const validationService = new PreDeploymentValidation(esClient, soClient, fleet, logger);
+
+        const validation = await validationService.validatePackDeployment({
+          benchmarkId: req.body.benchmark_id,
+          agentPolicyIds: req.body.agent_policy_ids,
+        });
+
+        if (!validation.valid) {
+          return res.badRequest({ body: validation });
+        }
+
+        return res.ok({ body: validation });
+      }
+    );
+
+  router.versioned
+    .post({
+      path: `${COMPLIANCE_API_BASE}/validate/query`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              query: schema.string({ minLength: 1 }),
+              platform: schema.maybe(
+                schema.oneOf([
+                  schema.literal('linux'),
+                  schema.literal('darwin'),
+                  schema.literal('windows'),
+                ])
+              ),
+            }),
+          },
+        },
+      },
+      async (context, req, res) => {
+        const logger = context.osquery.logger.get('compliance.query-validation');
+
+        const { QueryValidationService } = await import(
+          '../services/query_validation_service'
+        );
+        const validationService = new QueryValidationService(logger);
+
+        const validation = await validationService.validateQuery(req.body.query, req.body.platform);
+
+        return res.ok({ body: validation });
+      }
+    );
+
+  router.versioned
+    .post({
+      path: `${COMPLIANCE_API_BASE}/sandbox/test`,
+      access: 'internal',
+      security: ROUTE_SECURITY_WRITE,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              query: schema.string({ minLength: 1 }),
+              agent_id: schema.maybe(schema.string()),
+              platform: schema.maybe(
+                schema.oneOf([
+                  schema.literal('linux'),
+                  schema.literal('darwin'),
+                  schema.literal('windows'),
+                ])
+              ),
+            }),
+          },
+        },
+      },
+      async (context, req, res) => {
+        const soClient = (await context.core).savedObjects.client;
+        const fleet = context.fleet;
+        const logger = context.osquery.logger.get('compliance.sandbox');
+
+        const { QuerySandboxService } = await import('../services/query_sandbox_service');
+        const sandboxService = new QuerySandboxService(soClient, fleet, logger);
+
+        const result = await sandboxService.testQuery(
+          req.body.query,
+          req.body.agent_id,
+          req.body.platform
+        );
+
+        return res.ok({ body: result });
+      }
+    );
+
+  router.versioned
+    .get({
+      path: `${COMPLIANCE_API_BASE}/metrics`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion({ version: '1', validate: false }, async (context, _req, res) => {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const taskManager = context.taskManager;
+      const logger = context.osquery.logger.get('compliance.monitoring');
+
+      const { DeploymentMonitoringService } = await import(
+        '../lib/deployment/deployment_monitoring'
+      );
+      const monitoringService = new DeploymentMonitoringService(esClient, taskManager, logger);
+
+      const metrics = await monitoringService.collectMetrics();
+
+      return res.ok({ body: metrics });
+    });
+
+  // --- CSP Integration ---
+  router.versioned
+    .get({
+      path: `${COMPLIANCE_API_BASE}/posture/unified`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              endpoint_weight: schema.maybe(schema.number({ min: 0, max: 1 })),
+              cloud_weight: schema.maybe(schema.number({ min: 0, max: 1 })),
+              kubernetes_weight: schema.maybe(schema.number({ min: 0, max: 1 })),
+            }),
+          },
+        },
+      },
+      async (context, req, res) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const logger = context.osquery.logger.get('compliance.unified-scoring');
+
+        const { CSPUnifiedScoringService } = await import(
+          '../services/csp_unified_scoring_service'
+        );
+        const scoringService = new CSPUnifiedScoringService(esClient, logger);
+
+        const weights = {
+          endpoint: req.query.endpoint_weight,
+          cloud: req.query.cloud_weight,
+          kubernetes: req.query.kubernetes_weight,
+        };
+
+        const unifiedScore = await scoringService.calculateUnifiedScore(weights);
+
+        return res.ok({ body: unifiedScore });
+      }
+    );
+
+  router.versioned
+    .get({
+      path: `${COMPLIANCE_API_BASE}/reports/regulatory/templates`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion({ version: '1', validate: false }, async (context, _req, res) => {
+      const logger = context.osquery.logger.get('compliance.regulatory-templates');
+
+      const { RegulatoryReportTemplates } = await import(
+        '../services/regulatory_report_templates'
+      );
+      const templates = new RegulatoryReportTemplates(logger);
+
+      const availableTemplates = templates.listAvailableTemplates();
+
+      return res.ok({ body: { templates: availableTemplates } });
+    });
+
+  router.versioned
+    .post({
+      path: `${COMPLIANCE_API_BASE}/reports/regulatory`,
+      access: 'internal',
+      security: ROUTE_SECURITY_READ,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              framework: schema.oneOf([
+                schema.literal('soc2'),
+                schema.literal('iso27001'),
+                schema.literal('pci-dss'),
+                schema.literal('nist-800-53'),
+                schema.literal('hipaa'),
+                schema.literal('gdpr'),
+              ]),
+              time_range: schema.object({
+                from: schema.string(),
+                to: schema.string(),
+              }),
+              filters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            }),
+          },
+        },
+      },
+      async (context, req, res) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const soClient = (await context.core).savedObjects.client;
+        const logger = context.osquery.logger.get('compliance.regulatory-reports');
+
+        const { RegulatoryReportTemplates } = await import(
+          '../services/regulatory_report_templates'
+        );
+        const templates = new RegulatoryReportTemplates(logger);
+
+        // Get compliance data for time range
+        const complianceData = {}; // Would fetch actual data
+
+        const report = await templates.generateRegulatoryReport(req.body.framework, complianceData);
+
+        return res.ok({ body: report });
+      }
+    );
+
+  // Register cleanup routes
+  complianceCleanupRoutes(router);
 };
