@@ -20,6 +20,7 @@ import {
 } from '../../../../common/domain/euid/dsl';
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
 import {
+  USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
   USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT,
   USER_TS_EXTRACTION_CASES,
 } from '../fixtures/user_ts_extraction_cases';
@@ -47,15 +48,17 @@ async function searchWithFilter(
     index: UPDATES_INDEX,
     query: query ? { ...query } : {},
     size,
-  }) as Promise<{ hits: { hits: Array<{ _source?: unknown }>; total?: number | { value: number } } }>;
+  }) as Promise<{
+    hits: { hits: Array<{ _source?: unknown }>; total?: number | { value: number } };
+  }>;
 }
 
-type DocSource = {
+interface DocSource {
   user?: { name?: string; email?: string; id?: string };
   host?: { id?: string; name?: string; entity?: { id?: string } };
   entity?: { id?: string };
   service?: { name?: string; entity?: { id?: string } };
-};
+}
 
 function getDocSource(hit: { _source?: unknown }): DocSource | undefined {
   return hit._source as DocSource | undefined;
@@ -145,24 +148,50 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     }
   );
 
-  apiTest.describe('user.ts DSL (definitions/user.ts)', () => {
-    for (const scenario of USER_TS_ARCHIVE_SCENARIOS) {
-      apiTest(
-        `should return a single matching hit for user DSL scenario "${scenario.id}"`,
-        async ({ esClient }) => {
-          const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
-          expect(dsl).toBeDefined();
+  const userTsNoPerDocumentDslScenarios = USER_TS_ARCHIVE_SCENARIOS.filter(
+    (s) => s.expectNoPerDocumentDsl
+  );
 
-          const result = await searchWithFilter(esClient, dsl, 10);
-
-          expect(getTotal(result.hits)).toBe(1);
-          expect(result.hits.hits).toHaveLength(1);
-          expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
-          expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
-        }
-      );
+  apiTest(
+    'user.ts DSL: should return undefined when dslFilterSource fails documentsFilter or postAgg gate',
+    async ({ esClient }) => {
+      await searchWithFilter(esClient, { match_all: {} }, 1);
+      for (const scenario of userTsNoPerDocumentDslScenarios) {
+        expect(getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource)).toBeUndefined();
+      }
     }
-  });
+  );
+
+  apiTest(
+    'user: synthetic invalid docs should not return per-document DSL (documentsFilter or postAgg gate)',
+    async ({ esClient }) => {
+      await searchWithFilter(esClient, { match_all: {} }, 1);
+      for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
+        expect(getEuidDslFilterBasedOnDocument('user', example.doc)).toBeUndefined();
+      }
+    }
+  );
+
+  for (const scenario of USER_TS_ARCHIVE_SCENARIOS) {
+    if (scenario.expectNoPerDocumentDsl) {
+      continue;
+    }
+
+    apiTest(
+      `user.ts DSL: should return a single matching hit for scenario "${scenario.id}"`,
+      async ({ esClient }) => {
+        const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
+        expect(dsl).toBeDefined();
+
+        const result = await searchWithFilter(esClient, dsl, 10);
+
+        expect(getTotal(result.hits)).toBe(1);
+        expect(result.hits.hits).toHaveLength(1);
+        expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
+        expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
+      }
+    );
+  }
 
   apiTest(
     'should return exactly the mailchimp document when service DSL is built from service.name',
@@ -235,9 +264,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       }
 
       expect(hasDocWith(hits, (s) => s.user?.name === 'john.doe')).toBe(true);
-      expect(hasDocWith(hits, (s) => s.user?.name === 'alice.local' && s.host?.id === 'host-nonidp-001')).toBe(
-        true
-      );
+      expect(
+        hasDocWith(hits, (s) => s.user?.name === 'alice.local' && s.host?.id === 'host-nonidp-001')
+      ).toBe(true);
 
       expect(hasDocWith(hits, (s) => s.user?.email === 'invalid-idp-illegal@test.com')).toBe(false);
       expect(hasDocWith(hits, (s) => s.user?.name === 'not-captured-no-event')).toBe(false);
@@ -319,7 +348,10 @@ function isTermQuery(query: object): query is { term: Record<string, unknown> } 
   return 'term' in query && query.term !== null && typeof query.term === 'object';
 }
 
-function sourceMatchesTermQuery(src: Record<string, unknown>, term: Record<string, unknown>): boolean {
+function sourceMatchesTermQuery(
+  src: Record<string, unknown>,
+  term: Record<string, unknown>
+): boolean {
   const entries = Object.entries(term);
   if (entries.length !== 1) {
     return false;

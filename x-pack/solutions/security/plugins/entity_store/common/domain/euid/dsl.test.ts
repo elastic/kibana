@@ -9,10 +9,7 @@ import { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } 
 
 const fieldMissingOrEmpty = (field: string) => ({
   bool: {
-    should: [
-      { bool: { must_not: [{ exists: { field } }] } },
-      { term: { [field]: '' } },
-    ],
+    should: [{ bool: { must_not: [{ exists: { field } }] } }, { term: { [field]: '' } }],
     minimum_should_match: 1,
   },
 });
@@ -115,7 +112,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     it('returns filter with term on user.email and source clause (event.module whenClause expands to sourceMatchesAny)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
-        event: { module: 'okta' },
+        event: { kind: 'asset', module: 'okta' },
       });
 
       expect(result).toEqual({
@@ -141,6 +138,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     it('returns filter with term on user.email and unknown source clause when no event.module or data_stream.dataset', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
+        event: { kind: 'asset' },
       });
 
       expect(result).toEqual({
@@ -179,7 +177,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     it('returns filter with term on user.name and source clause and must on higher-ranked fields missing-or-empty', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
-        event: { module: 'azure' },
+        event: { kind: 'asset', module: 'azure' },
       });
 
       expect(result).toEqual({
@@ -207,31 +205,13 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns filter with term on user.id and source clause and must on user.email missing-or-empty', () => {
-      const result = getEuidDslFilterBasedOnDocument('user', {
-        user: { id: 'user-id-42' },
-        event: { module: 'o365' },
-      });
-
-      expect(result).toEqual({
-        bool: {
-          filter: [
-            { term: { 'user.id': 'user-id-42' } },
-            {
-              bool: {
-                should: [
-                  { term: { 'event.module': 'o365' } },
-                  { prefix: { 'data_stream.dataset': 'o365' } },
-                  { term: { 'event.module': 'o365_metrics' } },
-                  { prefix: { 'data_stream.dataset': 'o365_metrics' } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-          must: [fieldMissingOrEmpty('user.email')],
-        },
-      });
+    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/iam/entity.id)', () => {
+      expect(
+        getEuidDslFilterBasedOnDocument('user', {
+          user: { id: 'user-id-42' },
+          event: { module: 'o365' },
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined when no user id fields are present', () => {
@@ -241,7 +221,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com', id: 'user-42' },
-        event: { module: 'entityanalytics_okta' },
+        event: { kind: 'asset', module: 'entityanalytics_okta' },
       });
 
       expect(result).toEqual({
@@ -267,7 +247,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     it('returns filter for user.name and user.domain with source clause and must on higher-ranked fields missing-or-empty', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
-        event: { module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
       });
 
       expect(result).toEqual({
@@ -293,7 +273,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must so the query can match stored documents', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'bob@example.com' },
-        event: { module: 'okta' },
+        event: { kind: 'asset', module: 'okta' },
       });
       const filter = result?.bool?.filter as Array<{ term?: Record<string, string> }> | undefined;
       const filterFields = Array.isArray(filter)

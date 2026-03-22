@@ -17,6 +17,7 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFieldsPreAgg,
+  documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
   getFieldValue,
@@ -51,7 +52,9 @@ import {
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
- * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
+ * @returns An ESQL filter string, or `undefined` if the document does not contain enough identifying
+ *   information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter` (same gate
+ *   as logs extraction) after field evaluations and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
@@ -79,6 +82,9 @@ export function getEuidEsqlFilterBasedOnDocument(
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
     applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+    return undefined;
   }
   const effectiveEuidRanking = getEffectiveEuidRanking(doc, identityField);
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveEuidRanking);

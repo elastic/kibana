@@ -13,6 +13,7 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
   applyWhenConditionTrueSetFieldsPreAgg,
+  documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
   getFieldValue,
@@ -93,7 +94,10 @@ export function getEuidDslDocumentsContainsIdFilter(
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
- * @returns An Elasticsearch DSL query container, or undefined if the document does not contain enough identifying information.
+ * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain enough
+ *   identifying information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter`
+ *   (same gate as `getEuidDslDocumentsContainsIdFilter` / logs extraction) after field evaluations
+ *   and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
@@ -125,6 +129,9 @@ export function getEuidDslFilterBasedOnDocument(
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
     applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+    return undefined;
   }
   const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveRanking);
@@ -185,10 +192,7 @@ export function getEuidDslFilterBasedOnDocument(
 function fieldMissingOrEmptyDsl(field: string): QueryDslQueryContainer {
   return {
     bool: {
-      should: [
-        { bool: { must_not: [{ exists: { field } }] } },
-        { term: { [field]: '' } },
-      ],
+      should: [{ bool: { must_not: [{ exists: { field } }] } }, { term: { [field]: '' } }],
       minimum_should_match: 1,
     },
   };

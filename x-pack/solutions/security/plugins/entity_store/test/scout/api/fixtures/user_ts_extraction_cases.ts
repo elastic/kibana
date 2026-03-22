@@ -12,13 +12,13 @@
  * Used by Scout `dsl_translation` / `painless_translation` and by
  * `common/domain/euid/user_ts_extraction_cases.test.ts` to guard against drift.
  */
-export type UserTsExpectedMeta = {
+export interface UserTsExpectedMeta {
   namespace: string;
   confidence: 'high' | 'medium';
   entityName?: string;
-};
+}
 
-export type UserTsExtractionCase = {
+export interface UserTsExtractionCase {
   /** Stable id for test titles / debugging */
   readonly id: string;
   /** Elasticsearch query that must match exactly one document in the updates archive */
@@ -35,14 +35,21 @@ export type UserTsExtractionCase = {
    * not present in the static archive.
    */
   readonly ingestSource?: Record<string, unknown>;
-};
+  /**
+   * When true, `getEuidDslFilterBasedOnDocument` / `getEuidEsqlFilterBasedOnDocument` return
+   * undefined (document fails `documentsFilter` or `postAggFilter` gate vs log extraction).
+   */
+  readonly expectNoPerDocumentDsl?: boolean;
+}
 
 /** Cases backed by `es_archives/updates/data.json` (plus optional ingested-only rows). */
 export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   // --- IDP: event.kind asset + event.module namespace mapping (user.ts fieldEvaluations) ---
   {
     id: 'idp-asset-okta-user-name',
-    query: { bool: { must: [{ term: { 'user.name': 'john.doe' } }, { term: { 'event.module': 'okta' } }] } },
+    query: {
+      bool: { must: [{ term: { 'user.name': 'john.doe' } }, { term: { 'event.module': 'okta' } }] },
+    },
     dslFilterSource: {
       user: { name: 'john.doe' },
       event: { kind: 'asset', module: 'okta' },
@@ -52,7 +59,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-asset-azure-user-name',
-    query: { bool: { must: [{ term: { 'user.name': 'jane.smith' } }, { term: { 'host.id': 'host-456' } }] } },
+    query: {
+      bool: {
+        must: [{ term: { 'user.name': 'jane.smith' } }, { term: { 'host.id': 'host-456' } }],
+      },
+    },
     dslFilterSource: {
       user: { name: 'jane.smith' },
       event: { kind: 'asset', module: 'azure' },
@@ -74,7 +85,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-asset-o365-user-id-priority',
-    query: { bool: { must: [{ term: { 'user.id': 'user-789' } }, { term: { 'user.name': 'alice.brown' } }] } },
+    query: {
+      bool: {
+        must: [{ term: { 'user.id': 'user-789' } }, { term: { 'user.name': 'alice.brown' } }],
+      },
+    },
     dslFilterSource: {
       user: { id: 'user-789', name: 'alice.brown' },
       event: { kind: 'asset', module: 'o365' },
@@ -94,13 +109,24 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-asset-ad-user-name-domain',
-    query: { bool: { must: [{ term: { 'user.name': 'arnlod.schmidt' } }, { term: { 'user.domain': 'elastic.co' } }] } },
+    query: {
+      bool: {
+        must: [
+          { term: { 'user.name': 'arnlod.schmidt' } },
+          { term: { 'user.domain': 'elastic.co' } },
+        ],
+      },
+    },
     dslFilterSource: {
       user: { name: 'arnlod.schmidt', domain: 'elastic.co', entity: { id: 'arnlod.schmidt' } },
       event: { kind: 'asset', module: 'entityanalytics_ad' },
     },
     expectedEuid: 'user:arnlod.schmidt@elastic.co@active_directory',
-    expectedMeta: { namespace: 'active_directory', confidence: 'high', entityName: 'arnlod.schmidt' },
+    expectedMeta: {
+      namespace: 'active_directory',
+      confidence: 'high',
+      entityName: 'arnlod.schmidt',
+    },
   },
   {
     id: 'idp-asset-okta-user-email',
@@ -114,7 +140,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-asset-aws-user-name-domain',
-    query: { bool: { must: [{ term: { 'user.name': 'charlie.wilson' } }, { term: { 'user.domain': 'corp' } }] } },
+    query: {
+      bool: {
+        must: [{ term: { 'user.name': 'charlie.wilson' } }, { term: { 'user.domain': 'corp' } }],
+      },
+    },
     dslFilterSource: {
       user: { name: 'charlie.wilson', domain: 'corp' },
       event: { kind: 'asset', module: 'aws' },
@@ -176,7 +206,14 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-asset-okta-email-over-name',
-    query: { bool: { must: [{ term: { 'user.email': 'grace@example.com' } }, { term: { 'user.name': 'grace.anderson' } }] } },
+    query: {
+      bool: {
+        must: [
+          { term: { 'user.email': 'grace@example.com' } },
+          { term: { 'user.name': 'grace.anderson' } },
+        ],
+      },
+    },
     dslFilterSource: {
       user: { email: 'grace@example.com', name: 'grace.anderson' },
       event: { kind: 'asset', module: 'okta' },
@@ -218,7 +255,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   // --- IDP: IAM event types (idpEventTypeCondition), not asset kind ---
   {
     id: 'idp-iam-okta-user-id',
-    query: { bool: { must: [{ term: { 'user.name': 'karen.green' } }, { term: { 'user.id': 'user-505' } }] } },
+    query: {
+      bool: {
+        must: [{ term: { 'user.name': 'karen.green' } }, { term: { 'user.id': 'user-505' } }],
+      },
+    },
     dslFilterSource: {
       user: { id: 'user-505', name: 'karen.green' },
       event: { kind: 'any-random', category: 'iam', type: 'user', module: 'okta' },
@@ -229,7 +270,14 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-iam-azure-null-kind-email',
-    query: { bool: { must: [{ term: { 'user.email': 'larry@example.com' } }, { term: { 'user.name': 'larry.black' } }] } },
+    query: {
+      bool: {
+        must: [
+          { term: { 'user.email': 'larry@example.com' } },
+          { term: { 'user.name': 'larry.black' } },
+        ],
+      },
+    },
     dslFilterSource: {
       user: { email: 'larry@example.com', name: 'larry.black' },
       event: { kind: null, category: 'iam', type: 'creation', module: 'azure' },
@@ -240,7 +288,9 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   },
   {
     id: 'idp-iam-ad-user-name-domain',
-    query: { bool: { must: [{ term: { 'user.name': 'mary.blue' } }, { term: { 'user.domain': 'corp' } }] } },
+    query: {
+      bool: { must: [{ term: { 'user.name': 'mary.blue' } }, { term: { 'user.domain': 'corp' } }] },
+    },
     dslFilterSource: {
       user: { name: 'mary.blue', domain: 'corp' },
       event: { category: 'iam', type: 'group', module: 'entityanalytics_ad' },
@@ -281,7 +331,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset' },
     },
     expectedEuid: 'user:not-captured-no-module@unknown',
-    expectedMeta: { namespace: 'unknown', confidence: 'high', entityName: 'not-captured-no-module' },
+    expectedMeta: {
+      namespace: 'unknown',
+      confidence: 'high',
+      entityName: 'not-captured-no-module',
+    },
   },
   {
     id: 'idp-asset-no-module-second-unknown',
@@ -298,7 +352,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     id: 'non-idp-local-user-host',
     query: {
       bool: {
-        must: [{ term: { 'user.name': 'alice.local' } }, { term: { 'host.id': 'host-nonidp-001' } }],
+        must: [
+          { term: { 'user.name': 'alice.local' } },
+          { term: { 'host.id': 'host-nonidp-001' } },
+        ],
       },
     },
     dslFilterSource: {
@@ -318,6 +375,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       data_stream: { dataset: 'entityanalytics_okta.users' },
     },
     expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   // --- postAggFilter failures (passes documentsFilter, fails postAgg) ---
   {
@@ -327,6 +385,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       user: { name: 'not-captured-no-event' },
     },
     expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   {
     id: 'postagg-fail-illegal-idp-shape',
@@ -336,6 +395,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { module: 'azure' },
     },
     expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   // --- postAggFilter: entity.id exists (shared) even when IDP signals are weak ---
   {
@@ -346,7 +406,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       entity: { id: 'stored-user-entity-001' },
     },
     expectedEuid: 'user:entity-id-postagg-only@unknown',
-    expectedMeta: { namespace: 'unknown', confidence: 'high', entityName: 'entity-id-postagg-only' },
+    expectedMeta: {
+      namespace: 'unknown',
+      confidence: 'high',
+      entityName: 'entity-id-postagg-only',
+    },
     ingestSource: {
       '@timestamp': '2026-01-20T12:05:30Z',
       user: { name: 'entity-id-postagg-only' },
@@ -354,6 +418,54 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     },
   },
 ];
+
+/**
+ * Synthetic user documents (not in the archive) that must not produce
+ * `getEuidDslFilterBasedOnDocument` / `getEuidEsqlFilterBasedOnDocument`: they fail the same
+ * `documentsFilter` ∧ `postAggFilter` gate as log extraction.
+ */
+export interface UserScoutInvalidPerDocumentFilterExample {
+  readonly id: string;
+  readonly doc: Record<string, unknown>;
+}
+
+export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScoutInvalidPerDocumentFilterExample[] =
+  [
+    {
+      id: 'postAgg-user-id-and-o365-module-without-asset-or-iam',
+      doc: {
+        user: { id: 'scout-synthetic-postagg-miss-user-id' },
+        event: { module: 'o365' },
+      },
+    },
+    {
+      id: 'postAgg-user-email-and-okta-module-without-asset-or-iam',
+      doc: {
+        user: { email: 'scout-synthetic-postagg-miss@example.com' },
+        event: { module: 'okta' },
+      },
+    },
+    {
+      id: 'postAgg-user-name-only-no-asset-iam-or-nonIdp-host',
+      doc: {
+        user: { name: 'scout-synthetic-name-only-postagg-miss' },
+      },
+    },
+    {
+      id: 'documentsFilter-event-kind-enrichment',
+      doc: {
+        user: { name: 'scout-synthetic-enrichment-kind' },
+        event: { kind: 'enrichment' },
+      },
+    },
+    {
+      id: 'documentsFilter-event-outcome-failure-with-asset',
+      doc: {
+        user: { name: 'scout-synthetic-outcome-failure' },
+        event: { kind: 'asset', module: 'okta', outcome: 'failure' },
+      },
+    },
+  ];
 
 /**
  * Expected number of user documents in `es_archives/updates` that pass

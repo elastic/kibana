@@ -79,7 +79,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter with user.email and source clause when event.module is present (whenClause expands to sourceMatchesAny)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
-        event: { module: 'okta' },
+        event: { kind: 'asset', module: 'okta' },
       });
 
       expect(result).toBe(
@@ -90,6 +90,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter with user.email and unknown source clause when no event.module or data_stream.dataset', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
+        event: { kind: 'asset' },
       });
 
       expect(result).toBe(
@@ -100,7 +101,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter with user.name and source clause (event.module whenClause) and null/empty checks on higher-ranked identity fields', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'alice' },
-        event: { module: 'azure' },
+        event: { kind: 'asset', module: 'azure' },
       });
 
       expect(result).toBe(
@@ -108,15 +109,13 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       );
     });
 
-    it('returns filter with user.id and source clause (event.module whenClause) and null/empty check on user.email', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
-        user: { id: 'user-id-42' },
-        event: { module: 'o365' },
-      });
-
-      expect(result).toBe(
-        '((user.id == "user-id-42") AND (user.email IS NULL OR user.email == "") AND (((event.module == "o365") OR STARTS_WITH(data_stream.dataset, "o365")) OR ((event.module == "o365_metrics") OR STARTS_WITH(data_stream.dataset, "o365_metrics"))))'
-      );
+    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/iam/entity.id)', () => {
+      expect(
+        getEuidEsqlFilterBasedOnDocument('user', {
+          user: { id: 'user-id-42' },
+          event: { module: 'o365' },
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined when no user id fields are present', () => {
@@ -126,7 +125,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com', id: 'user-42' },
-        event: { module: 'entityanalytics_okta' },
+        event: { kind: 'asset', module: 'entityanalytics_okta' },
       });
 
       expect(result).toBe(
@@ -137,7 +136,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter for user.name and user.domain with source clause (single value from whenClause)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
-        event: { module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
       });
 
       expect(result).toBe(
@@ -148,7 +147,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter with single value source clause when event.module has no whenClause match (e.g. aws)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'romulo@elastic.co' },
-        event: { module: 'aws' },
+        event: { kind: 'asset', module: 'aws' },
       });
 
       expect(result).toBe(
@@ -159,6 +158,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter with source clause from first chunk of data_stream.dataset when event.module is missing', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'romulo@elastic.co' },
+        event: { kind: 'asset' },
         data_stream: { dataset: 'aws.cloudtrail' },
       });
 
@@ -294,7 +294,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
   it('uses else ranking when entity.namespace is not local', () => {
     const result = getEuidEsqlFilterBasedOnDocument('user', {
       user: { email: 'alice@example.com' },
-      event: { module: 'okta' },
+      event: { kind: 'asset', module: 'okta' },
     });
 
     expect(result).toContain('user.email == "alice@example.com"');
@@ -305,7 +305,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
     it('does not add filter on evaluated fields (entity.namespace) since they are not stored', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
-        event: { module: 'okta' },
+        event: { kind: 'asset', module: 'okta' },
       });
 
       expect(result).toBeDefined();
@@ -316,7 +316,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
     it('includes source clause for entity.namespace evaluation (event.module, data_stream.dataset)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
-        event: { module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
       });
 
       expect(result).toBeDefined();

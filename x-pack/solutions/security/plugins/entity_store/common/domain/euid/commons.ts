@@ -6,12 +6,15 @@
  */
 
 import { get } from 'lodash';
+import type { Condition } from '@kbn/streamlang';
 import type {
   CalculatedEntityIdentity,
+  EntityDefinitionWithoutId,
   EuidAttribute,
   FieldEvaluationSource,
   FieldValueSchema,
 } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
@@ -123,6 +126,31 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
     }
   }
   return false;
+}
+
+/**
+ * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
+ * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` is
+ * normalized with `normalizeConditionForSingleDoc` before evaluation.
+ *
+ * For single-field identity definitions, returns true (callers only use this on the
+ * calculated-identity path after field evaluations).
+ */
+export function documentPassesCalculatedIdentityPipelineGate(
+  doc: any,
+  entityDefinition: EntityDefinitionWithoutId
+): boolean {
+  const { identityField, postAggFilter } = entityDefinition;
+  if (isSingleFieldIdentity(identityField)) {
+    return true;
+  }
+  let condition: Condition = identityField.documentsFilter;
+  if (postAggFilter) {
+    condition = {
+      and: [condition, normalizeConditionForSingleDoc(postAggFilter) as Condition],
+    };
+  }
+  return evaluateStreamlangCondition(doc, condition);
 }
 
 /**
