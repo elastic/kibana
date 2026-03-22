@@ -25,7 +25,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -38,6 +39,9 @@ interface WorkflowStepExecutionDetailsProps {
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
+  workflowExecutionStatus?: ExecutionStatus;
+  resumeMessage?: string;
+  shouldAutoResume?: boolean;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionInfo;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
@@ -50,6 +54,9 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     stepExecution,
     workflowExecutionDuration,
     isLoadingStepData,
+    workflowExecutionStatus,
+    resumeMessage,
+    shouldAutoResume = false,
     childWorkflowExecution,
     parentWorkflowExecution,
   }) => {
@@ -71,9 +78,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         : { workflowId: '' }
     );
 
+    const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+
+    // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
-      () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
-      [stepExecution?.status]
+      () =>
+        Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)) ||
+        isWaitingForInput,
+      [stepExecution?.status, isWaitingForInput]
     );
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
@@ -138,13 +150,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ];
     }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
 
-    const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
+    const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
+    const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
 
     useEffect(() => {
       // reset the tab to the default one on step change
-      setSelectedTabId(tabs[0].id);
+      setSelectedTabId(isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input');
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [stepExecution?.stepId, tabs[0].id]);
+    }, [stepExecution?.stepId, stepExecution?.status, tabs[0].id]);
 
     if (!stepExecution) {
       return (
@@ -161,9 +174,15 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
+          executionId={workflowExecutionId}
+          resumeMessage={resumeMessage}
+          shouldAutoResume={shouldAutoResume}
         />
       );
     }
+
+    const showResumeUI = isWaitingForInput;
 
     return (
       <EuiPanel
@@ -248,6 +267,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   {selectedTabId === 'input' && (
                     <>
+                      {showResumeUI && (
+                        <>
+                          <ResumeExecutionButton
+                            executionId={workflowExecutionId}
+                            resumeMessage={resumeMessage}
+                            autoOpen={shouldAutoResume}
+                          />
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
                       {isTriggerPseudoStep && (
                         <>
                           <EuiCallOut

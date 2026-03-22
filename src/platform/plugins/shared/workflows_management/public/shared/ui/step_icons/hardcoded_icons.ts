@@ -42,6 +42,7 @@ export const HardcodedIcons: Record<string, string> = {
   switch: productStreamsWired,
   if: branch,
   wait: clock,
+  waitForInput: user,
   alert: warning,
   scheduled: clock,
   manual: user,
