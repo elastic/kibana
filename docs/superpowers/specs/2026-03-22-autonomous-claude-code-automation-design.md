@@ -187,10 +187,17 @@ reference_*.md          → L3-knowledge/     (external pointers)
 user_*.md               → Keep in project/  (not part of 6-tier)
 ```
 
-**Symlink for Compatibility:**
-```bash
-ln -s ~/.claude/memory ~/.claude/projects/-Users-patrykkopycinski-Projects-kibana/memory
-```
+**Migration Process:**
+1. Create `~/.claude/memory/` structure (L1-L6)
+2. Copy existing files to appropriate tiers:
+   - `cp feedback_*.md ~/.claude/memory/L3-knowledge/`
+   - `cp reference_*.md ~/.claude/memory/L3-knowledge/`
+   - `echo "$(cat project_current_work.md)" > ~/.claude/memory/L5-daily/2026-03-22.md`
+3. **Archive originals** (don't delete):
+   - `mkdir ~/.claude/projects/-Users-patrykkopycinski-Projects-kibana/memory-archive-2026-03-22/`
+   - `mv ~/.claude/projects/-Users-patrykkopycinski-Projects-kibana/memory/*.md memory-archive-2026-03-22/`
+4. Create symlink for compatibility:
+   - `ln -s ~/.claude/memory ~/.claude/projects/-Users-patrykkopycinski-Projects-kibana/memory`
 
 ---
 
@@ -316,14 +323,14 @@ ln -s ~/.claude/memory ~/.claude/projects/-Users-patrykkopycinski-Projects-kiban
 - Analyze L1-session/tool-history.jsonl
 - Write quality score to L6-audit/quality-scores.jsonl
 - Generate daily log at L5-daily/YYYY-MM-DD.md
-- Async (doesn't block session end)
+- Async (doesn't block session end, but completes before SessionEnd hook runs)
 
 **Hook Implementation:**
 ```json
 {
   "hooks": [{
     "type": "agent",
-    "prompt": "Session quality analysis:\n\n## Scoring (0-100)\n1. Read L1-session/tool-history.jsonl\n2. Score dimensions:\n   - Test Coverage: Did we add/update tests? (+20)\n   - Type Safety: TypeScript usage, no type errors? (+20)\n   - Documentation: Updated docs, comments, CLAUDE.md? (+20)\n   - Architecture: Sound design decisions, no quick hacks? (+20)\n   - Process: Pre-flight checks, validation, CI awareness? (+20)\n\n## Principal Indicators\nDetect Principal II markers:\n- Architectural decisions (multi-component, system-level)\n- Cross-team collaboration (multiple projects/repos)\n- Complex problem solving (non-trivial root cause)\n- Infrastructure improvement (automation, tooling, DX)\n- Innovation (novel approach, creative solution)\n\n## Outputs\n1. Write to L6-audit/quality-scores.jsonl:\n   {timestamp, overall_score, dimensions: {}, principal_indicators: []}\n\n2. Generate L5-daily/2026-03-22.md:\n   ## Work Completed\n   - [extracted from tool-history]\n   \n   ## Key Decisions\n   - [architectural choices made]\n   \n   ## Blockers Resolved\n   - [problems solved, root causes]\n   \n   ## Technical Depth\n   - [complexity indicators]",
+    "prompt": "Session quality analysis:\n\n## Scoring (0-100 per dimension)\n1. Read L1-session/tool-history.jsonl\n2. Score Principal II-aligned dimensions (each 0-100):\n\n   **Technical Leadership (0-100):**\n   - Architectural decisions made? (+25)\n   - System-level design? (+25)\n   - Multi-component integration? (+25)\n   - Long-term thinking? (+25)\n\n   **Problem Solving (0-100):**\n   - Root cause analysis performed? (+25)\n   - Non-obvious solution? (+25)\n   - Complex debugging? (+25)\n   - Innovation in approach? (+25)\n\n   **Influence (0-100):**\n   - Documentation created/updated? (+25)\n   - Patterns others can follow? (+25)\n   - Cross-team collaboration? (+25)\n   - Knowledge sharing? (+25)\n\n   **Strategic Delivery (0-100):**\n   - Infrastructure improvement? (+25)\n   - Process enhancement? (+25)\n   - Automation added? (+25)\n   - Long-term value? (+25)\n\n3. Overall score = Average of 4 dimensions\n\n## Principal Indicators\nDetect Principal II markers (any present = promotion-worthy):\n- architectural_decision (multi-component, system-level)\n- cross_repo_impact (affects >1 project)\n- complex_problem_solving (non-trivial root cause)\n- infrastructure_improvement (tooling, automation, DX)\n- innovation (novel approach, creative solution)\n- cross_team_collaboration (multiple teams/projects)\n\n## Outputs\n1. Write to L6-audit/quality-scores.jsonl:\n   {\n     \"timestamp\": \"2026-03-22T15:30:00Z\",\n     \"overall_score\": <avg of 4 dimensions>,\n     \"dimensions\": {\n       \"technical_leadership\": <0-100>,\n       \"problem_solving\": <0-100>,\n       \"influence\": <0-100>,\n       \"strategic_delivery\": <0-100>\n     },\n     \"principal_indicators\": [<list of indicators present>]\n   }\n\n2. Generate L5-daily/2026-03-22.md:\n   ## Work Completed\n   - [extracted from tool-history]\n   \n   ## Key Decisions\n   - [architectural choices made]\n   \n   ## Blockers Resolved\n   - [problems solved, root causes]\n   \n   ## Technical Depth\n   - [complexity indicators]",
     "timeout": 60
   }]
 }
@@ -864,41 +871,56 @@ ln -s ~/.claude/memory/L6-audit/promotion-evidence.md ~/.cursor/promotion-eviden
 ### 10.2 Hook Configuration Reference
 
 **Complete settings.json hooks section:**
+
+NOTE: Placeholders (e.g., `<adaptive-bash-safety>`) refer to the full prompts defined in Section 3 (Hook Architecture). For actual implementation, copy the complete prompts from:
+- Section 3.1: PreToolUse hooks (lines 218-267)
+- Section 3.2: PostToolUse hooks (lines 269-295)
+- Section 3.3: Stop hooks (lines 297-349)
+- Section 3.4: SessionEnd hooks (lines 351-387)
+
 ```json
 {
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{"type": "agent", "prompt": "<adaptive-bash-safety>", "timeout": 30}]
+        "hooks": [{"type": "agent", "prompt": "<see Section 3.1 Example 1>", "timeout": 30}]
       },
       {
         "matcher": "Write(**/*kibana.jsonc)",
-        "hooks": [{"type": "command", "command": "jq empty \"$PATH\"", "timeout": 5}]
+        "hooks": [{"type": "command", "command": "jq empty \"$PATH\" 2>&1 || (echo 'Invalid JSON5 in kibana.jsonc' && exit 1)", "timeout": 5}]
       },
       {
         "matcher": "Write",
-        "hooks": [{"type": "agent", "prompt": "<completeness-gate>", "timeout": 30}]
+        "hooks": [{"type": "agent", "prompt": "<see Section 3.1 Example 3>", "timeout": 30}]
+      },
+      {
+        "matcher": "Bash(rm:*)",
+        "hooks": [{"type": "prompt", "prompt": "<see Section 3.1 Example 4>", "timeout": 10}]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write(**/*.{ts,tsx,js,jsx})",
-        "hooks": [{"type": "command", "command": "<async-lint>", "timeout": 5}]
+        "hooks": [{"type": "command", "command": "<see Section 3.2 Example 1>", "timeout": 5}]
       },
       {
         "matcher": "Edit(**/*.ts)",
-        "hooks": [{"type": "agent", "prompt": "<type-check-reminder>", "timeout": 15}]
+        "hooks": [{"type": "agent", "prompt": "<see Section 3.2 Example 2>", "timeout": 15}]
+      },
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [{"type": "agent", "prompt": "<see Section 3.2 Example 3>", "timeout": 20}]
       }
     ],
     "Stop": [
       {
-        "hooks": [{"type": "agent", "prompt": "<quality-scoring>", "timeout": 60}]
+        "hooks": [{"type": "agent", "prompt": "<see Section 3.3 Hook Implementation>", "timeout": 60}]
       }
     ],
     "SessionEnd": [
       {
-        "hooks": [{"type": "agent", "prompt": "<memory-promotion>", "timeout": 90}]
+        "hooks": [{"type": "agent", "prompt": "<see Section 3.4 Hook Implementation>", "timeout": 90}]
       }
     ]
   }
