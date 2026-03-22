@@ -34,7 +34,120 @@ inputs:
     default: 10
     description: "Minimum pattern occurrences to propose skill"
 
+  - name: exploration_mode
+    type: string
+    default: "full"
+    description: "Exploration mode: 'full' or 'incremental'"
+
 steps:
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 0: LOAD FEEDBACK AND ADJUST PARAMETERS
+  # ══════════════════════════════════════════════════════════════
+
+  - name: load_rejection_feedback
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.aesop-rejection-feedback/_search
+      body:
+        query:
+          range:
+            timestamp:
+              gte: "now-30d"
+        size: 100
+        sort:
+          - timestamp: desc
+    timeout: 30s
+    on-failure:
+      - name: log_no_feedback
+        type: console
+        with:
+          message: "ℹ️ No previous feedback found - using default parameters"
+
+  - name: extract_learning_signals
+    type: ai.agent
+    agent-id: aesop.feedback_analyzer
+    with:
+      message: |
+        Analyze recent rejection feedback to improve this exploration.
+
+        Feedback from last 30 days:
+        {{ steps.load_rejection_feedback.output.hits.hits | json }}
+
+        Task:
+        1. Identify common rejection patterns
+        2. Extract threshold adjustments needed
+        3. Suggest scope refinements
+
+        Current baseline parameters:
+        - min_confidence: N/A (not currently used)
+        - min_pattern_frequency: {{ inputs.min_pattern_frequency }}
+        - scoped_indices: {{ inputs.scoped_indices | json }}
+
+        Return JSON with parameter adjustments:
+        {
+          "common_patterns": ["pattern1", "pattern2"],
+          "threshold_adjustments": {
+            "min_confidence": 0.85,
+            "min_pattern_frequency": 15
+          },
+          "scope_changes": {
+            "exclude_patterns": ["pattern1", "pattern2"],
+            "focus_areas": ["security", "high_frequency_patterns"]
+          },
+          "reasoning": "Explanation of adjustments based on feedback"
+        }
+    timeout: 120s
+    on-failure:
+      - name: use_default_params
+        type: console
+        with:
+          message: "⚠️ Feedback analysis failed - proceeding with default parameters"
+
+  - name: apply_adjusted_params
+    type: console
+    with:
+      message: |
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📊 Exploration Parameters (after feedback adjustment):
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        Feedback analyzed: {{ steps.load_rejection_feedback.output.hits.total.value || 0 }} rejections in last 30 days
+
+        Threshold Adjustments:
+        {% if steps.extract_learning_signals.output.threshold_adjustments %}
+        - Min confidence: {{ steps.extract_learning_signals.output.threshold_adjustments.min_confidence || 'N/A' }}
+        - Min pattern frequency: {{ steps.extract_learning_signals.output.threshold_adjustments.min_pattern_frequency || inputs.min_pattern_frequency }}
+        {% else %}
+        - Using defaults (no adjustments needed)
+        {% endif %}
+
+        Scope Changes:
+        {% if steps.extract_learning_signals.output.scope_changes %}
+        - Exclude patterns: {{ steps.extract_learning_signals.output.scope_changes.exclude_patterns | json }}
+        - Focus areas: {{ steps.extract_learning_signals.output.scope_changes.focus_areas | json }}
+        {% else %}
+        - No scope changes
+        {% endif %}
+
+        Reasoning: {{ steps.extract_learning_signals.output.reasoning || 'No feedback available' }}
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - name: store_exploration_state
+    type: elasticsearch.index
+    with:
+      index: .aesop-exploration-state
+      id: latest
+      body:
+        last_run_timestamp: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        workflow_execution_id: "{{ workflow.execution_id }}"
+        exploration_mode: "{{ inputs.exploration_mode }}"
+        adjusted_parameters:
+          min_pattern_frequency: "{{ steps.extract_learning_signals.output.threshold_adjustments.min_pattern_frequency || inputs.min_pattern_frequency }}"
+          min_confidence: "{{ steps.extract_learning_signals.output.threshold_adjustments.min_confidence || 0.8 }}"
+        feedback_analyzed: "{{ steps.load_rejection_feedback.output.hits.total.value || 0 }}"
+
   # ══════════════════════════════════════════════════════════════
   # PHASE 1: SCHEMA DISCOVERY
   # ══════════════════════════════════════════════════════════════
