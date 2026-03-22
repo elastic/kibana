@@ -86,7 +86,7 @@ export const getOAuth2Server = async (port: number = 3001): Promise<OAuth2Server
     server.listen(port, () => {
       resolve({
         server,
-        getAccessTokenUrl: () => `http://localhost:${port}${ACCESS_TOKEN_PATH}`,
+        getAccessTokenUrl: () => `http://127.0.0.1:${port}${ACCESS_TOKEN_PATH}`,
         getTokenRequests: () => [...tokenRequests],
         getTokenExpirationTime: () => TOKEN_EXPIRATION_TIME,
         reset,
