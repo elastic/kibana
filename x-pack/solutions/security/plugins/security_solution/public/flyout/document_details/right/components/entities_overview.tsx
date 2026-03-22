@@ -19,7 +19,7 @@ import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import type { IdentityFields } from '../../shared/utils';
+import { identityFieldsHaveUsableValues, type IdentityFields } from '../../shared/utils';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
@@ -37,23 +37,28 @@ export const EntitiesOverview: React.FC = () => {
   ) as IdentityFields;
 
   const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const userIdentityUsable = identityFieldsHaveUsableValues(userEntityIdentifiers);
+  const hostIdentityUsable = identityFieldsHaveUsableValues(hostEntityIdentifiers);
+
   const userEntityFromStore = useEntityFromStore({
     entityId: userEntityIdentifiers?.['user.entity.id'],
     identityFields: userEntityIdentifiers ?? undefined,
     entityType: 'user',
-    skip: !userEntityIdentifiers || !entityStoreV2Enabled,
+    skip: !userIdentityUsable || !entityStoreV2Enabled,
   });
   const hostEntityFromStore = useEntityFromStore({
     entityId: hostEntityIdentifiers?.['host.entity.id'],
     identityFields: hostEntityIdentifiers ?? undefined,
     entityType: 'host',
-    skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
+    skip: !hostIdentityUsable || !entityStoreV2Enabled,
   });
 
   const showUserOverview =
-    userEntityIdentifiers && (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+    userIdentityUsable &&
+    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
   const showHostOverview =
-    hostEntityIdentifiers && (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+    hostIdentityUsable &&
+    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
   const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({

@@ -9,6 +9,9 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getEcsField } from '../../document_details/right/components/table_field_name_cell';
 import {
+  HOST_ENTITY_ID_FIELD_NAME,
+  HOST_HOSTNAME_FIELD_NAME,
+  HOST_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -63,10 +66,45 @@ interface GetFlyoutParams {
 
 const FLYOUT_FIELDS = [
   HOST_NAME_FIELD_NAME,
+  HOST_HOSTNAME_FIELD_NAME,
+  HOST_ID_FIELD_NAME,
+  HOST_ENTITY_ID_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   EVENT_SOURCE_FIELD_DESCRIPTOR,
 ];
+
+const buildHostFlyoutParams = ({
+  value,
+  scopeId,
+  entityId,
+  preview,
+}: {
+  value: string;
+  scopeId: string;
+  entityId?: string;
+  preview: boolean;
+}) =>
+  preview
+    ? {
+        id: HostPreviewPanelKey,
+        params: {
+          hostName: value,
+          scopeId,
+          banner: HOST_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-host-preview',
+          entityId,
+        },
+      }
+    : {
+        id: HostPanelKey,
+        params: {
+          hostName: value,
+          scopeId,
+          contextID: scopeId,
+          entityId,
+        },
+      };
 
 // Helper get function to get flyout parameters based on field name and isFlyoutOpen
 // If flyout is currently open, preview panel params are returned
@@ -98,15 +136,10 @@ export const getRightPanelParams = ({
 
   switch (field) {
     case HOST_NAME_FIELD_NAME:
-      return {
-        id: HostPanelKey,
-        params: {
-          hostName: value,
-          scopeId,
-          contextID: scopeId,
-          entityId,
-        },
-      };
+    case HOST_HOSTNAME_FIELD_NAME:
+    case HOST_ID_FIELD_NAME:
+    case HOST_ENTITY_ID_FIELD_NAME:
+      return buildHostFlyoutParams({ value, scopeId, entityId, preview: false });
     case USER_NAME_FIELD_NAME:
       return {
         id: UserPanelKey,
@@ -158,16 +191,10 @@ export const getPreviewPanelParams = ({
 
   switch (field) {
     case HOST_NAME_FIELD_NAME:
-      return {
-        id: HostPreviewPanelKey,
-        params: {
-          hostName: value,
-          scopeId,
-          banner: HOST_PREVIEW_BANNER,
-          contextID: scopeId || 'highlighted-fields-host-preview',
-          entityId,
-        },
-      };
+    case HOST_HOSTNAME_FIELD_NAME:
+    case HOST_ID_FIELD_NAME:
+    case HOST_ENTITY_ID_FIELD_NAME:
+      return buildHostFlyoutParams({ value, scopeId, entityId, preview: true });
     case USER_NAME_FIELD_NAME:
       return {
         id: UserPreviewPanelKey,

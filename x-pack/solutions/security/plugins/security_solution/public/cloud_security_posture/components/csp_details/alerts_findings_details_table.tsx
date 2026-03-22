@@ -226,10 +226,23 @@ export const AlertsDetailsTable = memo(
       setQuery(alertsListQuery);
     }, [alertsListQuery, setQuery]);
 
+    const alertsByStatusIdentityFields = useMemo((): Record<string, string> => {
+      if (filterAlertsByEuid) {
+        return {};
+      }
+      return { [field]: value };
+    }, [field, filterAlertsByEuid, value]);
+
+    const alertsByStatusAdditionalFilters = useMemo((): ESBoolQuery[] | undefined => {
+      if (!filterAlertsByEuid || !euidEntityFilter) {
+        return undefined;
+      }
+      return [euidEntityFilter] as ESBoolQuery[];
+    }, [euidEntityFilter, filterAlertsByEuid]);
+
     const { filteredAlertsData: alertsData } = useNonClosedAlerts({
-      identityFields: filterAlertsByEuid ? {} : { [field]: value },
-      additionalFilters:
-        filterAlertsByEuid && euidEntityFilter ? ([euidEntityFilter] as ESBoolQuery[]) : undefined,
+      identityFields: alertsByStatusIdentityFields,
+      additionalFilters: alertsByStatusAdditionalFilters,
       skip: skipEntityResolution,
       to,
       from,

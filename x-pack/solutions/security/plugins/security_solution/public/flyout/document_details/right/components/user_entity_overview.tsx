@@ -241,8 +241,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    documentEntityIdentifiers: stableEntityIdentifiers,
     userName,
+    identityFields: stableEntityIdentifiers ?? {},
     entityId: entityRecord?.entity?.id,
     scopeId,
     isRiskScoreExist,

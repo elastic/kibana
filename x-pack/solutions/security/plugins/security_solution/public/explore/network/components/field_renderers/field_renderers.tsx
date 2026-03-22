@@ -10,7 +10,10 @@ import { getOr } from 'lodash/fp';
 import React, { Fragment, useMemo } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { type IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import {
+  type IdentityFields,
+  ecsSliceToFlattenedDocument,
+} from '../../../../flyout/document_details/shared/utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
@@ -98,8 +101,11 @@ export const HostIdRenderer = ({
   const hostName = host.name && host.name[0];
   const identityFields = useMemo((): IdentityFields => {
     if (euidApi?.euid) {
-      const built = euidApi.euid.getEntityIdentifiersFromDocument('host', host) as IdentityFields;
-      if (Object.keys(built).length > 0) {
+      const built = euidApi.euid.getEntityIdentifiersFromDocument(
+        'host',
+        ecsSliceToFlattenedDocument('host', host)
+      ) as IdentityFields | undefined;
+      if (built && Object.keys(built).length > 0) {
         return built;
       }
       if (hostName != null) {
@@ -158,8 +164,11 @@ export const HostNameRenderer = ({
   const hostNameFirst = host.name?.[0];
   const identityFields = useMemo((): IdentityFields => {
     if (euidApi?.euid) {
-      const built = euidApi.euid.getEntityIdentifiersFromDocument('host', host) as IdentityFields;
-      if (Object.keys(built).length > 0) {
+      const built = euidApi.euid.getEntityIdentifiersFromDocument(
+        'host',
+        ecsSliceToFlattenedDocument('host', host)
+      ) as IdentityFields | undefined;
+      if (built && Object.keys(built).length > 0) {
         return built;
       }
       if (hostNameFirst != null) {

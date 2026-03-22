@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 
 /**
@@ -112,3 +111,18 @@ export const getEventTitle = ({
  * IdentityFields - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
  */
 export type IdentityFields = Record<string, string>;
+
+/**
+ * True when the document-derived identity map has at least one non-empty string value.
+ * (An object reference alone is not enough — empty cards must not render.)
+ */
+export const identityFieldsHaveUsableValues = (
+  fields: IdentityFields | Record<string, string> | undefined | null
+): boolean => {
+  if (fields == null) {
+    return false;
+  }
+  return Object.values(fields).some((v) => typeof v === 'string' && v.trim() !== '');
+};
+
+export { ecsSliceToFlattenedDocument } from './utils/ecs_slice_to_flattened_document';

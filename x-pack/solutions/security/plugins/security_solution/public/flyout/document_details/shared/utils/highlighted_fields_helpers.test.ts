@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euid } from '@kbn/entity-store/common/library';
 import { convertHighlightedFieldsToTableRow } from './highlighted_fields_helpers';
 
 const scopeId = 'scopeId';
@@ -17,20 +18,24 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
-      [
-        {
+    const flattened = { 'host.name': 'host-1' };
+    const hostDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('host', flattened);
+    expect(
+      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions, undefined, {
+        hostDocumentIdentityFields,
+      })
+    ).toEqual([
+      {
+        field: 'host.name',
+        description: {
           field: 'host.name',
-          description: {
-            field: 'host.name',
-            values: ['host-1'],
-            scopeId: 'scopeId',
-            showCellActions,
-            identityFields: { 'host.name': 'host-1' },
-          },
+          values: ['host-1'],
+          scopeId: 'scopeId',
+          showCellActions,
+          identityFields: { 'host.name': 'host-1' },
         },
-      ]
-    );
+      },
+    ]);
   });
 
   it('should convert take override name over default name and use original values if not present in the override', () => {
@@ -40,21 +45,25 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
-      [
-        {
+    const flattened = { 'host.name': 'host-1' };
+    const hostDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('host', flattened);
+    expect(
+      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions, undefined, {
+        hostDocumentIdentityFields,
+      })
+    ).toEqual([
+      {
+        field: 'host.name-override',
+        description: {
           field: 'host.name-override',
-          description: {
-            field: 'host.name-override',
-            originalField: 'host.name',
-            values: ['host-1'],
-            scopeId: 'scopeId',
-            showCellActions,
-            identityFields: { 'host.name': 'host-1' },
-          },
+          originalField: 'host.name',
+          values: ['host-1'],
+          scopeId: 'scopeId',
+          showCellActions,
+          identityFields: { 'host.name': 'host-1' },
         },
-      ]
-    );
+      },
+    ]);
   });
 
   it('should convert take override name over default name and use provided values', () => {
@@ -64,21 +73,25 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
-      [
-        {
+    const flattened = { 'host.name': 'host-1' };
+    const hostDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('host', flattened);
+    expect(
+      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions, undefined, {
+        hostDocumentIdentityFields,
+      })
+    ).toEqual([
+      {
+        field: 'host.name-override',
+        description: {
           field: 'host.name-override',
-          description: {
-            field: 'host.name-override',
-            originalField: 'host.name',
-            values: ['value override!'],
-            scopeId: 'scopeId',
-            showCellActions,
-            identityFields: { 'host.name': 'host-1' },
-          },
+          originalField: 'host.name',
+          values: ['value override!'],
+          scopeId: 'scopeId',
+          showCellActions,
+          identityFields: { 'host.name': 'host-1' },
         },
-      ]
-    );
+      },
+    ]);
   });
 
   it('should build identityFields from EUID fields for host.name', () => {
@@ -86,10 +99,20 @@ describe('convertHighlightedFieldsToTableRow', () => {
       'host.entity.id': { values: ['host-entity-123'] },
       'host.name': { values: ['my-host'] },
     };
-    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
+    const flattened = {
+      'host.entity.id': 'host-entity-123',
+      'host.name': 'my-host',
+    };
+    const hostDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('host', flattened);
+    const result = convertHighlightedFieldsToTableRow(
+      highlightedFields,
+      scopeId,
+      showCellActions,
+      undefined,
+      { hostDocumentIdentityFields }
+    );
     const hostNameRow = result.find((r) => r.field === 'host.name');
     expect(hostNameRow?.description.identityFields).toEqual({
-      'host.entity.id': 'host-entity-123',
       'host.name': 'my-host',
     });
   });
@@ -99,10 +122,21 @@ describe('convertHighlightedFieldsToTableRow', () => {
       'user.entity.id': { values: ['user-entity-456'] },
       'user.name': { values: ['my-user'] },
     };
-    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
+    const flattened = {
+      'user.entity.id': 'user-entity-456',
+      'user.name': 'my-user',
+      'event.module': 'okta',
+    };
+    const userDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('user', flattened);
+    const result = convertHighlightedFieldsToTableRow(
+      highlightedFields,
+      scopeId,
+      showCellActions,
+      undefined,
+      { userDocumentIdentityFields }
+    );
     const userNameRow = result.find((r) => r.field === 'user.name');
     expect(userNameRow?.description.identityFields).toEqual({
-      'user.entity.id': 'user-entity-456',
       'user.name': 'my-user',
     });
   });
@@ -112,13 +146,24 @@ describe('convertHighlightedFieldsToTableRow', () => {
       'host.name': { values: ['my-host'] },
       'user.name': { values: ['my-user'] },
     };
-    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
+    const flattened = {
+      'host.name': 'my-host',
+      'user.name': 'my-user',
+      'event.module': 'okta',
+    };
+    const hostDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('host', flattened);
+    const userDocumentIdentityFields = euid.getEntityIdentifiersFromDocument('user', flattened);
+    const result = convertHighlightedFieldsToTableRow(
+      highlightedFields,
+      scopeId,
+      showCellActions,
+      undefined,
+      { hostDocumentIdentityFields, userDocumentIdentityFields }
+    );
     const userNameRow = result.find((r) => r.field === 'user.name');
     const hostNameRow = result.find((r) => r.field === 'host.name');
-    // user.name row should only have user.* keys (getUserIdentityFields adds host fields when user.name exists)
     expect(Object.keys(userNameRow?.description.identityFields ?? {})).toEqual(['user.name']);
     expect(userNameRow?.description.identityFields?.['user.name']).toBe('my-user');
-    // host.name row should only have host.* keys
     expect(Object.keys(hostNameRow?.description.identityFields ?? {})).toEqual(['host.name']);
     expect(hostNameRow?.description.identityFields?.['host.name']).toBe('my-host');
   });

@@ -20,6 +20,7 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
+  userName: string;
   identityFields: IdentityFields;
   /** Canonical Entity Store v2 id (`entity.id`) when known. */
   entityId?: string;
@@ -37,6 +38,7 @@ export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'use
 export const UserDetailsPanel = ({
   isRiskScoreExist,
   identityFields,
+  userName,
   entityId,
   path,
   scopeId,
@@ -45,15 +47,9 @@ export const UserDetailsPanel = ({
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser();
 
-  // Extract name from identityFields
-  // Priority: identityFields['user.name'] > identityFields[first key]
-  const name = useMemo(() => {
-    return identityFields['user.name'] || Object.values(identityFields)[0] || '';
-  }, [identityFields]);
-
   const tabs = useTabs(
     managedUser.data,
-    name || '',
+    userName,
     isRiskScoreExist,
     scopeId,
     hasMisconfigurationFindings,
@@ -73,8 +69,7 @@ export const UserDetailsPanel = ({
     hasNonClosedAlerts
   );
 
-  // Safety check: return null if name is missing or no tab selected
-  if (!name || !selectedTabId) {
+  if (!selectedTabId) {
     return null;
   }
 

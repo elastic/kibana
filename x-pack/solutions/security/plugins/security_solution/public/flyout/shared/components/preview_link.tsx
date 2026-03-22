@@ -16,6 +16,9 @@ import { getPreviewPanelParams } from '../utils/link_utils';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
 import {
+  HOST_ENTITY_ID_FIELD_NAME,
+  HOST_HOSTNAME_FIELD_NAME,
+  HOST_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -82,8 +85,12 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
     ) {
       return preferredField;
     }
-    if (identityFields['host.name']) return 'host.name';
-    if (identityFields['user.name']) return 'user.name';
+    if (identityFields[HOST_NAME_FIELD_NAME]) return HOST_NAME_FIELD_NAME;
+    if (identityFields[HOST_HOSTNAME_FIELD_NAME]) return HOST_HOSTNAME_FIELD_NAME;
+    if (identityFields[HOST_ID_FIELD_NAME]) return HOST_ID_FIELD_NAME;
+    if (identityFields[HOST_ENTITY_ID_FIELD_NAME]) return HOST_ENTITY_ID_FIELD_NAME;
+    if (identityFields[USER_NAME_FIELD_NAME]) return USER_NAME_FIELD_NAME;
+    if (identityFields['user.id']) return 'user.id';
     return Object.keys(identityFields)[0] ?? '';
   }, [identityFields, preferredField]);
 
@@ -92,8 +99,8 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   }, [identityFields, primaryField]);
 
   const isHostOrUser =
-    primaryField === HOST_NAME_FIELD_NAME || primaryField === USER_NAME_FIELD_NAME;
-  const entityType = primaryField === HOST_NAME_FIELD_NAME ? 'host' : 'user';
+    primaryField.startsWith('host.') || primaryField.startsWith('user.');
+  const entityType = primaryField.startsWith('host.') ? 'host' : 'user';
 
   const docEntityId =
     entityType === 'host' ? identityFields['host.entity.id'] : identityFields['user.entity.id'];

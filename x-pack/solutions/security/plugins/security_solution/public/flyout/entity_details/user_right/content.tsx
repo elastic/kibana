@@ -91,14 +91,14 @@ export const UserPanelContent = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
-              entityId={observedUser.id}
+              entityId={entityRecord?.entity.id}
             />
             <EuiHorizontalRule />
           </>
         )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
-          entity={{ identifiers: identityFields, name: userName, type: EntityType.user }}
+          entity={{ name: userName, type: EntityType.user }}
           onChange={onAssetCriticalityChange}
           entityRecord={entityRecord}
           criticalityFromEntityStore={criticalityFromEntityStore}

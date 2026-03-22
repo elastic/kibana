@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import type { ServiceItem } from '../../../../common/search_strategy';
+import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -18,12 +19,10 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../document_details/shared/utils';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
 interface ServicePanelContentProps {
-  identityFields: IdentityFields;
   serviceName: string;
   observedService: ObservedEntityData<ServiceItem>;
   riskScoreState: RiskScoreState<EntityType.service>;
@@ -32,11 +31,12 @@ interface ServicePanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  entityRecord?: Entity;
 }
 
 export const ServicePanelContent = ({
   serviceName,
-  identityFields,
+  entityRecord,
   observedService,
   riskScoreState,
   recalculatingScore,
@@ -58,13 +58,13 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityType={EntityType.service}
-            entityId={observedService.id}
+            entityId={entityRecord?.entity.id}
           />
           <EuiHorizontalRule />
         </>
       )}
       <AssetCriticalityAccordion
-        entity={{ identifiers: identityFields, name: serviceName, type: EntityType.service }}
+        entity={{ name: serviceName, type: EntityType.service }}
         onChange={onAssetCriticalityChange}
       />
       <ObservedEntity

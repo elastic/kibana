@@ -44,8 +44,6 @@ interface HostPanelContentProps {
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
-  /** When true, Risk Summary Visualization uses entity store v2 index instead of risk-score.risk-score-*. */
-  useEntityStoreV2?: boolean;
 }
 
 export const HostPanelContent = ({
@@ -62,7 +60,6 @@ export const HostPanelContent = ({
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
-  useEntityStoreV2 = false,
 }: HostPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -89,14 +86,14 @@ export const HostPanelContent = ({
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
-              entityId={entityId}
+              entityId={entityRecord?.entity.id}
             />
             <EuiHorizontalRule />
           </>
         )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
-          entity={{ identifiers: identityFields, name: hostName, type: EntityType.host }}
+          entity={{ name: hostName, type: EntityType.host }}
           onChange={onAssetCriticalityChange}
           entityRecord={entityRecord}
           criticalityFromEntityStore={criticalityFromEntityStore}

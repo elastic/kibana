@@ -242,21 +242,25 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
       : !!userRiskData?.user?.risk;
 
-  const userCspIdentityDoc = observedUser.entityRecord ?? identityFields;
+  const identityFields = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'user',
+    entityFromStoreResult
+  );
+  const userCspIdentityDoc = observedUser.details;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields,
+    identityFields: identityFields ?? null,
     to,
     from,
     queryId: USER_DETAILS_INSIGHTS_ID,
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    documentEntityIdentifiers: identityFields,
     userName,
-    entityId: observedUser.entityRecord?.entity?.id,
+    identityFields: identityFields ?? {},
+    entityId: entityFromStoreResult?.entityRecord?.entity.id,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -264,17 +268,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     isPreviewMode: true, // setting to true to always open a new user flyout
     contextID: USER_DETAILS_INSIGHTS_ID,
   });
-
-  /*
-  const [isUserLoadingFromDetails, userDetailsArgsFromDetails] = useObservedUserDetails({
-    id: userDetailsQueryId,
-    startDate: from,
-    endDate: to,
-    userName,
-    indexNames: selectedPatterns,
-    skip: entityStoreV2Enabled || selectedPatterns.length === 0,
-  });
-  */
 
   const {
     loading: isRelatedHostLoading,
@@ -461,13 +454,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
-          identityFields={identityFields}
+          identityFields={identityFields ?? {}}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
-          identityFields={identityFields}
+          identityFields={identityFields ?? {}}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
@@ -493,7 +486,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
                   defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
-                  values={{ userName: identityFields['user.name'] }}
+                  values={{ userName }}
                 />
               }
               type="info"

@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -166,15 +167,33 @@ export const HighlightedFields = memo(
       investigationFields,
     });
 
+    const euidApi = useEntityStoreEuidApi();
+    const hostDocumentIdentityFields = useMemo(
+      () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
+      [euidApi?.euid, hit.flattened]
+    );
+    const userDocumentIdentityFields = useMemo(
+      () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
+      [euidApi?.euid, hit.flattened]
+    );
+
     const items = useMemo(
       () =>
         convertHighlightedFieldsToTableRow(
           highlightedFields,
           scopeId,
           showCellActions,
-          ancestorsIndexName
+          ancestorsIndexName,
+          { hostDocumentIdentityFields, userDocumentIdentityFields }
         ),
-      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
+      [
+        highlightedFields,
+        scopeId,
+        showCellActions,
+        ancestorsIndexName,
+        hostDocumentIdentityFields,
+        userDocumentIdentityFields,
+      ]
     );
 
     return (

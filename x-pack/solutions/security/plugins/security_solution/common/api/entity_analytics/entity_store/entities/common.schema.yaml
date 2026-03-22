@@ -62,6 +62,9 @@ components:
             first_seen:
               type: string
               format: date-time
+            last_seen:
+              type: string
+              format: date-time
             last_activity:
               type: string
               format: date-time

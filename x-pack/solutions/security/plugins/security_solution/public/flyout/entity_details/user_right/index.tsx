@@ -88,23 +88,9 @@ export const UserPanel = ({
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
-  const resolutionSeedIdentifiers = useMemo(() => {
-    const next: IdentityFields = {};
-    if (userName) {
-      next['user.name'] = userName;
-    }
-    if (entityIdProp) {
-      next['user.entity.id'] = entityIdProp;
-    }
-    return next;
-  }, [userName, entityIdProp]);
-
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
   const entityFromStoreResult = useEntityFromStore({
     entityId: entityIdProp,
-    identityFields: Object.keys(resolutionSeedIdentifiers).length
-      ? resolutionSeedIdentifiers
-      : undefined,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
@@ -116,20 +102,11 @@ export const UserPanel = ({
     );
   }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
 
-  const effectiveUserName = useMemo<string>(
-    () =>
-      userName ||
-      documentEntityIdentifiers['user.name'] ||
-      Object.values(documentEntityIdentifiers)[0] ||
-      '',
-    [userName, documentEntityIdentifiers]
-  );
-
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const observedUser = useObservedUser(effectiveUserName, scopeId, entityIdProp);
+  const observedUser = useObservedUser(userName, scopeId, entityIdProp);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
@@ -153,7 +130,7 @@ export const UserPanel = ({
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     EntityType.user,
-    effectiveUserName,
+    userName,
     { onSuccess: refetchRiskScore }
   );
 
@@ -185,10 +162,10 @@ export const UserPanel = ({
       : !!userRiskData?.user?.risk;
 
   const openDetailsPanel = useNavigateToUserDetails({
-    documentEntityIdentifiers,
-    userName: effectiveUserName,
+    userName,
     entityId: entityIdProp,
     scopeId,
+    identityFields: documentEntityIdentifiers ?? {},
     contextID: safeContextID,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -257,7 +234,7 @@ export const UserPanel = ({
       <UserPanelHeader
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
-        userName={effectiveUserName}
+        userName={userName}
         entityId={entityIdProp}
       />
       {noEntityInStore && (
@@ -298,7 +275,7 @@ export const UserPanel = ({
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter
-          userName={effectiveUserName}
+          userName={userName}
           entityId={entityIdProp}
           contextID={safeContextID}
           scopeId={scopeId}

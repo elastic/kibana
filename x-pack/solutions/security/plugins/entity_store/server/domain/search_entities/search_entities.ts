@@ -8,8 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
-import type { Entity, EntityType } from '../../../common';
+import { getLatestEntitiesIndexName, type Entity, type EntityType } from '../../../common';
 
 const MAX_SEARCH_RESPONSE_SIZE = 10_000;
 

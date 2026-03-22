@@ -65,6 +65,7 @@ export const EntityField = z
     lifecycle: z
       .object({
         first_seen: z.string().datetime().optional(),
+        last_seen: z.string().datetime().optional(),
         last_activity: z.string().datetime().optional(),
       })
       .strict()

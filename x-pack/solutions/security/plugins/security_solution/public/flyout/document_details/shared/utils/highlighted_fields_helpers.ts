@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { IdentityFields } from '../utils';
 import type { UseHighlightedFieldsResult } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
@@ -21,6 +19,15 @@ const filterEntityIdentifiersByPrefix = (
 ): IdentityFields =>
   Object.fromEntries(Object.entries(identifiers).filter(([key]) => key.startsWith(prefix)));
 
+export interface ConvertHighlightedFieldsToTableRowOptions {
+  /**
+   * Entity identifiers from the alert/document (`DataTableRecord.flattened`), not the highlighted-fields UI map.
+   * Built with `euid.getEntityIdentifiersFromDocument` in the parent (same shape Elasticsearch flattening uses).
+   */
+  hostDocumentIdentityFields?: IdentityFields | null;
+  userDocumentIdentityFields?: IdentityFields | null;
+}
+
 /**
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
  * @param highlightedFields field/value pairs
@@ -32,8 +39,10 @@ export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
   scopeId: string,
   showCellActions: boolean,
-  ancestorsIndexName?: string
+  ancestorsIndexName?: string,
+  options?: ConvertHighlightedFieldsToTableRowOptions
 ): HighlightedFieldsTableRow[] => {
+  const { hostDocumentIdentityFields = null, userDocumentIdentityFields = null } = options ?? {};
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
     const overrideFieldName = highlightedFields[fieldName].overrideField?.field;
@@ -43,21 +52,13 @@ export const convertHighlightedFieldsToTableRow = (
       ? overrideFieldValues
       : highlightedFields[fieldName].values;
 
-    const euidApi = useEntityStoreEuidApi();
     const rawEntityIdentifiers =
       fieldName === HOST_NAME_FIELD_NAME
-        ? (euidApi?.euid.getEntityIdentifiersFromDocument(
-            'host',
-            highlightedFields
-          ) as IdentityFields)
+        ? hostDocumentIdentityFields
         : fieldName === USER_NAME_FIELD_NAME
-        ? (euidApi?.euid.getEntityIdentifiersFromDocument(
-            'user',
-            highlightedFields
-          ) as IdentityFields)
+        ? userDocumentIdentityFields
         : null;
 
-    console.log('rawEntityIdentifiers', rawEntityIdentifiers);
     const identityFields =
       rawEntityIdentifiers && fieldName === HOST_NAME_FIELD_NAME
         ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'host.')

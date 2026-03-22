@@ -136,7 +136,7 @@ export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
-  identityFields?: Record<string, string>;
+  identityFields?: Record<string, string> | null;
   /**
    * When `identityFields` includes `entity.id`, resolves the store record (Entity Store v2)
    * and expands to ECS-style identifier terms (e.g. `user.entity.id`, `user.name`) for the alerts query.
@@ -182,9 +182,13 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
   const euidApi = useEntityStoreEuidApi();
-  const identityFieldsForQuery = euidApi?.euid?.getEntityIdentifiersFromDocument(
-    storeEntityType ?? 'generic',
-    entityRecord
+  const identityFieldsForQuery = useMemo(
+    () =>
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        storeEntityType ?? 'generic',
+        entityRecord
+      ),
+    [euidApi?.euid, entityRecord, storeEntityType]
   );
 
   const skipAlertsQuery =

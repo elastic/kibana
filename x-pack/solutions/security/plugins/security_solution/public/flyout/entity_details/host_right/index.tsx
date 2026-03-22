@@ -267,7 +267,6 @@ export const HostPanel = ({
             : undefined
         }
         skipRiskAndCriticality={noEntityInStore}
-        useEntityStoreV2={entityStoreV2Enabled && observedHost.entityRecord != null}
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter
@@ -275,7 +274,6 @@ export const HostPanel = ({
           entityId={entityId}
           contextID={safeContextID}
           scopeId={scopeId}
-          entity={entityFromStore}
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (

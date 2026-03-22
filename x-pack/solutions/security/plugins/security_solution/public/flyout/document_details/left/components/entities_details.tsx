@@ -51,6 +51,19 @@ export const EntitiesDetails: React.FC = () => {
     skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
   });
 
+  console.log('hostEntityFromStore', hostEntityFromStore);
+
+  const hostRecord = hostEntityFromStore.entityRecord;
+  const hostNameFromStore =
+    hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
+
+  const resolvedHostName = entityStoreV2Enabled
+    ? hostEntityIdentifiers?.['host.name'] ?? hostNameFromStore
+    : hostEntityIdentifiers?.['host.name'] ??
+      Object.values(hostEntityIdentifiers ?? {}).find(
+        (v): v is string => typeof v === 'string' && v.length > 0
+      );
+
   const showUserDetails =
     userEntityIdentifiers &&
     timestamp &&
@@ -58,6 +71,7 @@ export const EntitiesDetails: React.FC = () => {
   const showHostDetails =
     hostEntityIdentifiers &&
     timestamp &&
+    resolvedHostName != null &&
     (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
   const showDetails = timestamp && (showUserDetails || showHostDetails);
 
@@ -99,9 +113,7 @@ export const EntitiesDetails: React.FC = () => {
               <EuiSpacer size="s" />
 
               <HostDetails
-                hostName={
-                  hostEntityIdentifiers['host.name'] ?? Object.values(hostEntityIdentifiers)[0]
-                }
+                hostName={resolvedHostName}
                 entityId={hostEntityIdentifiers?.['entity.id']}
                 timestamp={timestamp}
                 scopeId={scopeId}

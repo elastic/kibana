@@ -29,6 +29,7 @@ import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/u
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import type { ESQuery } from '../../../../../common/typed_json';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
@@ -142,10 +143,29 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     [from, to]
   );
 
-  const hostName = identityFields['host.name'];
+  const hostName =
+    identityFields['host.name'] ||
+    identityFields['host.hostname'] ||
+    identityFields['host.id'] ||
+    identityFields['host.entity.id'] ||
+    Object.values(identityFields).find((v) => typeof v === 'string' && v.trim() !== '');
+
+  const hostLastSeenField = identityFields['host.name']
+    ? 'host.name'
+    : identityFields['host.hostname']
+      ? 'host.hostname'
+      : identityFields['host.id']
+        ? 'host.id'
+        : identityFields['host.entity.id']
+          ? 'host.entity.id'
+          : 'host.name';
+
   const filterQuery = useMemo(
-    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-    [hostName]
+    () =>
+      identityFields['host.name']
+        ? (buildHostNamesFilter([identityFields['host.name']]) as ESQuery)
+        : undefined,
+    [identityFields]
   );
 
   const storeHostEntityId = identityFields['host.entity.id'];
@@ -238,7 +258,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
             ) : !entityStoreV2Enabled ? (
               <FirstLastSeen
                 indexPatterns={selectedPatterns}
-                field="host.name"
+                field={hostLastSeenField}
                 value={hostName}
                 type={FirstLastSeenType.LAST_SEEN}
               />
@@ -250,7 +270,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           ),
       },
     ],
-    [hostName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
+    [hostName, hostLastSeenField, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
   );
 
   const { euiTheme } = useEuiTheme();

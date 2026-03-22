@@ -13,23 +13,22 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { UserDetailsPanelKey } from '../../user_details_left';
 import { UserPanelKey } from '../../shared/constants';
-import type { IdentityFields } from '../../../document_details/shared/utils';
 
 interface UseNavigateToUserDetailsParams {
-  documentEntityIdentifiers: IdentityFields;
   userName: string;
   entityId?: string;
   scopeId: string;
   contextID: string;
   isRiskScoreExist: boolean;
+  identityFields: Record<string, string>;
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
   isPreviewMode: boolean;
 }
 
 export const useNavigateToUserDetails = ({
-  documentEntityIdentifiers,
   userName,
+  identityFields,
   entityId,
   scopeId,
   contextID,
@@ -49,10 +48,10 @@ export const useNavigateToUserDetails = ({
       const left = {
         id: UserDetailsPanelKey,
         params: {
+          identityFields,
           isRiskScoreExist,
           scopeId,
           path,
-          identityFields: documentEntityIdentifiers,
           entityId,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
@@ -64,6 +63,7 @@ export const useNavigateToUserDetails = ({
         params: {
           contextID,
           userName,
+          identityFields,
           entityId,
           scopeId,
         },
@@ -78,6 +78,7 @@ export const useNavigateToUserDetails = ({
     [
       telemetry,
       openLeftPanel,
+      identityFields,
       isRiskScoreExist,
       scopeId,
       hasMisconfigurationFindings,
@@ -85,7 +86,6 @@ export const useNavigateToUserDetails = ({
       isPreviewMode,
       openFlyout,
       contextID,
-      documentEntityIdentifiers,
       userName,
       entityId,
     ]

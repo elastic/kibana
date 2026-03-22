@@ -6,32 +6,37 @@
  */
 
 /**
- * Constants and types for the entity_store plugin with zero dependency on domain/euid.
+ * Constants and types for the entity_store plugin with zero dependency on domain/euid or zod.
  * Use this from the plugin's public entry so the page-load bundle stays under limit.
  */
-
-import { z } from '@kbn/zod/v4';
 
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
-export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
-export const EntityStoreStatus = z.enum([
-  'not_installed',
-  'installing',
-  'running',
-  'stopped',
-  'error',
-]);
+/** Runtime values mirror the former z.enum shape (`EntityStoreStatus.enum.running`). */
+export const EntityStoreStatus = {
+  enum: {
+    not_installed: 'not_installed',
+    installing: 'installing',
+    running: 'running',
+    stopped: 'stopped',
+    error: 'error',
+  },
+} as const;
+
+export type EntityStoreStatus =
+  (typeof EntityStoreStatus.enum)[keyof typeof EntityStoreStatus.enum];
 
 const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
 
 export const ENTITY_STORE_ROUTES = {
   INSTALL: `${ENTITY_STORE_BASE_ROUTE}/install`,
+  UPDATE: ENTITY_STORE_BASE_ROUTE,
   UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
   STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
+  CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
   START: `${ENTITY_STORE_BASE_ROUTE}/start`,
   STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
@@ -60,10 +65,19 @@ export const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+/** Runtime values mirror the former z.enum shape (`EntityType.enum.host`). */
+export const EntityType = {
+  enum: {
+    user: 'user',
+    host: 'host',
+    service: 'service',
+    generic: 'generic',
+  },
+} as const;
 
-export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
+export type EntityType = (typeof EntityType.enum)[keyof typeof EntityType.enum];
+
+export const ALL_ENTITY_TYPES = Object.values(EntityType.enum) as EntityType[];
 
 /** Minimal shape for identity source fields (avoids importing domain/euid in page-load bundle). */
 export interface IdentitySourceFields {

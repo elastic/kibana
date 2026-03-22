@@ -10,7 +10,6 @@ import type { ESBoolQuery } from '../../../common/typed_json';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
-import type { IdentityFields } from '../../flyout/document_details/shared/utils';
 
 export const useNonClosedAlerts = ({
   identityFields,
@@ -20,7 +19,7 @@ export const useNonClosedAlerts = ({
   additionalFilters,
   skip = false,
 }: {
-  identityFields: IdentityFields;
+  identityFields: Record<string, string> | null;
   to: string;
   from: string;
   queryId: string;

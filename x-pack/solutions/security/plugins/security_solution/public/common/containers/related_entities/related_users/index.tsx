@@ -22,7 +22,8 @@ export interface UseHostRelatedUsersResult {
 }
 
 interface UseHostRelatedUsersParam {
-  hostName: string;
+  /** Hostname for `host.name` term queries; omit or empty to skip the search. */
+  hostName?: string;
   entityId?: string;
   indexNames: string[];
   from: string;
@@ -36,6 +37,8 @@ export const useHostRelatedUsers = ({
   from,
   skip = false,
 }: UseHostRelatedUsersParam): UseHostRelatedUsersResult => {
+  const shouldSkip = skip || hostName == null || hostName === '';
+
   const {
     loading,
     result: response,
@@ -49,7 +52,7 @@ export const useHostRelatedUsers = ({
       relatedUsers: [],
     },
     errorMessage: FAIL_RELATED_USERS,
-    abort: skip,
+    abort: shouldSkip,
   });
 
   const hostRelatedUsersResponse = useMemo(
@@ -63,8 +66,11 @@ export const useHostRelatedUsers = ({
     [inspect, refetch, response.totalCount, response.relatedUsers, loading]
   );
 
-  const hostRelatedUsersRequest = useMemo(
-    () => ({
+  const hostRelatedUsersRequest = useMemo(() => {
+    if (hostName == null || hostName === '') {
+      return null;
+    }
+    return {
       defaultIndex: indexNames,
       factoryQueryType: RelatedEntitiesQueries.relatedUsers,
       hostName,
@@ -76,15 +82,14 @@ export const useHostRelatedUsers = ({
           }
         : undefined,
       from,
-    }),
-    [indexNames, from, hostName, entityId]
-  );
+    };
+  }, [indexNames, from, hostName, entityId]);
 
   useEffect(() => {
-    if (!skip) {
+    if (!shouldSkip && hostRelatedUsersRequest != null) {
       search(hostRelatedUsersRequest);
     }
-  }, [hostRelatedUsersRequest, search, skip]);
+  }, [hostRelatedUsersRequest, search, shouldSkip]);
 
   return hostRelatedUsersResponse;
 };
