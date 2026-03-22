@@ -808,16 +808,16 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.ClassicIngest",
-              "text": "ClassicIngest"
+              "section": "def-common.WiredIngest",
+              "text": "WiredIngest"
             },
             " | ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.WiredIngest",
-              "text": "WiredIngest"
+              "section": "def-common.ClassicIngest",
+              "text": "ClassicIngest"
             },
             "; }, undefined>; \"GET /internal/streams/_classic_status\": ",
             {
@@ -2176,16 +2176,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ClassicIngest",
-            "text": "ClassicIngest"
+            "section": "def-common.WiredIngest",
+            "text": "WiredIngest"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredIngest",
-            "text": "WiredIngest"
+            "section": "def-common.ClassicIngest",
+            "text": "ClassicIngest"
           },
           "; }, undefined>; \"GET /internal/streams/_classic_status\": ",
           {

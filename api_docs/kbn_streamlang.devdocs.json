@@ -8205,20 +8205,10 @@
         "label": "StreamlangOasDefinitions",
         "description": [],
         "signature": [
-          "{ readonly Condition: z.Schema<",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">; readonly StreamlangDSL: any; readonly StreamlangStep: z.ZodType<",
-          "StreamlangStep",
-          ">; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
+          "{ readonly Condition: any; readonly StreamlangDSL: any; readonly StreamlangStep: any; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/oas_definitions.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10767,20 +10757,10 @@
         "label": "streamlangOasDefinitions",
         "description": [],
         "signature": [
-          "{ readonly Condition: z.Schema<",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">; readonly StreamlangDSL: any; readonly StreamlangStep: z.ZodType<",
-          "StreamlangStep",
-          ">; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
+          "{ readonly Condition: any; readonly StreamlangDSL: any; readonly StreamlangStep: any; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/oas_definitions.ts",
-        "lineNumber": 45,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
