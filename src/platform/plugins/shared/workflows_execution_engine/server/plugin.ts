@@ -33,11 +33,13 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
@@ -796,11 +798,24 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
+      const cancelledAt = new Date().toISOString();
+
+      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        await cancelWaitingWorkflow({
+          workflowExecution,
+          workflowExecutionRepository,
+          stepExecutionRepository: new StepExecutionRepository(
+            coreStart.elasticsearch.client.asInternalUser
+          ),
+        });
+        return;
+      }
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
+        cancelledAt,
         cancelledBy: 'system', // TODO: set user if available
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);

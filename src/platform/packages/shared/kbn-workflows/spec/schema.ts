@@ -805,6 +805,7 @@ export const BuiltInStepTypes = [
   DataSetStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WaitForInputStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,

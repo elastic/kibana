@@ -171,7 +171,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   )}
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false} css={styles.durationContainer} justifyContent="flexEnd">
+              <EuiFlexItem grow={false} css={styles.durationContainer}>
                 {formattedDuration && (
                   <EuiFlexGroup
                     alignItems="center"
