@@ -7,8 +7,6 @@
 
 export {
   DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
 } from './constants';
 
 export {

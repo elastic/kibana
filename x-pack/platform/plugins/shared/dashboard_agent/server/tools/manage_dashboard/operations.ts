@@ -116,8 +116,6 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
   ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
-  onPanelsAdded: (panels: AttachmentPanel[]) => void;
-  onPanelsRemoved: (panels: AttachmentPanel[]) => void;
 }
 
 type DashboardWidget = AttachmentPanel | DashboardSection;
@@ -201,8 +199,6 @@ export const executeDashboardOperations = ({
   operations,
   logger,
   resolvePanelsFromAttachments,
-  onPanelsAdded,
-  onPanelsRemoved,
 }: ExecuteDashboardOperationsParams): {
   dashboardData: DashboardAttachmentData;
   failures: VisualizationFailure[];
@@ -258,7 +254,6 @@ export const executeDashboardOperations = ({
           };
         }
 
-        onPanelsAdded([markdownPanel]);
         break;
       }
 
@@ -291,7 +286,6 @@ export const executeDashboardOperations = ({
                 panels: [...nextDashboardData.panels, ...result.panels],
               };
             }
-            onPanelsAdded(result.panels);
           }
           failures.push(...result.failures);
         }
@@ -309,7 +303,6 @@ export const executeDashboardOperations = ({
           ]);
           if (result.panels.length > 0) {
             sectionPanels.push(...result.panels);
-            onPanelsAdded(result.panels);
           }
           failures.push(...result.failures);
         }
@@ -339,9 +332,6 @@ export const executeDashboardOperations = ({
         const nextPanels = nextDashboardData.panels.filter((_, i) => i !== sectionIndex);
 
         if (operation.panelAction === 'delete') {
-          if (sectionToRemove.panels.length > 0) {
-            onPanelsRemoved(sectionToRemove.panels);
-          }
           nextDashboardData = {
             ...nextDashboardData,
             panels: nextPanels,
@@ -372,7 +362,6 @@ export const executeDashboardOperations = ({
         });
         if (removedPanels.length > 0) {
           nextDashboardData = dashboardWithoutPanels;
-          onPanelsRemoved(removedPanels);
           logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
         }
         break;
@@ -401,9 +390,6 @@ export const executeDashboardOperations = ({
               uid: panel.uid,
               grid: panel.grid,
             };
-
-            onPanelsRemoved([panel]);
-            onPanelsAdded([updatedPanel]);
 
             return updatedPanel;
           } catch (error) {

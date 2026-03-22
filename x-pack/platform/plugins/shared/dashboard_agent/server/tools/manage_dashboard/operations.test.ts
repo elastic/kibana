@@ -6,7 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+  DashboardSection,
+} from '@kbn/dashboard-agent-common';
+import { isSection } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 
@@ -18,6 +23,12 @@ const createMockLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
+const getSections = (panels: DashboardAttachmentData['panels']): DashboardSection[] =>
+  panels.filter(isSection);
+
+const getPanelsOnly = (panels: DashboardAttachmentData['panels']): AttachmentPanel[] =>
+  panels.filter((p): p is AttachmentPanel => !isSection(p));
+
 describe('executeDashboardOperations', () => {
   const logger = createMockLogger();
   const createLensPanel = (uid: string, gridY = 0): AttachmentPanel => ({
@@ -25,6 +36,19 @@ describe('executeDashboardOperations', () => {
     uid,
     config: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
+  });
+
+  const createSection = (
+    uid: string,
+    title: string,
+    gridY: number,
+    panels: AttachmentPanel[] = []
+  ): DashboardSection => ({
+    uid,
+    title,
+    collapsed: false,
+    grid: { y: gridY },
+    panels,
   });
 
   it('executes operations in order', async () => {

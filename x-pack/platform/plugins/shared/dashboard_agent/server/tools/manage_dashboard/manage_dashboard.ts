@@ -13,13 +13,8 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
   isSection,
-  type AttachmentPanel,
   type DashboardAttachmentData,
-  type PanelAddedEventData,
-  type PanelsRemovedEventData,
 } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
@@ -74,27 +69,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
         const isNewDashboard = !latestVersion;
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const sendAddedEvents = (panels: AttachmentPanel[]) => {
-          for (const panel of panels) {
-            const addedPayload: PanelAddedEventData = {
-              dashboardAttachmentId,
-              panel,
-            };
-            events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, addedPayload);
-          }
-        };
-
-        const sendRemovedEvents = (panels: AttachmentPanel[]) => {
-          if (panels.length === 0) {
-            return;
-          }
-
-          const removedPayload: PanelsRemovedEventData = {
-            dashboardAttachmentId,
-            panelIds: panels.map(({ uid }) => uid),
-          };
-          events.sendUiEvent(DASHBOARD_PANELS_REMOVED_EVENT, removedPayload);
-        };
 
         const operationResult = executeDashboardOperations({
           dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
@@ -106,8 +80,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
               attachments,
               logger,
             }),
-          onPanelsAdded: sendAddedEvents,
-          onPanelsRemoved: sendRemovedEvents,
         });
 
         const failures: VisualizationFailure[] = operationResult.failures;
