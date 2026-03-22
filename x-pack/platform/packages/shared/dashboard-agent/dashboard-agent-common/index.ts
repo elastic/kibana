@@ -32,5 +32,4 @@ export type {
   DashboardAttachmentOrigin,
   PanelAddedEventData,
   PanelsRemovedEventData,
-  DashboardUiEvent,
 } from './types';

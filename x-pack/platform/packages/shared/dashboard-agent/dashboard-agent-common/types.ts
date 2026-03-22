@@ -6,14 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ToolUiEvent } from '@kbn/agent-builder-common/chat';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
-} from './constants';
 import { PANEL_GRID_CONSTRAINTS } from '@kbn/dashboard-plugin/common';
+import { DASHBOARD_ATTACHMENT_TYPE } from './constants';
 
 /**
  * Grid dimensions (in dashboard grid units) for layout.
@@ -175,12 +170,6 @@ export interface PanelsRemovedEventData {
   panelIds: string[];
 }
 
-/**
- * Union type for dashboard UI events.
- */
-export type DashboardUiEvent =
-  | ToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>
-  | ToolUiEvent<typeof DASHBOARD_PANELS_REMOVED_EVENT, PanelsRemovedEventData>;
 
 export type DashboardAttachment = Attachment<
   typeof DASHBOARD_ATTACHMENT_TYPE,
