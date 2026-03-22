@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
 import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
@@ -16,8 +17,8 @@ import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
-import type { AttachmentRequest } from '../../../common/types/api';
-import { AttachmentRequestRt } from '../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { AttachmentRequestRtV2 } from '../../../common/types/api';
 
 /**
  * Delete all comments for a case.
@@ -36,6 +37,7 @@ export async function deleteAll(
   try {
     const comments = await caseService.getAllCaseComments({
       id: caseID,
+      mode: 'legacy',
     });
 
     if (comments.total <= 0) {
@@ -101,6 +103,7 @@ export async function deleteComment(
   try {
     const attachment = await attachmentService.getter.get({
       attachmentId: attachmentID,
+      mode: 'legacy',
     });
 
     if (attachment == null) {
@@ -135,7 +138,7 @@ export async function deleteComment(
     // we only want to store the fields related to the original request of the attachment, not fields like
     // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
     // what type of attachment this is. Depending on the type it could have various fields.
-    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
+    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes);
 
     await userActionService.creator.createUserAction({
       userAction: {
@@ -161,13 +164,14 @@ export async function deleteComment(
 
 interface HandleAlertsArgs {
   alertsService: CasesClientArgs['services']['alertsService'];
-  attachments: AttachmentRequest[];
+  attachments: AttachmentRequestV2[];
   caseId: string;
 }
 
 const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
-  const alertAttachments = attachments.filter((attachment): attachment is AlertAttachmentPayload =>
-    isCommentRequestTypeAlert(attachment)
+  const alertAttachments = attachments.filter(
+    (attachment): attachment is AlertAttachmentPayload =>
+      isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)
   );
 
   if (alertAttachments.length === 0) {
