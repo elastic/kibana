@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-03-22T07:31:08.376Z",
+  "model": "qwen2.5:7b",
+  "benchmarks": {
+    "delta_mode": {
+      "alerts": 50,
+      "rounds": 1,
+      "duration_ms": 3709,
+      "tokens": 970,
+      "target_ms": 15000,
+      "status": "PASS"
+    },
+    "progressive_mode": {
+      "alerts": 200,
+      "rounds": 4,
+      "duration_ms": 11269,
+      "avg_round_duration_ms": 2817.25,
+      "rounds_detail": [
+        {
+          "round": 1,
+          "duration_ms": 1543,
+          "tokens": 957
+        },
+        {
+          "round": 2,
+          "duration_ms": 3518,
+          "tokens": 1026
+        },
+        {
+          "round": 3,
+          "duration_ms": 3064,
+          "tokens": 1021
+        },
+        {
+          "round": 4,
+          "duration_ms": 3119,
+          "tokens": 1020
+        }
+      ],
+      "max_tokens": 1026,
+      "target_ms": 120000,
+      "status": "PASS"
+    },
+    "context_boundary": {
+      "alerts": 75,
+      "duration_ms": 3863,
+      "tokens": 1373,
+      "estimated_max": 8000,
+      "status": "PASS"
+    }
+  }
+}
