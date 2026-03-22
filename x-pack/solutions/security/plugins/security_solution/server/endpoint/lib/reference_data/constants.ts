@@ -7,6 +7,7 @@
 
 import type {
   MigrationMetadata,
+  OptInStatusMetadata,
   OrphanResponseActionsMetadata,
   ReferenceDataItemKey,
   ReferenceDataSavedObject,
@@ -24,6 +25,10 @@ export const REF_DATA_KEYS = {
    * where orphan response actions (those whose associated with a policy that has been deleted).
    */
   orphanResponseActionsSpace: 'ORPHAN-RESPONSE-ACTIONS-SPACE',
+  /**
+   * v9.4.0: Per-policy opt-in status for Endpoint exceptions
+   */
+  endpointExceptionsPerPolicyOptInStatus: 'ENDPOINT-EXCEPTIONS-PER-POLICY-OPT-IN-STATUS',
 } as const;
 
 /**
@@ -65,5 +70,13 @@ export const REF_DATA_KEY_INITIAL_VALUE: Readonly<
       owner: 'EDR',
       type: 'RESPONSE-ACTIONS',
       metadata: { spaceId: '' },
+    }),
+
+  [REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus]:
+    (): ReferenceDataSavedObject<OptInStatusMetadata> => ({
+      id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
+      owner: 'EDR',
+      type: 'OPT-IN-STATUS',
+      metadata: { status: false },
     }),
 };
