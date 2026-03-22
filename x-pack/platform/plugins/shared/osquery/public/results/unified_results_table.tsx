@@ -526,7 +526,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
-      <div css={resultsTableContainerCss}>
+      <div css={resultsTableContainerCss} data-test-subj="osqueryResultsPanel">
         {/* Search bar with KQL autocomplete and filter pills */}
         <div css={searchBarWrapperCss}>
           <SearchBar
