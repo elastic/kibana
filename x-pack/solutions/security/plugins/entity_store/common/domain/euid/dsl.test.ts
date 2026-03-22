@@ -7,6 +7,16 @@
 
 import { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } from './dsl';
 
+const fieldMissingOrEmpty = (field: string) => ({
+  bool: {
+    should: [
+      { bool: { must_not: [{ exists: { field } }] } },
+      { term: { [field]: '' } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 describe('getEuidDslFilterBasedOnDocument', () => {
   it('returns undefined when doc is falsy', () => {
     expect(getEuidDslFilterBasedOnDocument('host', null)).toBeUndefined();
@@ -72,7 +82,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'host.name': 'server1' } }],
-          must_not: [{ exists: { field: 'host.id' } }],
+          must: [fieldMissingOrEmpty('host.id')],
         },
       });
     });
@@ -83,7 +93,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'host.hostname': 'node-1' } }],
-          must_not: [{ exists: { field: 'host.id' } }, { exists: { field: 'host.name' } }],
+          must: [fieldMissingOrEmpty('host.id'), fieldMissingOrEmpty('host.name')],
         },
       });
     });
@@ -166,7 +176,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns filter with term on user.name and source clause and must_not on higher-ranked identity fields', () => {
+    it('returns filter with term on user.name and source clause and must on higher-ranked fields missing-or-empty', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
         event: { module: 'azure' },
@@ -188,16 +198,16 @@ describe('getEuidDslFilterBasedOnDocument', () => {
               },
             },
           ],
-          must_not: [
-            { exists: { field: 'user.email' } },
-            { exists: { field: 'user.id' } },
-            { exists: { field: 'user.domain' } },
+          must: [
+            fieldMissingOrEmpty('user.email'),
+            fieldMissingOrEmpty('user.id'),
+            fieldMissingOrEmpty('user.domain'),
           ],
         },
       });
     });
 
-    it('returns filter with term on user.id and source clause and must_not on user.email', () => {
+    it('returns filter with term on user.id and source clause and must on user.email missing-or-empty', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { id: 'user-id-42' },
         event: { module: 'o365' },
@@ -219,7 +229,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
               },
             },
           ],
-          must_not: [{ exists: { field: 'user.email' } }],
+          must: [fieldMissingOrEmpty('user.email')],
         },
       });
     });
@@ -254,7 +264,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns filter for user.name and user.domain with source clause and must_not on higher-ranked identity fields', () => {
+    it('returns filter for user.name and user.domain with source clause and must on higher-ranked fields missing-or-empty', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
         event: { module: 'entityanalytics_ad' },
@@ -275,12 +285,12 @@ describe('getEuidDslFilterBasedOnDocument', () => {
               },
             },
           ],
-          must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
+          must: [fieldMissingOrEmpty('user.email'), fieldMissingOrEmpty('user.id')],
         },
       });
     });
 
-    it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must_not so the query can match stored documents', () => {
+    it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must so the query can match stored documents', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'bob@example.com' },
         event: { module: 'okta' },
@@ -289,12 +299,10 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       const filterFields = Array.isArray(filter)
         ? filter.map((clause) => Object.keys(clause.term ?? {})[0])
         : [];
-      const mustNot = (result?.bool?.must_not ?? []) as Array<{ exists?: { field: string } }>;
-      const mustNotFields = Array.isArray(mustNot)
-        ? mustNot.map((clause) => clause.exists?.field).filter(Boolean)
-        : [];
+      const must = (result?.bool?.must ?? []) as unknown[];
       expect(filterFields).not.toContain('entity.namespace');
-      expect(mustNotFields).not.toContain('entity.namespace');
+      expect(JSON.stringify(must)).not.toContain('entity.namespace');
+      expect(result?.bool?.must_not).toBeUndefined();
     });
 
     it('returns filter for user.name and host.id when whenConditionTrueSetFieldsPreAgg sets entity.namespace to local (non-IDP)', () => {

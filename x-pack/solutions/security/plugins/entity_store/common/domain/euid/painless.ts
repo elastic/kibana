@@ -5,11 +5,60 @@
  * 2.0.
  */
 
-import type { EntityType, EuidAttribute, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EntityDefinitionWithoutId,
+  EntityType,
+  EuidAttribute,
+  FieldEvaluation,
+} from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
 import { normalizeConditionForSingleDoc } from './commons';
+
+/**
+ * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
+ *
+ * We cannot use labeled blocks (`label: { }`) — Painless rejects the `:` token here.
+ * We cannot use `while (true) { ... break }` when every path breaks — the compiler reports
+ * `extraneous while loop`.
+ *
+ * Wrapping the evaluation in a `String`-returning function preserves ordinary `return`
+ * statements from getEuidPainlessEvaluation without break/loop tricks.
+ */
+function wrapEvaluationScriptForKeywordRuntimeField(evaluationScript: string): string {
+  const fn = '___euid_rt_eval';
+  return `String ${fn}(def doc) { ${evaluationScript} } String ___euid = ${fn}(doc); if (___euid != null) { emit(___euid); }`;
+}
+
+/**
+ * Mirrors `whenConditionTrueSetFieldsPreAgg` for fields produced by field evaluations (e.g.
+ * `entity.namespace` → `entity_namespace`). Matches in-memory EUID after field evals + pre-agg
+ * overrides (see getEuidFromObject / applyWhenConditionTrueSetFieldsPreAgg).
+ */
+function buildPreAggEvaluatedVarOverridesPreamble(
+  whenRules: EntityDefinitionWithoutId['whenConditionTrueSetFieldsPreAgg'],
+  evaluatedVars: Map<string, string>
+): string {
+  if (!whenRules?.length) {
+    return '';
+  }
+  const parts: string[] = [];
+  for (const rule of whenRules) {
+    const cond = streamlangConditionToPainlessDoc(rule.condition);
+    for (const [field, value] of Object.entries(rule.fields)) {
+      if (typeof value !== 'string') {
+        continue;
+      }
+      const varName = evaluatedVars.get(field);
+      if (varName === undefined) {
+        continue;
+      }
+      parts.push(`if (${cond}) { ${varName} = "${escapePainlessString(value)}"; }`);
+    }
+  }
+  return parts.length > 0 ? `${parts.join(' ')} ` : '';
+}
 
 /**
  * Returns an Elasticsearch runtime keyword field mapping whose Painless script
@@ -28,7 +77,7 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
   script: { source: string };
 } {
   const returnScript = getEuidPainlessEvaluation(entityType);
-  const emitScript = `String euid_eval(def doc) { ${returnScript} } def result = euid_eval(doc); if (result != null) { emit(result); }`;
+  const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript);
   return {
     type: 'keyword',
     script: { source: emitScript },
@@ -88,6 +137,10 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
+  preamble += buildPreAggEvaluatedVarOverridesPreamble(
+    entityDefinition.whenConditionTrueSetFieldsPreAgg,
+    evaluatedVars
+  );
 
   const fieldCondition = (field: string): string => {
     const varName = evaluatedVars.get(field);
@@ -151,7 +204,12 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     }
   }
   const branchLogic = branchParts.join(' ');
-  return filterPreamble + preamble + branchLogic + ' return null;';
+  // When the last branch is `else { ... return null; }`, every path through the if / else if /
+  // else chain already returns; a trailing `return null` is unreachable and Painless rejects it.
+  const lastBranchPart = branchParts[branchParts.length - 1] ?? '';
+  const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
+  const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
+  return filterPreamble + preamble + branchLogic + trailingReturn;
 }
 
 function painlessFieldNonEmpty(field: string): string {
@@ -191,7 +249,7 @@ export function streamlangConditionToPainlessDoc(condition: unknown): string {
     }
     if ('neq' in c && c.neq !== undefined) {
       const val = escapePainlessString(String(c.neq));
-      return `(!${nonEmpty} || doc['${escaped}'].value != "${val}")`;
+      return `(!(${nonEmpty}) || doc['${escaped}'].value != "${val}")`;
     }
     if ('exists' in c) {
       return c.exists ? nonEmpty : `!(${nonEmpty})`;

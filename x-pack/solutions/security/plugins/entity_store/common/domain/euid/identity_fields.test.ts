@@ -19,8 +19,8 @@ describe('getEuidSourceFields', () => {
     expect(result.identitySourceFields).toHaveLength(new Set(result.identitySourceFields).size);
   });
 
-  it.only('excludes fieldEvaluation destinations (entity.namespace, entity.confidence) for user', () => {
-    const result = getEuidSourceFields(EntityType.enum.user);    
+  it('excludes fieldEvaluation destinations (entity.namespace, entity.confidence) for user', () => {
+    const result = getEuidSourceFields(EntityType.enum.user);
 
     expect(result.identitySourceFields).not.toContain('entity.namespace');
     expect(result.identitySourceFields).not.toContain('entity.confidence');

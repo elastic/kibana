@@ -83,8 +83,9 @@ export function getEuidDslDocumentsContainsIdFilter(
  * //       { term: { 'host.name': 'server1' } },
  * //       { term: { 'host.domain': 'example.com' } }
  * //     ],
- * //     must_not: [
- * //       { exists: { field: 'host.entity.id' } }, ...
+ * //     must: [
+ * //       { bool: { should: [ { bool: { must_not: [{ exists: { field: 'host.id' } }] } }, { term: { 'host.id': '' } } ], minimum_should_match: 1 } },
+ * //       ...
  * //     ]
  * //   }
  * // }
@@ -152,9 +153,10 @@ export function getEuidDslFilterBasedOnDocument(
     (field) => !evaluatedDestinations.has(field)
   );
   if (toBeFilteredOut.length > 0) {
+    const priorMust = Array.isArray(dsl.bool?.must) ? dsl.bool.must : [];
     dsl.bool = {
       ...dsl.bool,
-      must_not: toBeFilteredOut.map((field) => ({ exists: { field } })),
+      must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
     };
   }
 
@@ -176,6 +178,22 @@ export function getEuidDslFilterBasedOnDocument(
   return dsl;
 }
 
+/**
+ * Document matches when the field is missing or equals "" — aligned with getFieldValue (empty is not
+ * identity) and ESQL `esqlIsNullOrEmpty` for higher-ranked fields we skipped.
+ */
+function fieldMissingOrEmptyDsl(field: string): QueryDslQueryContainer {
+  return {
+    bool: {
+      should: [
+        { bool: { must_not: [{ exists: { field } }] } },
+        { term: { [field]: '' } },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+}
+
 function buildSourceClauseDsl(
   evaluation: FieldEvaluation,
   spec: SourceMatchSpec
@@ -184,15 +202,9 @@ function buildSourceClauseDsl(
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
 
   if (spec.type === 'unknown') {
-    const mustNotExistOrEmpty = allSourceFields.map((field) => ({
-      bool: {
-        should: [{ bool: { must_not: [{ exists: { field } }] } }, { term: { [field]: '' } }],
-        minimum_should_match: 1,
-      },
-    }));
     return {
       bool: {
-        must: mustNotExistOrEmpty,
+        must: allSourceFields.map((field) => fieldMissingOrEmptyDsl(field)),
       },
     };
   }

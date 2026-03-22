@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
 import {
@@ -13,10 +14,97 @@ import {
   ENTITY_STORE_TAGS,
   UPDATES_INDEX,
 } from '../fixtures/constants';
+import { ingestDoc } from '../fixtures/helpers';
+import { USER_TS_EXTRACTION_CASES } from '../fixtures/user_ts_extraction_cases';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidPainlessRuntimeMapping } from '../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
-import { EntityType } from '../../../../common/domain/definitions/entity_schema';
+import {
+  getDocument,
+  applyWhenConditionTrueSetFieldsPreAgg,
+} from '../../../../common/domain/euid/commons';
+import { applyFieldEvaluations } from '../../../../common/domain/euid/field_evaluations';
+import { getEntityDefinitionWithoutId } from '../../../../common/domain/definitions/registry';
+import {
+  EntityType,
+  isSingleFieldIdentity,
+} from '../../../../common/domain/definitions/entity_schema';
+
+const USER_ENTITY_TYPE = 'user' as const;
+
+const userRuntimeSearchBody = {
+  runtime_mappings: { entity_id: getEuidPainlessRuntimeMapping(USER_ENTITY_TYPE) },
+  fields: ['entity_id'] as const,
+};
+
+async function runUserRuntimeSearch(
+  esClient: { search: (params: object) => Promise<unknown> },
+  query: object,
+  size = 10
+) {
+  return esClient.search({
+    index: UPDATES_INDEX,
+    body: {
+      ...userRuntimeSearchBody,
+      query,
+      size,
+    },
+  }) as Promise<{
+    hits: { hits: Array<{ _source?: unknown; fields?: Record<string, unknown> }> };
+  }>;
+}
+
+function assertUserRuntimeMatchesMemory(hit: {
+  _source?: unknown;
+  fields?: Record<string, unknown>;
+}) {
+  const expected = getEuidFromObject(USER_ENTITY_TYPE, hit);
+  const actual = (hit.fields?.entity_id as string[] | undefined)?.[0];
+  expect(actual).toBe(expected);
+}
+
+/**
+ * Mirrors user entity pre-aggregation field rules (field evaluations + whenConditionTrueSetFieldsPreAgg)
+ * so we can assert entity.namespace / entity.confidence / entity.name align with extracted entities.
+ * The Painless runtime field only emits the EUID string, not these fields.
+ */
+function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
+  namespace?: string;
+  confidence?: string;
+  entityName?: string;
+} {
+  const doc = cloneDeep(getDocument(hit));
+  const def = getEntityDefinitionWithoutId(USER_ENTITY_TYPE);
+  const { identityField } = def;
+  if ('fieldEvaluations' in identityField && identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    Object.assign(doc, evaluated);
+  }
+  if (def.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFieldsPreAgg(doc, def.whenConditionTrueSetFieldsPreAgg);
+  }
+  return {
+    namespace: doc['entity.namespace'] as string | undefined,
+    confidence: doc['entity.confidence'] as string | undefined,
+    entityName: doc['entity.name'] as string | undefined,
+  };
+}
+
+function assertRuntimeEuidMatchesEntityTypeFormat(
+  entityType: EntityType,
+  euid: string | undefined
+): void {
+  if (euid === undefined) {
+    return;
+  }
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (isSingleFieldIdentity(identityField) && identityField.skipTypePrepend) {
+    expect(euid).not.toMatch(/^(user|host|service|generic):/);
+    expect(euid.length).toBeGreaterThan(0);
+    return;
+  }
+  expect(euid).toMatch(new RegExp(`^${entityType}:`));
+}
 
 apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -55,7 +143,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
 
   for (const entityType of Object.values(EntityType.options)) {
     apiTest(
-      `${entityType}: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents`,
+      `should match in-memory euid for every document using getEuidPainlessRuntimeMapping (${entityType})`,
       async ({ esClient }) => {
         const result = await esClient.search({
           index: UPDATES_INDEX,
@@ -77,68 +165,66 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
           const actualEuid = (hit.fields?.entity_id as string[] | undefined)?.[0];
 
           expect(actualEuid).toBe(expectedEuid);
+          assertRuntimeEuidMatchesEntityTypeFormat(entityType, actualEuid);
         }
       }
     );
   }
 
-  apiTest(
-    'user: Painless correctly handles IDP, non-IDP, and illegal documents',
-    async ({ esClient }) => {
-      const entityType = 'user';
-      const baseBody = {
-        runtime_mappings: { entity_id: getEuidPainlessRuntimeMapping(entityType) },
-        size: 10,
-        fields: ['entity_id'],
-      };
+  apiTest.describe('user.ts runtime field (definitions/user.ts)', () => {
+    for (const scenario of USER_TS_EXTRACTION_CASES) {
+      apiTest(`Painless entity_id: ${scenario.id}`, async ({ esClient }) => {
+        if (scenario.ingestSource) {
+          await ingestDoc(esClient, scenario.ingestSource);
+        }
 
-      const runSearch = (query: object) =>
-        esClient.search({
-          index: UPDATES_INDEX,
-          body: { ...baseBody, query },
-        } as Parameters<typeof esClient.search>[1]);
+        const result = await runUserRuntimeSearch(esClient, scenario.query, 10);
+        const hits = result.hits.hits;
+        expect(hits).toHaveLength(1);
 
-      const getEuidFromHit = (hit: { _source?: unknown; fields?: Record<string, unknown> }) => {
-        const expected = getEuidFromObject(entityType, hit);
-        const actual = (hit.fields?.entity_id as string[] | undefined)?.[0];
-        return { expected, actual };
-      };
+        const hit = hits[0];
+        assertUserRuntimeMatchesMemory(hit);
 
-      const idpResult = await runSearch({
-        bool: {
-          must: [{ term: { 'event.kind': 'asset' } }, { exists: { field: 'user.email' } }],
-        },
+        expect(getEuidFromObject(USER_ENTITY_TYPE, hit)).toBe(scenario.expectedEuid);
+        expect((hit.fields?.entity_id as string[] | undefined)?.[0]).toBe(scenario.expectedEuid);
+
+        if (scenario.expectedEuid !== undefined) {
+          expect(scenario.expectedEuid).toMatch(/^user:.+/);
+          expect(scenario.expectedEuid).toContain('@');
+          if (scenario.expectedMeta) {
+            expect(deriveUserEntityPreAggMetadata(hit)).toStrictEqual({
+              namespace: scenario.expectedMeta.namespace,
+              confidence: scenario.expectedMeta.confidence,
+              entityName: scenario.expectedMeta.entityName,
+            });
+          }
+        }
       });
-      const idpHits = idpResult.hits.hits;
-      expect(idpHits.length).toBeGreaterThan(0);
-      for (const hit of idpHits) {
-        const { expected, actual } = getEuidFromHit(hit);
-        expect(expected).toBeDefined();
-        expect(actual).toBe(expected);
-      }
+    }
+  });
 
-      const nonIdpResult = await runSearch({
+  apiTest(
+    'should omit user entity_id for excluded user.name; runtime matches in-memory euid (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, user.ts)',
+    async ({ esClient }) => {
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-01-20T12:05:25Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'root' },
+        host: { id: 'painless-excluded-root-host', name: 'server' },
+      });
+      const result = await runUserRuntimeSearch(esClient, {
         bool: {
           must: [
-            { term: { 'user.name': 'alice.local' } },
-            { term: { 'host.id': 'host-nonidp-001' } },
+            { term: { 'user.name': 'root' } },
+            { term: { 'host.id': 'painless-excluded-root-host' } },
           ],
         },
       });
-      const nonIdpHits = nonIdpResult.hits.hits;
-      expect(nonIdpHits).toHaveLength(1);
-      const { expected: nonIdpExpected, actual: nonIdpActual } = getEuidFromHit(nonIdpHits[0]);
-      expect(nonIdpExpected).toBe('user:alice.local@host-nonidp-001@local');
-      expect(nonIdpActual).toBe(nonIdpExpected);
-
-      const illegalResult = await runSearch({
-        term: { 'user.email': 'invalid-idp-illegal@test.com' },
-      });
-      const illegalHits = illegalResult.hits.hits;
-      expect(illegalHits).toHaveLength(1);
-      const { expected: illegalExpected, actual: illegalActual } = getEuidFromHit(illegalHits[0]);
-      expect(illegalExpected).toBeUndefined();
-      expect(illegalActual).toBeUndefined();
+      const hits = result.hits.hits;
+      expect(hits).toHaveLength(1);
+      assertUserRuntimeMatchesMemory(hits[0]);
+      expect(getEuidFromObject(USER_ENTITY_TYPE, hits[0])).toBeUndefined();
+      expect((hits[0].fields?.entity_id as string[] | undefined)?.[0]).toBeUndefined();
     }
   );
 });

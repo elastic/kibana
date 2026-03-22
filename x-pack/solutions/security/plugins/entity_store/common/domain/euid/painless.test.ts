@@ -44,7 +44,7 @@ describe('streamlangConditionToPainlessDoc', () => {
   it('translates field neq predicate', () => {
     const condition = { field: 'event.outcome', neq: 'failure' };
     expect(streamlangConditionToPainlessDoc(condition)).toBe(
-      `(!${nonEmpty('event.outcome')} || doc['event.outcome'].value != "failure")`
+      `(!(${nonEmpty('event.outcome')}) || doc['event.outcome'].value != "failure")`
     );
   });
 
@@ -85,7 +85,9 @@ describe('streamlangConditionToPainlessDoc', () => {
       ],
     };
     expect(streamlangConditionToPainlessDoc(condition)).toBe(
-      `((${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset")) || ${nonEmpty('entity.id')})`
+      `((${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset")) || ${nonEmpty(
+        'entity.id'
+      )})`
     );
   });
 
@@ -164,8 +166,12 @@ describe('getEuidPainlessRuntimeMapping', () => {
 
       expect(mapping.type).toBe('keyword');
       expect(mapping.script).toBeDefined();
-      expect(mapping.script.source).toContain('emit(result)');
-      expect(mapping.script.source).toContain(returnScript);
+      expect(mapping.script.source).toContain('if (___euid != null) { emit(___euid); }');
+      expect(mapping.script.source).toContain('String ___euid_rt_eval(def doc)');
+      expect(mapping.script.source).toContain('___euid_rt_eval(doc)');
+      const firstReturn = returnScript.indexOf('return');
+      expect(firstReturn).toBeGreaterThan(-1);
+      expect(mapping.script.source).toContain(returnScript.slice(0, firstReturn));
     });
   });
 });
