@@ -19,6 +19,17 @@ export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 
+/**
+ * Constraints for panel grid positioning and sizing.
+ * Used by both server-side validation (config-schema) and client-side validation (zod).
+ */
+export const PANEL_GRID_CONSTRAINTS = {
+  width: { min: 1, max: DASHBOARD_GRID_COLUMN_COUNT },
+  height: { min: 1 },
+  x: { min: 0, max: DASHBOARD_GRID_COLUMN_COUNT - 1 },
+  y: { min: 0 },
+} as const;
+
 export const DEFAULT_DASHBOARD_OPTIONS = {
   hide_panel_titles: false,
   hide_panel_borders: false,

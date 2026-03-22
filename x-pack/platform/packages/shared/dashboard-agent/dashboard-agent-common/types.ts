@@ -13,16 +13,22 @@ import type {
   DASHBOARD_PANEL_ADDED_EVENT,
   DASHBOARD_PANELS_REMOVED_EVENT,
 } from './constants';
+import { PANEL_GRID_CONSTRAINTS } from '@kbn/dashboard-plugin/common';
 
 /**
  * Grid dimensions (in dashboard grid units) for layout.
- * Dashboard grid is 48 columns wide; height is in same units.
  */
 export const panelGridSchema = z.object({
-  w: z.number().int().min(1).max(48),
-  h: z.number().int().min(1).max(24),
-  x: z.number().int().min(0).max(47),
-  y: z.number().int().min(0),
+  w: z
+    .int()
+    .min(PANEL_GRID_CONSTRAINTS.width.min)
+    .max(PANEL_GRID_CONSTRAINTS.width.max),
+  h: z.number().int().min(PANEL_GRID_CONSTRAINTS.height.min),
+  x: z
+    .int()
+    .min(PANEL_GRID_CONSTRAINTS.x.min)
+    .max(PANEL_GRID_CONSTRAINTS.x.max),
+  y: z.int().min(PANEL_GRID_CONSTRAINTS.y.min),
 });
 
 /**

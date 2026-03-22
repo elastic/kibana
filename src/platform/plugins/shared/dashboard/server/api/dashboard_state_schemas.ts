@@ -18,11 +18,11 @@ import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
 import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
+  PANEL_GRID_CONSTRAINTS,
 } from '../../common/constants';
 
 const MAX_PANELS = 100;
@@ -37,17 +37,24 @@ export const allowUnmappedKeysSchema = schema.boolean({
 });
 
 export const panelGridSchema = schema.object({
-  x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
-  y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
+  x: schema.number({
+    min: PANEL_GRID_CONSTRAINTS.x.min,
+    max: PANEL_GRID_CONSTRAINTS.x.max,
+    meta: { description: 'The x coordinate of the panel in grid units' },
+  }),
+  y: schema.number({
+    min: PANEL_GRID_CONSTRAINTS.y.min,
+    meta: { description: 'The y coordinate of the panel in grid units' },
+  }),
   w: schema.number({
     defaultValue: DEFAULT_PANEL_WIDTH,
-    min: 1,
-    max: DASHBOARD_GRID_COLUMN_COUNT,
+    min: PANEL_GRID_CONSTRAINTS.width.min,
+    max: PANEL_GRID_CONSTRAINTS.width.max,
     meta: { description: 'The width of the panel in grid units' },
   }),
   h: schema.number({
     defaultValue: DEFAULT_PANEL_HEIGHT,
-    min: 1,
+    min: PANEL_GRID_CONSTRAINTS.height.min,
     meta: { description: 'The height of the panel in grid units' },
   }),
 });
