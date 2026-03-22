@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -23,10 +24,12 @@ import {
 import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import spaceSelectorImage from './assets/space_selector.png';
 import { BenefitRow } from './benefit_row';
 import { SolutionSelector } from './solution_selector';
+import { SOLUTION_VIEW_CONFIG } from '../../constants';
 import type { SolutionViewSwitchModalProps, SupportedSolutionView } from '../../types';
 
 export const SolutionViewSwitchModal = ({
@@ -34,6 +37,7 @@ export const SolutionViewSwitchModal = ({
   onSwitch,
   currentSolution,
   isLoading,
+  manageSpacesUrl,
 }: SolutionViewSwitchModalProps) => {
   const [selectedSolution, setSelectedSolution] = useState<SupportedSolutionView>(currentSolution);
   const modalTitleId = useGeneratedHtmlId();
@@ -43,7 +47,8 @@ export const SolutionViewSwitchModal = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.spaces.solutionViewSwitch.modal.title', {
-            defaultMessage: 'Switch your space to dedicated solution view',
+            defaultMessage: 'Get the new {solutionName} navigation',
+            values: { solutionName: SOLUTION_VIEW_CONFIG[selectedSolution].name },
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -53,7 +58,7 @@ export const SolutionViewSwitchModal = ({
             <EuiTitle size="xs">
               <h3>
                 {i18n.translate('xpack.spaces.solutionViewSwitch.modal.benefitsTitle', {
-                  defaultMessage: 'Why switching?',
+                  defaultMessage: 'What changes',
                 })}
               </h3>
             </EuiTitle>
@@ -62,27 +67,40 @@ export const SolutionViewSwitchModal = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <BenefitRow
                 iconType="brush"
-                text={i18n.translate('xpack.spaces.solutionViewSwitch.modal.benefitFocus', {
-                  defaultMessage:
-                    'Stay focused with a faster, fully customizable navigation that shows only what really matters.',
-                })}
+                text={
+                  <FormattedMessage
+                    id="xpack.spaces.solutionViewSwitch.modal.benefitFocus"
+                    defaultMessage="<strong>Focused left navigation</strong>. Only the tools you need for {solutionName}, with no clutter from other solutions."
+                    values={{
+                      strong: (...chunks: React.ReactNode[]) => <strong>{chunks}</strong>,
+                      solutionName: SOLUTION_VIEW_CONFIG[selectedSolution].name,
+                    }}
+                  />
+                }
               />
               <BenefitRow
                 iconType="popper"
-                text={i18n.translate('xpack.spaces.solutionViewSwitch.modal.benefitNewFeatures', {
-                  defaultMessage:
-                    'Benefit from every new feature and improvement we make — they land in the new solution view first.',
-                })}
+                text={
+                  <FormattedMessage
+                    id="xpack.spaces.solutionViewSwitch.modal.benefitClicks"
+                    defaultMessage="<strong>Fewer clicks</strong>. Hover to expand menus and navigate between items without extra clicks."
+                    values={{
+                      strong: (...chunks: React.ReactNode[]) => <strong>{chunks}</strong>,
+                    }}
+                  />
+                }
               />
               <BenefitRow
                 iconType="grid"
-                text={i18n.translate(
-                  'xpack.spaces.solutionViewSwitch.modal.benefitMultipleSpaces',
-                  {
-                    defaultMessage:
-                      'Create as many spaces as you need for the same dataset, each tuned to a specific task.',
-                  }
-                )}
+                text={
+                  <FormattedMessage
+                    id="xpack.spaces.solutionViewSwitch.modal.benefitSpace"
+                    defaultMessage="<strong>More room for your work</strong>. A narrower navigation bar gives more space to the content that matters."
+                    values={{
+                      strong: (...chunks: React.ReactNode[]) => <strong>{chunks}</strong>,
+                    }}
+                  />
+                }
               />
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -94,8 +112,30 @@ export const SolutionViewSwitchModal = ({
           <EuiFlexItem grow={1}>
             <EuiTitle size="xs">
               <h3>
+                {i18n.translate('xpack.spaces.solutionViewSwitch.modal.usersTitle', {
+                  defaultMessage: 'Affects all users',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.spaces.solutionViewSwitch.modal.currentSpaceOnly"
+                defaultMessage="This only affects the current space you're in. Switching will change the navigation for all users in this space."
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="l" />
+
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xs">
+              <h3>
                 {i18n.translate('xpack.spaces.solutionViewSwitch.modal.revertTitle', {
-                  defaultMessage: "What if I don't like it?",
+                  defaultMessage: 'Fully reversible',
                 })}
               </h3>
             </EuiTitle>
@@ -103,10 +143,17 @@ export const SolutionViewSwitchModal = ({
           <EuiFlexItem grow={3}>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiText>
-                {i18n.translate('xpack.spaces.solutionViewSwitch.modal.revertDescription', {
-                  defaultMessage:
-                    "You're never locked in — switch back anytime, create multiple spaces, and change any space type whenever you need.",
-                })}
+                <FormattedMessage
+                  id="xpack.spaces.solutionViewSwitch.modal.revertDescription"
+                  defaultMessage="You can switch back anytime in <manageSpacesLink>Manage spaces</manageSpacesLink>."
+                  values={{
+                    manageSpacesLink: (...chunks: React.ReactNode[]) => (
+                      <EuiLink href={manageSpacesUrl} target="_blank">
+                        {chunks}
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </EuiText>
               <EuiImage
                 src={spaceSelectorImage}
@@ -131,7 +178,7 @@ export const SolutionViewSwitchModal = ({
           iconType="merge"
         >
           {i18n.translate('xpack.spaces.solutionViewSwitch.modal.switchButton', {
-            defaultMessage: 'Switch',
+            defaultMessage: 'Switch now',
           })}
         </EuiButton>
       </EuiModalFooter>
