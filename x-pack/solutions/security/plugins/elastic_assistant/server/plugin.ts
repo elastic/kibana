@@ -48,6 +48,7 @@ import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
+import { registerElasticAssistantWorkflowSteps } from './workflows';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -150,6 +151,15 @@ export class ElasticAssistantPlugin
     }
 
     registerRoutes(router, this.logger, this.config, enableDataGeneratorRoutes);
+
+    // Register workflow steps (AI Investigation)
+    registerElasticAssistantWorkflowSteps({
+      workflowsExtensions: plugins.workflowsExtensions,
+      getActionsClient: async (request: KibanaRequest) =>
+        plugins.actions.getActionsClientWithRequest,
+      config: this.config,
+      logger: this.logger,
+    });
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.

@@ -28,6 +28,7 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsExtensionsPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
   PostAttackDiscoveryGenerateRequestBody,
   DefendInsightsPostRequestBody,
@@ -141,6 +142,7 @@ export interface ElasticAssistantPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsPluginSetup; // For registering AI investigation workflow steps
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;

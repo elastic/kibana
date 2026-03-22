@@ -1,0 +1,203 @@
+# LLM-Powered Alert Investigation - Example Workflows
+#
+# These workflows demonstrate how to use the AI Investigation step
+# with Kibana Workflows for event-driven automated investigations
+
+---
+# Workflow 1: Basic Auto-Investigation
+#
+# Automatically investigates high-risk alerts when created
+name: Auto-Investigate High-Risk Alerts
+description: Runs AI-powered investigation (Triage + MITRE mapping) on CRITICAL and HIGH severity alerts
+trigger: elastic_assistant.alert_created_high_risk
+
+steps:
+  - name: investigate_alert
+    type: elastic_assistant.ai_investigation
+    with:
+      alert_id: "${{ trigger.alert_id }}"
+      alert_index: "${{ trigger.alert_index }}"
+      connector_id: "YOUR_CLAUDE_CONNECTOR_ID"  # Replace with your connector ID
+
+---
+# Workflow 2: Investigate and Create Case
+#
+# Creates a security case and attaches AI investigation results
+name: Auto-Investigation with Case Creation
+description: Creates a case for high-risk alerts and attaches AI investigation results
+trigger: elastic_assistant.alert_created_high_risk
+
+steps:
+  # Step 1: Create case for the alert
+  - name: create_case
+    type: cases.createCase
+    with:
+      title: "High-Risk Alert: ${{ trigger.rule_name }}"
+      description: |
+        Alert ID: ${{ trigger.alert_id }}
+        Severity: ${{ trigger.severity }}
+        Risk Score: ${{ trigger.risk_score }}
+
+        AI investigation in progress...
+      tags:
+        - "auto-created"
+        - "ai-investigation"
+        - "${{ trigger.severity }}"
+
+  # Step 2: Run AI investigation (attached to case)
+  - name: investigate
+    type: elastic_assistant.ai_investigation
+    with:
+      alert_id: "${{ trigger.alert_id }}"
+      alert_index: "${{ trigger.alert_index }}"
+      connector_id: "YOUR_CLAUDE_CONNECTOR_ID"
+      case_id: "${{ steps.create_case.outputs.case.id }}"
+
+  # Step 3: Add investigation results as case comment
+  - name: add_investigation_comment
+    type: cases.addComment
+    with:
+      case_id: "${{ steps.create_case.outputs.case.id }}"
+      comment: "${{ steps.investigate.outputs.investigation_text }}"
+
+---
+# Workflow 3: Conditional Investigation
+#
+# Only runs deep investigation for CRITICAL alerts
+name: Conditional Deep Investigation
+description: Runs full 5-agent investigation for CRITICAL alerts, basic 2-agent for HIGH
+trigger: elastic_assistant.alert_created_high_risk
+
+steps:
+  - name: investigate
+    type: elastic_assistant.ai_investigation
+    with:
+      alert_id: "${{ trigger.alert_id }}"
+      alert_index: "${{ trigger.alert_index }}"
+      connector_id: "YOUR_CLAUDE_CONNECTOR_ID"
+      enabled_agents:
+        triage: true
+        mitre: true
+        cti: "${{ trigger.severity == 'critical' }}"  # Only for CRITICAL
+        investigation: "${{ trigger.severity == 'critical' }}"
+        remediation: "${{ trigger.severity == 'critical' }}"
+
+---
+# Workflow 4: Full Production Workflow
+#
+# Complete workflow with case creation, investigation, and notification
+name: Production Alert Investigation Workflow
+description: Full production workflow with AI investigation, case management, and team notification
+trigger: elastic_assistant.alert_created_high_risk
+
+steps:
+  # Step 1: Create case
+  - name: create_case
+    type: cases.createCase
+    with:
+      title: "🚨 ${{ trigger.severity }} Alert: ${{ trigger.rule_name }}"
+      description: |
+        **Alert Details:**
+        - ID: ${{ trigger.alert_id }}
+        - Severity: ${{ trigger.severity }}
+        - Risk Score: ${{ trigger.risk_score }}
+        - Timestamp: ${{ trigger.timestamp }}
+
+        **Status:** AI investigation in progress...
+      tags:
+        - "ai-investigation"
+        - "${{ trigger.severity }}"
+
+  # Step 2: Run AI investigation (all agents enabled for CRITICAL)
+  - name: ai_investigation
+    type: elastic_assistant.ai_investigation
+    with:
+      alert_id: "${{ trigger.alert_id }}"
+      alert_index: "${{ trigger.alert_index }}"
+      connector_id: "YOUR_CLAUDE_CONNECTOR_ID"
+      case_id: "${{ steps.create_case.outputs.case.id }}"
+      enabled_agents:
+        triage: true
+        mitre: true
+        cti: true
+        investigation: true
+        remediation: "${{ trigger.severity == 'critical' }}"  # Only CRITICAL gets remediation
+
+  # Step 3: Add investigation results to case
+  - name: add_investigation
+    type: cases.addComment
+    with:
+      case_id: "${{ steps.create_case.outputs.case.id }}"
+      comment: "${{ steps.ai_investigation.outputs.investigation_text }}"
+
+  # Step 4: Update case title with classification
+  - name: update_case_with_classification
+    type: cases.updateCase
+    with:
+      case_id: "${{ steps.create_case.outputs.case.id }}"
+      title: "[${{ steps.ai_investigation.outputs.triage.classification }}] ${{ trigger.rule_name }} - ${{ steps.ai_investigation.outputs.triage.attack_type }}"
+
+  # Step 5: Add CRITICAL alert notification (conditional)
+  # Note: This would require a notification workflow step (future)
+  # - name: notify_soc
+  #   type: notification.send
+  #   condition: "${{ trigger.severity == 'critical' }}"
+  #   with:
+  #     channel: "slack"
+  #     message: "CRITICAL alert: ${{ steps.create_case.outputs.case.id }}"
+
+---
+# Workflow 5: Investigation with Response Actions
+#
+# Demonstrates integration with response actions (future capability)
+name: Investigation with Auto-Response
+description: Investigates alert and executes response actions based on AI recommendations
+trigger: elastic_assistant.alert_created_high_risk
+
+steps:
+  - name: investigate
+    type: elastic_assistant.ai_investigation
+    with:
+      alert_id: "${{ trigger.alert_id }}"
+      alert_index: "${{ trigger.alert_index }}"
+      connector_id: "YOUR_CLAUDE_CONNECTOR_ID"
+      enabled_agents:
+        triage: true
+        mitre: true
+        cti: true
+        investigation: true
+        remediation: true  # Enable remediation agent
+
+  # Future: Execute remediation actions
+  # This would require integration with Response Actions
+  # - name: execute_remediation
+  #   type: response_actions.execute
+  #   condition: "${{ steps.investigate.outputs.triage.classification == 'CRITICAL' }}"
+  #   with:
+  #     actions: "${{ steps.investigate.outputs.remediation.recommended_actions }}"
+
+---
+# Configuration Notes:
+#
+# **Connector ID:**
+# - Replace YOUR_CLAUDE_CONNECTOR_ID with your actual Claude connector ID
+# - Get from: Stack Management → Connectors
+# - Recommended model: claude-3-5-sonnet-20241022
+#
+# **Trigger Conditions:**
+# - Trigger fires for CRITICAL or HIGH severity alerts only
+# - Modify trigger definition to change conditions
+#
+# **Agent Configuration:**
+# - enabled_agents controls which agents run
+# - Foundation spike: Only triage + mitre are implemented
+# - Production: cti, investigation, remediation will be added
+#
+# **Conditional Steps:**
+# - Use condition: "${{ expression }}" to conditionally run steps
+# - Example: Only notify for CRITICAL alerts
+#
+# **Variable Interpolation:**
+# - ${{ trigger.* }} - Access trigger event data
+# - ${{ steps.step_name.outputs.* }} - Access previous step outputs
+#

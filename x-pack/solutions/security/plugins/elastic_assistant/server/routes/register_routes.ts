@@ -59,6 +59,7 @@ import { suggestUsersRoute } from './users/suggest';
 import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymization_fields_route';
 import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
+import { postInvestigateAlertRoute } from './alert_investigation/post_investigate_alert';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -158,6 +159,9 @@ export const registerRoutes = (
   getDefendInsightRoute(router);
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
+
+  // Alert Investigation (Foundation Spike)
+  postInvestigateAlertRoute(router, config);
 
   // Test Internal
   updateAnonymizationFieldsRoute(router);

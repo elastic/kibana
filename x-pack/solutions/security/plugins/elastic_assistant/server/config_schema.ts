@@ -10,10 +10,14 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 export interface ConfigSchema {
   elserInferenceId: string;
   responseTimeout: number;
+  llmInvestigationEnabled: boolean;
 }
 export const configSchema = schema.object({
   elserInferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
   responseTimeout: schema.number({
     defaultValue: 10 * 60 * 1000, // 10 minutes
+  }),
+  llmInvestigationEnabled: schema.boolean({
+    defaultValue: false, // Disabled by default (spike/PoC)
   }),
 });
