@@ -30,11 +30,7 @@ import {
   DocumentVersionConflictError,
   EntityNotFoundError,
 } from './errors';
-import {
-  getEntitiesIndexName,
-  getEntitiesIndexNameV2,
-  getEntityUpdatesDataStreamNameV2,
-} from './utils';
+import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
 import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_entity_data_stream';
 import { engineDescriptionRegistry } from './installation/engine_description';
@@ -79,8 +75,6 @@ export class EntityStoreCrudClient {
   }
 
   public async upsertEntitiesBulk(entities: EntityContainer[], force = false) {
-    const entityStoreV2Enabled = await this.dataClient.isEntityStoreV2Enabled();
-
     const docs: Record<EntityType, (BulkOperationContainer | BulkUpdateAction)[]> = {
       [EntityType.user]: [],
       [EntityType.host]: [],
@@ -107,36 +101,22 @@ export class EntityStoreCrudClient {
       docs[type].push({ create: {} }, buildDocumentToUpdate(type, normalizedDocToECS));
     }
 
-    if (entityStoreV2Enabled) {
-      const allOps = Object.values(docs).flat();
-      if (allOps.length > 0) {
-        this.logger.info(
-          `Bulk updating entities (amount: ${allOps.length / 2}) via entity store v2`
-        );
-        await this.esClient.bulk({
-          index: getEntityUpdatesDataStreamNameV2(this.namespace),
-          operations: allOps,
+    const reqs = Object.entries(docs)
+      .filter(([_, ops]) => ops.length > 0)
+      .map(([type, ops]) => {
+        this.logger.info(`Bulk updating entities (amount: ${ops.length / 2}, type: ${type})`);
+        return this.esClient.bulk({
+          index: getEntityUpdatesDataStreamName(type as EntityType, this.namespace),
+          operations: ops,
         });
-      }
-    } else {
-      const reqs = Object.entries(docs)
-        .filter(([_, ops]) => ops.length > 0)
-        .map(([type, ops]) => {
-          this.logger.info(`Bulk updating entities (amount: ${ops.length / 2}, type: ${type})`);
-          return this.esClient.bulk({
-            index: getEntityUpdatesDataStreamName(type as EntityType, this.namespace),
-            operations: ops,
-          });
-        });
-      await Promise.all(reqs);
-    }
+      });
+
+    await Promise.all(reqs);
   }
 
   public async upsertEntity(type: APIEntityType, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
     await this.assertCRUDApiIsEnabled(type);
-
-    const entityStoreV2Enabled = await this.dataClient.isEntityStoreV2Enabled();
 
     const normalizedDocToECS = normalizeToECS(doc);
     const flatProps = getFlattenedObject(normalizedDocToECS);
@@ -155,46 +135,32 @@ export class EntityStoreCrudClient {
       throw new BadCRUDRequestError(`The request doesn't contain any update`);
     }
 
-    const entitiesIndex = entityStoreV2Enabled
-      ? getEntitiesIndexNameV2(type, this.namespace)
-      : getEntitiesIndexName(type, this.namespace);
-    const updateQuery = entityStoreV2Enabled
-      ? {
-          bool: {
-            must: [
-              { term: { 'entity.id': doc.entity.id } },
-              { term: { 'entity.EngineMetadata.Type': type } },
-            ],
-          },
-        }
-      : { term: { 'entity.id': doc.entity.id } };
-
     const updateByQueryResp = await this.esClient.updateByQuery({
-      index: entitiesIndex,
-      query: updateQuery,
+      index: getEntitiesIndexName(type, this.namespace),
+      query: {
+        term: {
+          'entity.id': doc.entity.id,
+        },
+      },
       script: {
         source: painlessUpdate,
         lang: 'painless',
       },
       conflicts: 'proceed',
-      refresh: true,
     });
 
     if (updateByQueryResp.version_conflicts) {
       throw new DocumentVersionConflictError();
     }
 
-    const updatesIndex = entityStoreV2Enabled
-      ? getEntityUpdatesDataStreamNameV2(this.namespace)
-      : getEntityUpdatesDataStreamName(type, this.namespace);
     await this.esClient.create({
       id: uuidv4(),
-      index: updatesIndex,
+      index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
       refresh: 'wait_for',
     });
 
-    if (updateByQueryResp.updated === 0 && !entityStoreV2Enabled) {
+    if (updateByQueryResp.updated === 0) {
       await this.createLatestIndexEntity(type, normalizedDocToECS);
     }
   }
@@ -207,24 +173,13 @@ export class EntityStoreCrudClient {
       throw new BadCRUDRequestError(`The entity ID cannot be blank`);
     }
 
-    const entityStoreV2Enabled = await this.dataClient.isEntityStoreV2Enabled();
-    const entitiesIndex = entityStoreV2Enabled
-      ? getEntitiesIndexNameV2(type, this.namespace)
-      : getEntitiesIndexName(type, this.namespace);
-    const deleteQuery = entityStoreV2Enabled
-      ? {
-          bool: {
-            must: [
-              { term: { 'entity.id': body.id } },
-              { term: { 'entity.EngineMetadata.Type': type } },
-            ],
-          },
-        }
-      : { term: { 'entity.id': body.id } };
-
     const deleteByQueryResp = await this.esClient.deleteByQuery({
-      index: entitiesIndex,
-      query: deleteQuery,
+      index: getEntitiesIndexName(type, this.namespace),
+      query: {
+        term: {
+          'entity.id': body.id,
+        },
+      },
       conflicts: 'proceed',
     });
 

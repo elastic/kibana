@@ -25,6 +25,10 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
@@ -71,17 +75,12 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
   const euidApi = useEntityStoreEuidApi();
-  const buildPreviewQuery =
-    euidApi && typeof euidApi.buildGenericEntityFlyoutPreviewQuery === 'function'
-      ? euidApi.buildGenericEntityFlyoutPreviewQuery
-      : null;
-  const query = buildPreviewQuery ? buildPreviewQuery(identityFields) : { bool: { filter: [] } };
-  const { data } = useVulnerabilitiesPreview({
-    query: query as Parameters<typeof useVulnerabilitiesPreview>[0]['query'],
-    sort: [],
-    enabled: !!buildPreviewQuery,
-    pageSize: 1,
-  });
+  const entityType = inferEntityTypeFromIdentityFields(identityFields);
+  const cspPreviewOptions = useMemo(
+    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi),
+    [euidApi, entityType, identityFields]
+  );
+  const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
   const totalVulnerabilities = useMemo(

@@ -51,8 +51,14 @@ export const useObservedUser = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
+  const identityFieldsForStoreLookup = useMemo(
+    () => (!entityId && userName ? { 'user.name': userName } : undefined),
+    [entityId, userName]
+  );
+
   const entityFromStore = useEntityFromStore({
     entityId,
+    identityFields: identityFieldsForStoreLookup,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });

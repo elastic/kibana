@@ -48,6 +48,7 @@ export const useNavigateToUserDetails = ({
       const left = {
         id: UserDetailsPanelKey,
         params: {
+          userName,
           identityFields,
           isRiskScoreExist,
           scopeId,

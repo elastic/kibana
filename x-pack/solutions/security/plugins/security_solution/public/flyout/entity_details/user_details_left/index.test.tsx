@@ -15,7 +15,7 @@ describe('LeftPanel', () => {
   it('renders', () => {
     const { queryByText } = render(
       <UserDetailsPanel
-        identityFields={{ 'user.name': 'test user' }}
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
@@ -36,7 +36,7 @@ describe('LeftPanel', () => {
   it('does not render the tab if tab is not found', () => {
     const { queryByText } = render(
       <UserDetailsPanel
-        identityFields={{ 'user.name': 'test user' }}
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
@@ -57,7 +57,7 @@ describe('LeftPanel', () => {
   it("doesn't render insights panel when there no misconfiguration findings", () => {
     const { queryByText } = render(
       <UserDetailsPanel
-        identityFields={{ 'user.name': 'test user' }}
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
@@ -79,7 +79,7 @@ describe('LeftPanel', () => {
   it('render insights panel when there are misconfiguration findings', () => {
     const { queryByText } = render(
       <UserDetailsPanel
-        identityFields={{ 'user.name': 'test user' }}
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
         }}

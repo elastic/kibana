@@ -89,8 +89,15 @@ export const UserPanel = ({
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
+  const userStoreIdentityFields = useMemo(
+    () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),
+    [entityIdProp, userName]
+  );
+
   const entityFromStoreResult = useEntityFromStore({
     entityId: entityIdProp,
+    identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
@@ -212,11 +219,15 @@ export const UserPanel = ({
     ? observedUser.entityRecord ?? undefined
     : undefined;
 
+  const entityStoreLookupRequested =
+    Boolean(entityIdProp) ||
+    Boolean(userStoreIdentityFields && Object.keys(userStoreIdentityFields).length > 0);
+
   const noEntityInStore =
     entityStoreV2Enabled &&
-    entityIdProp &&
+    entityStoreLookupRequested &&
     !entityFromStoreResult.isLoading &&
-    !observedUser.entityRecord;
+    !entityFromStoreResult.entityRecord;
 
   const hasUserDetailsData =
     isRiskScoreExist ||

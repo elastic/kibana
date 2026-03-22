@@ -50,5 +50,7 @@ describe('isFlyoutLink', () => {
     expect(isFlyoutLink({ field: 'user.entity.id', scopeId: 'scopeId' })).toBe(false);
     expect(isFlyoutLink({ field: 'user.id', scopeId: 'scopeId' })).toBe(false);
     expect(isFlyoutLink({ field: 'user.email', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'host.id', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'host.hostname', scopeId: 'scopeId' })).toBe(false);
   });
 });

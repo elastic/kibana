@@ -52,7 +52,7 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
+  const [isLoading, { hostDetails, inspect: inspectObservedHost }] = useHostDetails({
     endDate: to,
     startDate: from,
     hostName,

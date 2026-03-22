@@ -50,20 +50,10 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
 });
 
 /** Host EUID fields (entity store priority: host.entity.id > host.id > host.name > host.hostname) */
-const HOST_EUID_FIELDS: EventSummaryField[] = [
-  { id: 'host.entity.id' },
-  { id: 'host.id' },
-  { id: 'host.name' },
-  { id: 'host.hostname' },
-];
+const HOST_EUID_FIELDS: EventSummaryField[] = [{ id: 'host.name' }];
 
-/** User EUID fields (entity store priority: user.entity.id > user.id > user.email > user.name) */
-const USER_EUID_FIELDS: EventSummaryField[] = [
-  { id: 'user.entity.id' },
-  { id: 'user.id' },
-  { id: 'user.email' },
-  { id: 'user.name' },
-];
+/** Shown in highlighted fields; other user identity fields stay on the document for EUID / entity resolution. */
+const USER_EUID_FIELDS: EventSummaryField[] = [{ id: 'user.name' }];
 
 /** Always show these fields */
 export const alwaysDisplayedFields: EventSummaryField[] = [

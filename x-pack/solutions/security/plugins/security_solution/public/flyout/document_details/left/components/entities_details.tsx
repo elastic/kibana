@@ -51,8 +51,6 @@ export const EntitiesDetails: React.FC = () => {
     skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
   });
 
-  console.log('hostEntityFromStore', hostEntityFromStore);
-
   const hostRecord = hostEntityFromStore.entityRecord;
   const hostNameFromStore =
     hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
@@ -114,7 +112,7 @@ export const EntitiesDetails: React.FC = () => {
 
               <HostDetails
                 hostName={resolvedHostName}
-                entityId={hostEntityIdentifiers?.['entity.id']}
+                entityId={hostEntityFromStore.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}
                 hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}

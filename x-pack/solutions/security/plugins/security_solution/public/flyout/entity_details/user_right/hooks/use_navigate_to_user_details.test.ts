@@ -36,7 +36,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 const documentEntityIdentifiers = { 'user.name': 'testUser', 'user.email': 'test@test.com' };
 
 const mockProps = {
-  documentEntityIdentifiers,
+  identityFields: documentEntityIdentifiers,
   userName: 'testUser',
   entityId: 'resolved-entity-id',
   scopeId: 'testScopeId',
@@ -70,7 +70,8 @@ describe('useNavigateToUserDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: UserDetailsPanelKey,
       params: {
-        identityFields: mockProps.documentEntityIdentifiers,
+        userName: mockProps.userName,
+        identityFields: mockProps.identityFields,
         entityId: mockProps.entityId,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
@@ -101,7 +102,8 @@ describe('useNavigateToUserDetails', () => {
       left: {
         id: UserDetailsPanelKey,
         params: {
-          identityFields: mockProps.documentEntityIdentifiers,
+          userName: mockProps.userName,
+          identityFields: mockProps.identityFields,
           entityId: mockProps.entityId,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,

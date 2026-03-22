@@ -110,12 +110,10 @@ interface PrevalenceDetailsRow extends PrevalenceData {
   canUseTimeline: boolean;
   /**
    * Host entity identifiers from the current document (for EUID / entity store).
-   * Used when the prevalence row value matches this document's host so the flyout gets full identifiers.
    */
   documentHostEntityIdentifiers?: IdentityFields | null;
   /**
    * User entity identifiers from the current document (for EUID / entity store).
-   * Used when the prevalence row value matches this document's user so the flyout gets full identifiers.
    */
   documentUserEntityIdentifiers?: IdentityFields | null;
 }
@@ -154,13 +152,10 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
             <EuiFlexItem key={value}>
               <CellActions field={data.field} value={value}>
                 <PreviewLink
+                  field={data.field}
+                  value={value}
                   identityFields={linkIdentityFields}
                   scopeId={data.scopeId}
-                  preferredField={
-                    data.field === 'host.name' || data.field === 'user.name'
-                      ? data.field
-                      : undefined
-                  }
                   data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
                 >
                   <EuiText size="xs">{value}</EuiText>
@@ -475,8 +470,8 @@ export const PrevalenceDetails: React.FC = () => {
         : null,
     [dataAsNestedObject, euidApi?.euid]
   );
+
   // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns.
-  // When a row value matches the current document's host/user, pass full document entity identifiers (EUID) to the flyout.
   const items = useMemo(
     () =>
       data.map((item) => ({

@@ -10,8 +10,6 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy/securit
 import { getEcsField } from '../../document_details/right/components/table_field_name_cell';
 import {
   HOST_ENTITY_ID_FIELD_NAME,
-  HOST_HOSTNAME_FIELD_NAME,
-  HOST_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -66,8 +64,6 @@ interface GetFlyoutParams {
 
 const FLYOUT_FIELDS = [
   HOST_NAME_FIELD_NAME,
-  HOST_HOSTNAME_FIELD_NAME,
-  HOST_ID_FIELD_NAME,
   HOST_ENTITY_ID_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -136,8 +132,6 @@ export const getRightPanelParams = ({
 
   switch (field) {
     case HOST_NAME_FIELD_NAME:
-    case HOST_HOSTNAME_FIELD_NAME:
-    case HOST_ID_FIELD_NAME:
     case HOST_ENTITY_ID_FIELD_NAME:
       return buildHostFlyoutParams({ value, scopeId, entityId, preview: false });
     case USER_NAME_FIELD_NAME:
@@ -191,8 +185,6 @@ export const getPreviewPanelParams = ({
 
   switch (field) {
     case HOST_NAME_FIELD_NAME:
-    case HOST_HOSTNAME_FIELD_NAME:
-    case HOST_ID_FIELD_NAME:
     case HOST_ENTITY_ID_FIELD_NAME:
       return buildHostFlyoutParams({ value, scopeId, entityId, preview: true });
     case USER_NAME_FIELD_NAME:

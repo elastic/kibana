@@ -6,14 +6,8 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
-import type { GetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
-import {
-  getUserEntityIdentifiers,
-  getHostEntityIdentifiers,
-} from '../../document_details/shared/utils';
 import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
@@ -39,64 +33,30 @@ interface AttackEntitiesListsAggregations {
   unique_hosts_by_euid?: { buckets: TermsBucketWithTopHits[] };
 }
 
-/**
- * Builds a getFieldsData-like function from a raw _source document so we can reuse
- * getUserEntityIdentifiers / getHostEntityIdentifiers with aggregation hit _source.
- */
-function getFieldsDataFromSource(source: Record<string, unknown>): GetFieldsData {
-  return (field: string): string | string[] | null | undefined => {
-    const parts = field.split('.');
-    let v: unknown = source;
-    for (const p of parts) {
-      v =
-        v != null && typeof v === 'object' && p in v
-          ? (v as Record<string, unknown>)[p]
-          : undefined;
-    }
-    if (v !== undefined) return v as string | string[] | null | undefined;
-    const flat = source[field];
-    return flat !== undefined ? (flat as string | string[] | null | undefined) : undefined;
-  };
-}
-
 function extractEntityIdentifiersFromBuckets(
+  euidApi: EntityStoreEuidApi | undefined,
   buckets: TermsBucketWithTopHits[] | undefined,
-  extractIdentifiers: (source: Record<string, unknown>) => EntityIdentifiers | null
-): EntityIdentifiers[] {
+  entityType: 'user' | 'host'
+) {
   if (!buckets || !Array.isArray(buckets)) {
     return [];
   }
-  const result: EntityIdentifiers[] = [];
+  const result: Record<string, string>[] = [];
   for (const b of buckets) {
     const hit = b.sample?.hits?.hits?.[0];
     const source = hit?._source;
     if (source && typeof source === 'object' && !Array.isArray(source)) {
-      const identifiers = extractIdentifiers(source as Record<string, unknown>);
-      if (identifiers && Object.keys(identifiers).length > 0) {
-        result.push(identifiers);
+      const identityFields = euidApi?.euid?.getEntityIdentifiersFromDocument(entityType, source);
+      if (identityFields != null) {
+        result.push(identityFields);
       }
     }
   }
   return result;
 }
-
-function extractUserIdentifiersFromSource(
-  source: Record<string, unknown>
-): EntityIdentifiers | null {
-  const getFieldsData = getFieldsDataFromSource(source);
-  return getUserEntityIdentifiers(source as unknown as Ecs, getFieldsData);
-}
-
-function extractHostIdentifiersFromSource(
-  source: Record<string, unknown>
-): EntityIdentifiers | null {
-  const getFieldsData = getFieldsDataFromSource(source);
-  return getHostEntityIdentifiers(source as unknown as Ecs, getFieldsData);
-}
-
 export interface UseAttackEntitiesListsResult {
-  userEntityIdentifiers: EntityIdentifiers[];
-  hostEntityIdentifiers: EntityIdentifiers[];
+  userEntityIdentifiers: Record<string, string>[];
+  hostEntityIdentifiers: Record<string, string>[];
   loading: boolean;
   error: boolean;
 }
@@ -160,12 +120,14 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
 
   return useMemo(() => {
     const userEntityIdentifiers = extractEntityIdentifiersFromBuckets(
+      euidApi ?? undefined,
       data?.aggregations?.unique_users_by_euid?.buckets,
-      extractUserIdentifiersFromSource
+      'user'
     );
     const hostEntityIdentifiers = extractEntityIdentifiersFromBuckets(
+      euidApi ?? undefined,
       data?.aggregations?.unique_hosts_by_euid?.buckets,
-      extractHostIdentifiersFromSource
+      'host'
     );
     const error = !loading && data === undefined && originalAlertIds.length > 0;
 
@@ -175,5 +137,5 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
       loading,
       error,
     };
-  }, [data, loading, originalAlertIds.length]);
+  }, [data, loading, originalAlertIds.length, euidApi]);
 };

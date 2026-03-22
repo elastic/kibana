@@ -81,10 +81,35 @@ describe('<HighlightedFieldsCell />', () => {
       id: HostPreviewPanelKey,
       params: {
         contextID: SCOPE_ID,
-        identityFields: { 'host.name': 'test host' },
         hostName: 'test host',
         scopeId: SCOPE_ID,
         banner: HOST_PREVIEW_BANNER,
+        entityId: undefined,
+      },
+    });
+  });
+
+  it('should pass entityId to host preview when provided (document identity / entity resolution)', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell
+          values={['test host']}
+          field="host.name"
+          scopeId={SCOPE_ID}
+          showPreview
+          entityId="euid-from-highlighted-fields"
+        />
+      </TestProviders>
+    );
+    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: HostPreviewPanelKey,
+      params: {
+        contextID: SCOPE_ID,
+        hostName: 'test host',
+        scopeId: SCOPE_ID,
+        banner: HOST_PREVIEW_BANNER,
+        entityId: 'euid-from-highlighted-fields',
       },
     });
   });
@@ -98,10 +123,10 @@ describe('<HighlightedFieldsCell />', () => {
       id: UserPreviewPanelKey,
       params: {
         contextID: SCOPE_ID,
-        identityFields: { 'user.name': 'test user' },
         userName: 'test user',
         scopeId: SCOPE_ID,
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });

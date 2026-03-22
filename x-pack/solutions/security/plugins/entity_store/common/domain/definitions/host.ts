@@ -73,7 +73,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'host.network.ingress.packets', mapping: { type: 'long' } }),
     newestValue({ source: 'host.uptime', mapping: { type: 'long' } }),
     newestValue({ source: 'host.pid_ns_ino' }),
-    newestValue({ source: 'host.os.family' }),
+    newestValue({ source: 'host.os.family', mapping: { type: 'keyword' } }),
     newestValue({ source: 'host.os.full' }),
     newestValue({ source: 'host.os.kernel' }),
     newestValue({ source: 'host.os.platform' }),

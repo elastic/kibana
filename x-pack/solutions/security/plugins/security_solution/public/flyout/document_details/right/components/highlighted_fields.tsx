@@ -11,7 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -51,10 +53,8 @@ export interface HighlightedFieldsTableRow {
      * when clicking on "Source event" id
      */
     ancestorsIndexName?: string;
-    /**
-     * Entity identifiers (built from EUID logic) for host.name and user.name links
-     */
-    identityFields?: IdentityFields | null;
+    entityId?: string;
+    entityType?: string;
   };
 }
 
@@ -88,7 +88,8 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       isPreview: boolean;
       showCellActions: boolean;
       ancestorsIndexName?: string;
-      identityFields?: IdentityFields | null;
+      entityId?: string;
+      entityType?: string;
     }) => (
       <>
         {description.showCellActions ? (
@@ -100,7 +101,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               scopeId={description.scopeId}
               showPreview={true}
               ancestorsIndexName={description.ancestorsIndexName}
-              identityFields={description.identityFields}
+              entityId={description.entityId}
             />
           </CellActions>
         ) : (
@@ -108,7 +109,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
             values={description.values}
             field={description.field}
             originalField={description.originalField}
-            identityFields={description.identityFields}
+            entityId={description.entityId}
           />
         )}
       </>
@@ -167,6 +168,7 @@ export const HighlightedFields = memo(
       investigationFields,
     });
 
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
     const euidApi = useEntityStoreEuidApi();
     const hostDocumentIdentityFields = useMemo(
       () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
@@ -176,6 +178,51 @@ export const HighlightedFields = memo(
       () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
       [euidApi?.euid, hit.flattened]
     );
+    const isHostEntity = hostDocumentIdentityFields != null;
+    const hostEuidFromDocument = useMemo(
+      () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
+      [euidApi?.euid, hit.flattened]
+    );
+    const userEuidFromDocument = useMemo(
+      () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
+      [euidApi?.euid, hit.flattened]
+    );
+    const hostEntityFromStore = useEntityFromStore({
+      entityId: hostEuidFromDocument,
+      identityFields: hostDocumentIdentityFields ?? undefined,
+      entityType: 'host',
+      skip: !entityStoreV2Enabled || !isHostEntity,
+    });
+    const userEntityFromStore = useEntityFromStore({
+      entityId: userEuidFromDocument,
+      identityFields: userDocumentIdentityFields ?? undefined,
+      entityType: 'user',
+      skip: !entityStoreV2Enabled || isHostEntity,
+    });
+    const entityId = useMemo(() => {
+      if (entityStoreV2Enabled) {
+        if (isHostEntity) {
+          return (
+            hostEntityFromStore.entityRecord?.entity?.id ??
+            hostDocumentIdentityFields?.['entity.id']
+          );
+        }
+        return (
+          userEntityFromStore.entityRecord?.entity?.id ?? userDocumentIdentityFields?.['entity.id']
+        );
+      }
+      if (isHostEntity) {
+        return hostDocumentIdentityFields?.['entity.id'];
+      }
+      return userDocumentIdentityFields?.['entity.id'];
+    }, [
+      entityStoreV2Enabled,
+      isHostEntity,
+      hostDocumentIdentityFields,
+      userDocumentIdentityFields,
+      hostEntityFromStore.entityRecord,
+      userEntityFromStore.entityRecord,
+    ]);
 
     const items = useMemo(
       () =>
@@ -184,16 +231,9 @@ export const HighlightedFields = memo(
           scopeId,
           showCellActions,
           ancestorsIndexName,
-          { hostDocumentIdentityFields, userDocumentIdentityFields }
+          entityId
         ),
-      [
-        highlightedFields,
-        scopeId,
-        showCellActions,
-        ancestorsIndexName,
-        hostDocumentIdentityFields,
-        userDocumentIdentityFields,
-      ]
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName, entityId]
     );
 
     return (

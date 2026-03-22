@@ -13,7 +13,11 @@ import {
   buildMisconfigurationsFindingsQuery,
   getMisconfigurationAggregationCount,
 } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
-import { euid, type EntityType } from '@kbn/entity-store/public';
+import {
+  type EntityStoreEuidApi,
+  useEntityStoreEuidApi,
+  type EntityType,
+} from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { showErrorToast } from '../..';
 import type {
@@ -27,12 +31,15 @@ import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_stat
 /** Try entity types in order: enriched `entity.id` first, then user / host / service identity rules. */
 const EUID_FROM_DOCUMENT_ENTITY_ORDER: EntityType[] = ['generic', 'user', 'host', 'service'];
 
-const getEuidFromFindingDocument = (source: unknown): string | undefined => {
+const getEuidFromFindingDocument = (
+  source: unknown,
+  euidApi: EntityStoreEuidApi | undefined
+): string | undefined => {
   if (source === null || source === undefined || typeof source !== 'object') {
     return undefined;
   }
   for (const entityType of EUID_FROM_DOCUMENT_ENTITY_ORDER) {
-    const value = euid.getEuidFromObject(entityType, source);
+    const value = euidApi?.euid.getEuidFromObject(entityType, source);
     if (value !== undefined && value.length > 0) {
       return value;
     }
@@ -61,7 +68,7 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
     notifications: { toasts },
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
-
+  const euidApi = useEntityStoreEuidApi();
   return useQuery(
     ['csp_misconfiguration_findings', { params: options }, rulesStates],
     async () => {
@@ -88,7 +95,7 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
             resource: source?.resource,
             [MISCONFIGURATION.RULE_NAME]: source?.rule?.name,
             [MISCONFIGURATION.RESULT_EVALUATION]: source?.result?.evaluation,
-            entityId: getEuidFromFindingDocument(source),
+            entityId: getEuidFromFindingDocument(source, euidApi ?? undefined),
           };
         }),
       };

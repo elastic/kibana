@@ -20,8 +20,9 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  userName: string;
-  identityFields: IdentityFields;
+  /** Display / filter user name; may be omitted in serialized flyout state — falls back to `identityFields['user.name']`. */
+  userName?: string;
+  identityFields?: IdentityFields;
   /** Canonical Entity Store v2 id (`entity.id`) when known. */
   entityId?: string;
   path?: PanelPath;
@@ -47,9 +48,11 @@ export const UserDetailsPanel = ({
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser();
 
+  const resolvedUserName = userName ?? identityFields?.['user.name'] ?? '';
+
   const tabs = useTabs(
     managedUser.data,
-    userName,
+    resolvedUserName,
     isRiskScoreExist,
     scopeId,
     hasMisconfigurationFindings,
@@ -62,6 +65,7 @@ export const UserDetailsPanel = ({
     isRiskScoreExist,
     identityFields,
     entityId,
+    resolvedUserName,
     tabs,
     path,
     scopeId,
@@ -87,8 +91,9 @@ export const UserDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  identityFields: IdentityFields,
+  identityFields: IdentityFields | undefined,
   entityId: string | undefined,
+  resolvedUserName: string,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
   scopeId: string,
@@ -108,6 +113,7 @@ const useSelectedTab = (
     openLeftPanel({
       id: UserDetailsPanelKey,
       params: {
+        userName: resolvedUserName,
         identityFields,
         entityId,
         isRiskScoreExist,

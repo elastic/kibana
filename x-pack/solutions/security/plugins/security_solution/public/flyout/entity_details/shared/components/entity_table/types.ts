@@ -51,4 +51,8 @@ export type EntityTableRows<T extends BasicEntityData> = Array<EntityTableRow<T>
 
 export interface BasicEntityData {
   isLoading: boolean;
+  /**
+   * Canonical Entity Store id (`entity.id`) for preview links and flyout context when available.
+   */
+  entityId?: string;
 }

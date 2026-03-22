@@ -31,7 +31,6 @@ describe('AssetCriticalitySelector', () => {
         entity={{
           type: EntityType.host,
           name: 'My test Host',
-          identifiers: { 'host.name': 'My test Host' },
         }}
       />,
       {
@@ -49,7 +48,6 @@ describe('AssetCriticalitySelector', () => {
         entity={{
           type: EntityType.host,
           name: 'My test Host',
-          identifiers: { 'host.name': 'My test Host' },
         }}
         compressed
       />,

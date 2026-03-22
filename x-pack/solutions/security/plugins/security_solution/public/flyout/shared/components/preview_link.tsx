@@ -8,26 +8,35 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../common/lib/kibana';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { getPreviewPanelParams } from '../utils/link_utils';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
 import {
-  HOST_ENTITY_ID_FIELD_NAME,
-  HOST_HOSTNAME_FIELD_NAME,
-  HOST_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 
 interface PreviewLinkProps {
   /**
-   * Entity identifiers - key-value pairs of field names and their values
+   * Entity id to use for the preview panel
    */
-  identityFields: IdentityFields;
+  entityId?: string;
+  /**
+   * When set (e.g. from document EUID), used with Entity Store v2 to resolve `entity.id` for host/user previews.
+   */
+  identityFields?: IdentityFields;
+  /**
+   * Field name
+   */
+  field: string;
+  /**
+   * Value to display in EuiLink
+   */
+  value: string;
   /**
    * Scope id to use for the preview panel
    */
@@ -49,12 +58,6 @@ interface PreviewLinkProps {
    * when clicking on "Source event" id
    */
   ancestorsIndexName?: string;
-  /**
-   * When identityFields contain both host and user fields (e.g. from document context),
-   * use this to force which entity flyout (host vs user) to open. E.g. in Prevalence tab
-   * user.name row should open user flyout even when identifiers include host fields.
-   */
-  preferredField?: 'host.name' | 'user.name';
 }
 
 /**
@@ -62,78 +65,67 @@ interface PreviewLinkProps {
  * If the field is not previewable, the link will not be rendered
  */
 export const PreviewLink: FC<PreviewLinkProps> = ({
+  entityId,
   identityFields,
+  field,
+  value,
   scopeId,
   ruleId,
   children,
   ancestorsIndexName,
-  preferredField,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
-  // Extract primary field and value from identityFields.
-  // When preferredField is set (e.g. from Prevalence tab), use it so the correct entity flyout opens
-  // even when identityFields include both host and user fields.
-  const primaryField = useMemo(() => {
-    if (
-      preferredField &&
-      (preferredField === 'host.name' || preferredField === 'user.name') &&
-      identityFields[preferredField]
-    ) {
-      return preferredField;
-    }
-    if (identityFields[HOST_NAME_FIELD_NAME]) return HOST_NAME_FIELD_NAME;
-    if (identityFields[HOST_HOSTNAME_FIELD_NAME]) return HOST_HOSTNAME_FIELD_NAME;
-    if (identityFields[HOST_ID_FIELD_NAME]) return HOST_ID_FIELD_NAME;
-    if (identityFields[HOST_ENTITY_ID_FIELD_NAME]) return HOST_ENTITY_ID_FIELD_NAME;
-    if (identityFields[USER_NAME_FIELD_NAME]) return USER_NAME_FIELD_NAME;
-    if (identityFields['user.id']) return 'user.id';
-    return Object.keys(identityFields)[0] ?? '';
-  }, [identityFields, preferredField]);
+  const resolutionIdentifiers: IdentityFields = useMemo(
+    () => identityFields ?? { [field]: value },
+    [identityFields, field, value]
+  );
 
-  const primaryValue = useMemo(() => {
-    return primaryField ? identityFields[primaryField] : '';
-  }, [identityFields, primaryField]);
-
-  const isHostOrUser =
-    primaryField.startsWith('host.') || primaryField.startsWith('user.');
-  const entityType = primaryField.startsWith('host.') ? 'host' : 'user';
+  const isHostOrUser = field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME;
+  const entityType = field === HOST_NAME_FIELD_NAME ? 'host' : 'user';
 
   const docEntityId =
-    entityType === 'host' ? identityFields['host.entity.id'] : identityFields['user.entity.id'];
+    entityType === 'host'
+      ? resolutionIdentifiers['host.entity.id']
+      : resolutionIdentifiers['user.entity.id'];
 
   const { entityRecord } = useEntityFromStore({
     entityId: docEntityId,
-    identityFields,
+    identityFields: resolutionIdentifiers,
     entityType,
-    skip: !entityStoreV2Enabled || !isHostOrUser || Object.keys(identityFields).length === 0,
+    skip: !entityStoreV2Enabled || !isHostOrUser || Object.keys(resolutionIdentifiers).length === 0,
   });
 
   const resolvedEntityId = entityRecord?.entity?.id;
+  const previewEntityId = useMemo(() => {
+    const candidate = entityId ?? resolvedEntityId;
+    if (!candidate) {
+      return undefined;
+    }
+    // Avoid leaking a host id into user preview params (or vice versa), e.g. stale flyout props.
+    if (field === USER_NAME_FIELD_NAME && candidate.startsWith('host:')) {
+      return resolvedEntityId?.startsWith('user:') ? resolvedEntityId : undefined;
+    }
+    if (field === HOST_NAME_FIELD_NAME && candidate.startsWith('user:')) {
+      return resolvedEntityId?.startsWith('host:') ? resolvedEntityId : undefined;
+    }
+    return candidate;
+  }, [entityId, field, resolvedEntityId]);
 
   const previewParams = useMemo(
     () =>
       getPreviewPanelParams({
-        identityFields,
-        entityId: resolvedEntityId,
-        field: primaryField,
-        value: primaryValue,
+        value,
+        field,
+        entityId: previewEntityId,
         scopeId,
         ruleId,
         ancestorsIndexName,
       }),
-    [
-      identityFields,
-      resolvedEntityId,
-      primaryField,
-      primaryValue,
-      scopeId,
-      ruleId,
-      ancestorsIndexName,
-    ]
+    [value, field, scopeId, ruleId, ancestorsIndexName, previewEntityId]
   );
 
   const onClick = useCallback(() => {
@@ -151,9 +143,9 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 
   return previewParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? primaryValue}
+      {children ?? value}
     </EuiLink>
   ) : (
-    <>{children ?? primaryValue}</>
+    <>{children ?? value}</>
   );
 };

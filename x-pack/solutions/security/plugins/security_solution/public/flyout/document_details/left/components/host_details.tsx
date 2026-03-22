@@ -31,7 +31,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -73,7 +73,7 @@ import {
   HOST_IP_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { PreviewLink } from '../../../shared/components/preview_link';
@@ -201,7 +201,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     });
   }, [openPreviewPanel, hostName, entityId, scopeId, telemetry]);
 
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const hostIdentityFieldsForStore = euidApi?.euid.getEntityIdentifiersFromDocument(
@@ -294,7 +294,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
 
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
-    entityId: observedHost.entityRecord?.entity?.id,
+    entityId,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -312,7 +312,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     refetch: refetchRelatedUsers,
   } = useHostRelatedUsers({
     hostName,
-    entityId: observedHost.entityRecord?.entity?.id,
+    entityId,
     indexNames: relatedUsersIndexNames,
     from: timestamp, // related users are users who were successfully authenticated onto this host AFTER alert time
     skip:
@@ -334,7 +334,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           <EuiText grow={false} size="xs">
             <CellActions field={USER_NAME_FIELD_NAME} value={user}>
               <PreviewLink
-                identityFields={{ [USER_NAME_FIELD_NAME]: user }}
+                field={USER_NAME_FIELD_NAME}
+                value={user}
+                entityId={entityId}
                 scopeId={scopeId}
                 data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
               />
@@ -361,7 +363,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
                   getEmptyTagValue()
                 ) : (
                   <PreviewLink
-                    identityFields={{ 'host.name': hostName, [HOST_IP_FIELD_NAME]: ip }}
+                    field="host.ip"
+                    value={ip}
                     scopeId={scopeId}
                     data-test-subj={HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID}
                   />
@@ -390,7 +393,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           ]
         : []),
     ],
-    [hostName, isEntityAnalyticsAuthorized, scopeId]
+    [isEntityAnalyticsAuthorized, scopeId, entityId]
   );
 
   const relatedUsersCount = useMemo(

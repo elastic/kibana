@@ -61,10 +61,23 @@ jest.mock('../../../../common/lib/kibana', () => {
         serverless: mockServerless,
       },
     }),
+    useUiSetting: () => false,
   };
 });
 
 jest.mock('../../../../flyout_v2/document/hooks/use_prevalence');
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -196,10 +209,10 @@ describe('PrevalenceDetails', () => {
       id: HostPreviewPanelKey,
       params: {
         contextID: panelContextValue.scopeId,
-        identityFields: { 'host.name': 'test host' },
         hostName: 'test host',
         scopeId: panelContextValue.scopeId,
         banner: HOST_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
 
@@ -208,10 +221,10 @@ describe('PrevalenceDetails', () => {
       id: UserPreviewPanelKey,
       params: {
         contextID: panelContextValue.scopeId,
-        identityFields: { 'user.name': 'test user' },
         userName: 'test user',
         scopeId: panelContextValue.scopeId,
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });

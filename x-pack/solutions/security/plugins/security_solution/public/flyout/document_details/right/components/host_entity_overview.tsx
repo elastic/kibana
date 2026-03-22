@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import get from 'lodash/get';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import {
@@ -24,17 +25,19 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import type { ESQuery } from '../../../../../common/typed_json';
+import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
+import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import {
   FirstLastSeen,
@@ -73,7 +76,6 @@ import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const HOST_ICON = 'storage';
@@ -97,6 +99,10 @@ const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
 
 export interface HostEntityOverviewProps {
   /**
+   * Host name
+   */
+  hostName: string;
+  /**
    * Entity identifiers for looking up host related ip addresses and risk level
    */
   identityFields: Record<string, string>;
@@ -119,13 +125,14 @@ export const HOST_PREVIEW_BANNER = {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
+  hostName,
   identityFields,
   entityRecord: entityRecordProp,
 }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -143,32 +150,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     [from, to]
   );
 
-  const hostName =
-    identityFields['host.name'] ||
-    identityFields['host.hostname'] ||
-    identityFields['host.id'] ||
-    identityFields['host.entity.id'] ||
-    Object.values(identityFields).find((v) => typeof v === 'string' && v.trim() !== '');
-
-  const hostLastSeenField = identityFields['host.name']
-    ? 'host.name'
-    : identityFields['host.hostname']
-      ? 'host.hostname'
-      : identityFields['host.id']
-        ? 'host.id'
-        : identityFields['host.entity.id']
-          ? 'host.entity.id'
-          : 'host.name';
-
   const filterQuery = useMemo(
-    () =>
-      identityFields['host.name']
-        ? (buildHostNamesFilter([identityFields['host.name']]) as ESQuery)
-        : undefined,
-    [identityFields]
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
   );
 
-  const storeHostEntityId = identityFields['host.entity.id'];
+  const storeHostEntityId = identityFields['entity.id'];
 
   const entityFromStore = useEntityFromStore({
     entityId: storeHostEntityId,
@@ -226,11 +213,14 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
   const hostOSFamilyValue = useMemo(() => {
+    if (entityStoreV2Enabled && entityRecord != null) {
+      return getField(get(entityRecord, 'host.os.family'));
+    }
     if (entityStoreV2Enabled) {
-      return undefined;
+      return null;
     }
     return getField(getOr([], 'host.os.family', hostDetails));
-  }, [entityStoreV2Enabled, hostDetails]);
+  }, [entityRecord, entityStoreV2Enabled, hostDetails]);
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
@@ -252,13 +242,13 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       {
         title: LAST_SEEN,
         description:
-          hostName != null ? (
+          hostName != null && hostName !== '' ? (
             entityStoreV2Enabled && entityFromStore.lastSeen ? (
               <PreferenceFormattedDateFromPrimitive value={entityFromStore.lastSeen} />
             ) : !entityStoreV2Enabled ? (
               <FirstLastSeen
                 indexPatterns={selectedPatterns}
-                field={hostLastSeenField}
+                field={HOST_NAME_FIELD_NAME}
                 value={hostName}
                 type={FirstLastSeenType.LAST_SEEN}
               />
@@ -270,7 +260,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           ),
       },
     ],
-    [hostName, hostLastSeenField, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
+    [hostName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -324,6 +314,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
 
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
+    entityId: entityRecord?.entity?.id,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -347,9 +338,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              identityFields={identityFields}
+              field="host.name"
+              value={hostName}
+              entityId={entityRecord?.entity?.id}
               scopeId={scopeId}
-              preferredField="host.name"
               data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
             >
               <EuiText

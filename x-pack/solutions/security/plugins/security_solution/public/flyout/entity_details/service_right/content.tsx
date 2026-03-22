@@ -68,7 +68,7 @@ export const ServicePanelContent = ({
         onChange={onAssetCriticalityChange}
       />
       <ObservedEntity
-        observedData={observedService}
+        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}

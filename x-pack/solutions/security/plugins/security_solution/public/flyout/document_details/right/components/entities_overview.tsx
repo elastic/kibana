@@ -8,57 +8,63 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
+import { getField } from '../../shared/utils';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { identityFieldsHaveUsableValues, type IdentityFields } from '../../shared/utils';
+import { type IdentityFields } from '../../shared/utils';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
+  const { dataAsNestedObject, isPreviewMode, getFieldsData } = useDocumentDetailsContext();
+  const hostName = getField(getFieldsData('host.name'));
+  const userName = getField(getFieldsData('user.name'));
+
   const euidApi = useEntityStoreEuidApi();
   const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
     'host',
     dataAsNestedObject
   ) as IdentityFields;
+
+  const hostEntitId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
+
   const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
     'user',
     dataAsNestedObject
   ) as IdentityFields;
+  const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
 
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
-  const userIdentityUsable = identityFieldsHaveUsableValues(userEntityIdentifiers);
-  const hostIdentityUsable = identityFieldsHaveUsableValues(hostEntityIdentifiers);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const userEntityFromStore = useEntityFromStore({
-    entityId: userEntityIdentifiers?.['user.entity.id'],
+    entityId: userEntityId,
     identityFields: userEntityIdentifiers ?? undefined,
     entityType: 'user',
-    skip: !userIdentityUsable || !entityStoreV2Enabled,
+    skip: entityStoreV2Enabled,
   });
   const hostEntityFromStore = useEntityFromStore({
-    entityId: hostEntityIdentifiers?.['host.entity.id'],
+    entityId: hostEntitId,
     identityFields: hostEntityIdentifiers ?? undefined,
     entityType: 'host',
-    skip: !hostIdentityUsable || !entityStoreV2Enabled,
+    skip: !entityStoreV2Enabled,
   });
 
   const showUserOverview =
-    userIdentityUsable &&
-    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+    (!entityStoreV2Enabled && userName != null) ||
+    (entityStoreV2Enabled && userEntityFromStore.entityRecord != null);
   const showHostOverview =
-    hostIdentityUsable &&
-    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+    (!entityStoreV2Enabled && hostName != null) ||
+    (entityStoreV2Enabled && hostEntityFromStore.entityRecord != null);
   const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
@@ -100,6 +106,7 @@ export const EntitiesOverview: React.FC = () => {
               <>
                 <EuiFlexItem>
                   <UserEntityOverview
+                    userName={userName ?? ''}
                     identityFields={userEntityIdentifiers}
                     entityRecord={
                       entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined
@@ -112,6 +119,7 @@ export const EntitiesOverview: React.FC = () => {
             {showHostOverview && hostEntityIdentifiers && (
               <EuiFlexItem>
                 <HostEntityOverview
+                  hostName={hostName ?? ''}
                   identityFields={hostEntityIdentifiers}
                   entityRecord={entityStoreV2Enabled ? hostEntityFromStore.entityRecord : undefined}
                 />

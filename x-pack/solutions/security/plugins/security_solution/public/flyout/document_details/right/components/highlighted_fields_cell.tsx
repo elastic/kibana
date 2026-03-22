@@ -20,13 +20,16 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import type { IdentityFields } from '../../shared/utils';
 import { isFlyoutLink } from '../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../shared/components/preview_link';
 
 const EMPTY_ARRAY: string[] = [];
 
 export interface HighlightedFieldsCellProps {
+  /**
+   * Entity id to use for the preview panel
+   */
+  entityId?: string;
   /**
    * Highlighted field's name used to know what component to display
    */
@@ -55,10 +58,6 @@ export interface HighlightedFieldsCellProps {
    */
   ancestorsIndexName?: string;
   /**
-   * Entity identifiers built from EUID logic (for host.name and user.name links)
-   */
-  identityFields?: IdentityFields | null;
-  /**
    * Caps the amount of values displayed in the cell.
    * If the limit is reached a "show more" button is being rendered
    */
@@ -75,8 +74,8 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   scopeId = '',
   showPreview = false,
   ancestorsIndexName,
-  identityFields,
   displayValuesLimit = 2,
+  entityId,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -130,10 +129,9 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
       <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
         {showPreview && isFlyoutLink({ field, scopeId }) ? (
           <PreviewLink
-            identityFields={{
-              ...(identityFields ?? {}),
-              [field]: value,
-            }}
+            field={field}
+            value={value}
+            entityId={entityId}
             scopeId={scopeId}
             data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
             ancestorsIndexName={ancestorsIndexName}
@@ -151,7 +149,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         )}
       </div>
     ),
-    [agentType, ancestorsIndexName, identityFields, field, scopeId, showPreview]
+    [agentType, ancestorsIndexName, field, scopeId, showPreview, entityId]
   );
 
   if (values === null) return null;

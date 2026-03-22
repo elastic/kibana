@@ -33,7 +33,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 const mockProps = {
-  identityFields: { 'service.name': 'testService' },
+  serviceName: 'testService',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
 };
@@ -61,7 +61,7 @@ describe('useNavigateToServiceDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: ServiceDetailsPanelKey,
       params: {
-        identityFields: mockProps.identityFields,
+        serviceName: mockProps.serviceName,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },

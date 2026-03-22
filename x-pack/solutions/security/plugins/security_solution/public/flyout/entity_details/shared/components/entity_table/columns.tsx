@@ -57,7 +57,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       if (field) {
         const showPreviewLink = values && isFlyoutLink({ field, scopeId });
         const renderPreviewLink = (value: string) => (
-          <PreviewLink identityFields={{ [field]: value }} scopeId={scopeId} />
+          <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
         );
         return (
           <DefaultFieldRenderer

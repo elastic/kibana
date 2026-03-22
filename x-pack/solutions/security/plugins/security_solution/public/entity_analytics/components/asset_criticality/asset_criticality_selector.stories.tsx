@@ -50,7 +50,6 @@ export const Default: StoryFn = () => {
             entity={{
               type: EntityType.host,
               name: 'My test Host',
-              identifiers: { 'host.name': 'My test Host' },
             }}
           />
         </div>
@@ -69,7 +68,6 @@ export const Compressed: StoryFn = () => {
             entity={{
               type: EntityType.host as const,
               name: 'My test Host',
-              identifiers: { 'host.name': 'My test Host' },
             }}
             compressed
           />
@@ -89,7 +87,6 @@ export const Loading: StoryFn = () => {
             entity={{
               type: EntityType.host as const,
               name: 'My test Host',
-              identifiers: { 'host.name': 'My test Host' },
             }}
           />
         </div>

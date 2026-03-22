@@ -23,6 +23,10 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -68,16 +72,12 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
-  const buildPreviewQuery =
-    euidApi && typeof euidApi.buildGenericEntityFlyoutPreviewQuery === 'function'
-      ? euidApi.buildGenericEntityFlyoutPreviewQuery
-      : null;
-  const { data } = useMisconfigurationPreview({
-    query: buildPreviewQuery ? buildPreviewQuery(identityFields) : { bool: { filter: [] } },
-    sort: [],
-    enabled: !!buildPreviewQuery,
-    pageSize: 1,
-  });
+  const entityType = inferEntityTypeFromIdentityFields(identityFields);
+  const cspPreviewOptions = useMemo(
+    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi),
+    [euidApi, entityType, identityFields]
+  );
+  const { data } = useMisconfigurationPreview(cspPreviewOptions);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;

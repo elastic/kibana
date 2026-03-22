@@ -20,7 +20,8 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
@@ -90,6 +91,7 @@ const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
 };
 
 export interface UserEntityOverviewProps {
+  userName: string;
   identityFields: Record<string, string>;
   /**
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
@@ -110,13 +112,14 @@ export const USER_PREVIEW_BANNER = {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
+  userName,
   identityFields,
   entityRecord: entityRecordProp,
 }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -161,18 +164,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     return entityIdentifiersRef.current.value;
   }, [entityIdentifiersStableKey, identityFields]);
 
-  const userName =
-    stableEntityIdentifiers['user.name'] ||
-    stableEntityIdentifiers['user.id'] ||
-    stableEntityIdentifiers['user.email'] ||
-    stableEntityIdentifiers['user.entity.id'] ||
-    Object.values(stableEntityIdentifiers)[0];
   const riskScoreFilterQuery = useMemo(
     () => (userName ? (buildUserNamesFilter([userName]) as ESQuery) : undefined),
     [userName]
   );
 
-  const storeUserEntityId = stableEntityIdentifiers['user.entity.id'];
+  const storeUserEntityId = stableEntityIdentifiers['entity.id'];
 
   const entityFromStore = useEntityFromStore({
     entityId: storeUserEntityId,
@@ -202,7 +199,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   } = useRiskScore({
     filterQuery: riskScoreFilterQuery,
     riskEntity: EntityType.user,
-    skip: entityStoreV2Enabled && riskFromEntityRecord != null,
+    skip: entityStoreV2Enabled,
     timerange,
   });
   const userRiskFromSearch = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -348,9 +345,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              identityFields={stableEntityIdentifiers}
+              field="user.name"
+              value={userName}
+              entityId={entityRecord?.entity?.id}
               scopeId={scopeId}
-              preferredField="user.name"
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
             >
               <EuiText

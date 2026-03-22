@@ -210,7 +210,8 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           return (
             <CellTooltipWrapper tooltip={ruleName}>
               <PreviewLink
-                identityFields={{ [ALERT_RULE_NAME]: ruleName }}
+                field={ALERT_RULE_NAME}
+                value={ruleName}
                 scopeId={scopeId}
                 ruleId={ruleId}
                 data-test-subj={`${dataTestSubj}RulePreview`}

@@ -157,7 +157,7 @@ export const AlertsDetailsTable = memo(
     const entityTypeResolved: 'host' | 'user' =
       entityType ?? (field === 'user.name' ? 'user' : 'host');
 
-    const { entityRecord } = useEntityFromStore({
+    const { entityRecord, isLoading: entityFromStoreLoading } = useEntityFromStore({
       entityId,
       entityType: entityTypeResolved,
       skip: !entityStoreV2Enabled || !entityId,
@@ -172,7 +172,9 @@ export const AlertsDetailsTable = memo(
     }, [euidApi?.euid, entityTypeResolved, entityRecord]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
-    const skipEntityResolution = entityStoreV2Enabled && Boolean(entityId) && entityRecord === null;
+    /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */
+    const skipEntityResolution =
+      entityStoreV2Enabled && Boolean(entityId) && entityFromStoreLoading;
 
     const entityFilterForQuery: QueryDslQueryContainer | undefined = filterAlertsByEuid
       ? euidEntityFilter

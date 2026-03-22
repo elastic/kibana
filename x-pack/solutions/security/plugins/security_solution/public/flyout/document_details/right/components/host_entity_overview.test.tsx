@@ -52,6 +52,10 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
@@ -110,7 +114,7 @@ const renderHostEntityContent = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <HostEntityOverview identityFields={identityFields} />
+        <HostEntityOverview hostName={hostName} identityFields={identityFields} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -152,7 +156,7 @@ describe('<HostEntityContent />', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview identityFields={identityFields} />
+          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -166,7 +170,7 @@ describe('<HostEntityContent />', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview identityFields={identityFields} />
+          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -208,10 +212,10 @@ describe('<HostEntityContent />', () => {
         id: HostPreviewPanelKey,
         params: {
           contextID: mockContextValue.scopeId,
-          identityFields,
           hostName,
           scopeId: mockContextValue.scopeId,
           banner: HOST_PREVIEW_BANNER,
+          entityId: undefined,
         },
       });
     });

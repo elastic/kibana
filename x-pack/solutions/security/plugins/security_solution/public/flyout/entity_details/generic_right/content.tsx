@@ -93,7 +93,6 @@ export const GenericEntityFlyoutContent = ({
     <FlyoutBody>
       <AssetCriticalityAccordion
         entity={{
-          identifiers: identityFields,
           name: entityDisplayValue as string,
           type: EntityType.generic,
         }}

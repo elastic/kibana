@@ -8,6 +8,7 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { FLYOUT_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
@@ -15,7 +16,6 @@ import { PreviewLink } from './preview_link';
 import { getRightPanelParams } from '../utils/link_utils';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import type { IdentityFields } from '../../document_details/shared/utils';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
 import {
   HOST_NAME_FIELD_NAME,
@@ -136,7 +136,9 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   if (renderPreview) {
     return (
       <PreviewLink
-        identityFields={identityFields ?? { [field]: value }}
+        field={field}
+        value={value}
+        entityId={resolvedEntityId}
         scopeId={scopeId}
         data-test-subj={dataTestSubj}
       >

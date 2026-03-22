@@ -295,7 +295,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           <EuiText grow={false} size="xs">
             <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
               <PreviewLink
-                identityFields={{ [HOST_NAME_FIELD_NAME]: host }}
+                field={HOST_NAME_FIELD_NAME}
+                value={host}
+                entityId={entityId}
                 scopeId={scopeId}
                 data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
               />
@@ -322,7 +324,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                   getEmptyTagValue()
                 ) : (
                   <PreviewLink
-                    identityFields={{ ...identityFields, [HOST_IP_FIELD_NAME]: ip }}
+                    field={HOST_IP_FIELD_NAME}
+                    value={ip}
                     scopeId={scopeId}
                     data-test-subj={USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID}
                   />
@@ -351,7 +354,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           ]
         : []),
     ],
-    [identityFields, isEntityAnalyticsAuthorized, scopeId]
+    [isEntityAnalyticsAuthorized, scopeId, entityId]
   );
 
   const relatedHostsCount = useMemo(

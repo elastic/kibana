@@ -121,7 +121,7 @@ const mockAlertData = {
 const timestamp = '2022-07-25T08:20:18.966Z';
 
 const defaultProps = {
-  identityFields: { 'user.name': 'test user' },
+  userName: 'test user',
   timestamp,
   scopeId: 'scopeId',
 };
@@ -192,7 +192,7 @@ describe('<UserDetails />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
-        identityFields: defaultProps.identityFields,
+        identityFields: { 'user.name': defaultProps.userName },
         scopeId: defaultProps.scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -236,7 +236,7 @@ describe('<UserDetails />', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
-        identityFields: defaultProps.identityFields,
+        identityFields: { 'user.name': defaultProps.userName },
         skip: false,
       });
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
@@ -294,7 +294,7 @@ describe('<UserDetails />', () => {
         params: {
           contextID: defaultProps.scopeId,
           identityFields: {
-            ...defaultProps.identityFields,
+            'user.name': defaultProps.userName,
             'host.ip': '100.XXX.XXX',
           },
           scopeId: defaultProps.scopeId,

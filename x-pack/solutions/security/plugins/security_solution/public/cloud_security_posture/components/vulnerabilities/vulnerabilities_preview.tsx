@@ -20,6 +20,10 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../utils/build_euid_csp_preview_options';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
@@ -75,16 +79,12 @@ export const VulnerabilitiesPreview = ({
   }, []);
 
   const euidApi = useEntityStoreEuidApi();
-  const buildPreviewQuery =
-    euidApi && typeof euidApi?.buildGenericEntityFlyoutPreviewQuery === 'function'
-      ? euidApi.buildGenericEntityFlyoutPreviewQuery
-      : null;
-  const { data } = useVulnerabilitiesPreview({
-    query: buildPreviewQuery ? buildPreviewQuery(identityFields) : { bool: { filter: [] } },
-    sort: [],
-    enabled: !!buildPreviewQuery,
-    pageSize: 1,
-  });
+  const entityType = inferEntityTypeFromIdentityFields(identityFields);
+  const cspPreviewOptions = useMemo(
+    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi),
+    [euidApi, entityType, identityFields]
+  );
+  const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
