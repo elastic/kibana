@@ -43,9 +43,12 @@ import {
   EuiProgress,
   EuiText,
   EuiBadge,
+  EuiSteps,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHistory } from 'react-router-dom';
 import { useEvalsApi } from '../../hooks/use_evals_api';
+import { ExplorationProgress } from './components/exploration_progress';
 
 interface ExplorationRun {
   execution_id: string;
@@ -64,6 +67,7 @@ interface ExplorationRun {
 export const ExplorationDashboard = () => {
   const api = useEvalsApi();
   const queryClient = useQueryClient();
+  const history = useHistory();
 
   const [agentRole, setAgentRole] = useState('SOC analyst');
   const [scopedIndices, setScopedIndices] = useState([
@@ -189,8 +193,7 @@ export const ExplorationDashboard = () => {
   ];
 
   const viewDetails = (executionId: string) => {
-    // TODO: Navigate to execution details page
-    console.log('View execution:', executionId);
+    history.push(`/aesop/exploration/${executionId}`);
   };
 
   return (
@@ -344,6 +347,28 @@ export const ExplorationDashboard = () => {
 
         <EuiSpacer />
 
+        {/* Active Exploration Progress */}
+        {activeExplorations.length > 0 && (
+          <>
+            <EuiPanel>
+              <EuiText><h3>Active Explorations</h3></EuiText>
+              <EuiSpacer size="m" />
+              {activeExplorations.map((exploration) => (
+                <div key={exploration.execution_id}>
+                  <ExplorationProgress
+                    executionId={exploration.execution_id}
+                    onComplete={() => {
+                      queryClient.invalidateQueries({ queryKey: ['aesop', 'explorations'] });
+                    }}
+                  />
+                  <EuiSpacer size="m" />
+                </div>
+              ))}
+            </EuiPanel>
+            <EuiSpacer />
+          </>
+        )}
+
         {/* Exploration History */}
         <EuiPanel>
           <EuiText><h3>Exploration History</h3></EuiText>
@@ -357,15 +382,67 @@ export const ExplorationDashboard = () => {
             </EuiCallOut>
           ) : explorations?.explorations.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
-              title={<h3>No explorations yet</h3>}
-              body={<p>Trigger your first self-exploration to discover patterns and generate skills.</p>}
+              iconType="beaker"
+              title={<h2>Start Your First Exploration</h2>}
+              body={
+                <>
+                  <p>
+                    AESOP autonomously explores your Elasticsearch data to discover patterns and
+                    generate Agent Builder skills tailored to your use case.
+                  </p>
+                  <EuiSpacer size="m" />
+                  <EuiSteps
+                    steps={[
+                      {
+                        title: 'Configure exploration parameters',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            Set agent role, scoped indices, and exploration depth above
+                          </EuiText>
+                        ),
+                      },
+                      {
+                        title: 'Trigger exploration',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            Click "Start Exploration" to begin autonomous discovery
+                          </EuiText>
+                        ),
+                      },
+                      {
+                        title: 'Review discovered skills',
+                        children: (
+                          <EuiText size="s" color="subdued">
+                            Navigate to Proposed Skills to validate and approve
+                          </EuiText>
+                        ),
+                      },
+                    ]}
+                  />
+                </>
+              }
+              actions={
+                <EuiButton
+                  fill
+                  iconType="play"
+                  onClick={() => {
+                    // Scroll to trigger section
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
+                  Configure & Start Exploration
+                </EuiButton>
+              }
             />
           ) : (
             <EuiBasicTable
               items={explorations?.explorations || []}
               columns={columns}
               tableLayout="auto"
+              rowProps={(run) => ({
+                onClick: () => viewDetails(run.execution_id),
+                style: { cursor: 'pointer' },
+              })}
             />
           )}
         </EuiPanel>

@@ -27,7 +27,7 @@ import {
   EuiCallOut,
   EuiBadge,
 } from '@elastic/eui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEvalsApi } from '../../../hooks/use_evals_api';
 import { TraceWaterfall } from '../../../components/trace_waterfall';  // Reuse from evals plugin!
 
@@ -38,6 +38,7 @@ interface SkillReviewFlyoutProps {
 
 export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) => {
   const api = useEvalsApi();
+  const queryClient = useQueryClient();
   const [reviewNotes, setReviewNotes] = useState('');
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
@@ -53,7 +54,7 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
     },
   });
 
-  // Reject skill mutation (TODO: implement reject endpoint)
+  // Reject skill mutation
   const rejectMutation = useMutation({
     mutationFn: async () => {
       return await api.http.post(`/internal/aesop/skills/${skill.id}/reject`, {
@@ -62,6 +63,22 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
     },
     onSuccess: () => {
       onClose();
+    },
+  });
+
+  // Validation trigger mutation
+  const validateMutation = useMutation({
+    mutationFn: async () => {
+      return await api.http.post(`/internal/aesop/skills/${skill.id}/validate`, {
+        body: JSON.stringify({}),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      api.notifications.toasts.addSuccess('Validation started successfully');
+    },
+    onError: (error: Error) => {
+      api.notifications.toasts.addDanger(`Validation failed: ${error.message}`);
     },
   });
 
@@ -91,8 +108,17 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
               >
                 <p>Current validation status: {skill.validation?.status || 'pending'}</p>
                 {skill.validation?.status === 'pending' && (
-                  <EuiButton size="s" onClick={() => { /* TODO: trigger validation */ }}>
+                  <EuiButton
+                    size="s"
+                    onClick={() => validateMutation.mutate()}
+                    isLoading={validateMutation.isPending}
+                  >
                     Run Validation
+                  </EuiButton>
+                )}
+                {skill.validation?.status === 'validating' && (
+                  <EuiButton size="s" isLoading disabled>
+                    Validating...
                   </EuiButton>
                 )}
               </EuiCallOut>
