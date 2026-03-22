@@ -30,6 +30,15 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/library');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
@@ -137,7 +146,11 @@ describe('<EntitiesOverview />', () => {
   it('should only render user when host name is null', () => {
     const contextValue = {
       ...mockContextValue,
-      getFieldsData: (field: string) => (field === 'user.name' ? 'user1' : null),
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+        user: { name: ['user1'] },
+      },
     } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
@@ -150,7 +163,11 @@ describe('<EntitiesOverview />', () => {
   it('should only render host when user name is null', () => {
     const contextValue = {
       ...mockContextValue,
-      getFieldsData: (field: string) => (field === 'host.name' ? 'host1' : null),
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: { name: ['host-name'] },
+        user: {},
+      },
     } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
@@ -163,7 +180,11 @@ describe('<EntitiesOverview />', () => {
   it('should render no data message if both host name and user name are null/blank', () => {
     const contextValue = {
       ...mockContextValue,
-      getFieldsData: (field: string) => {},
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+        user: {},
+      },
     } as unknown as DocumentDetailsContext;
 
     const { getByText } = renderEntitiesOverview(contextValue);
