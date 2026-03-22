@@ -386,24 +386,38 @@ const COMPONENT_ID_MARKER = 'x-kbn-oas-component-id';
  * Maps Zod schema instances to their desired OAS `components/schemas` names.
  * Uses a WeakMap so schema objects can be GC-ed when no longer referenced.
  */
-const zodV4OasComponentRegistry = new WeakMap<object, string>();
+const OAS_EXTENSIONS_MARKER = 'x-kbn-oas-extensions';
 
 /**
  * Register a Zod schema so that the OAS converter emits it as a named
  * component (`$ref: '#/components/schemas/<name>'`) instead of inlining it.
  *
- * Call this once per schema, at module load time (e.g. in an `oas_definitions.ts`
- * file next to the schema definitions):
+ * These fields are merged verbatim into the generated OAS component schema,
+ * filling the gap where Zod/JSON Schema cannot express OAS-native concepts.
  *
+ * Example:
  * ```ts
- * import { registerZodV4Component } from '@kbn/router-to-openapispec';
- * import { conditionSchema } from './schemas';
- *
- * registerZodV4Component(conditionSchema, 'Condition');
+ * export const StreamDefinition = z.union([...]).meta({
+ *   id: 'StreamDefinition',
+ *   openapi: {
+ *     discriminator: {
+ *       propertyName: 'type',
+ *       mapping: { wired: '#/components/schemas/WiredStreamDefinition' },
+ *     },
+ *   },
+ * });
  * ```
+ */
+export interface OasMetaExtensions {
+  discriminator?: OpenAPIV3.DiscriminatorObject;
+}
+
+/**
+ * Reads the stable OAS component name for a Zod v4 schema, if one was declared
+ * via `.meta({ id: '<name>' })` on the schema.
  *
- * The name must be unique across all registered schemas in the document.
- * Names follow the same rules as OpenAPI component names: `[a-zA-Z0-9._-]+`.
+ * The name must be unique across all schemas in the document and follow OpenAPI
+ * component naming rules: `[a-zA-Z0-9._-]+`.
  */
 export const registerZodV4Component = (schema: z.ZodType, name: string): void => {
   zodV4OasComponentRegistry.set(schema as object, name);
@@ -439,8 +453,8 @@ function rewriteDefsRefs(obj: unknown, replacements: Record<string, string>): un
  * document root.
  *
  * When a `$defs` entry carries the `COMPONENT_ID_MARKER` property (injected by
- * the `override` callback for registered schemas), that stable name is used
- * instead of the auto-generated `_zod_v4_{batchId}_{key}` name.
+ * the `override` callback for schemas that declare `.meta({ id })`), that stable
+ * name is used instead of the auto-generated `_zod_v4_{batchId}_{key}` name.
  */
 function extractDefsToShared(
   defs: Record<string, unknown>,
@@ -461,11 +475,15 @@ function extractDefsToShared(
     replacements[`#/$defs/${key}`] = `#/components/schemas/${uniqueKey}`;
 
     if (stableId) {
-      const { [COMPONENT_ID_MARKER]: _marker, ...rest } = def;
+      const { [COMPONENT_ID_MARKER]: _idMarker, [OAS_EXTENSIONS_MARKER]: oasExt, ...rest } = def;
 
-      shared[uniqueKey] = rest as OpenAPIV3.SchemaObject;
+      shared[uniqueKey] = {
+        ...rest,
+        ...(oasExt as OasMetaExtensions | undefined),
+      } as OpenAPIV3.SchemaObject;
     } else {
-      shared[uniqueKey] = def as OpenAPIV3.SchemaObject;
+      const { [OAS_EXTENSIONS_MARKER]: _ext, ...rest } = def;
+      shared[uniqueKey] = rest as OpenAPIV3.SchemaObject;
     }
   }
 
@@ -511,7 +529,7 @@ function hoistMarkedSchemas(
   const name = obj[COMPONENT_ID_MARKER];
 
   if (typeof name === 'string') {
-    const { [COMPONENT_ID_MARKER]: _marker, ...rest } = obj;
+    const { [COMPONENT_ID_MARKER]: _idMarker, [OAS_EXTENSIONS_MARKER]: oasExt, ...rest } = obj;
 
     // Recursively handle nested marked schemas within this node first
     const processed: Record<string, unknown> = {};
@@ -520,7 +538,10 @@ function hoistMarkedSchemas(
       processed[k] = hoistMarkedSchemas(v, shared);
     }
 
-    shared[name] = processed as OpenAPIV3.SchemaObject;
+    shared[name] = {
+      ...processed,
+      ...(oasExt as OasMetaExtensions | undefined),
+    } as OpenAPIV3.SchemaObject;
 
     return { $ref: `#/components/schemas/${name}` };
   }
