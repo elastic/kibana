@@ -10,6 +10,14 @@ import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { EvalsRequestHandlerContext } from '../../types';
 import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
+import { RateLimiterService, DEFAULT_RATE_LIMITS } from '../../lib/aesop/security/rate_limiter';
+import {
+  sanitizeAgentRole,
+  validateScopedIndices,
+  validateExplorationDepth,
+  validateMinPatternFrequency,
+} from '../../lib/aesop/security/input_sanitization';
+import { APMInstrumentationService } from '../../lib/aesop/monitoring/apm_instrumentation';
 
 const runExplorationBodySchema = z.object({
   agent_role: z.string().default('SOC analyst'),
@@ -71,44 +79,95 @@ export function registerRunExplorationRoute(router: IRouter<EvalsRequestHandlerC
         }
 
         try {
+          // Rate limiting check (must be first)
+          const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, context.logger);
+          const userId = request.auth.credentials?.username || 'anonymous';
+          const rateLimit = await rateLimiter.checkRateLimit(userId, 'exploration');
+
+          if (!rateLimit.allowed) {
+            return response.customError({
+              statusCode: 429,
+              body: {
+                message: `Rate limit exceeded. You can run 1 exploration per hour. Try again in ${rateLimit.retryAfterSeconds} seconds.`,
+              },
+              headers: {
+                'Retry-After': rateLimit.retryAfterSeconds!.toString(),
+                'X-RateLimit-Limit': rateLimit.limit.toString(),
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': new Date(rateLimit.resetAt!).toISOString(),
+              },
+            });
+          }
+
+          // Input sanitization
           const { agent_role, scoped_indices, exploration_depth, min_pattern_frequency } = request.body;
 
+          const sanitizedAgentRole = sanitizeAgentRole(agent_role);
+          const sanitizedIndices = validateScopedIndices(scoped_indices);
+          const validatedDepth = validateExplorationDepth(exploration_depth);
+          const validatedFrequency = validateMinPatternFrequency(min_pattern_frequency);
+
           context.logger.info('[AESOP] Starting self-exploration workflow', {
-            agent_role,
-            scoped_indices,
-            exploration_depth,
+            agent_role: sanitizedAgentRole,
+            scoped_indices: sanitizedIndices,
+            exploration_depth: validatedDepth,
+            user_id: userId,
+            rate_limit_remaining: rateLimit.remaining,
           });
 
-          // Execute the self-exploration workflow
+          // Initialize APM instrumentation
+          const esClient = context.core.elasticsearch.client.asCurrentUser;
+          const apmService = new APMInstrumentationService(esClient, context.logger);
+
+          // Ensure metrics index exists
+          await apmService.ensureMetricsIndex();
+
+          // Execute the self-exploration workflow with APM instrumentation
           const workflowApi = workflowsManagement.management;
-          const executionId = await workflowApi.runWorkflow(
+          const executionId = await apmService.instrumentWorkflowStep(
+            'workflow_execution',
             {
-              id: 'aesop.self_exploration',
-              name: 'AESOP Self-Exploration',
-              enabled: true,
-              definition: {}, // Definition loaded from YAML
-              yaml: '', // Loaded from file
+              workflow_name: 'aesop.self_exploration',
+              agent_role: sanitizedAgentRole,
+              scoped_indices: sanitizedIndices,
+              exploration_depth: validatedDepth,
+              min_pattern_frequency: validatedFrequency,
+              user_id: userId,
             },
-            'default',  // spaceId
-            {
-              agent_role,
-              scoped_indices,
-              exploration_depth,
-              min_pattern_frequency,
-            },
-            request,
-            undefined,  // cancellationToken
-            {
-              // metadata
-              triggered_by: 'aesop_ui',
-              agent_role,
+            async () => {
+              return await workflowApi.runWorkflow(
+                {
+                  id: 'aesop.self_exploration',
+                  name: 'AESOP Self-Exploration',
+                  enabled: true,
+                  definition: {}, // Definition loaded from YAML
+                  yaml: '', // Loaded from file
+                },
+                'default',  // spaceId
+                {
+                  agent_role: sanitizedAgentRole,
+                  scoped_indices: sanitizedIndices,
+                  exploration_depth: validatedDepth,
+                  min_pattern_frequency: validatedFrequency,
+                },
+                request,
+                undefined,  // cancellationToken
+                {
+                  // metadata
+                  triggered_by: 'aesop_ui',
+                  agent_role: sanitizedAgentRole,
+                  user_id: userId,
+                }
+              );
             }
           );
 
-          context.logger.info('[AESOP] Workflow started', { execution_id: executionId });
+          context.logger.info('[AESOP] Workflow started', {
+            execution_id: executionId,
+            user_id: userId,
+          });
 
           // Initialize workflow state tracking for progress updates
-          const esClient = context.core.elasticsearch.client.asCurrentUser;
           const stateTracker = new WorkflowStateTracker(esClient, context.logger);
 
           await stateTracker.initializeExecution(executionId, 'aesop.self_exploration');
