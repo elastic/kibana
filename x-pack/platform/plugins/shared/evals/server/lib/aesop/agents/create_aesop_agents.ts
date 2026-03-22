@@ -15,10 +15,12 @@
  * - trace_analyzer: Analyzes OTEL traces for performance metrics
  * - skill_improver: Improves skills based on eval failures
  * - eval_dataset_generator: Creates eval datasets from patterns
+ * - feedback_analyzer: Analyzes rejection feedback to improve future explorations
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { feedbackAnalyzerAgent } from './feedback_analyzer_agent';
 
 export async function createAESOPAgents(
   agentBuilderSetup: AgentBuilderPluginSetup,
@@ -299,6 +301,7 @@ Return JSON with dataset object.`,
     traceAnalyzer,
     skillImprover,
     evalDatasetGenerator,
+    feedbackAnalyzerAgent,
   ];
 
   console.log('[AESOP] Creating custom Agent Builder agents...');
