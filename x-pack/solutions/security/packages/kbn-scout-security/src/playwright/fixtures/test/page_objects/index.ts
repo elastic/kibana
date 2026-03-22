@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { AlertsTablePage } from './alerts_table';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
@@ -13,6 +13,7 @@ import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { VulnerabilityPosturePage } from './vulnerability_posture';
+import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
@@ -21,9 +22,14 @@ export interface SecurityPageObjects extends PageObjects {
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   vulnerabilityPosturePage: VulnerabilityPosturePage;
+  detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
 }
 
-export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
+export function extendPageObjects(
+  pageObjects: PageObjects,
+  page: ScoutPage,
+  config: ScoutTestConfig
+): SecurityPageObjects {
   return {
     ...pageObjects,
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
@@ -32,5 +38,10 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Se
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
     vulnerabilityPosturePage: createLazyPageObject(VulnerabilityPosturePage, page),
+    detectionsAttackDiscoveryPage: createLazyPageObject(
+      DetectionsAttackDiscoveryPage,
+      page,
+      config
+    ),
   };
 }

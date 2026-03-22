@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const osqueryInternalApiVersion = '1';
 
   const actionIndex = '.logs-osquery_manager.actions-default';
+  const responsesIndex = 'logs-osquery_manager.action.responses-default';
 
   const createActionDoc = async (overrides: Record<string, unknown> = {}) => {
     const actionId = uuidv4();
@@ -58,12 +59,45 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
+  const createScheduledResponseDoc = async () => {
+    const scheduleId = uuidv4();
+
+    await es.index({
+      index: responsesIndex,
+      refresh: 'wait_for',
+      document: {
+        schedule_id: scheduleId,
+        schedule_execution_count: 1,
+        '@timestamp': new Date().toISOString(),
+        agent_id: 'test-agent-1',
+        action_response: { osquery: { count: 5 } },
+        space_id: 'default',
+      },
+    });
+
+    return scheduleId;
+  };
+
+  const deleteScheduledResponseDoc = async (scheduleId: string) => {
+    await es.deleteByQuery({
+      index: responsesIndex,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      refresh: true,
+      query: { term: { schedule_id: scheduleId } },
+    });
+  };
+
   describe('History tags', () => {
     const actionIds: string[] = [];
+    const scheduleIds: string[] = [];
 
     after(async () => {
       for (const id of actionIds) {
         await deleteActionDoc(id);
+      }
+      for (const id of scheduleIds) {
+        await deleteScheduledResponseDoc(id);
       }
     });
 
@@ -118,6 +152,20 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ tags: ['test'] });
 
         expect(response.status).to.be(404);
+      });
+
+      it('rejects tagging a scheduled query with 400', async () => {
+        const scheduleId = await createScheduledResponseDoc();
+        scheduleIds.push(scheduleId);
+
+        const response = await supertest
+          .put(`/api/osquery/history/${scheduleId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: ['should-fail'] });
+
+        expect(response.status).to.be(400);
+        expect(response.body.message).to.contain('scheduled');
       });
 
       it('rejects more than 20 tags', async () => {
