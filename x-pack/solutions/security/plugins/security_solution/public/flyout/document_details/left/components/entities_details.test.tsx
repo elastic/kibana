@@ -25,6 +25,15 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/library');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
   return { ...actual, useUiSetting: jest.fn() };

@@ -36,6 +36,7 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
@@ -192,7 +193,8 @@ describe('<UserDetails />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
-        identityFields: { 'user.name': defaultProps.userName },
+        userName: defaultProps.userName,
+        entityId: undefined,
         scopeId: defaultProps.scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -236,7 +238,7 @@ describe('<UserDetails />', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
-        identityFields: { 'user.name': defaultProps.userName },
+        userName: defaultProps.userName,
         skip: false,
       });
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
@@ -281,25 +283,21 @@ describe('<UserDetails />', () => {
         id: HostPreviewPanelKey,
         params: {
           contextID: defaultProps.scopeId,
-          identityFields: { 'host.name': 'test host' },
           hostName: 'test host',
           scopeId: defaultProps.scopeId,
           banner: HOST_PREVIEW_BANNER,
+          entityId: undefined,
         },
       });
 
       getAllByTestId(USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID)[0].click();
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenNthCalledWith(2, {
-        id: UserPreviewPanelKey,
+        id: NetworkPreviewPanelKey,
         params: {
-          contextID: defaultProps.scopeId,
-          identityFields: {
-            'user.name': defaultProps.userName,
-            'host.ip': '100.XXX.XXX',
-          },
+          ip: '100.XXX.XXX',
+          flowTarget: 'source',
           scopeId: defaultProps.scopeId,
-          userName: 'test user',
-          banner: USER_PREVIEW_BANNER,
+          banner: NETWORK_PREVIEW_BANNER,
         },
       });
     });

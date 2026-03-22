@@ -7,11 +7,21 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { searchEntitiesFromEntityStore } from '@kbn/entity-store/public';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useUiSetting } from '../../../../common/lib/kibana';
 import React from 'react';
 
 jest.mock('../../../api/api');
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({ services: { http: {} } }),
+  useUiSetting: jest.fn(),
+}));
+jest.mock('@kbn/entity-store/public', () => ({
+  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+  searchEntitiesFromEntityStore: jest.fn(),
+}));
 
 describe('useEntitiesListQuery', () => {
   const fetchEntitiesListMock = jest.fn();
@@ -21,6 +31,7 @@ describe('useEntitiesListQuery', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useUiSetting as jest.Mock).mockReturnValue(false);
     (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
       fetchEntitiesList: fetchEntitiesListMock,
     });
@@ -36,8 +47,46 @@ describe('useEntitiesListQuery', () => {
     });
 
     await waitFor(() => {
-      expect(fetchEntitiesListMock).toHaveBeenCalledWith({ params: searchParams });
+      expect(fetchEntitiesListMock).toHaveBeenCalledWith({
+        params: searchParams,
+        signal: expect.any(AbortSignal),
+      });
       expect(result.current.data).toEqual({ data: 'test data' });
+    });
+  });
+
+  it('should call searchEntitiesFromEntityStore when Entity Store v2 is enabled', async () => {
+    (useUiSetting as jest.Mock).mockReturnValue(true);
+    const searchParams = {
+      entityTypes: ['host'],
+      page: 2,
+      perPage: 20,
+      sortField: '@timestamp',
+      sortOrder: 'desc' as const,
+      filterQuery: '{"match_all":{}}',
+    };
+    const v2Response = { records: [], total: 0, page: 2, per_page: 20 };
+    (searchEntitiesFromEntityStore as jest.Mock).mockResolvedValueOnce(v2Response);
+
+    const { result } = renderHook(() => useEntitiesListQuery({ ...searchParams, skip: false }), {
+      wrapper: TestWrapper,
+    });
+
+    await waitFor(() => {
+      expect(searchEntitiesFromEntityStore).toHaveBeenCalledWith(
+        {},
+        {
+          entityTypes: ['host'],
+          filterQuery: '{"match_all":{}}',
+          page: 2,
+          perPage: 20,
+          sortField: '@timestamp',
+          sortOrder: 'desc',
+        },
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+      expect(fetchEntitiesListMock).not.toHaveBeenCalled();
+      expect(result.current.data).toEqual(v2Response);
     });
   });
 
@@ -49,6 +98,7 @@ describe('useEntitiesListQuery', () => {
     });
 
     expect(fetchEntitiesListMock).not.toHaveBeenCalled();
+    expect(searchEntitiesFromEntityStore as jest.Mock).not.toHaveBeenCalled();
     expect(result.current.data).toBeUndefined();
   });
 });

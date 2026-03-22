@@ -50,7 +50,7 @@ export const EntitiesOverview: React.FC = () => {
     entityId: userEntityId,
     identityFields: userEntityIdentifiers ?? undefined,
     entityType: 'user',
-    skip: entityStoreV2Enabled,
+    skip: !entityStoreV2Enabled,
   });
   const hostEntityFromStore = useEntityFromStore({
     entityId: hostEntitId,
@@ -65,7 +65,8 @@ export const EntitiesOverview: React.FC = () => {
   const showHostOverview =
     (!entityStoreV2Enabled && hostName != null) ||
     (entityStoreV2Enabled && hostEntityFromStore.entityRecord != null);
-  const hasAnyEntity = showUserOverview || showHostOverview;
+  const hasAnyEntity =
+    (showUserOverview && !!userEntityIdentifiers) || (showHostOverview && !!hostEntityIdentifiers);
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,

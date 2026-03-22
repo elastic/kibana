@@ -71,7 +71,8 @@ describe('useNavigateToHostDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: HostDetailsPanelKey,
       params: {
-        identityFields: mockProps.documentEntityIdentifiers,
+        hostName: mockProps.hostName,
+        entityId: mockProps.entityId,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },
@@ -103,7 +104,8 @@ describe('useNavigateToHostDetails', () => {
       left: {
         id: HostDetailsPanelKey,
         params: {
-          identityFields: mockProps.documentEntityIdentifiers,
+          hostName: mockProps.hostName,
+          entityId: mockProps.entityId,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,
           path: { tab, subTab },

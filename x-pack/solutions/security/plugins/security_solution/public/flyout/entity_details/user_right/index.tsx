@@ -115,6 +115,11 @@ export const UserPanel = ({
   );
   const observedUser = useObservedUser(userName, scopeId, entityIdProp);
 
+  const panelDisplayEntityId = useMemo(
+    () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityIdProp),
+    [entityIdProp, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
+  );
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
     filterQuery: userNameFilterQuery,
@@ -170,7 +175,7 @@ export const UserPanel = ({
 
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
-    entityId: entityIdProp,
+    entityId: panelDisplayEntityId,
     scopeId,
     identityFields: documentEntityIdentifiers ?? {},
     contextID: safeContextID,
@@ -246,7 +251,7 @@ export const UserPanel = ({
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
         userName={userName}
-        entityId={entityIdProp}
+        entityId={panelDisplayEntityId}
       />
       {noEntityInStore && (
         <EuiCallOut
@@ -287,7 +292,7 @@ export const UserPanel = ({
       {isPreviewMode && (
         <UserPreviewPanelFooter
           userName={userName}
-          entityId={entityIdProp}
+          entityId={panelDisplayEntityId}
           contextID={safeContextID}
           scopeId={scopeId}
           entity={entityFromStore}

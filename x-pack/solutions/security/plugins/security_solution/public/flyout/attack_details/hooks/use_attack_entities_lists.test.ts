@@ -10,6 +10,15 @@ import { useAttackEntitiesLists } from './use_attack_entities_lists';
 import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/library');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
 jest.mock('./use_original_alert_ids', () => ({
   useOriginalAlertIds: jest.fn(),
 }));

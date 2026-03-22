@@ -97,6 +97,7 @@ describe('useNavigateToUserDetails', () => {
           scopeId: mockProps.scopeId,
           userName: mockProps.userName,
           entityId: mockProps.entityId,
+          identityFields: mockProps.identityFields,
         },
       },
       left: {

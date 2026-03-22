@@ -51,6 +51,14 @@ jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
+
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
@@ -96,7 +104,7 @@ const renderUserEntityOverview = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <UserEntityOverview identityFields={identityFields} />
+        <UserEntityOverview userName={userName} identityFields={identityFields} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -161,7 +169,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview identityFields={identityFields} />
+            <UserEntityOverview userName={userName} identityFields={identityFields} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -176,7 +184,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview identityFields={identityFields} />
+            <UserEntityOverview userName={userName} identityFields={identityFields} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -191,7 +199,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview identityFields={identityFields} />
+            <UserEntityOverview userName={userName} identityFields={identityFields} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -204,7 +212,7 @@ describe('<UserEntityOverview />', () => {
           scopeId: mockContextValue.scopeId,
           banner: USER_PREVIEW_BANNER,
           contextID: mockContextValue.scopeId,
-          identityFields,
+          entityId: undefined,
         },
       });
     });

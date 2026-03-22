@@ -39,6 +39,14 @@ jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({
   useNavigateToLeftPanel: () => jest.fn(),
 }));
 
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
+
 const mockAddSuccess = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({

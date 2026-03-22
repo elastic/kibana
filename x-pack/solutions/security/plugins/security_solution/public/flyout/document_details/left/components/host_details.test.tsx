@@ -38,6 +38,7 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
@@ -304,25 +305,21 @@ describe('<HostDetails />', () => {
         id: UserPreviewPanelKey,
         params: {
           contextID: defaultProps.scopeId,
-          identityFields: { 'user.name': 'test user' },
           userName: 'test user',
           scopeId: defaultProps.scopeId,
           banner: USER_PREVIEW_BANNER,
+          entityId: undefined,
         },
       });
 
       getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0].click();
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenNthCalledWith(2, {
-        id: HostPreviewPanelKey,
+        id: NetworkPreviewPanelKey,
         params: {
-          contextID: defaultProps.scopeId,
-          identityFields: {
-            hostName: defaultProps.hostName,
-            'host.ip': '100.XXX.XXX',
-          },
-          hostName: 'test host',
+          ip: '100.XXX.XXX',
+          flowTarget: 'source',
           scopeId: defaultProps.scopeId,
-          banner: HOST_PREVIEW_BANNER,
+          banner: NETWORK_PREVIEW_BANNER,
         },
       });
     });

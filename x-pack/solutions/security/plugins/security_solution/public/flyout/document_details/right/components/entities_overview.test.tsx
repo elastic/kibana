@@ -27,8 +27,16 @@ import {
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { useUiSetting } from '../../../../common/lib/kibana';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn(),
+  };
+});
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
@@ -43,10 +51,6 @@ const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
-  return { ...actual, useUiSetting: jest.fn() };
-});
 jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 

@@ -151,6 +151,11 @@ export const HostPanel = ({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
+  const panelDisplayEntityId = useMemo(
+    () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
+    [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
+  );
+
   const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedHost.entityRecord != null;
 
   useQueryInspector({
@@ -199,7 +204,7 @@ export const HostPanel = ({
 
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
-    entityId,
+    entityId: panelDisplayEntityId,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -235,7 +240,11 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader hostName={hostName} lastSeen={observedHost.lastSeen} entityId={entityId} />
+      <HostPanelHeader
+        hostName={hostName}
+        lastSeen={observedHost.lastSeen}
+        entityId={panelDisplayEntityId}
+      />
       {noEntityInStore && (
         <EuiCallOut
           title={NO_CORRESPONDING_ENTITY_EXISTS}
@@ -271,7 +280,7 @@ export const HostPanel = ({
       {isPreviewMode && (
         <HostPreviewPanelFooter
           hostName={hostName}
-          entityId={entityId}
+          entityId={panelDisplayEntityId}
           contextID={safeContextID}
           scopeId={scopeId}
         />
