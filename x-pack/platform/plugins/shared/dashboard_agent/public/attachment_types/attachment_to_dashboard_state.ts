@@ -72,7 +72,7 @@ const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
   return panelList.reduce<DashboardPanel[]>((acc, panel) => {
     if (isLensAttachmentPanel(panel)) {
       acc.push({
-        ...buildLensPanelFromApi(panel.visualization as LensApiSchemaType, panel.uid),
+        ...buildLensPanelFromApi(panel.config as LensApiSchemaType, panel.uid),
         grid: panel.grid,
       });
     } else if (isGenericAttachmentPanel(panel)) {

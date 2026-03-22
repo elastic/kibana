@@ -23,7 +23,7 @@ describe('executeDashboardOperations', () => {
   const createLensPanel = (uid: string, gridY = 0): AttachmentPanel => ({
     type: 'lens',
     uid,
-    visualization: { type: 'metric' },
+    config: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
   });
 
@@ -449,7 +449,7 @@ describe('executeDashboardOperations', () => {
     ): AttachmentPanel => ({
       type: 'lens',
       uid,
-      visualization: { type: 'metric' },
+      config: { type: 'metric' },
       sourceAttachmentId,
       grid: { x: 0, y: gridY, w: 24, h: 9 },
     });
@@ -461,7 +461,7 @@ describe('executeDashboardOperations', () => {
           {
             type: 'lens',
             uid: 'new-generated-id',
-            visualization: { type: 'bar' },
+            config: { type: 'bar' },
             sourceAttachmentId: 'viz-att-1',
             grid: { x: 0, y: 5, w: 24, h: 9 },
           },
@@ -490,7 +490,7 @@ describe('executeDashboardOperations', () => {
       const updatedPanel = result.dashboardData.panels[0];
       expect(updatedPanel.uid).toBe('panel-1');
       expect(updatedPanel.grid).toEqual({ x: 0, y: 5, w: 24, h: 9 });
-      expect((updatedPanel as { visualization: unknown }).visualization).toEqual({ type: 'bar' });
+      expect((updatedPanel as { config: unknown }).config).toEqual({ type: 'bar' });
       expect((updatedPanel as { sourceAttachmentId: string }).sourceAttachmentId).toBe('viz-att-1');
     });
 
@@ -519,7 +519,7 @@ describe('executeDashboardOperations', () => {
             {
               type: 'lens',
               uid: 'new-id',
-              visualization: { type: 'line' },
+              config: { type: 'line' },
               sourceAttachmentId: 'viz-att-2',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -532,7 +532,7 @@ describe('executeDashboardOperations', () => {
 
       const updatedPanel = result.dashboardData.sections?.[0].panels[0];
       expect(updatedPanel?.uid).toBe('sec-panel-1');
-      expect((updatedPanel as { visualization: unknown }).visualization).toEqual({ type: 'line' });
+      expect((updatedPanel as { config: unknown }).config).toEqual({ type: 'line' });
     });
 
     it('is a no-op when no panels match the attachment ID', async () => {
@@ -603,7 +603,7 @@ describe('executeDashboardOperations', () => {
             {
               type: 'lens',
               uid: 'new-id',
-              visualization: { type: 'bar' },
+              config: { type: 'bar' },
               sourceAttachmentId: 'viz-att-1',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },

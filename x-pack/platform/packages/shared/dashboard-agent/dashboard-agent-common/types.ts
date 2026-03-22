@@ -32,8 +32,8 @@ export const panelGridSchema = z.object({
 export const lensAttachmentPanelSchema = z.object({
   type: z.literal('lens'),
   uid: z.string(),
-  /** The visualization configuration in Lens API format (LensApiSchemaType) */
-  visualization: z.record(z.string(), z.unknown()),
+  /** The Lens configuration in API format (LensApiSchemaType) */
+  config: z.record(z.string(), z.unknown()),
   /** Panel title */
   title: z.string().optional(),
   /** The visualization attachment ID this panel was resolved from */
@@ -91,7 +91,7 @@ export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
  * Type guard to check if a panel is a Lens panel.
  */
 export function isLensAttachmentPanel(panel: AttachmentPanel): panel is LensAttachmentPanel {
-  return panel.type === 'lens' && 'visualization' in panel;
+  return panel.type === 'lens' && 'config' in panel;
 }
 
 /**

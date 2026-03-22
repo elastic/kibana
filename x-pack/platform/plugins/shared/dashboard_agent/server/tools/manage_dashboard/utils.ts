@@ -61,7 +61,7 @@ const resolvePanelsFromVisualizationAttachment = (
     {
       type: 'lens',
       uid: uuidv4(),
-      visualization: visualization as LensApiSchemaType,
+      config: visualization as LensApiSchemaType,
       title,
       sourceAttachmentId: attachmentId,
     },
