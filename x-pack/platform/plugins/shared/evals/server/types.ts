@@ -16,9 +16,14 @@ export interface EvalsPluginStart {
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
+  agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
+  workflows?: any; // Optional: Required for AESOP workflow registration
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
+  workflows?: any; // Optional: Required for AESOP workflow execution
+}
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
