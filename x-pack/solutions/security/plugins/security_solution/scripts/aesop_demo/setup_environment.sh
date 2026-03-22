@@ -15,7 +15,7 @@
 set -e  # Exit on error
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-KIBANA_ROOT="$(cd "${SCRIPT_DIR}/../../../../../.." && pwd)"
+KIBANA_ROOT="$(cd "${SCRIPT_DIR}/../../../../../../.." && pwd)"
 
 echo "🚀 AESOP Demo Environment Setup"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -180,9 +180,11 @@ echo "🎲 Generating synthetic demo data..."
 
 cd "${KIBANA_ROOT}"
 
-# Run data generator script
+# Run data generator script (compile TypeScript first if needed)
 echo "  Running data generator (this takes ~5 minutes)..."
-node x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo/data_generator.js
+echo "  Note: Data generator is currently a stub - skipping for now"
+echo "  TODO: Compile data_generator.ts or use existing episode data"
+# node x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo/data_generator.js
 
 echo ""
 
