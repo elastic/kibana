@@ -161,9 +161,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                       type: panel.type,
                       uid: panel.uid,
                       grid: panel.grid,
-                      ...(panel.sourceAttachmentId
-                        ? { sourceAttachmentId: panel.sourceAttachmentId }
-                        : {}),
+                      sourceAttachmentId: panel.sourceAttachmentId 
                     })),
                     ...(updatedDashboardData.sections
                       ? {
@@ -176,9 +174,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                               type: panel.type,
                               uid: panel.uid,
                               grid: panel.grid,
-                              ...(panel.sourceAttachmentId
-                                ? { sourceAttachmentId: panel.sourceAttachmentId }
-                                : {}),
+                              sourceAttachmentId: panel.sourceAttachmentId,
                             })),
                           })),
                         }

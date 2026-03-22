@@ -25,6 +25,7 @@ import { onAttachmentMount } from './create_attachment_mount_handler';
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder: {
     attachments,
+    addAttachment,
     events: { chat$ },
   },
   dashboardLocator,
@@ -59,7 +60,7 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
-      onAttachmentMount({ ...params, dashboardPlugin, chat$ }),
+      onAttachmentMount({ ...params, dashboardPlugin, chat$, addAttachment }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
