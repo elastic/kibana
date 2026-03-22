@@ -14,18 +14,12 @@ export {
 export {
   panelGridSchema,
   sectionGridSchema,
-  lensAttachmentPanelSchema,
-  genericAttachmentPanelSchema,
   attachmentPanelSchema,
   dashboardSectionSchema,
   dashboardAttachmentDataSchema,
-  isLensAttachmentPanel,
-  isGenericAttachmentPanel,
 } from './types';
 
 export type {
-  LensAttachmentPanel,
-  GenericAttachmentPanel,
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,

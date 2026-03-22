@@ -12,10 +12,9 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { isLensAttachmentPanel, panelGridSchema } from '@kbn/dashboard-agent-common';
+import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import type { GenericAttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { VisualizationFailure } from './utils';
 
 export const setMetadataOperationSchema = z.object({
@@ -212,7 +211,7 @@ export const executeDashboardOperations = ({
       }
 
       case 'add_markdown': {
-        const markdownPanel: GenericAttachmentPanel = {
+        const markdownPanel: AttachmentPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           uid: uuidv4(),
           config: { content: operation.markdownContent },
@@ -375,7 +374,6 @@ export const executeDashboardOperations = ({
 
         const updatePanel = (panel: AttachmentPanel): AttachmentPanel => {
           if (
-            !isLensAttachmentPanel(panel) ||
             !panel.sourceAttachmentId ||
             !attachmentIdSet.has(panel.sourceAttachmentId)
           ) {

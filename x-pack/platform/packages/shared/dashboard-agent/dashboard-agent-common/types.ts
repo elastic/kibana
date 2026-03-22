@@ -42,75 +42,25 @@ export const panelGridSchema = z.object({
 });
 
 /**
- * Zod schema for Lens panel entries.
- */
-export const lensAttachmentPanelSchema = z.object({
-  type: z.literal('lens'),
-  uid: z.string(),
-  /** The Lens configuration in API format (LensApiSchemaType) */
-  config: z.record(z.string(), z.unknown()),
-  /** The visualization attachment ID this panel was resolved from */
-  sourceAttachmentId: z.string().optional(),
-  /** Layout hint: width/height and position in dashboard grid units. */
-  grid: panelGridSchema,
-});
-
-/**
- * A Lens panel entry containing full visualization configuration in API format.
- * All Lens panels (whether created by the agent or extracted from existing dashboards)
- * are stored in this unified format using LensApiSchemaType.
- */
-export type LensAttachmentPanel = z.infer<typeof lensAttachmentPanelSchema>;
-
-/**
  * Zod schema for generic (non-Lens) panel entries.
  * The `type` field contains the actual embeddable type.
  */
-export const genericAttachmentPanelSchema = z.object({
-  /** The actual embeddable type (e.g., 'DASHBOARD_MARKDOWN', 'aiOpsLogRateAnalysis', 'lens' for unsupported) */
+export const attachmentPanelSchema = z.object({
+  /** The actual embeddable type (e.g., 'DASHBOARD_MARKDOWN', 'aiOpsLogRateAnalysis', 'lens') */
   type: z.string(),
   uid: z.string(),
-  /** The raw panel configuration for recreating the panel */
+  /** The panel configuration in API format */
   config: z.record(z.string(), z.unknown()),
   /** Layout: width/height and position in dashboard grid units. */
   grid: panelGridSchema,
+  /** The visualization attachment ID this panel was resolved from */
+  sourceAttachmentId: z.string().optional(),
 });
 
 /**
- * A non-Lens panel entry containing the raw embeddable configuration.
- * Used for markdown, maps, TSVB, and other panel types, as well as
- * Lens panels with unsupported chart types that can't be converted to API format.
- */
-export type GenericAttachmentPanel = z.infer<typeof genericAttachmentPanelSchema>;
-
-/**
- * Zod schema for dashboard panel entries.
- */
-export const attachmentPanelSchema = z.union([
-  lensAttachmentPanelSchema,
-  genericAttachmentPanelSchema,
-]);
-
-/**
- * Union type for dashboard panel entries.
- * - LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')
- * - GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)
+ * A dashboard panel entry.
  */
 export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
-
-/**
- * Type guard to check if a panel is a Lens panel.
- */
-export function isLensAttachmentPanel(panel: AttachmentPanel): panel is LensAttachmentPanel {
-  return panel.type === 'lens' && 'config' in panel;
-}
-
-/**
- * Type guard to check if a panel is a generic (non-Lens) panel.
- */
-export function isGenericAttachmentPanel(panel: AttachmentPanel): panel is GenericAttachmentPanel {
-  return panel.type !== 'lens'
-}
 
 export const sectionGridSchema = z.object({
   y: z.number().int().min(PANEL_GRID_CONSTRAINTS.y.min),

@@ -15,7 +15,6 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ADDED_EVENT,
   DASHBOARD_PANELS_REMOVED_EVENT,
-  isLensAttachmentPanel,
   type AttachmentPanel,
   type DashboardAttachmentData,
   type PanelAddedEventData,
@@ -162,7 +161,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                       type: panel.type,
                       uid: panel.uid,
                       grid: panel.grid,
-                      ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
+                      ...(panel.sourceAttachmentId
                         ? { sourceAttachmentId: panel.sourceAttachmentId }
                         : {}),
                     })),
@@ -177,7 +176,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                               type: panel.type,
                               uid: panel.uid,
                               grid: panel.grid,
-                              ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
+                              ...(panel.sourceAttachmentId
                                 ? { sourceAttachmentId: panel.sourceAttachmentId }
                                 : {}),
                             })),
