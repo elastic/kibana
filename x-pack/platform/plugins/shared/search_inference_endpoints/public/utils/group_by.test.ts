@@ -83,41 +83,39 @@ describe('group by utils', () => {
       it('groups endpoints matching a known model group by that group id', () => {
         const anthropicEndpoints = InferenceEndpoints.filter((e) =>
           [
-            '.anthropic-claude-3.7-sonnet-chat_completion',
-            '.anthropic-claude-3.7-sonnet-completion',
+            '.anthropic-claude-4.5-opus-chat_completion',
+            '.anthropic-claude-4.5-opus-completion',
           ].includes(e.inference_id)
         );
         const result = anthropicEndpoints.reduce(reducer, {});
 
-        expect(Object.keys(result)).toEqual(['anthropic']);
-        expect(result.anthropic.endpoints).toHaveLength(2);
-        expect(result.anthropic.endpoints).toEqual(anthropicEndpoints);
+        expect(Object.keys(result)).toEqual(['Anthropic']);
+        expect(result.Anthropic.endpoints).toHaveLength(2);
+        expect(result.Anthropic.endpoints).toEqual(anthropicEndpoints);
       });
 
-      it('groups Elastic-branded endpoints (jina, elser, rainbow-sprinkles, rerank) under the elastic group', () => {
+      it('groups Elastic-branded endpoints (elser, rerank) under the elastic group', () => {
         const elasticModelEndpoints = InferenceEndpoints.filter((e) =>
-          [
-            '.elser-2-elastic',
-            '.jina-embeddings-v3',
-            '.rainbow-sprinkles-elastic',
-            '.rerank-v1-elasticsearch',
-          ].includes(e.inference_id)
+          ['.elser-2-elastic', '.rerank-v1-elasticsearch'].includes(e.inference_id)
         );
         const result = elasticModelEndpoints.reduce(reducer, {});
 
         expect(Object.keys(result)).toEqual([ELASTIC_GROUP_ID]);
-        expect(result[ELASTIC_GROUP_ID].endpoints).toHaveLength(4);
+        expect(result[ELASTIC_GROUP_ID].endpoints).toHaveLength(2);
       });
 
-      it('groups endpoints with no recognised model id by their model id directly', () => {
-        const unknownModelEndpoints = InferenceEndpoints.filter((e) =>
-          ['.gp-llm-v2-chat_completion', '.gp-llm-v2-completion'].includes(e.inference_id)
+      it('groups gp-llm-v2 and rainbow-sprinkles endpoints under the anthropic group', () => {
+        const anthropicEndpoints = InferenceEndpoints.filter((e) =>
+          [
+            '.gp-llm-v2-chat_completion',
+            '.gp-llm-v2-completion',
+            '.rainbow-sprinkles-elastic',
+          ].includes(e.inference_id)
         );
-        const result = unknownModelEndpoints.reduce(reducer, {});
+        const result = anthropicEndpoints.reduce(reducer, {});
 
-        expect(Object.keys(result)).toEqual(['gp-llm-v2']);
-        expect(result['gp-llm-v2'].groupLabel).toBe('gp-llm-v2');
-        expect(result['gp-llm-v2'].endpoints).toHaveLength(2);
+        expect(Object.keys(result)).toEqual(['Anthropic']);
+        expect(result.Anthropic.endpoints).toHaveLength(3);
       });
 
       it('groups endpoints with no model id at all under the unknown model fallback', () => {
@@ -144,10 +142,10 @@ describe('group by utils', () => {
         );
         const result = mixed.reduce(reducer, {});
 
-        expect(Object.keys(result).sort()).toEqual(['anthropic', 'google', 'openai']);
-        expect(result.anthropic.endpoints).toHaveLength(1);
-        expect(result.google.endpoints).toHaveLength(1);
-        expect(result.openai.endpoints).toHaveLength(1);
+        expect(Object.keys(result).sort()).toEqual(['Anthropic', 'Google', 'OpenAI']);
+        expect(result.Anthropic.endpoints).toHaveLength(1);
+        expect(result.Google.endpoints).toHaveLength(1);
+        expect(result.OpenAI.endpoints).toHaveLength(1);
       });
     });
   });

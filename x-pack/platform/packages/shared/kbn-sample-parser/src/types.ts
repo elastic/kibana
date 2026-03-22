@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export interface StreamLogDocument extends Record<string, any> {
+export interface StreamLogDocument extends Record<string, unknown> {
   '@timestamp': number;
+  message: string;
 }
 
 export interface StreamLogGenerator {

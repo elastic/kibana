@@ -16,7 +16,8 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { forceLogExtraction } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/256862
+apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {

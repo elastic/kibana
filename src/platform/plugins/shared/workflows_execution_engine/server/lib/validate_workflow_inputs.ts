@@ -10,10 +10,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
-  makeWorkflowInputsValidator,
-} from '@kbn/workflows/spec/lib/input_conversion';
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 /**
@@ -33,7 +34,8 @@ export const validateWorkflowInputs = async (
   if (!inputsDef) {
     return true;
   }
-  const { normalizedSchema, validator } = makeWorkflowInputsValidator(inputsDef);
+  const normalizedSchema = normalizeFieldsToJsonSchema(inputsDef);
+  const validator = buildFieldsZodValidator(normalizedSchema);
   if (!normalizedSchema?.properties) {
     return true;
   }

@@ -19,7 +19,9 @@ describe('internalToPublicDefinition', () => {
     readonly: true,
     basePath: 'skills/platform',
     getRegistryTools: () => [],
+    experimental: false,
     ...overrides,
+    referencedContentCount: overrides.referencedContentCount ?? 0,
   });
 
   it('converts basic fields', async () => {

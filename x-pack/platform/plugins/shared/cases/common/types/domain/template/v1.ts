@@ -98,7 +98,7 @@ export const ParsedTemplateDefinitionSchema = z.object({
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  category: z.string().optional(),
+  category: z.string().nullable().optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(fields.map((field) => field.name));

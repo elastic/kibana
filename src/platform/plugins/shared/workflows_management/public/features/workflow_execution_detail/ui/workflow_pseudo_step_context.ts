@@ -72,7 +72,7 @@ export function buildTriggerStepExecutionFromContext(
     stepType: `trigger_${triggerContext.triggerType}`,
     status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: undefined,
+    output: (workflowExecution.context?.output as JsonValue | undefined) ?? undefined,
     error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,

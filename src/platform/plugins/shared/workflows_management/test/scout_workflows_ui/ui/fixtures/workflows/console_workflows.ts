@@ -83,7 +83,7 @@ steps:
     type: foreach
     foreach: '{{consts.loop_items}}'
     steps:
-      - name: hello_world_step
+      - name: test_console_step
         type: console
         with:
           message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"
@@ -225,6 +225,71 @@ steps:
     type: console
     with:
       message: "{{ event. }}"`;
+
+/**
+ * Multi-step workflow with enough vertical content to require scrolling in the editor.
+ * Used for testing that clicking a step in the execution flyout scrolls the YAML editor
+ * to the corresponding step definition.
+ */
+export const getScrollTestWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: false
+description: Multi-step workflow for scroll testing
+triggers:
+  - type: manual
+
+inputs:
+  - name: param_a
+    type: string
+    default: "value_a"
+  - name: param_b
+    type: string
+    default: "value_b"
+  - name: param_c
+    type: string
+    default: "value_c"
+
+steps:
+  - name: step_alpha
+    type: console
+    with:
+      message: "Alpha executing with param_a={{ inputs.param_a }}"
+
+  - name: step_bravo
+    type: console
+    with:
+      message: "Bravo executing with param_b={{ inputs.param_b }}"
+
+  - name: step_charlie
+    type: console
+    with:
+      message: "Charlie executing with param_c={{ inputs.param_c }}"
+
+  - name: step_delta
+    type: console
+    with:
+      message: "Delta executing after charlie"
+
+  - name: step_echo
+    type: console
+    with:
+      message: "Echo executing after delta"
+
+  - name: step_foxtrot
+    type: console
+    with:
+      message: "Foxtrot executing after echo"
+
+  - name: step_golf
+    type: console
+    with:
+      message: "Golf executing after foxtrot"
+
+  - name: step_hotel
+    type: console
+    with:
+      message: "Hotel executing last"
+`;
 
 /**
  * Valid workflow that includes YAML comment lines with liquid variable syntax.

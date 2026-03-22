@@ -232,7 +232,7 @@ describe('runCiChecksTool', () => {
       });
 
       expect(mockedExeca.command).toHaveBeenCalledWith(
-        'node --no-experimental-require-module scripts/build_kibana_platform_plugins',
+        'node scripts/build_kibana_platform_plugins',
         {
           cwd: '/repo/root',
           stdio: 'pipe',

@@ -18,6 +18,7 @@ interface LiveActionsQueryOptions {
   searchAfter?: SortValues;
   kuery?: string;
   userIds?: string[];
+  tags?: string[];
   spaceId: string;
   startDate?: string;
   endDate?: string;
@@ -28,6 +29,7 @@ export const buildLiveActionsQuery = ({
   searchAfter,
   kuery,
   userIds,
+  tags,
   spaceId,
   startDate,
   endDate,
@@ -60,10 +62,9 @@ export const buildLiveActionsQuery = ({
   }
 
   if (kuery) {
-    const escaped = escapeSimpleQueryString(kuery);
     filters.push({
       simple_query_string: {
-        query: `*${escaped}*`,
+        query: `${escapeSimpleQueryString(kuery)}*`,
         fields: ['pack_name', 'queries.query', 'queries.id'],
         analyze_wildcard: true,
       },
@@ -72,6 +73,10 @@ export const buildLiveActionsQuery = ({
 
   if (userIds && userIds.length > 0) {
     filters.push({ terms: { user_id: userIds } });
+  }
+
+  if (tags && tags.length > 0) {
+    filters.push({ terms: { tags } });
   }
 
   return {

@@ -13,6 +13,7 @@ import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionDetail } from './workflow_execution_detail';
+import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('@kbn/react-query', () => ({
   ...jest.requireActual('@kbn/react-query'),
@@ -30,6 +31,10 @@ jest.mock('./workflow_step_execution_details', () => ({
 
 jest.mock('../model/use_step_execution', () => ({
   useStepExecution: jest.fn(() => ({ data: undefined, isLoading: false })),
+}));
+
+jest.mock('../model/use_child_workflow_executions', () => ({
+  useChildWorkflowExecutions: jest.fn(() => ({ childExecutions: new Map(), isLoading: false })),
 }));
 
 const mockSetSelectedStepExecution = jest.fn();
@@ -89,7 +94,9 @@ describe('WorkflowExecutionDetail - cache invalidation', () => {
 
   it('should call removeQueries on unmount with the current execution query key', () => {
     const { unmount } = render(
-      <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+      </TestWrapper>
     );
 
     expect(mockRemoveQueries).not.toHaveBeenCalled();
@@ -103,7 +110,9 @@ describe('WorkflowExecutionDetail - cache invalidation', () => {
 
   it('should call removeQueries for the previous execution when executionId changes', () => {
     const { rerender } = render(
-      <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+      </TestWrapper>
     );
 
     expect(mockRemoveQueries).not.toHaveBeenCalled();
@@ -114,7 +123,11 @@ describe('WorkflowExecutionDetail - cache invalidation', () => {
       error: null,
     });
 
-    rerender(<WorkflowExecutionDetail executionId="exec-2" onClose={jest.fn()} />);
+    rerender(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-2" onClose={jest.fn()} />
+      </TestWrapper>
+    );
 
     expect(mockRemoveQueries).toHaveBeenCalledWith({
       queryKey: ['stepExecution', 'exec-1'],
@@ -153,7 +166,11 @@ describe('WorkflowExecutionDetail - auto-select overview on failed before steps'
       selectedStepExecutionId: '',
     });
 
-    render(<WorkflowExecutionDetail executionId="exec-fail" onClose={jest.fn()} />);
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-fail" onClose={jest.fn()} />
+      </TestWrapper>
+    );
 
     expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
   });

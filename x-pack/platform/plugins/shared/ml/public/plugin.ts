@@ -55,7 +55,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import type { CPSPluginStart } from '@kbn/cps/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';

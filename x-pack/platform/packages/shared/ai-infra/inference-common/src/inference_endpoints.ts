@@ -9,6 +9,7 @@
  * Constants for all default (preconfigured) inference endpoints.
  */
 export const defaultInferenceEndpoints = {
+  JINAv5: '.jina-embeddings-v5-text-small',
   ELSER: '.elser-2-elasticsearch',
   ELSER_IN_EIS_INFERENCE_ID: '.elser-2-elastic',
   MULTILINGUAL_E5_SMALL: '.multilingual-e5-small-elasticsearch',

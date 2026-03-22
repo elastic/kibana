@@ -21,7 +21,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
@@ -34,6 +34,7 @@ import { QualityWarningPrompt } from './quality_warning_prompt';
 import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { isQualityIncompatible } from '../../../hooks/visibility_status_utils';
 import { useAutoCheckIndices } from './use_auto_check_indices';
 import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
@@ -96,7 +97,9 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
         return {
           ...index,
-          status: incompatibleCount > 0 ? ('incompatible' as const) : ('healthy' as const),
+          status: isQualityIncompatible(incompatibleCount)
+            ? ('incompatible' as const)
+            : ('healthy' as const),
           incompatibleFieldCount: incompatibleCount,
           checkedAt: result?.checkedAt,
         };
@@ -137,7 +140,9 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
-    const hasIncompatibleFields = category.items.some((item) => item.incompatibleFieldCount > 0);
+    const hasIncompatibleFields = category.items.some((item) =>
+      isQualityIncompatible(item.incompatibleFieldCount)
+    );
     const status = hasIncompatibleFields ? 'Actions required' : 'Healthy';
     const statusColor = hasIncompatibleFields ? 'warning' : 'success';
 
@@ -147,7 +152,9 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
 
     const affectedIndices = new Set(
-      category.items.filter((item) => item.incompatibleFieldCount > 0).map((item) => item.indexName)
+      category.items
+        .filter((item) => isQualityIncompatible(item.incompatibleFieldCount))
+        .map((item) => item.indexName)
     ).size;
 
     const totalDataSources = category.items.length;
@@ -355,28 +362,6 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   }
 
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.title', {
-            defaultMessage: 'No data available',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.description', {
-              defaultMessage: 'No category data found. Please check your indices.',
-            })}
-          </p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -455,6 +440,11 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         })}
         defaultSortField="indexName"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={
+          activeCategories.length < CATEGORY_ORDER.length &&
+          (getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0
+        }
+        hasUnfilteredData={(getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0}
       />
     </>
   );

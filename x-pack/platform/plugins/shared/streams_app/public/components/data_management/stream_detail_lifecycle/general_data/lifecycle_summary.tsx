@@ -229,6 +229,9 @@ const NonIlmLifecycleSummary = ({
         headerActions={dslHeaderActions}
         uiState={{
           editedPhaseName: undefined,
+          editedDownsampleStepIndex: dslSummary.isEditLifecycleFlyoutOpen
+            ? dslSummary.selectedStepIndex
+            : undefined,
           isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen,
           invalidStepIndices,
         }}

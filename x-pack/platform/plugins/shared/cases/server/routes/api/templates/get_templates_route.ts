@@ -30,7 +30,7 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const { page, perPage, sortField, sortOrder, search, tags, author, isDeleted } =
+      const { page, perPage, sortField, sortOrder, search, tags, author, owner, isDeleted } =
         request.query;
       const { templates, ...pagination } = await casesClient.templates.getAllTemplates({
         page: Number(page),
@@ -40,6 +40,7 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
         search,
         tags: tags ? castArray(tags).filter(Boolean) : [],
         author: author ? castArray(author).filter(Boolean) : [],
+        owner: owner ? castArray(owner).filter(Boolean) : [],
         isDeleted: String(isDeleted) === 'true',
       });
 
