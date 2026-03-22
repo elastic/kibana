@@ -91,7 +91,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
 
           const removedPayload: PanelsRemovedEventData = {
             dashboardAttachmentId,
-            panelIds: panels.map(({ panelId }) => panelId),
+            panelIds: panels.map(({ uid }) => uid),
           };
           events.sendUiEvent(DASHBOARD_PANELS_REMOVED_EVENT, removedPayload);
         };
@@ -160,7 +160,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                     ...updatedDashboardData,
                     panels: updatedDashboardData.panels.map((panel) => ({
                       type: panel.type,
-                      panelId: panel.panelId,
+                      uid: panel.uid,
                       title: panel.title ?? '',
                       grid: panel.grid,
                       ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
@@ -176,7 +176,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                             grid: section.grid,
                             panels: section.panels.map((panel) => ({
                               type: panel.type,
-                              panelId: panel.panelId,
+                              uid: panel.uid,
                               title: panel.title ?? '',
                               grid: panel.grid,
                               ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId

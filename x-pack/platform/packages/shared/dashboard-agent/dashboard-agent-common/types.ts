@@ -31,7 +31,7 @@ export const panelGridSchema = z.object({
  */
 export const lensAttachmentPanelSchema = z.object({
   type: z.literal('lens'),
-  panelId: z.string(),
+  uid: z.string(),
   /** The visualization configuration in Lens API format (LensApiSchemaType) */
   visualization: z.record(z.string(), z.unknown()),
   /** Panel title */
@@ -56,7 +56,7 @@ export type LensAttachmentPanel = z.infer<typeof lensAttachmentPanelSchema>;
 export const genericAttachmentPanelSchema = z.object({
   /** The actual embeddable type (e.g., 'DASHBOARD_MARKDOWN', 'aiOpsLogRateAnalysis', 'lens' for unsupported) */
   type: z.string(),
-  panelId: z.string(),
+  uid: z.string(),
   /** The raw panel configuration for recreating the panel */
   rawConfig: z.record(z.string(), z.unknown()),
   /** Panel title if available */

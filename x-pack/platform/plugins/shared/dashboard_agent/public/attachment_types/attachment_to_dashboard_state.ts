@@ -72,7 +72,7 @@ const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
   return panelList.reduce<DashboardPanel[]>((acc, panel) => {
     if (isLensAttachmentPanel(panel)) {
       acc.push({
-        ...buildLensPanelFromApi(panel.visualization as LensApiSchemaType, panel.panelId),
+        ...buildLensPanelFromApi(panel.visualization as LensApiSchemaType, panel.uid),
         grid: panel.grid,
       });
     } else if (isGenericAttachmentPanel(panel)) {
@@ -81,7 +81,7 @@ const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
           embeddableType: panel.type,
           rawConfig: panel.rawConfig,
           title: panel.title,
-          uid: panel.panelId,
+          uid: panel.uid,
         }),
         grid: panel.grid,
       });
@@ -109,6 +109,8 @@ const normalizeDashboardWidgets = ({
   panels: AttachmentPanel[];
   sections?: AgentDashboardSection[];
 }): DashboardState['panels'] => {
+  console.log('panels', panels);
+  console.log('normalizePanels', normalizePanels(panels));
   return [...normalizePanels(panels), ...normalizeSections(sections ?? [])];
 };
 
@@ -138,6 +140,7 @@ const getEmptyDashboardState = (): Omit<Required<DashboardState>, 'project_routi
 });
 
 export const getStateFromAttachment = (attachment: DashboardAttachment): DashboardState => {
+  console.log('attachment', attachment);
   const { title, description, panels = [], sections = [] } = attachment.data;
 
   return {

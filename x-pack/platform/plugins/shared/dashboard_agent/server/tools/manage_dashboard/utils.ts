@@ -60,7 +60,7 @@ const resolvePanelsFromVisualizationAttachment = (
   return [
     {
       type: 'lens',
-      panelId: uuidv4(),
+      uid: uuidv4(),
       visualization: visualization as LensApiSchemaType,
       title,
       sourceAttachmentId: attachmentId,
@@ -156,7 +156,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.panelId)) {
+    if (removeSet.has(panel.uid)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);

@@ -20,9 +20,9 @@ const createMockLogger = (): Logger =>
 
 describe('executeDashboardOperations', () => {
   const logger = createMockLogger();
-  const createLensPanel = (panelId: string, gridY = 0): AttachmentPanel => ({
+  const createLensPanel = (uid: string, gridY = 0): AttachmentPanel => ({
     type: 'lens',
-    panelId,
+    uid,
     visualization: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
   });
@@ -66,18 +66,18 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [attachmentPanel], failures: [] }),
       onPanelsAdded: (panels) => {
         for (const panel of panels) {
-          events.push(`added:${panel.panelId}`);
+          events.push(`added:${panel.uid}`);
         }
       },
       onPanelsRemoved: (panels) => {
-        events.push(`removed:${panels.map(({ panelId }) => panelId).join(',')}`);
+        events.push(`removed:${panels.map(({ uid }) => uid).join(',')}`);
       },
     });
 
     expect(result.dashboardData.title).toBe('Updated title');
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({
-        panelId: 'from-attachment-panel',
+        uid: 'from-attachment-panel',
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
       expect.objectContaining({
@@ -135,7 +135,7 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ panelId: 'from-attachment' }),
+      expect.objectContaining({ uid: 'from-attachment' }),
     ]);
     expect(result.failures).toEqual([
       expect.objectContaining({
@@ -221,7 +221,7 @@ describe('executeDashboardOperations', () => {
         failures: [],
       }),
       onPanelsAdded: (panels) => {
-        addedPanelEvents.push(...panels.map(({ panelId }) => panelId));
+        addedPanelEvents.push(...panels.map(({ uid }) => uid));
       },
       onPanelsRemoved: () => {},
     });
@@ -234,7 +234,7 @@ describe('executeDashboardOperations', () => {
       grid: { y: 12 },
       panels: [
         expect.objectContaining({
-          panelId: 'section-panel-1',
+          uid: 'section-panel-1',
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
       ],
@@ -287,7 +287,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.panels).toEqual([]);
     expect(result.dashboardData.sections?.[0].panels).toEqual([
       expect.objectContaining({
-        panelId: 'section-routed-panel',
+        uid: 'section-routed-panel',
         grid: { x: 12, y: 0, w: 12, h: 5 },
       }),
     ]);
@@ -318,9 +318,9 @@ describe('executeDashboardOperations', () => {
 
     expect(result.dashboardData.sections).toBeUndefined();
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ panelId: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
-      expect.objectContaining({ panelId: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
-      expect.objectContaining({ panelId: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
+      expect.objectContaining({ uid: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
+      expect.objectContaining({ uid: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
+      expect.objectContaining({ uid: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
     ]);
   });
 
@@ -347,12 +347,12 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: (panels) => {
-        removedPanelIds.push(...panels.map(({ panelId }) => panelId));
+        removedPanelIds.push(...panels.map(({ uid }) => uid));
       },
     });
 
     expect(result.dashboardData.sections).toBeUndefined();
-    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ panelId: 'top-1' })]);
+    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ uid: 'top-1' })]);
     expect(removedPanelIds).toEqual(['section-a-1']);
   });
 
@@ -379,7 +379,7 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: (panels) => {
-        removedPanelIds.push(...panels.map(({ panelId }) => panelId));
+        removedPanelIds.push(...panels.map(({ uid }) => uid));
       },
     });
 
@@ -390,7 +390,7 @@ describe('executeDashboardOperations', () => {
         title: 'Section A',
         collapsed: false,
         grid: { y: 8 },
-        panels: [expect.objectContaining({ panelId: 'section-a-2' })],
+        panels: [expect.objectContaining({ uid: 'section-a-2' })],
       },
     ]);
     expect(removedPanelIds.sort()).toEqual(['section-a-1', 'top-1']);
@@ -425,7 +425,7 @@ describe('executeDashboardOperations', () => {
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: (panels) => {
-        addedPanelIds.push(...panels.map(({ panelId }) => panelId));
+        addedPanelIds.push(...panels.map(({ uid }) => uid));
       },
       onPanelsRemoved: () => {},
     });
@@ -443,24 +443,24 @@ describe('executeDashboardOperations', () => {
 
   describe('update_panels_from_attachments', () => {
     const createLensPanelWithSource = (
-      panelId: string,
+      uid: string,
       sourceAttachmentId: string,
       gridY = 0
     ): AttachmentPanel => ({
       type: 'lens',
-      panelId,
+      uid,
       visualization: { type: 'metric' },
       sourceAttachmentId,
       grid: { x: 0, y: gridY, w: 24, h: 9 },
     });
 
-    it('updates a top-level panel from its source attachment, preserving panelId and grid', async () => {
+    it('updates a top-level panel from its source attachment, preserving uid and grid', async () => {
       const originalPanel = createLensPanelWithSource('panel-1', 'viz-att-1', 5);
       const resolveFn = jest.fn().mockReturnValue({
         panels: [
           {
             type: 'lens',
-            panelId: 'new-generated-id',
+            uid: 'new-generated-id',
             visualization: { type: 'bar' },
             sourceAttachmentId: 'viz-att-1',
             grid: { x: 0, y: 5, w: 24, h: 9 },
@@ -488,7 +488,7 @@ describe('executeDashboardOperations', () => {
 
       expect(result.dashboardData.panels).toHaveLength(1);
       const updatedPanel = result.dashboardData.panels[0];
-      expect(updatedPanel.panelId).toBe('panel-1');
+      expect(updatedPanel.uid).toBe('panel-1');
       expect(updatedPanel.grid).toEqual({ x: 0, y: 5, w: 24, h: 9 });
       expect((updatedPanel as { visualization: unknown }).visualization).toEqual({ type: 'bar' });
       expect((updatedPanel as { sourceAttachmentId: string }).sourceAttachmentId).toBe('viz-att-1');
@@ -518,7 +518,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               type: 'lens',
-              panelId: 'new-id',
+              uid: 'new-id',
               visualization: { type: 'line' },
               sourceAttachmentId: 'viz-att-2',
               grid: { x: 0, y: 0, w: 24, h: 9 },
@@ -531,7 +531,7 @@ describe('executeDashboardOperations', () => {
       });
 
       const updatedPanel = result.dashboardData.sections?.[0].panels[0];
-      expect(updatedPanel?.panelId).toBe('sec-panel-1');
+      expect(updatedPanel?.uid).toBe('sec-panel-1');
       expect((updatedPanel as { visualization: unknown }).visualization).toEqual({ type: 'line' });
     });
 
@@ -602,7 +602,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               type: 'lens',
-              panelId: 'new-id',
+              uid: 'new-id',
               visualization: { type: 'bar' },
               sourceAttachmentId: 'viz-att-1',
               grid: { x: 0, y: 0, w: 24, h: 9 },
@@ -611,10 +611,10 @@ describe('executeDashboardOperations', () => {
           failures: [],
         }),
         onPanelsAdded: (panels) => {
-          for (const p of panels) events.push(`added:${p.panelId}`);
+          for (const p of panels) events.push(`added:${p.uid}`);
         },
         onPanelsRemoved: (panels) => {
-          for (const p of panels) events.push(`removed:${p.panelId}`);
+          for (const p of panels) events.push(`removed:${p.uid}`);
         },
       });
 

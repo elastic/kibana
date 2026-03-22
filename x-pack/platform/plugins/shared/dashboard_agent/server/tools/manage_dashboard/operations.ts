@@ -146,7 +146,7 @@ const removePanelsFromDashboard = ({
   const topLevelPanelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of dashboardData.panels) {
-    if (panelIdSet.has(panel.panelId)) {
+    if (panelIdSet.has(panel.uid)) {
       removedPanels.push(panel);
     } else {
       topLevelPanelsToKeep.push(panel);
@@ -156,7 +156,7 @@ const removePanelsFromDashboard = ({
   const nextSections = (dashboardData.sections ?? []).map((section) => {
     const sectionPanelsToKeep: AttachmentPanel[] = [];
     for (const panel of section.panels) {
-      if (panelIdSet.has(panel.panelId)) {
+      if (panelIdSet.has(panel.uid)) {
         removedPanels.push(panel);
       } else {
         sectionPanelsToKeep.push(panel);
@@ -214,7 +214,7 @@ export const executeDashboardOperations = ({
       case 'add_markdown': {
         const markdownPanel: GenericAttachmentPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
-          panelId: uuidv4(),
+          uid: uuidv4(),
           rawConfig: { content: operation.markdownContent },
           grid: operation.grid,
         };
@@ -394,7 +394,7 @@ export const executeDashboardOperations = ({
 
             const updatedPanel = {
               ...result.panels[0],
-              panelId: panel.panelId,
+              uid: panel.uid,
               grid: panel.grid,
             };
 
@@ -404,7 +404,7 @@ export const executeDashboardOperations = ({
             return updatedPanel;
           } catch (error) {
             logger.error(
-              `Failed to update panel "${panel.panelId}" from attachment "${
+              `Failed to update panel "${panel.uid}" from attachment "${
                 panel.sourceAttachmentId
               }": ${error instanceof Error ? error.message : String(error)}`
             );
