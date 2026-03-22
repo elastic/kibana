@@ -10,11 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
-import {
-  ChromeLayout,
-  ChromeLayoutConfigProvider,
-  SimpleDebugOverlay,
-} from '@kbn/core-chrome-layout-components';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
@@ -34,11 +30,7 @@ import {
 } from '@kbn/core-chrome-browser-hooks';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
-import type {
-  LayoutService,
-  LayoutServiceParams,
-  LayoutServiceStartDeps,
-} from '../../layout_service';
+import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
@@ -71,10 +63,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
  * Service for providing layout component wired to other core services.
  */
 export class GridLayout implements LayoutService {
-  constructor(
-    private readonly deps: LayoutServiceStartDeps,
-    private readonly params: LayoutServiceParams
-  ) {}
+  constructor(private readonly deps: LayoutServiceStartDeps) {}
 
   /**
    * Returns a layout component with the provided dependencies
@@ -84,7 +73,6 @@ export class GridLayout implements LayoutService {
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const debug = this.params.debug ?? false;
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -93,7 +81,7 @@ export class GridLayout implements LayoutService {
       customBranding,
     };
 
-    const GridLayoutContent = React.memo(({ debug: showDebug }: { debug: boolean }) => {
+    const GridLayoutContent = React.memo(() => {
       const chromeVisible = useIsChromeVisible();
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
@@ -129,17 +117,6 @@ export class GridLayout implements LayoutService {
         banner = <HeaderTopBanner position="static" />;
       }
 
-      if (showDebug) {
-        if (chromeVisible) {
-          if (!navigation) {
-            navigation = <SimpleDebugOverlay label="Debug Navigation" />;
-          }
-        }
-        if (!banner) {
-          banner = <SimpleDebugOverlay label="Debug Banner" />;
-        }
-      }
-
       return (
         <>
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
@@ -169,7 +146,7 @@ export class GridLayout implements LayoutService {
 
     return () => (
       <ChromeComponentsProvider value={componentDeps}>
-        <GridLayoutContent debug={debug} />
+        <GridLayoutContent />
       </ChromeComponentsProvider>
     );
   }
