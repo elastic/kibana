@@ -239,7 +239,12 @@ const buildSchema = (operation: OperationObject): z.ZodObject<Record<string, z.Z
 const buildHttpRequest = (
   operation: OperationObject,
   args: Record<string, unknown>
-): { path: string; method: string; query: Record<string, string> } => {
+): {
+  path: string;
+  method: string;
+  query: Record<string, string>;
+  body?: Record<string, unknown>;
+} => {
   let path = operation.path;
   const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
   const pathParams = parameters.filter((p) => p.in === 'path');
@@ -255,15 +260,14 @@ const buildHttpRequest = (
   for (const p of queryParams) {
     if (args[p.name] != null) query[p.name] = String(args[p.name]);
   }
-  return { path, method: operation.method, query };
+  return { path, method: operation.method, query, body: args.body as Record<string, unknown> };
 };
 
 const buildConsoleRequest = (
   operation: OperationObject,
   args: Record<string, unknown>
 ): ConsoleRequest => {
-  const { body, ...restArgs } = args;
-  const { path, method, query } = buildHttpRequest(operation, restArgs);
+  const { body, path, method, query } = buildHttpRequest(operation, args);
   const queryString = Object.entries(query)
     .map(([k, v]) => `${k}=${v}`)
     .join('&');
@@ -276,8 +280,7 @@ const buildConsoleRequest = (
 
 const buildHandler = (operation: OperationObject): ToolHandler => {
   return async (args, esClient) => {
-    const { body, ...restArgs } = args;
-    const { path, method, query } = buildHttpRequest(operation, restArgs);
+    const { path, method, query, body } = buildHttpRequest(operation, args);
     const consoleRequest = buildConsoleRequest(operation, args);
 
     try {
@@ -285,7 +288,7 @@ const buildHandler = (operation: OperationObject): ToolHandler => {
         method,
         path,
         querystring: Object.keys(query).length ? query : undefined,
-        body: body ?? undefined,
+        body,
       });
 
       return { response, consoleRequest };

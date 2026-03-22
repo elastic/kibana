@@ -15,12 +15,11 @@ import {
   Command,
 } from '@langchain/langgraph';
 import { tool as toTool } from '@langchain/core/tools';
-import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ResourceTypes } from '@kbn/product-doc-common';
 import {
   createErrorResult,
@@ -29,6 +28,8 @@ import {
   type ToolPromptManager,
   type ToolStateManager,
 } from '@kbn/agent-builder-server';
+import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
@@ -49,10 +50,6 @@ const NODE_NAMES = {
   LLM_SELECT_TOOLS: 'llm_select_tools',
   ASK_FOR_CONFIRMATION: 'ask_for_confirmation',
   EXECUTE_TOOL: 'execute_tool',
-} as const;
-
-const CONFIRMATION_IDS = {
-  EXECUTE_ACTION: 'execute_action',
 } as const;
 
 /**
@@ -78,16 +75,14 @@ const StateAnnotation = Annotation.Root({
 export type StateType = typeof StateAnnotation.State;
 type StateManagerType = Pick<StateType, 'nlQuery' | 'openapiSpecs' | 'messages'>;
 
-const isDangerousOperation = (
-  response: AIMessageChunk,
-  openApiToolSet: OpenAPIToolSet
-): boolean => {
-  if (!response.tool_calls || response.tool_calls.length === 0) {
+const isDangerousOperation = (response: BaseMessage, openApiToolSet: OpenAPIToolSet): boolean => {
+  const toolCalls = extractToolCalls(response);
+  if (toolCalls.length === 0) {
     return false;
   }
 
-  const methods = response.tool_calls
-    .map((t) => openApiToolSet.getToolOperation(t.name)?.method.toLowerCase())
+  const methods = toolCalls
+    .map((t) => openApiToolSet.getToolOperation(t.toolName)?.method.toLowerCase())
     .filter(Boolean) as string[];
 
   return methods.some((method) => DANGEROUS_HTTP_METHODS.has(method));
@@ -133,7 +128,7 @@ const parseToolResponse = async (
   error?: string;
   statusCode?: number;
 }> => {
-  const content = toolMessage.content as string;
+  const content = extractTextContent(toolMessage);
   let parsedContent: Record<string, unknown>;
   try {
     parsedContent = JSON.parse(content);
@@ -234,9 +229,7 @@ export const createElasticsearchToolGraph = async ({
       });
     }
 
-    const { status: confirmStatus } = prompts.checkConfirmationStatus(
-      CONFIRMATION_IDS.EXECUTE_ACTION
-    );
+    const { status: confirmStatus } = prompts.checkConfirmationStatus('execute_action');
     if (confirmStatus === ConfirmationStatus.rejected) {
       return new Command({
         update: {
@@ -321,6 +314,19 @@ export const createElasticsearchToolGraph = async ({
 
     const openapiSpecs = result.documents.map((doc) => JSON.parse(doc.content));
 
+    if (openapiSpecs.length === 0) {
+      return {
+        tools: [],
+        toolOutput: {
+          results: [
+            createErrorResult({
+              message: `No relevant Elasticsearch API documentation was found for the query: "${state.nlQuery}". Try rephrasing your request or check that the OpenAPI spec documentation is installed.`,
+            }),
+          ],
+        },
+      };
+    }
+
     const openApiToolSet = new OpenAPIToolSet(openapiSpecs);
 
     const tools = openApiToolSet.getTools();
@@ -344,9 +350,9 @@ export const createElasticsearchToolGraph = async ({
       messages: state.messages,
     });
 
-    const aiMessage = state.messages[state.messages.length - 1] as AIMessageChunk;
-    const consoleRequests = aiMessage.tool_calls!.map((t) => {
-      const consoleRequest = state.openApiToolSet.formatConsoleRequest(t.name, t.args);
+    const lastMessage = state.messages[state.messages.length - 1];
+    const consoleRequests = extractToolCalls(lastMessage).map((t) => {
+      const consoleRequest = state.openApiToolSet.formatConsoleRequest(t.toolName, t.args);
       if (typeof consoleRequest === 'string') {
         return consoleRequest;
       }
@@ -355,12 +361,11 @@ export const createElasticsearchToolGraph = async ({
 
     const confirmationMessage = dedent(`
       Are you sure you want to call this Elasticsearch API?
-
-      **${consoleRequests.join('\n')}**
+      ${consoleRequests.join('\n')}
     `);
 
     const prompt = await prompts.askForConfirmation({
-      id: CONFIRMATION_IDS.EXECUTE_ACTION,
+      id: 'execute_action',
       message: confirmationMessage,
     });
     return { toolOutput: prompt };
@@ -380,14 +385,7 @@ export const createElasticsearchToolGraph = async ({
         return new Command({
           update: {
             toolOutput: {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    message: response.content,
-                  },
-                },
-              ],
+              results: [otherResult({ message: response.content })],
             },
           },
           goto: END,
@@ -428,12 +426,7 @@ export const createElasticsearchToolGraph = async ({
 
     return {
       toolOutput: {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: toolResponse,
-          },
-        ],
+        results: [otherResult(toolResponse)],
       },
     };
   };
