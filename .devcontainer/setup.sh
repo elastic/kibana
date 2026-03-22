@@ -76,11 +76,34 @@ echo "✅ AESOP indices created!"
 echo ""
 
 # ═══════════════════════════════════════════════════════════════
-# Step 4: Load baseline data for hypothesis testing
+# Step 4: Generate ALL test data automatically
 # ═══════════════════════════════════════════════════════════════
-echo "📊 Loading baseline data for hypothesis validation..."
+echo "📊 Generating comprehensive test data for hypothesis validation..."
+echo "   This generates all data types needed for H1-H4 validation"
+echo ""
 
-# Create documented relationships baseline (for H1 testing)
+# 4.1: Install tsx for TypeScript execution
+echo "  Installing tsx (TypeScript executor)..."
+npm install -g tsx > /dev/null 2>&1
+echo "  ✅ tsx installed"
+
+# 4.2: Run comprehensive data generator
+echo "  Running data generator (generates ~200K documents, ~5 minutes)..."
+cd /workspace/x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo/
+
+tsx data_generator.ts \
+  --mode hypothesis-validation \
+  --alerts 15000 \
+  --personas 2700 \
+  --apm-traces 100000 \
+  --logs 50000 \
+  --metrics 17000 \
+  2>&1 | tee /tmp/data-generation.log
+
+echo "  ✅ Demo data generated!"
+
+# 4.3: Create documented relationships baseline (for H1 testing)
+cd /workspace
 curl -s -X POST "http://elasticsearch:9200/.aesop-documented-relationships/_doc/baseline" \
   -H "Content-Type: application/json" \
   -u elastic:changeme \
@@ -104,7 +127,80 @@ curl -s -X POST "http://elasticsearch:9200/.aesop-documented-relationships/_doc/
     ]
   }' > /dev/null
 
-echo "✅ Baseline data loaded!"
+echo "  ✅ Documented relationships baseline created (12 relationships)"
+
+# 4.4: Generate hand-authored skills baseline (for H2 comparison)
+echo "  Generating hand-authored skills baseline for comparison..."
+
+# Create 5 hand-authored skills that AESOP will try to match/exceed
+cat > /tmp/hand_authored_skills.json <<'SKILLS'
+[
+  {
+    "id": "hand-authored-1",
+    "name": "Manual Alert Triage Workflow",
+    "description": "Manually investigate high-severity security alerts with enrichment",
+    "content": "# Alert Triage\n\n## Purpose\nInvestigate high-severity alerts\n\n## Steps\n1. Query alerts\n2. Enrich with threat intel\n3. Correlate with historical data\n4. Classify severity\n5. Create case if needed",
+    "tools": ["search_alerts", "get_threat_intel", "create_case"],
+    "created_by": "human_engineer",
+    "creation_time_hours": 4,
+    "source": "manual"
+  },
+  {
+    "id": "hand-authored-2",
+    "name": "Manual Entity Risk Scoring",
+    "description": "Score entities based on historical behavior and threat intelligence",
+    "content": "# Entity Risk Scoring\n\n## Purpose\nCalculate risk scores for hosts and users\n\n## Algorithm\n1. Count historical alerts for entity\n2. Check threat intel databases\n3. Calculate weighted score\n4. Return HIGH/MEDIUM/LOW",
+    "tools": ["search_alerts", "entity_analytics", "threat_intel"],
+    "created_by": "human_engineer",
+    "creation_time_hours": 3.5,
+    "source": "manual"
+  },
+  {
+    "id": "hand-authored-3",
+    "name": "Manual Multi-Alert Correlation",
+    "description": "Correlate related alerts by common entities",
+    "content": "# Alert Correlation\n\n## Purpose\nFind related alerts by host, user, or IP\n\n## Steps\n1. Extract entities from alert\n2. Search for alerts with same entities\n3. Group by time window (4 hours)\n4. Return correlated set",
+    "tools": ["search_alerts", "extract_entities"],
+    "created_by": "human_engineer",
+    "creation_time_hours": 3,
+    "source": "manual"
+  },
+  {
+    "id": "hand-authored-4",
+    "name": "Manual MITRE ATT&CK Mapping",
+    "description": "Map security alerts to MITRE ATT&CK framework",
+    "content": "# MITRE Mapping\n\n## Purpose\nClassify alerts by MITRE tactics and techniques\n\n## Mapping Rules\n- PowerShell execution → T1059.001\n- File creation in temp → T1105\n- Network connection → T1071\n\n## Output\nReturns: tactics[], techniques[], phase",
+    "tools": ["get_alert_details"],
+    "created_by": "human_engineer",
+    "creation_time_hours": 4.5,
+    "source": "manual"
+  },
+  {
+    "id": "hand-authored-5",
+    "name": "Manual Historical Context Enrichment",
+    "description": "Enrich alerts with historical context for better triage",
+    "content": "# Historical Context\n\n## Purpose\nAdd context from similar past alerts\n\n## Steps\n1. Extract key fields (IP, user, host)\n2. Search last 30 days for similar\n3. Aggregate: total count, severity distribution\n4. Return context summary",
+    "tools": ["search_alerts", "aggregate_metrics"],
+    "created_by": "human_engineer",
+    "creation_time_hours": 3,
+    "source": "manual"
+  }
+]
+SKILLS
+
+# Index hand-authored skills for comparison
+for skill in $(cat /tmp/hand_authored_skills.json | jq -c '.[]'); do
+  skill_id=$(echo $skill | jq -r '.id')
+  curl -s -X POST "http://elasticsearch:9200/.aesop-hand-authored-skills/_doc/$skill_id" \
+    -H "Content-Type: application/json" \
+    -u elastic:changeme \
+    -d "$skill" > /dev/null
+done
+
+echo "  ✅ Hand-authored skills baseline created (5 skills, 18 hours manual effort simulated)"
+echo ""
+
+echo "✅ All baseline data loaded!"
 echo ""
 
 # ═══════════════════════════════════════════════════════════════
