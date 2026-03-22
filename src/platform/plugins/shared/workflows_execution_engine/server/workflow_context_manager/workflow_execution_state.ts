@@ -111,7 +111,7 @@ export class WorkflowExecutionState {
     if (!this.stepExecutions.has(step.id)) {
       this.createStep(step);
     } else {
-      this.updateStep(step);
+      this.updateStep(step.id, step);
     }
   }
 
@@ -169,17 +169,17 @@ export class WorkflowExecutionState {
     });
   }
 
-  private updateStep(step: Partial<EsWorkflowStepExecution> & Pick<EsWorkflowStepExecution, 'id'>) {
-    const existingStep = this.stepExecutions.get(step.id);
+  private updateStep(stepId: string, step: Partial<EsWorkflowStepExecution>) {
+    const existingStep = this.stepExecutions.get(stepId);
     const updatedStep = {
       ...existingStep,
       ...step,
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(step.id, updatedStep);
+    this.stepExecutions.set(stepId, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes
     // ES partial update (doc_as_upsert) preserves fields not included in the update
-    this.stepDocumentsChanges.set(step.id, {
-      ...(this.stepDocumentsChanges.get(step.id) || {}),
+    this.stepDocumentsChanges.set(stepId, {
+      ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
   }
