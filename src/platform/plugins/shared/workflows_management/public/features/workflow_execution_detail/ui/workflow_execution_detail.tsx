@@ -19,7 +19,8 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WaitForInputStep, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -65,7 +66,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
-    const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
+    const { activeTab, setSelectedStepExecution, selectedStepExecutionId, shouldAutoResume } =
+      useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
       WidthStorageKey,
       DefaultSidebarWidth
@@ -105,6 +107,21 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
+
+    // Derive the resume message from the paused waitForInput step's config, if available.
+    const resumeMessage = useMemo<string | undefined>(() => {
+      if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+        return undefined;
+      }
+      const pausedStep = workflowExecution.stepExecutions?.find(
+        (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
+      );
+      if (!pausedStep) return undefined;
+      const stepDef = workflowDefinition?.steps?.find(
+        (s): s is WaitForInputStep => s.type === 'waitForInput' && s.name === pausedStep.stepId
+      );
+      return stepDef?.with?.message;
+    }, [workflowExecution, workflowDefinition]);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -251,6 +268,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
+              workflowExecutionStatus={workflowExecution?.status}
+              resumeMessage={resumeMessage}
+              shouldAutoResume={shouldAutoResume}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />
