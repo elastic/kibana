@@ -93,6 +93,7 @@ function CascadeGroupingSelectionPopover({
 
   return (
     <EuiPopover
+      aria-label="Cascade grouping selection popover"
       isOpen={cascadeSelectOpen}
       closePopover={closeSelectionPopover}
       panelPaddingSize="none"
@@ -113,7 +114,7 @@ function CascadeGroupingSelectionPopover({
               badgeContent={currentSelectedColumns.length}
               data-test-subj="discoverEnableCascadeLayoutSwitch"
             >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <FormattedMessage
                     id="discover.dataCascade.header.layoutSwitchLabel"
