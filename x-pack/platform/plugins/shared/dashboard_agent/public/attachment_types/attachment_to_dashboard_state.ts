@@ -10,7 +10,8 @@ import type {
   DashboardAttachmentData,
   DashboardSection as AgentDashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { type DashboardState } from '@kbn/dashboard-plugin/common';
+import { isSection } from '@kbn/dashboard-agent-common';
+import { isDashboardSection, type DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import {
@@ -47,17 +48,21 @@ const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): Das
   };
 };
 
-const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] =>
-  (panels ?? []).map(buildPanelFromConfig);
+type AgentWidget = AttachmentPanel | AgentDashboardSection;
+type DashboardWidget = DashboardPanel | DashboardSection;
 
-const normalizeSections = (sections: AgentDashboardSection[]): DashboardSection[] =>
-  (sections ?? []).map(({ uid, title, collapsed, grid: { y }, panels }) => ({
-    uid,
-    title,
-    collapsed,
-    grid: { y },
-    panels: normalizePanels(panels),
-  }));
+const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
+  uid: section.uid,
+  title: section.title,
+  collapsed: section.collapsed,
+  grid: { y: section.grid.y },
+  panels: section.panels.map(buildPanelFromConfig),
+});
+
+const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
+  (widgets ?? []).map((widget) =>
+    isSection(widget) ? normalizeSection(widget) : buildPanelFromConfig(widget)
+  );
 
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
@@ -86,16 +91,13 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
   });
 
 export const getStateFromAttachment = ({
-  data: { title, description, panels = [], sections = [] },
-}: DashboardAttachment): DashboardState => {
-  console.log('!!!!!!!!!getStateFromAttachment', { title, description, panels, sections })
-  return {
+  data: { title, description, panels = [] },
+}: DashboardAttachment): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,
   title,
   description,
-  panels: [...normalizePanels(panels), ...normalizeSections(sections)],
-};
-};
+  panels: normalizeWidgets(panels),
+});
 
 /**
  * Converts a DashboardPanel to an AttachmentPanel.
@@ -103,22 +105,20 @@ export const getStateFromAttachment = ({
 const toAttachmentPanel = ({ type, uid, grid, config }: DashboardPanel): AttachmentPanel => {
   let configObject = config;
   if (type === LENS_EMBEDDABLE_TYPE) {
-    // console.log('!!!!!!!!!toAttachmentPanel', { type, uid, grid, config })
     if ('attributes' in config && isLensLegacyAttributes(config.attributes)) {
       configObject = {
         ...config,
         attributes: lensConfigBuilder.toAPIFormat(config.attributes),
       };
-    } 
+    }
   }
   return {
-  type,
-  uid,
-  grid,
-  config: configObject,
+    type,
+    uid,
+    grid,
+    config: configObject,
+  };
 };
-};
-
 
 /**
  * Converts a DashboardSection to an AgentDashboardSection.
@@ -141,23 +141,10 @@ const toAttachmentSection = ({
  * Converts a DashboardState to DashboardAttachmentData.
  * This is the reverse of getStateFromAttachment.
  */
-export const toDashboardAttachmentData = (state: DashboardState): DashboardAttachmentData => {
-  console.log('!!!!!!!!!toDashboardAttachmentData', state)
-  const panels: AttachmentPanel[] = [];
-  const sections: AgentDashboardSection[] = [];
-
-  for (const widget of state.panels) {
-    if ('panels' in widget) {
-      sections.push(toAttachmentSection(widget));
-    } else {
-      panels.push(toAttachmentPanel(widget));
-    }
-  }
-
-  return {
-    title: state.title,
-    description: state.description ?? '',
-    panels,
-    ...(sections.length > 0 ? { sections } : {}),
-  };
-};
+export const toDashboardAttachmentData = (state: DashboardState): DashboardAttachmentData => ({
+  title: state.title,
+  description: state.description ?? '',
+  panels: state.panels.map((widget) =>
+    isDashboardSection(widget) ? toAttachmentSection(widget) : toAttachmentPanel(widget)
+  ),
+});

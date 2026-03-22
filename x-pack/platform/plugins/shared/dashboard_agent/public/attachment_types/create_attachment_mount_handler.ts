@@ -109,7 +109,7 @@ export const onAttachmentMount = ({
       api.setState(getStateFromAttachment(attachment));
       setTimeout(() => api!.scrollToBottom(), 0);
     });
-    console.log('!!!!!!!!!manualChangesSubscription')
+
     // Sync manual dashboard changes back to the attachment
     manualChangesSubscription = merge(
       api.query$.pipe(map(() => undefined)),
@@ -122,7 +122,6 @@ export const onAttachmentMount = ({
     )
       .pipe(auditTime(150))
       .subscribe(() => {
-        console.log('!!!!!!!!!manualChangesSubscription')
         const currentAttachment = getAttachment();
         const currentSavedObjectId = api.savedObjectId$.getValue();
 
@@ -135,8 +134,6 @@ export const onAttachmentMount = ({
         if (!currentDashboardState) {
           return;
         }
-        console.log('!!!!!!!!!currentDashboardState', currentDashboardState)
-        console.log('!!!!!!!!!toDashboardAttachmentData', toDashboardAttachmentData(currentDashboardState))
 
         addAttachment({
           id: currentAttachment.id,

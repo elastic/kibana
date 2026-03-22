@@ -12,7 +12,7 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { panelGridSchema } from '@kbn/dashboard-agent-common';
+import { isSection, panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { VisualizationFailure } from './utils';
@@ -120,14 +120,37 @@ interface ExecuteDashboardOperationsParams {
   onPanelsRemoved: (panels: AttachmentPanel[]) => void;
 }
 
-const asOptionalSections = (
-  sections: DashboardSection[] | undefined
-): DashboardSection[] | undefined => {
-  return sections && sections.length > 0 ? sections : undefined;
+type DashboardWidget = AttachmentPanel | DashboardSection;
+
+const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
+  return widgets.reduce((maxY, widget) => {
+    if (isSection(widget)) {
+      // Sections only have y in grid, no height - use panels inside
+      const sectionBottom = widget.panels.reduce(
+        (sectionMaxY, panel) => Math.max(sectionMaxY, widget.grid.y + panel.grid.y + panel.grid.h),
+        widget.grid.y
+      );
+      return Math.max(maxY, sectionBottom);
+    }
+    return Math.max(maxY, widget.grid.y + widget.grid.h);
+  }, 0);
 };
 
-const getPanelsBottomY = (panels: AttachmentPanel[]): number => {
-  return panels.reduce((maxY, panel) => Math.max(maxY, panel.grid.y + panel.grid.h), 0);
+const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
+  return panels.findIndex((widget) => isSection(widget) && widget.uid === sectionId);
+};
+
+const updateSectionPanels = (
+  panels: DashboardWidget[],
+  sectionId: string,
+  updateFn: (sectionPanels: AttachmentPanel[]) => AttachmentPanel[]
+): DashboardWidget[] => {
+  return panels.map((widget) => {
+    if (isSection(widget) && widget.uid === sectionId) {
+      return { ...widget, panels: updateFn(widget.panels) };
+    }
+    return widget;
+  });
 };
 
 const removePanelsFromDashboard = ({
@@ -142,36 +165,32 @@ const removePanelsFromDashboard = ({
 } => {
   const panelIdSet = new Set(panelIds);
   const removedPanels: AttachmentPanel[] = [];
-  const topLevelPanelsToKeep: AttachmentPanel[] = [];
+  const nextPanels: DashboardWidget[] = [];
 
-  for (const panel of dashboardData.panels) {
-    if (panelIdSet.has(panel.uid)) {
-      removedPanels.push(panel);
+  for (const widget of dashboardData.panels) {
+    if (isSection(widget)) {
+      const sectionPanelsToKeep: AttachmentPanel[] = [];
+      for (const panel of widget.panels) {
+        if (panelIdSet.has(panel.uid)) {
+          removedPanels.push(panel);
+        } else {
+          sectionPanelsToKeep.push(panel);
+        }
+      }
+      nextPanels.push({ ...widget, panels: sectionPanelsToKeep });
     } else {
-      topLevelPanelsToKeep.push(panel);
-    }
-  }
-
-  const nextSections = (dashboardData.sections ?? []).map((section) => {
-    const sectionPanelsToKeep: AttachmentPanel[] = [];
-    for (const panel of section.panels) {
-      if (panelIdSet.has(panel.uid)) {
-        removedPanels.push(panel);
+      if (panelIdSet.has(widget.uid)) {
+        removedPanels.push(widget);
       } else {
-        sectionPanelsToKeep.push(panel);
+        nextPanels.push(widget);
       }
     }
-    return {
-      ...section,
-      panels: sectionPanelsToKeep,
-    };
-  });
+  }
 
   return {
     dashboardData: {
       ...dashboardData,
-      panels: topLevelPanelsToKeep,
-      sections: asOptionalSections(nextSections),
+      panels: nextPanels,
     },
     removedPanels,
   };
@@ -219,21 +238,18 @@ export const executeDashboardOperations = ({
         };
 
         if (operation.sectionId) {
-          const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-            ({ uid }) => uid === operation.sectionId
-          );
+          const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.sectionId);
           if (sectionIndex === -1) {
             throw new Error(`Section "${operation.sectionId}" not found.`);
           }
 
-          const sections = [...(nextDashboardData.sections ?? [])];
-          sections[sectionIndex] = {
-            ...sections[sectionIndex],
-            panels: [...sections[sectionIndex].panels, markdownPanel],
-          };
           nextDashboardData = {
             ...nextDashboardData,
-            sections: asOptionalSections(sections),
+            panels: updateSectionPanels(
+              nextDashboardData.panels,
+              operation.sectionId,
+              (sectionPanels) => [...sectionPanels, markdownPanel]
+            ),
           };
         } else {
           nextDashboardData = {
@@ -256,21 +272,18 @@ export const executeDashboardOperations = ({
           ]);
           if (result.panels.length > 0) {
             if (item.sectionId) {
-              const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-                ({ uid }) => uid === item.sectionId
-              );
+              const sectionIndex = findSectionIndex(nextDashboardData.panels, item.sectionId);
               if (sectionIndex === -1) {
                 throw new Error(`Section "${item.sectionId}" not found.`);
               }
 
-              const sections = [...(nextDashboardData.sections ?? [])];
-              sections[sectionIndex] = {
-                ...sections[sectionIndex],
-                panels: [...sections[sectionIndex].panels, ...result.panels],
-              };
               nextDashboardData = {
                 ...nextDashboardData,
-                sections: asOptionalSections(sections),
+                panels: updateSectionPanels(
+                  nextDashboardData.panels,
+                  item.sectionId,
+                  (sectionPanels) => [...sectionPanels, ...result.panels]
+                ),
               };
             } else {
               nextDashboardData = {
@@ -311,22 +324,19 @@ export const executeDashboardOperations = ({
 
         nextDashboardData = {
           ...nextDashboardData,
-          sections: [...(nextDashboardData.sections ?? []), nextSection],
+          panels: [...nextDashboardData.panels, nextSection],
         };
         break;
       }
 
       case 'remove_section': {
-        const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-          ({ uid }) => uid === operation.sectionId
-        );
+        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.sectionId);
         if (sectionIndex === -1) {
           throw new Error(`Section "${operation.sectionId}" not found.`);
         }
 
-        const sections = [...(nextDashboardData.sections ?? [])];
-        const sectionToRemove = sections[sectionIndex];
-        sections.splice(sectionIndex, 1);
+        const sectionToRemove = nextDashboardData.panels[sectionIndex] as DashboardSection;
+        const nextPanels = nextDashboardData.panels.filter((_, i) => i !== sectionIndex);
 
         if (operation.panelAction === 'delete') {
           if (sectionToRemove.panels.length > 0) {
@@ -334,12 +344,12 @@ export const executeDashboardOperations = ({
           }
           nextDashboardData = {
             ...nextDashboardData,
-            sections: asOptionalSections(sections),
+            panels: nextPanels,
           };
           break;
         }
 
-        const baseY = getPanelsBottomY(nextDashboardData.panels);
+        const baseY = getWidgetsBottomY(nextPanels);
         const promotedPanels = sectionToRemove.panels.map((panel) => ({
           ...panel,
           grid: {
@@ -350,8 +360,7 @@ export const executeDashboardOperations = ({
 
         nextDashboardData = {
           ...nextDashboardData,
-          panels: [...nextDashboardData.panels, ...promotedPanels],
-          sections: asOptionalSections(sections),
+          panels: [...nextPanels, ...promotedPanels],
         };
         break;
       }
@@ -412,25 +421,19 @@ export const executeDashboardOperations = ({
           }
         };
 
-        const updatedTopLevelPanels: AttachmentPanel[] = [];
-        for (const panel of nextDashboardData.panels) {
-          updatedTopLevelPanels.push(updatePanel(panel));
-        }
-
-        const updatedSections = nextDashboardData.sections
-          ? nextDashboardData.sections.map((section) => {
-              const updatedSectionPanels: AttachmentPanel[] = [];
-              for (const panel of section.panels) {
-                updatedSectionPanels.push(updatePanel(panel));
-              }
-              return { ...section, panels: updatedSectionPanels };
-            })
-          : undefined;
+        const updatedPanels: DashboardWidget[] = nextDashboardData.panels.map((widget) => {
+          if (isSection(widget)) {
+            return {
+              ...widget,
+              panels: widget.panels.map(updatePanel),
+            };
+          }
+          return updatePanel(widget);
+        });
 
         nextDashboardData = {
           ...nextDashboardData,
-          panels: updatedTopLevelPanels,
-          sections: asOptionalSections(updatedSections),
+          panels: updatedPanels,
         };
         break;
       }

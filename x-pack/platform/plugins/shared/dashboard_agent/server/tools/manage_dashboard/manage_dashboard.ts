@@ -15,6 +15,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ADDED_EVENT,
   DASHBOARD_PANELS_REMOVED_EVENT,
+  isSection,
   type AttachmentPanel,
   type DashboardAttachmentData,
   type PanelAddedEventData,
@@ -135,14 +136,15 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           throw new Error(`Failed to persist dashboard attachment "${dashboardAttachmentId}".`);
         }
 
+        const panelCount = updatedDashboardData.panels.reduce((count, widget) => {
+          if (isSection(widget)) {
+            return count + widget.panels.length;
+          }
+          return count + 1;
+        }, 0);
+
         logger.info(
-          `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${
-            updatedDashboardData.panels.length +
-            (updatedDashboardData.sections ?? []).reduce(
-              (count, section) => count + section.panels.length,
-              0
-            )
-          } panels`
+          `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panelCount} panels`
         );
 
         return {
@@ -156,29 +158,30 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                 dashboardAttachment: {
                   id: attachment.id,
                   content: {
-                    ...updatedDashboardData,
-                    panels: updatedDashboardData.panels.map((panel) => ({
-                      type: panel.type,
-                      uid: panel.uid,
-                      grid: panel.grid,
-                      sourceAttachmentId: panel.sourceAttachmentId 
-                    })),
-                    ...(updatedDashboardData.sections
-                      ? {
-                          sections: updatedDashboardData.sections.map((section) => ({
-                            sectionId: section.uid,
-                            title: section.title,
-                            collapsed: section.collapsed,
-                            grid: section.grid,
-                            panels: section.panels.map((panel) => ({
-                              type: panel.type,
-                              uid: panel.uid,
-                              grid: panel.grid,
-                              sourceAttachmentId: panel.sourceAttachmentId,
-                            })),
+                    title: updatedDashboardData.title,
+                    description: updatedDashboardData.description,
+                    panels: updatedDashboardData.panels.map((widget) => {
+                      if (isSection(widget)) {
+                        return {
+                          uid: widget.uid,
+                          title: widget.title,
+                          collapsed: widget.collapsed,
+                          grid: widget.grid,
+                          panels: widget.panels.map((panel) => ({
+                            type: panel.type,
+                            uid: panel.uid,
+                            grid: panel.grid,
+                            sourceAttachmentId: panel.sourceAttachmentId,
                           })),
-                        }
-                      : {}),
+                        };
+                      }
+                      return {
+                        type: widget.type,
+                        uid: widget.uid,
+                        grid: widget.grid,
+                        sourceAttachmentId: widget.sourceAttachmentId,
+                      };
+                    }),
                   },
                 },
               },

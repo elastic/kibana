@@ -88,17 +88,25 @@ export const dashboardSectionSchema = z.object({
 export type DashboardSection = z.infer<typeof dashboardSectionSchema>;
 
 /**
+ * Type guard to check if a widget is a section.
+ */
+export const isSection = (
+  widget: AttachmentPanel | DashboardSection
+): widget is DashboardSection => {
+  return 'panels' in widget;
+};
+
+/**
  * Zod schema for dashboard attachment data.
+ * Matches the Dashboard API structure where panels and sections are in a single array.
  */
 export const dashboardAttachmentDataSchema = z.object({
   title: z.string(),
   description: z.string(),
   /** Optional saved object ID if the dashboard was saved */
   savedObjectId: z.string().optional(),
-  /** Array of top-level panel entries */
-  panels: z.array(attachmentPanelSchema),
-  /** Optional array of sections containing grouped panels */
-  sections: z.array(dashboardSectionSchema).optional(),
+  /** Array of panels and sections (matches Dashboard API structure) */
+  panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
 });
 
 /**

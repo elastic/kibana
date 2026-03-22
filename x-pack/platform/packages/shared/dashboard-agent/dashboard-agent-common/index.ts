@@ -17,6 +17,7 @@ export {
   attachmentPanelSchema,
   dashboardSectionSchema,
   dashboardAttachmentDataSchema,
+  isSection,
 } from './types';
 
 export type {
