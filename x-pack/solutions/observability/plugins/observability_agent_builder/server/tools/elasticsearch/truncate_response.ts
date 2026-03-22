@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { BaseMessageLike } from '@langchain/core/messages';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 
 const TRUNCATION_CONFIG = {
   TIER_1_MAX: 2000,
@@ -14,8 +16,8 @@ const TRUNCATION_CONFIG = {
   MAX_DEPTH: 5,
   MAX_STRING_LENGTH: 500,
   /** Mechanically trim before sending to the LLM to stay within context limits. */
-  TIER_3_PRE_TRIM_BUDGET: 15000,
-  TIER_3_SUMMARY_BUDGET: 4000,
+  TIER_3_PRE_TRIM_BUDGET: 25000,
+  TIER_3_SUMMARY_BUDGET: 10000,
 } as const;
 
 const estimateSize = (value: unknown): number => JSON.stringify(value).length;
@@ -150,34 +152,35 @@ const truncateObject = (
   return { value: result, size: usedSize };
 };
 
-const buildSummarizationPrompt = (serializedResponse: string): string =>
-  [
-    'You are a data summarization assistant. Summarize the Elasticsearch API response enclosed in <response> tags into a compact structured JSON.',
-    '',
-    'Rules:',
-    '- Preserve all key metrics, counts, status fields, and error information.',
-    '- Include representative data points (1-2 examples) for large collections.',
-    '- Indicate totals and counts where arrays/objects were condensed.',
-    '- Output ONLY raw JSON. Do NOT wrap the output in markdown code fences, backticks, or any other formatting.',
-    '- Do NOT include any text before or after the JSON object.',
-    `- Keep the output under ${TRUNCATION_CONFIG.TIER_3_SUMMARY_BUDGET} characters.`,
-    '',
-    'Response to summarize:',
-    '<response>',
-    serializedResponse,
-    '</response>',
-  ].join('\n');
-
-const extractTextContent = (content: unknown): string => {
-  if (typeof content === 'string') return content;
-  if (Array.isArray(content)) {
-    return content
-      .filter((item): item is { type: string; text?: string } => item?.type === 'text')
-      .map((item) => item.text ?? '')
-      .join('');
-  }
-  return '';
+const summarySchema = {
+  type: 'object',
+  description: 'Use this tool to provide the summarized Elasticsearch response.',
+  properties: {
+    summary: {
+      type: 'object',
+      description: 'The summarized Elasticsearch response as structured data',
+      properties: {},
+      additionalProperties: true,
+    },
+  },
+  required: ['summary'],
 };
+
+const buildSummarizationPrompt = (serializedResponse: string): BaseMessageLike[] => [
+  [
+    'system',
+    `You are a data summarization assistant. Your ONLY purpose is to summarize Elasticsearch API responses into compact structured JSON.
+
+You MUST call the 'summarize_response' tool to provide the summary. Do NOT respond with plain text or any other conversational language.
+
+Rules:
+- Preserve all key metrics, counts, status fields, and error information.
+- Include representative data points (1-2 examples) for large collections.
+- Indicate totals and counts where arrays/objects were condensed.
+- Keep the output under ${TRUNCATION_CONFIG.TIER_3_SUMMARY_BUDGET} characters.`,
+  ],
+  createUserMessage(`Summarize the following Elasticsearch API response:\n\n${serializedResponse}`),
+];
 
 /**
  * Tier 3: LLM-based summarization for very large responses.
@@ -191,14 +194,12 @@ const summarizeWithLlm = async (
   const serialized = JSON.stringify(preTrimmed);
   const prompt = buildSummarizationPrompt(serialized);
 
-  const response = await chatModel.invoke(prompt);
-  const responseText = extractTextContent(response.content);
+  const structuredModel = chatModel.withStructuredOutput(summarySchema, {
+    name: 'summarize_response',
+  });
+  const { summary } = await structuredModel.invoke(prompt);
 
-  try {
-    return { _summarized: true, summary: JSON.parse(responseText) as Record<string, unknown> };
-  } catch {
-    return { _summarized: true, summary: { raw_summary: responseText } };
-  }
+  return { _summarized: true, summary };
 };
 
 /**
