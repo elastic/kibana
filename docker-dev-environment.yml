@@ -1,0 +1,99 @@
+# Multi-Spike Docker Development Environment
+#
+# Enables working on multiple Kibana spikes simultaneously without port conflicts
+#
+# Features:
+# - Isolated ES + Kibana per spike
+# - Persistent ES data (Docker volumes, not local files)
+# - Access via different ports OR hostnames
+# - Hot-reload for local code changes
+# - No port conflicts between spikes
+
+version: '3.8'
+
+services:
+  # Elasticsearch for this spike (LLM Investigation)
+  elasticsearch-llm-investigation:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: es-llm-investigation
+    environment:
+      - node.name=es-llm-investigation
+      - cluster.name=llm-investigation-cluster
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+      - bootstrap.memory_lock=true
+      - xpack.license.self_generated.type=trial
+      # Enable ML for ELSER (CTI agent needs this)
+      - xpack.ml.enabled=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"  # Reduced for OrbStack (adjust if you have more RAM)
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      # Persistent volume (NOT local files - stays in Docker)
+      - es-llm-investigation-data:/usr/share/elasticsearch/data
+    ports:
+      # Custom port to avoid conflict (9200 is default, use 9201 for this spike)
+      - "9201:9200"
+      # For internal docker network, still uses 9200
+    networks:
+      - llm-investigation-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:${ELASTIC_PASSWORD:-changeme} http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # Kibana for this spike (with local source code mounted)
+  kibana-llm-investigation:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: kibana-llm-investigation
+    depends_on:
+      elasticsearch-llm-investigation:
+        condition: service_healthy
+    environment:
+      - SERVER_NAME=kibana-llm-investigation
+      - ELASTICSEARCH_HOSTS=http://elasticsearch-llm-investigation:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+
+      # Feature flag for this spike
+      - XPACK_ELASTIC_ASSISTANT_LLM_INVESTIGATION_ENABLED=true
+
+      # Development mode
+      - NODE_ENV=development
+
+      # Faster startup (disable some features not needed for spike)
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    volumes:
+      # Mount local Kibana source (for live development)
+      # This allows you to make code changes and see them in the container
+      - ./x-pack:/usr/share/kibana/x-pack:ro
+      - ./src:/usr/share/kibana/src:ro
+      - ./packages:/usr/share/kibana/packages:ro
+      - ./config/kibana.dev.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      # Custom port to avoid conflict (5601 is default, use 5602 for this spike)
+      - "5602:5601"
+    networks:
+      - llm-investigation-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q '\"overall\":{\"level\":\"available\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+# Persistent volumes (data survives container restarts)
+volumes:
+  es-llm-investigation-data:
+    driver: local
+    name: es-llm-investigation-data
+
+# Isolated network for this spike
+networks:
+  llm-investigation-network:
+    driver: bridge
+    name: llm-investigation-network
