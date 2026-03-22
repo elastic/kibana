@@ -109,7 +109,7 @@ const DataTable = (props: Partial<UnifiedDataTableProps>) => (
 
 const capabilities = capabilitiesServiceMock.createStartContract().capabilities;
 
-const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
+const renderDataTable = async (props: Partial<UnifiedDataTableProps> = {}) => {
   const DataTableWrapped = () => {
     const [columns, setColumns] = useState(props.columns ?? []);
     const [settings, setSettings] = useState(props.settings);
@@ -842,9 +842,38 @@ describe('UnifiedDataTable', () => {
     it(
       'should render external leading control columns',
       async () => {
+        const setExpandedDocMock = jest.fn();
+        const subscribeMock = jest.fn(() => () => {});
+        const stableSnapshot = {
+          expandedDoc: {
+            id: 'test',
+            raw: {
+              _index: 'test_i',
+              _id: 'test',
+            },
+            flattened: { test: jest.fn() },
+          },
+        };
+        const getSnapshotMock = jest.fn(() => stableSnapshot);
+
+        const connectionHandlerMock = jest.fn(
+          (
+            _displayedRows: DataTableRecord[],
+            _displayedColumns: string[],
+            _customColumnsMeta?: object
+          ) => ({
+            externalStore: {
+              subscribe: subscribeMock,
+              getSnapshot: getSnapshotMock,
+              getServerSnapshot: getSnapshotMock,
+            },
+            setExpandedDoc: setExpandedDocMock,
+          })
+        );
+
         const component = await getComponent({
           ...getProps(),
-          documentViewFlyoutConnectionHandler: jest.fn(),
+          documentViewFlyoutConnectionHandler: connectionHandlerMock,
           externalControlColumns: [testLeadingControlColumn],
         });
 
@@ -862,7 +891,8 @@ describe('UnifiedDataTable', () => {
         const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
         const setExpandedDocMock = jest.fn();
         const subscribeMock = jest.fn(() => () => {});
-        const getSnapshotMock = jest.fn(() => ({ expandedDoc: undefined }));
+        const stableSnapshot = { expandedDoc: undefined };
+        const getSnapshotMock = jest.fn(() => stableSnapshot);
 
         const connectionHandlerMock = jest.fn(
           (
@@ -903,7 +933,8 @@ describe('UnifiedDataTable', () => {
       'calls setExpandedDoc from documentViewFlyoutConnectionHandler when expand button is clicked',
       async () => {
         const setExpandedDocMock = jest.fn();
-        const getSnapshotMock = jest.fn(() => ({ expandedDoc: undefined }));
+        const stableSnapshot = { expandedDoc: undefined };
+        const getSnapshotMock = jest.fn(() => stableSnapshot);
 
         const connectionHandlerMock = jest.fn((_displayedRows: DataTableRecord[]) => ({
           externalStore: {
@@ -1016,9 +1047,38 @@ describe('UnifiedDataTable', () => {
     it(
       'should render tour step for the first row of leading control column expandButton',
       async () => {
+        const setExpandedDocMock = jest.fn();
+        const subscribeMock = jest.fn(() => () => {});
+        const stableSnapshot = {
+          expandedDoc: {
+            id: 'test',
+            raw: {
+              _index: 'test_i',
+              _id: 'test',
+            },
+            flattened: { test: jest.fn() },
+          },
+        };
+        const getSnapshotMock = jest.fn(() => stableSnapshot);
+
+        const connectionHandlerMock = jest.fn(
+          (
+            _displayedRows: DataTableRecord[],
+            _displayedColumns: string[],
+            _customColumnsMeta?: object
+          ) => ({
+            externalStore: {
+              subscribe: subscribeMock,
+              getSnapshot: getSnapshotMock,
+              getServerSnapshot: getSnapshotMock,
+            },
+            setExpandedDoc: setExpandedDocMock,
+          })
+        );
+
         const component = await getComponent({
           ...getProps(),
-          documentViewFlyoutConnectionHandler: jest.fn(),
+          documentViewFlyoutConnectionHandler: connectionHandlerMock,
           componentsTourSteps: { expandButton: 'test-expand' },
         });
 

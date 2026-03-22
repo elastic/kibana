@@ -28,7 +28,10 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import {
+  type UnifiedDataTableProps,
+  useDocumentViewFlyoutConnectionHandler,
+} from '@kbn/unified-data-table';
 import { DataLoadingState, getDataGridDensity, getRowHeight } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
@@ -140,25 +143,11 @@ export function ContextAppContent({
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
 
-  const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        onFilter={addFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
-        onClose={() => setExpandedDoc(undefined)}
-        initialTabId={initialTabId}
-        setExpandedDoc={setExpandedDocWithInitialTab}
-        docViewerRef={docViewerRef}
-      />
-    ),
-    [addFilter, dataView, onAddColumn, onRemoveColumn, setExpandedDocWithInitialTab, initialTabId]
-  );
+  const { documentViewFlyoutConnectionHandler, connectedGridMeta } =
+    useDocumentViewFlyoutConnectionHandler({
+      expandedDoc,
+      setExpandedDoc: setExpandedDocWithInitialTab,
+    });
 
   const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => {
@@ -227,7 +216,6 @@ export function ContextAppContent({
             columns={columns}
             rows={rows}
             dataView={dataView}
-            expandedDoc={expandedDoc}
             loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
             sampleSizeState={0}
             sort={sort as SortOrder[]}
@@ -242,7 +230,7 @@ export function ContextAppContent({
             configRowHeight={configRowHeight}
             showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-            documentViewFlyoutConnectionHandler={renderDocumentView}
+            documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
             services={services}
             configHeaderRowHeight={3}
             settings={grid}
@@ -251,6 +239,21 @@ export function ContextAppContent({
           />
         </CellActionsProvider>
       </div>
+      {expandedDoc && (
+        <DiscoverGridFlyout
+          dataView={dataView}
+          hit={expandedDoc}
+          hits={connectedGridMeta.current?.displayedRows ?? []}
+          columns={connectedGridMeta.current?.displayedColumns ?? []}
+          onFilter={addFilter}
+          onRemoveColumn={onRemoveColumn}
+          onAddColumn={onAddColumn}
+          onClose={() => setExpandedDoc(undefined)}
+          initialTabId={initialTabId}
+          setExpandedDoc={setExpandedDocWithInitialTab}
+          docViewerRef={docViewerRef}
+        />
+      )}
       <WrapperWithPadding>
         <ActionBarMemoized
           type={SurrDocType.SUCCESSORS}

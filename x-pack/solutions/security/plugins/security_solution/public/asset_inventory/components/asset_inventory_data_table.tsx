@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,6 +13,7 @@ import {
   DataLoadingState,
   DataGridDensity,
   useColumns,
+  useDocumentViewFlyoutConnectionHandler,
   type UnifiedDataTableSettings,
   type UnifiedDataTableSettingsColumn,
   type CustomCellRenderer,
@@ -37,7 +38,6 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_criticality/asset_criticality_badge';
@@ -158,22 +158,30 @@ export const AssetInventoryDataTable = ({
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  const openTableFlyout = (doc?: DataTableRecord | undefined) => {
-    if (doc && doc.raw._source) {
-      const source = doc.raw._source as GenericEntityRecord;
-      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
-      openDynamicFlyout({
-        entityDocId: doc.raw._id,
-        entityType: source.entity?.EngineMetadata?.Type,
-        entityName: source.entity?.name,
-        scopeId: ASSET_INVENTORY_TABLE_ID,
-        contextId: ASSET_INVENTORY_TABLE_ID,
-      });
-    } else {
-      closeDynamicFlyout();
-      setExpandedDoc(undefined);
-    }
-  };
+  const openTableFlyout = useCallback(
+    (doc?: DataTableRecord | undefined) => {
+      if (doc && doc.raw._source) {
+        const source = doc.raw._source as GenericEntityRecord;
+        setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
+        openDynamicFlyout({
+          entityDocId: doc.raw._id,
+          entityType: source.entity?.EngineMetadata?.Type,
+          entityName: source.entity?.name,
+          scopeId: ASSET_INVENTORY_TABLE_ID,
+          contextId: ASSET_INVENTORY_TABLE_ID,
+        });
+      } else {
+        closeDynamicFlyout();
+        setExpandedDoc(undefined);
+      }
+    },
+    [openDynamicFlyout, closeDynamicFlyout]
+  );
+
+  const { documentViewFlyoutConnectionHandler } = useDocumentViewFlyoutConnectionHandler({
+    expandedDoc,
+    setExpandedDoc: openTableFlyout,
+  });
 
   // -----------------------------------------------------------------------------------------
 
@@ -388,9 +396,7 @@ export const AssetInventoryDataTable = ({
             onSort={onSort}
             rows={rows}
             sampleSizeState={MAX_ASSETS_TO_LOAD}
-            expandedDoc={expandedDoc}
-            setExpandedDoc={openTableFlyout}
-            renderDocumentView={EmptyComponent}
+            documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
             sort={sort}
             rowsPerPageState={pageSize}
             totalHits={totalHits}

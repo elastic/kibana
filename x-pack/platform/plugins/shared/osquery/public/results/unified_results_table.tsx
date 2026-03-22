@@ -23,7 +23,12 @@ import type {
   UnifiedDataTableSettings,
   UnifiedDataTableRestorableState,
 } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTable,
+  DataLoadingState,
+  DataGridDensity,
+  useDocumentViewFlyoutConnectionHandler,
+} from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -51,6 +56,8 @@ import {
 } from './results_table_shared';
 
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
+const EMPTY_ROWS: DataTableRecord[] = [];
+const EMPTY_COLUMNS: string[] = [];
 
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
 
@@ -271,6 +278,12 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
 
+  const { documentViewFlyoutConnectionHandler, connectedGridMeta } =
+    useDocumentViewFlyoutConnectionHandler({
+      expandedDoc,
+      setExpandedDoc,
+    });
+
   const externalCustomRenderers = useMemo(
     () =>
       getOsqueryCellRenderers({
@@ -468,6 +481,8 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     };
   }, [dataView, sourceFieldNamesKey, dataService.dataViews]);
 
+  const handleCloseFlyout = useCallback(() => setExpandedDoc(undefined), []);
+
   const searchBarIndexPatterns = useMemo(
     () => (filteredDataView ? [filteredDataView] : []),
     [filteredDataView]
@@ -480,30 +495,6 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       }
     },
     []
-  );
-
-  const handleCloseFlyout = useCallback(() => {
-    setExpandedDoc(undefined);
-  }, []);
-
-  const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => {
-      if (!dataView) return undefined;
-
-      return (
-        <OsqueryResultsFlyout
-          hit={hit}
-          hits={displayedRows}
-          dataView={dataView}
-          columns={displayedColumns}
-          onClose={handleCloseFlyout}
-          setExpandedDoc={setExpandedDoc}
-          toastNotifications={toasts}
-          chrome={chrome}
-        />
-      );
-    },
-    [dataView, handleCloseFlyout, toasts, chrome]
   );
 
   useEffect(
@@ -584,9 +575,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   columns={visibleColumns}
                   rows={rows}
                   loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-                  expandedDoc={expandedDoc}
-                  setExpandedDoc={setExpandedDoc}
-                  renderDocumentView={renderDocumentView}
+                  documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
                   externalCustomRenderers={externalCustomRenderers}
                   sort={sortingColumns.map((col) => [col.id, col.direction])}
                   onSort={handleSort}
@@ -615,6 +604,18 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 />
               </CellActionsProvider>
             </div>
+            {expandedDoc && dataView && (
+              <OsqueryResultsFlyout
+                hit={expandedDoc}
+                hits={connectedGridMeta.current?.displayedRows ?? EMPTY_ROWS}
+                dataView={dataView}
+                columns={connectedGridMeta.current?.displayedColumns ?? EMPTY_COLUMNS}
+                onClose={handleCloseFlyout}
+                setExpandedDoc={setExpandedDoc}
+                toastNotifications={toasts}
+                chrome={chrome}
+              />
+            )}
 
             {!isCompareActive && (
               <EuiTablePagination

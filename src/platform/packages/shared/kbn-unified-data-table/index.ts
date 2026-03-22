@@ -45,6 +45,7 @@ export {
 
 export { getDataGridDensity } from './src/hooks/use_data_grid_density';
 export { getRowHeight } from './src/hooks/use_row_height';
+export { useDocumentViewFlyoutConnectionHandler } from './src/hooks/use_document_view_flyout_connection_handler';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
