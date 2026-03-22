@@ -32,8 +32,6 @@ import {
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { z } from '@kbn/zod/v4';
-import type { ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { getElasticsearchPrompt, getRefineSearchTermPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
@@ -95,67 +93,15 @@ const isDangerousOperation = (
   return methods.some((method) => DANGEROUS_HTTP_METHODS.has(method));
 };
 
-const schemaTypeToZod = (prop: ToolSchemaType, required = false): z.ZodTypeAny => {
-  const desc = prop.description ?? '';
-  const withOptional = (schema: z.ZodTypeAny) => (required ? schema : schema.optional());
-  switch (prop.type) {
-    case 'number':
-      return withOptional(z.number().describe(desc));
-    case 'boolean':
-      return withOptional(z.boolean().describe(desc));
-    case 'array':
-      return withOptional(z.array(z.any()).describe(desc));
-    case 'object':
-      return withOptional(z.record(z.string(), z.any()).describe(desc));
-    default:
-      return withOptional(z.string().describe(desc));
-  }
-};
-
-/**
- * Converts a ToolSchema to a Zod schema with lenient validation for `body`
- * properties. Body fields use `z.any()` so the LLM can generate arrays,
- * objects, or strings without Zod rejecting type mismatches against the
- * (often over-simplified) OpenAPI spec types.
- */
-const toolSchemaToZod = (schema: ToolSchema): z.ZodObject<Record<string, z.ZodTypeAny>> => {
-  const requiredFields = new Set(schema.required ?? []);
-  const shape: Record<string, z.ZodTypeAny> = {};
-  for (const [key, prop] of Object.entries(schema.properties)) {
-    const isRequired = requiredFields.has(key);
-    if (key === 'body' && prop.type === 'object') {
-      const bodyShape: Record<string, z.ZodTypeAny> = {};
-      if ('properties' in prop && prop.properties) {
-        for (const [bodyKey, bodyProp] of Object.entries(prop.properties)) {
-          bodyShape[bodyKey] = z
-            .any()
-            .optional()
-            .describe(bodyProp.description ?? '');
-        }
-      }
-      shape[key] = z
-        .object(bodyShape)
-        .passthrough()
-        .optional()
-        .describe(prop.description ?? 'The request body');
-    } else {
-      shape[key] = schemaTypeToZod(prop, isRequired);
-    }
-  }
-  return z.object(shape);
-};
-
 /**
  * Converts an OpenAPI-based Tool into a LangChain-compatible tool.
- * Uses a custom Zod schema so that body properties accept any JSON type,
- * avoiding validation failures when the LLM generates arrays/objects for
- * fields the OpenAPI spec typed as strings.
+ * The tool's schema is a Zod object built by buildSchema in openapi_tool_set.ts
  */
 const toLangchainTool = (tool: Tool, esClient: IScopedClusterClient) => {
   return toTool(async (args) => tool.handler(args as Record<string, unknown>, esClient), {
     name: tool.name,
     description: tool.description,
-    schema: toolSchemaToZod(tool.schema),
+    schema: tool.schema,
   });
 };
 

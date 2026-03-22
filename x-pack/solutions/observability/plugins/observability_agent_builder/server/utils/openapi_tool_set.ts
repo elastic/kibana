@@ -6,8 +6,8 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
 
 export type OperationObject = OpenAPIV3.OperationObject & {
   path: string;
@@ -26,7 +26,7 @@ type ToolHandler = (
 export interface Tool {
   readonly name: string;
   readonly description: string;
-  readonly schema: ToolSchema;
+  readonly schema: z.ZodObject<Record<string, z.ZodTypeAny>>;
   readonly handler: ToolHandler;
 }
 
@@ -127,9 +127,9 @@ function resolveOperationRefs(
   return recursiveResolve(operation) as OperationObject;
 }
 
-type NonArrayToolSchemaType = Exclude<ToolSchemaType, { type: 'array' }>;
+const convertOpenApiSchema = (schema: OpenAPIV3.SchemaObject): z.ZodTypeAny => {
+  const desc = schema.description ?? '';
 
-const convertOpenApiSchema = (schema: OpenAPIV3.SchemaObject): ToolSchemaType => {
   if (schema.allOf) {
     const merged: OpenAPIV3.SchemaObject = { type: 'object' };
     for (const sub of schema.allOf) {
@@ -139,7 +139,7 @@ const convertOpenApiSchema = (schema: OpenAPIV3.SchemaObject): ToolSchemaType =>
       }
     }
     if (merged.properties) {
-      return convertOpenApiSchema(merged);
+      return convertOpenApiSchema({ ...merged, description: schema.description });
     }
   }
 
@@ -152,103 +152,88 @@ const convertOpenApiSchema = (schema: OpenAPIV3.SchemaObject): ToolSchemaType =>
       }
     }
     if (merged.properties) {
-      return convertOpenApiSchema(merged);
+      return convertOpenApiSchema({ ...merged, description: schema.description });
     }
-
-    const arrayVariant = options.find((o) => o.type === 'array');
-    if (arrayVariant) {
-      return convertOpenApiSchema(arrayVariant);
-    }
-    const objectVariant = options.find((o) => o.type === 'object');
-    if (objectVariant) {
-      return convertOpenApiSchema(objectVariant);
-    }
-    const firstTyped = options.find((o) => o.type);
-    if (firstTyped) {
-      return convertOpenApiSchema(firstTyped);
-    }
+    return z.any().describe(desc);
   }
 
   if (schema.type === 'array') {
-    const itemSchema = schema.items as OpenAPIV3.SchemaObject | undefined;
-    let items: NonArrayToolSchemaType | undefined;
-    if (itemSchema) {
-      const converted = convertOpenApiSchema(itemSchema);
-      items = converted.type !== 'array' ? (converted as NonArrayToolSchemaType) : undefined;
-    }
-    return {
-      type: 'array',
-      items,
-      description: schema.description,
-    };
+    return z.array(z.any()).describe(desc);
   }
 
   if (schema.type === 'object' || schema.properties) {
-    const properties: Record<string, ToolSchemaType> = {};
+    const shape: Record<string, z.ZodTypeAny> = {};
     if (schema.properties) {
       for (const [key, value] of Object.entries(schema.properties)) {
-        properties[key] = convertOpenApiSchema(value as OpenAPIV3.SchemaObject);
+        const prop = value as OpenAPIV3.SchemaObject;
+        shape[key] = convertOpenApiSchema(prop).optional();
       }
     }
-    return {
-      type: 'object',
-      properties,
-      description: schema.description,
-    };
+    return z.object(shape).passthrough().describe(desc);
   }
 
-  return {
-    type: (schema.type as 'string') ?? 'string',
-    description: schema.description,
-  };
+  return z.any().describe(desc);
 };
 
-const buildSchema = (operation: OperationObject): ToolSchema => {
-  const properties: Record<string, ToolSchemaType> = {};
-  const required: string[] = [];
+const paramToZod = (
+  schema: OpenAPIV3.SchemaObject,
+  description: string,
+  isRequired: boolean
+): z.ZodTypeAny => {
+  const withOptional = (s: z.ZodTypeAny) => (isRequired ? s : s.optional());
+
+  if (schema.enum) {
+    const values = schema.enum;
+    return withOptional(z.enum(values).describe(description));
+  }
+
+  switch (schema.type) {
+    case 'number':
+    case 'integer':
+      return withOptional(z.coerce.number().describe(description));
+    case 'boolean':
+      return withOptional(z.coerce.boolean().describe(description));
+    case 'array':
+      return withOptional(z.array(z.any()).describe(description));
+    case 'object':
+      return withOptional(z.record(z.string(), z.any()).describe(description));
+    default:
+      return withOptional(z.string().describe(description));
+  }
+};
+
+const buildSchema = (operation: OperationObject): z.ZodObject<Record<string, z.ZodTypeAny>> => {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  const requiredFields = new Set<string>();
   const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
+
   for (const param of parameters) {
     const schema = param.schema as OpenAPIV3.SchemaObject;
-    if (schema.type === 'array') {
-      properties[param.name] = {
-        type: 'array',
-        items: { type: 'string' },
-        description: param.description,
-      };
-    } else {
-      properties[param.name] = {
-        type: (schema.type as 'string') ?? 'string',
-        description: param.description,
-      };
-    }
-    if (param.required) required.push(param.name);
+    const isRequired = !!param.required;
+    shape[param.name] = paramToZod(schema, param.description ?? '', isRequired);
+    if (isRequired) requiredFields.add(param.name);
   }
 
   const requestBody = operation.requestBody as OpenAPIV3.RequestBodyObject | undefined;
   const bodyContent = requestBody?.content?.['application/json'];
   if (bodyContent?.schema) {
     const bodySchema = bodyContent.schema as OpenAPIV3.SchemaObject;
-    const bodyToolSchema = convertOpenApiSchema(bodySchema);
-    if (bodyToolSchema.type === 'object') {
-      properties.body = {
-        ...bodyToolSchema,
-        description: requestBody?.description || bodySchema.description || 'The request body',
-      };
-
-      if (bodyToolSchema.properties) {
-        const bodyKeys = new Set(Object.keys(bodyToolSchema.properties));
-        for (const param of parameters) {
-          if (param.in === 'query' && bodyKeys.has(param.name)) {
-            delete properties[param.name];
-            const idx = required.indexOf(param.name);
-            if (idx !== -1) required.splice(idx, 1);
-          }
+    const bodyZodSchema = convertOpenApiSchema(bodySchema);
+    if (bodyZodSchema instanceof z.ZodObject) {
+      const bodyKeys = new Set(Object.keys(bodyZodSchema.shape));
+      for (const param of parameters) {
+        if (param.in === 'query' && bodyKeys.has(param.name)) {
+          delete shape[param.name];
+          requiredFields.delete(param.name);
         }
       }
+      shape.body = bodyZodSchema
+        .optional()
+        .describe(requestBody?.description || bodySchema.description || 'The request body');
     }
   }
 
-  return { type: 'object', properties, required };
+  return z.object(shape);
 };
 
 const buildHttpRequest = (
