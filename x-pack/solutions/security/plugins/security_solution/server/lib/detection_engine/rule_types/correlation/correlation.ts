@@ -20,6 +20,7 @@ import {
   extractEnrichmentFields,
   computeShellEnrichment,
 } from './enrich_building_blocks';
+import { logCrossSpaceCorrelation, validateSpaceIdFormat } from './validate_cross_space_access';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import {
@@ -118,6 +119,20 @@ export const correlationExecutor = async ({
       alertConstruction: 0,
       bulkCreate: 0,
     };
+
+    // Validate and log cross-space correlation for audit trail and security monitoring
+    // Security Model: Elasticsearch document-level security (DLS) is the PRIMARY boundary
+    // - ES|QL query enforcement: User must have read access to all target space indices
+    // - Kibana validation: Format validation only (injection prevention)
+    // - Audit logging: Track all cross-space correlation attempts for security monitoring
+    if (ruleParams.correlation.targetSpaces) {
+      validateSpaceIdFormat(ruleParams.correlation.targetSpaces); // Prevent injection
+      logCrossSpaceCorrelation(
+        ruleParams.correlation.targetSpaces,
+        sharedParams.spaceId,
+        ruleExecutionLogger
+      );
+    }
 
     // Incremental correlation: Only process alerts newer than last execution
     // Enabled by default for performance (50-70% faster)
