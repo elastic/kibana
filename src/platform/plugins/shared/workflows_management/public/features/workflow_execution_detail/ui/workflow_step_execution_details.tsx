@@ -124,6 +124,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const tabs = useMemo(() => {
       if (isTriggerPseudoStep) {
         const pseudoTabs: { id: string; name: string }[] = [];
+        if (hasError) {
+          pseudoTabs.push({
+            id: 'output',
+            name: 'Error',
+          });
+        }
         if (hasInput) {
           pseudoTabs.push({
             id: 'input',
