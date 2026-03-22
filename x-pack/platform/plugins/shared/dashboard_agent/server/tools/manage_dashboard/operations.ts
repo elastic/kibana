@@ -215,7 +215,7 @@ export const executeDashboardOperations = ({
         const markdownPanel: GenericAttachmentPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           uid: uuidv4(),
-          rawConfig: { content: operation.markdownContent },
+          config: { content: operation.markdownContent },
           grid: operation.grid,
         };
 

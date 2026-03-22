@@ -36,32 +36,32 @@ const buildLensPanelFromApi = (
 
 const isLensEmbeddableType = (
   embeddableType: string,
-  rawConfig: unknown
-): rawConfig is LensAttributes => {
-  return embeddableType === LENS_EMBEDDABLE_TYPE && isLensLegacyAttributes(rawConfig);
+  config: unknown
+): config is LensAttributes => {
+  return embeddableType === LENS_EMBEDDABLE_TYPE && isLensLegacyAttributes(config);
 };
 
 interface BuildPanelFromRawConfigOptions {
   embeddableType: string;
-  rawConfig: Record<string, unknown>;
+  config: Record<string, unknown>;
   title: string | undefined;
   uid?: string;
 }
 
 const buildPanelFromRawConfig = ({
   embeddableType,
-  rawConfig,
+  config,
   title,
   uid,
 }: BuildPanelFromRawConfigOptions): Omit<DashboardPanel, 'grid'> => {
   return {
     type: embeddableType,
-    config: isLensEmbeddableType(embeddableType, rawConfig)
+    config: isLensEmbeddableType(embeddableType, config)
       ? {
-          title: title ?? rawConfig.title ?? 'Panel',
-          attributes: lensConfigBuilder.toAPIFormat(rawConfig),
+          title: title ?? config.title ?? '',
+          attributes: lensConfigBuilder.toAPIFormat(config),
         }
-      : rawConfig,
+      : config,
     uid,
   };
 };
@@ -79,7 +79,7 @@ const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
       acc.push({
         ...buildPanelFromRawConfig({
           embeddableType: panel.type,
-          rawConfig: panel.rawConfig,
+          config: panel.config,
           title: panel.title,
           uid: panel.uid,
         }),

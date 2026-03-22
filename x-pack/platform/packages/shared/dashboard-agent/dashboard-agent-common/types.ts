@@ -7,8 +7,23 @@
 
 import { z } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { PANEL_GRID_CONSTRAINTS } from '@kbn/dashboard-plugin/common';
 import { DASHBOARD_ATTACHMENT_TYPE } from './constants';
+
+/**
+ * Dashboard grid column count (matches DASHBOARD_GRID_COLUMN_COUNT from dashboard plugin).
+ */
+const DASHBOARD_GRID_COLUMN_COUNT = 48;
+
+/**
+ * Constraints for panel grid positioning and sizing.
+ * Mirrors PANEL_GRID_CONSTRAINTS from @kbn/dashboard-plugin/common.
+ */
+const PANEL_GRID_CONSTRAINTS = {
+  width: { min: 1, max: DASHBOARD_GRID_COLUMN_COUNT },
+  height: { min: 1 },
+  x: { min: 0, max: DASHBOARD_GRID_COLUMN_COUNT - 1 },
+  y: { min: 0 },
+} as const;
 
 /**
  * Grid dimensions (in dashboard grid units) for layout.
@@ -58,7 +73,7 @@ export const genericAttachmentPanelSchema = z.object({
   type: z.string(),
   uid: z.string(),
   /** The raw panel configuration for recreating the panel */
-  rawConfig: z.record(z.string(), z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   /** Panel title if available */
   title: z.string().optional(),
   /** Layout: width/height and position in dashboard grid units. */
@@ -98,7 +113,7 @@ export function isLensAttachmentPanel(panel: AttachmentPanel): panel is LensAtta
  * Type guard to check if a panel is a generic (non-Lens) panel.
  */
 export function isGenericAttachmentPanel(panel: AttachmentPanel): panel is GenericAttachmentPanel {
-  return 'rawConfig' in panel;
+  return panel.type !== 'lens'
 }
 
 export const sectionGridSchema = z.object({

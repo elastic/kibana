@@ -434,7 +434,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.sections?.[0].panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        rawConfig: { content: '### Section Summary' },
+        config: { content: '### Section Summary' },
         grid: { x: 0, y: 0, w: 24, h: 4 },
       }),
     ]);
