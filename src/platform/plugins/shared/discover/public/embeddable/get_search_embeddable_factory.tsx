@@ -44,6 +44,7 @@ import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { compareSelectedTabId } from './utils/compare_selected_tab_id';
 import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
@@ -170,7 +171,9 @@ export const getSearchEmbeddableFactory = ({
                   Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
                 )
               : {}),
-            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+            selectedTabId: shouldSkipTabComparators
+              ? 'skip'
+              : (last, current) => compareSelectedTabId(tabs[0]?.id, last, current),
             attributes: 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
