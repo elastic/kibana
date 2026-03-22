@@ -24,6 +24,10 @@ import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
+import {
+  initializeVulnerabilityPostureSetup,
+  initializeVulnerabilityPostureStart,
+} from './lib/vulnerability_posture/plugin_integration';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -506,6 +510,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
+    // Initialize Vulnerability Posture (if feature flag enabled)
+    if (config.experimentalFeatures.vulnerabilityCheckerEnabled) {
+      initializeVulnerabilityPostureSetup(plugins.taskManager, this.logger);
+    }
+
     const trialCompanionDeps: TrialCompanionRoutesDeps = {
       router,
       logger,
@@ -851,6 +860,19 @@ export class Plugin implements ISecuritySolutionPlugin {
           esClient: core.elasticsearch.client.asInternalUser,
         })
         .catch(() => {}); // it shouldn't refuse, but just in case
+
+      // Initialize Vulnerability Posture (if feature flag enabled)
+      if (config.experimentalFeatures.vulnerabilityCheckerEnabled) {
+        initializeVulnerabilityPostureStart(
+          core,
+          { taskManager: plugins.taskManager },
+          this.router,
+          this.logger,
+          config
+        ).catch((error) => {
+          this.logger.error(`Failed to initialize Vulnerability Posture: ${error.message}`);
+        });
+      }
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(
