@@ -28,6 +28,7 @@ export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as cons
 export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
 
 /* Investigation */
+
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
@@ -44,3 +45,13 @@ export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
   `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
 export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;
 export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as const;
+
+/* Insights */
+
+export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
+export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
+  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;
+export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID =
+  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
+
+export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
