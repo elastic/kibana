@@ -10,7 +10,11 @@ import type {
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
-import { DataGridDensity, useColumns } from '@kbn/unified-data-table';
+import {
+  DataGridDensity,
+  useColumns,
+  useDocumentViewFlyoutConnectionHandler,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -41,6 +45,8 @@ export interface CloudSecurityDefaultColumn {
   id: string;
   width?: number;
 }
+
+const noopSetExpandedDoc = () => {};
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -259,6 +265,11 @@ export const CloudSecurityDataTable = ({
 
   const { expandedDoc, onExpandDocClick } = useExpandableFlyoutCsp(flyoutType);
 
+  const { documentViewFlyoutConnectionHandler } = useDocumentViewFlyoutConnectionHandler({
+    expandedDoc,
+    setExpandedDoc: onExpandDocClick ?? noopSetExpandedDoc,
+  });
+
   if (!onExpandDocClick) {
     return <></>;
   }
@@ -341,7 +352,6 @@ export const CloudSecurityDataTable = ({
           className={styles.gridStyle}
           ariaLabelledBy={title}
           columns={currentColumns}
-          expandedDoc={expandedDoc}
           dataView={dataView}
           loadingState={loadingState}
           onFilter={onAddFilter as DocViewFilterFn}
@@ -350,8 +360,7 @@ export const CloudSecurityDataTable = ({
           onSort={onSort}
           rows={rows}
           sampleSizeState={MAX_FINDINGS_TO_LOAD}
-          setExpandedDoc={onExpandDocClick}
-          renderDocumentView={onOpenFlyoutCallback}
+          documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
           sort={sort}
           rowsPerPageState={pageSize}
           totalHits={total}

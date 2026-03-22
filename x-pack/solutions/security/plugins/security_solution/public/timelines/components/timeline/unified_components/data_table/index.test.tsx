@@ -36,7 +36,7 @@ const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
-
+const closeFlyoutMock = jest.fn();
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
 jest.mock('@kbn/expandable-flyout');
@@ -119,6 +119,7 @@ describe('unified data table', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
+      closeFlyout: closeFlyoutMock,
     });
   });
   afterEach(() => {

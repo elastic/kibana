@@ -15,7 +15,6 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type useLatest from 'react-use/lib/useLatest';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
@@ -27,8 +26,11 @@ import {
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
 
-export interface DiscoverGridProps extends Omit<UnifiedDataTableProps, 'expandedDoc'> {
-  latestExpandedDoc?: ReturnType<typeof useLatest<DataTableRecord | undefined>>;
+export interface DiscoverGridProps extends UnifiedDataTableProps {
+  /**
+   * Function to set the expanded document, which is displayed in a flyout, required for leading controls
+   */
+  setExpandedDoc?: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
   onUpdateESQLQuery?: UpdateESQLQueryFn;
@@ -76,8 +78,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       getRowAdditionalLeadingControlsAccessor,
       onUpdateESQLQuery,
       query,
-      setExpandedDoc,
       renderDocumentView,
+      setExpandedDoc,
     ]);
 
     const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');

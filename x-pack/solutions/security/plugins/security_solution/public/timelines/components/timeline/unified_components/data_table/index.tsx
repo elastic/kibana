@@ -12,7 +12,11 @@ import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  UnifiedDataTable,
+  useDocumentViewFlyoutConnectionHandler,
+} from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   EuiDataGridControlColumn,
@@ -31,7 +35,6 @@ import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_det
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
-import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -256,6 +259,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [tableRows, handleOnEventDetailPanelOpened, closeFlyout]
     );
 
+    const { documentViewFlyoutConnectionHandler } = useDocumentViewFlyoutConnectionHandler({
+      expandedDoc,
+      setExpandedDoc: onSetExpandedDoc,
+    });
+
     const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
       (colSettings) => {
         if (colSettings.width) {
@@ -439,7 +447,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             ariaLabelledBy="timelineDocumentsAriaLabel"
             className="udtTimeline"
             columns={columnIds}
-            expandedDoc={expandedDoc}
             gridStyleOverride={tableStylesOverride}
             dataView={dataView}
             showColumnTokens={true}
@@ -451,7 +458,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             rows={tableRows}
             sampleSizeState={sampleSize || 500}
             onUpdateSampleSize={onUpdateSampleSize}
-            setExpandedDoc={onSetExpandedDoc}
+            documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
             showTimeCol={showTimeCol}
             isSortEnabled={isSortEnabled}
             sort={sort}
@@ -465,7 +472,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
-            renderDocumentView={EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
             maxDocFieldsDisplayed={50}

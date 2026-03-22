@@ -15,11 +15,11 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
-  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
+  useDocumentViewFlyoutConnectionHandler,
 } from '@kbn/unified-data-table';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
@@ -68,45 +68,11 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     []
   );
 
-  const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>,
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <DiscoverGridFlyout
-        dataView={props.dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={props.savedSearchId}
-        onFilter={props.onFilter}
-        onRemoveColumn={props.onRemoveColumn}
-        onAddColumn={props.onAddColumn}
-        onClose={() => expandedDocSetter(undefined)}
-        setExpandedDoc={expandedDocSetter}
-        initialTabId={initialTabId}
-        query={props.query}
-        filters={props.filters}
-        docViewerRef={docViewerRef}
-        hideFilteringOnComputedColumns={true}
-      />
-    ),
-    [
-      props.dataView,
-      props.savedSearchId,
-      props.onFilter,
-      props.onRemoveColumn,
-      props.onAddColumn,
-      props.query,
-      props.filters,
-      initialTabId,
-    ]
-  );
+  const { documentViewFlyoutConnectionHandler, connectedGridMeta } =
+    useDocumentViewFlyoutConnectionHandler({
+      expandedDoc,
+      setExpandedDoc: setExpandedDocWithInitialTab,
+    });
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
@@ -151,24 +117,47 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       interceptedWarnings={props.interceptedWarnings}
       inlineEditing={inlineEditing}
     >
-      <DiscoverGrid
-        {...gridProps}
-        isPaginationEnabled={!gridProps.isPlainRecord}
-        totalHits={props.totalHitCount}
-        setExpandedDoc={setExpandedDocWithInitialTab}
-        expandedDoc={expandedDoc}
-        showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
-        hideFilteringOnComputedColumns={true}
-        maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        documentViewFlyoutConnectionHandler={enableDocumentViewer ? renderDocumentView : undefined}
-        renderCustomToolbar={renderCustomToolbarWithElements}
-        externalCustomRenderers={cellRenderers}
-        enableComparisonMode
-        showColumnTokens
-        showFullScreenButton={false}
-        className="unifiedDataTable"
-        css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
-      />
+      <>
+        <DiscoverGrid
+          {...gridProps}
+          isPaginationEnabled={!gridProps.isPlainRecord}
+          totalHits={props.totalHitCount}
+          setExpandedDoc={setExpandedDocWithInitialTab}
+          showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
+          hideFilteringOnComputedColumns={true}
+          maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+          documentViewFlyoutConnectionHandler={
+            enableDocumentViewer ? documentViewFlyoutConnectionHandler : undefined
+          }
+          renderCustomToolbar={renderCustomToolbarWithElements}
+          externalCustomRenderers={cellRenderers}
+          enableComparisonMode
+          showColumnTokens
+          showFullScreenButton={false}
+          className="unifiedDataTable"
+          css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
+        />
+        {enableDocumentViewer && expandedDoc && (
+          <DiscoverGridFlyout
+            dataView={props.dataView}
+            hit={expandedDoc}
+            hits={connectedGridMeta.current?.displayedRows ?? []}
+            columns={connectedGridMeta.current?.displayedColumns ?? []}
+            columnsMeta={connectedGridMeta.current?.customColumnsMeta}
+            savedSearchId={props.savedSearchId}
+            onFilter={props.onFilter}
+            onRemoveColumn={props.onRemoveColumn}
+            onAddColumn={props.onAddColumn}
+            onClose={() => setExpandedDocWithInitialTab(undefined)}
+            setExpandedDoc={setExpandedDocWithInitialTab}
+            initialTabId={initialTabId}
+            query={props.query}
+            filters={props.filters}
+            docViewerRef={docViewerRef}
+            hideFilteringOnComputedColumns={true}
+          />
+        )}
+      </>
     </SavedSearchEmbeddableBase>
   );
 }

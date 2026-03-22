@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo, type ComponentProps } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
 import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
@@ -15,6 +15,7 @@ import {
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
+  useDocumentViewFlyoutConnectionHandler,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -66,35 +67,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns(columns);
   }, []);
 
-  const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      expandedDocSetter: ComponentProps<typeof RowViewer>['setExpandedDoc'],
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <RowViewer
-        dataView={props.dataView}
-        notifications={props.core.notifications}
-        chrome={props.core.chrome}
-        hit={hit}
-        hits={displayedRows}
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        flyoutType={props.flyoutType ?? 'push'}
-        onRemoveColumn={(column) => {
-          setActiveColumns(activeColumns.filter((c) => c !== column));
-        }}
-        onAddColumn={(column) => {
-          setActiveColumns([...activeColumns, column]);
-        }}
-        onClose={() => expandedDocSetter(undefined)}
-        setExpandedDoc={expandedDocSetter}
-      />
-    ),
-    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
-  );
+  const { documentViewFlyoutConnectionHandler, connectedGridMeta } =
+    useDocumentViewFlyoutConnectionHandler({
+      expandedDoc,
+      setExpandedDoc,
+    });
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
@@ -198,41 +175,61 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   return (
-    <UnifiedDataTable
-      columns={activeColumns}
-      css={css`
-        .unifiedDataTableToolbar {
-          padding: 4px 0px;
-        }
-      `}
-      rows={rows}
-      columnsMeta={columnsMeta}
-      services={services}
-      enableInTableSearch
-      isPlainRecord
-      isSortEnabled={false}
-      loadingState={DataLoadingState.loaded}
-      dataView={props.dataView}
-      sampleSizeState={rows.length}
-      rowsPerPageState={rowsPerPage}
-      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-      onSetColumns={onSetColumns}
-      onUpdateRowsPerPage={setRowsPerPage}
-      expandedDoc={expandedDoc}
-      setExpandedDoc={setExpandedDoc}
-      showTimeCol
-      enableComparisonMode
-      sort={sortOrder}
-      ariaLabelledBy="esqlDataGrid"
-      maxDocFieldsDisplayed={100}
-      documentViewFlyoutConnectionHandler={renderDocumentView}
-      showFullScreenButton={false}
-      configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
-      rowHeightState={rowHeight}
-      onUpdateRowHeight={setRowHeight}
-      controlColumnIds={props.controlColumnIds}
-      renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
-    />
+    <>
+      <UnifiedDataTable
+        columns={activeColumns}
+        css={css`
+          .unifiedDataTableToolbar {
+            padding: 4px 0px;
+          }
+        `}
+        rows={rows}
+        columnsMeta={columnsMeta}
+        services={services}
+        enableInTableSearch
+        isPlainRecord
+        isSortEnabled={false}
+        loadingState={DataLoadingState.loaded}
+        dataView={props.dataView}
+        sampleSizeState={rows.length}
+        rowsPerPageState={rowsPerPage}
+        rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+        onSetColumns={onSetColumns}
+        onUpdateRowsPerPage={setRowsPerPage}
+        showTimeCol
+        enableComparisonMode
+        sort={sortOrder}
+        ariaLabelledBy="esqlDataGrid"
+        maxDocFieldsDisplayed={100}
+        documentViewFlyoutConnectionHandler={documentViewFlyoutConnectionHandler}
+        showFullScreenButton={false}
+        configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
+        rowHeightState={rowHeight}
+        onUpdateRowHeight={setRowHeight}
+        controlColumnIds={props.controlColumnIds}
+        renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
+      />
+      {expandedDoc && (
+        <RowViewer
+          dataView={props.dataView}
+          notifications={props.core.notifications}
+          chrome={props.core.chrome}
+          hit={expandedDoc}
+          hits={connectedGridMeta.current?.displayedRows ?? []}
+          columns={connectedGridMeta.current?.displayedColumns ?? []}
+          columnsMeta={connectedGridMeta.current?.customColumnsMeta}
+          flyoutType={props.flyoutType ?? 'push'}
+          onRemoveColumn={(column) => {
+            setActiveColumns((prev) => prev.filter((c) => c !== column));
+          }}
+          onAddColumn={(column) => {
+            setActiveColumns((prev) => [...prev, column]);
+          }}
+          onClose={() => setExpandedDoc(undefined)}
+          setExpandedDoc={setExpandedDoc}
+        />
+      )}
+    </>
   );
 };
 

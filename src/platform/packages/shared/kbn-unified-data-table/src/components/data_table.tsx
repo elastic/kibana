@@ -137,6 +137,9 @@ export interface DocViewerSnapshot {
   expandedDoc: DataTableRecord | undefined;
 }
 
+/** Stable snapshot for useSyncExternalStore fallback when no doc viewer handler is provided */
+const EMPTY_DOC_VIEWER_SNAPSHOT: DocViewerSnapshot = { expandedDoc: undefined };
+
 export interface GetDocViewerExternalStore {
   subscribe: (onStoreChange: () => void) => () => void;
   getSnapshot: () => DocViewerSnapshot;
@@ -213,10 +216,6 @@ interface InternalUnifiedDataTableProps {
    * Array of documents provided by Elasticsearch
    */
   rows?: DataTableRecord[];
-  /**
-   * Function to set the expanded document, which is displayed in a flyout
-   */
-  setExpandedDoc?: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -759,8 +758,8 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const docViewerSnapshot = useSyncExternalStore(
       docViewerHelpers?.externalStore.subscribe || (() => () => {}),
-      docViewerHelpers?.externalStore.getSnapshot || (() => ({ expandedDoc: undefined })),
-      docViewerHelpers?.externalStore.getServerSnapshot || (() => undefined)
+      docViewerHelpers?.externalStore.getSnapshot || (() => EMPTY_DOC_VIEWER_SNAPSHOT),
+      docViewerHelpers?.externalStore.getServerSnapshot || (() => EMPTY_DOC_VIEWER_SNAPSHOT)
     );
 
     const unifiedDataTableContextValue = useMemo<DataTableContext>(

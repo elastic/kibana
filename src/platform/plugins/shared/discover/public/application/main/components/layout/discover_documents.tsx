@@ -207,7 +207,7 @@ function DiscoverDocumentsComponent({
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
-  const { DiscoverGridFlyoutRenderer, flyoutConnectionHandler } =
+  const { DiscoverGridFlyoutRenderer, flyoutConnectionHandler, setExpandedDoc } =
     useGetDiscoverGridFlyoutRenderer();
 
   const latestGrid = useLatest(grid);
@@ -560,6 +560,7 @@ function DiscoverDocumentsComponent({
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+            setExpandedDoc={setExpandedDoc}
             documentViewFlyoutConnectionHandler={flyoutConnectionHandler}
             renderCustomToolbar={renderCustomToolbarWithElements}
             services={services}
