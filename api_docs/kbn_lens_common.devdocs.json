@@ -5007,12 +5007,12 @@
             "signature": [
               "{ notifications: ",
               "NotificationsStart",
+              "; http: ",
+              "HttpSetup",
               "; docLinks: ",
               "DocLinksStart",
               "; application: ",
               "ApplicationStart",
-              "; http: ",
-              "HttpSetup",
               "; overlays: ",
               "OverlayStart",
               "; uiSettings: ",
@@ -7682,7 +7682,7 @@
         "label": "ESQLVariablesCompatibleDashboardApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 496,
+        "lineNumber": 501,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8048,7 +8048,7 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 497,
+            "lineNumber": 502,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8414,7 +8414,7 @@
               "> | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 498,
+            "lineNumber": 503,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8580,7 +8580,7 @@
               "; }; toPromise: { (): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: unknown; } | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 499,
+            "lineNumber": 504,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17438,7 +17438,7 @@
         "label": "MetricVisualizationState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -17451,7 +17451,7 @@
             "label": "layerId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17467,7 +17467,7 @@
               "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17483,7 +17483,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17499,7 +17499,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17515,7 +17515,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17531,7 +17531,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17547,7 +17547,7 @@
               "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17563,7 +17563,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17583,7 +17583,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -17625,7 +17625,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17648,7 +17648,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17665,7 +17665,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17681,7 +17681,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17697,7 +17697,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17717,7 +17717,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -17775,7 +17775,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17791,7 +17791,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17807,7 +17807,7 @@
               "\"right\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17830,7 +17830,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17846,7 +17846,7 @@
               "TitleFontWeightString | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17862,7 +17862,7 @@
               "\"top\" | \"bottom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17878,7 +17878,7 @@
               "\"after\" | \"before\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17894,7 +17894,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17910,7 +17910,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17941,7 +17941,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17957,7 +17957,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17973,7 +17973,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -17996,7 +17996,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -18012,7 +18012,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -18028,7 +18028,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -18044,7 +18044,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -18060,7 +18060,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -18076,7 +18076,7 @@
               "\"value\" | \"background\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -19391,93 +19391,6 @@
           },
           {
             "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.SharedPartitionLayerState.legendStats",
-            "type": "Array",
-            "tags": [],
-            "label": "legendStats",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressionPartitionVis",
-                "scope": "common",
-                "docId": "kibExpressionPartitionVisPluginApi",
-                "section": "def-common.PartitionLegendValue",
-                "text": "PartitionLegendValue"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.SharedPartitionLayerState.nestedLegend",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "nestedLegend",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
-            "lineNumber": 40,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.SharedPartitionLayerState.percentDecimals",
-            "type": "number",
-            "tags": [],
-            "label": "percentDecimals",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
-            "lineNumber": 41,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.SharedPartitionLayerState.emptySizeRatio",
-            "type": "number",
-            "tags": [],
-            "label": "emptySizeRatio",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
-            "lineNumber": 42,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.SharedPartitionLayerState.legendMaxLines",
-            "type": "number",
-            "tags": [],
-            "label": "legendMaxLines",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
-            "lineNumber": 43,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
             "id": "def-common.SharedPartitionLayerState.legendSize",
             "type": "CompoundType",
             "tags": [],
@@ -19494,7 +19407,30 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.SharedPartitionLayerState.legendStats",
+            "type": "Array",
+            "tags": [],
+            "label": "legendStats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.PartitionLegendValue",
+                "text": "PartitionLegendValue"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -19508,6 +19444,70 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.SharedPartitionLayerState.legendMaxLines",
+            "type": "number",
+            "tags": [],
+            "label": "legendMaxLines",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.SharedPartitionLayerState.nestedLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.SharedPartitionLayerState.percentDecimals",
+            "type": "number",
+            "tags": [],
+            "label": "percentDecimals",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.SharedPartitionLayerState.emptySizeRatio",
+            "type": "number",
+            "tags": [],
+            "label": "emptySizeRatio",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
             "lineNumber": 45,
@@ -19744,17 +19744,17 @@
         "label": "StructuredDatasourceStates",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 442,
+        "lineNumber": 450,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.StructuredDatasourceStates.formBased",
+            "id": "def-common.StructuredDatasourceStates.LENS_DATASOURCE_ID.FORM_BASED",
             "type": "Object",
             "tags": [],
-            "label": "formBased",
+            "label": "[LENS_DATASOURCE_ID.FORM_BASED]",
             "description": [],
             "signature": [
               {
@@ -19767,17 +19767,17 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 443,
+            "lineNumber": 451,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.StructuredDatasourceStates.textBased",
+            "id": "def-common.StructuredDatasourceStates.LENS_DATASOURCE_ID.TEXT_BASED",
             "type": "Object",
             "tags": [],
-            "label": "textBased",
+            "label": "[LENS_DATASOURCE_ID.TEXT_BASED]",
             "description": [],
             "signature": [
               {
@@ -19790,7 +19790,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 444,
+            "lineNumber": 452,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28736,7 +28736,7 @@
           "\"right\" | \"center\" | \"left\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 114,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29075,7 +29075,7 @@
           },
           "<T, { isDimensionComplete?: boolean | undefined; forceRender?: boolean | undefined; }>; core: Pick<",
           "CoreStart",
-          ", \"notifications\" | \"docLinks\" | \"i18n\" | \"http\" | \"analytics\" | \"overlays\" | \"uiSettings\" | \"theme\" | \"userProfile\">; dateRange: ",
+          ", \"notifications\" | \"http\" | \"docLinks\" | \"i18n\" | \"analytics\" | \"overlays\" | \"uiSettings\" | \"theme\" | \"userProfile\">; dateRange: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -30208,7 +30208,7 @@
           "\"right\" | \"left\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 112,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31360,7 +31360,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 492,
+        "lineNumber": 497,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32610,7 +32610,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 488,
+        "lineNumber": 493,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32903,6 +32903,25 @@
       },
       {
         "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.LensDatasourceId",
+        "type": "Type",
+        "tags": [],
+        "label": "LensDatasourceId",
+        "description": [
+          "The supported datasource identifiers"
+        ],
+        "signature": [
+          "\"formBased\" | \"textBased\""
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
+        "lineNumber": 447,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
         "id": "def-common.LensEditSupportedActions",
         "type": "Type",
         "tags": [],
@@ -32950,7 +32969,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 494,
+        "lineNumber": 499,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34746,7 +34765,7 @@
           ", \"titlesTextAlign\" | \"primaryAlign\" | \"titleWeight\">> & { iconAlign?: \"right\" | \"left\" | undefined; secondaryAlign?: \"right\" | \"center\" | \"left\" | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 103,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34805,7 +34824,7 @@
           " | undefined; trendlineTimeAccessor?: string | undefined; trendlineMetricAccessor?: string | undefined; trendlineSecondaryMetricAccessor?: string | undefined; trendlineBreakdownByAccessor?: string | undefined; applyColorTo?: \"value\" | \"background\" | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 83,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35149,7 +35168,7 @@
           "\"default\" | \"fit\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35166,7 +35185,7 @@
           "\"top\" | \"bottom\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35291,10 +35310,18 @@
         "label": "SecondaryTrend",
         "description": [],
         "signature": [
-          "{ type: \"none\"; } | { type: \"static\"; color: string; } | { type: \"dynamic\"; visuals: \"value\" | \"both\" | \"icon\"; paletteId: string; reversed: boolean; baselineValue: number | \"primary\"; }"
+          "{ type: \"none\"; } | { type: \"static\"; color: string; } | { type: \"dynamic\"; visuals: \"value\" | \"both\" | \"icon\"; paletteId: ",
+          {
+            "pluginId": "@kbn/palettes",
+            "scope": "common",
+            "docId": "kibKbnPalettesPluginApi",
+            "section": "def-common.KbnPaletteId",
+            "text": "KbnPaletteId"
+          },
+          "; reversed: boolean; baselineValue: number | \"primary\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35311,7 +35338,7 @@
           "\"none\" | \"dynamic\" | \"static\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35496,32 +35523,6 @@
       },
       {
         "parentPluginId": "@kbn/lens-common",
-        "id": "def-common.SupportedDatasourceId",
-        "type": "Type",
-        "tags": [],
-        "label": "SupportedDatasourceId",
-        "description": [
-          "The supported datasource identifiers"
-        ],
-        "signature": [
-          "keyof ",
-          {
-            "pluginId": "@kbn/lens-common",
-            "scope": "common",
-            "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.StructuredDatasourceStates",
-            "text": "StructuredDatasourceStates"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 447,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/lens-common",
         "id": "def-common.TableChangeType",
         "type": "Type",
         "tags": [],
@@ -35656,7 +35657,7 @@
           "\"bold\" | 500 | \"normal\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 110,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36764,7 +36765,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; hidePanelTitles?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 493,
+        "lineNumber": 498,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37723,7 +37724,7 @@
           " | undefined; }; visualization: unknown; }; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 468,
+        "lineNumber": 473,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37863,7 +37864,7 @@
           "\"default\" | \"fit\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38546,6 +38547,23 @@
       },
       {
         "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.LENS_DATASOURCE_ID",
+        "type": "Object",
+        "tags": [],
+        "label": "LENS_DATASOURCE_ID",
+        "description": [],
+        "signature": [
+          "{ readonly FORM_BASED: \"formBased\"; readonly TEXT_BASED: \"textBased\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
+        "lineNumber": 442,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
         "id": "def-common.LENS_GAUGE_GROUP_ID",
         "type": "Object",
         "tags": [],
@@ -38634,7 +38652,7 @@
                       "Interpolation",
                       "<",
                       "Theme",
-                      ">; suppressHydrationWarning?: boolean | undefined; lang?: string | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; title?: string | undefined; role?: React.AriaRole | undefined; color?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"location\" | \"false\" | \"true\" | \"time\" | \"step\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"grid\" | \"false\" | \"true\" | \"dialog\" | \"menu\" | \"listbox\" | \"tree\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"false\" | \"true\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<SVGElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCut?: React.ClipboardEventHandler<SVGElement> | undefined; onCutCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onPaste?: React.ClipboardEventHandler<SVGElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStart?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<SVGElement> | undefined; onFocus?: React.FocusEventHandler<SVGElement> | undefined; onFocusCapture?: React.FocusEventHandler<SVGElement> | undefined; onBlur?: React.FocusEventHandler<SVGElement> | undefined; onBlurCapture?: React.FocusEventHandler<SVGElement> | undefined; onChange?: React.FormEventHandler<SVGElement> | undefined; onChangeCapture?: React.FormEventHandler<SVGElement> | undefined; onBeforeInput?: React.FormEventHandler<SVGElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<SVGElement> | undefined; onInput?: React.FormEventHandler<SVGElement> | undefined; onInputCapture?: React.FormEventHandler<SVGElement> | undefined; onReset?: React.FormEventHandler<SVGElement> | undefined; onResetCapture?: React.FormEventHandler<SVGElement> | undefined; onSubmit?: React.FormEventHandler<SVGElement> | undefined; onSubmitCapture?: React.FormEventHandler<SVGElement> | undefined; onInvalid?: React.FormEventHandler<SVGElement> | undefined; onInvalidCapture?: React.FormEventHandler<SVGElement> | undefined; onLoad?: React.ReactEventHandler<SVGElement> | undefined; onLoadCapture?: React.ReactEventHandler<SVGElement> | undefined; onErrorCapture?: React.ReactEventHandler<SVGElement> | undefined; onKeyDown?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPress?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUp?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onAbort?: React.ReactEventHandler<SVGElement> | undefined; onAbortCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlay?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<SVGElement> | undefined; onDurationChange?: React.ReactEventHandler<SVGElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onEmptied?: React.ReactEventHandler<SVGElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEncrypted?: React.ReactEventHandler<SVGElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEnded?: React.ReactEventHandler<SVGElement> | undefined; onEndedCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedData?: React.ReactEventHandler<SVGElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadStart?: React.ReactEventHandler<SVGElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<SVGElement> | undefined; onPause?: React.ReactEventHandler<SVGElement> | undefined; onPauseCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlay?: React.ReactEventHandler<SVGElement> | undefined; onPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlaying?: React.ReactEventHandler<SVGElement> | undefined; onPlayingCapture?: React.ReactEventHandler<SVGElement> | undefined; onProgress?: React.ReactEventHandler<SVGElement> | undefined; onProgressCapture?: React.ReactEventHandler<SVGElement> | undefined; onRateChange?: React.ReactEventHandler<SVGElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onResize?: React.ReactEventHandler<SVGElement> | undefined; onResizeCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeked?: React.ReactEventHandler<SVGElement> | undefined; onSeekedCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeking?: React.ReactEventHandler<SVGElement> | undefined; onSeekingCapture?: React.ReactEventHandler<SVGElement> | undefined; onStalled?: React.ReactEventHandler<SVGElement> | undefined; onStalledCapture?: React.ReactEventHandler<SVGElement> | undefined; onSuspend?: React.ReactEventHandler<SVGElement> | undefined; onSuspendCapture?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdate?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChange?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onWaiting?: React.ReactEventHandler<SVGElement> | undefined; onWaitingCapture?: React.ReactEventHandler<SVGElement> | undefined; onAuxClick?: React.MouseEventHandler<SVGElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onClick?: React.MouseEventHandler<SVGElement> | undefined; onClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onContextMenu?: React.MouseEventHandler<SVGElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClick?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onDrag?: React.DragEventHandler<SVGElement> | undefined; onDragCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnd?: React.DragEventHandler<SVGElement> | undefined; onDragEndCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnter?: React.DragEventHandler<SVGElement> | undefined; onDragEnterCapture?: React.DragEventHandler<SVGElement> | undefined; onDragExit?: React.DragEventHandler<SVGElement> | undefined; onDragExitCapture?: React.DragEventHandler<SVGElement> | undefined; onDragLeave?: React.DragEventHandler<SVGElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<SVGElement> | undefined; onDragOver?: React.DragEventHandler<SVGElement> | undefined; onDragOverCapture?: React.DragEventHandler<SVGElement> | undefined; onDragStart?: React.DragEventHandler<SVGElement> | undefined; onDragStartCapture?: React.DragEventHandler<SVGElement> | undefined; onDrop?: React.DragEventHandler<SVGElement> | undefined; onDropCapture?: React.DragEventHandler<SVGElement> | undefined; onMouseDown?: React.MouseEventHandler<SVGElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseEnter?: React.MouseEventHandler<SVGElement> | undefined; onMouseLeave?: React.MouseEventHandler<SVGElement> | undefined; onMouseMove?: React.MouseEventHandler<SVGElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOut?: React.MouseEventHandler<SVGElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOver?: React.MouseEventHandler<SVGElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseUp?: React.MouseEventHandler<SVGElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<SVGElement> | undefined; onSelect?: React.ReactEventHandler<SVGElement> | undefined; onSelectCapture?: React.ReactEventHandler<SVGElement> | undefined; onTouchCancel?: React.TouchEventHandler<SVGElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchEnd?: React.TouchEventHandler<SVGElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchMove?: React.TouchEventHandler<SVGElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchStart?: React.TouchEventHandler<SVGElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<SVGElement> | undefined; onPointerDown?: React.PointerEventHandler<SVGElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerMove?: React.PointerEventHandler<SVGElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerUp?: React.PointerEventHandler<SVGElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancel?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerEnter?: React.PointerEventHandler<SVGElement> | undefined; onPointerLeave?: React.PointerEventHandler<SVGElement> | undefined; onPointerOver?: React.PointerEventHandler<SVGElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerOut?: React.PointerEventHandler<SVGElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onScroll?: React.UIEventHandler<SVGElement> | undefined; onScrollCapture?: React.UIEventHandler<SVGElement> | undefined; onWheel?: React.WheelEventHandler<SVGElement> | undefined; onWheelCapture?: React.WheelEventHandler<SVGElement> | undefined; onAnimationStart?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<SVGElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<SVGElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<SVGElement> | undefined; size?: \"m\" | \"s\" | \"original\" | \"l\" | \"xl\" | \"xxl\" | undefined; cursor?: string | number | undefined; path?: string | undefined; from?: string | number | undefined; to?: string | number | undefined; clipPath?: string | undefined; mask?: string | undefined; offset?: string | number | undefined; href?: string | undefined; media?: string | undefined; target?: string | undefined; direction?: string | number | undefined; width?: string | number | undefined; textDecoration?: string | number | undefined; result?: string | undefined; by?: string | number | undefined; display?: string | number | undefined; scale?: string | number | undefined; y?: string | number | undefined; d?: string | undefined; x?: string | number | undefined; stdDeviation?: string | number | undefined; operator?: string | number | undefined; method?: string | undefined; fillOpacity?: string | number | undefined; orientation?: string | number | undefined; strokeWidth?: string | number | undefined; stroke?: string | undefined; opacity?: string | number | undefined; height?: string | number | undefined; crossOrigin?: CrossOrigin; accentHeight?: string | number | undefined; accumulate?: \"sum\" | \"none\" | undefined; additive?: \"sum\" | \"replace\" | undefined; alignmentBaseline?: \"inherit\" | \"auto\" | \"alphabetic\" | \"hanging\" | \"ideographic\" | \"mathematical\" | \"baseline\" | \"before-edge\" | \"text-before-edge\" | \"middle\" | \"central\" | \"after-edge\" | \"text-after-edge\" | undefined; allowReorder?: \"yes\" | \"no\" | undefined; alphabetic?: string | number | undefined; amplitude?: string | number | undefined; arabicForm?: \"initial\" | \"medial\" | \"terminal\" | \"isolated\" | undefined; ascent?: string | number | undefined; attributeName?: string | undefined; attributeType?: string | undefined; autoReverse?: Booleanish | undefined; azimuth?: string | number | undefined; baseFrequency?: string | number | undefined; baselineShift?: string | number | undefined; baseProfile?: string | number | undefined; bbox?: string | number | undefined; begin?: string | number | undefined; bias?: string | number | undefined; calcMode?: string | number | undefined; capHeight?: string | number | undefined; clip?: string | number | undefined; clipPathUnits?: string | number | undefined; clipRule?: string | number | undefined; colorInterpolation?: string | number | undefined; colorInterpolationFilters?: \"inherit\" | \"auto\" | \"sRGB\" | \"linearRGB\" | undefined; colorProfile?: string | number | undefined; colorRendering?: string | number | undefined; contentScriptType?: string | number | undefined; contentStyleType?: string | number | undefined; cx?: string | number | undefined; cy?: string | number | undefined; decelerate?: string | number | undefined; descent?: string | number | undefined; diffuseConstant?: string | number | undefined; divisor?: string | number | undefined; dominantBaseline?: string | number | undefined; dur?: string | number | undefined; dx?: string | number | undefined; dy?: string | number | undefined; edgeMode?: string | number | undefined; elevation?: string | number | undefined; enableBackground?: string | number | undefined; exponent?: string | number | undefined; externalResourcesRequired?: Booleanish | undefined; fillRule?: \"inherit\" | \"nonzero\" | \"evenodd\" | undefined; filterRes?: string | number | undefined; filterUnits?: string | number | undefined; floodColor?: string | number | undefined; floodOpacity?: string | number | undefined; focusable?: Booleanish | \"auto\" | undefined; fontFamily?: string | undefined; fontSize?: string | number | undefined; fontSizeAdjust?: string | number | undefined; fontStretch?: string | number | undefined; fontStyle?: string | number | undefined; fontVariant?: string | number | undefined; fontWeight?: string | number | undefined; fr?: string | number | undefined; fx?: string | number | undefined; fy?: string | number | undefined; g1?: string | number | undefined; g2?: string | number | undefined; glyphName?: string | number | undefined; glyphOrientationHorizontal?: string | number | undefined; glyphOrientationVertical?: string | number | undefined; glyphRef?: string | number | undefined; gradientTransform?: string | undefined; gradientUnits?: string | undefined; hanging?: string | number | undefined; horizAdvX?: string | number | undefined; horizOriginX?: string | number | undefined; ideographic?: string | number | undefined; imageRendering?: string | number | undefined; in2?: string | number | undefined; intercept?: string | number | undefined; k1?: string | number | undefined; k2?: string | number | undefined; k3?: string | number | undefined; k4?: string | number | undefined; k?: string | number | undefined; kernelMatrix?: string | number | undefined; kernelUnitLength?: string | number | undefined; kerning?: string | number | undefined; keyPoints?: string | number | undefined; keySplines?: string | number | undefined; keyTimes?: string | number | undefined; lengthAdjust?: string | number | undefined; letterSpacing?: string | number | undefined; lightingColor?: string | number | undefined; limitingConeAngle?: string | number | undefined; local?: string | number | undefined; markerEnd?: string | undefined; markerHeight?: string | number | undefined; markerMid?: string | undefined; markerStart?: string | undefined; markerUnits?: string | number | undefined; markerWidth?: string | number | undefined; maskContentUnits?: string | number | undefined; maskUnits?: string | number | undefined; mathematical?: string | number | undefined; numOctaves?: string | number | undefined; orient?: string | number | undefined; overflow?: string | number | undefined; overlinePosition?: string | number | undefined; overlineThickness?: string | number | undefined; paintOrder?: string | number | undefined; panose1?: string | number | undefined; pathLength?: string | number | undefined; patternContentUnits?: string | undefined; patternTransform?: string | number | undefined; patternUnits?: string | undefined; pointerEvents?: string | number | undefined; points?: string | undefined; pointsAtX?: string | number | undefined; pointsAtY?: string | number | undefined; pointsAtZ?: string | number | undefined; preserveAlpha?: Booleanish | undefined; preserveAspectRatio?: string | undefined; primitiveUnits?: string | number | undefined; r?: string | number | undefined; radius?: string | number | undefined; refX?: string | number | undefined; refY?: string | number | undefined; renderingIntent?: string | number | undefined; repeatCount?: string | number | undefined; repeatDur?: string | number | undefined; requiredExtensions?: string | number | undefined; requiredFeatures?: string | number | undefined; restart?: string | number | undefined; rotate?: string | number | undefined; rx?: string | number | undefined; ry?: string | number | undefined; seed?: string | number | undefined; shapeRendering?: string | number | undefined; slope?: string | number | undefined; spacing?: string | number | undefined; specularConstant?: string | number | undefined; specularExponent?: string | number | undefined; speed?: string | number | undefined; spreadMethod?: string | undefined; startOffset?: string | number | undefined; stemh?: string | number | undefined; stemv?: string | number | undefined; stitchTiles?: string | number | undefined; stopColor?: string | undefined; stopOpacity?: string | number | undefined; strikethroughPosition?: string | number | undefined; strikethroughThickness?: string | number | undefined; strokeDasharray?: string | number | undefined; strokeDashoffset?: string | number | undefined; strokeLinecap?: \"inherit\" | \"butt\" | \"round\" | \"square\" | undefined; strokeLinejoin?: \"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined; strokeMiterlimit?: string | number | undefined; strokeOpacity?: string | number | undefined; surfaceScale?: string | number | undefined; systemLanguage?: string | number | undefined; tableValues?: string | number | undefined; targetX?: string | number | undefined; targetY?: string | number | undefined; textAnchor?: string | undefined; textLength?: string | number | undefined; textRendering?: string | number | undefined; u1?: string | number | undefined; u2?: string | number | undefined; underlinePosition?: string | number | undefined; underlineThickness?: string | number | undefined; unicode?: string | number | undefined; unicodeBidi?: string | number | undefined; unicodeRange?: string | number | undefined; unitsPerEm?: string | number | undefined; vAlphabetic?: string | number | undefined; vectorEffect?: string | number | undefined; vertAdvY?: string | number | undefined; vertOriginX?: string | number | undefined; vertOriginY?: string | number | undefined; vHanging?: string | number | undefined; vIdeographic?: string | number | undefined; viewBox?: string | undefined; viewTarget?: string | number | undefined; visibility?: string | number | undefined; vMathematical?: string | number | undefined; widths?: string | number | undefined; wordSpacing?: string | number | undefined; writingMode?: string | number | undefined; x1?: string | number | undefined; x2?: string | number | undefined; xChannelSelector?: string | undefined; xHeight?: string | number | undefined; xlinkActuate?: string | undefined; xlinkArcrole?: string | undefined; xlinkHref?: string | undefined; xlinkRole?: string | undefined; xlinkShow?: string | undefined; xlinkTitle?: string | undefined; xlinkType?: string | undefined; xmlBase?: string | undefined; xmlLang?: string | undefined; xmlns?: string | undefined; xmlnsXlink?: string | undefined; xmlSpace?: string | undefined; y1?: string | number | undefined; y2?: string | number | undefined; yChannelSelector?: string | undefined; z?: string | number | undefined; zoomAndPan?: string | undefined; titleId?: string | undefined; onIconLoad?: (() => void) | undefined; }"
+                      ">; suppressHydrationWarning?: boolean | undefined; lang?: string | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; title?: string | undefined; role?: React.AriaRole | undefined; color?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"location\" | \"false\" | \"true\" | \"time\" | \"step\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"grid\" | \"false\" | \"true\" | \"dialog\" | \"menu\" | \"listbox\" | \"tree\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"false\" | \"true\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<SVGElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCut?: React.ClipboardEventHandler<SVGElement> | undefined; onCutCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onPaste?: React.ClipboardEventHandler<SVGElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStart?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<SVGElement> | undefined; onFocus?: React.FocusEventHandler<SVGElement> | undefined; onFocusCapture?: React.FocusEventHandler<SVGElement> | undefined; onBlur?: React.FocusEventHandler<SVGElement> | undefined; onBlurCapture?: React.FocusEventHandler<SVGElement> | undefined; onChange?: React.FormEventHandler<SVGElement> | undefined; onChangeCapture?: React.FormEventHandler<SVGElement> | undefined; onBeforeInput?: React.FormEventHandler<SVGElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<SVGElement> | undefined; onInput?: React.FormEventHandler<SVGElement> | undefined; onInputCapture?: React.FormEventHandler<SVGElement> | undefined; onReset?: React.FormEventHandler<SVGElement> | undefined; onResetCapture?: React.FormEventHandler<SVGElement> | undefined; onSubmit?: React.FormEventHandler<SVGElement> | undefined; onSubmitCapture?: React.FormEventHandler<SVGElement> | undefined; onInvalid?: React.FormEventHandler<SVGElement> | undefined; onInvalidCapture?: React.FormEventHandler<SVGElement> | undefined; onLoad?: React.ReactEventHandler<SVGElement> | undefined; onLoadCapture?: React.ReactEventHandler<SVGElement> | undefined; onErrorCapture?: React.ReactEventHandler<SVGElement> | undefined; onKeyDown?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPress?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUp?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onAbort?: React.ReactEventHandler<SVGElement> | undefined; onAbortCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlay?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<SVGElement> | undefined; onDurationChange?: React.ReactEventHandler<SVGElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onEmptied?: React.ReactEventHandler<SVGElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEncrypted?: React.ReactEventHandler<SVGElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEnded?: React.ReactEventHandler<SVGElement> | undefined; onEndedCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedData?: React.ReactEventHandler<SVGElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadStart?: React.ReactEventHandler<SVGElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<SVGElement> | undefined; onPause?: React.ReactEventHandler<SVGElement> | undefined; onPauseCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlay?: React.ReactEventHandler<SVGElement> | undefined; onPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlaying?: React.ReactEventHandler<SVGElement> | undefined; onPlayingCapture?: React.ReactEventHandler<SVGElement> | undefined; onProgress?: React.ReactEventHandler<SVGElement> | undefined; onProgressCapture?: React.ReactEventHandler<SVGElement> | undefined; onRateChange?: React.ReactEventHandler<SVGElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onResize?: React.ReactEventHandler<SVGElement> | undefined; onResizeCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeked?: React.ReactEventHandler<SVGElement> | undefined; onSeekedCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeking?: React.ReactEventHandler<SVGElement> | undefined; onSeekingCapture?: React.ReactEventHandler<SVGElement> | undefined; onStalled?: React.ReactEventHandler<SVGElement> | undefined; onStalledCapture?: React.ReactEventHandler<SVGElement> | undefined; onSuspend?: React.ReactEventHandler<SVGElement> | undefined; onSuspendCapture?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdate?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChange?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onWaiting?: React.ReactEventHandler<SVGElement> | undefined; onWaitingCapture?: React.ReactEventHandler<SVGElement> | undefined; onAuxClick?: React.MouseEventHandler<SVGElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onClick?: React.MouseEventHandler<SVGElement> | undefined; onClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onContextMenu?: React.MouseEventHandler<SVGElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClick?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onDrag?: React.DragEventHandler<SVGElement> | undefined; onDragCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnd?: React.DragEventHandler<SVGElement> | undefined; onDragEndCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnter?: React.DragEventHandler<SVGElement> | undefined; onDragEnterCapture?: React.DragEventHandler<SVGElement> | undefined; onDragExit?: React.DragEventHandler<SVGElement> | undefined; onDragExitCapture?: React.DragEventHandler<SVGElement> | undefined; onDragLeave?: React.DragEventHandler<SVGElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<SVGElement> | undefined; onDragOver?: React.DragEventHandler<SVGElement> | undefined; onDragOverCapture?: React.DragEventHandler<SVGElement> | undefined; onDragStart?: React.DragEventHandler<SVGElement> | undefined; onDragStartCapture?: React.DragEventHandler<SVGElement> | undefined; onDrop?: React.DragEventHandler<SVGElement> | undefined; onDropCapture?: React.DragEventHandler<SVGElement> | undefined; onMouseDown?: React.MouseEventHandler<SVGElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseEnter?: React.MouseEventHandler<SVGElement> | undefined; onMouseLeave?: React.MouseEventHandler<SVGElement> | undefined; onMouseMove?: React.MouseEventHandler<SVGElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOut?: React.MouseEventHandler<SVGElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOver?: React.MouseEventHandler<SVGElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseUp?: React.MouseEventHandler<SVGElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<SVGElement> | undefined; onSelect?: React.ReactEventHandler<SVGElement> | undefined; onSelectCapture?: React.ReactEventHandler<SVGElement> | undefined; onTouchCancel?: React.TouchEventHandler<SVGElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchEnd?: React.TouchEventHandler<SVGElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchMove?: React.TouchEventHandler<SVGElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchStart?: React.TouchEventHandler<SVGElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<SVGElement> | undefined; onPointerDown?: React.PointerEventHandler<SVGElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerMove?: React.PointerEventHandler<SVGElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerUp?: React.PointerEventHandler<SVGElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancel?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerEnter?: React.PointerEventHandler<SVGElement> | undefined; onPointerLeave?: React.PointerEventHandler<SVGElement> | undefined; onPointerOver?: React.PointerEventHandler<SVGElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerOut?: React.PointerEventHandler<SVGElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onScroll?: React.UIEventHandler<SVGElement> | undefined; onScrollCapture?: React.UIEventHandler<SVGElement> | undefined; onWheel?: React.WheelEventHandler<SVGElement> | undefined; onWheelCapture?: React.WheelEventHandler<SVGElement> | undefined; onAnimationStart?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<SVGElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<SVGElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<SVGElement> | undefined; size?: \"m\" | \"s\" | \"original\" | \"l\" | \"xl\" | \"xxl\" | undefined; cursor?: string | number | undefined; from?: string | number | undefined; to?: string | number | undefined; clipPath?: string | undefined; mask?: string | undefined; path?: string | undefined; offset?: string | number | undefined; href?: string | undefined; media?: string | undefined; target?: string | undefined; direction?: string | number | undefined; width?: string | number | undefined; textDecoration?: string | number | undefined; result?: string | undefined; by?: string | number | undefined; display?: string | number | undefined; scale?: string | number | undefined; y?: string | number | undefined; d?: string | undefined; x?: string | number | undefined; stdDeviation?: string | number | undefined; operator?: string | number | undefined; method?: string | undefined; fillOpacity?: string | number | undefined; orientation?: string | number | undefined; strokeWidth?: string | number | undefined; stroke?: string | undefined; opacity?: string | number | undefined; height?: string | number | undefined; crossOrigin?: CrossOrigin; accentHeight?: string | number | undefined; accumulate?: \"sum\" | \"none\" | undefined; additive?: \"sum\" | \"replace\" | undefined; alignmentBaseline?: \"inherit\" | \"auto\" | \"alphabetic\" | \"hanging\" | \"ideographic\" | \"mathematical\" | \"baseline\" | \"before-edge\" | \"text-before-edge\" | \"middle\" | \"central\" | \"after-edge\" | \"text-after-edge\" | undefined; allowReorder?: \"yes\" | \"no\" | undefined; alphabetic?: string | number | undefined; amplitude?: string | number | undefined; arabicForm?: \"initial\" | \"medial\" | \"terminal\" | \"isolated\" | undefined; ascent?: string | number | undefined; attributeName?: string | undefined; attributeType?: string | undefined; autoReverse?: Booleanish | undefined; azimuth?: string | number | undefined; baseFrequency?: string | number | undefined; baselineShift?: string | number | undefined; baseProfile?: string | number | undefined; bbox?: string | number | undefined; begin?: string | number | undefined; bias?: string | number | undefined; calcMode?: string | number | undefined; capHeight?: string | number | undefined; clip?: string | number | undefined; clipPathUnits?: string | number | undefined; clipRule?: string | number | undefined; colorInterpolation?: string | number | undefined; colorInterpolationFilters?: \"inherit\" | \"auto\" | \"sRGB\" | \"linearRGB\" | undefined; colorProfile?: string | number | undefined; colorRendering?: string | number | undefined; contentScriptType?: string | number | undefined; contentStyleType?: string | number | undefined; cx?: string | number | undefined; cy?: string | number | undefined; decelerate?: string | number | undefined; descent?: string | number | undefined; diffuseConstant?: string | number | undefined; divisor?: string | number | undefined; dominantBaseline?: string | number | undefined; dur?: string | number | undefined; dx?: string | number | undefined; dy?: string | number | undefined; edgeMode?: string | number | undefined; elevation?: string | number | undefined; enableBackground?: string | number | undefined; exponent?: string | number | undefined; externalResourcesRequired?: Booleanish | undefined; fillRule?: \"inherit\" | \"nonzero\" | \"evenodd\" | undefined; filterRes?: string | number | undefined; filterUnits?: string | number | undefined; floodColor?: string | number | undefined; floodOpacity?: string | number | undefined; focusable?: Booleanish | \"auto\" | undefined; fontFamily?: string | undefined; fontSize?: string | number | undefined; fontSizeAdjust?: string | number | undefined; fontStretch?: string | number | undefined; fontStyle?: string | number | undefined; fontVariant?: string | number | undefined; fontWeight?: string | number | undefined; fr?: string | number | undefined; fx?: string | number | undefined; fy?: string | number | undefined; g1?: string | number | undefined; g2?: string | number | undefined; glyphName?: string | number | undefined; glyphOrientationHorizontal?: string | number | undefined; glyphOrientationVertical?: string | number | undefined; glyphRef?: string | number | undefined; gradientTransform?: string | undefined; gradientUnits?: string | undefined; hanging?: string | number | undefined; horizAdvX?: string | number | undefined; horizOriginX?: string | number | undefined; ideographic?: string | number | undefined; imageRendering?: string | number | undefined; in2?: string | number | undefined; intercept?: string | number | undefined; k1?: string | number | undefined; k2?: string | number | undefined; k3?: string | number | undefined; k4?: string | number | undefined; k?: string | number | undefined; kernelMatrix?: string | number | undefined; kernelUnitLength?: string | number | undefined; kerning?: string | number | undefined; keyPoints?: string | number | undefined; keySplines?: string | number | undefined; keyTimes?: string | number | undefined; lengthAdjust?: string | number | undefined; letterSpacing?: string | number | undefined; lightingColor?: string | number | undefined; limitingConeAngle?: string | number | undefined; local?: string | number | undefined; markerEnd?: string | undefined; markerHeight?: string | number | undefined; markerMid?: string | undefined; markerStart?: string | undefined; markerUnits?: string | number | undefined; markerWidth?: string | number | undefined; maskContentUnits?: string | number | undefined; maskUnits?: string | number | undefined; mathematical?: string | number | undefined; numOctaves?: string | number | undefined; orient?: string | number | undefined; overflow?: string | number | undefined; overlinePosition?: string | number | undefined; overlineThickness?: string | number | undefined; paintOrder?: string | number | undefined; panose1?: string | number | undefined; pathLength?: string | number | undefined; patternContentUnits?: string | undefined; patternTransform?: string | number | undefined; patternUnits?: string | undefined; pointerEvents?: string | number | undefined; points?: string | undefined; pointsAtX?: string | number | undefined; pointsAtY?: string | number | undefined; pointsAtZ?: string | number | undefined; preserveAlpha?: Booleanish | undefined; preserveAspectRatio?: string | undefined; primitiveUnits?: string | number | undefined; r?: string | number | undefined; radius?: string | number | undefined; refX?: string | number | undefined; refY?: string | number | undefined; renderingIntent?: string | number | undefined; repeatCount?: string | number | undefined; repeatDur?: string | number | undefined; requiredExtensions?: string | number | undefined; requiredFeatures?: string | number | undefined; restart?: string | number | undefined; rotate?: string | number | undefined; rx?: string | number | undefined; ry?: string | number | undefined; seed?: string | number | undefined; shapeRendering?: string | number | undefined; slope?: string | number | undefined; spacing?: string | number | undefined; specularConstant?: string | number | undefined; specularExponent?: string | number | undefined; speed?: string | number | undefined; spreadMethod?: string | undefined; startOffset?: string | number | undefined; stemh?: string | number | undefined; stemv?: string | number | undefined; stitchTiles?: string | number | undefined; stopColor?: string | undefined; stopOpacity?: string | number | undefined; strikethroughPosition?: string | number | undefined; strikethroughThickness?: string | number | undefined; strokeDasharray?: string | number | undefined; strokeDashoffset?: string | number | undefined; strokeLinecap?: \"inherit\" | \"butt\" | \"round\" | \"square\" | undefined; strokeLinejoin?: \"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined; strokeMiterlimit?: string | number | undefined; strokeOpacity?: string | number | undefined; surfaceScale?: string | number | undefined; systemLanguage?: string | number | undefined; tableValues?: string | number | undefined; targetX?: string | number | undefined; targetY?: string | number | undefined; textAnchor?: string | undefined; textLength?: string | number | undefined; textRendering?: string | number | undefined; u1?: string | number | undefined; u2?: string | number | undefined; underlinePosition?: string | number | undefined; underlineThickness?: string | number | undefined; unicode?: string | number | undefined; unicodeBidi?: string | number | undefined; unicodeRange?: string | number | undefined; unitsPerEm?: string | number | undefined; vAlphabetic?: string | number | undefined; vectorEffect?: string | number | undefined; vertAdvY?: string | number | undefined; vertOriginX?: string | number | undefined; vertOriginY?: string | number | undefined; vHanging?: string | number | undefined; vIdeographic?: string | number | undefined; viewBox?: string | undefined; viewTarget?: string | number | undefined; visibility?: string | number | undefined; vMathematical?: string | number | undefined; widths?: string | number | undefined; wordSpacing?: string | number | undefined; writingMode?: string | number | undefined; x1?: string | number | undefined; x2?: string | number | undefined; xChannelSelector?: string | undefined; xHeight?: string | number | undefined; xlinkActuate?: string | undefined; xlinkArcrole?: string | undefined; xlinkHref?: string | undefined; xlinkRole?: string | undefined; xlinkShow?: string | undefined; xlinkTitle?: string | undefined; xlinkType?: string | undefined; xmlBase?: string | undefined; xmlLang?: string | undefined; xmlns?: string | undefined; xmlnsXlink?: string | undefined; xmlSpace?: string | undefined; y1?: string | number | undefined; y2?: string | number | undefined; yChannelSelector?: string | undefined; z?: string | number | undefined; zoomAndPan?: string | undefined; titleId?: string | undefined; onIconLoad?: (() => void) | undefined; }"
                     ],
                     "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_heatmap.tsx",
                     "lineNumber": 15,

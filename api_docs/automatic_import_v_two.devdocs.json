@@ -1445,7 +1445,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 192,
+        "lineNumber": 196,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1462,7 +1462,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 193,
+        "lineNumber": 197,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

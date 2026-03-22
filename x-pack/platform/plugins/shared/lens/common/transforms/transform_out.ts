@@ -22,6 +22,7 @@ import type {
 } from './types';
 import { findLensReference, isByRefLensState } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
+import { stripInheritedContext } from './helpers';
 
 /**
  * Transform from Lens Stored State to Lens API format
@@ -35,7 +36,8 @@ export const getTransformOut = (
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
-      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
+      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences),
+      stripInheritedContext
     );
 
     const state = transformsFlow(storedState);
