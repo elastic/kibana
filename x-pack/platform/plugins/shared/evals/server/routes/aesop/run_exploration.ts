@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { EvalsRequestHandlerContext } from '../../types';
+import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
 
 const runExplorationBodySchema = z.object({
   agent_role: z.string().default('SOC analyst'),
@@ -105,6 +106,13 @@ export function registerRunExplorationRoute(router: IRouter<EvalsRequestHandlerC
           );
 
           context.logger.info('[AESOP] Workflow started', { execution_id: executionId });
+
+          // Initialize workflow state tracking for progress updates
+          const esClient = context.core.elasticsearch.client.asCurrentUser;
+          const stateTracker = new WorkflowStateTracker(esClient, context.logger);
+
+          await stateTracker.initializeExecution(executionId, 'aesop.self_exploration');
+          context.logger.debug('[AESOP] Workflow state tracking initialized', { execution_id: executionId });
 
           return response.ok({
             body: {
