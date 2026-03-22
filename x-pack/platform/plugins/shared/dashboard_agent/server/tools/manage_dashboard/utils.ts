@@ -37,7 +37,6 @@ export const getErrorMessage = (error: unknown): string => {
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
-  query: z.string().optional(),
 });
 
 type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
@@ -51,18 +50,13 @@ const resolvePanelsFromVisualizationAttachment = (
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
 
-  const { visualization, query } = parseResult.data;
-  const title =
-    typeof visualization.title === 'string'
-      ? visualization.title
-      : query ?? 'Generated visualization';
+  const { visualization } = parseResult.data;
 
   return [
     {
       type: 'lens',
       uid: uuidv4(),
       config: visualization as LensApiSchemaType,
-      title,
       sourceAttachmentId: attachmentId,
     },
   ];

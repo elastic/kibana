@@ -49,8 +49,6 @@ export const lensAttachmentPanelSchema = z.object({
   uid: z.string(),
   /** The Lens configuration in API format (LensApiSchemaType) */
   config: z.record(z.string(), z.unknown()),
-  /** Panel title */
-  title: z.string().optional(),
   /** The visualization attachment ID this panel was resolved from */
   sourceAttachmentId: z.string().optional(),
   /** Layout hint: width/height and position in dashboard grid units. */
@@ -74,8 +72,6 @@ export const genericAttachmentPanelSchema = z.object({
   uid: z.string(),
   /** The raw panel configuration for recreating the panel */
   config: z.record(z.string(), z.unknown()),
-  /** Panel title if available */
-  title: z.string().optional(),
   /** Layout: width/height and position in dashboard grid units. */
   grid: panelGridSchema,
 });

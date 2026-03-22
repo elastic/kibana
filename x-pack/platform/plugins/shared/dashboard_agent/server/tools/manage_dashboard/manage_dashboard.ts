@@ -161,7 +161,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                     panels: updatedDashboardData.panels.map((panel) => ({
                       type: panel.type,
                       uid: panel.uid,
-                      title: panel.title ?? '',
                       grid: panel.grid,
                       ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
                         ? { sourceAttachmentId: panel.sourceAttachmentId }
@@ -177,7 +176,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                             panels: section.panels.map((panel) => ({
                               type: panel.type,
                               uid: panel.uid,
-                              title: panel.title ?? '',
                               grid: panel.grid,
                               ...(isLensAttachmentPanel(panel) && panel.sourceAttachmentId
                                 ? { sourceAttachmentId: panel.sourceAttachmentId }

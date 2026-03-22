@@ -42,7 +42,6 @@ describe('executeDashboardOperations', () => {
 
     const attachmentPanel: AttachmentPanel = {
       ...createLensPanel('from-attachment-panel'),
-      title: 'From attachment',
     };
 
     const operations: DashboardOperation[] = [

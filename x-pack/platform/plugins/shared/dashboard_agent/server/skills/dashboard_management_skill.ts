@@ -93,7 +93,7 @@ If you omit metadata on a new dashboard, creation can fail.
 
 After a successful call, the tool returns:
 - \`data.dashboardAttachment.id\`: the attachment ID needed for future updates.
-- \`data.dashboardAttachment.content.panels\`: array of \`{ type, uid, title }\` for each panel on the dashboard.
+- \`data.dashboardAttachment.content.panels\`: array of \`{ type, uid, grid }\` for each panel on the dashboard.
 - \`data.dashboardAttachment.content.sections\`: ordered section list with \`sectionId\`, \`title\`, \`collapsed\`, \`grid.y\`, and section panels.
 - \`data.failures\`: array of \`{ type, identifier, error }\` for attachment resolution failures. Only present when there are failures.
 - \`data.version\`: the version number of the dashboard attachment, incrementing with each update.
@@ -101,7 +101,7 @@ After a successful call, the tool returns:
 See \`./examples/tool-result-format\` for the complete result structure with examples.
 
 **After a successful call:**
-- Summarize what was created or updated. List each panel by title so the user knows what is included.
+- Summarize what was created or updated.
 - If \`failures\` is present and non-empty, explain which attachments could not be resolved and include the error message. Offer to recreate those visualizations and retry adding them.
 - Remember the \`dashboardAttachment.id\` for follow-up updates. Do not ask the user for it again.
 - **Render the dashboard attachment inline** so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition — only the final dashboard attachment should be rendered.
@@ -317,9 +317,9 @@ Use this after updating a visualization attachment via \`create_visualization\` 
         "title": "Web Server Performance",
         "description": "Overview of web server request traffic and host resource usage",
         "panels": [
-          { "type": "lens", "uid": "viz-001", "title": "Total Requests", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
-          { "type": "lens", "uid": "viz-002", "title": "Average CPU Usage", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
-          { "type": "lens", "uid": "viz-003", "title": "Requests Over Time", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
+          { "type": "lens", "uid": "viz-001", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "uid": "viz-002", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "uid": "viz-003", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
         ]
       }
     }
@@ -356,7 +356,7 @@ Key fields to remember:
         "title": "Server Metrics",
         "description": "System performance overview",
         "panels": [
-          { "type": "lens", "uid": "viz-001", "title": "CPU Usage Over Time" }
+          { "type": "lens", "uid": "viz-001", "grid": { "x": 0, "y": 0, "w": 24, "h": 10 } }
         ]
       }
     }
