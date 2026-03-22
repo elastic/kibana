@@ -153,12 +153,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const hostLastSeenField = identityFields['host.name']
     ? 'host.name'
     : identityFields['host.hostname']
-      ? 'host.hostname'
-      : identityFields['host.id']
-        ? 'host.id'
-        : identityFields['host.entity.id']
-          ? 'host.entity.id'
-          : 'host.name';
+    ? 'host.hostname'
+    : identityFields['host.id']
+    ? 'host.id'
+    : identityFields['host.entity.id']
+    ? 'host.entity.id'
+    : 'host.name';
 
   const filterQuery = useMemo(
     () =>

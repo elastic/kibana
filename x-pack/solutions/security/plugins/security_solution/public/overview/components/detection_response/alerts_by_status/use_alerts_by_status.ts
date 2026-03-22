@@ -184,10 +184,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   const euidApi = useEntityStoreEuidApi();
   const identityFieldsForQuery = useMemo(
     () =>
-      euidApi?.euid?.getEntityIdentifiersFromDocument(
-        storeEntityType ?? 'generic',
-        entityRecord
-      ),
+      euidApi?.euid?.getEntityIdentifiersFromDocument(storeEntityType ?? 'generic', entityRecord),
     [euidApi?.euid, entityRecord, storeEntityType]
   );
 

@@ -98,8 +98,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
     return primaryField ? identityFields[primaryField] : '';
   }, [identityFields, primaryField]);
 
-  const isHostOrUser =
-    primaryField.startsWith('host.') || primaryField.startsWith('user.');
+  const isHostOrUser = primaryField.startsWith('host.') || primaryField.startsWith('user.');
   const entityType = primaryField.startsWith('host.') ? 'host' : 'user';
 
   const docEntityId =

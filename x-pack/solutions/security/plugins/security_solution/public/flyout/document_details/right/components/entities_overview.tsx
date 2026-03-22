@@ -54,11 +54,9 @@ export const EntitiesOverview: React.FC = () => {
   });
 
   const showUserOverview =
-    userIdentityUsable &&
-    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+    userIdentityUsable && (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
   const showHostOverview =
-    hostIdentityUsable &&
-    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+    hostIdentityUsable && (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
   const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
