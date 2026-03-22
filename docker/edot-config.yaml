@@ -1,0 +1,51 @@
+# EDOT Collector Configuration for AESOP Spike
+# Collects OTEL traces from Kibana Agent Builder agents and exports to Elasticsearch
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  # Add AESOP-specific attributes
+  attributes:
+    actions:
+      - key: deployment.environment
+        value: aesop-spike-local
+        action: insert
+
+exporters:
+  elasticsearch:
+    endpoints: ["http://elasticsearch:9200"]
+    auth:
+      authenticator: basicauth
+    traces_index: traces-apm.otel-default
+    mapping:
+      mode: ecs
+
+  # Debug exporter for troubleshooting
+  debug:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+extensions:
+  basicauth:
+    client_auth:
+      username: elastic
+      password: changeme
+
+service:
+  extensions: [basicauth]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, attributes]
+      exporters: [elasticsearch, debug]
