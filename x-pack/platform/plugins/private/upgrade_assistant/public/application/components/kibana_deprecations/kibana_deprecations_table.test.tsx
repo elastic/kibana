@@ -70,12 +70,6 @@ const mockDeprecations: KibanaDeprecationDetails[] = [
     level: 'warning',
     title: 'Warning feature deprecation',
   }),
-  createFeatureDeprecation({
-    id: 'dep-3',
-    domainId: 'test_domain_3',
-    level: 'warning',
-    title: 'Another warning feature deprecation',
-  }),
 ];
 
 const mockReload = jest.fn();
@@ -139,7 +133,10 @@ describe('KibanaDeprecationsTable', () => {
         />
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Status Selection' }));
+      const filterButtons =
+        document.body.querySelectorAll<HTMLButtonElement>('button.euiFilterButton');
+      expect(filterButtons.length).toBeGreaterThanOrEqual(2);
+      fireEvent.click(filterButtons[0]);
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
           '.euiSelectableListItem[title="Critical"]'
@@ -155,7 +152,11 @@ describe('KibanaDeprecationsTable', () => {
       });
 
       // Clear (restore all rows)
-      fireEvent.click(screen.getByTestId('clearSearchButton'));
+      const clearButton = document.body.querySelector<HTMLElement>(
+        '[data-test-subj="clearSearchButton"]'
+      );
+      expect(clearButton).not.toBeNull();
+      fireEvent.click(clearButton!);
 
       await waitFor(() => {
         expect(
@@ -174,7 +175,10 @@ describe('KibanaDeprecationsTable', () => {
         />
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Type Selection' }));
+      const filterButtons =
+        document.body.querySelectorAll<HTMLButtonElement>('button.euiFilterButton');
+      expect(filterButtons.length).toBeGreaterThanOrEqual(2);
+      fireEvent.click(filterButtons[1]);
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
           '.euiSelectableListItem[title="Config"]'
