@@ -101,6 +101,7 @@ const actionExecutorInitializerParams = {
   inMemoryConnectors: [],
   analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
   security: securityServiceMock.createStart(),
+  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
 };
 
 const taskRunnerFactoryInitializerParams = {

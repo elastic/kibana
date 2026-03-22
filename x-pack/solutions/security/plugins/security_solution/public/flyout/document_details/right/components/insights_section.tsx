@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { CorrelationsOverview } from './correlations_overview';
 import { ContributingAlertSection } from './contributing_alert_section';
-import { PrevalenceOverview } from './prevalence_overview';
-import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
+import { PrevalenceOverview } from '../../../../flyout_v2/document/components/prevalence_overview';
+import { ThreatIntelligenceOverview } from '../../../../flyout_v2/document/components/threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { LeftPanelInsightsTab } from '../../left';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 
 const KEY = 'insights';
 
@@ -27,8 +32,21 @@ const KEY = 'insights';
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
 export const InsightsSection = memo(() => {
-  const { getFieldsData } = useDocumentDetailsContext();
+  const { getFieldsData, searchHit, investigationFields, isPreviewMode } =
+    useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
+  const goToThreatIntelligenceTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: THREAT_INTELLIGENCE_TAB_ID,
+  });
+
+  const goToPrevalenceTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: PREVALENCE_TAB_ID,
+  });
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -53,7 +71,11 @@ export const InsightsSection = memo(() => {
       {eventKind === EventKind.signal && (
         <>
           <EuiSpacer size="s" />
-          <ThreatIntelligenceOverview />
+          <ThreatIntelligenceOverview
+            hit={hit}
+            showIcon={!isPreviewMode}
+            onShowThreatIntelligence={goToThreatIntelligenceTab}
+          />
         </>
       )}
       <EuiSpacer size="s" />
@@ -61,7 +83,12 @@ export const InsightsSection = memo(() => {
       <EuiSpacer size="s" />
       <ContributingAlertSection />
       <EuiSpacer size="s" />
-      <PrevalenceOverview />
+      <PrevalenceOverview
+        hit={hit}
+        investigationFields={investigationFields}
+        showIcon={!isPreviewMode}
+        onShowPrevalenceDetails={goToPrevalenceTab}
+      />
     </ExpandableSection>
   );
 });
