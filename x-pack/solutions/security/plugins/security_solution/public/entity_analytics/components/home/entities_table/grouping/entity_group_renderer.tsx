@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
-import _ from 'lodash';
+import { capitalize } from 'lodash';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
@@ -108,7 +108,7 @@ export const groupPanelRenderer = (
   }
 
   if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
-    const entityType = _.capitalize(bucket.key_as_string ?? bucket.key.toString());
+    const entityType = capitalize(bucket.key_as_string ?? bucket.key.toString());
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
