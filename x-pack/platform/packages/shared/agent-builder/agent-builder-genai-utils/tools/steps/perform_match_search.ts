@@ -35,14 +35,15 @@ const numSnippets = 2;
 const numWords = 750;
 
 // The reranker inference ID to use. We assume this reranker is always available.
-const rerankInferenceID = '.jina-reranker-v3';
+const rerankInferenceID = '.jina-reranker-v2-base-multilingual';
+// const rerankInferenceID = '.jina-reranker-v3';
 // When true, perform RERANK on the documents that were returned via the RRF retriever.
 const rerankCandidateDocs = true;
 // When true, perform an additional rerank operation on the generated snippets for each document.
 const rerankSnippets = false;
 
 // Number of candidate documents to retrieve for doc reranking
-const rankWindowSize = 20;
+const rankWindowSize = 30;
 // Number of candidate snippets to extract per doc for snippet reranking
 const snippetRankWindowSize = 10;
 
@@ -157,7 +158,7 @@ const extractSnippetsBatch = async ({
 
   const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | EVAL doc = MV_DEDUPE(${mvAppendExpr}) | EVAL snippets = TOP_SNIPPETS(doc, "${escapedTerm}", {"num_snippets": ${snippetCount}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP _id, snippets`;
 
-  logger.info(`TOP_SNIPPETS batch query for ${docIds.length} docs: ${esqlQuery}`);
+  logger.debug(`TOP_SNIPPETS batch query for ${docIds.length} docs: ${esqlQuery}`);
 
   const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
 
@@ -212,7 +213,7 @@ const rerankDocuments = async ({
   logger.info(`RERANK candidate docs query: ${esqlQuery}`);
 
   const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
-  logger.info(`RERANK candidate docs response: ${JSON.stringify(esqlResponse)}`);
+  logger.debug(`RERANK candidate docs response: ${JSON.stringify(esqlResponse)}`);
 
   return esqlResponse.values.map((row) => row[0]).filter((v): v is string => typeof v === 'string');
 };
@@ -324,7 +325,8 @@ export const performMatchSearch = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<PerformMatchSearchResponse> => {
-  const searchRequest = buildSearchRequest({ index, term, fields, size });
+  const hardCodedSize = 5;
+  const searchRequest = buildSearchRequest({ index, term, fields, size: hardCodedSize });
 
   logger.info(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
 
@@ -341,35 +343,30 @@ export const performMatchSearch = async ({
   }
 
   let hitOrder = response.hits.hits.map((hit) => hit._id!);
-  logger.info(
+  logger.debug(
     `Search returned ${hitOrder.length} hits: [${hitOrder.join(
       ', '
     )}], rerankCandidateDocs=${rerankCandidateDocs}, useSnippets=${useSnippets}`
   );
 
   if (rerankCandidateDocs) {
-    const originalOrder = hitOrder;
-    logger.info(`Entering RERANK candidate docs block with ${hitOrder.length} docs`);
     try {
       hitOrder = await rerankDocuments({
         docIds: hitOrder,
         index,
         term,
         fields,
-        resultSize: size,
+        resultSize: hardCodedSize,
         esClient,
         logger,
       });
-      logger.info(
-        `RERANK candidate docs: before=[${originalOrder.join(', ')}] after=[${hitOrder.join(', ')}]`
-      );
     } catch (error) {
       logger.info(
         `RERANK candidate docs failed, keeping original order: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      hitOrder = hitOrder.slice(0, size);
+      hitOrder = hitOrder.slice(0, hardCodedSize);
     }
   }
 
