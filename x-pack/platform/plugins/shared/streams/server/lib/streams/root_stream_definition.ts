@@ -20,6 +20,7 @@ export const createRootStreamDefinition = (
   const now = new Date().toISOString();
 
   return {
+    type: 'wired',
     name: streamName,
     description: `Root stream for ${streamName}`,
     updated_at: now,
