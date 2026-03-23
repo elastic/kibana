@@ -42,7 +42,7 @@ export type {
   WorkflowAggsDto,
   WorkflowStatsDto,
   WorkflowStepExecutionListDto,
-  WorkflowGetBatchResponseDto,
+  WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
   // enums
   ExecutionStatusUnion,

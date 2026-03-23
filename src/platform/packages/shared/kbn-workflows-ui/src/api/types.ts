@@ -31,7 +31,7 @@ export interface UpdateWorkflowParams {
   [key: string]: unknown;
 }
 
-export interface GetBatchWorkflowsParams {
+export interface MgetWorkflowsParams {
   ids: string[];
   source?: string[];
 }

@@ -344,7 +344,7 @@ export interface WorkflowDetailDto {
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
   id: string;
 }
-export type WorkflowGetBatchResponseDto = WorkflowPartialDetailDto[];
+export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
 export interface WorkflowListItemDto {
   id: string;

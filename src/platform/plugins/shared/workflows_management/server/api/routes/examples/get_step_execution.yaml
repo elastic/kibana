@@ -21,6 +21,11 @@ responses:
               topologicalIndex: 0
               globalExecutionIndex: 0
               stepExecutionIndex: 0
+              input:
+                message: 'hello world'
+              output: 'hello world'
+              error: null
+              state: null
               scopeStack: []
 x-codeSamples:
   - lang: curl

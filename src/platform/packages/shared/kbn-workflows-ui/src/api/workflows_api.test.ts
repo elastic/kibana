@@ -137,11 +137,11 @@ describe('WorkflowApi', () => {
     });
   });
 
-  describe('getBatchWorkflows', () => {
-    it('should call POST /api/workflows/batch with ids', async () => {
-      await api.getBatchWorkflows({ ids: ['wf-1', 'wf-2'] });
+  describe('mgetWorkflows', () => {
+    it('should call POST /api/workflows/mget with ids', async () => {
+      await api.mgetWorkflows({ ids: ['wf-1', 'wf-2'] });
 
-      expect(http.post).toHaveBeenCalledWith('/api/workflows/batch', {
+      expect(http.post).toHaveBeenCalledWith('/api/workflows/mget', {
         body: JSON.stringify({ ids: ['wf-1', 'wf-2'] }),
         headers: VERSION_HEADER,
       });

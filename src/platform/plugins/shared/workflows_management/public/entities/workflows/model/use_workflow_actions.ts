@@ -341,7 +341,7 @@ export function useWorkflowActions() {
 
       let conflicts: PreflightImportResult['conflicts'] = [];
       if (clientResult.workflowIds.length > 0) {
-        const conflictResponse = await api.getBatchWorkflows({
+        const conflictResponse = await api.mgetWorkflows({
           ids: clientResult.workflowIds,
           source: ['name'],
         });

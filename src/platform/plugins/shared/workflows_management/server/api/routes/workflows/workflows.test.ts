@@ -358,8 +358,8 @@ describe('Workflow routes', () => {
     });
   });
 
-  describe('POST:/api/workflows/batch (get by IDs)', () => {
-    const key = 'POST:/api/workflows/batch';
+  describe('POST:/api/workflows/mget (get by IDs)', () => {
+    const key = 'POST:/api/workflows/mget';
 
     it('should register route handler', () => {
       expect(routeHandlers[key]).toBeDefined();

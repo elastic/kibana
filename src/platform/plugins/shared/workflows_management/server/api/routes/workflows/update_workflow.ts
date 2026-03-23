@@ -48,9 +48,6 @@ export function registerUpdateWorkflowRoute({ router, api, spaces }: RouteDepend
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
           const updated = await api.updateWorkflow(id, request.body, spaceId, request);
-          if (updated === null) {
-            return response.notFound();
-          }
           return response.ok({ body: updated });
         } catch (error) {
           return handleRouteError(response, error);

@@ -9,12 +9,13 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { MAX_WORKFLOW_YAML_LENGTH } from '../../../../common/lib/export/workflow_export_types';
 import type { RouteDependencies } from '../types';
 import { AVAILABILITY, INTERNAL_API_VERSION, OAS_TAG } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerValidateWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerValidateWorkflowRoute({ router, api, spaces, logger }: RouteDependencies) {
   router.versioned
     .post({
       path: '/api/workflows/validate',
@@ -39,6 +40,7 @@ export function registerValidateWorkflowRoute({ router, api, spaces }: RouteDepe
             body: schema.object({
               yaml: schema.string({
                 meta: { description: 'Workflow YAML definition to validate.' },
+                maxLength: MAX_WORKFLOW_YAML_LENGTH,
               }),
             }),
           },
@@ -50,9 +52,10 @@ export function registerValidateWorkflowRoute({ router, api, spaces }: RouteDepe
           const result = await api.validateWorkflow(request.body.yaml, spaceId, request);
           return response.ok({ body: result });
         } catch (error) {
+          logger.error(error);
           return response.customError({
             statusCode: 500,
-            body: { message: `Internal server error: ${error}` },
+            body: { message: `Internal server error: ${error.message}` },
           });
         }
       })

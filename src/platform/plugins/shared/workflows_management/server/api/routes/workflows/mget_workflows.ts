@@ -15,10 +15,10 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerGetBatchWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .post({
-      path: '/api/workflows/batch',
+      path: '/api/workflows/mget',
       access: 'public',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Get workflows by IDs',
@@ -33,7 +33,7 @@ export function registerGetBatchWorkflowsRoute({ router, api, spaces }: RouteDep
       {
         version: API_VERSION,
         options: {
-          oasOperationObject: () => path.join(__dirname, '../examples/get_batch_workflows.yaml'),
+          oasOperationObject: () => path.join(__dirname, '../examples/mget_workflows.yaml'),
         },
         validate: {
           request: {

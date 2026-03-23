@@ -208,10 +208,10 @@ export class WorkflowsManagementApi {
     workflow: Partial<EsWorkflow>,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<UpdatedWorkflowResponseDto | null> {
+  ): Promise<UpdatedWorkflowResponseDto> {
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
-      throw new Error(`Workflow with id ${id} not found`);
+      throw new WorkflowNotFoundError(id);
     }
     return this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
   }

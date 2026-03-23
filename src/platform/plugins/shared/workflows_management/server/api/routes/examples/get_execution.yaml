@@ -33,6 +33,9 @@ responses:
               executedBy: elastic
               triggeredBy: manual
               yaml: "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+              input:
+                message: 'hello world'
+              output: 'hello world'
               stepExecutions:
                 - id: step-exec-001
                   stepId: hello_world_step

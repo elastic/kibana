@@ -22,8 +22,8 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
-  WorkflowGetBatchResponseDto,
   WorkflowListDto,
+  WorkflowMgetResponseDto,
   WorkflowsSearchParams,
   WorkflowStatsDto,
   WorkflowStepExecutionListDto,
@@ -35,11 +35,11 @@ import type {
   BulkCreateWorkflowsResponse,
   ExportWorkflowsParams,
   GetAggsParams,
-  GetBatchWorkflowsParams,
   GetExecutionParams,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
+  MgetWorkflowsParams,
   ResumeExecutionParams,
   RunWorkflowOptions,
   TestWorkflowParams,
@@ -118,11 +118,8 @@ export class WorkflowApi {
     });
   }
 
-  async getBatchWorkflows({
-    ids,
-    source,
-  }: GetBatchWorkflowsParams): Promise<WorkflowGetBatchResponseDto> {
-    return this.http.post(`${BASE}/batch`, {
+  async mgetWorkflows({ ids, source }: MgetWorkflowsParams): Promise<WorkflowMgetResponseDto> {
+    return this.http.post(`${BASE}/mget`, {
       body: JSON.stringify({ ids, source }),
       version: API_VERSION,
     });

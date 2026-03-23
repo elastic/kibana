@@ -21,11 +21,11 @@ jest.mock('../../../features/import_workflows/lib/parse_import_file');
 jest.mock('../../../hooks/use_telemetry');
 
 // var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
-let mockGetBatchWorkflows: jest.Mock;
+let mockMgetWorkflows: jest.Mock;
 let mockBulkCreateWorkflows: jest.Mock;
 
 jest.mock('@kbn/workflows-ui', () => {
-  mockGetBatchWorkflows = jest.fn();
+  mockMgetWorkflows = jest.fn();
   mockBulkCreateWorkflows = jest.fn();
   return {
     useRunWorkflow: () => ({
@@ -37,7 +37,7 @@ jest.mock('@kbn/workflows-ui', () => {
       reset: jest.fn(),
     }),
     useWorkflowsApi: () => ({
-      getBatchWorkflows: mockGetBatchWorkflows,
+      mgetWorkflows: mockMgetWorkflows,
       bulkCreateWorkflows: mockBulkCreateWorkflows,
     }),
   };
@@ -103,9 +103,9 @@ describe('useWorkflowActions – import mutations', () => {
       rawWorkflows: [{ id: 'w-1', yaml: 'name: W1' }],
     };
 
-    it('should parse the file client-side and check conflicts via getBatchWorkflows', async () => {
+    it('should parse the file client-side and check conflicts via mgetWorkflows', async () => {
       mockParseImportFile.mockResolvedValueOnce(clientParseResult);
-      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
       const file = createFile('test.yml', 'name: Test');
@@ -117,8 +117,8 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
 
       expect(mockParseImportFile).toHaveBeenCalledWith(file);
-      expect(mockGetBatchWorkflows).toHaveBeenCalledTimes(1);
-      expect(mockGetBatchWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
+      expect(mockMgetWorkflows).toHaveBeenCalledTimes(1);
+      expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
     });
 
     it('should combine client parse results with server conflict data', async () => {
@@ -153,7 +153,7 @@ describe('useWorkflowActions – import mutations', () => {
         ],
       };
       mockParseImportFile.mockResolvedValueOnce(parseResult);
-      mockGetBatchWorkflows.mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce({
         conflicts: [{ id: 'w-1', existingName: 'Existing' }],
       });
 
@@ -231,7 +231,7 @@ describe('useWorkflowActions – import mutations', () => {
 
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
 
-      expect(mockGetBatchWorkflows).not.toHaveBeenCalled();
+      expect(mockMgetWorkflows).not.toHaveBeenCalled();
       expect(result.current.preflightImportWorkflows.data?.conflicts).toEqual([]);
     });
   });
@@ -477,7 +477,7 @@ describe('useWorkflowActions – import mutations', () => {
       const importResponse = { created: [{ id: 'w-1', name: 'W' }], failed: [], parseErrors: [] };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
       mockBulkCreateWorkflows.mockResolvedValueOnce(importResponse);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
@@ -495,8 +495,8 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
       expect(result.current.importWorkflows.data?.created).toHaveLength(1);
 
-      expect(mockGetBatchWorkflows).toHaveBeenCalledTimes(1);
-      expect(mockGetBatchWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
+      expect(mockMgetWorkflows).toHaveBeenCalledTimes(1);
+      expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
       expect(mockBulkCreateWorkflows).toHaveBeenCalledTimes(1);
       expect(mockBulkCreateWorkflows).toHaveBeenCalledWith({
         workflows: clientResult.rawWorkflows,
@@ -530,7 +530,7 @@ describe('useWorkflowActions – import mutations', () => {
       };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockGetBatchWorkflows.mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce({
         conflicts: [{ id: 'w-1', existingName: 'Existing Workflow' }],
       });
       mockBulkCreateWorkflows.mockResolvedValueOnce(importResponse);
@@ -579,7 +579,7 @@ describe('useWorkflowActions – import mutations', () => {
       };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
       mockBulkCreateWorkflows.mockRejectedValueOnce(new Error('Import failed'));
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });

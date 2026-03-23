@@ -23,13 +23,15 @@ responses:
                   globalExecutionIndex: 0
                   stepExecutionIndex: 0
                   scopeStack: []
+                  input:
+                    message: 'hello world'
               total: 1
 x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/steps?includeOutput=true" \
+        -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/steps?includeInput=true" \
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |
-      GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeOutput=true
+      GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeInput=true
