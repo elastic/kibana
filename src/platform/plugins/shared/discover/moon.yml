@@ -129,6 +129,9 @@ dependsOn:
   - '@kbn/background-search'
   - '@kbn/react-query'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
+  - '@kbn/synthtrace-client'
 tags:
   - plugin
   - prod

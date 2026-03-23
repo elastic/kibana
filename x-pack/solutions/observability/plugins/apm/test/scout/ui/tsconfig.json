@@ -4,6 +4,15 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
+<<<<<<< HEAD
   "kbn_references": ["@kbn/apm-synthtrace-client", "@kbn/scout-oblt", "@kbn/apm-types"],
+=======
+  "kbn_references": [
+    "@kbn/synthtrace-client",
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
+    "@kbn/apm-types"
+  ],
+>>>>>>> 5df5c02aa0a9 (add kbn/scout-synthtrace (#258961))
   "exclude": ["target/**/*"]
 }

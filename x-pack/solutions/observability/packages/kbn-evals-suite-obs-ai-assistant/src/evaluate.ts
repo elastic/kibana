@@ -6,11 +6,15 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
+import { mergeTests } from '@kbn/scout';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import { KnowledgeBaseClient } from './clients/knowledge_base_client';
 import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
 
-export const evaluate = base.extend<
+const evaluateWithSynthtrace = mergeTests(base, synthtraceFixture);
+
+export const evaluate = evaluateWithSynthtrace.extend<
   {},
   {
     knowledgeBaseClient: KnowledgeBaseClient;

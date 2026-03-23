@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { globalSetupHook } from '@kbn/scout-oblt';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
+=======
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
+>>>>>>> 5df5c02aa0a9 (add kbn/scout-synthtrace (#258961))
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
 import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
