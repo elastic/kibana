@@ -14,7 +14,8 @@ import {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 
-describe('ES capabilities for serverless ES', () => {
+// Serverless tests only supported on main
+describe.skip('ES capabilities for serverless ES', () => {
   let serverlessES: TestServerlessESUtils;
   let client: ElasticsearchClient;
 
