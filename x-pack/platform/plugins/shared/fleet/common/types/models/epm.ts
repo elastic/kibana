@@ -470,23 +470,12 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
 }
 
-export interface InputOnlyRegistryDataStream {
-  type?: string;
-  ilm_policy?: string;
-  hidden?: boolean;
-  dataset: string;
-  title: string;
-  release: RegistryRelease;
-  streams?: RegistryStream[];
-  package: string;
-  path: string;
-  ingest_pipeline?: string;
-  elasticsearch?: RegistryElasticsearch;
-  dataset_is_prefix?: boolean;
-  routing_rules?: RegistryDataStreamRoutingRules[];
-  lifecycle?: RegistryDataStreamLifecycle;
-  agent?: RegistryAgent;
-}
+export type InputOnlyRegistryDataStream = Omit<
+  Pick<RegistryDataStream, RegistryDataStreamKeys>,
+  RegistryDataStreamKeys.type
+> & {
+  [RegistryDataStreamKeys.type]?: string;
+};
 
 export interface RegistryAgent {
   privileges?: { root?: boolean };
