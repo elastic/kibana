@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AgentPolicy,
-  DownloadSource,
-  EnrollmentSettingsProxy,
-} from '../../types';
+import type { AgentPolicy, DownloadSource, EnrollmentSettingsProxy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
