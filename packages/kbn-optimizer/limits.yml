@@ -27,14 +27,14 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 556473
+  core: 546620
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
   dashboardAgent: 5135
   dashboardMarkdown: 6219
-  data: 498703
+  data: 496967
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -51,6 +51,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
+  elasticConsole: 4451
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37566
@@ -210,5 +211,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 89850
-  workflowsManagement: 21318
+  workflowsManagement: 23749
   workplaceAIApp: 65547

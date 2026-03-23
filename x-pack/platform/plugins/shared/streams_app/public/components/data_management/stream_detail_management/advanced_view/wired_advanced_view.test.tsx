@@ -49,6 +49,7 @@ jest.mock('../../../stream_detail_systems/stream_description/use_stream_descript
 jest.mock('../../../../hooks/use_stream_features', () => ({
   useStreamFeatures: () => ({
     features: [],
+    excludedFeatures: [],
     featuresLoading: false,
     refreshFeatures: jest.fn(),
     error: null,

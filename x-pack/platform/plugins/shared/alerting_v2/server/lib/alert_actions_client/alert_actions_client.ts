@@ -73,6 +73,7 @@ export class AlertActionsClient {
           last_ack_action: null,
           last_deactivate_action: null,
           last_snooze_action: null,
+          tags: null,
         });
       }
     }

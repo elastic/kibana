@@ -204,4 +204,30 @@ describe('ListNotificationPoliciesPage', () => {
 
     expect(screen.getByText('1 workflow')).not.toBeNull();
   });
+
+  it('renders the policy description below the name', () => {
+    renderPage();
+
+    expect(screen.getByText('Policy One')).not.toBeNull();
+    expect(screen.getByText('Policy description')).not.toBeNull();
+  });
+
+  it('renders columns in the correct order', () => {
+    renderPage();
+
+    const columnHeaders = screen
+      .getAllByRole('columnheader')
+      .map((header) => header.textContent?.trim())
+      .filter(Boolean);
+
+    expect(columnHeaders).toEqual([
+      'Name',
+      'Destinations',
+      'Last update',
+      'Updated by',
+      'State',
+      'Notify',
+      'Actions',
+    ]);
+  });
 });

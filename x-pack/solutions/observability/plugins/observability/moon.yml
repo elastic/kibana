@@ -154,6 +154,11 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
+  - '@kbn/cell-actions'
+  - '@kbn/unified-data-table'
+  - '@kbn/alerting-v2-plugin'
+  - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/expressions-plugin'
 tags:
   - plugin
   - prod
