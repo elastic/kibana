@@ -54,6 +54,7 @@ export const optionsListDSLControlSchema = dataControlSchema
     search_technique: optionsListSearchTechniqueSchema,
     selected_options: schema.arrayOf(optionsListSelectionSchema, {
       defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
+      maxSize: 100000,
     }),
     single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
     sort: optionsListSortSchema,
@@ -62,7 +63,7 @@ export const optionsListDSLControlSchema = dataControlSchema
 export const optionsListESQLControlSchema = controlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
-    selected_options: schema.arrayOf(schema.string()),
+    selected_options: schema.arrayOf(schema.string(), { maxSize: 100000 }),
     single_select: schema.boolean({ defaultValue: DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select }),
     variable_name: schema.string(),
     variable_type: schema.oneOf([
@@ -77,5 +78,5 @@ export const optionsListESQLControlSchema = controlSchema
       schema.literal('STATIC_VALUES'),
       schema.literal('VALUES_FROM_QUERY'),
     ]),
-    available_options: schema.maybe(schema.arrayOf(schema.string())),
+    available_options: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100000 })),
   });
