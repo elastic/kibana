@@ -6,7 +6,10 @@
  */
 
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
@@ -15,7 +18,8 @@ export interface AttachmentServiceSetup {
 
 export interface AttachmentServiceStart {
   validate<Type extends string, Data>(
-    attachment: AttachmentInput<Type, Data>
+    attachment: AttachmentInput<Type, Data>,
+    resolveContext: AttachmentResolveContext
   ): Promise<ValidateAttachmentResult<Type, Data>>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
   getRegisteredTypeIds(): string[];

@@ -135,7 +135,7 @@ export interface AttachmentDiff {
 /**
  * Input for creating a new versioned attachment.
  */
-export interface VersionedAttachmentInput<
+export interface AttachmentInput<
   Type extends string = string,
   DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
 > {
@@ -200,7 +200,7 @@ export const versionedAttachmentSchema = z.object({
   origin_snapshot_at: z.string().optional(),
 });
 
-export const versionedAttachmentInputSchema = z.object({
+export const attachmentInputSchema = z.object({
   id: z.string().optional(),
   type: z.string(),
   data: z.unknown().optional(),
@@ -311,3 +311,13 @@ export interface UpdateOriginResponse {
   success: boolean;
   attachment: VersionedAttachment;
 }
+
+export const getContentKey = (input: AttachmentInput, fallback: string): string => {
+  if (input.data !== undefined) {
+    return `${input.type}:${hashContent(input.data)}`;
+  }
+  if (input.origin !== undefined) {
+    return `${input.type}:origin:${input.origin}`;
+  }
+  return `${input.type}:${fallback}`;
+};

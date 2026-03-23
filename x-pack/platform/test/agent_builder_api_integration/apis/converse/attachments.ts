@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
@@ -73,6 +73,37 @@ export function createAttachmentsTests(executionMode: ExecutionMode) {
 
         expect(body.statusCode).to.eql(400);
         expect(body.message).to.contain('Attachment validation failed');
+      });
+
+      it('returns an error when attachment has neither data nor origin', async () => {
+        const body: any = await agentBuilderApiClient.converse({
+          input: 'Hello AgentBuilder',
+          attachments: [
+            {
+              type: 'text',
+            },
+          ],
+          connector_id: connectorId,
+        });
+
+        expect(body.statusCode).to.eql(400);
+        expect(body.message).to.contain('either data or origin');
+      });
+
+      it('returns an error when origin-only attachment type does not support resolve', async () => {
+        const body: any = await agentBuilderApiClient.converse({
+          input: 'Hello AgentBuilder',
+          attachments: [
+            {
+              type: 'text',
+              origin: 'some-origin-id',
+            },
+          ],
+          connector_id: connectorId,
+        });
+
+        expect(body.statusCode).to.eql(400);
+        expect(body.message).to.contain('does not support resolving from origin');
       });
 
       it('calls the LLM with the attachment', async () => {

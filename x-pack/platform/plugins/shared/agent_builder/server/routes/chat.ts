@@ -81,9 +81,22 @@ export function registerChatRoutes({
           type: schema.string({
             meta: { description: 'Type of the attachment.' },
           }),
-          data: schema.recordOf(schema.string(), schema.any(), {
-            meta: { description: 'Payload of the attachment.' },
-          }),
+          data: schema.maybe(
+            schema.recordOf(schema.string(), schema.any(), {
+              meta: {
+                description:
+                  'Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).',
+              },
+            })
+          ),
+          origin: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.',
+              },
+            })
+          ),
           hidden: schema.maybe(
             schema.boolean({
               meta: { description: 'When true, the attachment will not be displayed in the UI.' },
@@ -185,6 +198,19 @@ export function registerChatRoutes({
   const validateAction = (payload: ChatRequestBodyPayload) => {
     if (payload.action === 'regenerate' && !payload.conversation_id) {
       throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
+  };
+
+  const validateConverseAttachments = (payload: ChatRequestBodyPayload) => {
+    if (!payload.attachments?.length) {
+      return;
+    }
+    for (const attachment of payload.attachments) {
+      if (attachment.data === undefined && attachment.origin === undefined) {
+        throw createBadRequestError(
+          'Each attachment must include either data or origin (by-reference attachments require origin)'
+        );
+      }
     }
   };
   const validateConfigurationOverrides = async ({
@@ -295,6 +321,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
+        validateConverseAttachments(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -368,6 +395,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
+        validateConverseAttachments(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {

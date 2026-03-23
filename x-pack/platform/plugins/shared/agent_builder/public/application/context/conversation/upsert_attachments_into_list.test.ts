@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 
 const attachment = (
   id: string | undefined,
-  overrides: Partial<AttachmentInput> = {}
-): AttachmentInput => ({
+  overrides: Partial<VersionedAttachmentInput> = {}
+): VersionedAttachmentInput => ({
   id,
   type: 'visualization',
   data: {},

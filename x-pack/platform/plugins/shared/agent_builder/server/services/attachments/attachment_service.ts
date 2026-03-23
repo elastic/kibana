@@ -36,8 +36,12 @@ export class AttachmentServiceImpl implements AttachmentService {
 
   start(): AttachmentServiceStart {
     return {
-      validate: (attachment) => {
-        return validateAttachment({ attachment, registry: this.attachmentTypeRegistry });
+      validate: (attachment, resolveContext) => {
+        return validateAttachment({
+          attachment,
+          registry: this.attachmentTypeRegistry,
+          resolveContext,
+        });
       },
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);
