@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-v2-rule-list'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: '@elastic/rna-project-team'
 toolchains:
   default: node
   javascript:
@@ -16,7 +16,7 @@ project:
   title: '@kbn/alerting-v2-rule-list'
   description: Moon project for @kbn/alerting-v2-rule-list
   channel: ''
-  owner: '@elastic/response-ops'
+  owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-list
 dependsOn:
   - '@kbn/i18n'
@@ -27,6 +27,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-rule-apis'
+  - '@kbn/share-plugin'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-notifications-browser'
 tags:
   - shared-browser
   - package

@@ -72,7 +72,10 @@
     "@kbn/deeplinks-workflows",
     "@kbn/lens-plugin",
     "@kbn/core-security-server-mocks",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/deeplinks-alerting-v2"
   ],
   "exclude": ["target/**/*"]
 }

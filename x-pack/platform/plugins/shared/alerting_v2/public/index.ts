@@ -9,11 +9,17 @@ import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-browser';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { mountAlertingV2App } from './main';
 import { ALERTING_V2_APP_ID } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
+import {
+  AlertingV2RuleDetailsLocatorDefinition,
+  AlertingV2RuleEditLocatorDefinition,
+  AlertingV2RuleCreateLocatorDefinition,
+} from './locators';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -21,6 +27,11 @@ export const module = new ContainerModule(({ bind }) => {
   bind(WorkflowsApi).toSelf().inSingletonScope();
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
+
+    const share = container.get(PluginSetup('share')) as SharePluginSetup;
+    share.url.locators.create(new AlertingV2RuleDetailsLocatorDefinition());
+    share.url.locators.create(new AlertingV2RuleEditLocatorDefinition());
+    share.url.locators.create(new AlertingV2RuleCreateLocatorDefinition());
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     management.sections.section.insightsAndAlerting.registerApp({

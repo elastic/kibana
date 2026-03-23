@@ -560,6 +560,7 @@
     "@kbn/date-range-picker": "link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker",
     "@kbn/datemath": "link:src/platform/packages/shared/kbn-datemath",
     "@kbn/deeplinks-agent-builder": "link:src/platform/packages/shared/deeplinks/agent_builder",
+    "@kbn/deeplinks-alerting-v2": "link:x-pack/platform/packages/shared/deeplinks/alerting-v2",
     "@kbn/deeplinks-analytics": "link:src/platform/packages/shared/deeplinks/analytics",
     "@kbn/deeplinks-data-sources": "link:src/platform/packages/shared/deeplinks/data_sources",
     "@kbn/deeplinks-devtools": "link:src/platform/packages/shared/deeplinks/devtools",

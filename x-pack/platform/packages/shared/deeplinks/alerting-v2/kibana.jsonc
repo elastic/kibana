@@ -1,6 +1,6 @@
 {
-  "type": "shared-browser",
-  "id": "@kbn/alerting-v2-rule-apis",
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-alerting-v2",
   "owner": "@elastic/rna-project-team",
   "group": "platform",
   "visibility": "shared"

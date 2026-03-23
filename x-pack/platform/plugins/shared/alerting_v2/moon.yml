@@ -73,12 +73,13 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/es-query'
   - '@kbn/react-hooks'
+  - '@kbn/alerting-v2-rule-apis'
   - '@kbn/deeplinks-workflows'
   - '@kbn/lens-plugin'
   - '@kbn/core-security-server-mocks'
-  - '@kbn/alerting-v2-rule-list'
-  - '@kbn/alerting-v2-rule-apis'
   - '@kbn/scout'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

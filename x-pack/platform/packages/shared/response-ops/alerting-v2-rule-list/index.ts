@@ -10,8 +10,8 @@ import { RuleList } from './components/rule_list';
 export { RuleList } from './components/rule_list';
 export type { RuleListProps } from './components/rule_list';
 
-export { RuleListProvider, useRuleListServices, useRuleListPaths } from './rule_list_context';
-export type { RuleListServices, RuleListPaths } from './rule_list_context';
+export { RuleListProvider, useRuleListServices } from './rule_list_context';
+export type { RuleListServices } from './rule_list_context';
 
 export type {
   RuleApiResponse,

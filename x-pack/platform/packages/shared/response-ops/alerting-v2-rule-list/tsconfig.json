@@ -24,6 +24,9 @@
     "@kbn/esql-utils",
     "@kbn/react-query",
     "@kbn/alerting-v2-schemas",
-    "@kbn/alerting-v2-rule-apis"
+    "@kbn/alerting-v2-rule-apis",
+    "@kbn/share-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser"
   ]
 }

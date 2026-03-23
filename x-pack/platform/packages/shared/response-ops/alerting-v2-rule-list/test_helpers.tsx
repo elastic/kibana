@@ -8,7 +8,9 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RuleListServices, RuleListPaths } from './rule_list_context';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { RuleListServices } from './rule_list_context';
 import { RuleListProvider } from './rule_list_context';
 
 export const createMockServices = (
@@ -22,7 +24,7 @@ export const createMockServices = (
     delete: jest.fn(),
     basePath: { prepend: jest.fn((path: string) => path) },
     ...overrides.http,
-  } as unknown as RuleListServices['http'],
+  } as unknown as HttpStart,
   notifications: {
     toasts: {
       addSuccess: jest.fn(),
@@ -31,24 +33,10 @@ export const createMockServices = (
       addError: jest.fn(),
     },
     ...overrides.notifications,
-  } as unknown as RuleListServices['notifications'],
-  application: {
-    navigateToUrl: jest.fn(),
-    capabilities: {},
-    ...overrides.application,
-  } as unknown as RuleListServices['application'],
+  } as unknown as NotificationsStart,
 });
 
-export const createMockPaths = (overrides: Partial<RuleListPaths> = {}): RuleListPaths => ({
-  ruleDetails: overrides.ruleDetails ?? ((id: string) => `/rules/${id}`),
-  ruleEdit: overrides.ruleEdit ?? ((id: string) => `/rules/edit/${id}`),
-  ruleCreate: overrides.ruleCreate ?? '/rules/create',
-});
-
-export const createTestWrapper = (
-  services: RuleListServices = createMockServices(),
-  paths: RuleListPaths = createMockPaths()
-) => {
+export const createTestWrapper = (services: RuleListServices = createMockServices()) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -59,9 +47,7 @@ export const createTestWrapper = (
   return ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <RuleListProvider services={services} paths={paths}>
-          {children}
-        </RuleListProvider>
+        <RuleListProvider services={services}>{children}</RuleListProvider>
       </QueryClientProvider>
     </I18nProvider>
   );

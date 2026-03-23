@@ -33,3 +33,14 @@ export { useDeleteRule } from './hooks/use_delete_rule';
 export { useBulkDeleteRules } from './hooks/use_bulk_delete_rules';
 export { useBulkEnableRules, useBulkDisableRules } from './hooks/use_bulk_enable_disable_rules';
 export { useToggleRuleEnabled } from './hooks/use_toggle_rule_enabled';
+
+export {
+  ALERTING_V2_RULE_DETAILS_LOCATOR,
+  ALERTING_V2_RULE_EDIT_LOCATOR,
+  ALERTING_V2_RULE_CREATE_LOCATOR,
+} from '@kbn/deeplinks-alerting-v2';
+export type {
+  AlertingV2RuleDetailsLocatorParams,
+  AlertingV2RuleEditLocatorParams,
+  AlertingV2RuleCreateLocatorParams,
+} from '@kbn/deeplinks-alerting-v2';

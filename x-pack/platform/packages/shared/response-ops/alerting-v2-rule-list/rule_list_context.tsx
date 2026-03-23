@@ -7,50 +7,28 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 export interface RuleListServices {
   http: HttpStart;
   notifications: NotificationsStart;
-  application: ApplicationStart;
 }
 
-export interface RuleListPaths {
-  ruleDetails: (id: string) => string;
-  ruleEdit: (id: string) => string;
-  ruleCreate: string;
-}
-
-interface RuleListContextValue {
-  services: RuleListServices;
-  paths: RuleListPaths;
-}
-
-const RuleListContext = createContext<RuleListContextValue | undefined>(undefined);
+const RuleListContext = createContext<RuleListServices | undefined>(undefined);
 
 export const RuleListProvider = ({
   children,
   services,
-  paths,
-}: PropsWithChildren<{ services: RuleListServices; paths: RuleListPaths }>) => {
-  const value = useMemo(() => ({ services, paths }), [services, paths]);
+}: PropsWithChildren<{ services: RuleListServices }>) => {
+  const value = useMemo(() => services, [services]);
   return <RuleListContext.Provider value={value}>{children}</RuleListContext.Provider>;
 };
 
-const useRuleListContext = (): RuleListContextValue => {
+export const useRuleListServices = (): RuleListServices => {
   const context = useContext(RuleListContext);
   if (!context) {
-    throw new Error('useRuleListContext must be used within RuleListProvider');
+    throw new Error('useRuleListServices must be used within RuleListProvider');
   }
   return context;
-};
-
-export const useRuleListServices = (): RuleListServices => {
-  const { services } = useRuleListContext();
-  return services;
-};
-
-export const useRuleListPaths = (): RuleListPaths => {
-  const { paths } = useRuleListContext();
-  return paths;
 };

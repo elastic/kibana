@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
 import {
   useDeleteRule,
@@ -14,8 +15,12 @@ import {
   useBulkEnableRules,
   useBulkDisableRules,
   useToggleRuleEnabled,
+  ALERTING_V2_RULE_EDIT_LOCATOR,
+  ALERTING_V2_RULE_CREATE_LOCATOR,
+  type AlertingV2RuleEditLocatorParams,
+  type AlertingV2RuleCreateLocatorParams,
 } from '@kbn/alerting-v2-rule-apis';
-import { useRuleListServices, useRuleListPaths } from '../rule_list_context';
+import { useRuleListServices } from '../rule_list_context';
 import { useBulkSelect } from '../hooks/use_bulk_select';
 import { DeleteConfirmationModal } from './delete_confirmation_modal';
 import { RulesListTable } from './rules_list_table';
@@ -27,6 +32,7 @@ export interface RulesListTableContainerProps {
   perPage: number;
   isLoading: boolean;
   onTableChange: (criteria: CriteriaWithPagination<RuleApiResponse>) => void;
+  share: SharePluginStart;
 }
 
 export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = ({
@@ -36,9 +42,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   perPage,
   isLoading,
   onTableChange,
+  share,
 }) => {
-  const { http, notifications, application } = useRuleListServices();
-  const paths = useRuleListPaths();
+  const { http, notifications } = useRuleListServices();
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
@@ -48,6 +54,13 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const bulkEnableMutation = useBulkEnableRules({ http, notifications });
   const bulkDisableMutation = useBulkDisableRules({ http, notifications });
   const toggleEnabledMutation = useToggleRuleEnabled({ http, notifications });
+
+  const editLocator = share.url.locators.get<AlertingV2RuleEditLocatorParams>(
+    ALERTING_V2_RULE_EDIT_LOCATOR
+  );
+  const createLocator = share.url.locators.get<AlertingV2RuleCreateLocatorParams>(
+    ALERTING_V2_RULE_CREATE_LOCATOR
+  );
 
   const {
     isAllSelected,
@@ -94,6 +107,20 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     });
   };
 
+  const handleEdit = useCallback(
+    (r: RuleApiResponse) => {
+      editLocator?.navigate({ ruleId: r.id });
+    },
+    [editLocator]
+  );
+
+  const handleClone = useCallback(
+    (r: RuleApiResponse) => {
+      createLocator?.navigate({ cloneFrom: r.id });
+    },
+    [createLocator]
+  );
+
   return (
     <>
       <RulesListTable
@@ -113,12 +140,8 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkEnable={handleBulkEnable}
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
-        onEdit={(r) => application.navigateToUrl(http.basePath.prepend(paths.ruleEdit(r.id)))}
-        onClone={(r) =>
-          application.navigateToUrl(
-            http.basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
-          )
-        }
+        onEdit={handleEdit}
+        onClone={handleClone}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         onTableChange={onTableChange}

@@ -10,40 +10,44 @@ import { EuiButton, EuiCallOut, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
-import { useFetchRules } from '@kbn/alerting-v2-rule-apis';
 import {
-  RuleListProvider,
-  useRuleListServices,
-  useRuleListPaths,
-  type RuleListServices,
-  type RuleListPaths,
-} from '../rule_list_context';
+  useFetchRules,
+  ALERTING_V2_RULE_CREATE_LOCATOR,
+  type AlertingV2RuleCreateLocatorParams,
+} from '@kbn/alerting-v2-rule-apis';
+import { RuleListProvider, useRuleListServices, type RuleListServices } from '../rule_list_context';
 import { RulesListTableContainer } from './rules_list_table_container';
 
 const DEFAULT_PER_PAGE = 20;
 
 export interface RuleListProps {
   services: RuleListServices;
-  paths: RuleListPaths;
+  share: SharePluginStart;
   showPageHeader?: boolean;
 }
 
 const queryClient = new QueryClient();
 
-export const RuleList = ({ services, paths, showPageHeader = true }: RuleListProps) => {
+export const RuleList = ({ services, share, showPageHeader = true }: RuleListProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <RuleListProvider services={services} paths={paths}>
-        <RuleListInner showPageHeader={showPageHeader} />
+      <RuleListProvider services={services}>
+        <RuleListInner share={share} showPageHeader={showPageHeader} />
       </RuleListProvider>
     </QueryClientProvider>
   );
 };
 
-const RuleListInner = ({ showPageHeader }: { showPageHeader: boolean }) => {
+const RuleListInner = ({
+  share,
+  showPageHeader,
+}: {
+  share: SharePluginStart;
+  showPageHeader: boolean;
+}) => {
   const { http, notifications } = useRuleListServices();
-  const paths = useRuleListPaths();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -53,6 +57,11 @@ const RuleListInner = ({ showPageHeader }: { showPageHeader: boolean }) => {
     { page, perPage }
   );
 
+  const createLocator = share.url.locators.get<AlertingV2RuleCreateLocatorParams>(
+    ALERTING_V2_RULE_CREATE_LOCATOR
+  );
+  const createRuleUrl = createLocator?.useUrl({});
+
   const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
     setPage(tablePage.index + 1);
     setPerPage(tablePage.size);
@@ -61,28 +70,30 @@ const RuleListInner = ({ showPageHeader }: { showPageHeader: boolean }) => {
   return (
     <div>
       {showPageHeader && (
-        <EuiPageHeader
-          pageTitle={
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.pageTitle"
-              defaultMessage="Alerting V2 Rules"
-            />
-          }
-          rightSideItems={[
-            <EuiButton
-              key="create-rule"
-              href={http.basePath.prepend(paths.ruleCreate)}
-              data-test-subj="createRuleButton"
-            >
+        <>
+          <EuiPageHeader
+            pageTitle={
               <FormattedMessage
-                id="xpack.alertingV2.rulesList.createRuleButton"
-                defaultMessage="Create rule"
+                id="xpack.alertingV2.rulesList.pageTitle"
+                defaultMessage="Alerting V2 Rules"
               />
-            </EuiButton>,
-          ]}
-        />
+            }
+            rightSideItems={[
+              <EuiButton
+                key="create-rule"
+                href={createRuleUrl || undefined}
+                data-test-subj="createRuleButton"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.createRuleButton"
+                  defaultMessage="Create rule"
+                />
+              </EuiButton>,
+            ]}
+          />
+          <EuiSpacer size="m" />
+        </>
       )}
-      {showPageHeader && <EuiSpacer size="m" />}
       {isError ? (
         <>
           <EuiCallOut
@@ -109,6 +120,7 @@ const RuleListInner = ({ showPageHeader }: { showPageHeader: boolean }) => {
           perPage={perPage}
           isLoading={isLoading}
           onTableChange={onTableChange}
+          share={share}
         />
       ) : null}
     </div>

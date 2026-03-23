@@ -958,6 +958,8 @@
       "@kbn/datemath/*": ["src/platform/packages/shared/kbn-datemath/*"],
       "@kbn/deeplinks-agent-builder": ["src/platform/packages/shared/deeplinks/agent_builder"],
       "@kbn/deeplinks-agent-builder/*": ["src/platform/packages/shared/deeplinks/agent_builder/*"],
+      "@kbn/deeplinks-alerting-v2": ["x-pack/platform/packages/shared/deeplinks/alerting-v2"],
+      "@kbn/deeplinks-alerting-v2/*": ["x-pack/platform/packages/shared/deeplinks/alerting-v2/*"],
       "@kbn/deeplinks-analytics": ["src/platform/packages/shared/deeplinks/analytics"],
       "@kbn/deeplinks-analytics/*": ["src/platform/packages/shared/deeplinks/analytics/*"],
       "@kbn/deeplinks-data-sources": ["src/platform/packages/shared/deeplinks/data_sources"],

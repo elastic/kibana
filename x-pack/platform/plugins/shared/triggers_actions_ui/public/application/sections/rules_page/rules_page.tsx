@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -20,7 +20,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import type { RuleListProps } from '@kbn/alerting-v2-rule-list';
 import { RulesSettingsLink } from '../../components/rules_setting/rules_settings_link';
 import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
@@ -39,8 +38,6 @@ const AlertingV2RuleList = lazy(() =>
   import('@kbn/alerting-v2-rule-list').then((m) => ({ default: m.RuleList }))
 );
 
-const ALERTING_V2_BASE_PATH = '/app/management/insightsAndAlerting/alerting_v2';
-
 const RulesPage = () => {
   const history = useHistory();
   const location = useLocation();
@@ -50,6 +47,7 @@ const RulesPage = () => {
     application,
     http,
     notifications,
+    share,
     ruleTypeRegistry,
   } = useKibana().services;
   const { navigateToApp, getUrlForApp, isAppRegistered, capabilities } = application;
@@ -187,31 +185,22 @@ const RulesPage = () => {
     );
   }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
 
-  const alertingV2RuleListProps: RuleListProps = useMemo(
-    () => ({
-      services: { http, notifications, application },
-      paths: {
-        ruleDetails: (id: string) => `${ALERTING_V2_BASE_PATH}/${encodeURIComponent(id)}`,
-        ruleEdit: (id: string) => `${ALERTING_V2_BASE_PATH}/edit/${encodeURIComponent(id)}`,
-        ruleCreate: `${ALERTING_V2_BASE_PATH}/create`,
-      },
-      showPageHeader: false,
-    }),
-    [http, notifications, application]
-  );
-
   const renderAlertingV2RulesList = useCallback(() => {
-    if (!canViewAlertingV2) {
+    if (!canViewAlertingV2 || !share) {
       return null;
     }
     return (
       <KibanaPageTemplate.Section paddingSize="l" data-test-subj="alertingV2RulesListWrapper">
         <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-          <AlertingV2RuleList {...alertingV2RuleListProps} />
+          <AlertingV2RuleList
+            services={{ http, notifications }}
+            share={share}
+            showPageHeader={false}
+          />
         </Suspense>
       </KibanaPageTemplate.Section>
     );
-  }, [canViewAlertingV2, alertingV2RuleListProps]);
+  }, [canViewAlertingV2, http, notifications, share]);
 
   const renderLogsList = useCallback(() => {
     return (

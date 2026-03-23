@@ -22,6 +22,8 @@
     "@kbn/alerting-v2-schemas",
     "@kbn/react-query",
     "@kbn/i18n",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/deeplinks-alerting-v2"
   ]
 }
