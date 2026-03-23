@@ -58,7 +58,6 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
-  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -72,6 +71,7 @@ fileGroups:
     - server/**/*.ts
     - common/**/*.ts
     - test/scout/**/*
+    - test/scout_automatic_import_v2
     - '!target/**/*'
 tasks:
   jest:
