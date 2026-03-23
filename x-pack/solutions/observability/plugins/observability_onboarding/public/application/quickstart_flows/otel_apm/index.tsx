@@ -14,6 +14,8 @@ import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
+  EuiFieldText,
+  EuiFormRow,
   EuiLink,
   EuiMarkdownFormat,
   EuiPanel,
@@ -53,6 +55,7 @@ export function OtelApmQuickstartFlow() {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useOtelApmFlow();
   const { onPageReady } = usePerformanceContext();
+  const [serviceName, setServiceName] = useState('');
 
   useEffect(() => {
     if (data) {
@@ -80,6 +83,7 @@ export function OtelApmQuickstartFlow() {
     }
   }, [isMonitoringStepActive, sessionStartTime]);
 
+  const trimmedServiceName = serviceName.trim();
   const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
     isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
     sessionStartTime: sessionStartTime ?? '',
@@ -88,6 +92,7 @@ export function OtelApmQuickstartFlow() {
     flowType: 'otel_apm',
     onboardingId: data?.onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_apm/has-data',
+    extraQueryParams: trimmedServiceName ? { serviceName: trimmedServiceName } : undefined,
   });
 
   if (error !== undefined) {
@@ -131,6 +136,8 @@ export function OtelApmQuickstartFlow() {
                   <ConfigureSDKInstructions
                     managedOtlpServiceUrl={data.managedOtlpServiceUrl}
                     apiKeyEncoded={data.apiKeyEncoded}
+                    serviceName={serviceName}
+                    onServiceNameChange={setServiceName}
                   />
                 )}
               </>
@@ -285,10 +292,15 @@ function InstallSDKInstructions() {
 function ConfigureSDKInstructions({
   managedOtlpServiceUrl,
   apiKeyEncoded,
+  serviceName,
+  onServiceNameChange,
 }: {
   managedOtlpServiceUrl: string;
   apiKeyEncoded: string;
+  serviceName: string;
+  onServiceNameChange: (value: string) => void;
 }) {
+  const serviceNameDisplay = serviceName.trim() || '<app-name>';
   const items = [
     {
       setting: 'OTEL_EXPORTER_OTLP_ENDPOINT',
@@ -300,8 +312,7 @@ function ConfigureSDKInstructions({
     },
     {
       setting: 'OTEL_RESOURCE_ATTRIBUTES',
-      value:
-        'service.name=<app-name>,service.version=<app-version>,deployment.environment=production',
+      value: `service.name=${serviceNameDisplay},service.version=<app-version>,deployment.environment=production`,
     },
   ];
 
@@ -342,10 +353,30 @@ function ConfigureSDKInstructions({
 
   return (
     <>
+      <EuiFormRow
+        label={i18n.translate('xpack.observability_onboarding.otelApm.serviceNameLabel', {
+          defaultMessage: 'Service name',
+        })}
+        helpText={i18n.translate('xpack.observability_onboarding.otelApm.serviceNameHelpText', {
+          defaultMessage:
+            'Enter the name of your application service. This updates the configuration below and helps detect your data.',
+        })}
+      >
+        <EuiFieldText
+          data-test-subj="observabilityOnboardingOtelApmServiceNameInput"
+          placeholder={i18n.translate(
+            'xpack.observability_onboarding.otelApm.serviceNamePlaceholder',
+            { defaultMessage: 'my-service' }
+          )}
+          value={serviceName}
+          onChange={(e) => onServiceNameChange(e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
       <EuiMarkdownFormat>
         {i18n.translate('xpack.observability_onboarding.otelApm.configureAgent.textPre', {
           defaultMessage:
-            'Set the following variables in your application’s environment to configure the SDK:',
+            "Set the following variables in your application's environment to configure the SDK:",
         })}
       </EuiMarkdownFormat>
       <EuiSpacer />

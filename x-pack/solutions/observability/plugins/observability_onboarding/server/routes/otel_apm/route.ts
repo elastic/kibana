@@ -60,9 +60,7 @@ const createOtelApmOnboardingFlowRoute = createObservabilityOnboardingServerRout
 const hasOtelApmDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/otel_apm/has-data',
   params: t.type({
-    query: t.type({
-      start: t.string,
-    }),
+    query: t.intersection([t.type({ start: t.string }), t.partial({ serviceName: t.string })]),
   }),
   security: {
     authz: {
@@ -71,19 +69,20 @@ const hasOtelApmDataRoute = createObservabilityOnboardingServerRoute({
     },
   },
   async handler(resources): Promise<{ hasData: boolean }> {
-    const { start } = resources.params.query;
+    const { start, serviceName } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
+      const filters: estypes.QueryDslQueryContainer[] = [
+        { range: { '@timestamp': { gte: start } } },
+      ];
+      if (serviceName) {
+        filters.push({ term: { 'service.name': serviceName } });
+      }
       const query: estypes.QueryDslQueryContainer = {
-        bool: {
-          filter: [{ range: { '@timestamp': { gte: start } } }],
-        },
+        bool: { filter: filters },
       };
 
-      // Time-window detection: matches any APM data arriving after session start.
-      // May produce false positives if other services are already active.
-      // Correlation ID fallback (labels.onboarding_id) is available if needed.
       const result = await elasticsearch.client.asCurrentUser.search({
         index: [
           'traces-apm*',
