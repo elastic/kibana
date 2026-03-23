@@ -29,7 +29,7 @@
     {
       "id": "streams",
       "name": "Streams",
-      "slackChannel": "#significant-events-dev",
+      "slackChannel": "#observability-streams-dev",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts",
       "tags": [
         "platform",
