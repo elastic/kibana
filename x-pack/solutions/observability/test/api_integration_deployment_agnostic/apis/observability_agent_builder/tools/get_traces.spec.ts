@@ -48,7 +48,6 @@ async function indexCorrelatedLogs({
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
-  const range = timerange(START, END);
 
   describe(`tool: ${OBSERVABILITY_GET_TRACES_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -66,7 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await logsSynthtraceEsClient.clean();
 
       const apmData = generateGetTracesApmDataset({
-        range,
+        range: timerange(START, END),
         apmEsClient: apmSynthtraceEsClient,
         traces: DEFAULT_TRACE_CONFIGS,
       });
