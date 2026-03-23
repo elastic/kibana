@@ -47,7 +47,7 @@ export const SalesforceConnector: ConnectorSpec = {
     id: '.salesforce',
     displayName: 'Salesforce',
     description: i18n.translate('core.kibanaConnectorSpecs.salesforce.metadata.description', {
-      defaultMessage: 'Connect to Salesforce to query and explore your org data',
+      defaultMessage: 'Query records, search, describe objects, and download files in Salesforce',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
