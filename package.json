@@ -1714,6 +1714,7 @@
     "@kbn/jest-serializers": "link:src/platform/packages/private/kbn-jest-serializers",
     "@kbn/journeys": "link:src/platform/packages/private/kbn-journeys",
     "@kbn/json-ast": "link:packages/kbn-json-ast",
+    "@kbn/kbn-client": "link:src/platform/packages/shared/kbn-kbn-client",
     "@kbn/kbn-genai-cli": "link:x-pack/solutions/observability/packages/kbn-genai-cli",
     "@kbn/kibana-manifest-schema": "link:packages/kbn-kibana-manifest-schema",
     "@kbn/lazy-object": "link:src/platform/packages/shared/kbn-lazy-object",

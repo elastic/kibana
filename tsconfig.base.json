@@ -1418,6 +1418,8 @@
       "@kbn/json-ast/*": ["packages/kbn-json-ast/*"],
       "@kbn/json-schemas": ["x-pack/platform/packages/private/ml/json_schemas"],
       "@kbn/json-schemas/*": ["x-pack/platform/packages/private/ml/json_schemas/*"],
+      "@kbn/kbn-client": ["src/platform/packages/shared/kbn-kbn-client"],
+      "@kbn/kbn-client/*": ["src/platform/packages/shared/kbn-kbn-client/*"],
       "@kbn/kbn-genai-cli": ["x-pack/solutions/observability/packages/kbn-genai-cli"],
       "@kbn/kbn-genai-cli/*": ["x-pack/solutions/observability/packages/kbn-genai-cli/*"],
       "@kbn/kbn-health-gateway-status-plugin": ["src/platform/test/health_gateway/plugins/status"],
