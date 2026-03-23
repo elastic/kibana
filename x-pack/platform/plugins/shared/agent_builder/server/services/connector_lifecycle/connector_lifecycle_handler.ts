@@ -10,6 +10,7 @@ import Mustache from 'mustache';
 import { parse } from 'yaml';
 import { trimStart } from 'lodash';
 import { ToolType } from '@kbn/agent-builder-common';
+import { AttachmentType, CONNECTOR_TAG_PREFIX } from '@kbn/agent-builder-common/attachments';
 import { toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -18,16 +19,18 @@ import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
 } from '@kbn/actions-plugin/server';
+import type { CoreStart } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ServiceManager } from '..';
 
 const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
-const CONNECTOR_TAG_PREFIX = 'connector:';
 
 interface ConnectorLifecycleHandlerDeps {
   serviceManager: ServiceManager;
   workflowsManagement?: WorkflowsServerPluginSetup;
   logger: Logger;
+  getStartServices: () => Promise<[CoreStart, { spaces?: SpacesPluginStart }, unknown]>;
 }
 
 function renderWorkflowTemplate(
@@ -50,7 +53,7 @@ function slugify(input: string): string {
 }
 
 export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerDeps) {
-  const { serviceManager, workflowsManagement, logger } = deps;
+  const { serviceManager, workflowsManagement, logger, getStartServices } = deps;
 
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
@@ -159,6 +162,33 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
             }
           })
         );
+
+        // Index the connector into SML for immediate discoverability
+        const sml = serviceManager.internalStart?.sml;
+        if (sml) {
+          try {
+            const [coreStart, startDeps] = await getStartServices();
+            const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+            await sml.indexAttachment({
+              originId: connectorId,
+              attachmentType: AttachmentType.connector,
+              action: 'create',
+              spaces: [spaceId],
+              esClient: coreStart.elasticsearch.client.asInternalUser,
+              savedObjectsClient: coreStart.savedObjects.getScopedClient(request, {
+                includedHiddenTypes: ['action'],
+              }),
+              logger,
+            });
+            logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
+          } catch (smlError) {
+            logger.warn(
+              `Connector lifecycle: failed to index connector ${connectorId} into SML: ${
+                (smlError as Error).message
+              }`
+            );
+          }
+        }
       } catch (error) {
         logger.error(
           `Connector lifecycle: failed to create workflows/tools for connector ${connectorId}: ${error.message}`
@@ -183,11 +213,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
         const toolRegistry = await internalServices.tools.getRegistry({ request });
         const connectorTag = `${CONNECTOR_TAG_PREFIX}${connectorId}`;
-
-        const tools = await toolRegistry.list();
-        const connectorTools = tools.filter(
-          (tool) => tool.tags && tool.tags.includes(connectorTag)
-        );
+        const connectorTools = await toolRegistry.list({ tags: [connectorTag] });
 
         // Collect workflow IDs before deleting tools, then delete both in parallel
         const workflowIds = connectorTools
@@ -213,6 +239,33 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
             : Promise.resolve();
 
         await Promise.all([deleteToolsPromise, deleteWorkflowsPromise]);
+
+        // Remove the connector from SML
+        const sml = serviceManager.internalStart?.sml;
+        if (sml) {
+          try {
+            const [coreStart, startDeps] = await getStartServices();
+            const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+            await sml.indexAttachment({
+              originId: connectorId,
+              attachmentType: AttachmentType.connector,
+              action: 'delete',
+              spaces: [spaceId],
+              esClient: coreStart.elasticsearch.client.asInternalUser,
+              savedObjectsClient: coreStart.savedObjects.getScopedClient(request, {
+                includedHiddenTypes: ['action'],
+              }),
+              logger,
+            });
+            logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
+          } catch (smlError) {
+            logger.warn(
+              `Connector lifecycle: failed to remove connector ${connectorId} from SML: ${
+                (smlError as Error).message
+              }`
+            );
+          }
+        }
       } catch (error) {
         logger.error(
           `Connector lifecycle: failed to clean up for connector ${connectorId}: ${error.message}`
