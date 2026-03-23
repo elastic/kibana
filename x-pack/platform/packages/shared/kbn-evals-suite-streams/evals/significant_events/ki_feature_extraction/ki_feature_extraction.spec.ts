@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
-import { identifyStreamFeatures } from '@kbn/streams-plugin/server/lib/tasks/task_definitions/features_identification';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -111,10 +111,9 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   input as { sample_documents: Array<SearchHit<Record<string, unknown>>> }
                 ).sample_documents;
 
-                const { features } = await identifyStreamFeatures({
+                const { features } = await identifyFeatures({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: taskSampleDocuments,
-                  existingFeatures: [],
                   systemPrompt: featuresPrompt,
                   inferenceClient,
                   logger,
