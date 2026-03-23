@@ -38,8 +38,7 @@ export const colorModeToApplyColorTo = (
 
 export const applyColorToToColorMode = (
   target: ApiColorTarget
-): NonNullable<ColumnState['colorMode']> =>
-  API_TO_COLOR_MODE[target as keyof typeof API_TO_COLOR_MODE] ?? 'cell';
+): NonNullable<ColumnState['colorMode']> => API_TO_COLOR_MODE[target];
 
 /**
  * Checks if the column is a metric column in a formBased layer
