@@ -6,11 +6,19 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.search,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsFullAIPrivilegesUser();

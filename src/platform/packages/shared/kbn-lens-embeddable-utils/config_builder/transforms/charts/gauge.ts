@@ -215,15 +215,15 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
 
 function getValueColumns(layer: GaugeStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
     ...(layer.metric.max
-      ? [getValueColumn(getAccessorName('max'), layer.metric.max.column, 'number')]
+      ? [getValueColumn(getAccessorName('max'), layer.metric.max, 'number')]
       : []),
     ...(layer.metric.min
-      ? [getValueColumn(getAccessorName('min'), layer.metric.min.column, 'number')]
+      ? [getValueColumn(getAccessorName('min'), layer.metric.min, 'number')]
       : []),
     ...(layer.metric.goal
-      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal.column, 'number')]
+      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal, 'number')]
       : []),
   ];
 }

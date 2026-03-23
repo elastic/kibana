@@ -3500,6 +3500,34 @@ describe('CasesConnectorExecutor', () => {
           expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock);
         });
 
+        it('attaches grouped comments using unified shape when attachments feature flag is enabled', async () => {
+          const connectorExecutorWithFlagOn = new CasesConnectorExecutor({
+            logger: mockLogger,
+            casesOracleService: new CasesOracleServiceMock(),
+            casesService: new CasesServiceMock(),
+            casesClient: casesClientMock,
+            spaceId: 'default',
+            isCasesAttachmentsEnabled: true,
+          });
+
+          await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(
+            1,
+            expect.objectContaining({
+              caseId: 'mock-id-1',
+              attachments: expect.arrayContaining([
+                expect.objectContaining({
+                  type: 'comment',
+                  data: { content: 'comment-1' },
+                  owner: 'securitySolution',
+                }),
+              ]),
+            })
+          );
+        });
+
         it('attaches alerts to reopened cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }],

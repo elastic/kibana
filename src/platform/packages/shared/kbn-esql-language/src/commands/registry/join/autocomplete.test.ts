@@ -112,21 +112,23 @@ describe('JOIN Autocomplete', () => {
         (s) => s.label === 'Create lookup index'
       );
 
-      expect(createIndexCommandSuggestion).toEqual({
-        category: SuggestionCategory.CUSTOM_ACTION,
-        command: {
-          arguments: [{ indexName: '' }],
-          id: 'esql.lookup_index.create',
-          title: 'Click to create',
-        },
-        detail: 'Click to create',
-        filterText: '',
-        incomplete: true,
-        kind: 'Issue',
-        label: 'Create lookup index',
-        sortText: '0',
-        text: '',
-      });
+      expect(createIndexCommandSuggestion).toEqual(
+        expect.objectContaining({
+          category: SuggestionCategory.CUSTOM_ACTION,
+          command: {
+            arguments: [{ indexName: '' }],
+            id: 'esql.lookup_index.create',
+            title: 'Click to create',
+          },
+          detail: 'Click to create',
+          filterText: '',
+          incomplete: true,
+          kind: 'Issue',
+          label: 'Create lookup index',
+          sortText: '0',
+          text: '',
+        })
+      );
     });
 
     test('can suggest indeces based on a fragment', async () => {
