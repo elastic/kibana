@@ -8,16 +8,16 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/streams-schema';
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
+import { getDiverseSampleDocuments } from '@kbn/ai-tools';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import type { Condition } from '@kbn/streamlang';
 import { compact } from 'lodash';
 import { getEntityFilters, MAX_FILTERS } from './get_entity_filters';
 
-const DEFAULT_SAMPLE_SIZE = 20;
+const DEFAULT_SAMPLE_SIZE = 100;
 // Defines the proportion of the sample size (e.g., 60%) that should be fetched
 // from a pool that excludes known features (via must_not filters). The remaining
-// portion is backfilled with unfiltered, random documents to ensure a diverse sample.
+// portion is backfilled with unfiltered, diverse documents.
 const ENTITY_FILTERED_RATIO = 0.6;
 
 export async function fetchSampleDocuments({
@@ -39,7 +39,7 @@ export async function fetchSampleDocuments({
 }) {
   const entityFilters = getEntityFilters(features, MAX_FILTERS);
   if (entityFilters.length === 0) {
-    const { hits } = await getSampleDocuments({ esClient, index, start, end, size });
+    const { hits } = await getDiverseSampleDocuments({ esClient, index, start, end, size });
     return { documents: hits, totalFilters: 0, filtersCapped: false, hasFilteredDocuments: false };
   }
 
@@ -53,17 +53,16 @@ export async function fetchSampleDocuments({
   const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
   const entityFilteredSize = Math.round(size * ENTITY_FILTERED_RATIO);
   const [{ hits: entityFilteredDocs }, { hits: unfilteredDocs }] = await Promise.all([
-    getSampleDocuments({
+    getDiverseSampleDocuments({
       esClient,
       index,
       start,
       end,
-      timeout: '10s',
       size: entityFilteredSize,
       filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
       runtime_mappings: runtimeMappings,
     }),
-    getSampleDocuments({
+    getDiverseSampleDocuments({
       esClient,
       index,
       start,

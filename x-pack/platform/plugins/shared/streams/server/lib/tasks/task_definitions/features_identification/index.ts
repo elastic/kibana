@@ -31,7 +31,6 @@ import {
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/streams-ai';
-import { getDiverseSampleDocuments } from '@kbn/ai-tools';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
@@ -345,34 +344,19 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const [
-                  { hits: diverseSampleDocuments },
-                  {
-                    documents: filteredSampleDocuments,
-                    totalFilters,
-                    filtersCapped,
-                    hasFilteredDocuments,
-                  },
-                ] = await Promise.all([
-                  getDiverseSampleDocuments({
-                    esClient,
-                    index: stream.name,
-                    start,
-                    end,
-                    size: 80,
-                  }),
-                  fetchSampleDocuments({
-                    esClient,
-                    index: stream.name,
-                    start,
-                    end,
-                    features: allExistingFeatures.filter(isFeatureWithFilter),
-                    logger: taskContext.logger,
-                    size: 20,
-                  }),
-                ]);
-
-                const sampleDocuments = [...diverseSampleDocuments, ...filteredSampleDocuments];
+                const {
+                  documents: sampleDocuments,
+                  totalFilters,
+                  filtersCapped,
+                  hasFilteredDocuments,
+                } = await fetchSampleDocuments({
+                  esClient,
+                  index: stream.name,
+                  start,
+                  end,
+                  features: allExistingFeatures.filter(isFeatureWithFilter),
+                  logger: taskContext.logger,
+                });
 
                 if (sampleDocuments.length === 0) {
                   taskContext.logger.debug(

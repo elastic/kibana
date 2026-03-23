@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
+import { castArray } from 'lodash';
 import { getSampleDocuments } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
@@ -24,6 +29,9 @@ interface GetDiverseSampleDocumentsOptions {
   start: number;
   end: number;
   size?: number;
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
+  runtime_mappings?: MappingRuntimeFields;
+  timeout?: string;
 }
 
 export async function getDiverseSampleDocuments({
@@ -32,18 +40,21 @@ export async function getDiverseSampleDocuments({
   start,
   end,
   size = 100,
+  filter,
+  runtime_mappings,
+  timeout = '10s',
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
+  const combinedFilter = [...timeRangeFilter, ...castArray(filter ?? [])];
+  const sampleDocOpts = { esClient, index, start, end, size, filter, runtime_mappings, timeout };
 
   const [messageField, totalDocs] = await Promise.all([
     detectMessageField({ esClient, index, timeRangeFilter }),
-    countDocs({ esClient, index, timeRangeFilter }),
+    countDocs({ esClient, index, combinedFilter }),
   ]);
 
   if (!messageField || totalDocs === 0) {
-    return totalDocs === 0
-      ? { hits: [] }
-      : getSampleDocuments({ esClient, index, start, end, size });
+    return totalDocs === 0 ? { hits: [] } : getSampleDocuments(sampleDocOpts);
   }
 
   let samplingProbability = MAX_DOCS_TO_SAMPLE / totalDocs;
@@ -57,8 +68,9 @@ export async function getDiverseSampleDocuments({
       index,
       size: 0,
       track_total_hits: false,
-      timeout: '10s',
-      query: { bool: { filter: timeRangeFilter } },
+      timeout,
+      runtime_mappings,
+      query: { bool: { filter: combinedFilter } },
       aggregations: {
         sampler: {
           random_sampler: { probability: samplingProbability },
@@ -89,11 +101,11 @@ export async function getDiverseSampleDocuments({
 
     buckets = sampler?.categories?.buckets ?? [];
   } catch {
-    return getSampleDocuments({ esClient, index, start, end, size });
+    return getSampleDocuments(sampleDocOpts);
   }
 
   if (buckets.length === 0) {
-    return getSampleDocuments({ esClient, index, start, end, size });
+    return getSampleDocuments(sampleDocOpts);
   }
 
   // 1 representative doc per category
@@ -109,10 +121,7 @@ export async function getDiverseSampleDocuments({
 
   // Over-fetch to compensate for duplicates that will be removed during dedup
   const randomSamples = await getSampleDocuments({
-    esClient,
-    index,
-    start,
-    end,
+    ...sampleDocOpts,
     size: remaining + categoryHits.length,
   });
 
@@ -158,15 +167,15 @@ async function detectMessageField({
 async function countDocs({
   esClient,
   index,
-  timeRangeFilter,
+  combinedFilter,
 }: {
   esClient: ElasticsearchClient;
   index: string;
-  timeRangeFilter: ReturnType<typeof dateRangeQuery>;
+  combinedFilter: QueryDslQueryContainer[];
 }): Promise<number> {
   const response = await esClient.count({
     index,
-    query: { bool: { filter: timeRangeFilter } },
+    query: { bool: { filter: combinedFilter } },
   });
 
   return response.count;
