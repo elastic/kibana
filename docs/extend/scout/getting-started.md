@@ -10,3 +10,4 @@ Start here to set up Scout in a plugin/package, run tests, and debug failures.
 - [Run Scout tests](./run-tests.md)
 - [Debug Scout test runs](./debugging.md)
 - [Best practices for Scout tests](./best-practices.md)
+- [Training](./training.md)
