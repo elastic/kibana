@@ -11,13 +11,13 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { getFieldIconType } from '@kbn/field-utils';
 import type {
   Dimension,
   MetricsESQLResponse,
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
-import { enrichDimensions } from '../utils/enrich_dimensions';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
@@ -66,21 +66,21 @@ export function useFetchMetricsData({
         uiSettings: services.uiSettings,
       });
 
-      const parsed = parseMetricsResponse(result);
-      const getFieldType = (name: string) => fetchParams.dataView?.getFieldByName(name)?.type;
+      const getFieldType = (name: string) => {
+        const field = fetchParams.dataView?.getFieldByName(name);
+        return field ? getFieldIconType(field) : undefined;
+      };
 
-      const metricItems = [...(parsed?.metricItems ?? [])]
-        .sort((a, b) => a.metricName.localeCompare(b.metricName))
-        .map((item) => ({
-          ...item,
-          dimensionFields: enrichDimensions(item.dimensionFields, getFieldType),
-        }));
+      const parsed = parseMetricsResponse(result, getFieldType);
 
-      const allDimensions = enrichDimensions([...(parsed?.allDimensions ?? [])], getFieldType).sort(
-        (a, b) => a.name.localeCompare(b.name)
-      );
-
-      return { metricItems, allDimensions };
+      return {
+        metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
+          a.metricName.localeCompare(b.metricName)
+        ),
+        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        ),
+      };
     },
     [
       metricsInfoQuery,
