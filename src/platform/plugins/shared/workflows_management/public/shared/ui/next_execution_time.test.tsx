@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { NextExecutionTime } from './next_execution_time';
 import { useGetFormattedDateTime } from './use_formatted_date';
-import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
+import type { WorkflowTrigger } from '../../../common/lib/trigger_types';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
 
 // Mock the dependencies
