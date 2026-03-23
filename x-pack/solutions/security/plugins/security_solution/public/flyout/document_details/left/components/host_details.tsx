@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -56,7 +56,6 @@ import { manageQuery } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -87,6 +86,8 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
@@ -152,6 +153,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
@@ -223,15 +230,6 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     return selectedPatterns;
   }, [entityStoreV2Enabled, spaceId, selectedPatterns]);
 
-  const [isHostLoadingFromDetails, hostDetailsArgs, refetch] = useHostDetails({
-    id: hostDetailsQueryId,
-    startDate: from,
-    endDate: to,
-    hostName,
-    indexNames: selectedPatterns,
-    skip: entityStoreV2Enabled || selectedPatterns.length === 0,
-  });
-
   const filterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
     [hostName]
@@ -246,8 +244,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     riskScoreStateFromApi.data && riskScoreStateFromApi.data.length > 0
       ? riskScoreStateFromApi.data[0]
       : undefined;
-  const hostDetails = entityStoreV2Enabled ? observedHost.details : hostDetailsArgs.hostDetails;
-  const isHostLoading = entityStoreV2Enabled ? observedHost.isLoading : isHostLoadingFromDetails;
+  // Same as UserDetails: useObservedHost always queries security default indices; duplicating
+  // useHostDetails against sourcerer patterns yields sparse hostDetails that still suppress real data.
+  const hostDetails = observedHost.details;
+  const isHostLoading = observedHost.isLoading;
   const hostRiskScoreStateFromEntityStore = useMemo(
     () =>
       entityStoreV2Enabled && observedHost.entityRecord
@@ -465,7 +465,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             id={hostDetailsQueryId}
             hostName={hostName}
             data={hostDetails}
-            indexNames={selectedPatterns}
+            indexNames={securityDefaultPatterns}
             jobNameById={jobNameById}
             anomaliesData={anomaliesData}
             isLoadingAnomaliesData={isLoadingAnomaliesData}
@@ -475,9 +475,15 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             endDate={to}
             narrowDateRange={narrowDateRange}
             setQuery={setQuery}
-            refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
+            refetch={
+              entityStoreV2Enabled
+                ? observedHost.refetchEntityStore ?? (() => {})
+                : observedHost.refetchObservedDetails ?? (() => {})
+            }
             inspect={
-              entityStoreV2Enabled ? hostEntityFromStoreResult?.inspect : hostDetailsArgs.inspect
+              entityStoreV2Enabled
+                ? hostEntityFromStoreResult?.inspect
+                : observedHost.observedDetailsInspect
             }
             deleteQuery={deleteQuery}
             scopeId={scopeId}

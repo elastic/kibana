@@ -7,8 +7,9 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { inputsSelectors } from '../../../../common/store';
+import { inputsSelectors, type inputsModel } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
@@ -21,12 +22,17 @@ import { isActiveTimeline } from '../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import type { InspectResponse } from '../../../../types';
 import { useEntityFromStore } from '../../shared/hooks/use_entity_from_store';
 
 export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
   /** Refetch from entity store (when entity store v2 is enabled). */
   refetchEntityStore?: () => void;
+  /** Inspect/refetch for the observed-user search strategy (security default indices). */
+  observedDetailsInspect?: InspectResponse;
+  refetchObservedDetails?: inputsModel.Refetch;
 };
 
 export const useObservedUser = (
@@ -41,7 +47,7 @@ export const useObservedUser = (
   const isActiveTimelines = isActiveTimeline(scopeId);
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -123,6 +129,8 @@ export const useObservedUser = (
         },
         entityRecord: entityFromStore.entityRecord ?? null,
         refetchEntityStore: entityFromStore.refetch,
+        observedDetailsInspect: inspect,
+        refetchObservedDetails: refetch,
       };
     }
     return {
@@ -135,6 +143,8 @@ export const useObservedUser = (
       lastSeen: { date: lastSeen, isLoading: loading },
       entityRecord: null,
       refetchEntityStore: entityStoreV2Enabled ? entityFromStore.refetch : undefined,
+      observedDetailsInspect: inspect,
+      refetchObservedDetails: refetch,
     };
   }, [
     useEntityStoreData,
@@ -150,5 +160,7 @@ export const useObservedUser = (
     entityFromStore.firstSeen,
     entityFromStore.lastSeen,
     entityFromStore.entityRecord,
+    inspect,
+    refetch,
   ]);
 };

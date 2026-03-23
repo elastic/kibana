@@ -15,7 +15,7 @@ import { TestProviders } from '../../../../common/mock';
 import { HostDetails } from './host_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
@@ -103,8 +103,8 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
   }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
 
-jest.mock('../../../../explore/hosts/containers/hosts/details');
-const mockUseHostDetails = useHostDetails as jest.Mock;
+jest.mock('../../../entity_details/host_right/hooks/use_observed_host');
+const mockUseObservedHost = useObservedHost as jest.Mock;
 
 jest.mock('../../../../common/containers/related_entities/related_users');
 const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
@@ -133,14 +133,16 @@ const defaultProps = {
   scopeId: 'scopeId',
 };
 
-const mockHostDetailsResponse = [
-  false,
-  {
-    inspect: jest.fn(),
-    refetch: jest.fn(),
-    hostDetails: { host: { name: ['test host'] } },
-  },
-];
+const mockObservedHostResult = {
+  details: { host: { name: ['test host'] } },
+  isLoading: false,
+  firstSeen: { date: null, isLoading: false },
+  lastSeen: { date: null, isLoading: false },
+  entityRecord: null,
+  refetchEntityStore: undefined,
+  observedDetailsInspect: undefined,
+  refetchObservedDetails: jest.fn(),
+};
 
 const mockRiskScoreResponse = {
   data: [
@@ -175,7 +177,7 @@ describe('<HostDetails />', () => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
-    mockUseHostDetails.mockReturnValue(mockHostDetailsResponse);
+    mockUseObservedHost.mockReturnValue(mockObservedHostResult);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
@@ -210,16 +212,7 @@ describe('<HostDetails />', () => {
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
-      expect(mockUseHostDetails).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'entities-hosts-details-uuid',
-          startDate: from,
-          endDate: to,
-          hostName: 'test host',
-          indexNames: ['index'],
-          skip: false,
-        })
-      );
+      expect(mockUseObservedHost).toHaveBeenCalledWith('test host', 'scopeId', undefined);
       expect(getByTestId(HOST_DETAILS_INFO_TEST_ID)).toBeInTheDocument();
     });
 

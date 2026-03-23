@@ -125,4 +125,116 @@ export const identityFieldsHaveUsableValues = (
   return Object.values(fields).some((v) => typeof v === 'string' && v.trim() !== '');
 };
 
+const USER_DISPLAY_FIELD_PRIORITY: readonly string[] = [
+  'user.name',
+  'related.user',
+  'user.email',
+  'user.full_name',
+];
+
+const HOST_DISPLAY_FIELD_PRIORITY: readonly string[] = ['host.name', 'host.hostname'];
+
+const USER_ID_FIELD_KEYS = new Set(['user.id', 'entity.id']);
+const HOST_ID_FIELD_KEYS = new Set(['host.id', 'entity.id']);
+
+const firstNonEmptyIdentityValue = (
+  identityFields: IdentityFields | undefined
+): string | undefined =>
+  Object.values(identityFields ?? {}).find((v) => typeof v === 'string' && v.trim() !== '');
+
+/**
+ * Value to pass into observed-user queries and flyout headers: prefer ECS names from the document
+ * and human-readable identity keys before user.id / entity.id (EUID maps often list ids first).
+ */
+export const resolveUserNameForEntityInsights = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData
+): string | undefined => {
+  for (const field of USER_DISPLAY_FIELD_PRIORITY) {
+    const fromDoc = getField(getFieldsData(field));
+    if (fromDoc) {
+      return fromDoc;
+    }
+  }
+  if (identityFields) {
+    for (const field of USER_DISPLAY_FIELD_PRIORITY) {
+      const v = identityFields[field];
+      if (typeof v === 'string' && v.trim() !== '') {
+        return v;
+      }
+    }
+    const sortedKeys = Object.keys(identityFields).sort();
+    for (const key of sortedKeys) {
+      if (USER_ID_FIELD_KEYS.has(key) || key.endsWith('.id')) {
+        continue;
+      }
+      const v = identityFields[key];
+      if (typeof v === 'string' && v.trim() !== '') {
+        return v;
+      }
+    }
+    for (const key of ['user.id', 'entity.id'] as const) {
+      const v = identityFields[key];
+      if (typeof v === 'string' && v.trim() !== '') {
+        return v;
+      }
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Same as {@link resolveUserNameForEntityInsights} for host panels (host.name before host.id).
+ */
+export const resolveHostNameForEntityInsights = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData
+): string | undefined => {
+  for (const field of HOST_DISPLAY_FIELD_PRIORITY) {
+    const fromDoc = getField(getFieldsData(field));
+    if (fromDoc) {
+      return fromDoc;
+    }
+  }
+  if (identityFields) {
+    for (const field of HOST_DISPLAY_FIELD_PRIORITY) {
+      const v = identityFields[field];
+      if (typeof v === 'string' && v.trim() !== '') {
+        return v;
+      }
+    }
+    const sortedKeys = Object.keys(identityFields).sort();
+    for (const key of sortedKeys) {
+      if (HOST_ID_FIELD_KEYS.has(key) || key.endsWith('.id')) {
+        continue;
+      }
+      const v = identityFields[key];
+      if (typeof v === 'string' && v.trim() !== '') {
+        return v;
+      }
+    }
+    for (const key of ['host.id', 'entity.id'] as const) {
+      const v = identityFields[key];
+      if (typeof v === 'string' && v.trim() !== '') {
+        return v;
+      }
+    }
+  }
+  return undefined;
+};
+
+export const resolveUserNameForEntityInsightsWithFallback = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData
+): string | undefined =>
+  resolveUserNameForEntityInsights(identityFields, getFieldsData) ??
+  firstNonEmptyIdentityValue(identityFields);
+
+export const resolveHostNameForEntityInsightsWithFallback = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData
+): string | undefined =>
+  resolveHostNameForEntityInsights(identityFields, getFieldsData) ??
+  firstNonEmptyIdentityValue(identityFields);
+
 export { ecsSliceToFlattenedDocument } from './utils/ecs_slice_to_flattened_document';

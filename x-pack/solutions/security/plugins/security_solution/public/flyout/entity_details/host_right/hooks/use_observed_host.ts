@@ -15,7 +15,9 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
+import type { inputsModel } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import type { InspectResponse } from '../../../../types';
 import type {
   EntityStoreRecord,
   EntityFromStoreResult,
@@ -29,6 +31,9 @@ export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'>
   entityRecord?: EntityStoreRecord | null;
   /** Refetch from entity store (when entity store v2 is enabled). */
   refetchEntityStore?: () => void;
+  /** Inspect/refetch for the observed-host search strategy (security default indices). */
+  observedDetailsInspect?: InspectResponse;
+  refetchObservedDetails?: inputsModel.Refetch;
 };
 
 export const useObservedHost = (
@@ -52,21 +57,24 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const [isLoading, { hostDetails, inspect: inspectObservedHost }] = useHostDetails({
-    endDate: to,
-    startDate: from,
-    hostName,
-    indexNames: securityDefaultPatterns,
-    id: HOST_PANEL_RISK_SCORE_QUERY_ID,
-    skip: isInitializing || !entityFromStore,
-  });
+  const useEntityStoreObservedData = entityFromStore != null;
+
+  const [isLoading, { hostDetails, inspect: inspectObservedHost, refetch: refetchHostDetails }] =
+    useHostDetails({
+      endDate: to,
+      startDate: from,
+      hostName,
+      indexNames: securityDefaultPatterns,
+      id: HOST_PANEL_RISK_SCORE_QUERY_ID,
+      skip: isInitializing || useEntityStoreObservedData,
+    });
 
   useQueryInspector({
     deleteQuery,
     inspect: entityFromStore?.inspect ?? inspectObservedHost,
     loading: entityFromStore?.isLoading ?? isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: entityFromStore?.refetch ?? (() => {}),
+    refetch: entityFromStore?.refetch ?? refetchHostDetails,
     setQuery,
   });
 
@@ -76,7 +84,7 @@ export const useObservedHost = (
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: !entityFromStore,
+    skip: useEntityStoreObservedData,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
@@ -85,7 +93,7 @@ export const useObservedHost = (
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: !entityFromStore,
+    skip: useEntityStoreObservedData,
   });
 
   return useMemo((): ObservedHostResult => {
@@ -103,6 +111,8 @@ export const useObservedHost = (
         },
         entityRecord: entityFromStore.entityRecord ?? null,
         refetchEntityStore: entityFromStore.refetch,
+        observedDetailsInspect: undefined,
+        refetchObservedDetails: undefined,
       };
     }
     return {
@@ -113,6 +123,8 @@ export const useObservedHost = (
         isLoading: loadingFirstSeen,
       },
       lastSeen: { date: lastSeen, isLoading: loadingLastSeen },
+      observedDetailsInspect: inspectObservedHost,
+      refetchObservedDetails: refetchHostDetails,
     };
   }, [
     hostDetails,
@@ -122,5 +134,7 @@ export const useObservedHost = (
     firstSeen,
     lastSeen,
     entityFromStore,
+    inspectObservedHost,
+    refetchHostDetails,
   ]);
 };

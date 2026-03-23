@@ -11,14 +11,35 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { IdentityFields } from '../../shared/utils';
-import { getField } from '../../shared/utils';
+import {
+  getField,
+  resolveHostNameForEntityInsightsWithFallback,
+  resolveUserNameForEntityInsightsWithFallback,
+} from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 
 export const ENTITIES_TAB_ID = 'entity';
+
+const resolveUserDisplayForEntities = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData
+): string | undefined =>
+  resolveUserNameForEntityInsightsWithFallback(identityFields, getFieldsData);
+
+const resolveHostDisplayForEntities = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData,
+  entityStoreV2Enabled: boolean,
+  hostNameFromStore: string | undefined
+): string | undefined => {
+  const fromDocument = resolveHostNameForEntityInsightsWithFallback(identityFields, getFieldsData);
+  return entityStoreV2Enabled ? fromDocument ?? hostNameFromStore : fromDocument;
+};
 
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
@@ -55,12 +76,13 @@ export const EntitiesDetails: React.FC = () => {
   const hostNameFromStore =
     hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
 
-  const resolvedHostName = entityStoreV2Enabled
-    ? hostEntityIdentifiers?.['host.name'] ?? hostNameFromStore
-    : hostEntityIdentifiers?.['host.name'] ??
-      Object.values(hostEntityIdentifiers ?? {}).find(
-        (v): v is string => typeof v === 'string' && v.length > 0
-      );
+  const resolvedUserName = resolveUserDisplayForEntities(userEntityIdentifiers, getFieldsData);
+  const resolvedHostName = resolveHostDisplayForEntities(
+    hostEntityIdentifiers,
+    getFieldsData,
+    entityStoreV2Enabled,
+    hostNameFromStore
+  );
 
   const showUserDetails =
     userEntityIdentifiers &&
@@ -89,9 +111,7 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                userName={
-                  userEntityIdentifiers['user.name'] ?? Object.values(userEntityIdentifiers)[0]
-                }
+                userName={resolvedUserName as string}
                 entityId={userEntityIdentifiers?.['entity.id']}
                 timestamp={timestamp}
                 scopeId={scopeId}

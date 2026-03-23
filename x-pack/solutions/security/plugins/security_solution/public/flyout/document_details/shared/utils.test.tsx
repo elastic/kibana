@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getField, getFieldArray, getEventTitle, getAlertTitle } from './utils';
+import type { GetFieldsData } from './hooks/use_get_fields_data';
+import {
+  getField,
+  getFieldArray,
+  getEventTitle,
+  getAlertTitle,
+  resolveHostNameForEntityInsights,
+  resolveUserNameForEntityInsights,
+} from './utils';
 
 describe('getField', () => {
   it('should return the string value if field is a string', () => {
@@ -75,6 +83,46 @@ describe('getEventTitle', () => {
     expect(getEventTitle({ eventKind: null, eventCategory: null, getFieldsData: jest.fn() })).toBe(
       'Event details'
     );
+  });
+});
+
+const emptyGetFieldsData: GetFieldsData = () => [];
+
+describe('resolveUserNameForEntityInsights', () => {
+  it('prefers user.name from document over user.id in identity map', () => {
+    expect(
+      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'entity.id': 'e-1' }, (field) =>
+        field === 'user.name' ? ['alice'] : []
+      )
+    ).toBe('alice');
+  });
+
+  it('prefers user.name in identity map over user.id', () => {
+    expect(
+      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'user.name': 'bob' }, emptyGetFieldsData)
+    ).toBe('bob');
+  });
+
+  it('falls back to user.id when no name fields exist', () => {
+    expect(
+      resolveUserNameForEntityInsights({ 'user.id': 'uid-9' }, emptyGetFieldsData)
+    ).toBe('uid-9');
+  });
+});
+
+describe('resolveHostNameForEntityInsights', () => {
+  it('prefers host.name from document over host.id in identity map', () => {
+    expect(
+      resolveHostNameForEntityInsights({ 'host.id': 'h-1' }, (field) =>
+        field === 'host.name' ? ['srv'] : []
+      )
+    ).toBe('srv');
+  });
+
+  it('falls back to host.id when no name fields exist', () => {
+    expect(
+      resolveHostNameForEntityInsights({ 'host.id': 'uuid-host' }, emptyGetFieldsData)
+    ).toBe('uuid-host');
   });
 });
 

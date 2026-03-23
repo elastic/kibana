@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -49,7 +49,6 @@ import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -65,7 +64,7 @@ import {
   HOST_IP_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
@@ -78,6 +77,8 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
@@ -135,6 +136,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
+
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
@@ -169,7 +177,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     [dispatch]
   );
 
-  const entityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const openUserPreview = useCallback(() => {
@@ -207,18 +215,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     skip: entityStoreV2Enabled,
   });
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const [isUserLoadingFromSearch, { inspect, userDetails: userDetailsFromSearch, refetch }] =
-    useObservedUserDetails({
-      id: userDetailsQueryId,
-      startDate: from,
-      endDate: to,
-      userName,
-      indexNames: selectedPatterns,
-      skip: entityStoreV2Enabled || selectedPatterns.length === 0,
-    });
-
-  const effectiveUserDetails = entityStoreV2Enabled ? observedUser.details : userDetailsFromSearch;
-  const isUserLoading = entityStoreV2Enabled ? observedUser.isLoading : isUserLoadingFromSearch;
+  // Always show observed user fields from the same indices useObservedUser queries (security
+  // defaults). A duplicate useObservedUserDetails against sourcerer patterns (e.g. alerts-only)
+  // returns sparse objects that are still truthy, which hid real data behind "—" rows.
+  const effectiveUserDetails = observedUser.details;
+  const isUserLoading = observedUser.isLoading;
 
   const userRiskScoreStateFromEntityStore = useMemo(
     () =>
@@ -436,10 +437,18 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             endDate={to}
             narrowDateRange={narrowDateRange}
             setQuery={setQuery}
-            refetch={entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch}
-            inspect={entityStoreV2Enabled ? entityFromStoreResult?.inspect : inspect}
+            refetch={
+              entityStoreV2Enabled
+                ? observedUser.refetchEntityStore ?? (() => {})
+                : observedUser.refetchObservedDetails ?? (() => {})
+            }
+            inspect={
+              entityStoreV2Enabled
+                ? entityFromStoreResult?.inspect
+                : observedUser.observedDetailsInspect
+            }
             userName={userName}
-            indexPatterns={selectedPatterns}
+            indexPatterns={securityDefaultPatterns}
             jobNameById={jobNameById}
             scopeId={scopeId}
             isFlyoutOpen={true}
