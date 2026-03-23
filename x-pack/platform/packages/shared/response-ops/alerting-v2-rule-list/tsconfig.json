@@ -19,11 +19,9 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/core",
     "@kbn/es-query",
     "@kbn/esql-utils",
     "@kbn/react-query",
-    "@kbn/alerting-v2-schemas",
     "@kbn/alerting-v2-rule-apis",
     "@kbn/deeplinks-alerting-v2",
     "@kbn/share-plugin",
