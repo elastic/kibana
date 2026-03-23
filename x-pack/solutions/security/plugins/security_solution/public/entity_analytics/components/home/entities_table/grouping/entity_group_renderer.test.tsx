@@ -11,6 +11,7 @@ import type { RawBucket } from '@kbn/grouping';
 import { groupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
 import type { EntitiesGroupingAggregation } from './use_fetch_grouped_data';
 import { ENTITY_GROUPING_OPTIONS } from '../constants';
+import { TestProviders } from '../../../../../common/mock';
 
 const mockOpenRightPanel = jest.fn();
 
@@ -179,7 +180,7 @@ describe('groupStatsRenderer', () => {
       });
       const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
 
-      render(<>{stats[1].component}</>);
+      render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('73.18')).toBeInTheDocument();
     });
@@ -191,7 +192,7 @@ describe('groupStatsRenderer', () => {
       });
       const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
 
-      render(<>{stats[1].component}</>);
+      render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('\u2013')).toBeInTheDocument();
     });
@@ -202,7 +203,7 @@ describe('groupStatsRenderer', () => {
 
       expect(stats).toHaveLength(2);
 
-      render(<>{stats[1].component}</>);
+      render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('\u2013')).toBeInTheDocument();
     });

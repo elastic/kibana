@@ -13,7 +13,9 @@ import {
   EuiFlexItem,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import _ from 'lodash';
@@ -25,7 +27,8 @@ import {
 } from '../../../../../flyout/entity_details/shared/constants';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/utils';
+import { formatRiskScore } from '../../../../common/utils';
+import { getRiskScoreColors } from '../risk_score_cell';
 import type { EntitiesGroupingAggregation } from './use_fetch_grouped_data';
 import { ENTITY_GROUPING_OPTIONS } from '../constants';
 
@@ -122,6 +125,35 @@ export const groupPanelRenderer = (
   return undefined;
 };
 
+const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefined }) => {
+  const { euiTheme } = useEuiTheme();
+
+  if (riskScore == null) {
+    return (
+      <EuiBadge style={{ marginLeft: 10, width: 55 }} color="hollow">
+        {'\u2013'}
+      </EuiBadge>
+    );
+  }
+
+  const riskLevel = getRiskLevel(riskScore);
+  const colors = getRiskScoreColors(euiTheme, riskLevel);
+
+  return (
+    <EuiBadge style={{ marginLeft: 10, width: 55 }} color={colors.background}>
+      <EuiText
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+        size="xs"
+        color={colors.text}
+      >
+        {formatRiskScore(riskScore)}
+      </EuiText>
+    </EuiBadge>
+  );
+};
+
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<EntitiesGroupingAggregation>
@@ -139,17 +171,9 @@ export const groupStatsRenderer = (
   }
 
   if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
-    const riskScore = bucket.resolutionRiskScore?.value;
     stats.push({
       title: riskScoreLabel,
-      component: (
-        <EuiBadge
-          style={{ marginLeft: 10, width: 55 }}
-          color={riskScore != null ? RISK_SEVERITY_COLOUR[getRiskLevel(riskScore)] : 'hollow'}
-        >
-          {riskScore != null ? riskScore.toFixed(2) : '\u2013'}
-        </EuiBadge>
-      ),
+      component: <GroupRiskScoreBadge riskScore={bucket.resolutionRiskScore?.value} />,
     });
   }
 
