@@ -35,10 +35,6 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
     '&:has(.euiDataGrid--fullScreen) [role="gridcell"] *:not(.euiDataGrid--fullScreen *)': {
       clipPath: 'unset',
     },
-
-    '#tabs-view-container:has(&)': {
-      height: '100%',
-    },
   }),
 
   textBadge: css({
