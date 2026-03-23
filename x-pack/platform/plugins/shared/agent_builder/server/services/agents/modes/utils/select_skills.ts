@@ -63,12 +63,14 @@ export const selectSkills = async ({
   skills,
   skillsStore,
   agentConfiguration,
+  additionalSkillIds,
 }: {
   skills: SkillsService;
   skillsStore: WritableSkillsStore;
   agentConfiguration: AgentConfiguration;
+  additionalSkillIds?: string[];
 }): Promise<InternalSkillDefinition[]> => {
-  const agentSkills = await resolveAgentSkills({ skills, agentConfiguration });
+  const agentSkills = await resolveAgentSkills({ skills, agentConfiguration, additionalSkillIds });
   for (const skill of agentSkills) {
     skillsStore.add(skill);
   }
