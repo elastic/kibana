@@ -49,6 +49,8 @@ export * from './server/repositories/workflow_repository';
 export {
   AlertRuleTriggerSchema,
   ScheduledTriggerSchema,
+  SCHEDULED_INTERVAL_ERROR,
+  SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
   TriggerSchema,
   getTriggerSchema,
