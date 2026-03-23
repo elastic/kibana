@@ -215,11 +215,7 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           >
             {/* Script Selector Column */}
             <EuiFlexItem grow={2} className="eui-textTruncate">
-              <EuiFormRow
-                label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
-                fullWidth
-                helpText={<>&nbsp;</>}
-              >
+              <EuiFormRow label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined} fullWidth>
                 <EndpointRunscriptScriptSelector
                   selectedScriptId={config.scriptId}
                   osType={platform}
@@ -235,7 +231,6 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               <EuiFormRow
                 label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
                 fullWidth
-                helpText={!currentValidationState.arguments.errors && <>&nbsp;</>}
                 isInvalid={!currentValidationState.arguments.isValid}
                 error={currentValidationState.arguments.errors?.join('; ')}
                 data-test-subj={getTestId('scriptParamsContainer')}
@@ -260,7 +255,6 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
                 isInvalid={!currentValidationState.timeout.isValid}
                 error={currentValidationState.timeout.errors?.join('; ')}
                 data-test-subj={getTestId('timeoutContainer')}
-                helpText={<>&nbsp;</>}
                 labelAppend={
                   showFieldLabels ? <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText> : undefined
                 }
