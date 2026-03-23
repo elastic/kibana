@@ -62,6 +62,18 @@ const navLabels = {
   }),
 };
 
+const navSections = {
+  about: i18n.translate('xpack.agentBuilder.routeConfig.about', {
+    defaultMessage: 'About',
+  }),
+  capabilities: i18n.translate('xpack.agentBuilder.routeConfig.capabilities', {
+    defaultMessage: 'Capabilities',
+  }),
+  advanced: i18n.translate('xpack.agentBuilder.routeConfig.advanced', {
+    defaultMessage: 'Advanced',
+  }),
+};
+
 // Routes ordered from most specific to least specific for correct matching
 export const agentRoutes: RouteDefinition[] = [
   {
@@ -72,7 +84,7 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/overview',
     sidebarView: 'agentSettings',
-    navSection: 'About',
+    navSection: navSections.about,
     navIcon: 'sparkles',
     isAgentDisplayName: true,
     element: <RouteDisplay />,
@@ -82,7 +94,7 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'agentSettings',
     navLabel: navLabels.skills,
     navIcon: 'bolt',
-    navSection: 'Capabilities',
+    navSection: navSections.capabilities,
     element: <AgentSkills />,
   },
   {
@@ -90,7 +102,7 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'agentSettings',
     navLabel: navLabels.plugins,
     navIcon: 'package',
-    navSection: 'Capabilities',
+    navSection: navSections.capabilities,
     element: <AgentPlugins />,
   },
   {
@@ -98,7 +110,7 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'agentSettings',
     navLabel: navLabels.connectors,
     navIcon: 'plugs',
-    navSection: 'Capabilities',
+    navSection: navSections.capabilities,
     element: <RouteDisplay />,
   },
   // Catch-all for agent root - must be last
