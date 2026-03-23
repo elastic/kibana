@@ -117,6 +117,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { ExecutionResultsPocTable } from './execution_results_poc/execution_results_poc_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
@@ -932,6 +933,11 @@ export const RuleDetailsPage = connector(
                         <EuiSpacer size="xl" />
                         <RuleBackfillsInfo ruleId={ruleId} />
                       </>
+                    </Route>
+                    <Route
+                      path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResultsPoc})`}
+                    >
+                      <ExecutionResultsPocTable ruleId={ruleId} />
                     </Route>
                     <Route
                       path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}
