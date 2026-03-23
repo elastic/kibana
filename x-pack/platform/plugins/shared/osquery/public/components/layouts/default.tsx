@@ -20,6 +20,12 @@ export const wrapperCss = {
   flex: 1,
 };
 
+export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `0 ${euiTheme.size.l}`,
+  flex: 1,
+  minWidth: 0,
+});
+
 export const navCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,
   borderBottom: euiTheme.border.thin,
