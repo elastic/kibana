@@ -15,7 +15,7 @@ import {
   CasesStepCaseIdSchema,
   CasesStepSingleCaseOutputSchema,
 } from './shared';
-import { MAX_ALERTS_PER_CASE } from '../../constants';
+import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
 
 export const AddAlertsStepTypeId = 'cases.addAlerts';
 
@@ -26,7 +26,7 @@ const AlertInputSchema = z.object({
 });
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  alerts: z.array(AlertInputSchema).min(1).max(MAX_ALERTS_PER_CASE),
+  alerts: z.array(AlertInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
