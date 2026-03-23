@@ -9,7 +9,9 @@ import { useMemo, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import type { SourceFilter } from '../../common/api/unified_history/types';
-import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './components/history_filters';
+
+export const DEFAULT_START_DATE = 'now-24h';
+export const DEFAULT_END_DATE = 'now';
 
 const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled'];
 
