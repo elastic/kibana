@@ -115,6 +115,12 @@ const mergeCurrentAndParentFilters = (
   return [...currentGroupFilters, ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])];
 };
 
+type MatchPhraseValue = string | { query: string };
+type MatchPhraseQuery = Record<string, MatchPhraseValue>;
+
+const getMatchPhraseStringValue = (value: MatchPhraseValue): string =>
+  typeof value === 'string' ? value : value.query;
+
 export const groupFilterMap = (filter: Filter | null): Filter | null => {
   const query = filter?.query;
   return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
@@ -127,16 +133,13 @@ export const groupFilterMap = (filter: Filter | null): Filter | null => {
  * aliases because the target entity doesn't have resolved_to set.
  */
 export const transformResolutionFilter = (filter: Filter): Filter => {
-  const matchPhrase = filter?.query?.match_phrase as
-    | Record<string, string | { query: string }>
-    | undefined;
+  const matchPhrase = filter?.query?.match_phrase as MatchPhraseQuery | undefined;
   if (!matchPhrase) return filter;
 
   const resolvedToEntry = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
   if (!resolvedToEntry) return filter;
 
-  const targetEntityId =
-    typeof resolvedToEntry === 'string' ? resolvedToEntry : resolvedToEntry.query;
+  const targetEntityId = getMatchPhraseStringValue(resolvedToEntry);
 
   return {
     ...filter,
@@ -265,9 +268,10 @@ const getDataGridFilter = (filter: Filter | null) => {
 };
 
 export const extractMatchPhraseValue = (filter: Filter): string | undefined => {
-  const matchPhrase = filter?.query?.match_phrase as Record<string, { query: string }> | undefined;
+  const matchPhrase = filter?.query?.match_phrase as MatchPhraseQuery | undefined;
   if (!matchPhrase) return undefined;
-  return Object.values(matchPhrase)[0]?.query;
+  const firstValue = Object.values(matchPhrase)[0];
+  return firstValue ? getMatchPhraseStringValue(firstValue) : undefined;
 };
 
 export const buildResolutionGroupFilter = (
