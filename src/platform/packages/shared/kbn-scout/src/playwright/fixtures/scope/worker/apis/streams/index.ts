@@ -7,12 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
 import { ScoutSpaceParallelFixture } from '../../scout_space';
+=======
+import { omit } from 'lodash';
+import type { KbnClient, ScoutLogger } from '../../../../../../common';
+import { measurePerformanceAsync } from '../../../../../../common';
+import type { ScoutSpaceParallelFixture } from '../../scout_space';
+import {
+  type Condition,
+  type IngestUpsertRequest,
+  type RoutingStatus,
+  type StreamlangDSL,
+  type StreamsIngestGetResponse,
+  isClassicStreamDefinition,
+  isWiredStreamDefinition,
+} from './types';
+>>>>>>> 192d722b3edf ([scout] hardcode stream types and remove external deps (#258958))
 
 export interface StreamsApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
+<<<<<<< HEAD
+=======
+  forkStream: (
+    streamName: string,
+    destination: string,
+    condition: Condition,
+    status?: RoutingStatus
+  ) => Promise<void>;
+  /** See `./types` JSDoc for casting to `@kbn/streams-schema` definition types in tests. */
+  getStreamDefinition: (streamName: string) => Promise<StreamsIngestGetResponse>;
+  deleteStream: (streamName: string) => Promise<void>;
+  updateStream: (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => Promise<void>;
+  clearStreamChildren: (streamName: string) => Promise<void>;
+  clearStreamMappings: (streamName: string) => Promise<void>;
+  clearStreamProcessors: (streamName: string) => Promise<void>;
+  updateStreamProcessors: (
+    streamName: string,
+    getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
+  ) => Promise<void>;
+>>>>>>> 192d722b3edf ([scout] hardcode stream types and remove external deps (#258958))
 }
 
 export const getStreamsApiService = ({
@@ -43,5 +79,130 @@ export const getStreamsApiService = ({
         });
       });
     },
+<<<<<<< HEAD
+=======
+    forkStream: async (
+      streamName: string,
+      newStreamName: string,
+      condition: Condition,
+      status: RoutingStatus = 'enabled'
+    ) => {
+      await measurePerformanceAsync(log, 'streamsApi.createRoutingRule', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${basePath}/api/streams/${streamName}/_fork`,
+          body: {
+            where: condition,
+            status,
+            stream: {
+              name: newStreamName,
+            },
+          },
+        });
+      });
+    },
+    getStreamDefinition: (streamName: string) => {
+      return measurePerformanceAsync(log, 'streamsApi.getStreamDefinition', async () => {
+        const response = await kbnClient.request({
+          method: 'GET',
+          path: `${basePath}/api/streams/${streamName}`,
+        });
+        return response.data as StreamsIngestGetResponse;
+      });
+    },
+    deleteStream: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.deleteStream', async () => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${basePath}/api/streams/${streamName}`,
+        });
+      });
+    },
+    updateStream: async (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => {
+      await measurePerformanceAsync(log, 'streamsApi.updateStream', async () => {
+        await kbnClient.request({
+          method: 'PUT',
+          path: `${basePath}/api/streams/${streamName}/_ingest`,
+          body: updateBody,
+        });
+      });
+    },
+    clearStreamChildren: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        if (isWiredStreamDefinition(definition.stream)) {
+          await Promise.all(
+            definition.stream.ingest.wired.routing.map((child) =>
+              service.deleteStream(child.destination)
+            )
+          );
+        }
+      });
+    },
+    clearStreamMappings: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamMappings', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        if (isWiredStreamDefinition(definition.stream)) {
+          await service.updateStream(streamName, {
+            ingest: {
+              ...definition.stream.ingest,
+              processing: omit(definition.stream.ingest.processing, 'updated_at'),
+              wired: {
+                ...definition.stream.ingest.wired,
+                fields: {},
+              },
+            },
+          });
+        } else if (isClassicStreamDefinition(definition.stream)) {
+          await service.updateStream(streamName, {
+            ingest: {
+              ...definition.stream.ingest,
+              processing: omit(definition.stream.ingest.processing, 'updated_at'),
+              classic: {
+                ...definition.stream.ingest.classic,
+                field_overrides: {},
+              },
+            },
+          });
+        } else {
+          throw new Error(
+            `Stream ${streamName} is not a wired or classic stream, cannot clear mappings.`
+          );
+        }
+      });
+    },
+    clearStreamProcessors: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamProcessors', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            processing: {
+              steps: [],
+            },
+          },
+        });
+      });
+    },
+    updateStreamProcessors: async (
+      streamName: string,
+      getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
+    ) => {
+      await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        const processing = !(typeof getProcessors === 'function')
+          ? getProcessors
+          : getProcessors(definition.stream.ingest.processing);
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            processing: {
+              ...processing,
+            },
+          },
+        });
+      });
+    },
+>>>>>>> 192d722b3edf ([scout] hardcode stream types and remove external deps (#258958))
   };
 };
