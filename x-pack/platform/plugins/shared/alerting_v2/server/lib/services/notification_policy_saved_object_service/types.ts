@@ -53,7 +53,9 @@ export interface NotificationPolicySavedObjectServiceContract {
       attrs: Partial<NotificationPolicySavedObjectAttributes>;
     }>;
   }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
-  findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
+  findAllDecrypted(params?: {
+    filter?: { enabled: boolean };
+  }): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(params: { ids: string[] }): Promise<NotificationPolicySavedObjectBulkDeleteItem[]>;
   find(params: {

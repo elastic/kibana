@@ -130,7 +130,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
 
     const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
-      perPage: ruleIds.length,
+      perPage: 1000,
       namespaces: namespace ? [namespace] : ['*'],
       filter,
     });

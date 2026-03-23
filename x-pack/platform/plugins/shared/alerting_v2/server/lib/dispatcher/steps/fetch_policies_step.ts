@@ -27,7 +27,9 @@ export class FetchPoliciesStep implements DispatcherStep {
   ) {}
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const result = await this.notificationPolicySavedObjectService.findAllDecrypted();
+    const result = await this.notificationPolicySavedObjectService.findAllDecrypted({
+      filter: { enabled: true },
+    });
 
     const policies = new Map<NotificationPolicyId, NotificationPolicy>();
 
