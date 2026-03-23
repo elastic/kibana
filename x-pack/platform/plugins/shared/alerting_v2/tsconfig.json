@@ -8,7 +8,8 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "public/**/*"
+    "public/**/*",
+    "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -69,7 +70,8 @@
     "@kbn/react-hooks",
     "@kbn/deeplinks-workflows",
     "@kbn/lens-plugin",
-    "@kbn/core-security-server-mocks"
+    "@kbn/core-security-server-mocks",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

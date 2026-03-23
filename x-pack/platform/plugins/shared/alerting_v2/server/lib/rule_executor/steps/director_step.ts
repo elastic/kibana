@@ -53,12 +53,10 @@ export class DirectorStep implements RuleExecutionStep {
         alertEvents: alertEventsBatch,
       });
 
-      if (processedBatch.length > 0) {
-        yield {
-          type: 'continue',
-          state: { ...state, alertEventsBatch: processedBatch },
-        };
-      }
+      yield {
+        type: 'continue',
+        state: { ...state, alertEventsBatch: processedBatch },
+      };
     });
   }
 }

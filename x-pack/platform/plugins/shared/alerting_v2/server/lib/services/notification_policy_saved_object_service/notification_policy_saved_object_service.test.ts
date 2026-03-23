@@ -353,4 +353,56 @@ describe('NotificationPolicySavedObjectService', () => {
       expect(result).toEqual([{ id: 'policy-missing', error: soError }]);
     });
   });
+
+  describe('bulkDelete', () => {
+    it('returns empty array when ids is empty without calling the client', async () => {
+      const result = await service.bulkDelete({ ids: [] });
+
+      expect(result).toEqual([]);
+      expect(mockSoClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes saved objects and returns id for each', async () => {
+      mockSoClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      const result = await service.bulkDelete({ ids: ['policy-1', 'policy-2'] });
+
+      expect(result).toEqual([{ id: 'policy-1' }, { id: 'policy-2' }]);
+      expect(mockSoClient.bulkDelete).toHaveBeenCalledWith([
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2' },
+      ]);
+    });
+
+    it('returns errors for failed deletes', async () => {
+      const soError = { statusCode: 404, error: 'Not Found', message: 'Not found' };
+      mockSoClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-missing',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: false,
+            error: soError,
+          },
+        ],
+      });
+
+      const result = await service.bulkDelete({ ids: ['policy-missing'] });
+
+      expect(result).toEqual([{ id: 'policy-missing', error: soError }]);
+    });
+  });
 });
