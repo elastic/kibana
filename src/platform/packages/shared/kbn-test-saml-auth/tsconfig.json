@@ -10,6 +10,7 @@
   "kbn_references": [
     "@kbn/es",
     "@kbn/mock-idp-utils",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/repo-info"
   ]
 }
