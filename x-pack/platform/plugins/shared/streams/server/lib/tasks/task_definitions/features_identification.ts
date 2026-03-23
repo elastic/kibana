@@ -49,6 +49,49 @@ const DOCUMENTS_BATCH_SIZE = 20;
 const MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 
+class FeatureAccumulator {
+  private readonly features: Feature[] = [];
+  private readonly byLowerId = new Map<string, Feature>();
+
+  constructor(initialFeatures: Feature[] = []) {
+    for (const f of initialFeatures) {
+      this.add(f);
+    }
+  }
+
+  add(feature: Feature) {
+    this.byLowerId.set(feature.id.toLowerCase(), feature);
+    this.features.push(feature);
+  }
+
+  update(feature: Feature) {
+    const idx = this.features.findIndex((f) => f.uuid === feature.uuid);
+    if (idx !== -1) {
+      this.features[idx] = feature;
+      this.byLowerId.set(feature.id.toLowerCase(), feature);
+    }
+  }
+
+  findDuplicate(candidate: BaseFeature): Feature | undefined {
+    return (
+      this.byLowerId.get(candidate.id.toLowerCase()) ??
+      this.features.find((f) => isDuplicateFeature(f, candidate))
+    );
+  }
+
+  getAll(): Feature[] {
+    return this.features;
+  }
+
+  getTopByConfidence(limit: number): Feature[] {
+    return [...this.features].sort((a, b) => b.confidence - a.confidence).slice(0, limit);
+  }
+
+  public get length(): number {
+    return this.features.length;
+  }
+}
+
 export interface IterationTelemetry {
   iteration: number;
   docsCount: number;
@@ -105,14 +148,8 @@ export async function identifyStreamFeatures({
       properties,
     }));
 
-  const existingByLowerId = new Map<string, Feature>();
-  for (const ef of existingFeatures) {
-    existingByLowerId.set(ef.id.toLowerCase(), ef);
-  }
-
-  const knownFeatures: Feature[] = [];
-  const knownByLowerId = new Map<string, Feature>();
-  const knownIdxByUuid = new Map<string, number>();
+  const known = new FeatureAccumulator();
+  const existing = new FeatureAccumulator(existingFeatures);
 
   let totalTokensUsed: ChatCompletionTokenCount = {
     prompt: 0,
@@ -128,14 +165,12 @@ export async function identifyStreamFeatures({
     }
 
     const batch = batches[i];
-    const previousFeatures = [...knownFeatures]
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
+    const previousFeatures = known.getTopByConfidence(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
 
     logger.debug(
       () =>
         `Iteration ${i + 1}/${effectiveMaxIterations}: processing ${batch.length} documents, ${
-          knownFeatures.length
+          known.length
         } features known`
     );
 
@@ -164,10 +199,8 @@ export async function identifyStreamFeatures({
 
     const { newFeatures, updatedFeatures, codeIgnoredCount } = reconcileFeatures({
       rawFeatures,
-      knownFeatures,
-      knownByLowerId,
-      existingFeatures,
-      existingByLowerId,
+      known,
+      existing,
       ignoredFeatures,
       logger,
       excludedFeatures,
@@ -176,16 +209,10 @@ export async function identifyStreamFeatures({
     const changedFeatures = [...newFeatures, ...updatedFeatures];
 
     for (const feature of newFeatures) {
-      knownByLowerId.set(feature.id.toLowerCase(), feature);
-      knownIdxByUuid.set(feature.uuid, knownFeatures.length);
-      knownFeatures.push(feature);
+      known.add(feature);
     }
     for (const feature of updatedFeatures) {
-      const idx = knownIdxByUuid.get(feature.uuid);
-      if (idx !== undefined) {
-        knownFeatures[idx] = feature;
-        knownByLowerId.set(feature.id.toLowerCase(), feature);
-      }
+      known.update(feature);
     }
 
     const iterationEntry: IterationTelemetry = {
@@ -203,7 +230,7 @@ export async function identifyStreamFeatures({
     logger.debug(
       () =>
         `Iteration ${i + 1}: found ${rawFeatures.length} features ` +
-        `(${newFeatures.length} new, ${updatedFeatures.length} updated), ${knownFeatures.length} total known, ` +
+        `(${newFeatures.length} new, ${updatedFeatures.length} updated), ${known.length} total known, ` +
         `tokens: prompt=${tokensUsed.prompt} completion=${tokensUsed.completion} cached=${
           tokensUsed.cached ?? 0
         }`
@@ -216,7 +243,7 @@ export async function identifyStreamFeatures({
   }
 
   return {
-    features: knownFeatures,
+    features: known.getAll(),
     tokensUsed: totalTokensUsed,
   };
 }
@@ -456,29 +483,29 @@ function createFeatureMetadata() {
   };
 }
 
+/** Compares only domain fields (ignores uuid, status, timestamps) */
+const hasChanged = (updated: BaseFeature, current: Feature): boolean =>
+  !isEqual(updated, toBaseFeature(current));
+
 function reconcileFeatures({
   rawFeatures,
-  knownFeatures,
+  known,
+  existing,
   ignoredFeatures,
-  knownByLowerId,
-  existingFeatures,
   excludedFeatures,
-  existingByLowerId,
   logger,
 }: {
   rawFeatures: BaseFeature[];
-  knownFeatures: Feature[];
+  known: FeatureAccumulator;
+  existing: FeatureAccumulator;
   ignoredFeatures: IgnoredFeature[];
-  knownByLowerId: Map<string, Feature>;
-  existingFeatures: Feature[];
   excludedFeatures: Feature[];
-  existingByLowerId: Map<string, Feature>;
   logger: Logger;
 }): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
   const newFeatures: Feature[] = [];
   const updatedFeatures: Feature[] = [];
   const metadata = createFeatureMetadata();
-  // Log all LLM-reported ignored features
+
   for (const ignored of ignoredFeatures) {
     logger.debug(
       () =>
@@ -504,27 +531,21 @@ function reconcileFeatures({
   });
 
   for (const raw of nonExcludedInferredFeatures) {
-    // 1. Intra-run match: merge features between iterations of this run
-    const thisRunMatch =
-      knownByLowerId.get(raw.id.toLowerCase()) ??
-      knownFeatures.find((kf) => isDuplicateFeature(kf, raw));
+    // Intra-run match: merge features between iterations of this run
+    const thisRunMatch = known.findDuplicate(raw);
 
     if (thisRunMatch) {
       const merged = mergeFeature(thisRunMatch, raw);
-      if (!isEqual(merged, toBaseFeature(thisRunMatch))) {
+      if (hasChanged(merged, thisRunMatch)) {
         updatedFeatures.push({ ...merged, ...metadata, uuid: thisRunMatch.uuid });
       }
     } else {
-      // 2. Cross-run match: check against features from prior runs
-      const existingMatch =
-        existingByLowerId.get(raw.id.toLowerCase()) ??
-        existingFeatures.find((ef) => isDuplicateFeature(ef, raw));
+      // Cross-run match: check against features from prior runs
+      const existingMatch = existing.findDuplicate(raw);
 
       if (existingMatch) {
-        // Re-discovered: new version + existing UUID + fresh metadata
         newFeatures.push({ ...raw, ...metadata, uuid: existingMatch.uuid });
       } else {
-        // Truly new feature
         newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
       }
     }
