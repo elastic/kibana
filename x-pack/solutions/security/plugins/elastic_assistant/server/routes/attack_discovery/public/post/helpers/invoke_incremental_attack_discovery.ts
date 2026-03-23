@@ -13,12 +13,12 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Document } from '@langchain/core/documents';
 
-import { incrementalAttackDiscovery } from '../../../../../../lib/attack_discovery/incremental';
+import { incrementalAttackDiscovery } from '../../../../../lib/attack_discovery/incremental';
 import type {
   IncrementalMode,
   Alert,
   IncrementalADConfig,
-} from '../../../../../../lib/attack_discovery/incremental';
+} from '../../../../../lib/attack_discovery/incremental/types';
 import { invokeAttackDiscoveryGraph } from './invoke_attack_discovery_graph';
 
 export interface InvokeIncrementalAttackDiscoveryParams {

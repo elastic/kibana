@@ -18,14 +18,14 @@
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { incrementalAttackDiscovery } from '../index';
 import type { Alert } from '../types';
-import { validationScenarios, generateMockAlerts } from './validation_scenarios';
+import { generateMockAlerts } from './validation_scenarios';
 
 describe('Incremental Attack Discovery - Integration Tests', () => {
   // Mock ES client
   const mockEsClient = {
     bulk: jest.fn(async () => ({ errors: false })),
     get: jest.fn(async () => ({ found: false })),
-    search: jest.fn(async () => ({ hits: { hits: [] }, aggregations: {} })),
+    search: jest.fn(async () => ({ hits: { hits: [] as Array<{ _source: { alertId: string } }> }, aggregations: {} })),
   };
 
   // Mock LLM (simulates real model behavior)
@@ -35,7 +35,7 @@ describe('Incremental Attack Discovery - Integration Tests', () => {
   ): Promise<AttackDiscovery[]> {
     // Group alerts by rule name
     const alertsByRule = alerts.reduce((acc, alert) => {
-      const content = JSON.parse(alert.content);
+      const content = JSON.parse(alert.content as string);
       const ruleName = content.rule?.name || 'Unknown';
       if (!acc[ruleName]) acc[ruleName] = [];
       acc[ruleName].push(alert);
@@ -198,7 +198,6 @@ describe('Incremental Attack Discovery - Integration Tests', () => {
       });
 
       // With 100 alerts in 4 rounds, should have some merging
-      const totalGenerated = result.rounds.reduce((sum, r) => sum + r.insightsGenerated, 0);
       const totalMerged = result.rounds.reduce((sum, r) => sum + r.insightsMerged, 0);
 
       expect(totalMerged).toBeGreaterThan(0); // At least some merging occurred

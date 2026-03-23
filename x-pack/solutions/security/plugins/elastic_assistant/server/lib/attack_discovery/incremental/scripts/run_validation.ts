@@ -44,7 +44,7 @@ async function mockGenerateInsights(
 
   // Group alerts by rule name
   const alertsByRule = alerts.reduce((acc, alert) => {
-    const content = JSON.parse(alert.content);
+    const content = JSON.parse(alert.content as string);
     const ruleName = content.rule?.name || 'Unknown';
     if (!acc[ruleName]) acc[ruleName] = [];
     acc[ruleName].push(alert);

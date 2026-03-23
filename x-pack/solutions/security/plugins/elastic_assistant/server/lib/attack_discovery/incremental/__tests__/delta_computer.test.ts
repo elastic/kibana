@@ -6,13 +6,13 @@
  */
 
 import { computeDelta } from '../delta_computer';
-import type { StateTracker } from '../state_tracker';
+import type { Alert } from '../types';
 
 describe('computeDelta', () => {
   it('should return only unprocessed alerts', async () => {
     const mockTracker = {
-      filterUnprocessed: jest.fn(async alerts =>
-        alerts.filter(a => a.id !== 'alert-1')  // alert-1 already processed
+      filterUnprocessed: jest.fn(async (alerts: Alert[]) =>
+        alerts.filter((a: Alert) => a.id !== 'alert-1')  // alert-1 already processed
       ),
     } as any;
 
