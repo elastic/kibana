@@ -10,14 +10,13 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   Dimension,
   MetricsESQLResponse,
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
-import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
