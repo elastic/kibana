@@ -71,11 +71,14 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
     [mutateAsync, navigateToCasesTemplates, templateId]
   );
 
+  if (isLoading && !template) {
+    return null;
+  }
+
   return (
     <TemplateFormLayout
       form={form}
       title={i18n.EDIT_TEMPLATE_TITLE}
-      isLoading={isLoading && !template}
       isSaving={isSaving}
       onCreate={handleSave}
       isEdit

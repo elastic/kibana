@@ -68,6 +68,7 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
             definition: clonedDefinition,
             description: template.description,
             tags: template.tags,
+            isEnabled: template.isEnabled,
           },
         },
         {

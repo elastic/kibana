@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -63,14 +63,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [savedValue, setSavedValue] = useState(initialValue);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
-
-  useEffect(() => {
-    setSavedValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    setIsEnabled(initialIsEnabled);
-  }, [initialIsEnabled]);
 
   const {
     value: yamlValue,

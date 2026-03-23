@@ -162,6 +162,41 @@ describe('useTemplatesActions', () => {
     expect(template).not.toHaveProperty('isDefault');
   });
 
+  it('handleClone passes isEnabled from template when isEnabled is true', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+    const enabledTemplate = { ...mockTemplate, isEnabled: true };
+
+    act(() => {
+      result.current.handleClone(enabledTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.isEnabled).toBe(true);
+  });
+
+  it('handleClone passes isEnabled from template when isEnabled is false', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+    const disabledTemplate = { ...mockTemplate, isEnabled: false };
+
+    act(() => {
+      result.current.handleClone(disabledTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.isEnabled).toBe(false);
+  });
+
+  it('handleClone passes isEnabled as undefined when template has no isEnabled property', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleClone(mockTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.isEnabled).toBeUndefined();
+  });
+
   it('handleClone handles definition that is already a parsed object', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
