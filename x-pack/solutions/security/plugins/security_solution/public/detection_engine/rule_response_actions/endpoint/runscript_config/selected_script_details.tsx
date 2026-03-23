@@ -91,25 +91,23 @@ export const SelectedScriptDetails = memo<SelectedScriptDetailsProps>(
     }, [script.description, script.example, script.instructions, getTestId]);
 
     return (
-      <EuiPanel paddingSize="s" hasShadow={false} hasBorder={true}>
-        <EuiAccordion
-          id={accordionId}
-          buttonContent={SELECTED_SCRIPT_DETAILS_LABEL}
-          buttonClassName="triggerButton"
-          buttonProps={{ paddingSize: 's' }}
-          css={accordionCss}
-          data-test-subj={dataTestSubj}
-        >
-          <EuiHorizontalRule margin="xs" />
-          <EuiPanel color="transparent" paddingSize="none">
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <EuiDescriptionList listItems={listItems} rowGutterSize="m" />
-            </EuiText>
-            <EuiSpacer size="s" />
-          </EuiPanel>
-        </EuiAccordion>
-      </EuiPanel>
+      <EuiAccordion
+        id={accordionId}
+        buttonContent={SELECTED_SCRIPT_DETAILS_LABEL}
+        buttonClassName="triggerButton"
+        buttonProps={{ paddingSize: 's' }}
+        css={accordionCss}
+        data-test-subj={dataTestSubj}
+      >
+        <EuiHorizontalRule margin="xs" />
+        <EuiPanel color="transparent" paddingSize="none">
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <EuiDescriptionList listItems={listItems} rowGutterSize="m" />
+          </EuiText>
+          <EuiSpacer size="s" />
+        </EuiPanel>
+      </EuiAccordion>
     );
   }
 );

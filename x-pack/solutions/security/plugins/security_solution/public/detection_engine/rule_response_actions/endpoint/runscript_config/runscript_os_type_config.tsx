@@ -235,11 +235,7 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               <EuiFormRow
                 label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
                 fullWidth
-                helpText={
-                  !currentValidationState.arguments.errors && scriptSelected?.requiresInput
-                    ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
-                    : currentValidationState.arguments.isValid && <>&nbsp;</>
-                }
+                helpText={!currentValidationState.arguments.errors && <>&nbsp;</>}
                 isInvalid={!currentValidationState.arguments.isValid}
                 error={currentValidationState.arguments.errors?.join('; ')}
                 data-test-subj={getTestId('scriptParamsContainer')}
