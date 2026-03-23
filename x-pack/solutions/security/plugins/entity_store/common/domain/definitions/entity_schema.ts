@@ -130,6 +130,8 @@ export const entitySchema = z.object({
   postAggFilter: z.optional(streamlangConditionSchema),
   // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
+  // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
+  whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields

@@ -10,6 +10,10 @@ import { expect } from '@kbn/scout-security/api';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
+  ENTITY_CONFIDENCE,
+  USER_ENTITY_NAMESPACE,
+} from '../../../../common/domain/definitions/user_entity_constants';
+import {
   expectedGenericEntities,
   expectedHostEntities,
   expectedServiceEntities,
@@ -239,7 +243,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         type: 'Identity',
         name: 'latest-test-name',
         namespace: 'okta',
-        confidence: 'high',
+        confidence: ENTITY_CONFIDENCE.High,
       },
     });
 
@@ -277,7 +281,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         name: 'latest-test-name',
         sub_type: 'Sub Type 1',
         namespace: 'okta',
-        confidence: 'high',
+        confidence: ENTITY_CONFIDENCE.High,
       },
       user: { hash: ['hash-1', 'hash-2'] },
     });
@@ -351,7 +355,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
         namespace: 'okta',
-        confidence: 'high',
+        confidence: ENTITY_CONFIDENCE.High,
       },
       user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
     });
@@ -388,7 +392,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
         namespace: 'okta',
-        confidence: 'high',
+        confidence: ENTITY_CONFIDENCE.High,
       },
       user: {
         hash: [
@@ -433,7 +437,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           type: 'Identity',
           name: 'IDP NoLatest',
           namespace: 'okta',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
       });
 
@@ -465,7 +469,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           type: 'Identity',
           name: 'IDP InLatest Updated',
           namespace: 'okta',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
       });
 
@@ -502,7 +506,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           type: 'Identity',
           name: 'NonIDP InLatest',
           namespace: 'active_directory',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
       });
 
@@ -525,7 +529,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           type: 'Identity',
           name: 'NonIDP InLatest Updated',
           namespace: 'active_directory',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
       });
     }
@@ -591,7 +595,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           type: 'Identity',
           name: 'Enrich IDP Updated',
           namespace: 'okta',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
         user: { domain: 'enrichment.com' },
       });
@@ -603,8 +607,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           id: 'user:enrich-local-user@enrich-host-1@local',
           type: 'Identity',
           name: 'enrich-local-user@enrich-ws-updated',
-          namespace: 'local',
-          confidence: 'medium',
+          namespace: USER_ENTITY_NAMESPACE.Local,
+          confidence: ENTITY_CONFIDENCE.Medium,
         },
       });
     }
@@ -639,8 +643,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           id: 'user:local-user@local-host-1@local',
           type: 'Identity',
           name: 'local-user@workstation-42',
-          namespace: 'local',
-          confidence: 'medium',
+          namespace: USER_ENTITY_NAMESPACE.Local,
+          confidence: ENTITY_CONFIDENCE.Medium,
         },
       });
     }
@@ -708,7 +712,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           type: 'Identity',
           name: 'IDP User',
           namespace: 'okta',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
       });
 
@@ -719,8 +723,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           id: 'user:mixed-local-user@mixed-host-1@local',
           type: 'Identity',
           name: 'mixed-local-user@workstation-99',
-          namespace: 'local',
-          confidence: 'medium',
+          namespace: USER_ENTITY_NAMESPACE.Local,
+          confidence: ENTITY_CONFIDENCE.Medium,
         },
       });
 
@@ -792,8 +796,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           id: 'user:allowed.user@excluded-host-allowed@local',
           type: 'Identity',
           name: 'allowed.user@workstation',
-          namespace: 'local',
-          confidence: 'medium',
+          namespace: USER_ENTITY_NAMESPACE.Local,
+          confidence: ENTITY_CONFIDENCE.Medium,
         },
       });
     }
@@ -869,7 +873,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         entity: {
           id: 'user:mixed-all-idp@okta',
           namespace: 'okta',
-          confidence: 'high',
+          confidence: ENTITY_CONFIDENCE.High,
         },
       });
 
@@ -881,8 +885,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       expect(userLocalHit.hits.hits[0]._source).toMatchObject({
         entity: {
           id: 'user:mixed-all-local@mixed-all-host@local',
-          namespace: 'local',
-          confidence: 'medium',
+          namespace: USER_ENTITY_NAMESPACE.Local,
+          confidence: ENTITY_CONFIDENCE.Medium,
         },
       });
 

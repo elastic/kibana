@@ -8,7 +8,11 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import type { EntityField, SetFieldsByCondition } from '../../../common/domain/definitions/entity_schema';
+import type {
+  EntityField,
+  SetFieldsByCondition,
+} from '../../../common/domain/definitions/entity_schema';
+import { USER_ENTITY_NAMESPACE } from '../../../common/domain/definitions/user_entity_constants';
 import { getEuidEsqlDocumentsContainsIdFilter } from '../../../common/domain/euid/esql';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -22,6 +26,7 @@ import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
   buildPaginationSection,
+  buildPostStatsLogicalToColumnMap,
   buildSetFieldsByCondition,
   castSrcType,
   extractPaginationParams,
@@ -57,9 +62,7 @@ describe('buildExtractionSourceClause', () => {
     expect(clause).toContain('FROM logs-*, metrics-*');
     expect(clause).toContain('METADATA _index');
     expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(
-      `${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`
-    );
+    expect(clause).not.toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(clause).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(clause).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
   });
@@ -82,7 +85,9 @@ describe('aggregationStats', () => {
 
   it('should prefix destinations with recentData when renameToRecent is true', () => {
     expect(aggregationStats([keywordField()], true)).toBe(
-      `${recentData('host.name')} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      `${recentData(
+        'host.name'
+      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
     );
   });
 
@@ -210,10 +215,7 @@ describe('extractPaginationParams', () => {
 
   it('should return undefined when row count is below docs limit', () => {
     const response = makeResponse(
-      [
-        { name: '@ts' },
-        { name: 'finalId' },
-      ],
+      [{ name: '@ts' }, { name: 'finalId' }],
       [
         ['2024-01-01', 'a'],
         ['2024-01-02', 'b'],
@@ -224,10 +226,7 @@ describe('extractPaginationParams', () => {
 
   it('should return cursors from the last row when row count reaches docs limit', () => {
     const response = makeResponse(
-      [
-        { name: '@ts' },
-        { name: 'finalId' },
-      ],
+      [{ name: '@ts' }, { name: 'finalId' }],
       [
         ['2024-01-01', 'first'],
         ['2024-01-02', 'last'],
@@ -272,14 +271,14 @@ describe('buildSetFieldsByCondition', () => {
     const spec: SetFieldsByCondition = {
       condition: { always: true },
       fields: {
-        'entity.namespace': 'local',
+        'entity.namespace': USER_ENTITY_NAMESPACE.Local,
         'entity.name': { source: 'user.name' },
       },
     };
     const fragment = buildSetFieldsByCondition(spec);
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment).toContain('entity.namespace = CASE(');
-    expect(fragment).toContain('"local"');
+    expect(fragment).toContain(`"${USER_ENTITY_NAMESPACE.Local}"`);
     expect(fragment).toContain('TO_STRING(user.name)');
     expect(fragment).toContain('entity.name = CASE(');
   });
@@ -298,6 +297,84 @@ describe('buildSetFieldsByCondition', () => {
   });
 });
 
+const postStatsSampleFields: EntityField[] = [
+  {
+    source: 'entity.namespace',
+    destination: 'entity.namespace',
+    retention: { operation: 'prefer_newest_value' },
+  },
+  {
+    source: 'user.name',
+    destination: 'user.name',
+    retention: { operation: 'prefer_newest_value' },
+  },
+  {
+    source: 'entity.name',
+    destination: 'entity.name',
+    retention: { operation: 'prefer_newest_value' },
+  },
+];
+
+describe('buildPostStatsLogicalToColumnMap', () => {
+  it('should prefix destinations with recent. when useRecentDataPrefix is true', () => {
+    const m = buildPostStatsLogicalToColumnMap(postStatsSampleFields, true);
+    expect(m.get('entity.namespace')).toBe(recentData('entity.namespace'));
+    expect(m.get('user.name')).toBe(recentData('user.name'));
+  });
+
+  it('should use plain destination names when useRecentDataPrefix is false (CCS)', () => {
+    const m = buildPostStatsLogicalToColumnMap(postStatsSampleFields, false);
+    expect(m.get('entity.namespace')).toBe('entity.namespace');
+    expect(m.get('user.name')).toBe('user.name');
+  });
+});
+
+describe('buildSetFieldsByCondition post-STATS context', () => {
+  it('should remap condition and targets to recent.* when useRecentDataPrefix is true', () => {
+    const fragment = buildSetFieldsByCondition(
+      {
+        condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+        fields: { 'entity.name': { source: 'user.name' } },
+      },
+      { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
+    );
+    expect(fragment).toBe(
+      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local"), TO_STRING(recent.user.name), recent.entity.name)'
+    );
+  });
+
+  it('should use plain column names when useRecentDataPrefix is false (CCS)', () => {
+    const fragment = buildSetFieldsByCondition(
+      {
+        condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+        fields: { 'entity.name': { source: 'user.name' } },
+      },
+      { entityFields: postStatsSampleFields, useRecentDataPrefix: false }
+    );
+    expect(fragment).toBe(
+      '| EVAL entity.name = CASE((`entity.namespace` == "local"), TO_STRING(user.name), entity.name)'
+    );
+  });
+
+  it('should remap nested and conditions', () => {
+    const fragment = buildSetFieldsByCondition(
+      {
+        condition: {
+          and: [
+            { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+            { field: 'user.name', exists: true },
+          ],
+        },
+        fields: { 'entity.name': { source: 'user.name' } },
+      },
+      { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
+    );
+    expect(fragment).toBe(
+      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local" AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
+    );
+  });
+});
+
 describe('buildPaginationSection', () => {
   const paginationFields: PaginationFields = {
     timestampField: '@timestamp',
@@ -306,21 +383,17 @@ describe('buildPaginationSection', () => {
   };
 
   it('should emit SORT and LIMIT only when pagination is absent', () => {
-    expect(
-      buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields)
-    ).toEqual([
+    expect(buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields)).toEqual([
       '| SORT @timestamp ASC, recent.id ASC',
       '| LIMIT 25',
     ]);
   });
 
   it('should add a WHERE cursor clause when pagination is provided without recovery', () => {
-    const parts = buildPaginationSection(
-      '2024-01-01T00:00:00.000Z',
-      25,
-      paginationFields,
-      { timestampCursor: '2024-06-01T00:00:00.000Z', idCursor: 'cursor-id' }
-    );
+    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
+      timestampCursor: '2024-06-01T00:00:00.000Z',
+      idCursor: 'cursor-id',
+    });
     expect(parts[0]).toBe('| SORT @timestamp ASC, recent.id ASC');
     expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-06-01T00:00:00.000Z")');
     expect(parts[1]).toContain('recent.id > "cursor-id"');

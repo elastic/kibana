@@ -7,6 +7,7 @@
 
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import { applyFieldEvaluations, getFieldValue, getSourceMatchSpec } from './field_evaluations';
 
 describe('getFieldValue', () => {
@@ -117,8 +118,10 @@ describe('applyFieldEvaluations', () => {
   });
 
   it('should set entity.namespace to local when event.module is local', () => {
-    expect(applyFieldEvaluations({ event: { module: 'local' } }, userEvaluations)).toEqual({
-      'entity.namespace': 'local',
+    expect(
+      applyFieldEvaluations({ event: { module: USER_ENTITY_NAMESPACE.Local } }, userEvaluations)
+    ).toEqual({
+      'entity.namespace': USER_ENTITY_NAMESPACE.Local,
     });
   });
 

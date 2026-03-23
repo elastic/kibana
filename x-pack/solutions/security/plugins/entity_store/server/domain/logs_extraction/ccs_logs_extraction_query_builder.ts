@@ -92,6 +92,17 @@ export function buildCcsLogsExtractionEsqlQuery({
     ${aggregationStats(fields, false)}
     BY ${MAIN_ENTITY_ID_FIELD}`);
 
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
+      parts.push(
+        buildSetFieldsByCondition(entry, {
+          entityFields: fields,
+          useRecentDataPrefix: false,
+        })
+      );
+    }
+  }
+
   // Keep fields
   parts.push(`| KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}`);
 

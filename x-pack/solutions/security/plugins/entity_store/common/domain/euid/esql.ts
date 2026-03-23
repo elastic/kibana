@@ -16,7 +16,7 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
-  applyWhenConditionTrueSetFieldsPreAgg,
+  applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
@@ -54,7 +54,8 @@ import {
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @returns An ESQL filter string, or `undefined` if the document does not contain enough identifying
  *   information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter` (same gate
- *   as logs extraction) after field evaluations and `whenConditionTrueSetFieldsPreAgg`.
+ *   as logs extraction) after field evaluations, `whenConditionTrueSetFieldsPreAgg`, and single-doc
+ *   simulation of `whenConditionTrueSetFieldsAfterStats`.
  */
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
@@ -81,7 +82,10 @@ export function getEuidEsqlFilterBasedOnDocument(
     doc = { ...doc, ...evaluated };
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
   }
   if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;

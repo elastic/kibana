@@ -32,12 +32,13 @@ function wrapEvaluationScriptForKeywordRuntimeField(evaluationScript: string): s
 }
 
 /**
- * Mirrors `whenConditionTrueSetFieldsPreAgg` for fields produced by field evaluations (e.g.
- * `entity.namespace` → `entity_namespace`). Matches in-memory EUID after field evals + pre-agg
- * overrides (see getEuidFromObject / applyWhenConditionTrueSetFieldsPreAgg).
+ * Mirrors string-literal when-rules for fields that have evaluated vars (e.g. `entity.namespace`).
+ * Used for pre-agg and `whenConditionTrueSetFieldsAfterStats` (see getEuidFromObject).
  */
 function buildPreAggEvaluatedVarOverridesPreamble(
-  whenRules: EntityDefinitionWithoutId['whenConditionTrueSetFieldsPreAgg'],
+  whenRules:
+    | EntityDefinitionWithoutId['whenConditionTrueSetFieldsPreAgg']
+    | EntityDefinitionWithoutId['whenConditionTrueSetFieldsAfterStats'],
   evaluatedVars: Map<string, string>
 ): string {
   if (!whenRules?.length) {
@@ -139,6 +140,10 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   }
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
     entityDefinition.whenConditionTrueSetFieldsPreAgg,
+    evaluatedVars
+  );
+  preamble += buildPreAggEvaluatedVarOverridesPreamble(
+    entityDefinition.whenConditionTrueSetFieldsAfterStats,
     evaluatedVars
   );
 

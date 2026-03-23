@@ -12,7 +12,7 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
-  applyWhenConditionTrueSetFieldsPreAgg,
+  applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
@@ -128,7 +128,10 @@ export function getEuidDslFilterBasedOnDocument(
     doc = { ...doc, ...evaluated };
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
   }
   if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;

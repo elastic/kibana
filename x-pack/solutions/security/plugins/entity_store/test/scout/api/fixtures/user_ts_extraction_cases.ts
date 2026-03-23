@@ -12,9 +12,16 @@
  * Used by Scout `dsl_translation` / `painless_translation` and by
  * `common/domain/euid/user_ts_extraction_cases.test.ts` to guard against drift.
  */
+
+import {
+  ENTITY_CONFIDENCE,
+  type EntityConfidence,
+  USER_ENTITY_NAMESPACE,
+} from '../../../../common/domain/definitions/user_entity_constants';
+
 export interface UserTsExpectedMeta {
   namespace: string;
-  confidence: 'high' | 'medium';
+  confidence: EntityConfidence;
   entityName?: string;
 }
 
@@ -55,7 +62,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'okta' },
     },
     expectedEuid: 'user:john.doe@okta',
-    expectedMeta: { namespace: 'okta', confidence: 'high', entityName: 'john.doe' },
+    expectedMeta: { namespace: 'okta', confidence: ENTITY_CONFIDENCE.High, entityName: 'john.doe' },
   },
   {
     id: 'idp-asset-azure-user-name',
@@ -70,7 +77,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { id: 'host-456' },
     },
     expectedEuid: 'user:jane.smith@entra_id',
-    expectedMeta: { namespace: 'entra_id', confidence: 'high', entityName: 'jane.smith' },
+    expectedMeta: {
+      namespace: 'entra_id',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'jane.smith',
+    },
   },
   {
     id: 'idp-asset-entra-id-module-user-name',
@@ -81,7 +92,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { name: 'server-01' },
     },
     expectedEuid: 'user:bob.jones@entra_id',
-    expectedMeta: { namespace: 'entra_id', confidence: 'high', entityName: 'bob.jones' },
+    expectedMeta: {
+      namespace: 'entra_id',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'bob.jones',
+    },
   },
   {
     id: 'idp-asset-o365-user-id-priority',
@@ -95,7 +110,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'o365' },
     },
     expectedEuid: 'user:user-789@microsoft_365',
-    expectedMeta: { namespace: 'microsoft_365', confidence: 'high', entityName: 'alice.brown' },
+    expectedMeta: {
+      namespace: 'microsoft_365',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'alice.brown',
+    },
   },
   {
     id: 'idp-asset-o365-metrics-user-id-only',
@@ -105,7 +124,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'o365_metrics' },
     },
     expectedEuid: 'user:user-101@microsoft_365',
-    expectedMeta: { namespace: 'microsoft_365', confidence: 'high', entityName: undefined },
+    expectedMeta: {
+      namespace: 'microsoft_365',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: undefined,
+    },
   },
   {
     id: 'idp-asset-ad-user-name-domain',
@@ -124,7 +147,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     expectedEuid: 'user:arnlod.schmidt@elastic.co@active_directory',
     expectedMeta: {
       namespace: 'active_directory',
-      confidence: 'high',
+      confidence: ENTITY_CONFIDENCE.High,
       entityName: 'arnlod.schmidt',
     },
   },
@@ -136,7 +159,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'entityanalytics_okta' },
     },
     expectedEuid: 'user:test@example.com@okta',
-    expectedMeta: { namespace: 'okta', confidence: 'high', entityName: undefined },
+    expectedMeta: { namespace: 'okta', confidence: ENTITY_CONFIDENCE.High, entityName: undefined },
   },
   {
     id: 'idp-asset-aws-user-name-domain',
@@ -150,7 +173,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'aws' },
     },
     expectedEuid: 'user:charlie.wilson@corp@aws',
-    expectedMeta: { namespace: 'aws', confidence: 'high', entityName: 'charlie.wilson' },
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'charlie.wilson',
+    },
   },
   {
     id: 'idp-asset-gcp-user-name',
@@ -160,7 +187,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'gcp' },
     },
     expectedEuid: 'user:david.lee@gcp',
-    expectedMeta: { namespace: 'gcp', confidence: 'high', entityName: 'david.lee' },
+    expectedMeta: { namespace: 'gcp', confidence: ENTITY_CONFIDENCE.High, entityName: 'david.lee' },
   },
   {
     id: 'idp-asset-okta-user-id-empty-name',
@@ -170,7 +197,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'okta' },
     },
     expectedEuid: 'user:user-202@okta',
-    expectedMeta: { namespace: 'okta', confidence: 'high', entityName: undefined },
+    expectedMeta: { namespace: 'okta', confidence: ENTITY_CONFIDENCE.High, entityName: undefined },
   },
   {
     id: 'idp-asset-azure-user-id-null-name',
@@ -180,7 +207,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'azure' },
     },
     expectedEuid: 'user:user-303@entra_id',
-    expectedMeta: { namespace: 'entra_id', confidence: 'high', entityName: undefined },
+    expectedMeta: {
+      namespace: 'entra_id',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: undefined,
+    },
   },
   {
     id: 'idp-asset-o365-user-name-only',
@@ -191,7 +222,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { entity: { id: '' }, id: 'host-404' },
     },
     expectedEuid: 'user:eve.martin@microsoft_365',
-    expectedMeta: { namespace: 'microsoft_365', confidence: 'high', entityName: 'eve.martin' },
+    expectedMeta: {
+      namespace: 'microsoft_365',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'eve.martin',
+    },
   },
   {
     id: 'idp-asset-ad-user-name-only',
@@ -202,7 +237,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { entity: { id: null }, id: '', name: 'workstation-05' },
     },
     expectedEuid: 'user:frank.taylor@active_directory',
-    expectedMeta: { namespace: 'active_directory', confidence: 'high', entityName: 'frank.taylor' },
+    expectedMeta: {
+      namespace: 'active_directory',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'frank.taylor',
+    },
   },
   {
     id: 'idp-asset-okta-email-over-name',
@@ -220,7 +259,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { entity: { id: null }, id: null, name: null },
     },
     expectedEuid: 'user:grace@example.com@okta',
-    expectedMeta: { namespace: 'okta', confidence: 'high', entityName: 'grace.anderson' },
+    expectedMeta: {
+      namespace: 'okta',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'grace.anderson',
+    },
   },
   {
     id: 'idp-asset-entra-user-name',
@@ -230,7 +273,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'entityanalytics_entra_id' },
     },
     expectedEuid: 'user:henry.clark@entra_id',
-    expectedMeta: { namespace: 'entra_id', confidence: 'high', entityName: 'henry.clark' },
+    expectedMeta: {
+      namespace: 'entra_id',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'henry.clark',
+    },
   },
   {
     id: 'idp-asset-aws-empty-domain',
@@ -240,7 +287,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'aws' },
     },
     expectedEuid: 'user:iris.davis@aws',
-    expectedMeta: { namespace: 'aws', confidence: 'high', entityName: 'iris.davis' },
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'iris.davis',
+    },
   },
   {
     id: 'idp-asset-gcp-null-domain',
@@ -250,7 +301,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'gcp' },
     },
     expectedEuid: 'user:jack.white@gcp',
-    expectedMeta: { namespace: 'gcp', confidence: 'high', entityName: 'jack.white' },
+    expectedMeta: {
+      namespace: 'gcp',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'jack.white',
+    },
   },
   // --- IDP: IAM event types (idpEventTypeCondition), not asset kind ---
   {
@@ -266,7 +321,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { entity: { id: 'host-505' } },
     },
     expectedEuid: 'user:user-505@okta',
-    expectedMeta: { namespace: 'okta', confidence: 'high', entityName: 'karen.green' },
+    expectedMeta: {
+      namespace: 'okta',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'karen.green',
+    },
   },
   {
     id: 'idp-iam-azure-null-kind-email',
@@ -284,7 +343,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { id: 'host-606' },
     },
     expectedEuid: 'user:larry@example.com@entra_id',
-    expectedMeta: { namespace: 'entra_id', confidence: 'high', entityName: 'larry.black' },
+    expectedMeta: {
+      namespace: 'entra_id',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'larry.black',
+    },
   },
   {
     id: 'idp-iam-ad-user-name-domain',
@@ -297,7 +360,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { name: 'server-07' },
     },
     expectedEuid: 'user:mary.blue@corp@active_directory',
-    expectedMeta: { namespace: 'active_directory', confidence: 'high', entityName: 'mary.blue' },
+    expectedMeta: {
+      namespace: 'active_directory',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'mary.blue',
+    },
   },
   // --- Namespace from data_stream.dataset (first segment) ---
   {
@@ -309,7 +376,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       data_stream: { dataset: 'entityanalytics_okta.users' },
     },
     expectedEuid: 'user:okta.from.dataset@okta',
-    expectedMeta: { namespace: 'okta', confidence: 'high', entityName: 'okta.from.dataset' },
+    expectedMeta: {
+      namespace: 'okta',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'okta.from.dataset',
+    },
   },
   {
     id: 'idp-asset-aws-from-dataset',
@@ -320,7 +391,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       data_stream: { dataset: 'aws.cloudtrail' },
     },
     expectedEuid: 'user:cloudtrail.user@aws',
-    expectedMeta: { namespace: 'aws', confidence: 'high', entityName: 'cloudtrail.user' },
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'cloudtrail.user',
+    },
   },
   // --- Unknown namespace fallback (no module / dataset mapping) ---
   {
@@ -333,7 +408,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     expectedEuid: 'user:not-captured-no-module@unknown',
     expectedMeta: {
       namespace: 'unknown',
-      confidence: 'high',
+      confidence: ENTITY_CONFIDENCE.High,
       entityName: 'not-captured-no-module',
     },
   },
@@ -345,7 +420,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset' },
     },
     expectedEuid: 'user:no.module.user@unknown',
-    expectedMeta: { namespace: 'unknown', confidence: 'high', entityName: 'no.module.user' },
+    expectedMeta: {
+      namespace: 'unknown',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'no.module.user',
+    },
   },
   // --- Non-IDP local namespace (whenConditionTrueSetFieldsPreAgg + local euid branch) ---
   {
@@ -363,7 +442,11 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       host: { id: 'host-nonidp-001' },
     },
     expectedEuid: 'user:alice.local@host-nonidp-001@local',
-    expectedMeta: { namespace: 'local', confidence: 'medium', entityName: undefined },
+    expectedMeta: {
+      namespace: USER_ENTITY_NAMESPACE.Local,
+      confidence: ENTITY_CONFIDENCE.Medium,
+      entityName: undefined,
+    },
   },
   // --- documentsFilter failures ---
   {
@@ -408,7 +491,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     expectedEuid: 'user:entity-id-postagg-only@unknown',
     expectedMeta: {
       namespace: 'unknown',
-      confidence: 'high',
+      confidence: ENTITY_CONFIDENCE.High,
       entityName: 'entity-id-postagg-only',
     },
     ingestSource: {

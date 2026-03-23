@@ -9,7 +9,7 @@ import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
-  applyWhenConditionTrueSetFieldsPreAgg,
+  applyWhenConditionTrueSetFields,
   evaluateStreamlangCondition,
   getDocument,
   getEffectiveEuidRanking,
@@ -63,7 +63,10 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
   }
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
   }
 
   if (

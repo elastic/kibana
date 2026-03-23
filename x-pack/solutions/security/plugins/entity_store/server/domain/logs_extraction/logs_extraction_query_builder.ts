@@ -165,6 +165,17 @@ export function buildLogsExtractionEsqlQuery({
     );
   }
 
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
+      parts.push(
+        buildSetFieldsByCondition(entry, {
+          entityFields: fields,
+          useRecentDataPrefix: true,
+        })
+      );
+    }
+  }
+
   // Perform the final merge of the fields between latest and recent data
   // and some custom field evaluations, like type and name fallback
   parts.push(`| EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},

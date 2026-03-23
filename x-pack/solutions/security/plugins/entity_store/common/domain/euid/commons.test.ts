@@ -6,7 +6,7 @@
  */
 
 import {
-  applyWhenConditionTrueSetFieldsPreAgg,
+  applyWhenConditionTrueSetFields,
   evaluateStreamlangCondition,
   getDocument,
   getFieldValue,
@@ -16,6 +16,7 @@ import {
 import type { Condition } from '@kbn/streamlang';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -365,7 +366,9 @@ describe('normalizeConditionForSingleDoc', () => {
 
 describe('resolveFieldValueSchema', () => {
   it('returns literal string as-is', () => {
-    expect(resolveFieldValueSchema({}, 'local')).toBe('local');
+    expect(resolveFieldValueSchema({}, USER_ENTITY_NAMESPACE.Local)).toBe(
+      USER_ENTITY_NAMESPACE.Local
+    );
     expect(resolveFieldValueSchema({ a: 'x' }, 'literal')).toBe('literal');
   });
 
@@ -408,43 +411,49 @@ describe('resolveFieldValueSchema', () => {
   });
 });
 
-describe('applyWhenConditionTrueSetFieldsPreAgg', () => {
+describe('applyWhenConditionTrueSetFields', () => {
   it('sets literal field when condition matches', () => {
     const doc: Record<string, unknown> = { a: 'x' };
-    applyWhenConditionTrueSetFieldsPreAgg(doc, [
-      { condition: { field: 'a', eq: 'x' }, fields: { 'entity.namespace': 'local' } },
+    applyWhenConditionTrueSetFields(doc, [
+      {
+        condition: { field: 'a', eq: 'x' },
+        fields: { 'entity.namespace': USER_ENTITY_NAMESPACE.Local },
+      },
     ]);
-    expect(doc['entity.namespace']).toBe('local');
+    expect(doc['entity.namespace']).toBe(USER_ENTITY_NAMESPACE.Local);
   });
 
   it('does not set fields when condition does not match', () => {
     const doc: Record<string, unknown> = { a: 'x' };
-    applyWhenConditionTrueSetFieldsPreAgg(doc, [
-      { condition: { field: 'a', eq: 'y' }, fields: { 'entity.namespace': 'local' } },
+    applyWhenConditionTrueSetFields(doc, [
+      {
+        condition: { field: 'a', eq: 'y' },
+        fields: { 'entity.namespace': USER_ENTITY_NAMESPACE.Local },
+      },
     ]);
     expect(doc['entity.namespace']).toBeUndefined();
   });
 
   it('applies entries in order; later entries can depend on earlier', () => {
     const doc: Record<string, unknown> = { 'user.name': 'alice', 'host.name': 'server1' };
-    applyWhenConditionTrueSetFieldsPreAgg(doc, [
-      { condition: { always: true }, fields: { 'entity.namespace': 'local' } },
+    applyWhenConditionTrueSetFields(doc, [
+      { condition: { always: true }, fields: { 'entity.namespace': USER_ENTITY_NAMESPACE.Local } },
       {
-        condition: { field: 'entity.namespace', eq: 'local' },
+        condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
         fields: {
           'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
         },
       },
     ]);
-    expect(doc['entity.namespace']).toBe('local');
+    expect(doc['entity.namespace']).toBe(USER_ENTITY_NAMESPACE.Local);
     expect(doc['entity.name']).toBe('alice@server1');
   });
 
   it('sets source-based field when condition matches', () => {
     const doc: Record<string, unknown> = { 'entity.namespace': 'okta', 'user.name': 'bob' };
-    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+    applyWhenConditionTrueSetFields(doc, [
       {
-        condition: { field: 'entity.namespace', neq: 'local' },
+        condition: { field: 'entity.namespace', neq: USER_ENTITY_NAMESPACE.Local },
         fields: { 'entity.name': { source: 'user.name' } },
       },
     ]);
@@ -452,10 +461,10 @@ describe('applyWhenConditionTrueSetFieldsPreAgg', () => {
   });
 
   it('skips entry when resolved value is undefined', () => {
-    const doc: Record<string, unknown> = { 'entity.namespace': 'local' };
-    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+    const doc: Record<string, unknown> = { 'entity.namespace': USER_ENTITY_NAMESPACE.Local };
+    applyWhenConditionTrueSetFields(doc, [
       {
-        condition: { field: 'entity.namespace', eq: 'local' },
+        condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
         fields: {
           'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
         },

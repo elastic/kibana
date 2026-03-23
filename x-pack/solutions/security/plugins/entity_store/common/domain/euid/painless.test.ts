@@ -6,6 +6,7 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
+import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   getEuidPainlessEvaluation,
   getEuidPainlessRuntimeMapping,
@@ -151,10 +152,10 @@ describe('streamlangConditionToPainlessDoc', () => {
   it('should use evaluated var for eq when field is in evaluatedVars', () => {
     expect(
       streamlangConditionToPainlessDoc(
-        { field: 'entity.namespace', eq: 'local' },
+        { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe('entity_namespace != null && entity_namespace == "local"');
+    ).toBe(`entity_namespace != null && entity_namespace == "${USER_ENTITY_NAMESPACE.Local}"`);
   });
 
   it('should use doc access for eq when field is not in evaluatedVars', () => {
@@ -163,35 +164,35 @@ describe('streamlangConditionToPainlessDoc', () => {
         { field: 'user.name', eq: 'alice' },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe(
-      `(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`
-    );
+    ).toBe(`(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`);
   });
 
   it('should mix evaluated var and doc fields in and conditions', () => {
     const result = streamlangConditionToPainlessDoc(
       {
         and: [
-          { field: 'entity.namespace', eq: 'local' },
+          { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
           { field: 'user.name', eq: 'x' },
         ],
       },
       { evaluatedVars: userEvaluatedVars }
     );
     expect(result).toBe(
-      `(entity_namespace != null && entity_namespace == "local" && (${nonEmpty(
-        'user.name'
-      )} && doc['user.name'].value == "x"))`
+      `(entity_namespace != null && entity_namespace == "${
+        USER_ENTITY_NAMESPACE.Local
+      }" && (${nonEmpty('user.name')} && doc['user.name'].value == "x"))`
     );
   });
 
   it('should use evaluated var for neq', () => {
     expect(
       streamlangConditionToPainlessDoc(
-        { field: 'entity.namespace', neq: 'local' },
+        { field: 'entity.namespace', neq: USER_ENTITY_NAMESPACE.Local },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe('(entity_namespace == null || entity_namespace == "" || entity_namespace != "local")');
+    ).toBe(
+      `(entity_namespace == null || entity_namespace == "" || entity_namespace != "${USER_ENTITY_NAMESPACE.Local}")`
+    );
   });
 
   it('should use evaluated var for exists true and false', () => {
@@ -215,7 +216,9 @@ describe('streamlangConditionToPainlessDoc', () => {
         { field: 'entity.namespace', includes: 'okta' },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe('entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")');
+    ).toBe(
+      'entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")'
+    );
   });
 });
 

@@ -11,9 +11,10 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
+import { ENTITY_CONFIDENCE, USER_ENTITY_NAMESPACE } from './user_entity_constants';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { recentData } from './esql';
-import { collectValues as collect, newestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 /** User names excluded from local namespace (system/service accounts). */
 const LOCAL_NAMESPACE_EXCLUDED_USER_NAMES = [
@@ -140,7 +141,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     euidRanking: {
       branches: [
         {
-          when: { field: 'entity.namespace', eq: 'local' },
+          when: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
           ranking: [
             [
               { field: 'user.name' },
@@ -187,26 +188,29 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. */
   postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
-  /** Pre-agg: set entity.namespace, entity.confidence, and entity.name based on conditions (EVAL after field evals, before STATS). */
+  /** Pre-agg: non-IDP local path sets entity.namespace + Medium confidence (before STATS / EU ID). */
   whenConditionTrueSetFieldsPreAgg: [
     {
       condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
       fields: {
-        'entity.namespace': 'local',
-        'entity.confidence': 'medium',
+        'entity.namespace': USER_ENTITY_NAMESPACE.Local,
+        'entity.confidence': ENTITY_CONFIDENCE.Medium,
       },
     },
+  ],
+  /** Post-STATS: entity.name (local composition vs user.name) and High confidence when not local (logs ESQL only). */
+  whenConditionTrueSetFieldsAfterStats: [
     {
-      condition: { field: 'entity.namespace', eq: 'local' },
+      condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
       fields: {
         'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
       },
     },
     {
-      condition: { field: 'entity.namespace', neq: 'local' },
+      condition: { field: 'entity.namespace', neq: USER_ENTITY_NAMESPACE.Local },
       fields: {
         'entity.name': { source: 'user.name' },
-        'entity.confidence': 'high',
+        'entity.confidence': ENTITY_CONFIDENCE.High,
       },
     },
   ],
@@ -226,7 +230,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'event.outcome' }),
 
     newestValue({ source: 'entity.namespace' }),
-    newestValue({ source: 'entity.confidence' }),
+    oldestValue({ source: 'entity.confidence' }),
 
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),

@@ -24,7 +24,7 @@ import { getEuidPainlessRuntimeMapping } from '../../../../common/domain/euid/pa
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
 import {
   getDocument,
-  applyWhenConditionTrueSetFieldsPreAgg,
+  applyWhenConditionTrueSetFields,
 } from '../../../../common/domain/euid/commons';
 import { applyFieldEvaluations } from '../../../../common/domain/euid/field_evaluations';
 import { getEntityDefinitionWithoutId } from '../../../../common/domain/definitions/registry';
@@ -97,7 +97,10 @@ function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
     Object.assign(doc, evaluated);
   }
   if (def.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFieldsPreAgg(doc, def.whenConditionTrueSetFieldsPreAgg);
+    applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (def.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsAfterStats);
   }
   return {
     namespace: doc['entity.namespace'] as string | undefined,

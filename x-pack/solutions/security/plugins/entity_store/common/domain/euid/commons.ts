@@ -172,10 +172,10 @@ export function resolveFieldValueSchema(doc: any, value: FieldValueSchema): stri
 }
 
 /**
- * Applies whenConditionTrueSetFieldsPreAgg entries to doc. Iterates in order; for each entry
- * whose condition matches, sets the fields on doc (resolving source/composition values).
+ * Applies when-condition field overrides to doc (source/composition resolved per entry).
+ * Used for `whenConditionTrueSetFieldsPreAgg` and `whenConditionTrueSetFieldsAfterStats` on a single-document simulation.
  */
-export function applyWhenConditionTrueSetFieldsPreAgg(
+export function applyWhenConditionTrueSetFields(
   doc: any,
   entries: Array<{ condition: unknown; fields: Record<string, FieldValueSchema> }>
 ): void {
