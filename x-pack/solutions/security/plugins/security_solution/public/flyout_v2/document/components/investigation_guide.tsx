@@ -70,17 +70,17 @@ export const InvestigationGuide: React.FC<InvestigationGuideProps> = ({
           size="s"
           title={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewTitle"
+              id="xpack.securitySolution.flyout.document.investigation.investigationGuide.previewTitle"
               defaultMessage="Investigation guide"
             />
           }
           aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.investigation.investigationGuide.previewAriaLabel',
+            'xpack.securitySolution.flyout.document.investigation.investigationGuide.previewAriaLabel',
             { defaultMessage: 'Investigation guide' }
           )}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage"
+            id="xpack.securitySolution.flyout.document.investigation.investigationGuide.previewMessage"
             defaultMessage="Investigation guide is not available in alert preview."
           />
         </EuiCallOut>
@@ -92,7 +92,7 @@ export const InvestigationGuide: React.FC<InvestigationGuideProps> = ({
         <EuiSkeletonText
           data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(
-            'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideLoadingAriaLabel',
+            'xpack.securitySolution.flyout.document.investigation.investigationGuide.investigationGuideLoadingAriaLabel',
             { defaultMessage: 'investigation guide' }
           )}
         />
@@ -108,12 +108,12 @@ export const InvestigationGuide: React.FC<InvestigationGuideProps> = ({
           fullWidth
           data-test-subj={INVESTIGATION_GUIDE_BUTTON_TEST_ID}
           aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonAriaLabel',
+            'xpack.securitySolution.flyout.document.investigation.investigationGuide.investigationGuideButtonAriaLabel',
             { defaultMessage: 'Show investigation guide' }
           )}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel"
+            id="xpack.securitySolution.flyout.document.investigation.investigationGuide.investigationGuideButtonLabel"
             defaultMessage="Show investigation guide"
           />
         </EuiButton>
@@ -126,17 +126,17 @@ export const InvestigationGuide: React.FC<InvestigationGuideProps> = ({
         size="s"
         title={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataTitle"
+            id="xpack.securitySolution.flyout.document.investigation.investigationGuide.noDataTitle"
             defaultMessage="Investigation guide"
           />
         }
         aria-label={i18n.translate(
-          'xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataAriaLabel',
+          'xpack.securitySolution.flyout.document.investigation.investigationGuide.noDataAriaLabel',
           { defaultMessage: 'Investigation guide' }
         )}
       >
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
+          id="xpack.securitySolution.flyout.document.investigation.investigationGuide.noDataDescription"
           defaultMessage="There's no investigation guide for this rule."
         />
       </EuiCallOut>

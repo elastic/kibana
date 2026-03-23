@@ -155,7 +155,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   );
 
   return (
-    <>
+    <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
       <EuiPanel
@@ -233,6 +233,13 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
               >
                 <EuiFlexItem
                   grow={true}
+                  tabIndex={0}
+                  aria-label={i18n.translate(
+                    'metricsExperience.overviewTab.dimensionsScrollableRegion',
+                    {
+                      defaultMessage: 'Scrollable dimensions list',
+                    }
+                  )}
                   css={css`
                     overflow-y: auto;
                     overflow-x: hidden;
@@ -289,6 +296,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 };
