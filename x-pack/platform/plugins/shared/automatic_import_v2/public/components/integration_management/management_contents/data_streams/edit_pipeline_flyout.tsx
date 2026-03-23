@@ -122,10 +122,6 @@ export const EditPipelineFlyout = ({
       );
 
       reportPipelineEdited({
-        integrationId,
-        integrationName,
-        dataStreamId: dataStream.dataStreamId,
-        dataStreamName: dataStream.title,
         linesAdded,
         linesRemoved,
         netLineChange,
@@ -137,10 +133,8 @@ export const EditPipelineFlyout = ({
     updateDataStreamPipelineMutation,
     integrationId,
     dataStream.dataStreamId,
-    dataStream.title,
     pipelineText,
     stringifiedPipeline,
-    integrationName,
     reportPipelineEdited,
   ]);
 

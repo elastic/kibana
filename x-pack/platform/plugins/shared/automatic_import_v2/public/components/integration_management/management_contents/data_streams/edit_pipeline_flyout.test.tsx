@@ -362,7 +362,7 @@ describe('EditPipelineFlyout', () => {
       });
     });
 
-    it('should include integrationName in pipeline edited telemetry', async () => {
+    it('should report pipeline edited telemetry with line diff stats', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
       render(<EditPipelineFlyout {...defaultProps} />);
 
@@ -370,7 +370,11 @@ describe('EditPipelineFlyout', () => {
       await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
 
       expect(mockReportPipelineEdited).toHaveBeenCalledWith(
-        expect.objectContaining({ integrationName: 'Test Integration' })
+        expect.objectContaining({
+          linesAdded: expect.any(Number),
+          linesRemoved: expect.any(Number),
+          netLineChange: expect.any(Number),
+        })
       );
     });
 

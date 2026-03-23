@@ -112,10 +112,7 @@ export interface DataStreamRefreshConfirmedPayload {
 }
 
 export interface PipelineEditedPayload {
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
+  sessionId: string;
   linesAdded: number;
   linesRemoved: number;
   netLineChange: number;

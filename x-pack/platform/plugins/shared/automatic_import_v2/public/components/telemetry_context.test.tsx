@@ -218,10 +218,6 @@ describe('useTelemetry', () => {
 
     act(() => {
       result.current.reportPipelineEdited({
-        integrationId: 'int-1',
-        integrationName: 'My Integration',
-        dataStreamId: 'ds-1',
-        dataStreamName: 'My DataStream',
         linesAdded: 5,
         linesRemoved: 2,
         netLineChange: 3,
@@ -231,7 +227,7 @@ describe('useTelemetry', () => {
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.PipelineEdited,
       expect.objectContaining({
-        integrationId: 'int-1',
+        sessionId: expect.any(String),
         linesAdded: 5,
         linesRemoved: 2,
         netLineChange: 3,

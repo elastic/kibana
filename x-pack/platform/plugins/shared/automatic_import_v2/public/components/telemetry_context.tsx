@@ -32,10 +32,6 @@ type ReportDataStreamDeleteConfirmed = () => void;
 type ReportDataStreamRefreshConfirmed = () => void;
 
 type ReportPipelineEdited = (params: {
-  integrationId: string;
-  integrationName: string;
-  dataStreamId: string;
-  dataStreamName: string;
   linesAdded: number;
   linesRemoved: number;
   netLineChange: number;
@@ -159,20 +155,9 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   }, [telemetry]);
 
   const reportPipelineEdited = useCallback<ReportPipelineEdited>(
-    ({
-      integrationId,
-      integrationName,
-      dataStreamId,
-      dataStreamName,
-      linesAdded,
-      linesRemoved,
-      netLineChange,
-    }) => {
+    ({ linesAdded, linesRemoved, netLineChange }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.PipelineEdited, {
-        integrationId,
-        integrationName,
-        dataStreamId,
-        dataStreamName,
+        sessionId: sessionData.current.sessionId,
         linesAdded,
         linesRemoved,
         netLineChange,

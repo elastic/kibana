@@ -143,21 +143,12 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
     },
   },
   [AIV2TelemetryEventType.PipelineEdited]: {
-    integrationId: {
+    sessionId: {
       type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
-    },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: false },
-    },
-    dataStreamId: {
-      type: 'keyword',
-      _meta: { description: 'Data stream ID', optional: false },
-    },
-    dataStreamName: {
-      type: 'keyword',
-      _meta: { description: 'Data stream name', optional: false },
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
     },
     linesAdded: {
       type: 'long',
