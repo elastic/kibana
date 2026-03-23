@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  DATASTREAM_NAME_REGEX_PATTERN,
   MAX_DESCRIPTION_LENGTH,
   MAX_NAME_LENGTH,
   MAX_TITLE_LENGTH,
