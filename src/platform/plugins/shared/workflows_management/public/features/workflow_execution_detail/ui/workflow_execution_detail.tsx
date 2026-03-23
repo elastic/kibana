@@ -20,7 +20,7 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import type { WaitForInputStep, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, getStepByNameFromNestedSteps, isTerminalStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -117,9 +117,10 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
       );
       if (!pausedStep) return undefined;
-      return workflowDefinition?.steps?.find(
-        (s): s is WaitForInputStep => s.type === 'waitForInput' && s.name === pausedStep.stepId
-      );
+      const step = workflowDefinition?.steps
+        ? getStepByNameFromNestedSteps(workflowDefinition.steps, pausedStep.stepId)
+        : null;
+      return step?.type === 'waitForInput' ? (step as WaitForInputStep) : undefined;
     }, [workflowExecution, workflowDefinition]);
 
     const resumeMessage = pausedStepDef?.with?.message;

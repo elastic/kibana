@@ -53,7 +53,9 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   const modalTitleId = useGeneratedHtmlId();
 
   const [inputsJson, setInputsJson] = useState<string>(
-    initialcontextOverride ? JSON.stringify(initialcontextOverride.stepContext, null, 2) : '{}'
+    initialcontextOverride?.stepContext != null
+      ? JSON.stringify(initialcontextOverride.stepContext, null, 2)
+      : '{}'
   );
   const isResumePayloadValid = useMemo(() => {
     try {
