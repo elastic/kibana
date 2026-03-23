@@ -35,8 +35,6 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
-import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
-import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/time_series_agg_functions';
 import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../esql_fields_utils';
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
@@ -56,28 +54,6 @@ import {
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
-
-let aggReturnTypeLookup: Map<string, string> | undefined;
-
-// This function is used to get the return type of an aggregation function
-// It is used to determine the return type of an aggregation function in the cascade experience
-// It is cached to avoid recalculating the return type for the same function multiple times
-const getAggFunctionReturnType = (name: string): string => {
-  if (!aggReturnTypeLookup) {
-    aggReturnTypeLookup = new Map();
-    for (const def of [...aggFunctionDefinitions, ...timeSeriesAggFunctionDefinitions]) {
-      const returnTypes = [...new Set(def.signatures.map((s) => s.returnType))];
-      const resolvedType = returnTypes.length === 1 ? returnTypes[0] : 'unknown';
-      aggReturnTypeLookup.set(def.name, resolvedType);
-      if (def.alias) {
-        for (const alias of def.alias) {
-          aggReturnTypeLookup.set(alias, resolvedType);
-        }
-      }
-    }
-  }
-  return aggReturnTypeLookup.get(name.toLowerCase()) ?? 'unknown';
-};
 
 const hasUnsupportedGroupingFunction = (definition: ESQLProperNode): boolean => {
   const funcExpr = isFunctionExpression(definition)
@@ -100,7 +76,6 @@ type NodeType = 'group' | 'leaf';
 export interface AppliedStatsFunction {
   identifier: string;
   aggregation: string;
-  returnType: string;
 }
 
 export interface ESQLStatsQueryMeta {
@@ -283,7 +258,6 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     appliedFunctions.push({
       identifier: removeBackticks(aggregate.field), // we remove backticks to have a clean identifier that gets displayed in the UI
       aggregation: aggregationName,
-      returnType: getAggFunctionReturnType(aggregationName),
     });
   });
 

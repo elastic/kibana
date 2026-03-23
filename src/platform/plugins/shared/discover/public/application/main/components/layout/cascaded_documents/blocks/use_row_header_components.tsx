@@ -377,12 +377,11 @@ const textSlotStyles = css({
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
-  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
+  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'],
+  columnTypes: Map<string, 'number' | 'array'>
 ) {
-  const aggregateColumnTypes = useMemo(() => {
-    return new Map(
-      editorQueryMeta.appliedFunctions.map(({ identifier, returnType }) => [identifier, returnType])
-    );
+  const aggregateColumnIdentifiers = useMemo(() => {
+    return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
   }, [editorQueryMeta.appliedFunctions]);
 
   /**
@@ -426,14 +425,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData }) =>
       selectedColumns
         .map((selectedColumn) => {
-          // only allow displaying selected columns to be rendered in the meta part of the row header that are aggregation columns
-          const aggregateReturnType = aggregateColumnTypes.get(selectedColumn);
-
-          if (!aggregateReturnType) {
+          if (!aggregateColumnIdentifiers.has(selectedColumn)) {
             return null;
           }
-
-          const isNumericType = ['double', 'long', 'integer'].includes(aggregateReturnType);
 
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -449,26 +443,34 @@ export function useEsqlDataCascadeRowHeaderComponents(
                   ),
                   badge: () => {
                     const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+                    const isArrayType =
+                      Array.isArray(aggregatedValue) ||
+                      (aggregatedValue === undefined &&
+                        columnTypes.get(selectedColumn) === 'array');
+
+                    if (isArrayType) {
+                      return (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow" css={textSlotStyles}>
+                            {Array.isArray(aggregatedValue)
+                              ? aggregatedValue
+                                  .map(
+                                    (value) =>
+                                      value ||
+                                      i18n.translate('discover.dataCascade.row.action.noValue', {
+                                        defaultMessage: '(blank)',
+                                      })
+                                  )
+                                  .join(', ')
+                              : '-'}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      );
+                    }
 
                     return (
                       <EuiFlexItem grow={false}>
-                        {typeof aggregatedValue === 'number' || isNumericType ? (
-                          <NumberBadge value={Number(aggregatedValue)} shortenAtExpSize={3} />
-                        ) : (
-                          <EuiBadge color="hollow" css={textSlotStyles}>
-                            {([] as string[])
-                              .concat(aggregatedValue)
-                              .map((value) => {
-                                return (
-                                  value ||
-                                  i18n.translate('discover.dataCascade.row.action.noValue', {
-                                    defaultMessage: '(blank)',
-                                  })
-                                );
-                              })
-                              .join(', ')}
-                          </EuiBadge>
-                        )}
+                        <NumberBadge value={Number(aggregatedValue)} shortenAtExpSize={3} />
                       </EuiFlexItem>
                     );
                   },
@@ -478,7 +480,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
           );
         })
         .filter(Boolean),
-    [aggregateColumnTypes, selectedColumns]
+    [aggregateColumnIdentifiers, columnTypes, selectedColumns]
   );
 
   const rowActions = useCallback<
