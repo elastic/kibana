@@ -25,6 +25,7 @@ export function StreamDiscoveryConfiguration({
 }: StreamDiscoveryConfigurationProps) {
   const {
     features: existingFeatures,
+    excludedFeatures,
     refreshFeatures,
     featuresLoading,
   } = useStreamFeatures(definition);
@@ -91,12 +92,13 @@ export function StreamDiscoveryConfiguration({
               </EuiFlexGroup>
             }
           />
-          {existingFeatures.length > 0 && (
+          {(existingFeatures.length > 0 || excludedFeatures.length > 0) && (
             <>
               <EuiSpacer size="m" />
               <StreamFeaturesAccordion
                 definition={definition}
                 features={existingFeatures}
+                excludedFeatures={excludedFeatures}
                 isLoadingFeatures={featuresLoading}
                 refreshFeatures={refreshFeatures}
                 isIdentifyingFeatures={isIdentifyingFeatures}
