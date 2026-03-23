@@ -7,6 +7,7 @@
 
 import { injectable } from 'inversify';
 import { evaluateKql } from '@kbn/eval-kql';
+import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEpisode,
   MatchedPair,
@@ -44,6 +45,8 @@ export function evaluateMatchers(
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 
+    let context: MatcherContext | undefined;
+
     for (const policy of allPolicies) {
       if (!policy.enabled) continue;
       if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
@@ -53,7 +56,8 @@ export function evaluateMatchers(
         continue;
       }
 
-      const isMatch = evaluateKql(policy.matcher, { ...episode, rule });
+      context ??= createMatcherContext(episode, rule);
+      const isMatch = evaluateKql(policy.matcher, context);
       if (isMatch) {
         matched.push({ episode, policy });
       }
@@ -61,4 +65,22 @@ export function evaluateMatchers(
   }
 
   return matched;
+}
+
+function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
+  return {
+    last_event_timestamp: episode.last_event_timestamp,
+    group_hash: episode.group_hash,
+    episode_id: episode.episode_id,
+    episode_status: episode.episode_status,
+    rule: {
+      id: rule.id,
+      name: rule.name,
+      description: rule.description,
+      labels: rule.labels,
+      enabled: rule.enabled,
+      createdAt: rule.createdAt,
+      updatedAt: rule.updatedAt,
+    },
+  };
 }
