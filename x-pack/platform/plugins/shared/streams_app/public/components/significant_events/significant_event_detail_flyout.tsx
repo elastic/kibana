@@ -1164,7 +1164,7 @@ export function SignificantEventDetailFlyout({
                   <strong>
                     {i18n.translate(
                       'xpack.streams.significantEvents.flyout.workflow.detailsTitle',
-                      { defaultMessage: 'Workflow details' }
+                      { defaultMessage: 'Workflow' }
                     )}
                   </strong>
                 </EuiText>

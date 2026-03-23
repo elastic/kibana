@@ -8,10 +8,14 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingElastic,
+  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -34,7 +38,7 @@ import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
-import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
+import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamListView() {
@@ -146,6 +150,8 @@ export function StreamListView() {
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
+  const [isQueryStreamFlyoutOpen, setIsQueryStreamFlyoutOpen] = React.useState(false);
+  const [isCreatePopoverOpen, setIsCreatePopoverOpen] = React.useState(false);
 
   return (
     <>
@@ -167,18 +173,6 @@ export function StreamListView() {
                   defaultMessage: 'Streams',
                 })}
               </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                href={router.link('/_significant_events')}
-                iconType="bellSlash"
-                data-test-subj="streamsSignificantEventsButton"
-              >
-                {i18n.translate('xpack.streams.streamsListView.significantEventsButtonLabel', {
-                  defaultMessage: 'Significant events',
-                })}
-              </EuiButton>
             </EuiFlexItem>
             {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
@@ -209,22 +203,105 @@ export function StreamListView() {
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
+            {/* Custom split button — primary + chevron popover joined visually */}
+            <EuiFlexItem grow={false}>
+              <div
+                css={css`
+                  display: inline-flex;
+                  align-items: stretch;
+                  height: 32px;
+                `}
+              >
+                <EuiButton
+                  size="s"
+                  fill
+                  isDisabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                  onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                  data-test-subj="streamsCreateStreamButton"
+                  css={css`
+                    border-top-right-radius: 0 !important;
+                    border-bottom-right-radius: 0 !important;
+                    border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+                  `}
+                >
+                  {i18n.translate('xpack.streams.streamsListView.createStreamButtonLabel', {
+                    defaultMessage: 'Create stream',
+                  })}
+                </EuiButton>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      iconType="arrowDown"
+                      size="s"
+                      display="fill"
+                      color="primary"
+                      isDisabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamsListView.createStreamOptionsAriaLabel',
+                        { defaultMessage: 'More create options' }
+                      )}
+                      data-test-subj="streamsCreateStreamChevron"
+                      onClick={() => setIsCreatePopoverOpen((v) => !v)}
+                      css={css`
+                        position: relative;
+                        top: -5px;
+                        height: 100%;
+                        border-top-left-radius: 0 !important;
+                        border-bottom-left-radius: 0 !important;
+                      `}
+                    />
+                  }
+                  isOpen={isCreatePopoverOpen}
+                  closePopover={() => setIsCreatePopoverOpen(false)}
+                  panelPaddingSize="none"
+                  anchorPosition="downRight"
+                >
+                  <EuiContextMenuPanel
+                    items={[
+                      <EuiContextMenuItem
+                        key="classic"
+                        icon="indexOpen"
+                        data-test-subj="streamsCreateClassicStreamOption"
+                        disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                        onClick={() => {
+                          setIsCreatePopoverOpen(false);
+                          setIsClassicStreamCreationFlyoutOpen(true);
+                        }}
+                      >
+                        {i18n.translate('xpack.streams.streamsListView.classicStreamOption', {
+                          defaultMessage: 'Classic stream',
+                        })}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="query"
+                        icon="search"
+                        data-test-subj="streamsCreateQueryStreamOption"
+                        disabled={!queryStreams?.enabled}
+                        onClick={() => {
+                          setIsCreatePopoverOpen(false);
+                          setIsQueryStreamFlyoutOpen(true);
+                        }}
+                      >
+                        {i18n.translate('xpack.streams.streamsListView.queryStreamOption', {
+                          defaultMessage: 'Query stream',
+                        })}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </div>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
                 size="s"
-                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                href={router.link('/_significant_events')}
+                data-test-subj="streamsSignificantEventsButton"
               >
-                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
-                  defaultMessage: 'Create classic stream',
+                {i18n.translate('xpack.streams.streamsListView.significantEventsButtonLabel', {
+                  defaultMessage: 'Significant events',
                 })}
               </EuiButton>
             </EuiFlexItem>
-            {queryStreams?.enabled && (
-              <EuiFlexItem grow={false}>
-                <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         }
       />
@@ -272,6 +349,15 @@ export function StreamListView() {
       )}
       {isClassicStreamCreationFlyoutOpen && (
         <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
+      )}
+      {isQueryStreamFlyoutOpen && (
+        <CreateQueryStreamFlyoutContent
+          onClose={() => setIsQueryStreamFlyoutOpen(false)}
+          onQueryStreamCreated={() => {
+            setIsQueryStreamFlyoutOpen(false);
+            streamsListFetch.refresh();
+          }}
+        />
       )}
     </>
   );
