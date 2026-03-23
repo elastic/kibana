@@ -168,8 +168,8 @@ describe('useAttackEntitiesLists', () => {
     const { result } = renderHook(() => useAttackEntitiesLists());
 
     expect(result.current.userEntityIdentifiers).toEqual([
-      { 'user.name': 'user1' },
-      { 'user.name': 'user2' },
+      { 'user.name': 'user1', 'entity.namespace': 'unknown' },
+      { 'user.name': 'user2', 'entity.namespace': 'unknown' },
     ]);
     expect(result.current.hostEntityIdentifiers).toEqual([
       { 'host.name': 'host1' },
@@ -245,7 +245,9 @@ describe('useAttackEntitiesLists', () => {
 
     const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.userEntityIdentifiers).toEqual([{ 'user.name': 'user1' }]);
+    expect(result.current.userEntityIdentifiers).toEqual([
+      { 'user.name': 'user1', 'entity.namespace': 'unknown' },
+    ]);
     expect(result.current.hostEntityIdentifiers).toEqual([{ 'host.name': 'host1' }]);
   });
 });

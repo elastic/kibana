@@ -172,9 +172,14 @@ describe('<EntitiesDetails />', () => {
   it('should render no data message if user name and host name are not available', () => {
     const contextValue = {
       ...mockContextValue,
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+        user: {},
+      },
       getFieldsData: (fieldName: string) =>
         fieldName === '@timestamp' ? ['2022-07-25T08:20:18.966Z'] : [],
-    };
+    } as DocumentDetailsContext;
     const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();

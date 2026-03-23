@@ -25,6 +25,9 @@ import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighte
 import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -87,9 +90,19 @@ const renderInvestigationSection = (contextValue = panelContextValue) =>
 
 describe('<InvestigationSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
     mockUseExpandSection.mockReturnValue(true);
     (useExpandSection as jest.Mock).mockReturnValue(true);
     (useHighlightedFields as jest.Mock).mockReturnValue([]);
