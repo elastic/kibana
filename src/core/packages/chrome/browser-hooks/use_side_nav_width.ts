@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/layout/core-chrome-layout-feature-flags'],
-};
+import { useMemo } from 'react';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Returns the effective side nav pixel width.
+ */
+export function useSideNavWidth(): number {
+  const chrome = useChromeService();
+  const sideNavWidth$ = useMemo(() => chrome.sideNav.getWidth$(), [chrome]);
+  return useObservable(sideNavWidth$, chrome.sideNav.getWidth());
+}
