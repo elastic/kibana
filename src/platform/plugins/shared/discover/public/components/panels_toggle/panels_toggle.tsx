@@ -83,8 +83,8 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
-  const sidebarToggleState = useObservable(sidebarToggleState$);
-  const isSidebarHidden = sidebarToggleState?.isCollapsed ?? false;
+  const sidebarToggleState = useObservable(sidebarToggleState$, sidebarToggleState$.getValue());
+  const isSidebarHidden = sidebarToggleState.isCollapsed;
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const onToggleChart = useCallback(() => {
@@ -92,7 +92,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   }, [dispatch, isChartHidden, updateAppState]);
 
   const onToggleSidebar = useCallback(() => {
-    sidebarToggleState?.toggle?.(!isSidebarHidden);
+    sidebarToggleState.toggle?.(!isSidebarHidden);
   }, [isSidebarHidden, sidebarToggleState]);
 
   const buttons = [];

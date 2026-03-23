@@ -359,13 +359,13 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       stateService,
       isProcessing,
       isAffectedByGlobalFilter,
+      isSidebarCollapsed,
       onEditField: editField,
       onDeleteField: deleteField,
       compressed: stateService.creationOptions.compressed ?? false,
       buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
     };
 
-    commonProps.isSidebarCollapsed = isSidebarCollapsed;
     if (stateService.creationOptions.showSidebarToggleButton) {
       commonProps.onToggleSidebar = sidebarVisibility.toggle;
     }
