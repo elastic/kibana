@@ -64,6 +64,26 @@ export interface VersionedAttachment<
 }
 
 /**
+ * A versioned attachment with a defined `origin` (by-reference).
+ */
+export type VersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+> = VersionedAttachment<Type, DataType> & { origin: string };
+
+/**
+ * Returns true when `origin` is defined. Narrows `attachment` to {@link VersionedAttachmentWithOrigin}.
+ */
+export function isVersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+>(
+  attachment: VersionedAttachment<Type, DataType>
+): attachment is VersionedAttachmentWithOrigin<Type, DataType> {
+  return attachment.origin !== undefined;
+}
+
+/**
  * Operation performed on an attachment during a round.
  */
 export const ATTACHMENT_REF_OPERATION = {

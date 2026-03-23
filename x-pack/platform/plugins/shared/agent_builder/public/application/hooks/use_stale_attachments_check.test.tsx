@@ -161,7 +161,7 @@ describe('useStaleAttachments', () => {
     expect(mockAddErrorToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: expect.any(String),
-        text: expect.stringContaining('bad: resolve failed'),
+        text: expect.stringContaining('resolve failed (attachment id: bad)'),
       })
     );
   });

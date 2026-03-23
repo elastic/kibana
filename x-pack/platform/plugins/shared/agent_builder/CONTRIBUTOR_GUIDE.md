@@ -706,14 +706,12 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
    * No automatic fallback — staleness detection is opt-in per type.
    */
   isStale: async (attachment, context) => {
-    if (!attachment.origin || !attachment.origin_snapshot_at) {
-      return false;
-    }
     const savedObject = await context.savedObjectsClient?.get('my_type', attachment.origin);
     if (!savedObject) return false;
     // Compare the saved object's last-modified time against when the attachment was snapshotted
     return (
       Boolean(savedObject.updated_at) &&
+      Boolean(attachment.origin_snapshot_at) &&
       new Date(savedObject.updated_at) > new Date(attachment.origin_snapshot_at)
     );
   },

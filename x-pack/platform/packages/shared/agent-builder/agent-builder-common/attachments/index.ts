@@ -38,6 +38,7 @@ export {
 
 export type {
   VersionedAttachment,
+  VersionedAttachmentWithOrigin,
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentRefOperation,
@@ -62,6 +63,7 @@ export {
   parseVersionId,
   isAttachmentActive,
   getActiveAttachments,
+  isVersionedAttachmentWithOrigin,
   hashContent,
   estimateTokens,
 } from './versioned_attachment';

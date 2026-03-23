@@ -27,6 +27,7 @@ import {
   getLatestVersion,
   getVersion,
   isAttachmentActive,
+  isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
 
@@ -579,9 +580,9 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     attachment: VersionedAttachment,
     resolveContext: AttachmentResolveContext
   ): Promise<AttachmentStaleCheckResult> {
-    const { id, origin, type, hidden } = attachment;
+    const { id, type, hidden } = attachment;
 
-    if (origin === undefined) {
+    if (!isVersionedAttachmentWithOrigin(attachment)) {
       return { id, is_stale: false };
     }
 
@@ -592,7 +593,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return { id, is_stale: false };
     }
 
-    const latestFromOrigin = await definition?.resolve?.(origin, resolveContext);
+    const latestFromOrigin = await definition?.resolve?.(attachment.origin, resolveContext);
     if (latestFromOrigin === undefined) {
       return { id, is_stale: false };
     }
@@ -603,7 +604,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       data: latestFromOrigin as Record<string, unknown>,
       type,
       hidden,
-      origin,
+      origin: attachment.origin,
     };
   }
 
