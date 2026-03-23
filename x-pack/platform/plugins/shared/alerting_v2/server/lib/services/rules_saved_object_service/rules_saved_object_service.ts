@@ -123,18 +123,22 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       return [];
     }
 
-    const targetIds = new Set(ruleIds);
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const filter = ruleIds
+      .map((id) => `${RULE_SAVED_OBJECT_TYPE}.id: "${RULE_SAVED_OBJECT_TYPE}:${id}"`)
+      .join(' OR ');
+
     const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
-      perPage: targetIds.size,
+      perPage: ruleIds.length,
       namespaces: namespace ? [namespace] : ['*'],
+      filter,
     });
 
     const results: RulesFindAllResultItem[] = [];
     for await (const response of finder.find()) {
       for (const doc of response.saved_objects) {
-        if (!('error' in doc && doc.error) && targetIds.has(doc.id)) {
+        if (!('error' in doc && doc.error)) {
           results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
         }
       }
