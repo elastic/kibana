@@ -354,6 +354,32 @@ describe('data table dimension editor', () => {
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
   });
 
+  it('should set a default palette when enabling legacy palettes', async () => {
+    state.columns[0].colorMode = 'badge';
+    mockFirstColumn({ isBucketed: true, dataType: 'string' });
+
+    renderTableDimensionEditor();
+
+    await user.click(screen.getByLabelText('Edit colors'));
+    act(() => jest.advanceTimersByTime(256));
+
+    await user.click(screen.getByTestId('lns_colorMappingOrLegacyPalette_switch'));
+    act(() => jest.advanceTimersByTime(256));
+
+    expect(props.setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columns: [
+          expect.objectContaining({
+            columnId: 'foo',
+            colorMode: 'badge',
+            palette: { type: 'palette', name: 'default' },
+            colorMapping: undefined,
+          }),
+        ],
+      })
+    );
+  });
+
   it('should clear palette and colorMapping when colorMode is set to "none"', async () => {
     state.columns[0].colorMode = 'cell';
     state.columns[0].palette = {
