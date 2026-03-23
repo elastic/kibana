@@ -140,7 +140,7 @@ export class WorkflowApi {
   async validateWorkflow({ yaml }: ValidateWorkflowParams): Promise<ValidateWorkflowResponseDto> {
     return this.http.post(`${BASE}/validate`, {
       body: JSON.stringify({ yaml }),
-      version: API_VERSION,
+      version: INTERNAL_API_VERSION,
     });
   }
 

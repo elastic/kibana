@@ -9,6 +9,7 @@
 
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsRouter } from '../../../types';
+import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
@@ -27,7 +28,7 @@ export function registerGetConfigRoute({
     })
     .addVersion(
       {
-        version: '1',
+        version: INTERNAL_API_VERSION,
         validate: false,
       },
       withLicenseCheck(async (_context, _request, response) => {

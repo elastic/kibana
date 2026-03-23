@@ -10,7 +10,7 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import { AVAILABILITY, INTERNAL_API_VERSION, OAS_TAG } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
@@ -18,7 +18,8 @@ export function registerValidateWorkflowRoute({ router, api, spaces }: RouteDepe
   router.versioned
     .post({
       path: '/api/workflows/validate',
-      access: 'public',
+      // This routes is not ready for public use yet. Turning it to public will make it available to public API docs.
+      access: 'internal',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Validate a workflow',
       description: 'Validate a workflow YAML definition without saving it.',
@@ -29,7 +30,7 @@ export function registerValidateWorkflowRoute({ router, api, spaces }: RouteDepe
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: INTERNAL_API_VERSION,
         options: {
           oasOperationObject: () => path.join(__dirname, '../examples/validate_workflow.yaml'),
         },
