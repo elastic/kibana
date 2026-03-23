@@ -9,7 +9,7 @@ requestBody:
         createWorkflowWithIdRequestExample:
           description: 'Example request for creating a workflow with a custom ID'
           value:
-            id: workflow-example_definition
+            id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
             yaml: "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
 responses:
   200:

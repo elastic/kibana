@@ -11,7 +11,8 @@ responses:
               stepId: hello_world_step
               stepType: console
               workflowRunId: exec-a1b2c3d4-e5f6-7890
-              workflowId: workflow-example_definition
+              workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              spaceId: default
               status: completed
               isTestRun: false
               startedAt: '2025-11-20T12:00:01.000Z'

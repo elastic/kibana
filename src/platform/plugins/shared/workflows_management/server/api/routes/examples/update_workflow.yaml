@@ -27,7 +27,7 @@ responses:
           updateWorkflowResponseExample:
             description: 'Example response returning the updated workflow'
             value:
-              id: workflow-example_definition
+              id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
               lastUpdatedAt: '2026-03-23T13:38:59.568Z'
               lastUpdatedBy: elastic
               enabled: false

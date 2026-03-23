@@ -16,8 +16,7 @@ responses:
                   finishedAt: '2025-11-20T12:00:03.000Z'
                   duration: 3000
                   error: null
-                  workflowId: workflow-example_definition
-                  workflowName: Example definition
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                   executedBy: elastic
                   triggeredBy: manual
                 - id: exec-002
@@ -29,8 +28,7 @@ responses:
                   duration: 2000
                   error:
                     message: "Step 'hello_world_step' failed"
-                  workflowId: workflow-example_definition
-                  workflowName: Example definition
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                   executedBy: elastic
                   triggeredBy: manual
               page: 1

@@ -13,7 +13,7 @@ responses:
                   stepId: hello_world_step
                   stepType: console
                   workflowRunId: exec-001
-                  workflowId: workflow-example_definition
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                   status: completed
                   isTestRun: false
                   startedAt: '2025-11-20T12:00:01.000Z'
@@ -24,8 +24,6 @@ responses:
                   stepExecutionIndex: 0
                   scopeStack: []
               total: 1
-              page: 1
-              size: 20
 x-codeSamples:
   - lang: curl
     source: |

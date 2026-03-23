@@ -11,7 +11,7 @@ responses:
               size: 20
               total: 1
               results:
-                - id: workflow-example_definition
+                - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                   name: Example definition
                   description: This is a workflow example
                   enabled: true
@@ -33,7 +33,7 @@ responses:
                   createdAt: '2025-11-20T10:30:00.000Z'
                   history:
                     - id: exec-001
-                      workflowId: workflow-example_definition
+                      workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                       workflowName: Example definition
                       status: completed
                       startedAt: '2025-11-20T12:00:00.000Z'

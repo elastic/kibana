@@ -7,7 +7,7 @@ responses:
           getWorkflowResponseExample:
             description: 'Example response returning a single workflow'
             value:
-              id: workflow-example_definition
+              id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
               name: Example definition
               description: This is a workflow example
               enabled: true

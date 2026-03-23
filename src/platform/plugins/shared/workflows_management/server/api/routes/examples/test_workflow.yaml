@@ -5,7 +5,7 @@ requestBody:
         testWorkflowByIdRequestExample:
           description: 'Example request to test a saved workflow by its ID'
           value:
-            workflowId: workflow-example_definition
+            workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
             inputs:
               message: 'test message'
         testWorkflowByYamlRequestExample:
@@ -33,13 +33,13 @@ x-codeSamples:
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \
         -d '{
-          "workflowId": "workflow-example_definition",
+          "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
           "inputs": { "message": "test message" }
         }'
   - lang: Console
     source: |
       POST kbn://api/workflows/test
       {
-        "workflowId": "workflow-example_definition",
+        "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "inputs": { "message": "test message" }
       }
