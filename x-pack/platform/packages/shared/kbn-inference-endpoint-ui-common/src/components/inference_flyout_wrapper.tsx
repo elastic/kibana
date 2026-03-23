@@ -15,7 +15,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -192,24 +191,6 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               allowedTaskTypes,
             }}
           />
-          <EuiSpacer size="m" />
-          {isPreconfigured ? null : (
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="success"
-                  size="m"
-                  isLoading={form.isSubmitting || isLoading}
-                  disabled={(!form.isValid && form.isSubmitted) || isLoading}
-                  data-test-subj="inference-endpoint-submit-button"
-                  onClick={handleSubmit}
-                >
-                  {LABELS.SAVE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -223,6 +204,21 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               {LABELS.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {!isPreconfigured && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="success"
+                size="m"
+                isLoading={form.isSubmitting || isLoading}
+                disabled={!form.isValid || isLoading}
+                data-test-subj="inference-endpoint-submit-button"
+                onClick={handleSubmit}
+              >
+                {LABELS.SAVE}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
