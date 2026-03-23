@@ -310,6 +310,7 @@ exports[`LoginPage page renders as expected 1`] = `
         style={Object {}}
       >
         <EuiIcon
+          aria-hidden={true}
           size="xxl"
           type="logoElastic"
         />
