@@ -33,7 +33,7 @@ export const generateSecretsSchemaFromSpec = (
     const authTypeSpec = Object.values(authTypeSpecs).find((spec) => spec.id === schema.id);
     const authTypeMode = authTypeSpec?.authMode ?? 'shared';
 
-    const hasAuthModeFilter = authMode !== undefined && authMode !== '';
+    const hasAuthModeFilter = Boolean(authMode);
     if (hasAuthModeFilter && authTypeMode !== authMode) {
       continue;
     }
