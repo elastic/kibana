@@ -189,6 +189,7 @@ export {
 
 export {
   type Feature,
+  type FeatureWithFilter,
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
@@ -199,6 +200,7 @@ export {
   ERROR_LOGS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   isFeature,
+  isFeatureWithFilter,
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
