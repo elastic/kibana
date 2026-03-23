@@ -25,6 +25,7 @@
     "@kbn/react-query",
     "@kbn/alerting-v2-schemas",
     "@kbn/alerting-v2-rule-apis",
+    "@kbn/deeplinks-alerting-v2",
     "@kbn/share-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser"

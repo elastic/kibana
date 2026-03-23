@@ -12,11 +12,11 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
+import { useFetchRules } from '@kbn/alerting-v2-rule-apis';
 import {
-  useFetchRules,
   ALERTING_V2_RULE_CREATE_LOCATOR,
   type AlertingV2RuleCreateLocatorParams,
-} from '@kbn/alerting-v2-rule-apis';
+} from '@kbn/deeplinks-alerting-v2';
 import { RuleListProvider, useRuleListServices, type RuleListServices } from '../rule_list_context';
 import { RulesListTableContainer } from './rules_list_table_container';
 

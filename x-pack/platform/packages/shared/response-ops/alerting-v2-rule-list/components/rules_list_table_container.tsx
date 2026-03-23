@@ -15,11 +15,13 @@ import {
   useBulkEnableRules,
   useBulkDisableRules,
   useToggleRuleEnabled,
+} from '@kbn/alerting-v2-rule-apis';
+import {
   ALERTING_V2_RULE_EDIT_LOCATOR,
   ALERTING_V2_RULE_CREATE_LOCATOR,
   type AlertingV2RuleEditLocatorParams,
   type AlertingV2RuleCreateLocatorParams,
-} from '@kbn/alerting-v2-rule-apis';
+} from '@kbn/deeplinks-alerting-v2';
 import { useRuleListServices } from '../rule_list_context';
 import { useBulkSelect } from '../hooks/use_bulk_select';
 import { DeleteConfirmationModal } from './delete_confirmation_modal';
