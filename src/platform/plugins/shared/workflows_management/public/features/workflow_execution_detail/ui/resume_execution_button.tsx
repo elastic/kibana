@@ -49,14 +49,20 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema) return undefined;
-    const jsonSchema = resumeSchema as JSONSchema7;
-    const zodSchema = convertJsonSchemaToZod(jsonSchema);
-    const defaults = generateSampleFromJsonSchema(jsonSchema);
-    return {
-      schema: zodSchema,
-      stepContext: defaults as Partial<StepContext>,
-      rawJsonSchema: resumeSchema,
-    };
+    try {
+      const jsonSchema = resumeSchema as JSONSchema7;
+      const zodSchema = convertJsonSchemaToZod(jsonSchema);
+      const defaults = generateSampleFromJsonSchema(jsonSchema);
+      return {
+        schema: zodSchema,
+        stepContext: defaults as Partial<StepContext>,
+        rawJsonSchema: resumeSchema,
+      };
+    } catch {
+      // A malformed or unsupported schema must not crash the execution detail page
+      // Fall back to no context override so the modal still opens with a free form JSON editor.
+      return undefined;
+    }
   }, [resumeSchema]);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
