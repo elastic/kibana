@@ -10,25 +10,23 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-interface SignificantEventTableItem {
+interface RuleTableItem {
   id: string;
 }
 
-const columns: Array<EuiBasicTableColumn<SignificantEventTableItem>> = [];
+const columns: Array<EuiBasicTableColumn<RuleTableItem>> = [];
 
-export function SignificantEventsTable() {
+export function RulesTable() {
   return (
     <>
       <span>
-        {i18n.translate('xpack.streams.significantEventsTable.span.kisLabel', {
-          defaultMessage: 'KIs',
-        })}
+        {i18n.translate('xpack.streams.rulesTable.span.rulesLabel', { defaultMessage: 'Rules' })}
       </span>
-      <EuiInMemoryTable<SignificantEventTableItem>
+      <EuiInMemoryTable<RuleTableItem>
         items={[]}
         columns={columns}
-        tableCaption={i18n.translate('xpack.streams.significantEventsTable.tableCaption', {
-          defaultMessage: 'Significant events',
+        tableCaption={i18n.translate('xpack.streams.rulesTable.tableCaption', {
+          defaultMessage: 'Rules',
         })}
       />
     </>

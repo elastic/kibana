@@ -4,17 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiPopover,
+  EuiSelectable,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { compact, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
@@ -22,16 +32,15 @@ import { LoadingPanel } from '../loading_panel';
 import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
 import type { Flow } from './add_significant_event_flyout/types';
 import { EmptyState } from './empty_state';
-import { SignificantEventsHistogramChart } from './significant_events_histogram';
+import { RulesTable } from './rules_table';
 import { SignificantEventsTable } from './significant_events_table';
-import { formatChangePoint } from './utils/change_point';
 
 interface Props {
   definition: Streams.all.GetResponse;
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const { rangeFrom, rangeTo, startMs, endMs } = useTimeRange();
+  const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
   const { refresh } = useTimefilter();
   const {
@@ -39,25 +48,46 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       start: { unifiedSearch },
     },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
   const aiFeatures = useAIFeatures();
 
-  const xFormatter = useMemo(() => {
-    return niceTimeFormatter([startMs, endMs]);
-  }, [startMs, endMs]);
-
   const [query, setQuery] = useState<string>('');
+  const [tableSearchValue, setTableSearchValue] = useState('');
+  const [isTypeFilterPopoverOpen, setIsTypeFilterPopoverOpen] = useState(false);
+  const [typeFilterOptions, setTypeFilterOptions] = useState<EuiSelectableOption[]>([
+    {
+      key: 'knowledge_indicator',
+      checked: 'on',
+      label: i18n.translate(
+        'xpack.streams.significantEventsTable.typeFilter.knowledgeIndicatorsLabel',
+        {
+          defaultMessage: 'Knowledge Indicators',
+        }
+      ),
+    },
+    {
+      key: 'rule',
+      label: i18n.translate('xpack.streams.significantEventsTable.typeFilter.rulesLabel', {
+        defaultMessage: 'Rules',
+      }),
+    },
+  ]);
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
     query,
   });
-
-  const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
   const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
+  const typeFilterPopoverId = useGeneratedHtmlId({
+    prefix: 'significantEventsTypeFilterPopover',
+  });
+
+  const isRulesSelected = useMemo(
+    () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
+    [typeFilterOptions]
+  );
 
   if (!significantEventsFetchState.data && significantEventsFetchState.isLoading) {
     return <LoadingPanel size="xxl" />;
@@ -153,60 +183,91 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiPanel grow={false} hasShadow={false} hasBorder={true}>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
-                  {
-                    defaultMessage: 'Detected event occurrences ({count})',
-                    values: {
-                      count: (
-                        significantEventsFetchState.data?.aggregated_occurrences ?? []
-                      ).reduce((acc, point) => acc + point.y, 0),
-                    },
-                  }
-                )}
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <SignificantEventsHistogramChart
-                id={'all-events'}
-                occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
-                changes={compact(
-                  (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
-                    formatChangePoint({
-                      query: item.query,
-                      change_points: item.change_points,
-                      occurrences: item.occurrences,
-                    })
-                  )
-                )}
-                xFormatter={xFormatter}
-                compressed={false}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-
         <EuiFlexItem grow={false}>
-          <SignificantEventsTable
-            loading={significantEventsFetchState.isLoading}
-            definition={definition.stream}
-            items={significantEventsFetchState.data?.significant_events ?? []}
-            onEditClick={(item) => {
-              setIsEditFlyoutOpen(true);
-              setQueryToEdit({ ...item.query });
-            }}
-            onDeleteClick={async (item) => {
-              await removeQuery?.(item.query.id).then(() => {
-                significantEventsFetchState.refetch();
-              });
-            }}
-            xFormatter={xFormatter}
-          />
+          <EuiPanel hasBorder={false} hasShadow={true}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={css`
+                width: 100%;
+                min-height: 44px;
+              `}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id={typeFilterPopoverId}
+                  aria-label={i18n.translate(
+                    'xpack.streams.significantEventsTable.typeFilterPopoverLabel',
+                    {
+                      defaultMessage: 'Type filter',
+                    }
+                  )}
+                  button={
+                    <EuiButton
+                      iconType="arrowDown"
+                      iconSide="right"
+                      color="text"
+                      onClick={() => setIsTypeFilterPopoverOpen((isOpen) => !isOpen)}
+                    >
+                      {i18n.translate('xpack.streams.significantEventsTable.typeFilterLabel', {
+                        defaultMessage: 'Type',
+                      })}
+                    </EuiButton>
+                  }
+                  isOpen={isTypeFilterPopoverOpen}
+                  closePopover={() => setIsTypeFilterPopoverOpen(false)}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    aria-label={i18n.translate(
+                      'xpack.streams.significantEventsTable.typeFilterSelectableAriaLabel',
+                      {
+                        defaultMessage: 'Filter by type',
+                      }
+                    )}
+                    singleSelection="always"
+                    options={typeFilterOptions}
+                    onChange={(options) => {
+                      setTypeFilterOptions(options);
+                      setIsTypeFilterPopoverOpen(false);
+                    }}
+                  >
+                    {(list) => (
+                      <div
+                        css={css`
+                          min-width: 260px;
+                        `}
+                      >
+                        {list}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  fullWidth
+                  value={tableSearchValue}
+                  onChange={(event) => setTableSearchValue(event.target.value)}
+                  placeholder={i18n.translate(
+                    'xpack.streams.significantEventsTable.searchPlaceholder',
+                    {
+                      defaultMessage: 'Search significant events',
+                    }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.streams.significantEventsTable.searchAriaLabel',
+                    {
+                      defaultMessage: 'Search significant events',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            {isRulesSelected ? <RulesTable /> : <SignificantEventsTable />}
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
       {editFlyout(false)}
