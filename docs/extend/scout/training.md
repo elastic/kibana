@@ -47,5 +47,5 @@ Identify common test design anti-patterns that cause flakiness and learn proven 
 - {icon}`document` [Slides](https://docs.google.com/presentation/d/1QqSSrxehjvgAhinU9IFGLgLbr_H2C53dy5DloL3dGws/edit?usp=sharing)
 
 :::::{note}
-This talk is testing framework-agnostic. The talk showcases FTR code examples but the same concepts are also valid with Scout.
+This talk is testing framework-agnostic. It showcases FTR code examples, but the same concepts apply to Scout as well.
 :::::
