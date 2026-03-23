@@ -247,24 +247,6 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'Iteration number (1-based); 0 for terminal failure/cancel events',
     },
   },
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  state: {
-    type: 'keyword',
-    _meta: {
-      description: 'The state of this event (success, failure, or canceled)',
-    },
-  },
   docs_count: {
     type: 'long',
     _meta: {
@@ -301,18 +283,6 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'Total tokens used in this iteration',
     },
   },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'Cached tokens used in this iteration',
-    },
-  },
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'Duration of this iteration in milliseconds',
-    },
-  },
   excluded_features_count: {
     type: 'long',
     _meta: {
@@ -330,6 +300,36 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
     _meta: {
       description:
         'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Cached tokens used in this iteration',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'Duration of this iteration in milliseconds',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  state: {
+    type: 'keyword',
+    _meta: {
+      description: 'The state of the features identification task (success, failure, or canceled)',
     },
   },
 };
