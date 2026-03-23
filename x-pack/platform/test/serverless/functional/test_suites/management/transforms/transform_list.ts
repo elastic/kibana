@@ -16,7 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Transform List', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/258129
+  describe.skip('Transform List', function () {
     before(async () => {
       await security.testUser.setRoles(['transform_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();

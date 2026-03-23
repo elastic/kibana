@@ -10,6 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { SearchHomepageVersionBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
@@ -17,10 +18,11 @@ import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
+import { docLinks } from '../../../common/doc_links';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin, history, searchNavigation, cloud },
+    services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
 
   const { isTrial } = useGetLicenseInfo();
@@ -89,8 +91,25 @@ export const SearchHomepagePage = () => {
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-
-        <BasicMetricBadges />
+        <EuiFlexGroup>
+          <BasicMetricBadges />
+          <EuiFlexItem grow={false}>
+            <SearchHomepageVersionBadge
+              docLink={
+                cloud?.isServerlessEnabled
+                  ? docLinks.serverlessReleaseNotes
+                  : docLinks.hostedCloudReleaseNotes
+              }
+              kibanaVersion={
+                !cloud?.isServerlessEnabled
+                  ? `v${kibanaVersion}`
+                  : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
+                      defaultMessage: 'Changelog',
+                    })
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}
