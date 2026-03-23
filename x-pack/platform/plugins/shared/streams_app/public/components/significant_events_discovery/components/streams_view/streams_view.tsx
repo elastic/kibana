@@ -288,43 +288,53 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     processQueriesStatusUpdateQueue,
   ]);
 
-  const bulkScheduleOnboardingTask = async (streamList: string[]) => {
+  const bulkSchedule = async (
+    streamList: string[],
+    scheduleTask: (streamName: string) => Promise<unknown>,
+    failureTitle: string
+  ) => {
     try {
-      await pMap(
-        streamList,
-        async (streamName) => {
-          await scheduleOnboardingTask(streamName);
-        },
-        { concurrency: 10 }
-      );
+      await pMap(streamList, async (streamName) => scheduleTask(streamName), { concurrency: 10 });
     } catch (error) {
-      toasts.addError(getFormattedError(error), {
-        title: ONBOARDING_SCHEDULING_FAILURE_TITLE,
-      });
+      toasts.addError(getFormattedError(error), { title: failureTitle });
     }
   };
 
-  const onBulkOnboardStreamsClick = async () => {
-    const streamList = selectedStreams
-      .filter((item) => {
-        const onboardingResult = streamOnboardingResultMap[item.stream.name];
+  const createBulkClickHandler = (
+    resultMap: Record<string, TaskResult<unknown>>,
+    scheduleTask: (streamName: string) => Promise<unknown>,
+    failureTitle: string,
+    queue: Set<string>,
+    processQueue: () => Promise<void | undefined>
+  ) => {
+    return async () => {
+      const streamList = selectedStreams
+        .filter((item) => {
+          const result = resultMap[item.stream.name];
+          return (
+            !result || ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)
+          );
+        })
+        .map((item) => item.stream.name);
 
-        return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(onboardingResult.status);
-      })
-      .map((item) => item.stream.name);
+      setSelectedStreams([]);
 
-    setSelectedStreams([]);
-
-    await bulkScheduleOnboardingTask(streamList);
-    streamList.forEach((streamName) => {
-      onboardingStatusUpdateQueue.add(streamName);
-    });
-    processStatusUpdateQueue();
+      await bulkSchedule(streamList, scheduleTask, failureTitle);
+      streamList.forEach((streamName) => queue.add(streamName));
+      processQueue();
+    };
   };
 
-  const onOnboardStreamActionClick = async (streamName: string) => {
-    await bulkScheduleOnboardingTask([streamName]);
+  const onBulkOnboardStreamsClick = createBulkClickHandler(
+    streamOnboardingResultMap,
+    scheduleOnboardingTask,
+    ONBOARDING_SCHEDULING_FAILURE_TITLE,
+    onboardingStatusUpdateQueue,
+    processStatusUpdateQueue
+  );
 
+  const onOnboardStreamActionClick = async (streamName: string) => {
+    await bulkSchedule([streamName], scheduleOnboardingTask, ONBOARDING_SCHEDULING_FAILURE_TITLE);
     onboardingStatusUpdateQueue.add(streamName);
     processStatusUpdateQueue();
   };
@@ -333,75 +343,21 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     cancelOnboardingTask(streamName);
   };
 
-  const bulkScheduleFeaturesIdentificationTask = async (streamList: string[]) => {
-    try {
-      await pMap(
-        streamList,
-        async (streamName) => {
-          await scheduleFeaturesIdentificationTask(streamName);
-        },
-        { concurrency: 10 }
-      );
-    } catch (error) {
-      toasts.addError(getFormattedError(error), {
-        title: KI_FEATURE_GENERATION_SCHEDULING_FAILURE_TITLE,
-      });
-    }
-  };
+  const onBulkKIFeatureGenerationClick = createBulkClickHandler(
+    streamFeaturesResultMap,
+    scheduleFeaturesIdentificationTask,
+    KI_FEATURE_GENERATION_SCHEDULING_FAILURE_TITLE,
+    featuresIdentificationStatusUpdateQueue,
+    processFeaturesStatusUpdateQueue
+  );
 
-  const bulkScheduleQueriesGenerationTask = async (streamList: string[]) => {
-    try {
-      await pMap(
-        streamList,
-        async (streamName) => {
-          await scheduleQueriesGenerationTask(streamName);
-        },
-        { concurrency: 10 }
-      );
-    } catch (error) {
-      toasts.addError(getFormattedError(error), {
-        title: KI_QUERY_GENERATION_SCHEDULING_FAILURE_TITLE,
-      });
-    }
-  };
-
-  const onBulkKIFeatureGenerationClick = async () => {
-    const streamList = selectedStreams
-      .filter((item) => {
-        const result = streamFeaturesResultMap[item.stream.name];
-        return (
-          !result || ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)
-        );
-      })
-      .map((item) => item.stream.name);
-
-    setSelectedStreams([]);
-
-    await bulkScheduleFeaturesIdentificationTask(streamList);
-    streamList.forEach((streamName) => {
-      featuresIdentificationStatusUpdateQueue.add(streamName);
-    });
-    processFeaturesStatusUpdateQueue();
-  };
-
-  const onBulkKIQueryGenerationClick = async () => {
-    const streamList = selectedStreams
-      .filter((item) => {
-        const result = streamQueriesResultMap[item.stream.name];
-        return (
-          !result || ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)
-        );
-      })
-      .map((item) => item.stream.name);
-
-    setSelectedStreams([]);
-
-    await bulkScheduleQueriesGenerationTask(streamList);
-    streamList.forEach((streamName) => {
-      queriesGenerationStatusUpdateQueue.add(streamName);
-    });
-    processQueriesStatusUpdateQueue();
-  };
+  const onBulkKIQueryGenerationClick = createBulkClickHandler(
+    streamQueriesResultMap,
+    scheduleQueriesGenerationTask,
+    KI_QUERY_GENERATION_SCHEDULING_FAILURE_TITLE,
+    queriesGenerationStatusUpdateQueue,
+    processQueriesStatusUpdateQueue
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

@@ -6,10 +6,8 @@
  */
 
 import type { SignificantEventsQueriesGenerationResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
-import pMap from 'p-map';
-import { useCallback, useRef } from 'react';
 import { useFeaturesQueriesSubtaskApi } from '../../../hooks/use_features_queries_subtask_api';
+import { useStatusUpdateQueue } from './use_status_update_queue';
 
 type StreamQueriesGenerationStatusUpdateCallback = (
   streamName: string,
@@ -19,42 +17,11 @@ type StreamQueriesGenerationStatusUpdateCallback = (
 export function useQueriesGenerationStatusUpdateQueue(
   onStreamStatusUpdate: StreamQueriesGenerationStatusUpdateCallback
 ) {
-  const queue = useRef(new Set<string>([]));
-  const isProcessing = useRef(false);
-
   const { getQueriesGenerationStatus } = useFeaturesQueriesSubtaskApi();
+  const { statusUpdateQueue, processStatusUpdateQueue } = useStatusUpdateQueue(
+    getQueriesGenerationStatus,
+    onStreamStatusUpdate
+  );
 
-  const updateStatuses = useCallback(async (): Promise<void> => {
-    await pMap(
-      queue.current,
-      async (streamName) => {
-        const taskResult = await getQueriesGenerationStatus(streamName);
-        onStreamStatusUpdate(streamName, taskResult);
-
-        if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(taskResult.status)) {
-          queue.current.delete(streamName);
-        }
-      },
-      { concurrency: 10 }
-    );
-
-    if (queue.current.size > 0) {
-      await new Promise((res) => setTimeout(res, 2000));
-      await updateStatuses();
-    }
-  }, [getQueriesGenerationStatus, onStreamStatusUpdate]);
-
-  const processStatusUpdateQueue = useCallback(async () => {
-    if (isProcessing.current) {
-      return;
-    }
-
-    isProcessing.current = true;
-
-    return await updateStatuses().finally(() => {
-      isProcessing.current = false;
-    });
-  }, [updateStatuses]);
-
-  return { queriesGenerationStatusUpdateQueue: queue.current, processStatusUpdateQueue };
+  return { queriesGenerationStatusUpdateQueue: statusUpdateQueue, processStatusUpdateQueue };
 }
