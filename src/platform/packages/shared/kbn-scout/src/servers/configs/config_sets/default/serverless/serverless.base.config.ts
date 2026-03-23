@@ -13,8 +13,8 @@ import Fs from 'fs';
 
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import {
-  defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
+  defineDockerServersConfig,
   getDockerFileMountPath,
 } from '@kbn/test';
 import {
