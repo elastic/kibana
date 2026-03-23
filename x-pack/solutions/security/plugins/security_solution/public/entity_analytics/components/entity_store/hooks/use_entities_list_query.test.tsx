@@ -8,6 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { searchEntitiesFromEntityStore } from '@kbn/entity-store/public';
+import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useUiSetting } from '../../../../common/lib/kibana';
@@ -58,7 +59,7 @@ describe('useEntitiesListQuery', () => {
   it('should call searchEntitiesFromEntityStore when Entity Store v2 is enabled', async () => {
     (useUiSetting as jest.Mock).mockReturnValue(true);
     const searchParams = {
-      entityTypes: ['host'],
+      entityTypes: ['host'] as EntityType[],
       page: 2,
       perPage: 20,
       sortField: '@timestamp',

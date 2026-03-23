@@ -42,8 +42,6 @@ jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockUseRiskScore(),
 }));
 
-const defaultEntityIdentifiers = { 'host.name': 'elastic' };
-
 describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {
     const { getByTestId } = render(

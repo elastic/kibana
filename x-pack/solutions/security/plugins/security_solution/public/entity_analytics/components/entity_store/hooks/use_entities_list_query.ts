@@ -37,8 +37,8 @@ export const useEntitiesListQuery = (params: UseEntitiesListParams) => {
           {
             entityTypes: fetchParams.entityTypes as EntityStoreEntityType[],
             filterQuery: fetchParams.filterQuery,
-            page: fetchParams.page,
-            perPage: fetchParams.perPage,
+            page: fetchParams.page ?? 1,
+            perPage: fetchParams.perPage ?? 20,
             sortField: fetchParams.sortField,
             sortOrder: fetchParams.sortOrder,
           },

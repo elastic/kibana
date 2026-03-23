@@ -62,7 +62,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     ({
       hostName,
       severity,
-      lookupFields: _entityIdentifiers,
+      identityFields: _identityFields,
     }: {
       hostName: string;
       severity?: string;

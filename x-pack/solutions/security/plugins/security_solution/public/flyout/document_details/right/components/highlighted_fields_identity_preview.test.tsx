@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { HighlightedFields } from './highlighted_fields';
 import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
@@ -85,7 +86,7 @@ describe('<HighlightedFields /> host.name preview and document identity entityId
         ),
         getEuidFromObject: jest.fn(() => null),
       },
-    } as ReturnType<typeof useEntityStoreEuidApi>);
+    } as unknown as EntityStoreEuidApi);
   });
 
   it('opens host preview with entityId derived from document identity fields when clicking host.name', () => {

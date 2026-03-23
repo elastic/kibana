@@ -8,18 +8,23 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
-import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
-import {
-  useMisconfigurationFindings,
-  MISCONFIGURATION,
-} from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
 import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { FindingsMisconfigurationPanelExpandableFlyoutPropsPreview } from '@kbn/cloud-security-posture';
-import { CspEvaluationBadge, useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import type {
+  FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+  MisconfigurationFindingDetailFields,
+} from '@kbn/cloud-security-posture';
+import {
+  CspEvaluationBadge,
+  MISCONFIGURATION,
+  useGetMisconfigurationStatusColor,
+  useGetNavigationUrlParams,
+  useHasMisconfigurations,
+  useMisconfigurationFindings,
+} from '@kbn/cloud-security-posture';
 
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
@@ -28,9 +33,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '@kbn/entity-store/public';
