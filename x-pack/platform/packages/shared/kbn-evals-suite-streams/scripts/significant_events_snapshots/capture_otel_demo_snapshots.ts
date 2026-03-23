@@ -243,6 +243,10 @@ async function processScenario(
   // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
   if (logsIndex === 'logs') {
     await ensureLogsDataStream(esClient, log);
+  } else {
+    log.warning(
+      `Custom logsIndex "${logsIndex}" specified — the data stream must already exist before running feature extraction.`
+    );
   }
 
   // Step 1+2 — Deploy the demo app. Resolves once pods are ready (no log streaming).

@@ -8,6 +8,6 @@
 import type { FailureScenario } from '@kbn/otel-demo';
 export type Scenario =
   | {
-      id: string;
+      id: 'healthy-baseline';
     }
   | FailureScenario;

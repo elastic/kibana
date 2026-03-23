@@ -74,7 +74,7 @@ export async function triggerSigEventsKIFeatureExtraction(
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  log.info('Triggering feature extraction on stream "logs"...');
+  log.info(`Triggering feature extraction on stream ${streamName}...`);
 
   const now = Date.now();
   const { status, data } = await kibanaRequest(
