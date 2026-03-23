@@ -392,11 +392,16 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents, auditLogService } = getInternalServices();
+        const { agents, auditLogService, heartbeats } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
         try {
           const result = await service.delete({ id: request.params.id });
+
+          // Cascade: delete all heartbeats for this agent (cancels their TM tasks)
+          const heartbeatClient = heartbeats.getScopedClient({ request });
+          await heartbeatClient.deleteByAgentId(request.params.id);
+
           if (result) {
             auditLogService.logAgentDeleted(request, { agentId: request.params.id });
           } else {

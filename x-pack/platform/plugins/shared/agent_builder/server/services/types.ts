@@ -28,6 +28,7 @@ import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
 import type { AgentExecutionService, TaskHandler } from './execution';
+import type { HeartbeatServiceStart, HeartbeatTaskHandler } from './heartbeat';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -52,6 +53,8 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
+  heartbeats: HeartbeatServiceStart;
+  heartbeatTaskHandler: HeartbeatTaskHandler;
 }
 
 export interface ServiceSetupDeps {

@@ -51,6 +51,7 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
+import { HeartbeatsTab } from './tabs/heartbeats_tab';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
@@ -259,6 +260,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      ...(editingAgentId
+        ? [
+            {
+              id: 'heartbeats',
+              name: i18n.translate('xpack.agentBuilder.agents.form.heartbeatsTab', {
+                defaultMessage: 'Heartbeats',
+              }),
+              content: <HeartbeatsTab agentId={editingAgentId} />,
+            },
+          ]
+        : []),
     ],
     [
       control,
@@ -270,6 +282,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       euiTheme,
       activeToolsCount,
       manageAgents,
+      editingAgentId,
     ]
   );
 

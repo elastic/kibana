@@ -27,6 +27,7 @@ import {
   NavigationService,
   ToolsService,
   EventsService,
+  HeartbeatsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
@@ -121,6 +122,7 @@ export class AgentBuilderPlugin
     const { licensing, inference } = startDependencies;
 
     const agentService = new AgentService({ http });
+    const heartbeatsService = new HeartbeatsService({ http });
     const attachmentsService = new AttachmentsService();
 
     attachmentsService.addAttachmentType(
@@ -149,6 +151,7 @@ export class AgentBuilderPlugin
       docLinksService,
       navigationService,
       toolsService,
+      heartbeatsService,
       startDependencies,
       accessChecker,
       eventsService,

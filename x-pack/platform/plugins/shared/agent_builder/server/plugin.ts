@@ -30,6 +30,7 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerTaskDefinitions } from './services/execution';
+import { registerHeartbeatTaskDefinitions } from './services/heartbeat';
 
 export class AgentBuilderPlugin
   implements
@@ -92,6 +93,17 @@ export class AgentBuilderPlugin
           throw new Error('getTaskHandler called before service init');
         }
         return services.taskHandler;
+      },
+    });
+
+    registerHeartbeatTaskDefinitions({
+      taskManager: setupDeps.taskManager,
+      getHeartbeatTaskHandler: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getHeartbeatTaskHandler called before service init');
+        }
+        return services.heartbeatTaskHandler;
       },
     });
 

@@ -21,6 +21,10 @@ import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
+import {
+  HeartbeatService,
+  createHeartbeatTaskHandler,
+} from './heartbeat';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -171,6 +175,20 @@ export class ServiceManager {
       analyticsService,
     });
 
+    const heartbeats = new HeartbeatService({
+      logger: logger.get('heartbeats'),
+      elasticsearch,
+      conversationService: conversations,
+      taskManager,
+      spaces,
+    });
+
+    const heartbeatTaskHandler = createHeartbeatTaskHandler({
+      logger: logger.get('heartbeat-task-handler'),
+      esClient: elasticsearch.client.asInternalUser,
+      executionService: execution,
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -181,6 +199,8 @@ export class ServiceManager {
       auditLogService,
       execution,
       taskHandler,
+      heartbeats,
+      heartbeatTaskHandler,
       hooks,
       spaces,
       featureFlags,
