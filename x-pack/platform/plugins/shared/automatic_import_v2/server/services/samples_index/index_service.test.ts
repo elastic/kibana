@@ -10,7 +10,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportSamplesIndexService } from './index_service';
 import type { AddSamplesToDataStreamParams } from './index_service';
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 // Mock the storage adapter
 jest.mock('./storage', () => {
@@ -58,20 +57,14 @@ describe('AutomaticImportSamplesIndexService', () => {
   let service: AutomaticImportSamplesIndexService;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
-  let mockUser: AuthenticatedUser;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockLoggerFactory = loggerMock.create();
 
-    mockUser = {
-      username: 'test-user',
-      roles: [],
-      profile_uid: 'test-profile',
-    } as unknown as AuthenticatedUser;
-
     service = new AutomaticImportSamplesIndexService(mockLoggerFactory);
+    service.initialize(mockEsClient);
   });
 
   describe('addSamplesToDataStream', () => {
@@ -81,8 +74,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['Sample log line 1', 'Sample log line 2', 'Sample log line 3'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
-        authenticatedUser: mockUser,
-        esClient: mockEsClient,
+        createdBy: 'test-user',
       };
 
       await service.addSamplesToDataStream(params);
@@ -116,8 +108,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['Sample log line 1'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
-        authenticatedUser: mockUser,
-        esClient: mockEsClient,
+        createdBy: 'test-user',
       };
 
       await service.addSamplesToDataStream(params);
@@ -142,14 +133,13 @@ describe('AutomaticImportSamplesIndexService', () => {
       });
     });
 
-    it('should use authenticated user for created_by field', async () => {
+    it('should use createdBy for created_by field', async () => {
       const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
         rawSamples: ['Sample log'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
-        authenticatedUser: mockUser,
-        esClient: mockEsClient,
+        createdBy: 'test-user',
       };
 
       await service.addSamplesToDataStream(params);
@@ -170,8 +160,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['Sample log'],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
-        authenticatedUser: mockUser,
-        esClient: mockEsClient,
+        createdBy: 'test-user',
       };
 
       await service.addSamplesToDataStream(params);
@@ -196,8 +185,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: [],
         originalSource: { sourceType: 'file', sourceValue: 'logs.txt' },
-        authenticatedUser: mockUser,
-        esClient: mockEsClient,
+        createdBy: 'test-user',
       };
 
       await service.addSamplesToDataStream(params);
@@ -217,8 +205,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         dataStreamId: 'data-stream-456',
         rawSamples: ['Log with "quotes" and \\backslashes\\ and \nnewlines'],
         originalSource: { sourceType: 'file', sourceValue: 'logs with spaces.txt' },
-        authenticatedUser: mockUser,
-        esClient: mockEsClient,
+        createdBy: 'test-user',
       };
 
       await service.addSamplesToDataStream(params);
@@ -240,11 +227,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
   describe('getSamplesForDataStream', () => {
     it('should retrieve samples for a data stream', async () => {
-      const samples = await service.getSamplesForDataStream(
-        'integration-123',
-        'data-stream-456',
-        mockEsClient
-      );
+      const samples = await service.getSamplesForDataStream('integration-123', 'data-stream-456');
 
       const { createIndexAdapter } = jest.requireMock('./storage');
       const adapterInstance = createIndexAdapter.mock.results[0].value;
@@ -297,11 +280,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         getClient: mockGetClient,
       });
 
-      const result = await service.deleteSamplesForDataStream(
-        'integration-123',
-        'data-stream-456',
-        mockEsClient
-      );
+      const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
       expect(mockSearch).toHaveBeenCalledTimes(1);
       expect(mockSearch).toHaveBeenCalledWith({
@@ -359,11 +338,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         getClient: mockGetClient,
       });
 
-      const result = await service.deleteSamplesForDataStream(
-        'integration-123',
-        'data-stream-456',
-        mockEsClient
-      );
+      const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       expect(mockDelete).toHaveBeenCalledTimes(1500);
@@ -386,11 +361,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         getClient: mockGetClient,
       });
 
-      const result = await service.deleteSamplesForDataStream(
-        'integration-123',
-        'data-stream-456',
-        mockEsClient
-      );
+      const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
       expect(mockSearch).toHaveBeenCalledTimes(1);
       expect(mockDelete).not.toHaveBeenCalled();
@@ -411,7 +382,7 @@ describe('AutomaticImportSamplesIndexService', () => {
       });
 
       await expect(
-        service.deleteSamplesForDataStream('integration-123', 'data-stream-456', mockEsClient)
+        service.deleteSamplesForDataStream('integration-123', 'data-stream-456')
       ).rejects.toThrow('Search failed');
     });
 
@@ -434,7 +405,7 @@ describe('AutomaticImportSamplesIndexService', () => {
       });
 
       await expect(
-        service.deleteSamplesForDataStream('integration-123', 'data-stream-456', mockEsClient)
+        service.deleteSamplesForDataStream('integration-123', 'data-stream-456')
       ).rejects.toThrow('Delete failed');
     });
 
@@ -454,7 +425,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         getClient: mockGetClient,
       });
 
-      await service.deleteSamplesForDataStream('test-integration', 'test-datastream', mockEsClient);
+      await service.deleteSamplesForDataStream('test-integration', 'test-datastream');
 
       expect(mockSearch).toHaveBeenCalledWith({
         query: {
