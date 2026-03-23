@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
@@ -18,6 +19,8 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
+  euiYScrollWithShadows,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,9 +32,10 @@ import { coreServices, shareService } from '../services/kibana_services';
 
 export interface ExportSourceAssetPanelProps {
   dashboardState: DashboardState;
+  onLoadStateChange?: (loadState: ExportSourceLoadState) => void;
 }
 
-type LoadState =
+export type ExportSourceLoadState =
   | { status: 'loading' }
   | { status: 'success'; data: DashboardState; warnings: string[] }
   | { status: 'error'; errorMessage: string };
@@ -42,8 +46,8 @@ function useSanitizedExportSource({
 }: {
   dashboardState: DashboardState;
   onLoadStart?: () => void;
-}): { loadState: LoadState; retry: () => void } {
-  const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
+}): { loadState: ExportSourceLoadState; retry: () => void } {
+  const [loadState, setLoadState] = useState<ExportSourceLoadState>({ status: 'loading' });
   const [requestNonce, setRequestNonce] = useState(0);
 
   const retry = useCallback(() => {
@@ -92,6 +96,18 @@ function WarningsCallout({
   isVisible: boolean;
   onDismiss: () => void;
 }) {
+  const euiThemeContext = useEuiTheme();
+
+  const warningsListStyles = useMemo(
+    () => css`
+      ${euiYScrollWithShadows(euiThemeContext, { height: 'auto' })}
+      max-height: 240px;
+      padding-top: ${euiThemeContext.euiTheme.size.s};
+      padding-bottom: ${euiThemeContext.euiTheme.size.s};
+    `,
+    [euiThemeContext]
+  );
+
   if (!isVisible || !warnings.length) return null;
 
   return (
@@ -102,6 +118,7 @@ function WarningsCallout({
         title={i18n.translate('dashboard.exportSource.warningsTitle', {
           defaultMessage: 'Unsupported properties were removed',
         })}
+        size="s"
         data-test-subj="dashboardExportSourceWarnings"
         onDismiss={onDismiss}
       >
@@ -129,24 +146,17 @@ function WarningsCallout({
           }
         >
           {isExpanded ? (
-            <div
-              className="eui-yScrollWithShadows"
-              css={{
-                maxHeight: 240,
-                overflowY: 'auto',
-                ul: {
-                  marginBottom: 0,
-                },
-              }}
+            <EuiText
+              size="s"
+              data-test-subj="dashboardExportSourceWarningsList"
+              css={warningsListStyles}
             >
-              <EuiText size="s" data-test-subj="dashboardExportSourceWarningsList">
-                <ul>
-                  {warnings.map((warning, idx) => (
-                    <li key={`${idx}-${warning}`}>{warning}</li>
-                  ))}
-                </ul>
-              </EuiText>
-            </div>
+              <ul>
+                {warnings.map((warning, idx) => (
+                  <li key={`${idx}-${warning}`}>{warning}</li>
+                ))}
+              </ul>
+            </EuiText>
           ) : null}
         </EuiAccordion>
       </EuiCallOut>
@@ -287,7 +297,10 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
   );
 }
 
-export const ExportSourceAssetPanel = ({ dashboardState }: ExportSourceAssetPanelProps) => {
+export const ExportSourceAssetPanel = ({
+  dashboardState,
+  onLoadStateChange,
+}: ExportSourceAssetPanelProps) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
@@ -299,13 +312,14 @@ export const ExportSourceAssetPanel = ({ dashboardState }: ExportSourceAssetPane
 
   const { loadState, retry } = useSanitizedExportSource({ dashboardState, onLoadStart });
 
+  useEffect(() => {
+    onLoadStateChange?.(loadState);
+  }, [loadState, onLoadStateChange]);
+
   const warnings = loadState.status === 'success' ? loadState.warnings : [];
   const sanitizedState = loadState.status === 'success' ? loadState.data : undefined;
 
-  const jsonValue = useMemo(
-    () => JSON.stringify(sanitizedState ?? dashboardState, null, 2),
-    [sanitizedState, dashboardState]
-  );
+  const jsonValue = useMemo(() => JSON.stringify(sanitizedState, null, 2), [sanitizedState]);
 
   const openInConsoleRequest = useMemo(() => {
     return buildCreateDashboardRequestForConsole(jsonValue);

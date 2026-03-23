@@ -12,7 +12,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 import type { DashboardState } from '../types';
-import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
+import { DASHBOARD_INTERNAL_API_PATH, DEFAULT_DASHBOARD_OPTIONS } from '../../../common/constants';
 import { registerExportSourceRoute } from './register_export_source_route';
 
 const mockGetTransforms = jest.fn();
@@ -41,6 +41,8 @@ describe('registerExportSourceRoute', () => {
 
     const dashboardState: DashboardState = {
       title: 'my dashboard',
+      pinned_panels: [],
+      options: DEFAULT_DASHBOARD_OPTIONS,
       panels: [
         {
           type: 'mapped',
@@ -74,6 +76,8 @@ describe('registerExportSourceRoute', () => {
 
     const dashboardState: DashboardState = {
       title: 'my dashboard',
+      pinned_panels: [],
+      options: DEFAULT_DASHBOARD_OPTIONS,
       panels: [
         {
           type: 'typeWithoutSchema',
@@ -94,6 +98,8 @@ describe('registerExportSourceRoute', () => {
     expect(result.payload).toEqual({
       data: {
         title: 'my dashboard',
+        pinned_panels: [],
+        options: DEFAULT_DASHBOARD_OPTIONS,
         panels: [],
       },
       warnings: [
@@ -113,6 +119,8 @@ describe('registerExportSourceRoute', () => {
 
     const dashboardState: DashboardState = {
       title: 'my dashboard',
+      pinned_panels: [],
+      options: DEFAULT_DASHBOARD_OPTIONS,
       panels: [
         {
           type: 'mapped',
@@ -136,6 +144,8 @@ describe('registerExportSourceRoute', () => {
     expect(result.payload).toEqual({
       data: {
         title: 'my dashboard',
+        pinned_panels: [],
+        options: DEFAULT_DASHBOARD_OPTIONS,
         panels: [
           {
             type: 'mapped',

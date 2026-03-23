@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import type { DashboardState } from '../../server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { ExportSourceAssetPanel } from './export_source_asset_panel';
 import { getSanitizedExportSource } from './dashboard_export_source_client';
 import { userEvent } from '@testing-library/user-event';
@@ -22,6 +23,8 @@ describe('ExportSourceAssetPanel', () => {
   const dashboardState: DashboardState = {
     title: 'my dashboard',
     panels: [],
+    pinned_panels: [],
+    options: DEFAULT_DASHBOARD_OPTIONS,
   };
 
   beforeEach(() => {
@@ -30,7 +33,7 @@ describe('ExportSourceAssetPanel', () => {
 
   it('shows a loading indicator then renders sanitized JSON', async () => {
     (getSanitizedExportSource as jest.Mock).mockResolvedValue({
-      data: { title: 'my dashboard (sanitized)', panels: [] },
+      data: { ...dashboardState, title: 'my dashboard (sanitized)' },
       warnings: [],
     });
 
@@ -48,7 +51,7 @@ describe('ExportSourceAssetPanel', () => {
   it('renders warnings when the server reports unsupported panels', async () => {
     const user = userEvent.setup();
     (getSanitizedExportSource as jest.Mock).mockResolvedValue({
-      data: { title: 'my dashboard', panels: [] },
+      data: dashboardState,
       warnings: ['Dropped panel panel1, panel schema not available for panel type: foo.'],
     });
 
@@ -89,7 +92,7 @@ describe('ExportSourceAssetPanel', () => {
     (getSanitizedExportSource as jest.Mock)
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
-        data: { title: 'my dashboard (sanitized)', panels: [] },
+        data: { ...dashboardState, title: 'my dashboard (sanitized)' },
         warnings: [],
       });
 

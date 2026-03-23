@@ -53,7 +53,11 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { ExportShare, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  ExportShareDerivatives,
+  SharePluginSetup,
+  SharePluginStart,
+} from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -184,7 +188,7 @@ export class DashboardPlugin
           },
         })
       );
-      share.registerShareIntegration<ExportShare>(
+      share.registerShareIntegration<ExportShareDerivatives>(
         'dashboard',
         exportSourceDashboardShareIntegration()
       );

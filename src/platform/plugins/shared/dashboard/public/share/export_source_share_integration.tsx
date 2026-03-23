@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
+import type {
+  ExportShareDerivatives,
+  RegisterShareIntegrationArgs,
+} from '@kbn/share-plugin/public';
 
 export const exportSourceDashboardShareIntegration =
-  (): RegisterShareIntegrationArgs<ExportShare> => {
+  (): RegisterShareIntegrationArgs<ExportShareDerivatives> => {
     return {
       id: 'exportSourceDashboard',
-      groupId: 'export',
+      groupId: 'exportDerivatives',
       getShareIntegrationConfig: async (...args) => {
         const { getShareMenuItems } = await import('./json_export_config');
         return getShareMenuItems()(...args);
