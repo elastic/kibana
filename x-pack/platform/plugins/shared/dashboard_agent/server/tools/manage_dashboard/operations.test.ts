@@ -159,7 +159,6 @@ describe('executeDashboardOperations', () => {
       dashboardData: {
         title: 'Existing title',
         description: 'Existing description',
-        savedObjectId: 'saved-dashboard-id',
         panels: [createSection('section-1', 'Section 1', 10)],
       },
       operations: [
@@ -179,7 +178,6 @@ describe('executeDashboardOperations', () => {
       }),
     });
 
-    expect(result.dashboardData.savedObjectId).toBe('saved-dashboard-id');
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toEqual([
       {
@@ -286,7 +284,7 @@ describe('executeDashboardOperations', () => {
           ]),
         ],
       },
-      operations: [{ operation: 'remove_section', sectionId: 'section-a', panelAction: 'promote' }],
+      operations: [{ operation: 'remove_section', uid: 'section-a', panelAction: 'promote' }],
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
@@ -309,7 +307,7 @@ describe('executeDashboardOperations', () => {
           createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
         ],
       },
-      operations: [{ operation: 'remove_section', sectionId: 'section-a', panelAction: 'delete' }],
+      operations: [{ operation: 'remove_section', uid: 'section-a', panelAction: 'delete' }],
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });

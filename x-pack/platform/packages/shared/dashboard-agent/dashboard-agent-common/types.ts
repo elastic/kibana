@@ -88,8 +88,6 @@ export const isSection = (
 export const dashboardAttachmentDataSchema = z.object({
   title: z.string(),
   description: z.string(),
-  /** Optional saved object ID if the dashboard was saved */
-  savedObjectId: z.string().optional(),
   /** Array of panels and sections (matches Dashboard API structure) */
   panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
 });

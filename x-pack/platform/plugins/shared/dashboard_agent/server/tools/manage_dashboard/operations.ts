@@ -76,7 +76,7 @@ export const addSectionOperationSchema = z.object({
 
 export const removeSectionOperationSchema = z.object({
   operation: z.literal('remove_section'),
-  sectionId: z.string().describe('Section id to remove.'),
+  uid: z.string().describe('Section uid to remove.'),
   panelAction: z
     .enum(['promote', 'delete'])
     .describe('How to handle section panels: promote to top-level or delete them.'),
@@ -323,9 +323,9 @@ export const executeDashboardOperations = ({
       }
 
       case 'remove_section': {
-        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.sectionId);
+        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.uid);
         if (sectionIndex === -1) {
-          throw new Error(`Section "${operation.sectionId}" not found.`);
+          throw new Error(`Section "${operation.uid}" not found.`);
         }
 
         const sectionToRemove = nextDashboardData.panels[sectionIndex] as DashboardSection;
