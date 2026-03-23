@@ -14,7 +14,15 @@
  *   version: 1
  */
 
+import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers';
 
 import {
   PackageName,
@@ -35,7 +43,7 @@ export const EcsMappingRequestBody = z.object({
   rawSamples: RawSamples,
   samplesFormat: SamplesFormat,
   mapping: Mapping.optional(),
-  additionalProcessors: z.array(ESProcessorItem).optional(),
+  additionalProcessors: z.array(ESProcessorItem).max(200).optional(),
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),
 });

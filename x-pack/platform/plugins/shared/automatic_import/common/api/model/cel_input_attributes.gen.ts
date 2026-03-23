@@ -14,7 +14,15 @@
  *   version: not applicable
  */
 
+import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers';
 
 export type PathOptions = z.infer<typeof PathOptions>;
 export const PathOptions = z.object({}).catchall(z.unknown());
@@ -32,9 +40,9 @@ export const CelAuthTypeEnum = CelAuthType.enum;
  */
 export type OpenApiDetails = z.infer<typeof OpenApiDetails>;
 export const OpenApiDetails = z.object({
-  operation: z.string(),
-  schemas: z.string(),
-  auth: z.string().optional(),
+  operation: z.string().min(1).max(65536).superRefine(isNonEmptyString),
+  schemas: z.string().min(1).max(500000).superRefine(isNonEmptyString),
+  auth: z.string().max(65536).optional(),
 });
 
 /**
@@ -42,7 +50,7 @@ export const OpenApiDetails = z.object({
  */
 export type CelDetails = z.infer<typeof CelDetails>;
 export const CelDetails = z.object({
-  path: z.string(),
+  path: z.string().min(1).max(2048).superRefine(isNonEmptyString),
   auth: CelAuthType,
   openApiDetails: OpenApiDetails.optional(),
 });
@@ -67,8 +75,8 @@ export const CelInput = z.object({
   authType: CelAuthType,
   configFields: z.object({}).catchall(z.unknown()),
   needsAuthConfigBlock: z.boolean(),
-  program: z.string(),
+  program: z.string().max(500000),
   stateSettings: z.object({}).catchall(z.unknown()),
-  redactVars: z.array(z.string()),
-  url: z.string(),
+  redactVars: z.array(z.string()).max(100),
+  url: z.string().min(1).max(2048).superRefine(isNonEmptyString),
 });
