@@ -29,7 +29,10 @@ export function useStepExecution(
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      return api.getStepExecution(workflowExecutionId, stepExecutionId!);
+      if (!workflowExecutionId || !stepExecutionId) {
+        throw new Error('Workflow execution ID and step execution ID are required');
+      }
+      return api.getStepExecution(workflowExecutionId, stepExecutionId);
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
     staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS,

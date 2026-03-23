@@ -42,7 +42,10 @@ export function useWorkflowExecutions(
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
-      return api.getWorkflowExecutions(params.workflowId!, {
+      if (!params.workflowId) {
+        throw new Error('Workflow ID is required');
+      }
+      return api.getWorkflowExecutions(params.workflowId, {
         statuses: params.statuses,
         executionTypes: params.executionTypes,
         ...(params.executedBy && params.executedBy.length > 0
@@ -51,7 +54,7 @@ export function useWorkflowExecutions(
         ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
         page: pageParam,
         size: currentSize,
-      }) as Promise<WorkflowExecutionListDto>;
+      });
     },
     [
       api,

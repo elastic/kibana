@@ -47,7 +47,7 @@ export function useChildWorkflowExecutions(
     queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
       const executionId = parentExecution?.id ?? '';
-      const items = await api.getChildrenExecutions(executionId) as ChildWorkflowExecutionInfo[];
+      const items = (await api.getChildrenExecutions(executionId)) as ChildWorkflowExecutionInfo[];
       const map: ChildWorkflowExecutionsMap = new Map();
       for (const item of items) {
         map.set(item.parentStepExecutionId, item);

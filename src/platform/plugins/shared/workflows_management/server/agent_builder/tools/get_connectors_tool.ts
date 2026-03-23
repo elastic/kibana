@@ -53,16 +53,16 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
       cacheMode: 'space',
     },
     handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {
-      const { connectorsByType, totalConnectors } = await api.getAvailableConnectors(
+      const { connectorTypes, totalConnectors } = await api.getAvailableConnectors(
         spaceId,
         request
       );
 
       const entries = actionTypeId
-        ? connectorsByType[actionTypeId]
-          ? [[actionTypeId, connectorsByType[actionTypeId]] as const]
+        ? connectorTypes[actionTypeId]
+          ? [[actionTypeId, connectorTypes[actionTypeId]] as const]
           : []
-        : Object.entries(connectorsByType);
+        : Object.entries(connectorTypes);
 
       let connectors = entries.flatMap(([type, typeInfo]) => {
         const baseStepType = type.replace(/^\./, '');

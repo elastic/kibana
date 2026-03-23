@@ -8,6 +8,7 @@
  */
 
 import { useMemo } from 'react';
+import type { HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WorkflowApi } from './workflows_api';
 
@@ -21,8 +22,6 @@ import { WorkflowApi } from './workflows_api';
  * ```
  */
 export const useWorkflowsApi = (): WorkflowApi => {
-  const {
-    services: { http },
-  } = useKibana();
-  return useMemo(() => new WorkflowApi(http!), [http]);
+  const { services } = useKibana<{ http: HttpStart }>();
+  return useMemo(() => new WorkflowApi(services.http), [services.http]);
 };
