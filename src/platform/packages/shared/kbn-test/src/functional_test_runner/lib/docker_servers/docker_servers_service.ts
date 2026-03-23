@@ -16,7 +16,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
-import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
+import type { DockerServer, DockerServerSpec } from '@kbn/test-docker-servers';
 
 const SECOND = 1000;
 
