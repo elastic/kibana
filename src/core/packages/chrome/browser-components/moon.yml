@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-env'
   - '@kbn/react-kibana-context-env'
-  - '@kbn/core-chrome-layout-components'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/core-chrome-navigation'
   - '@kbn/core-chrome-sidebar-components'

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { AiGradientColors } from './gradient_types';
+import type { AiGradientColors } from './use_ai_gradient_styles';
 
 /** Percentage offsets that inset the gradient stops to keep the color transition within the icon's visible area. */
 const ICON_GRADIENT_START_OFFSET = 16;
