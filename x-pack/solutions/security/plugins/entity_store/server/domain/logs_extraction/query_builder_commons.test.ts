@@ -12,7 +12,10 @@ import type {
   EntityField,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
+<<<<<<< HEAD
 import { USER_ENTITY_NAMESPACE } from '../../../common/domain/definitions/user_entity_constants';
+=======
+>>>>>>> 58aeef1d60a4b378d0a6b2bb55e69ca1bd21c4ed
 import { getEuidEsqlDocumentsContainsIdFilter } from '../../../common/domain/euid/esql';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,

@@ -226,15 +226,11 @@ export function streamlangConditionToPainlessDoc(
   if (!condition || typeof condition !== 'object') return 'false';
   const c = condition as Record<string, unknown>;
   if ('and' in c && Array.isArray(c.and)) {
-    const parts = (c.and as unknown[]).map((sub) =>
-      streamlangConditionToPainlessDoc(sub, opts)
-    );
+    const parts = (c.and as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub, opts));
     return parts.length > 0 ? `(${parts.join(' && ')})` : 'true';
   }
   if ('or' in c && Array.isArray(c.or)) {
-    const parts = (c.or as unknown[]).map((sub) =>
-      streamlangConditionToPainlessDoc(sub, opts)
-    );
+    const parts = (c.or as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub, opts));
     return parts.length > 0 ? `(${parts.join(' || ')})` : 'false';
   }
   if ('not' in c) {
