@@ -7,82 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function transformType(type: string) {
-  if (type === 'DASHBOARD_MARKDOWN') {
-    return 'markdown';
-  }
+// Prior to 9.4, embeddable type did not matter as long as it was unique
+// 9.4 and forward, embeddable type is part of public REST API 
+// and needs to be snake and lower cases
+// Table containing embeddable types that required a change for public REST API
+const LEGACY_TO_AS_CODE_TYPES: { [key: string]: string} = {
+  DASHBOARD_MARKDOWN: 'markdown',
+  timeSlider: 'time_slider_control',
+  rangeSliderControl: 'range_slider_control',
+  optionsListControl: 'options_list_control',
+  esqlControl: 'esql_control',
+  search: 'discover_session',
+  LOG_STREAM_EMBEDDABLE: 'log_stream',
+  aiopsChangePointChart: 'aiops_change_point_chart',
+  aiopsPatternAnalysisEmbeddable: 'aiops_pattern_analysis',
+  aiopsLogRateAnalysisEmbeddable: 'aiops_log_rate_analysis',
+  APM_ALERTING_LATENCY_CHART_EMBEDDABLE: 'apm_alerting_latency_chart',
+  APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE: 'apm_alerting_throughput_chart',
+  APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE: 'apm_alerting_failed_transactions_chart',
+  SLO_EMBEDDABLE: 'slo_overview',
+  SLO_ALERTS_EMBEDDABLE: 'slo_alerts',
+  SLO_ERROR_BUDGET_EMBEDDABLE: 'slo_error_budget',
+  SLO_BURN_RATE_EMBEDDABLE: 'slo_burn_rate',
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE: 'synthetics_stats_overview',
+  SYNTHETICS_MONITORS_EMBEDDABLE: 'synthetics_monitors'
+};
 
-  if (type === 'timeSlider') {
-    return 'time_slider_control';
-  }
+const AS_CODE_TO_LEGACY_TYPES = Object.fromEntries(
+  Object.entries(LEGACY_TO_AS_CODE_TYPES).map(([key, value]) => [value, key])
+);
 
-  if (type === 'rangeSliderControl') {
-    return 'range_slider_control';
-  }
+// Use on read to convert stored embeddabel type into public REST API embeddable type
+export function transformTypeOut(storedType: string) {
+  return Object.hasOwn(LEGACY_TO_AS_CODE_TYPES, storedType) ? LEGACY_TO_AS_CODE_TYPES[storedType] : storedType;
+}
 
-  if (type === 'optionsListControl') {
-    return 'options_list_control';
-  }
-
-  if (type === 'esqlControl') {
-    return 'esql_control';
-  }
-
-  if (type === 'search') {
-    return 'discover_session';
-  }
-
-  if (type === 'LOG_STREAM_EMBEDDABLE') {
-    return 'log_stream';
-  }
-
-  if (type === 'aiopsChangePointChart') {
-    return 'aiops_change_point_chart';
-  }
-
-  if (type === 'aiopsPatternAnalysisEmbeddable') {
-    return 'aiops_pattern_analysis';
-  }
-
-  if (type === 'aiopsLogRateAnalysisEmbeddable') {
-    return 'aiops_log_rate_analysis';
-  }
-
-  if (type === 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE') {
-    return 'apm_alerting_latency_chart';
-  }
-
-  if (type === 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE') {
-    return 'apm_alerting_throughput_chart';
-  }
-
-  if (type === 'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE') {
-    return 'apm_alerting_failed_transactions_chart';
-  }
-
-  if (type === 'SLO_EMBEDDABLE') {
-    return 'slo_overview';
-  }
-
-  if (type === 'SLO_ALERTS_EMBEDDABLE') {
-    return 'slo_alerts';
-  }
-
-  if (type === 'SLO_ERROR_BUDGET_EMBEDDABLE') {
-    return 'slo_error_budget';
-  }
-
-  if (type === 'SLO_BURN_RATE_EMBEDDABLE') {
-    return 'slo_burn_rate';
-  }
-
-  if (type === 'SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE') {
-    return 'synthetics_stats_overview';
-  }
-
-  if (type === 'SYNTHETICS_MONITORS_EMBEDDABLE') {
-    return 'synthetics_monitors';
-  }
-
-  return type;
+// Use on write to convert public REST API embeddable type into stored embeddable type
+export function transformTypeIn(type: string) {
+  return Object.hasOwn(AS_CODE_TO_LEGACY_TYPES, type) ? AS_CODE_TO_LEGACY_TYPES[type] : type;
 }

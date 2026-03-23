@@ -13,7 +13,7 @@ import type {
   LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { flow } from 'lodash';
-import { transformType } from '@kbn/embeddable-plugin/server';
+import { transformTypeOut } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
 
@@ -107,7 +107,7 @@ export function transformPinnedPanelProperties(
     .map(({ id, type, grow, width, ...rest }) => {
       return {
         uid: id,
-        type: transformType(type),
+        type: transformTypeOut(type),
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
         config: 'explicitInput' in rest ? rest.explicitInput : rest.config,

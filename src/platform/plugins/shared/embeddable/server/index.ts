@@ -26,7 +26,7 @@ export type {
   EmbeddablePersistableStateService,
 } from './persistable_state';
 
-export { transformType } from '../common/bwc/transform_type';
+export { transformTypeIn, transformTypeOut } from '../common/bwc/transform_type';
 
 export const plugin = async () => {
   const { EmbeddableServerPlugin } = await import('./plugin');

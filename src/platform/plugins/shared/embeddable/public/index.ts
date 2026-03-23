@@ -39,9 +39,9 @@ export {
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
-export async function transformType(type: string) {
-  const { transformType: transformTypeFn } = await import('./async_module');
-  return transformTypeFn(type);
+export async function transformTypeOut(type: string) {
+  const { transformTypeOut: transformTypeOutFn } = await import('./async_module');
+  return transformTypeOutFn(type);
 }
 
 export type { SerializedDrilldowns } from '../server';
