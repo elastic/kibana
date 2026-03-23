@@ -345,11 +345,11 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 });
 
 async function seedEntity(
-  apiClient: { put: Function },
+  apiClient: { post: Function },
   headers: Record<string, string>,
   entityId: string
 ): Promise<void> {
-  const response = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('generic') + '?force=true', {
+  const response = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
     headers,
     responseType: 'json',
     body: { entity: { id: entityId } },
