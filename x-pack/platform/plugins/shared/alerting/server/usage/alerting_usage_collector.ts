@@ -595,6 +595,41 @@ export function createAlertingUsageCollector(
         },
       },
       gap_auto_fill_scheduler_results_by_status_per_day: gapAutoFillSchedulerResultStatusSchema,
+      count_uiam_api_key_provisioning_status_total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of uiam_api_keys_provisioning_status saved objects (UIAM API key migration status records). Omitted on stateful deployments.',
+        },
+      },
+      count_uiam_api_key_provisioning_status_completed: {
+        type: 'long',
+        _meta: {
+          description:
+            'Count of provisioning status documents with status completed. Omitted on stateful deployments.',
+        },
+      },
+      count_uiam_api_key_provisioning_status_failed: {
+        type: 'long',
+        _meta: {
+          description:
+            'Count of provisioning status documents with status failed. Omitted on stateful deployments.',
+        },
+      },
+      count_uiam_api_key_provisioning_status_skipped: {
+        type: 'long',
+        _meta: {
+          description:
+            'Count of provisioning status documents with status skipped. Omitted on stateful deployments.',
+        },
+      },
+      serverless_project_id: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Serverless project id from the Cloud plugin. Omitted on stateful deployments.',
+        },
+      },
     },
   });
 }

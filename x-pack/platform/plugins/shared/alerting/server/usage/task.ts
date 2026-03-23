@@ -27,34 +27,51 @@ import {
 import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
 import { getGapAutoFillSchedulerTelemetryPerDay } from './lib/get_gap_auto_fill_scheduler_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
+import { getUiamApiKeyProvisioningStatusTelemetry } from './lib/get_uiam_api_key_provisioning_status_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
 export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
+/**
+ * @param serverlessProjectId When `undefined`, the deployment is stateful (no UIAM provisioning
+ * telemetry). When set (including `''`), build flavor is serverless; value is from Cloud
+ * `serverless.projectId` or empty if unavailable.
+ */
 export function initializeAlertingTelemetry(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  eventLogIndex: string
+  eventLogIndex: string,
+  serverlessProjectId?: string
 ) {
-  registerAlertingTelemetryTask(logger, core, taskManager, eventLogIndex);
+  registerAlertingTelemetryTask(logger, core, taskManager, eventLogIndex, serverlessProjectId);
 }
 
 function registerAlertingTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  eventLogIndex: string
+  eventLogIndex: string,
+  serverlessProjectId?: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
       stateSchemaByVersion,
-      createTaskRunner: telemetryTaskRunner(logger, core, eventLogIndex, taskManager.index),
+      createTaskRunner: telemetryTaskRunner(
+        logger,
+        core,
+        eventLogIndex,
+        taskManager.index,
+        serverlessProjectId
+      ),
     },
   });
 }
@@ -83,8 +100,11 @@ export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
   eventLogIndex: string,
-  taskManagerIndex: string
+  taskManagerIndex: string,
+  serverlessProjectId?: string
 ) {
+  const isServerless = serverlessProjectId !== undefined;
+
   return ({ taskInstance }: RunContext) => {
     const state = taskInstance.state as LatestTaskStateSchema;
     const getEsClient = () =>
@@ -100,17 +120,30 @@ export function telemetryTaskRunner(
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getIndexForType(RULE_SAVED_OBJECT_TYPE));
 
+    const getUiamIndex = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) =>
+          coreStart.savedObjects.getIndexForType(
+            UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE
+          )
+        );
+
     const getSavedObjectClient = () =>
       core
         .getStartServices()
         .then(([coreStart]) =>
-          coreStart.savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE])
+          coreStart.savedObjects.createInternalRepository([
+            MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+            ...(isServerless ? [UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE] : []),
+          ])
         );
 
     return {
       async run() {
         const esClient = await getEsClient();
         const alertIndex = await getAlertIndex();
+        const uiamIndex = isServerless ? await getUiamIndex() : '';
         const savedObjectsClient = await getSavedObjectClient();
 
         return Promise.all([
@@ -123,6 +156,13 @@ export function telemetryTaskRunner(
           getTotalAlertsCountAggregations({ esClient, logger }),
           getBackfillTelemetryPerDay({ esClient, eventLogIndex, logger }),
           getGapAutoFillSchedulerTelemetryPerDay({ esClient, eventLogIndex, logger }),
+          isServerless
+            ? getUiamApiKeyProvisioningStatusTelemetry({
+                esClient,
+                savedObjectsIndex: uiamIndex,
+                logger,
+              })
+            : Promise.resolve({ hasErrors: false }),
         ])
           .then(
             ([
@@ -135,7 +175,12 @@ export function telemetryTaskRunner(
               totalAlertsCountAggregations,
               dailyBackfillCounts,
               dailyGapAutoFillSchedulerCounts,
+              uiamProvisioningStatusTelemetry,
             ]) => {
+              const uiamResult = uiamProvisioningStatusTelemetry as Awaited<
+                ReturnType<typeof getUiamApiKeyProvisioningStatusTelemetry>
+              >;
+
               const hasErrors =
                 totalCountAggregations.hasErrors ||
                 totalInUse.hasErrors ||
@@ -145,7 +190,8 @@ export function telemetryTaskRunner(
                 MWTelemetry.hasErrors ||
                 totalAlertsCountAggregations.hasErrors ||
                 dailyBackfillCounts.hasErrors ||
-                dailyGapAutoFillSchedulerCounts.hasErrors;
+                dailyGapAutoFillSchedulerCounts.hasErrors ||
+                uiamResult.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -157,6 +203,7 @@ export function telemetryTaskRunner(
                 totalAlertsCountAggregations.errorMessage,
                 dailyBackfillCounts.errorMessage,
                 dailyGapAutoFillSchedulerCounts.errorMessage,
+                uiamResult.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -255,6 +302,19 @@ export function telemetryTaskRunner(
                   dailyGapAutoFillSchedulerCounts.resultsByStatus,
                 count_ignored_fields_by_rule_type:
                   totalAlertsCountAggregations.count_ignored_fields_by_rule_type,
+                ...(isServerless
+                  ? {
+                      count_uiam_api_key_provisioning_status_total:
+                        uiamResult.count_uiam_api_key_provisioning_status_total ?? 0,
+                      count_uiam_api_key_provisioning_status_completed:
+                        uiamResult.count_uiam_api_key_provisioning_status_completed ?? 0,
+                      count_uiam_api_key_provisioning_status_failed:
+                        uiamResult.count_uiam_api_key_provisioning_status_failed ?? 0,
+                      count_uiam_api_key_provisioning_status_skipped:
+                        uiamResult.count_uiam_api_key_provisioning_status_skipped ?? 0,
+                      serverless_project_id: serverlessProjectId ?? '',
+                    }
+                  : {}),
               };
 
               return {

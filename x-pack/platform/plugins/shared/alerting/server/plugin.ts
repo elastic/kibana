@@ -48,6 +48,7 @@ import type {
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginSetup as KQLPluginSetup } from '@kbn/kql/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
@@ -191,6 +192,7 @@ export interface AlertingServerStart {
 }
 
 export interface AlertingPluginsSetup {
+  cloud?: CloudSetup;
   security?: SecurityPluginSetup;
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
@@ -390,7 +392,13 @@ export class AlertingPlugin {
     if (usageCollection) {
       registerAlertingUsageCollector(usageCollection, taskManagerStartPromise);
       const eventLogIndex = this.eventLogService.getIndexPattern();
-      initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, eventLogIndex);
+      initializeAlertingTelemetry(
+        this.telemetryLogger,
+        core,
+        plugins.taskManager,
+        eventLogIndex,
+        plugins.cloud?.serverless?.projectId
+      );
     }
 
     // Usage counter for telemetry
@@ -796,6 +804,7 @@ export class AlertingPlugin {
   }
 
   private getShouldGrantUiam(core: CoreStart): boolean {
+    return false;
     return !!core.security.authc.apiKeys.uiam;
   }
 

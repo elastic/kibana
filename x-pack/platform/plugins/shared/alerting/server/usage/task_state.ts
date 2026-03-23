@@ -169,6 +169,14 @@ const stateSchemaV9 = stateSchemaV8.extends({
   ),
 });
 
+const stateSchemaV10 = stateSchemaV9.extends({
+  count_uiam_api_key_provisioning_status_total: schema.maybe(schema.number()),
+  count_uiam_api_key_provisioning_status_completed: schema.maybe(schema.number()),
+  count_uiam_api_key_provisioning_status_failed: schema.maybe(schema.number()),
+  count_uiam_api_key_provisioning_status_skipped: schema.maybe(schema.number()),
+  serverless_project_id: schema.maybe(schema.string()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -340,9 +348,36 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV9,
   },
+  10: {
+    up: (state: Record<string, unknown>) => {
+      const base = stateSchemaByVersion[9].up(state);
+      const optional: Record<string, unknown> = {};
+      if (typeof state.count_uiam_api_key_provisioning_status_total === 'number') {
+        optional.count_uiam_api_key_provisioning_status_total =
+          state.count_uiam_api_key_provisioning_status_total;
+      }
+      if (typeof state.count_uiam_api_key_provisioning_status_completed === 'number') {
+        optional.count_uiam_api_key_provisioning_status_completed =
+          state.count_uiam_api_key_provisioning_status_completed;
+      }
+      if (typeof state.count_uiam_api_key_provisioning_status_failed === 'number') {
+        optional.count_uiam_api_key_provisioning_status_failed =
+          state.count_uiam_api_key_provisioning_status_failed;
+      }
+      if (typeof state.count_uiam_api_key_provisioning_status_skipped === 'number') {
+        optional.count_uiam_api_key_provisioning_status_skipped =
+          state.count_uiam_api_key_provisioning_status_skipped;
+      }
+      if (typeof state.serverless_project_id === 'string') {
+        optional.serverless_project_id = state.serverless_project_id;
+      }
+      return { ...base, ...optional };
+    },
+    schema: stateSchemaV10,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[9].schema;
+const latestTaskStateSchema = stateSchemaByVersion[10].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

@@ -123,4 +123,16 @@ export interface AlertingUsage {
   gap_auto_fill_scheduler_unique_rule_count_per_day: number;
   gap_auto_fill_scheduler_processed_gaps_total_per_day: number;
   gap_auto_fill_scheduler_results_by_status_per_day: Record<string, number>;
+  /**
+   * UIAM API key provisioning status SO counts. Present only on serverless deployments where the
+   * telemetry task queries this SO type; omitted on stateful.
+   */
+  count_uiam_api_key_provisioning_status_total?: number;
+  count_uiam_api_key_provisioning_status_completed?: number;
+  count_uiam_api_key_provisioning_status_failed?: number;
+  count_uiam_api_key_provisioning_status_skipped?: number;
+  /**
+   * Serverless project id from the Cloud plugin when running serverless; omitted on stateful.
+   */
+  serverless_project_id?: string;
 }

@@ -1106,4 +1106,35 @@ describe('telemetry task state', () => {
       expect(result).toEqual(expect.objectContaining(state));
     });
   });
+
+  describe('v10', () => {
+    const v10 = stateSchemaByVersion[10];
+
+    it('does not add UIAM or serverless project fields when absent from state', () => {
+      const result = v10.up({});
+      expect(result).not.toHaveProperty('count_uiam_api_key_provisioning_status_total');
+      expect(result).not.toHaveProperty('serverless_project_id');
+    });
+
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        count_uiam_api_key_provisioning_status_total: 10,
+        count_uiam_api_key_provisioning_status_completed: 7,
+        count_uiam_api_key_provisioning_status_failed: 2,
+        count_uiam_api_key_provisioning_status_skipped: 1,
+      };
+      const result = v10.up(state);
+      expect(result).toEqual(expect.objectContaining(state));
+      expect(result).not.toHaveProperty('serverless_project_id');
+    });
+
+    it('preserves serverless_project_id when present in state', () => {
+      const result = v10.up({ serverless_project_id: 'proj-1' });
+      expect(result).toEqual(
+        expect.objectContaining({
+          serverless_project_id: 'proj-1',
+        })
+      );
+    });
+  });
 });
