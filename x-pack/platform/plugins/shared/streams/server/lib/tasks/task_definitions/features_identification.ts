@@ -375,7 +375,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     esClient,
                     logger: taskContext.logger.get('computed_features'),
                   }),
-                  featureClient.getFeatures(stream.name),
                 ]);
 
                 const reconciledComputedFeatures = reconcileComputedFeatures({
