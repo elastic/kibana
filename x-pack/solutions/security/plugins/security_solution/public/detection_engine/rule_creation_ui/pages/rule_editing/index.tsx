@@ -533,11 +533,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const isEndpointExceptionListLinked: boolean = useMemo(
     () =>
-      rule != null &&
-      rule.exceptions_list != null &&
-      rule.exceptions_list.some(
+      rule?.exceptions_list?.some(
         (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-      ),
+      ) ?? false,
     [rule]
   );
 
