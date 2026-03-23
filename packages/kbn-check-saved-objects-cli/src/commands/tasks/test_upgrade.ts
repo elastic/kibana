@@ -13,10 +13,21 @@ import type { Task, TaskContext } from '../types';
 import { checkDocuments } from './check_documents';
 
 export const testUpgrade: Task = async (ctx, task) => {
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = ctx;
+  if (!migrationTypes || !migrationTypes.length) {
+    throw new Error('Missing migrationTypes. This task must be run from automated rollback tests.');
+  }
+  if (!migrationKibanaIndex) {
+    throw new Error('Missing migrationKibanaIndex. This task must be run from automated rollback tests.');
+  }
+  if (!migrationAlgorithm) {
+    throw new Error('Missing migrationAlgorithm. This task must be run from automated rollback tests.');
+  }
+
   const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
-    types: ctx.updatedTypes,
-    kibanaIndex: ctx.migrationKibanaIndex,
-    settings: { migrations: { algorithm: ctx.migrationAlgorithm } },
+    types: migrationTypes,
+    kibanaIndex: migrationKibanaIndex,
+    settings: { migrations: { algorithm: migrationAlgorithm } },
     encryptionExtensionFactory: ctx.encryptedSavedObjects
       ? (typeRegistry) => ctx.encryptedSavedObjects!.__testCreateDangerousExtension(typeRegistry)
       : undefined,
@@ -24,7 +35,7 @@ export const testUpgrade: Task = async (ctx, task) => {
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run migration on updated types: '${ctx.updatedTypes
+      title: `Run migration on updated types: '${migrationTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await runMigrations(),
@@ -33,7 +44,7 @@ export const testUpgrade: Task = async (ctx, task) => {
       title: `Ensure migrated objects match latest version fixtures`,
       task: checkDocuments({
         repository: savedObjectsRepository,
-        types: ctx.updatedTypes,
+        types: migrationTypes,
         fixtures: ctx.fixtures.current,
       }),
     },

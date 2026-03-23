@@ -196,7 +196,7 @@ export function runCheckSavedObjectsCli() {
       description: `
       Determine if the changes performed to the Saved Objects mappings are following our standards.
 
-      Usage: node scripts/check_saved_objects --baseline <gitRev> --fix
+      Usage: node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>] --fix
     `,
       flags: {
         alias: {

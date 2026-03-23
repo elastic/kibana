@@ -36,6 +36,7 @@ export interface TaskContext {
   serverlessFrom?: MigrationSnapshot;
   to?: MigrationSnapshot;
   updatedTypes: SavedObjectsType<any>[];
+  migrationTypes?: SavedObjectsType<any>[];
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
   baselineMappings?: SavedObjectsTypeMappingDefinitions;

@@ -120,6 +120,6 @@ else
       exit 1
     fi
     # Perform the check against current serverless release
-    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_RELEASE_SHA" --algorithm both
+    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_BASELINE_SHA" --algorithm both
   fi
 fi

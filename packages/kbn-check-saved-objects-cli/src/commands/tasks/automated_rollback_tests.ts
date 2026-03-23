@@ -22,7 +22,7 @@ const rollbackTestsForAlgorithm = (algorithm: MigrationAlgorithm): ListrTask<Tas
     ctx.migrationAlgorithm = algorithm;
     ctx.migrationKibanaIndex = `.kibana_migrator_${algorithm}_${Date.now()}`;
 
-    ctx.updatedTypes = ctx.updatedTypes.map((type) => ({
+    ctx.migrationTypes = ctx.updatedTypes.map((type) => ({
       ...type,
       indexPattern: ctx.migrationKibanaIndex,
     }));

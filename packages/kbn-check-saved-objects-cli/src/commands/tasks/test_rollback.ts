@@ -14,17 +14,26 @@ import { getPreviousVersionType } from '../../migrations';
 import { checkDocuments } from './check_documents';
 
 export const testRollback: Task = async (ctx, task) => {
-  const { updatedTypes, baselineMappings } = ctx;
+  const { migrationTypes, baselineMappings, migrationKibanaIndex, migrationAlgorithm } = ctx;
+  if (!migrationTypes || !migrationTypes.length) {
+    throw new Error('Missing migrationTypes. This task must be run from automated rollback tests.');
+  }
+  if (!migrationKibanaIndex) {
+    throw new Error('Missing migrationKibanaIndex. This task must be run from automated rollback tests.');
+  }
+  if (!migrationAlgorithm) {
+    throw new Error('Missing migrationAlgorithm. This task must be run from automated rollback tests.');
+  }
 
-  const previousVersionTypes = updatedTypes.map((type) =>
+  const previousVersionTypes = migrationTypes.map((type) =>
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
   );
 
   const { runMigrations: performRollback, savedObjectsRepository } = await getKibanaMigratorTestKit(
     {
       types: previousVersionTypes,
-      kibanaIndex: ctx.migrationKibanaIndex,
-      settings: { migrations: { algorithm: ctx.migrationAlgorithm } },
+      kibanaIndex: migrationKibanaIndex,
+      settings: { migrations: { algorithm: migrationAlgorithm } },
       encryptionExtensionFactory: ctx.encryptedSavedObjects
         ? (typeRegistry) =>
             ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
@@ -37,7 +46,7 @@ export const testRollback: Task = async (ctx, task) => {
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run rollback migration on updated types: '${updatedTypes
+      title: `Run rollback migration on updated types: '${migrationTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await performRollback(),
