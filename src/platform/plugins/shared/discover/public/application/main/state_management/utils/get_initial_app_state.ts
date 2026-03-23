@@ -204,6 +204,9 @@ function getDefaultAppState({
   if (persistedTab?.hideChart !== undefined) {
     defaultState.hideChart = persistedTab.hideChart;
   }
+  if (persistedTab?.hideTable !== undefined) {
+    defaultState.hideTable = persistedTab.hideTable;
+  }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;
   }

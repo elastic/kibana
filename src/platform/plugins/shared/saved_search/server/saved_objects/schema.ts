@@ -45,6 +45,9 @@ const SCHEMA_SEARCH_BASE = schema.object({
   rowHeight: schema.maybe(schema.number()),
   rowsPerPage: schema.maybe(schema.number()),
 
+  // Table
+  hideTable: schema.boolean({ defaultValue: false }),
+
   // Chart
   hideChart: schema.boolean({ defaultValue: false }),
   breakdownField: schema.maybe(schema.string()),
@@ -154,14 +157,23 @@ export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.exten
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
 
-const { columns, grid, hideChart, isTextBasedQuery, kibanaSavedObjectMeta, rowHeight, sort } =
-  SCHEMA_SEARCH_MODEL_VERSION_6.getPropSchemas();
+const {
+  columns,
+  grid,
+  hideChart,
+  hideTable,
+  isTextBasedQuery,
+  kibanaSavedObjectMeta,
+  rowHeight,
+  sort,
+} = SCHEMA_SEARCH_MODEL_VERSION_6.getPropSchemas();
 
 // Mark top-level attributes (except title and description) optional, and mark tabs as required
 export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.extends({
   columns: schema.maybe(columns),
   grid: schema.maybe(grid),
   hideChart: schema.maybe(hideChart),
+  hideTable: schema.maybe(hideTable),
   isTextBasedQuery: schema.maybe(isTextBasedQuery),
   kibanaSavedObjectMeta: schema.maybe(kibanaSavedObjectMeta),
   rowHeight: schema.maybe(rowHeight),
