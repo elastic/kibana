@@ -8,7 +8,11 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { AlertRuleTriggerSchema, ManualTriggerSchema, ScheduledTriggerSchema } from './schema';
+import {
+  AlertRuleTriggerSchema,
+  ManualTriggerSchema,
+  ScheduledTriggerSchema,
+} from './schema/triggers';
 
 export interface TriggerDocumentation {
   details?: string;
@@ -66,17 +70,12 @@ export const builtInTriggerDefinitions: BaseTriggerDefinition[] = [
   {
     id: 'alert',
     label: 'Alert',
-    description:
-      'Trigger a workflow when an alerting rule fires. Optionally filter by rule_id or rule_name',
+    description: 'Trigger a workflow when an alerting rule fires',
     schema: AlertRuleTriggerSchema,
     documentation: {
       examples: [
         `triggers:
   - type: alert`,
-        `triggers:
-  - type: alert
-    with:
-      rule_name: "High CPU Usage"`,
       ],
     },
   },

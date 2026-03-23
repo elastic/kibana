@@ -7436,6 +7436,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kbn-client@link:src/platform/packages/shared/kbn-kbn-client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kbn-genai-cli@link:x-pack/solutions/observability/packages/kbn-genai-cli":
   version "0.0.0"
   uid ""
@@ -8545,6 +8549,10 @@
   uid ""
 
 "@kbn/scout-security@link:x-pack/solutions/security/packages/kbn-scout-security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/scout-synthtrace@link:src/platform/packages/shared/kbn-scout-synthtrace":
   version "0.0.0"
   uid ""
 
