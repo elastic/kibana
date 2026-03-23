@@ -6,23 +6,13 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
-import {
-  generateLogsData,
-  generateMetricsData,
-  generateRulesData,
-} from '../fixtures/generators';
+import { generateLogsData, generateMetricsData, generateRulesData } from '../fixtures/generators';
 import { GENERATED_METRICS } from '../fixtures/constants';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({
-    apiServices,
-    log,
-    logsSynthtraceEsClient,
-    infraSynthtraceEsClient,
-    esClient,
-  }) => {
+  async ({ apiServices, log, logsSynthtraceEsClient, infraSynthtraceEsClient, esClient }) => {
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
 

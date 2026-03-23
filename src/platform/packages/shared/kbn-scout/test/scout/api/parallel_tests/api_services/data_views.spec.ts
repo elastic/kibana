@@ -94,48 +94,45 @@ apiTest.describe(
       expect(status).toBe(404);
     });
 
-    apiTest(
-      'should find data views with a predicate using find()',
-      async ({ apiServices }) => {
-        const title1 = `test-find-alpha-${Date.now()}`;
-        const title2 = `test-find-beta-${Date.now()}`;
+    apiTest('should find data views with a predicate using find()', async ({ apiServices }) => {
+      const title1 = `test-find-alpha-${Date.now()}`;
+      const title2 = `test-find-beta-${Date.now()}`;
 
-        const { data: dv1 } = await apiServices.dataViews.create({
-          title: title1,
-          name: 'Find Test Alpha',
-        });
+      const { data: dv1 } = await apiServices.dataViews.create({
+        title: title1,
+        name: 'Find Test Alpha',
+      });
 
-        const { data: dv2 } = await apiServices.dataViews.create({
-          title: title2,
-          name: 'Find Test Beta',
-        });
+      const { data: dv2 } = await apiServices.dataViews.create({
+        title: title2,
+        name: 'Find Test Beta',
+      });
 
-        const id1 = dv1.id;
-        const id2 = dv2.id;
+      const id1 = dv1.id;
+      const id2 = dv2.id;
 
-        try {
-          // Find data views with titles containing "test-find-alpha"
-          const { data: foundDataViews, status } = await apiServices.dataViews.find((dv) =>
-            dv.title.includes('test-find-alpha')
-          );
+      try {
+        // Find data views with titles containing "test-find-alpha"
+        const { data: foundDataViews, status } = await apiServices.dataViews.find((dv) =>
+          dv.title.includes('test-find-alpha')
+        );
 
-          expect(status).toBe(200);
-          expect(foundDataViews.length).toBeGreaterThan(0);
+        expect(status).toBe(200);
+        expect(foundDataViews.length).toBeGreaterThan(0);
 
-          const matchingDataView = foundDataViews.find((dv) => dv.id === id1);
-          expect(matchingDataView).toBeDefined();
-          expect(matchingDataView?.title).toBe(title1);
+        const matchingDataView = foundDataViews.find((dv) => dv.id === id1);
+        expect(matchingDataView).toBeDefined();
+        expect(matchingDataView?.title).toBe(title1);
 
-          // Verify the other data view is NOT in the results
-          const nonMatchingDataView = foundDataViews.find((dv) => dv.id === id2);
-          expect(nonMatchingDataView).toBeUndefined();
-        } finally {
-          // Clean up
-          await apiServices.dataViews.delete(id1);
-          await apiServices.dataViews.delete(id2);
-        }
+        // Verify the other data view is NOT in the results
+        const nonMatchingDataView = foundDataViews.find((dv) => dv.id === id2);
+        expect(nonMatchingDataView).toBeUndefined();
+      } finally {
+        // Clean up
+        await apiServices.dataViews.delete(id1);
+        await apiServices.dataViews.delete(id2);
       }
-    );
+    });
 
     apiTest(
       'should return empty array when find() predicate matches nothing',
@@ -149,27 +146,24 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'should delete a data view by title with deleteByTitle()',
-      async ({ apiServices }) => {
-        const tempTitle = `test-delete-by-title-${Date.now()}`;
+    apiTest('should delete a data view by title with deleteByTitle()', async ({ apiServices }) => {
+      const tempTitle = `test-delete-by-title-${Date.now()}`;
 
-        const { data: tempDataView } = await apiServices.dataViews.create({
-          title: tempTitle,
-          name: `Delete By Title Test ${Date.now()}`,
-        });
-        const tempId = tempDataView.id;
+      const { data: tempDataView } = await apiServices.dataViews.create({
+        title: tempTitle,
+        name: `Delete By Title Test ${Date.now()}`,
+      });
+      const tempId = tempDataView.id;
 
-        // Delete by title
-        const { status } = await apiServices.dataViews.deleteByTitle(tempTitle);
+      // Delete by title
+      const { status } = await apiServices.dataViews.deleteByTitle(tempTitle);
 
-        expect(status).toBe(200);
+      expect(status).toBe(200);
 
-        // Verify it's deleted
-        const { status: getStatus } = await apiServices.dataViews.get(tempId);
-        expect(getStatus).toBe(404);
-      }
-    );
+      // Verify it's deleted
+      const { status: getStatus } = await apiServices.dataViews.get(tempId);
+      expect(getStatus).toBe(404);
+    });
 
     apiTest(
       'should return 200 when deleteByTitle() is called with non-existent title',
@@ -293,24 +287,21 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'should handle deleteByTitle() when called twice',
-      async ({ apiServices }) => {
-        const tempTitle = `duplicate-delete-test-${Date.now()}`;
+    apiTest('should handle deleteByTitle() when called twice', async ({ apiServices }) => {
+      const tempTitle = `duplicate-delete-test-${Date.now()}`;
 
-        await apiServices.dataViews.create({
-          title: tempTitle,
-          name: 'Duplicate Delete Test',
-        });
+      await apiServices.dataViews.create({
+        title: tempTitle,
+        name: 'Duplicate Delete Test',
+      });
 
-        // Delete by title first time
-        const { status: firstStatus } = await apiServices.dataViews.deleteByTitle(tempTitle);
-        expect(firstStatus).toBe(200);
+      // Delete by title first time
+      const { status: firstStatus } = await apiServices.dataViews.deleteByTitle(tempTitle);
+      expect(firstStatus).toBe(200);
 
-        // Delete by title second time (should return 200, not an error)
-        const { status: secondStatus } = await apiServices.dataViews.deleteByTitle(tempTitle);
-        expect(secondStatus).toBe(200);
-      }
-    );
+      // Delete by title second time (should return 200, not an error)
+      const { status: secondStatus } = await apiServices.dataViews.deleteByTitle(tempTitle);
+      expect(secondStatus).toBe(200);
+    });
   }
 );
