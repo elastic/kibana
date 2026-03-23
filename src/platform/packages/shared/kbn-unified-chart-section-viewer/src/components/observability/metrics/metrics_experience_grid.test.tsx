@@ -24,7 +24,6 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { createInitialMetricsTelemetry } from './utils/parse_metrics_response';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 
@@ -156,7 +155,6 @@ describe('MetricsExperienceGrid', () => {
       allDimensions: dimensions,
       loading: false,
       error: null,
-      telemetry: createInitialMetricsTelemetry(),
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({

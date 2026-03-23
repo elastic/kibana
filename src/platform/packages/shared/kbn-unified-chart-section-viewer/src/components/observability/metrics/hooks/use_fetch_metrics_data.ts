@@ -20,10 +20,7 @@ import type {
 } from '../../../../types';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import {
-  createInitialMetricsTelemetry,
-  parseMetricsResponse,
-} from '../utils/parse_metrics_response';
+import { parseMetricsResponse } from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
@@ -76,18 +73,14 @@ export function useFetchMetricsData({
       });
 
       const parsed = parseMetricsResponse(result);
-      const telemetry = parsed?.telemetry ?? createInitialMetricsTelemetry();
 
-      onMetricsTelemetryReportedRef.current?.(telemetry);
+      onMetricsTelemetryReportedRef.current?.(parsed.telemetry);
 
       return {
-        metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
+        metricItems: [...parsed.metricItems].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ),
-        telemetry,
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
       };
     },
     [
@@ -126,6 +119,5 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
-    telemetry: value?.telemetry ?? createInitialMetricsTelemetry(),
   };
 }

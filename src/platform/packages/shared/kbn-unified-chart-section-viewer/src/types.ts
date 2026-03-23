@@ -86,7 +86,6 @@ export interface MetricsTelemetry {
 export interface ParsedMetricsResult {
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
-  telemetry: MetricsTelemetry;
 }
 
 export interface MetricsInfoResponse {
@@ -94,5 +93,4 @@ export interface MetricsInfoResponse {
   error: Error | null;
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
-  telemetry: MetricsTelemetry;
 }

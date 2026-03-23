@@ -13,6 +13,11 @@ import type {
   ParsedMetricItem,
   ParsedMetricsResult,
 } from '../../../../types';
+
+/** Full parse output including aggregated METRICS_INFO telemetry (for callbacks, not part of {@link ParsedMetricsResult}). */
+export type ParseMetricsResponseResult = ParsedMetricsResult & {
+  telemetry: MetricsTelemetry;
+};
 import { toArray } from './to_array';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
 import { accumulateMetricsRowTelemetry } from './accumulate_metrics_row_telemetry';
@@ -27,7 +32,9 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
   multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
 });
 
-export const parseMetricsResponse = (response: MetricsESQLResponse[]): ParsedMetricsResult => {
+export const parseMetricsResponse = (
+  response: MetricsESQLResponse[]
+): ParseMetricsResponseResult => {
   const result: ParsedMetricItem[] = [];
   const telemetry = createInitialMetricsTelemetry();
 
