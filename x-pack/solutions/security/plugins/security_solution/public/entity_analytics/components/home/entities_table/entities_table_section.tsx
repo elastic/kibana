@@ -135,8 +135,7 @@ const buildResolutionBoolQuery = (targetEntityId: string) => ({
 });
 
 export const groupFilterMap = (filter: Filter | null): Filter | null => {
-  const query = filter?.query;
-  return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
+  return filter?.query ? filter : null;
 };
 
 /**

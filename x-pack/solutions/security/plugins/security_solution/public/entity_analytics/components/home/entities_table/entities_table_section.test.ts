@@ -212,16 +212,20 @@ describe('groupFilterMap', () => {
     expect(groupFilterMap(filter)).toBe(filter);
   });
 
-  it('returns null for unrecognized filter shapes', () => {
+  it('passes through any filter with a query', () => {
     const filter = createFilter({
       term: { field: 'value' },
     });
 
-    expect(groupFilterMap(filter)).toBeNull();
+    expect(groupFilterMap(filter)).toBe(filter);
   });
 
   it('returns null for null input', () => {
     expect(groupFilterMap(null)).toBeNull();
+  });
+
+  it('returns null for filter without query', () => {
+    expect(groupFilterMap({ meta: {} } as Filter)).toBeNull();
   });
 });
 
