@@ -201,6 +201,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
           rowHeight: true,
           breakdownField: true,
           hideChart: true,
+          hideTable: true,
         },
       })
     );
@@ -253,6 +254,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
           rowHeight: true,
           breakdownField: true,
           hideChart: true,
+          hideTable: true,
         },
       })
     );
