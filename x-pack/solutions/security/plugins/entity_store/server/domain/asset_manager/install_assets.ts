@@ -24,7 +24,7 @@ import {
   getLatestEntityIndexTemplateConfig,
   getLatestIndexTemplateId,
 } from './latest_index_template';
-import { getLatestEntitiesIndexName } from './latest_index';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import {
   getComponentTemplateName,
   getEntityDefinitionComponentTemplate,

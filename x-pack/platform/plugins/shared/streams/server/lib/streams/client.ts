@@ -464,6 +464,7 @@ export class StreamsClient {
         {
           type: 'upsert',
           definition: {
+            type: 'wired',
             name,
             description: '',
             updated_at: now,
@@ -501,6 +502,7 @@ export class StreamsClient {
         {
           type: 'upsert',
           definition: {
+            type: 'query',
             name,
             description: '',
             updated_at: new Date().toISOString(),
@@ -730,6 +732,7 @@ export class StreamsClient {
     const timestamp = new Date(0).toISOString();
 
     const definition: Streams.ClassicStream.Definition = {
+      type: 'classic',
       name: dataStream.name,
       description: '',
       updated_at: timestamp,
@@ -817,6 +820,7 @@ export class StreamsClient {
     const now = new Date().toISOString();
 
     return response.data_streams.map((dataStream) => ({
+      type: 'classic' as const,
       name: dataStream.name,
       description: '',
       updated_at: now,
