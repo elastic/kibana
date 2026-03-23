@@ -7,7 +7,6 @@
 
 import type { PluginDefinition, UnmanagedPluginAssets } from '@kbn/agent-builder-common';
 import type { BuiltInPluginDefinition } from '@kbn/agent-builder-server/plugins';
-import { createPluginNotFoundError } from '@kbn/agent-builder-common';
 import type { BuiltinPluginRegistry } from './registry';
 import type { ReadonlyPluginProvider } from '../plugin_provider';
 
@@ -31,10 +30,11 @@ export const createBuiltinPluginProvider = ({
     has: (pluginId: string) => registry.has(pluginId),
     get: (pluginId: string) => {
       const definition = registry.get(pluginId);
-      if (!definition) {
-        throw createPluginNotFoundError({ pluginId });
-      }
-      return toPluginDefinition(definition);
+      return definition ? toPluginDefinition(definition) : undefined;
+    },
+    findByName: (name: string) => {
+      const definition = registry.findByName(name);
+      return definition ? toPluginDefinition(definition) : undefined;
     },
     list: () => registry.list().map(toPluginDefinition),
   };
@@ -49,6 +49,6 @@ const toPluginDefinition = (definition: BuiltInPluginDefinition): PluginDefiniti
   manifest: definition.manifest ?? {},
   skill_ids: definition.skill_ids ?? [],
   unmanaged_assets: emptyUnmanagedAssets,
-  created_at: new Date(0).toISOString(),
-  updated_at: new Date(0).toISOString(),
+  created_at: '',
+  updated_at: '',
 });

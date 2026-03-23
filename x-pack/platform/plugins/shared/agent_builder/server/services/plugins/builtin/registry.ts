@@ -11,6 +11,7 @@ export interface BuiltinPluginRegistry {
   register(plugin: BuiltInPluginDefinition): void;
   has(pluginId: string): boolean;
   get(pluginId: string): BuiltInPluginDefinition | undefined;
+  findByName(name: string): BuiltInPluginDefinition | undefined;
   list(): BuiltInPluginDefinition[];
 }
 
@@ -23,7 +24,7 @@ class BuiltinPluginRegistryImpl implements BuiltinPluginRegistry {
 
   register(plugin: BuiltInPluginDefinition) {
     if (this.plugins.has(plugin.id)) {
-      throw new Error(`Plugin with id ${plugin.id} already registered`);
+      throw new Error(`Built-in plugin with id "${plugin.id}" is already registered`);
     }
     this.plugins.set(plugin.id, plugin);
   }
@@ -34,6 +35,15 @@ class BuiltinPluginRegistryImpl implements BuiltinPluginRegistry {
 
   get(pluginId: string) {
     return this.plugins.get(pluginId);
+  }
+
+  findByName(name: string) {
+    for (const plugin of this.plugins.values()) {
+      if (plugin.name === name) {
+        return plugin;
+      }
+    }
+    return undefined;
   }
 
   list() {

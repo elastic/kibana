@@ -13,7 +13,8 @@ export interface ReadonlyPluginProvider {
   id: string;
   readonly: true;
   has(pluginId: string): MaybePromise<boolean>;
-  get(pluginId: string): MaybePromise<PluginDefinition>;
+  get(pluginId: string): MaybePromise<PluginDefinition | undefined>;
+  findByName(name: string): MaybePromise<PluginDefinition | undefined>;
   list(): MaybePromise<PluginDefinition[]>;
 }
 

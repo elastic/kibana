@@ -37,7 +37,7 @@ import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
-import type { PluginsServiceSetup } from './services/plugins';
+import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -234,6 +234,17 @@ export interface SmlStart {
 }
 
 /**
+ * AgentBuilder plugins service's start contract
+ */
+export interface PluginsStart {
+  /**
+   * Return a plugin registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted plugins.
+   */
+  getRegistry: (opts: { request: KibanaRequest }) => PluginRegistry;
+}
+
+/**
  * Start contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -249,6 +260,10 @@ export interface AgentBuilderPluginStart {
    * Skills service, to manage and access skills.
    */
   skills: SkillsStart;
+  /**
+   * Plugins service, to query built-in and persisted plugins.
+   */
+  plugins: PluginsStart;
   /**
    * Execution service, to execute agents and retrieve execution status.
    */

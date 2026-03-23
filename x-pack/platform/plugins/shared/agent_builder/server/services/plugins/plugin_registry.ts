@@ -18,6 +18,7 @@ import type { PluginCreateRequest, PluginUpdateRequest } from './client';
 export interface PluginRegistry {
   has(pluginId: string): Promise<boolean>;
   get(pluginId: string): Promise<PluginDefinition>;
+  findByName(name: string): Promise<PluginDefinition | undefined>;
   list(): Promise<PluginDefinition[]>;
   create(request: PluginCreateRequest): Promise<PluginDefinition>;
   update(pluginId: string, update: PluginUpdateRequest): Promise<PluginDefinition>;
@@ -57,31 +58,44 @@ class PluginRegistryImpl implements PluginRegistry {
 
   async get(pluginId: string): Promise<PluginDefinition> {
     for (const provider of this.orderedProviders) {
-      if (await provider.has(pluginId)) {
-        return provider.get(pluginId);
+      const plugin = await provider.get(pluginId);
+      if (plugin) {
+        return plugin;
       }
     }
     throw createPluginNotFoundError({ pluginId });
   }
 
-  async list(): Promise<PluginDefinition[]> {
-    const allPlugins: PluginDefinition[] = [];
+  async findByName(name: string): Promise<PluginDefinition | undefined> {
     for (const provider of this.orderedProviders) {
-      const plugins = await provider.list();
-      allPlugins.push(...plugins);
+      const plugin = await provider.findByName(name);
+      if (plugin) {
+        return plugin;
+      }
     }
-    return allPlugins;
+    return undefined;
+  }
+
+  async list(): Promise<PluginDefinition[]> {
+    const results = await Promise.all(this.orderedProviders.map((provider) => provider.list()));
+    return results.flat();
   }
 
   async create(request: PluginCreateRequest): Promise<PluginDefinition> {
+    if (await this.builtinProvider.has(request.id ?? '')) {
+      throw createBadRequestError(
+        `Plugin with id "${request.id}" already exists as a built-in plugin`
+      );
+    }
     return this.persistedProvider.create(request);
   }
 
   async update(pluginId: string, update: PluginUpdateRequest): Promise<PluginDefinition> {
     for (const provider of this.orderedProviders) {
-      if (await provider.has(pluginId)) {
+      const plugin = await provider.get(pluginId);
+      if (plugin) {
         if (isReadonlyProvider(provider)) {
-          throw createBadRequestError(`Plugin ${pluginId} is read-only and can't be updated`);
+          throw createBadRequestError(`Plugin "${pluginId}" is read-only and can't be updated`);
         }
         return provider.update(pluginId, update);
       }
@@ -91,9 +105,10 @@ class PluginRegistryImpl implements PluginRegistry {
 
   async delete(pluginId: string): Promise<void> {
     for (const provider of this.orderedProviders) {
-      if (await provider.has(pluginId)) {
+      const plugin = await provider.get(pluginId);
+      if (plugin) {
         if (isReadonlyProvider(provider)) {
-          throw createBadRequestError(`Plugin ${pluginId} is read-only and can't be deleted`);
+          throw createBadRequestError(`Plugin "${pluginId}" is read-only and can't be deleted`);
         }
         return provider.delete(pluginId);
       }

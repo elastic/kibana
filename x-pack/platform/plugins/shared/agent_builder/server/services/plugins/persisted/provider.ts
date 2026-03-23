@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PluginDefinition } from '@kbn/agent-builder-common';
 import type { PluginClient } from '../client';
 import { toPluginDefinition } from '../client';
 import type { WritablePluginProvider } from '../plugin_provider';
@@ -19,21 +18,22 @@ export const createPersistedPluginProvider = ({
     id: 'persisted',
     readonly: false,
     has: (pluginId) => client.has(pluginId),
-    get: async (pluginId) =>
-      toPersistedPluginDefinition(toPluginDefinition(await client.get(pluginId))),
+    get: async (pluginId) => {
+      if (!(await client.has(pluginId))) {
+        return undefined;
+      }
+      return toPluginDefinition(await client.get(pluginId));
+    },
+    findByName: async (name) => {
+      const found = await client.findByName(name);
+      return found ? toPluginDefinition(found) : undefined;
+    },
     list: async () => {
       const plugins = await client.list();
-      return plugins.map((p) => toPersistedPluginDefinition(toPluginDefinition(p)));
+      return plugins.map(toPluginDefinition);
     },
-    create: async (request) =>
-      toPersistedPluginDefinition(toPluginDefinition(await client.create(request))),
-    update: async (pluginId, update) =>
-      toPersistedPluginDefinition(toPluginDefinition(await client.update(pluginId, update))),
+    create: async (request) => toPluginDefinition(await client.create(request)),
+    update: async (pluginId, update) => toPluginDefinition(await client.update(pluginId, update)),
     delete: (pluginId) => client.delete(pluginId),
   };
 };
-
-const toPersistedPluginDefinition = (definition: PluginDefinition): PluginDefinition => ({
-  ...definition,
-  readonly: false,
-});

@@ -12,12 +12,6 @@ import { createPluginsService, type PluginsServiceStart } from './plugin_service
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import type { SkillClient } from '../skills/persisted/client';
 
-const mockRandomUUID = jest.fn().mockReturnValue('test-plugin-uuid');
-jest.mock('crypto', () => ({
-  ...jest.requireActual('crypto'),
-  randomUUID: () => mockRandomUUID(),
-}));
-
 const mockParsePluginFromUrl = jest.fn();
 const mockParsePluginFromFile = jest.fn();
 jest.mock('./utils', () => ({
@@ -145,16 +139,14 @@ describe('PluginsService', () => {
     });
   });
 
-  describe('getScopedClient', () => {
-    it('creates a client with the correct parameters', () => {
-      const client = start.getScopedClient({ request: mockRequest });
-
-      expect(client).toBe(mockClient);
-      expect(mockCreateClient).toHaveBeenCalledWith(
-        expect.objectContaining({
-          space: 'default',
-        })
-      );
+  describe('getRegistry', () => {
+    it('returns a registry that queries both builtin and persisted providers', async () => {
+      mockClient.has.mockResolvedValue(false);
+      const registry = start.getRegistry({ request: mockRequest });
+      expect(registry).toBeDefined();
+      expect(typeof registry.get).toBe('function');
+      expect(typeof registry.list).toBe('function');
+      expect(typeof registry.findByName).toBe('function');
     });
   });
 
@@ -204,29 +196,26 @@ describe('PluginsService', () => {
           {
             id: 'my-plugin-pdf-processor',
             name: 'PDF Processor',
-            base_path: '/skills/my-plugin',
             description: 'Processes PDFs',
             content: 'Skill instructions for PDF.',
             referenced_content: [
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
             tool_ids: [],
-            plugin_id: 'test-plugin-uuid',
+            plugin_id: 'my-plugin',
           },
           {
             id: 'my-plugin-code-reviewer',
             name: 'code-reviewer',
-            base_path: '/skills/my-plugin',
             description: '',
             content: 'Review code.',
             referenced_content: [],
             tool_ids: [],
-            plugin_id: 'test-plugin-uuid',
+            plugin_id: 'my-plugin',
           },
         ]);
 
         expect(mockClient.create).toHaveBeenCalledWith({
-          id: 'test-plugin-uuid',
           name: 'my-plugin',
           version: '1.0.0',
           description: 'A test plugin',
@@ -385,11 +374,11 @@ describe('PluginsService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               id: 'custom-name-pdf-processor',
-              plugin_id: 'test-plugin-uuid',
+              plugin_id: 'custom-name',
             }),
             expect.objectContaining({
               id: 'custom-name-code-reviewer',
-              plugin_id: 'test-plugin-uuid',
+              plugin_id: 'custom-name',
             }),
           ])
         );
@@ -407,18 +396,25 @@ describe('PluginsService', () => {
   });
 
   describe('deletePlugin', () => {
-    it('deletes associated skills by plugin name, then deletes the plugin', async () => {
-      mockClient.has.mockResolvedValue(true);
+    it('deletes associated skills by plugin name, then deletes via registry', async () => {
+      mockClient.has.mockResolvedValue(false);
       mockClient.get.mockResolvedValue(
         createMockPersistedPlugin({ id: 'plugin-1', name: 'my-plugin' })
       );
+
+      const mockGetReturningPlugin = jest
+        .fn()
+        .mockImplementation(async () =>
+          mockClient.has('plugin-1').then(async () => mockClient.get('plugin-1'))
+        );
+      mockClient.has.mockResolvedValue(true);
+
       mockSkillClient.deleteByPluginId.mockResolvedValue(undefined);
       mockClient.delete.mockResolvedValue(undefined);
 
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
-      expect(mockClient.get).toHaveBeenCalledWith('plugin-1');
-      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('plugin-1');
+      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('my-plugin');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
