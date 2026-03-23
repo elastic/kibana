@@ -18,6 +18,11 @@ test.describe(
       await pageObjects.gettingStarted.goto();
     });
 
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
+    });
+
     test('verifies viewer has limited access to API keys functionality', async ({
       pageObjects,
     }) => {
