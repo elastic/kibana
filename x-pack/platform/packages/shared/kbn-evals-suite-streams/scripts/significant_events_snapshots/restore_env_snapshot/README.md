@@ -6,7 +6,7 @@ Restores a Streams/SigEvents environment from a GCS snapshot. Automates the full
 
 - Local Elasticsearch running.
 - Access to the GCS bucket containing the snapshot (credentials available in your environment or keystore).
-- A user with `manage` privilege on the `.kibana_*` system indices. Use a user with the `system_indices_superuser` role (or the built-in `elastic` superuser).
+- A user with `manage` privilege on the `.kibana_*` system indices. Use a user with the `system_indices_superuser` role.
 
 ## Why
 
