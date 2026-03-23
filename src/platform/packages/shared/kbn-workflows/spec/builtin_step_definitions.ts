@@ -13,6 +13,7 @@ import {
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  SwitchStepConfigSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
@@ -116,6 +117,41 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       type: http
       with:
         url: https://api.example.com/status`,
+      ],
+    },
+  },
+  {
+    id: 'switch',
+    label: 'Switch',
+    description:
+      'Multi-way branching. Evaluates an expression and runs the steps of the first case whose match equals the expression',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: SwitchStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: route_by_status
+  type: switch
+  expression: "{{ steps.check.output.status }}"
+  cases:
+    - match: success
+      steps:
+        - name: on_success
+          type: console
+          with:
+            message: "Operation succeeded"
+    - match: error
+      steps:
+        - name: on_error
+          type: console
+          with:
+            message: "Operation failed"
+  default:
+    - name: on_unknown
+      type: console
+      with:
+        message: "Unknown status"`,
       ],
     },
   },

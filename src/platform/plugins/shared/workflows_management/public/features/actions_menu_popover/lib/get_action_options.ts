@@ -171,6 +171,17 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'switch',
+        label: i18n.translate('workflows.actionsMenu.switch', {
+          defaultMessage: 'Switch',
+        }),
+        description: i18n.translate('workflows.actionsMenu.switchDescription', {
+          defaultMessage: 'Multi-way branching based on expression value matching',
+        }),
+        iconType: 'productStreamsWired',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
         id: 'foreach',
         label: i18n.translate('workflows.actionsMenu.foreach', {
           defaultMessage: 'Loop (foreach)',

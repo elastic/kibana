@@ -12,6 +12,8 @@ import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
+import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
+import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import type { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
   createMockEncryptedSavedObjects,
@@ -19,8 +21,6 @@ import {
 } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
-import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
-import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
 
 describe('NotificationPolicyClient', () => {
@@ -116,7 +116,9 @@ describe('NotificationPolicyClient', () => {
             createdByUser: false,
           },
           createdBy: 'elastic_profile_uid',
+          createdByUsername: 'elastic',
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         }),
@@ -131,12 +133,18 @@ describe('NotificationPolicyClient', () => {
           description: 'my-policy description',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          matcher: null,
+          groupBy: null,
+          throttle: null,
+          snoozedUntil: null,
           auth: {
             owner: 'test-user',
             createdByUser: false,
           },
           createdBy: 'elastic_profile_uid',
+          createdByUsername: 'elastic',
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -176,6 +184,10 @@ describe('NotificationPolicyClient', () => {
             owner: 'test-user',
             createdByUser: false,
           },
+          createdBy: 'elastic_profile_uid',
+          createdByUsername: 'elastic',
+          updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
         }),
         expect.objectContaining({
           overwrite: false,
@@ -187,6 +199,8 @@ describe('NotificationPolicyClient', () => {
       expect(res.name).toBe('my-policy');
       expect(res.description).toBe('my-policy description');
       expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
+      expect(res.createdByUsername).toBe('elastic');
+      expect(res.updatedByUsername).toBe('elastic');
       expect(res.auth).not.toHaveProperty('apiKey');
     });
 
@@ -261,8 +275,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -280,7 +296,13 @@ describe('NotificationPolicyClient', () => {
         'policy-id-get-1',
         undefined
       );
+      expect(res.matcher).toBeNull();
+      expect(res.groupBy).toBeNull();
+      expect(res.throttle).toBeNull();
+      expect(res.snoozedUntil).toBeNull();
       expect(res.auth).toEqual({ owner: 'test-user', createdByUser: false });
+      expect(res.createdByUsername).toBe('elastic');
+      expect(res.updatedByUsername).toBe('elastic');
       expect(res.auth).not.toHaveProperty('apiKey');
     });
 
@@ -313,8 +335,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       const secondAttributes: NotificationPolicySavedObjectAttributes = {
@@ -328,8 +352,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -357,8 +383,12 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).toHaveLength(2);
       expect(res[0].auth).toEqual({ owner: 'user-2', createdByUser: false });
+      expect(res[0].createdByUsername).toBe('elastic');
+      expect(res[0].updatedByUsername).toBe('elastic');
       expect(res[0].auth).not.toHaveProperty('apiKey');
       expect(res[1].auth).toEqual({ owner: 'user-1', createdByUser: false });
+      expect(res[1].createdByUsername).toBe('elastic');
+      expect(res[1].updatedByUsername).toBe('elastic');
       expect(res[1].auth).not.toHaveProperty('apiKey');
     });
 
@@ -380,8 +410,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       const thirdAttributes: NotificationPolicySavedObjectAttributes = {
@@ -395,8 +427,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -435,8 +469,12 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).toHaveLength(2);
       expect(res[0].id).toBe('policy-id-get-found-1');
+      expect(res[0].createdByUsername).toBe('elastic');
+      expect(res[0].updatedByUsername).toBe('elastic');
       expect(res[0].auth).not.toHaveProperty('apiKey');
       expect(res[1].id).toBe('policy-id-get-found-3');
+      expect(res[1].createdByUsername).toBe('elastic');
+      expect(res[1].updatedByUsername).toBe('elastic');
       expect(res[1].auth).not.toHaveProperty('apiKey');
     });
 
@@ -452,8 +490,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -486,6 +526,8 @@ describe('NotificationPolicyClient', () => {
       expect(res).toHaveLength(1);
       expect(res[0].id).toBe('policy-id-valid');
       expect(res[0].auth).toEqual({ owner: 'valid-user', createdByUser: false });
+      expect(res[0].createdByUsername).toBe('elastic');
+      expect(res[0].updatedByUsername).toBe('elastic');
       expect(res[0].auth).not.toHaveProperty('apiKey');
     });
   });
@@ -524,8 +566,10 @@ describe('NotificationPolicyClient', () => {
         createdByUser: false,
       },
       createdBy: 'elastic_profile_uid',
+      createdByUsername: 'elastic',
       createdAt: '2025-01-01T00:00:00.000Z',
       updatedBy: 'elastic_profile_uid',
+      updatedByUsername: 'elastic',
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
@@ -537,7 +581,13 @@ describe('NotificationPolicyClient', () => {
       const res = await client.findNotificationPolicies();
 
       expect(res.items).toHaveLength(1);
+      expect(res.items[0].matcher).toBeNull();
+      expect(res.items[0].groupBy).toBeNull();
+      expect(res.items[0].throttle).toBeNull();
+      expect(res.items[0].snoozedUntil).toBeNull();
       expect(res.items[0].auth).toEqual({ owner: 'find-user', createdByUser: false });
+      expect(res.items[0].createdByUsername).toBe('elastic');
+      expect(res.items[0].updatedByUsername).toBe('elastic');
       expect(res.items[0].auth).not.toHaveProperty('apiKey');
     });
 
@@ -688,16 +738,86 @@ describe('NotificationPolicyClient', () => {
       expect(res.items[0].id).toBe('policy-find-1');
       expect(res.items[0].name).toBe('find-policy');
       expect(res.items[0].auth).toEqual({ owner: 'find-user', createdByUser: false });
+      expect(res.items[0].createdByUsername).toBe('elastic');
+      expect(res.items[0].updatedByUsername).toBe('elastic');
       expect(res.items[0].auth).not.toHaveProperty('apiKey');
 
       expect(res.items[1].id).toBe('policy-find-2');
       expect(res.items[1].name).toBe('find-policy-2');
       expect(res.items[1].auth).toEqual({ owner: 'another-user', createdByUser: true });
+      expect(res.items[1].createdByUsername).toBe('elastic');
+      expect(res.items[1].updatedByUsername).toBe('elastic');
       expect(res.items[1].auth).not.toHaveProperty('apiKey');
     });
   });
 
   describe('updateNotificationPolicy', () => {
+    it('clears nullable fields with null values', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        matcher: 'event.severity: critical',
+        groupBy: ['host.name'],
+        throttle: { interval: '1h' },
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.updateNotificationPolicy({
+        data: {
+          matcher: null,
+          groupBy: null,
+          throttle: null,
+        },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(apiKeyService.create).toHaveBeenCalledWith('Notification Policy: original-policy');
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          name: 'original-policy',
+          description: 'original-policy description',
+          destinations: [{ type: 'workflow', id: 'original-workflow' }],
+          matcher: null,
+          groupBy: null,
+          throttle: null,
+          updatedByUsername: 'elastic',
+        }),
+        { version: 'WzEsMV0=' }
+      );
+      expect(res.matcher).toBeNull();
+      expect(res.groupBy).toBeNull();
+      expect(res.throttle).toBeNull();
+      expect(res.snoozedUntil).toBeNull();
+    });
+
     it('updates a notification policy and rotates the API key', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
@@ -710,8 +830,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -752,8 +874,10 @@ describe('NotificationPolicyClient', () => {
             createdByUser: false,
           },
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
           createdBy: 'creator_profile_uid',
+          createdByUsername: 'creator',
           createdAt: '2024-12-01T00:00:00.000Z',
         }),
         { version: 'WzEsMV0=' }
@@ -770,6 +894,8 @@ describe('NotificationPolicyClient', () => {
             owner: 'test-user',
             createdByUser: false,
           },
+          createdByUsername: 'creator',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       );
@@ -791,8 +917,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: true,
         },
         createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -842,8 +970,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -888,8 +1018,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -971,8 +1103,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1015,8 +1149,10 @@ describe('NotificationPolicyClient', () => {
         createdByUser: false,
       },
       createdBy: 'elastic_profile_uid',
+      createdByUsername: 'elastic',
       createdAt: '2024-12-01T00:00:00.000Z',
       updatedBy: 'elastic_profile_uid',
+      updatedByUsername: 'elastic',
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
@@ -1044,6 +1180,7 @@ describe('NotificationPolicyClient', () => {
         {
           enabled: true,
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
         undefined
@@ -1088,8 +1225,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.update.mockResolvedValueOnce({
@@ -1115,6 +1254,7 @@ describe('NotificationPolicyClient', () => {
         {
           enabled: false,
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
         undefined
@@ -1139,8 +1279,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.update.mockResolvedValueOnce({
@@ -1169,6 +1311,7 @@ describe('NotificationPolicyClient', () => {
         {
           snoozedUntil: '2025-06-01T12:00:00.000Z',
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
         undefined
@@ -1230,7 +1373,7 @@ describe('NotificationPolicyClient', () => {
         actions: [
           { id: 'policy-1', action: 'enable' },
           { id: 'policy-2', action: 'disable' },
-          { id: 'policy-3', action: 'snooze', snoozed_until: '2025-06-01T12:00:00.000Z' },
+          { id: 'policy-3', action: 'snooze', snoozedUntil: '2025-06-01T12:00:00.000Z' },
           { id: 'policy-4', action: 'unsnooze' },
         ],
       });
@@ -1243,6 +1386,7 @@ describe('NotificationPolicyClient', () => {
           attributes: {
             enabled: true,
             updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
@@ -1252,6 +1396,7 @@ describe('NotificationPolicyClient', () => {
           attributes: {
             enabled: false,
             updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
@@ -1261,6 +1406,7 @@ describe('NotificationPolicyClient', () => {
           attributes: {
             snoozedUntil: '2025-06-01T12:00:00.000Z',
             updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
@@ -1270,6 +1416,7 @@ describe('NotificationPolicyClient', () => {
           attributes: {
             snoozedUntil: null,
             updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
@@ -1307,6 +1454,223 @@ describe('NotificationPolicyClient', () => {
       expect(res.errors).toHaveLength(1);
       expect(res.errors[0].id).toBe('missing-policy');
     });
+
+    it('handles delete actions via bulkDelete and update actions via bulkUpdate', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzMsMV0=',
+          },
+        ],
+      });
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-1', action: 'enable' },
+          { id: 'policy-2', action: 'delete' },
+        ],
+      });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: {
+            enabled: true,
+            updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2' },
+      ]);
+
+      expect(res).toEqual({ processed: 2, total: 2, errors: [] });
+    });
+
+    it('handles delete-only bulk actions without calling bulkUpdate', async () => {
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'policy-1', action: 'delete' }],
+      });
+
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+
+      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+    });
+
+    it('collects errors from both bulkUpdate and bulkDelete', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Not found',
+            },
+          },
+        ],
+      });
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: false,
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-1', action: 'enable' },
+          { id: 'policy-2', action: 'delete' },
+        ],
+      });
+
+      expect(res.processed).toBe(0);
+      expect(res.total).toBe(2);
+      expect(res.errors).toHaveLength(2);
+    });
+
+    it('invalidates API keys for successfully bulk-deleted policies', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
+        {
+          async *find() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'policy-del-1',
+                  type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'key-1', createdByUser: false, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+                {
+                  id: 'policy-del-2',
+                  type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'key-2', createdByUser: false, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+              ],
+            };
+          },
+          close: jest.fn(),
+        }
+      );
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-1', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+          { id: 'policy-del-2', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-del-1', action: 'delete' },
+          { id: 'policy-del-2', action: 'delete' },
+        ],
+      });
+
+      expect(res).toEqual({ processed: 2, total: 2, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(2);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1']);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-2']);
+    });
+
+    it('skips API key invalidation for bulk-deleted policies with createdByUser: true', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
+        {
+          async *find() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'policy-del-user',
+                  type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'user-key', createdByUser: true, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+              ],
+            };
+          },
+          close: jest.fn(),
+        }
+      );
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-user', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'policy-del-user', action: 'delete' }],
+      });
+
+      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when PIT finder fails during bulk delete', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockRejectedValueOnce(
+        new Error('decryption failure')
+      );
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-err', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'policy-del-err', action: 'delete' }],
+      });
+
+      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
   });
 
   describe('deleteNotificationPolicy', () => {
@@ -1322,8 +1686,10 @@ describe('NotificationPolicyClient', () => {
           createdByUser: false,
         },
         createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1381,8 +1747,10 @@ describe('NotificationPolicyClient', () => {
           destinations: [],
           auth: { apiKey: 'user-created-key', owner: 'test-user', createdByUser: true },
           createdBy: 'elastic_profile_uid',
+          createdByUsername: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
       });
@@ -1408,8 +1776,10 @@ describe('NotificationPolicyClient', () => {
           destinations: [],
           auth: { owner: 'test-user', createdByUser: false },
           createdBy: 'elastic_profile_uid',
+          createdByUsername: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
       });

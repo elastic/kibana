@@ -419,6 +419,37 @@ describe('RulesClient', () => {
         data: { stateTransition: null } as unknown as UpdateRuleData,
       });
     });
+
+    it('clears artifacts when update payload sets artifacts to null', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        artifacts: [{ id: 'runbook-id', type: 'runbook', value: 'Persisted runbook' }],
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-clear-artifacts',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-clear-artifacts',
+        data: { artifacts: null } as unknown as UpdateRuleData,
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-clear-artifacts',
+        expect.objectContaining({
+          artifacts: [],
+        }),
+        { version: 'WzEsMV0=' }
+      );
+    });
   });
 
   describe('getRule', () => {
