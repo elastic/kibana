@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { flatMap, sortBy } from 'lodash';
-import { useMemo } from 'react';
+import { flatMap, isEqual, sortBy } from 'lodash';
+import { useMemo, useRef } from 'react';
 import type { OsqueryTable } from '../../common/types/schema';
 import { useOsquerySchema } from '../common/hooks/use_osquery_schema';
 
-type TablesJSON = Array<{
-  name: string;
-}>;
-const normalizeTables = (tablesJSON: TablesJSON) => sortBy(tablesJSON, 'name');
+const normalizeTables = (tablesJSON: OsqueryTable[]) => sortBy(tablesJSON, 'name');
 
 // Sync fallback used while the async API data is loading
-let osqueryTables: TablesJSON | null = null;
+let bundledOsqueryTables: OsqueryTable[] | null = null;
 
-const getOsqueryTables = () => {
-  if (!osqueryTables) {
+const getOsqueryTables = (): OsqueryTable[] => {
+  if (!bundledOsqueryTables) {
+    // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.19.0.json'));
+    bundledOsqueryTables = normalizeTables(
+      require('../common/schemas/osquery/v5.19.0.json') as OsqueryTable[]
+    );
   }
 
-  return osqueryTables;
+  return bundledOsqueryTables;
 };
 
 /**
@@ -33,12 +33,20 @@ const getOsqueryTables = () => {
  */
 export const useOsqueryTables = () => {
   const { data, isLoading, osqueryVersion } = useOsquerySchema();
+  const tablesStableRef = useRef<OsqueryTable[] | null>(null);
 
-  const tables = useMemo(() => data ?? getOsqueryTables(), [data]);
+  const tables = useMemo(() => {
+    const next = data ?? getOsqueryTables();
+    if (tablesStableRef.current !== null && isEqual(tablesStableRef.current, next)) {
+      return tablesStableRef.current;
+    }
+    tablesStableRef.current = next;
+    return next;
+  }, [data]);
 
   const tablesRecord = useMemo(
     () =>
-      Object.fromEntries((tables as OsqueryTable[]).map((table) => [table.name, table])) as Record<
+      Object.fromEntries(tables.map((table) => [table.name, table])) as Record<
         string,
         { columns: Array<{ name: string }> }
       >,

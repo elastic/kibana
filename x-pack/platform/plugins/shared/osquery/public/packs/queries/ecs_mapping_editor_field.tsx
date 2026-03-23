@@ -713,7 +713,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   const ecsSchemaOptions = useEcsSchemaOptions();
   const { data: osquerySchemaData } = useOsquerySchema();
 
-  const osquerySchemaRef = useMemo(
+  const osqueryTables = useMemo(
     () => osquerySchemaData ?? ([] as OsqueryTable[]),
     [osquerySchemaData]
   );
@@ -823,7 +823,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
         (acc, data) => {
           // select * from uptime
           if (data?.type === 'identifier' && data?.variant === 'table') {
-            const osqueryTable = find(osquerySchemaRef, ['name', data.name]);
+            const osqueryTable = find(osqueryTables, ['name', data.name]);
 
             if (osqueryTable) {
               acc[data.alias || data.name] = {
@@ -836,7 +836,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
           // select * from uptime, routes
           if (data?.type === 'map' && data?.variant === 'join') {
             if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
-              const osqueryTable = find(osquerySchemaRef, ['name', data?.source?.name]);
+              const osqueryTable = find(osqueryTables, ['name', data?.source?.name]);
 
               if (osqueryTable) {
                 acc[data?.source?.alias || data?.source?.name] = {
@@ -851,7 +851,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
                 data?.source?.statement.from.type === 'identifier' &&
                 data?.source?.statement.from.variant === 'table'
               ) {
-                const osqueryTable = find(osquerySchemaRef, [
+                const osqueryTable = find(osqueryTables, [
                   'name',
                   data?.source?.statement.from.name,
                 ]);
@@ -876,7 +876,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
                     mapValue?.source?.type === 'identifier' &&
                     mapValue?.source?.variant === 'table'
                   ) {
-                    const osqueryTable = find(osquerySchemaRef, ['name', mapValue?.source?.name]);
+                    const osqueryTable = find(osqueryTables, ['name', mapValue?.source?.name]);
 
                     if (osqueryTable) {
                       acc[mapValue?.source?.alias || mapValue?.source?.name] = {
@@ -1029,7 +1029,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
       return prevValue;
     });
-  }, [query, trigger, osquerySchemaRef]);
+  }, [query, trigger, osqueryTables]);
 
   useEffect(() => {
     const parsedMapping = convertECSMappingToObject(formValue.ecsMappingArray);

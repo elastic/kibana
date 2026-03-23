@@ -13,6 +13,7 @@ import {
   OSQUERY_INTEGRATION_NAME,
   FALLBACK_OSQUERY_VERSION,
   FALLBACK_ECS_VERSION,
+  OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
 } from '../../common/constants';
 import type { SchemaType, OsqueryTable, EcsField } from '../../common/types/schema';
 
@@ -24,6 +25,10 @@ interface CacheEntry<T> {
 export class SchemaService {
   private osqueryCache: CacheEntry<OsqueryTable> | null = null;
   private ecsCache: CacheEntry<EcsField> | null = null;
+  private installationVersionCache: {
+    version: string | undefined;
+    expiresAt: number;
+  } | null = null;
 
   constructor(private readonly logger: Logger) {}
 
@@ -99,15 +104,39 @@ export class SchemaService {
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<string | undefined> {
+    if (!packageService) {
+      return undefined;
+    }
+
+    const now = Date.now();
+
+    if (
+      this.installationVersionCache !== null &&
+      now < this.installationVersionCache.expiresAt
+    ) {
+      return this.installationVersionCache.version;
+    }
+
     try {
-      const installation = await packageService?.asInternalUser.getInstallation(
+      const installation = await packageService.asInternalUser.getInstallation(
         OSQUERY_INTEGRATION_NAME,
         savedObjectsClient
       );
 
-      return installation?.version;
+      const version = installation?.version;
+      this.installationVersionCache = {
+        version,
+        expiresAt: now + OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
+      };
+
+      return version;
     } catch (e) {
       this.logger.debug(`Failed to get osquery_manager installation: ${e.message}`);
+
+      this.installationVersionCache = {
+        version: undefined,
+        expiresAt: now + OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
+      };
 
       return undefined;
     }

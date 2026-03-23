@@ -140,11 +140,28 @@ describe('SchemaService', () => {
         expect(result).toEqual({ version: pkgVersion, data: mockOsqueryTables });
         // getPackageAsset should only be called once — on the first fetch
         expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(1);
+        expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      });
+
+      it('should call getInstallation once when getSchema is invoked repeatedly within the installation cache TTL', async () => {
+        const pkgVersion = '1.5.0';
+        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+          version: pkgVersion,
+        });
+
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
+          createMockAsset(mockOsqueryTables)
+        );
+
+        await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+        await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+
+        expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('cache miss / version change', () => {
-      it('should fetch fresh data when package version changes after TTL expires', async () => {
+      it('should fetch fresh data when package version changes after installation cache TTL expires', async () => {
         const firstVersion = '1.4.0';
         const secondVersion = '1.5.0';
         const now = Date.now();
@@ -188,6 +205,7 @@ describe('SchemaService', () => {
 
         expect(result).toEqual({ version: secondVersion, data: updatedTables });
         expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
+        expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(2);
 
         dateNowSpy.mockRestore();
       });
@@ -367,6 +385,7 @@ describe('SchemaService', () => {
 
         expect(result).toEqual({ version: pkgVersion, data: mockEcsFields });
         expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(1);
+        expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -482,6 +501,7 @@ describe('SchemaService', () => {
         ecsAssetPath,
         savedObjectsClient
       );
+      expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
     });
 
     it('should serve osquery cache hit without affecting ecs schema fetch', async () => {
@@ -508,6 +528,7 @@ describe('SchemaService', () => {
       expect(osqueryCacheResult).toEqual({ version: pkgVersion, data: mockOsqueryTables });
       // Still only 2 total calls (both from the initial population)
       expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
+      expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -15,10 +15,12 @@ import { useKibana } from '../lib/kibana';
 let fallbackEcsSchema: EcsField[] | null = null;
 const getFallbackEcsSchema = (): EcsField[] => {
   if (!fallbackEcsSchema) {
-    fallbackEcsSchema = require('../schemas/ecs/v9.2.0.json');
+    // Static path required by webpack — must match FALLBACK_ECS_VERSION in common/constants.ts
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    fallbackEcsSchema = require('../schemas/ecs/v9.2.0.json') as EcsField[];
   }
 
-  return fallbackEcsSchema as EcsField[];
+  return fallbackEcsSchema;
 };
 
 export const useEcsSchema = () => {

@@ -39,6 +39,9 @@ export const SCHEMAS_ROUTE = '/internal/osquery/schemas/{schemaType}';
 export const FALLBACK_OSQUERY_VERSION = '5.19.0';
 export const FALLBACK_ECS_VERSION = '9.2.0';
 
+/** Cache Fleet installation version lookups to avoid a SavedObjects read on every schema request. */
+export const OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS = 60_000;
+
 export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
   MAX = 900, // 15 minutes (matches backend inRangeRt(60, 60 * 15))
