@@ -13,7 +13,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
   layerSettingsSchema,
@@ -52,7 +52,7 @@ const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.l
 });
 
 const heatmapSharedStateSchema = {
-  type: schema.literal('heat_map'),
+  type: schema.literal('heatmap'),
   legend: schema.maybe(
     schema.object(legendSchemaProps, {
       meta: {
@@ -134,8 +134,8 @@ const heatmapAxesStateSchemaProps = {
 };
 
 const heatmapAxesStateESQLSchemaProps = {
-  x: esqlColumnSchema,
-  y: schema.maybe(esqlColumnSchema),
+  x: esqlColumnWithFormatSchema,
+  y: schema.maybe(esqlColumnWithFormatSchema),
 };
 
 const heatmapStateMetricOptionsSchemaProps = {
@@ -160,7 +160,7 @@ export const heatmapStateSchemaESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
     ...datasetEsqlTableSchema,
-    metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
+    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );
