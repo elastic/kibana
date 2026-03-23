@@ -252,7 +252,8 @@ const buildHttpRequest = (
     if (!args[p.name] && p.required) {
       throw new Error(`Missing required path param: ${p.name}`);
     }
-    path = path.replace(`{${p.name}}`, encodeURIComponent(String(args[p.name])));
+    const value = String(args[p.name]);
+    path = path.replace(`{${p.name}}`, value);
   }
 
   const queryParams = parameters.filter((p) => p.in === 'query');
@@ -282,7 +283,6 @@ const buildHandler = (operation: OperationObject): ToolHandler => {
   return async (args, esClient) => {
     const { path, method, query, body } = buildHttpRequest(operation, args);
     const consoleRequest = buildConsoleRequest(operation, args);
-
     try {
       const response = await esClient.asCurrentUser.transport.request({
         method,
