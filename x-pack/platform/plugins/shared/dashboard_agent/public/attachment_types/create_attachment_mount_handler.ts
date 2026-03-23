@@ -112,9 +112,9 @@ export const onAttachmentMount = ({
 
     // Sync manual dashboard changes back to the attachment
     manualChangesSubscription = merge(
-      api.query$.pipe(map(() => undefined)),
-      api.filters$.pipe(map(() => undefined)),
-      api.timeRange$.pipe(map(() => undefined)),
+      // api.query$.pipe(map(() => undefined)),
+      // api.filters$.pipe(map(() => undefined)),
+      // api.timeRange$.pipe(map(() => undefined)),
       api.layout$.pipe(map(() => undefined)),
       api.title$.pipe(map(() => undefined)),
       api.description$.pipe(map(() => undefined)),

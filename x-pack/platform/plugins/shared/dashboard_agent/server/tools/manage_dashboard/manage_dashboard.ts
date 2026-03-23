@@ -56,9 +56,7 @@ Use operations[] to:
 3. add panels from attachments
 4. add / remove sections
 5. remove panels
-6. update panels from attachments (re-resolve panels from updated source attachments)
-
-The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while operations run, and always returns the latest dashboard attachment state.`,
+6. update panels from attachments (re-resolve panels from updated source attachments)`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },

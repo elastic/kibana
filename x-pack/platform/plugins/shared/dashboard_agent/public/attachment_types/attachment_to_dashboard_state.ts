@@ -20,25 +20,17 @@ import {
 } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import { v4 as uuidv4 } from 'uuid';
 
 const lensConfigBuilder = new LensConfigBuilder();
 
 const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE) {
-    // TODO: ask Robert about how do we get this usecase
-    if ('attributes' in config && isLensLegacyAttributes(config.attributes)) {
-      configObject = {
-        ...config,
-        title: config.title ?? '',
-        attributes: lensConfigBuilder.toAPIFormat(config.attributes),
-      };
-    } else if (isLensAPIFormat(config)) {
-      configObject = {
-        title: config.title ?? '',
-        attributes: lensConfigBuilder.fromAPIFormat(config),
-      };
-    }
+  if (isLensAPIFormat(config) && type === LENS_EMBEDDABLE_TYPE) {
+    configObject = {
+      title: config.title ?? '',
+      attributes: lensConfigBuilder.fromAPIFormat(config),
+    };
   }
   return {
     type,
@@ -52,7 +44,7 @@ type AgentWidget = AttachmentPanel | AgentDashboardSection;
 type DashboardWidget = DashboardPanel | DashboardSection;
 
 const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
-  uid: section.uid,
+  uid: section.uid || uuidv4(), // id generation should never happen
   title: section.title,
   collapsed: section.collapsed,
   grid: { y: section.grid.y },
@@ -114,7 +106,7 @@ const toAttachmentPanel = ({ type, uid, grid, config }: DashboardPanel): Attachm
   }
   return {
     type,
-    uid,
+    uid: uid || uuidv4(), // id generation should never happen
     grid,
     config: configObject,
   };
@@ -130,7 +122,7 @@ const toAttachmentSection = ({
   grid,
   panels,
 }: DashboardSection): AgentDashboardSection => ({
-  uid,
+  uid: uid || uuidv4(), // id generation should never happen
   title,
   collapsed,
   grid,
