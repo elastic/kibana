@@ -239,15 +239,9 @@ async function processScenario(
   log.info(`SCENARIO: ${scenario.id}${isFailure ? ' (failure)' : ' (baseline)'}`);
   log.info('='.repeat(70));
 
-  // Step 0 — Ensure the `logs` data stream exists so that feature extraction can run.
+  // Step 0 — Ensure the target data stream exists so that feature extraction can run.
   // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
-  if (logsIndex === 'logs') {
-    await ensureLogsDataStream(esClient, log);
-  } else {
-    log.warning(
-      `Custom logsIndex "${logsIndex}" specified — the data stream must already exist before running feature extraction.`
-    );
-  }
+  await ensureDataStream(esClient, log, logsIndex);
 
   // Step 1+2 — Deploy the demo app. Resolves once pods are ready (no log streaming).
   log.info('[1/7] Deploying demo app...');
@@ -316,9 +310,13 @@ const parseDurationFlag = (
   return moment.duration(amount, unit).asMilliseconds();
 };
 
-async function ensureLogsDataStream(esClient: Client, log: ToolingLog): Promise<void> {
+async function ensureDataStream(
+  esClient: Client,
+  log: ToolingLog,
+  streamName: string
+): Promise<void> {
   try {
-    await esClient.indices.getDataStream({ name: 'logs' });
+    await esClient.indices.getDataStream({ name: streamName });
     return;
   } catch (err) {
     const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
@@ -327,24 +325,25 @@ async function ensureLogsDataStream(esClient: Client, log: ToolingLog): Promise<
     }
   }
 
-  log.info('logs data stream not found — creating it for snapshot capture');
-  await ensureLogsIndexTemplate(esClient, log);
+  log.info(`"${streamName}" data stream not found — creating it for snapshot capture`);
+
+  await ensureLogsIndexTemplate(esClient, log, streamName);
 
   try {
-    await esClient.indices.createDataStream({ name: 'logs' });
+    await esClient.indices.createDataStream({ name: streamName });
   } catch (err) {
-    // If something already exists at "logs" (e.g. a plain index), try to remove it and retry.
+    // If something already exists at this name (e.g. a plain index), try to remove it and retry.
     log.warning(
-      `Failed to create logs data stream (will attempt cleanup and retry): ${
+      `Failed to create "${streamName}" data stream (will attempt cleanup and retry): ${
         err instanceof Error ? err.message : String(err)
       }`
     );
     try {
-      await esClient.indices.deleteDataStream({ name: 'logs' });
+      await esClient.indices.deleteDataStream({ name: streamName });
     } catch {
       // ignore
     }
-    await esClient.indices.delete({ index: 'logs', ignore_unavailable: true });
-    await esClient.indices.createDataStream({ name: 'logs' });
+    await esClient.indices.delete({ index: streamName, ignore_unavailable: true });
+    await esClient.indices.createDataStream({ name: streamName });
   }
 }
