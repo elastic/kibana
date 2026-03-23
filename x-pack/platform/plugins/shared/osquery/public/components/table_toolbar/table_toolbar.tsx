@@ -26,9 +26,9 @@ interface TableToolbarProps {
   searchValue: string;
   onSearchSubmit: (value: string) => void;
 
-  users?: string[];
-  selectedUsers?: string[];
-  onSelectedUsersChange?: (users: string[]) => void;
+  creators?: string[];
+  selectedCreators?: string[];
+  onSelectedCreatorsChange?: (creators: string[]) => void;
   profilesMap?: Map<string, UserProfileWithAvatar>;
 
   enabledFilter?: EnabledFilter;
@@ -55,9 +55,9 @@ const TableToolbarComponent: React.FC<TableToolbarProps> = ({
   searchPlaceholder,
   searchValue,
   onSearchSubmit,
-  users,
-  selectedUsers,
-  onSelectedUsersChange,
+  creators,
+  selectedCreators,
+  onSelectedCreatorsChange,
   profilesMap,
   enabledFilter,
   onEnabledFilterChange,
@@ -116,13 +116,13 @@ const TableToolbarComponent: React.FC<TableToolbarProps> = ({
           <EuiFlexItem grow={false}>{additionalFilters}</EuiFlexItem>
         ) : (
           <>
-            {users && selectedUsers && onSelectedUsersChange && profilesMap && (
+            {creators && selectedCreators && onSelectedCreatorsChange && profilesMap && (
               <EuiFlexItem grow={false}>
                 <EuiFilterGroup>
                   <CreatedByFilterPopover
-                    users={users}
-                    selectedUsers={selectedUsers}
-                    onSelectionChange={onSelectedUsersChange}
+                    creators={creators}
+                    selectedCreators={selectedCreators}
+                    onSelectionChange={onSelectedCreatorsChange}
                     profilesMap={profilesMap}
                     data-test-subj={`${dataTestSubj}-created-by`}
                   />
