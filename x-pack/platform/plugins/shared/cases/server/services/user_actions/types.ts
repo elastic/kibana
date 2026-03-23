@@ -166,6 +166,7 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 export interface PushTimeFrameInfo {
