@@ -144,7 +144,7 @@ when scores sit near a boundary, prefer **relative ordering among the KIs return
 - `feature.properties`: structured data about the pattern (field names, values, counts) — use for query construction
 - `feature.confidence`: 0-100 reliability. **Higher** values mean the pattern is more consistently observed — compare within the returned feature set.
 - `feature.evidence`: human-readable supporting facts (may name the error type, field, or component directly)
-- `feature.filter`: - `feature.filter`: a structured JSON condition (streamlang format) scoping this feature to the
+- `feature.filter`: a structured JSON condition (streamlang format) scoping this feature to the
   data subset it was computed on — **not** a KQL string. You MUST use this same filter in any
   query you derive from this feature — otherwise your query operates on different data than the feature did.
 - `feature.status`: "active" = currently observed; "stale" or "expired" = historical only.
