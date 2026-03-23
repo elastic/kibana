@@ -220,7 +220,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest('validation - returns error when id is too long', async ({ apiClient }) => {
-    const id = `test-markdown-with-specific-id-that-is-way-more-than-one-hundred-characters-and-should-fail-validation-because-it-is-too-long`;
+    const id = `this-is-my-test-markdown-with-specific-identifier-that-is-way-more-than-two-hundred-and-fifty-characters-and-should-fail-validation-because-it-is-much-too-long-and-should-be-two-hundred-and-fifty-characters-or-less-to-be-a-valid-identifier-1234567890_`;
     const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -235,7 +235,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request params.id]: value has length [125] but it must have a maximum length of [100].'
+      '[request params.id]: value has length [251] but it must have a maximum length of [250].'
     );
   });
 
