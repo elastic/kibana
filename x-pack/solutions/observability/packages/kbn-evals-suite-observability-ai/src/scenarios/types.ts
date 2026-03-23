@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import type { ErrorCountRuleParams } from '@kbn/response-ops-rule-params/error_count';
+
 export interface GcsConfig {
   bucket: string;
   basePath: string;
@@ -15,8 +18,10 @@ export interface ErrorQuery {
   serviceName: string;
 }
 
+export type ApmErrorCountRuleCreateRequest = CreateRuleRequestBody<ErrorCountRuleParams>;
+
 export interface AlertRuleConfig {
-  ruleParams: Record<string, unknown>;
+  ruleParams: ApmErrorCountRuleCreateRequest;
   alertsIndex: string;
 }
 
@@ -30,6 +35,10 @@ export interface BaseScenario {
 
 export interface ApmErrorScenario extends BaseScenario {
   errorQuery: ErrorQuery;
+}
+
+export interface ApmErrorIdSearchFields {
+  'error.id'?: string[];
 }
 
 export interface AlertScenario extends BaseScenario {

@@ -13,6 +13,7 @@ import {
   cleanObservabilityDataStreams,
 } from '../../src/data_generators/replay';
 import { getErrorScenarios, type ApmErrorScenario } from '../../src/scenarios/error_scenarios';
+import type { ApmErrorIdSearchFields } from '../../src/scenarios/types';
 import { evaluate } from './evaluate_ai_insights';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
@@ -25,7 +26,7 @@ for (const scenario of scenarios) {
 
 function createScenarioTest(scenario: ApmErrorScenario) {
   evaluate.describe(
-    'APM Error AI Insights',
+    `APM Error AI Insights - ${scenario.id} (${scenario.snapshotName})`,
     { tag: tags.serverless.observability.complete },
     () => {
       let errorId: string;
@@ -49,6 +50,7 @@ function createScenarioTest(scenario: ApmErrorScenario) {
             bool: {
               filter: [
                 { term: { 'service.name': scenario.errorQuery.serviceName } },
+                { term: { 'error.exception.type': 'Error' } },
                 {
                   match_phrase: {
                     'error.exception.message': scenario.errorQuery.errorMessage,
@@ -70,20 +72,25 @@ function createScenarioTest(scenario: ApmErrorScenario) {
           );
         }
 
-        const fields = errorDoc.fields as { 'error.id'?: string[] } | undefined;
-        errorId = fields?.['error.id']?.[0] ?? (errorDoc._id as string);
+        const fields: ApmErrorIdSearchFields = errorDoc.fields ?? {};
+        const resolvedErrorId = fields['error.id']?.[0] ?? errorDoc._id;
+        if (resolvedErrorId === undefined) {
+          throw new Error(
+            `No APM error found for scenario ${scenario.id} (service: ${scenario.errorQuery.serviceName})`
+          );
+        }
+        errorId = resolvedErrorId;
         log.info(`Found APM error with ID: ${errorId}`);
       });
 
       evaluate(
-        `APM error AI insight correctness (${scenario.id})`,
+        `APM error AI insight correctness (${scenario.id}, ${scenario.snapshotName})`,
         async ({ aiInsightClient, evaluateDataset }) => {
           await evaluateDataset<ErrorInsightParams>({
             getInsight: (params) => aiInsightClient.getErrorInsight(params),
             dataset: {
-              name: 'ai insights: APM error analysis',
-              description:
-                'Evaluates correctness of APM error AI insight summaries against ground truth',
+              name: `ai insights: APM error analysis (${scenario.id}, ${scenario.snapshotName})`,
+              description: `Evaluates correctness of APM error AI insight summaries for ${scenario.id} (snapshot: ${scenario.snapshotName})`,
               examples: [
                 {
                   input: {

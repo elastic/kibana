@@ -6,16 +6,10 @@
  */
 
 import type { ApmErrorScenario, GcsConfig } from './types';
-
-export const GCS_BUCKET = 'obs-ai-datasets';
+import { GCS_BUCKET, PAYMENT_SERVICE_GCS } from './constants';
 
 const PAYMENT_SERVICE_FAILURE_SCENARIO_ID = 'payment-service-failure';
 const PAYMENT_UNREACHABLE_SCENARIO_ID = 'payment-unreachable';
-
-const PAYMENT_SERVICE_GCS: GcsConfig = {
-  bucket: GCS_BUCKET,
-  basePath: 'otel-demo/payment-service-failures',
-};
 
 const PAYMENT_UNREACHABLE_GCS: GcsConfig = {
   bucket: GCS_BUCKET,

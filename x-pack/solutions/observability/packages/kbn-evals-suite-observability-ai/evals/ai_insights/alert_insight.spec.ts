@@ -25,7 +25,9 @@ for (const scenario of scenarios) {
 }
 
 function createScenarioTest(scenario: AlertScenario) {
-  evaluate.describe('Alert AI Insights', { tag: tags.serverless.observability.complete }, () => {
+  const scenarioLabel = `Alert AI Insights - ${scenario.id} (${scenario.snapshotName})`;
+
+  evaluate.describe(scenarioLabel, { tag: tags.serverless.observability.complete }, () => {
     let ruleId: string;
     let alertId: string;
 
@@ -76,29 +78,31 @@ function createScenarioTest(scenario: AlertScenario) {
       log.info(`Found alert with ID: ${alertId}`);
     });
 
-    evaluate('alert analysis correctness', async ({ aiInsightClient, evaluateDataset }) => {
-      await evaluateDataset<AlertInsightParams>({
-        getInsight: (params) => aiInsightClient.getAlertInsight(params),
-        dataset: {
-          name: 'ai insights: alert analysis',
-          description: 'Evaluates correctness of alert AI insight summaries against ground truth',
-          examples: [
-            {
-              input: {
-                requestPayload: {
-                  alertId,
+    evaluate(
+      `alert analysis (${scenario.id}, ${scenario.snapshotName})`,
+      async ({ aiInsightClient, evaluateDataset }) => {
+        await evaluateDataset<AlertInsightParams>({
+          getInsight: (params) => aiInsightClient.getAlertInsight(params),
+          dataset: {
+            name: `ai insights: alert analysis (${scenario.id}, ${scenario.snapshotName})`,
+            description: `Evaluates correctness of alert AI insight summaries for ${scenario.id} (snapshot: ${scenario.snapshotName})`,
+            examples: [
+              {
+                input: {
+                  requestPayload: {
+                    alertId,
+                  },
+                  question:
+                    'Analyze this alert and provide a summary of the likely cause and impact, an assessment, related signals with their relevance, and 2-3 immediate actions an SRE can take.',
                 },
-                question:
-                  'Analyze this alert and provide a summary of the likely cause and impact, an assessment, related signals with their relevance, and 2-3 immediate actions an SRE can take.',
+                output: {
+                  expected: scenario.expectedOutput,
+                },
               },
-              output: {
-                expected: scenario.expectedOutput,
-              },
-            },
-          ],
-        },
+            ],
+          },
+        });
       });
-    });
 
     evaluate.afterAll(async ({ kbnClient, esClient, log }) => {
       log.debug('Cleaning up indices');

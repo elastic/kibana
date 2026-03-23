@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { AlertScenario, GcsConfig } from './types';
-import { GCS_BUCKET } from './error_scenarios';
+import type { AlertScenario } from './types';
+import { PAYMENT_SERVICE_GCS } from './constants';
 
 const PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID = 'payment-error-count-alert';
-
-const PAYMENT_SERVICE_GCS: GcsConfig = {
-  bucket: GCS_BUCKET,
-  basePath: 'otel-demo/payment-service-failures',
-};
 
 const PAYMENT_ALERT_EXPECTED_OUTPUT = `-   Summary: A single handled error was detected in the payment service, specifically related to an invalid token during a payment request. The error appears isolated, with no evidence of broader anomalies or downstream impact.
 
@@ -40,8 +35,10 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
     alertRule: {
       ruleParams: {
         consumer: 'apm',
+        enabled: true,
         name: 'Error count threshold - payment service',
         rule_type_id: 'apm.error_rate',
+        tags: [],
         params: {
           threshold: 1,
           windowSize: 5,
