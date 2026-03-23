@@ -30,6 +30,7 @@ export class EvalsPlugin
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private datasetService?: DatasetService;
+  private actionsStart?: EvalsStartDependencies['actions'];
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -57,6 +58,7 @@ export class EvalsPlugin
 
         return {
           datasetService: this.datasetService,
+          getActionsStart: () => this.actionsStart,
         };
       }
     );
@@ -99,7 +101,7 @@ export class EvalsPlugin
     // AESOP Integration (Agent-driven Exploration for Security Ops)
     // ═══════════════════════════════════════════════════════════════
     this.logger.info('Registering AESOP routes for self-directed skill acquisition');
-    registerAESOPRoutes(router);
+    registerAESOPRoutes({ router, logger: this.logger });
 
     // Register AESOP workflows (if Workflows plugin available)
     if (workflows) {
@@ -121,6 +123,7 @@ export class EvalsPlugin
   }
 
   async start(core: CoreStart, plugins: EvalsStartDependencies): Promise<EvalsPluginStart> {
+    this.actionsStart = plugins.actions;
     // ═══════════════════════════════════════════════════════════════
     // AESOP: Auto-create custom agents on plugin start
     // ═══════════════════════════════════════════════════════════════

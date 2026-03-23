@@ -6,39 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { EvalsRequestHandlerContext } from '../../types';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
 
 const getExplorationProgressParamsSchema = z.object({
   executionId: z.string().min(1),
-});
-
-const explorationProgressResponseSchema = z.object({
-  execution_id: z.string(),
-  workflow_name: z.string(),
-  status: z.enum(['running', 'completed', 'failed']),
-  current_phase: z.number().int().min(1).max(5),
-  current_step: z.string(),
-  total_steps: z.number().int(),
-  completed_steps: z.number().int(),
-  progress_percentage: z.number().int().min(0).max(100),
-  estimated_time_remaining_ms: z.number(),
-  started_at: z.string(),
-  updated_at: z.string(),
-  completed_at: z.string().optional(),
-  error_message: z.string().optional(),
-  phases: z.array(
-    z.object({
-      phase_number: z.number().int(),
-      phase_name: z.string(),
-      status: z.enum(['pending', 'running', 'completed', 'failed']),
-      duration_ms: z.number().optional(),
-      started_at: z.string().optional(),
-      completed_at: z.string().optional(),
-    })
-  ),
 });
 
 /**
@@ -55,7 +28,7 @@ const explorationProgressResponseSchema = z.object({
  *
  * Poll this endpoint every 2 seconds for live updates.
  */
-export function registerGetExplorationProgressRoute(router: IRouter<EvalsRequestHandlerContext>) {
+export function registerGetExplorationProgressRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .get({
       path: '/internal/aesop/exploration/{executionId}/progress',
@@ -76,19 +49,14 @@ export function registerGetExplorationProgressRoute(router: IRouter<EvalsRequest
           request: {
             params: buildRouteValidationWithZod(getExplorationProgressParamsSchema),
           },
-          response: {
-            200: {
-              body: () => explorationProgressResponseSchema,
-            },
-          },
         },
       },
       async (context, request, response) => {
         const { executionId } = request.params;
 
         try {
-          const esClient = context.core.elasticsearch.client.asCurrentUser;
-          const tracker = new WorkflowStateTracker(esClient, context.logger);
+          const coreContext = await context.core; const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const tracker = new WorkflowStateTracker(esClient, logger);
 
           const state = await tracker.getExecutionState(executionId);
 
@@ -100,7 +68,7 @@ export function registerGetExplorationProgressRoute(router: IRouter<EvalsRequest
             });
           }
 
-          context.logger.debug('[AESOP] Fetched exploration progress', {
+          logger.debug('[AESOP] Fetched exploration progress', {
             execution_id: executionId,
             progress: state.progress_percentage,
             phase: state.current_phase,
@@ -110,7 +78,7 @@ export function registerGetExplorationProgressRoute(router: IRouter<EvalsRequest
             body: state,
           });
         } catch (error) {
-          context.logger.error('[AESOP] Failed to fetch exploration progress', {
+          logger.error('[AESOP] Failed to fetch exploration progress', {
             execution_id: executionId,
             error,
           });
@@ -118,7 +86,7 @@ export function registerGetExplorationProgressRoute(router: IRouter<EvalsRequest
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to fetch exploration progress: ${error.message}`,
+              message: `Failed to fetch exploration progress: ${error instanceof Error ? error.message : String(error)}`,
             },
           });
         }

@@ -6,47 +6,29 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { EvalsRequestHandlerContext } from '../../types';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
+import { ExplorationWorkflowExecutor } from '../../lib/aesop/workflows/exploration_workflow_executor';
 import { RateLimiterService, DEFAULT_RATE_LIMITS } from '../../lib/aesop/security/rate_limiter';
-import {
-  sanitizeAgentRole,
-  validateScopedIndices,
-  validateExplorationDepth,
-  validateMinPatternFrequency,
-} from '../../lib/aesop/security/input_sanitization';
 import { APMInstrumentationService } from '../../lib/aesop/monitoring/apm_instrumentation';
+import { discoverIndices } from '../../services/index_discovery';
+import { inferAnalystRole, describeRole } from '../../services/analyst_role_inference';
+import { calibrateSamplingStrategy } from '../../services/sampling_strategy';
 
 const runExplorationBodySchema = z.object({
-  agent_role: z.string().default('SOC analyst'),
-  scoped_indices: z.array(z.string()).default([
-    '.alerts-security.alerts-*',
-    '.siem-signals-*',
-    'logs-endpoint.*',
-  ]),
-  exploration_depth: z.number().int().min(10).max(1000).default(100),
-  min_pattern_frequency: z.number().int().min(1).max(100).default(10),
+  include_sample_data: z.boolean().optional().default(true),
+  connector_id: z.string().optional(),
 });
 
-const runExplorationResponseSchema = z.object({
-  success: z.boolean(),
-  execution_id: z.string(),
-  workflow_name: z.string(),
-  status: z.enum(['running', 'completed', 'failed']),
-  started_at: z.string(),
-  message: z.string().optional(),
-});
-
-export function registerRunExplorationRoute(router: IRouter<EvalsRequestHandlerContext>) {
+export function registerRunExplorationRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/exploration/run',
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['evals'],  // Requires evals privilege
+          requiredPrivileges: ['evals'],
         },
       },
       options: {
@@ -60,27 +42,12 @@ export function registerRunExplorationRoute(router: IRouter<EvalsRequestHandlerC
           request: {
             body: buildRouteValidationWithZod(runExplorationBodySchema),
           },
-          response: {
-            200: {
-              body: () => runExplorationResponseSchema,
-            },
-          },
         },
       },
       async (context, request, response) => {
-        const { workflowsManagement } = context;
-
-        if (!workflowsManagement) {
-          return response.badRequest({
-            body: {
-              message: 'Workflows Management plugin not available. Ensure xpack.workflows.enabled: true in kibana.yml',
-            },
-          });
-        }
-
         try {
-          // Rate limiting check (must be first)
-          const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, context.logger);
+          // Rate limiting check
+          const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, logger);
           const userId = request.auth.credentials?.username || 'anonymous';
           const rateLimit = await rateLimiter.checkRateLimit(userId, 'exploration');
 
@@ -99,79 +66,117 @@ export function registerRunExplorationRoute(router: IRouter<EvalsRequestHandlerC
             });
           }
 
-          // Input sanitization
-          const { agent_role, scoped_indices, exploration_depth, min_pattern_frequency } = request.body;
+          const coreContext = await context.core;
+          const evalsContext = await context.evals;
+          const esClient = coreContext.elasticsearch.client;
+          const { include_sample_data, connector_id: connectorId } = request.body;
 
-          const sanitizedAgentRole = sanitizeAgentRole(agent_role);
-          const sanitizedIndices = validateScopedIndices(scoped_indices);
-          const validatedDepth = validateExplorationDepth(exploration_depth);
-          const validatedFrequency = validateMinPatternFrequency(min_pattern_frequency);
+          // Get actions client for LLM-powered skill synthesis (optional)
+          let actionsClient: any;
+          if (connectorId) {
+            const actionsStart = evalsContext.getActionsStart();
+            if (actionsStart) {
+              actionsClient = await actionsStart.getActionsClientWithRequest(request);
+            }
+          }
 
-          context.logger.info('[AESOP] Starting self-exploration workflow', {
-            agent_role: sanitizedAgentRole,
-            scoped_indices: sanitizedIndices,
-            exploration_depth: validatedDepth,
+          logger.info('[AESOP] Starting autonomous exploration', {
             user_id: userId,
+            include_sample_data,
             rate_limit_remaining: rateLimit.remaining,
           });
 
-          // Initialize APM instrumentation
-          const esClient = context.core.elasticsearch.client.asCurrentUser;
-          const apmService = new APMInstrumentationService(esClient, context.logger);
+          // Phase 1: Auto-discover available indices
+          logger.info('[AESOP] Phase 1: Discovering available indices...');
+          const indexCatalog = await discoverIndices(esClient, logger);
 
-          // Ensure metrics index exists
-          await apmService.ensureMetricsIndex();
+          if (indexCatalog.indices.length === 0) {
+            return response.badRequest({
+              body: {
+                message:
+                  'No security-relevant indices found. Please ensure your cluster has data in alert, log, or metric indices.',
+              },
+            });
+          }
 
-          // Execute the self-exploration workflow with APM instrumentation
-          const workflowApi = workflowsManagement.management;
-          const executionId = await apmService.instrumentWorkflowStep(
-            'workflow_execution',
-            {
-              workflow_name: 'aesop.self_exploration',
-              agent_role: sanitizedAgentRole,
-              scoped_indices: sanitizedIndices,
-              exploration_depth: validatedDepth,
-              min_pattern_frequency: validatedFrequency,
-              user_id: userId,
-            },
-            async () => {
-              return await workflowApi.runWorkflow(
-                {
-                  id: 'aesop.self_exploration',
-                  name: 'AESOP Self-Exploration',
-                  enabled: true,
-                  definition: {}, // Definition loaded from YAML
-                  yaml: '', // Loaded from file
-                },
-                'default',  // spaceId
-                {
-                  agent_role: sanitizedAgentRole,
-                  scoped_indices: sanitizedIndices,
-                  exploration_depth: validatedDepth,
-                  min_pattern_frequency: validatedFrequency,
-                },
-                request,
-                undefined,  // cancellationToken
-                {
-                  // metadata
-                  triggered_by: 'aesop_ui',
-                  agent_role: sanitizedAgentRole,
-                  user_id: userId,
-                }
-              );
-            }
+          // Phase 2: Infer analyst role from event log
+          logger.info('[AESOP] Phase 2: Inferring analyst role...');
+          const roleInference = await inferAnalystRole(esClient, logger, userId);
+          logger.info(
+            `[AESOP] Inferred role: ${describeRole(roleInference.role)} (confidence: ${(roleInference.confidence * 100).toFixed(1)}%)`
           );
 
-          context.logger.info('[AESOP] Workflow started', {
-            execution_id: executionId,
-            user_id: userId,
+          // Phase 3: Calibrate sampling strategy
+          logger.info('[AESOP] Phase 3: Calibrating sampling strategy...');
+          const samplingConfig = await calibrateSamplingStrategy(
+            esClient,
+            logger,
+            indexCatalog.indices
+          );
+
+          const topIndices = indexCatalog.indices.slice(0, 10).map((idx) => idx.name);
+
+          logger.info('[AESOP] Autonomous discovery complete', {
+            discovered_indices: indexCatalog.securityRelevantCount,
+            analyst_role: roleInference.role,
+            sampling_strategy: samplingConfig.strategyName,
+            top_indices: topIndices,
           });
 
-          // Initialize workflow state tracking for progress updates
-          const stateTracker = new WorkflowStateTracker(esClient, context.logger);
+          // Use the current user's client for index creation (kibana_system lacks
+          // privileges to create custom .aesop-* indices, but the logged-in user does)
+          const currentUserClient = esClient.asCurrentUser;
 
+          // Initialize APM instrumentation
+          const apmService = new APMInstrumentationService(currentUserClient, logger);
+          await apmService.ensureMetricsIndex();
+
+          // Generate execution ID and initialize state tracking
+          const executionId = `aesop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          const stateTracker = new WorkflowStateTracker(currentUserClient, logger);
           await stateTracker.initializeExecution(executionId, 'aesop.self_exploration');
-          context.logger.debug('[AESOP] Workflow state tracking initialized', { execution_id: executionId });
+
+          logger.info('[AESOP] Exploration initialized', {
+            execution_id: executionId,
+            user_id: userId,
+            discovered_indices: topIndices.length,
+            inferred_role: roleInference.role,
+            sampling_strategy: samplingConfig.strategyName,
+          });
+
+          // Record APM metric for exploration start
+          await apmService.instrumentWorkflowStep(
+            'exploration_started',
+            {
+              workflow_name: 'aesop.autonomous_exploration',
+              analyst_role: roleInference.role,
+              discovered_indices_count: indexCatalog.indices.length,
+              top_indices: topIndices,
+              sampling_strategy: samplingConfig.strategyName,
+              user_id: userId,
+            },
+            async () => executionId
+          );
+
+          // Fire-and-forget: run the 5-phase exploration asynchronously
+          const executor = new ExplorationWorkflowExecutor(
+            currentUserClient,
+            logger,
+            stateTracker,
+            {
+              executionId,
+              userId,
+              indices: indexCatalog.indices,
+              analystRole: roleInference.role,
+              roleDescription: describeRole(roleInference.role),
+              samplingConfig,
+              connectorId,
+              actionsClient,
+            }
+          );
+          executor.execute().catch((err) => {
+            logger.error('[AESOP] Background exploration failed', { error: err });
+          });
 
           return response.ok({
             body: {
@@ -180,16 +185,16 @@ export function registerRunExplorationRoute(router: IRouter<EvalsRequestHandlerC
               workflow_name: 'aesop.self_exploration',
               status: 'running',
               started_at: new Date().toISOString(),
-              message: `Self-exploration started. Execution ID: ${executionId}`,
+              message: `Autonomous exploration started. Discovered ${indexCatalog.indices.length} indices, inferred role: ${describeRole(roleInference.role)}.`,
             },
           });
         } catch (error) {
-          context.logger.error('[AESOP] Failed to start exploration', { error });
+          logger.error('[AESOP] Failed to start exploration', { error });
 
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to start exploration: ${error.message}`,
+              message: `Failed to start exploration: ${error instanceof Error ? error.message : String(error)}`,
             },
           });
         }

@@ -26,108 +26,364 @@ import {
   EuiFormRow,
   EuiCallOut,
   EuiBadge,
+  EuiSuperSelect,
+  EuiLoadingSpinner,
+  EuiProgress,
+  EuiFieldText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEvalsApi } from '../../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../../components/trace_waterfall';  // Reuse from evals plugin!
+import { useLLMConnectors } from '../../../hooks/use_llm_connectors';
 
 interface SkillReviewFlyoutProps {
   skill: any;
   onClose: () => void;
 }
 
-export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) => {
+export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewFlyoutProps) => {
   const api = useEvalsApi();
   const queryClient = useQueryClient();
   const [reviewNotes, setReviewNotes] = useState('');
-  const [showTraceFlyout, setShowTraceFlyout] = useState(false);
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string>('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
+  const [editedName, setEditedName] = useState(initialSkill.name);
+  const [editedDescription, setEditedDescription] = useState(initialSkill.description);
+  const [editedMarkdown, setEditedMarkdown] = useState(initialSkill.markdown || '');
+
+  // Poll for skill updates while validating
+  const { data: polledSkill } = useQuery({
+    queryKey: ['aesop', 'skill-detail', initialSkill.id],
+    queryFn: async () => {
+      const response = await api.http.get('/internal/aesop/skills/proposed', {
+        query: { status: 'all', limit: 100 },
+        version: '1',
+      }) as { skills: any[] };
+      return response.skills.find((s: any) => s.id === initialSkill.id) || initialSkill;
+    },
+    initialData: initialSkill,
+    refetchInterval: (data) => {
+      return (data?.validation?.status === 'validating' || isValidating || isImproving) ? 2000 : false;
+    },
+  });
+
+  const skill = polledSkill || initialSkill;
+
+  // Clear local validating state when server confirms terminal status
+  React.useEffect(() => {
+    if (isValidating && skill.validation?.status !== 'validating' && skill.validation?.status !== 'pending') {
+      setIsValidating(false);
+    }
+  }, [isValidating, skill.validation?.status]);
+
+  const { data: connectors, isLoading: connectorsLoading } = useLLMConnectors();
+
+  // Auto-select first .gen-ai connector, or first available — only once
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
+  React.useEffect(() => {
+    if (connectors?.length && !hasAutoSelected) {
+      const genAi = connectors.find((c) => c.actionTypeId === '.gen-ai');
+      setSelectedConnectorId(genAi?.id || connectors[0].id);
+      setHasAutoSelected(true);
+    }
+  }, [connectors, hasAutoSelected]);
 
   // Approve skill mutation
   const approveMutation = useMutation({
     mutationFn: async () => {
       return await api.http.post(`/internal/aesop/skills/${skill.id}/approve`, {
-        body: { review_notes: reviewNotes },
+        body: JSON.stringify({ review_notes: reviewNotes }),
+        version: '1',
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      api.notifications.toasts.addSuccess(`Skill "${skill.name}" approved and deployed`);
       onClose();
+    },
+    onError: (error: Error) => {
+      api.notifications.toasts.addDanger(`Failed to approve: ${error.message}`);
     },
   });
 
-  // Reject skill mutation
+  // Reject skill mutation — passes connector_id to trigger cross-evaluation
   const rejectMutation = useMutation({
     mutationFn: async () => {
       return await api.http.post(`/internal/aesop/skills/${skill.id}/reject`, {
-        body: { review_notes: reviewNotes },
+        body: JSON.stringify({
+          review_notes: reviewNotes,
+          connector_id: selectedConnectorId || undefined,
+        }),
+        version: '1',
+      });
+    },
+    onSuccess: (result: any) => {
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      const msg = result?.cross_evaluation_triggered
+        ? `Skill "${skill.name}" rejected. Evaluating remaining skills for similar issues...`
+        : `Skill "${skill.name}" rejected`;
+      api.notifications.toasts.addSuccess(msg);
+      onClose();
+    },
+    onError: (error: Error) => {
+      api.notifications.toasts.addDanger(`Failed to reject: ${error.message}`);
+    },
+  });
+
+  // Unreject mutation — restore to pending review
+  const unrejectMutation = useMutation({
+    mutationFn: async () => {
+      return await api.http.post(`/internal/aesop/skills/${skill.id}/unreject`, {
+        body: JSON.stringify({}),
+        version: '1',
       });
     },
     onSuccess: () => {
-      onClose();
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'skill-detail', initialSkill.id] });
+      api.notifications.toasts.addSuccess('Skill restored to pending review');
+    },
+    onError: (error: Error) => {
+      api.notifications.toasts.addDanger(`Failed to restore: ${error.message}`);
+    },
+  });
+
+  // Re-deploy to Agent Builder (for approved skills deleted by mistake)
+  const redeployMutation = useMutation({
+    mutationFn: async () => {
+      // The approve endpoint handles creating the skill in Agent Builder
+      // Force re-approval by temporarily resetting validation status, then re-approving
+      return await api.http.post(`/internal/aesop/skills/${skill.id}/redeploy`, {
+        body: JSON.stringify({}),
+        version: '1',
+      });
+    },
+    onSuccess: () => {
+      api.notifications.toasts.addSuccess('Skill re-deployed to Agent Builder');
+    },
+    onError: (error: Error) => {
+      api.notifications.toasts.addDanger(`Failed to re-deploy: ${error.message}`);
+    },
+  });
+
+  // Save edits mutation
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      return await api.http.put(`/internal/aesop/skills/${skill.id}`, {
+        body: JSON.stringify({
+          name: editedName,
+          description: editedDescription,
+          markdown: editedMarkdown,
+        }),
+        version: '1',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'skill-detail', initialSkill.id] });
+      api.notifications.toasts.addSuccess('Skill updated — re-run validation to verify changes');
+      setIsEditing(false);
+    },
+    onError: (error: Error) => {
+      api.notifications.toasts.addDanger(`Failed to save: ${error.message}`);
+    },
+  });
+
+  // Auto-improve mutation
+  const improveMutation = useMutation({
+    mutationFn: async () => {
+      setIsImproving(true);
+      return await api.http.post(`/internal/aesop/skills/${skill.id}/improve`, {
+        body: JSON.stringify({ connector_id: selectedConnectorId }),
+        version: '1',
+      });
+    },
+    onSuccess: () => {
+      // Keep isImproving true — auto-validation is running in background
+      // The polling + useEffect will clear it when validation completes
+      setIsValidating(true);
+      setIsImproving(false);
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'skill-detail', initialSkill.id] });
+    },
+    onError: (error: Error) => {
+      setIsImproving(false);
+      api.notifications.toasts.addDanger(`Failed to improve: ${error.message}`);
     },
   });
 
   // Validation trigger mutation
   const validateMutation = useMutation({
     mutationFn: async () => {
+      setIsValidating(true);
       return await api.http.post(`/internal/aesop/skills/${skill.id}/validate`, {
-        body: JSON.stringify({}),
+        body: JSON.stringify({ connector_id: selectedConnectorId }),
+        version: '1',
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
-      api.notifications.toasts.addSuccess('Validation started successfully');
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'skill-detail', initialSkill.id] });
     },
     onError: (error: Error) => {
+      setIsValidating(false);
       api.notifications.toasts.addDanger(`Validation failed: ${error.message}`);
     },
   });
 
   const canApprove = skill.validation?.status === 'passed';
+  const isReviewable = skill.review?.status === 'pending_review';
+  const connectorOptions = (connectors || []).map((c) => ({
+    value: c.id,
+    inputDisplay: c.name,
+    dropdownDisplay: (
+      <>
+        <strong>{c.name}</strong>
+        <EuiText size="xs" color="subdued">
+          <p>{c.actionTypeId.replace('.', '').replace('-', ' ')}</p>
+        </EuiText>
+      </>
+    ),
+  }));
 
   return (
     <>
       <EuiFlyout onClose={onClose} size="l" ownFocus>
         <EuiFlyoutHeader>
-          <EuiTitle size="m">
-            <h2>{skill.name}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            {skill.description}
-          </EuiText>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiTitle size="m">
+                <h2>{skill.name}</h2>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                {skill.description}
+              </EuiText>
+            </EuiFlexItem>
+            {isReviewable && (
+              <EuiFlexItem grow={false} style={{ minWidth: 220 }}>
+                <EuiSuperSelect
+                  options={connectorOptions}
+                  valueOfSelected={selectedConnectorId}
+                  onChange={setSelectedConnectorId}
+                  isLoading={connectorsLoading}
+                  compressed
+                  prepend="LLM"
+                  disabled={connectorsLoading || connectorOptions.length === 0}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          {/* Validation Status */}
-          {!canApprove && (
+          {/* Cross-evaluation warning */}
+          {skill.cross_evaluation?.action === 'flagged' && (
             <>
               <EuiCallOut
-                title="Skill must pass validation before approval"
+                title={`Potentially affected by rejection of a related skill`}
                 color="warning"
                 iconType="alert"
               >
-                <p>Current validation status: {skill.validation?.status || 'pending'}</p>
-                {skill.validation?.status === 'pending' && (
-                  <EuiButton
-                    size="s"
-                    onClick={() => validateMutation.mutate()}
-                    isLoading={validateMutation.isPending}
-                  >
-                    Run Validation
-                  </EuiButton>
-                )}
-                {skill.validation?.status === 'validating' && (
-                  <EuiButton size="s" isLoading disabled>
-                    Validating...
-                  </EuiButton>
-                )}
+                <EuiText size="s">{skill.cross_evaluation.reason}</EuiText>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  Severity: {skill.cross_evaluation.severity} — review carefully before approving
+                </EuiText>
               </EuiCallOut>
               <EuiSpacer />
             </>
           )}
 
-          {/* Evaluation Score */}
-          {skill.validation?.final_score && (
+          {/* In-progress states */}
+          {isImproving && (
+            <>
+              <EuiCallOut
+                title="Applying LLM suggestions"
+                color="primary"
+                iconType="sparkles"
+              >
+                <EuiProgress size="s" color="primary" />
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      The LLM is rewriting the skill based on validation feedback. This typically takes 10-20 seconds.
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {!isImproving && (isValidating || skill.validation?.status === 'validating') && (
+            <>
+              <EuiCallOut
+                title="LLM validation in progress"
+                color="primary"
+                iconType="iInCircle"
+              >
+                <EuiProgress size="s" color="primary" />
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      The skill is being evaluated by the LLM. This typically takes 5-15 seconds.
+                      The results will appear automatically when complete.
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {isReviewable && skill.validation?.status !== 'validating' && !isValidating && (
+            <>
+              {!canApprove ? (
+                <EuiCallOut
+                  title="Skill must pass validation before approval"
+                  color={skill.validation?.status === 'failed' ? 'danger' : 'warning'}
+                  iconType={skill.validation?.status === 'failed' ? 'error' : 'alert'}
+                >
+                  <p>Current validation status: {skill.validation?.status || 'pending'}</p>
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    size="s"
+                    onClick={() => validateMutation.mutate()}
+                    disabled={!selectedConnectorId}
+                  >
+                    {skill.validation?.status === 'failed' ? 'Re-run Validation' : 'Run Validation'}
+                  </EuiButton>
+                </EuiCallOut>
+              ) : (
+                <EuiCallOut
+                  title="Validation passed — ready for approval"
+                  color="success"
+                  iconType="check"
+                >
+                  <EuiButton
+                    size="s"
+                    onClick={() => validateMutation.mutate()}
+                    disabled={!selectedConnectorId}
+                  >
+                    Re-run Validation
+                  </EuiButton>
+                </EuiCallOut>
+              )}
+              <EuiSpacer />
+            </>
+          )}
+
+          {/* Evaluation Score + LLM Feedback — hidden during re-validation or improvement */}
+          {skill.validation?.final_score != null && !isValidating && !isImproving && skill.validation?.status !== 'validating' && (
             <>
               <EuiPanel>
                 <EuiFlexGroup>
@@ -145,29 +401,194 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
                       titleColor="primary"
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton
-                      size="s"
-                      iconType="apmTrace"
-                      onClick={() => setShowTraceFlyout(true)}
-                      disabled={!skill.validation?.eval_trace_id}
-                    >
-                      View Trace
-                    </EuiButton>
-                  </EuiFlexItem>
+                  {skill.validation.duration_ms && (
+                    <EuiFlexItem>
+                      <EuiStat
+                        title={`${(skill.validation.duration_ms / 1000).toFixed(1)}s`}
+                        description="Validation Time"
+                        titleColor="subdued"
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiPanel>
+              <EuiSpacer size="s" />
+
+              {/* Criteria Breakdown */}
+              {skill.validation.criteria && (
+                <>
+                  <EuiPanel>
+                    <EuiTitle size="xs"><h4>Evaluation Criteria</h4></EuiTitle>
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup gutterSize="s" wrap>
+                      {Object.entries(skill.validation.criteria as Record<string, number>).map(
+                        ([criterion, score]) => (
+                          <EuiFlexItem key={criterion} grow={false} style={{ minWidth: 120 }}>
+                            <EuiStat
+                              title={`${(score * 100).toFixed(0)}%`}
+                              description={criterion.charAt(0).toUpperCase() + criterion.slice(1)}
+                              titleSize="xs"
+                              titleColor={score >= 0.85 ? 'success' : score >= 0.6 ? 'default' : 'danger'}
+                            />
+                          </EuiFlexItem>
+                        )
+                      )}
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+
+              {/* LLM Feedback */}
+              {skill.validation.llm_feedback && (
+                <EuiPanel>
+                  <EuiTitle size="xs"><h4>LLM Feedback</h4></EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s">{skill.validation.llm_feedback}</EuiText>
+
+                  {skill.validation.strengths?.length > 0 && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="xs"><strong>Strengths</strong></EuiText>
+                      <ul>
+                        {skill.validation.strengths.map((s: string, i: number) => (
+                          <li key={i}><EuiText size="xs">{s}</EuiText></li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {skill.validation.weaknesses?.length > 0 && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="xs"><strong>Weaknesses</strong></EuiText>
+                      <ul>
+                        {skill.validation.weaknesses.map((w: string, i: number) => (
+                          <li key={i}><EuiText size="xs">{w}</EuiText></li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {skill.validation.suggestions?.length > 0 && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="xs"><strong>Suggestions</strong></EuiText>
+                      <ul>
+                        {skill.validation.suggestions.map((s: string, i: number) => (
+                          <li key={i}><EuiText size="xs">{s}</EuiText></li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {isReviewable && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiButton
+                        iconType="sparkles"
+                        onClick={() => improveMutation.mutate()}
+                        isLoading={improveMutation.isPending}
+                        disabled={!selectedConnectorId}
+                        size="s"
+                        fill
+                      >
+                        Apply LLM Suggestions
+                      </EuiButton>
+                    </>
+                  )}
+                </EuiPanel>
+              )}
               <EuiSpacer />
             </>
           )}
 
-          {/* Skill Content Preview */}
+          {/* Skill Content — view or edit */}
           <EuiPanel>
-            <EuiTitle size="s"><h3>Skill Content</h3></EuiTitle>
-            <EuiSpacer />
-            <EuiCodeBlock language="markdown" isCopyable>
-              {skill.markdown}
-            </EuiCodeBlock>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s"><h3>Skill Content</h3></EuiTitle>
+              </EuiFlexItem>
+              {isReviewable && (
+                <EuiFlexItem grow={false}>
+                  {isEditing ? (
+                    <EuiFlexGroup gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="s"
+                          onClick={() => {
+                            setEditedName(skill.name);
+                            setEditedDescription(skill.description);
+                            setEditedMarkdown(skill.markdown || '');
+                            setIsEditing(false);
+                          }}
+                        >
+                          Cancel
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          fill
+                          onClick={() => saveMutation.mutate()}
+                          isLoading={saveMutation.isPending}
+                        >
+                          Save Changes
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <EuiButtonEmpty
+                      size="s"
+                      iconType="pencil"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit
+                    </EuiButtonEmpty>
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+
+            {isEditing ? (
+              <>
+                <EuiFormRow label="Skill Name" fullWidth>
+                  <EuiFieldText
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    fullWidth
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+                <EuiFormRow label="Description" fullWidth>
+                  <EuiTextArea
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    rows={2}
+                    fullWidth
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+                <EuiFormRow
+                  label="Skill Markdown"
+                  helpText="Edit the skill content. Saving will reset validation — re-run to verify your changes."
+                  fullWidth
+                >
+                  <EuiTextArea
+                    value={editedMarkdown}
+                    onChange={(e) => setEditedMarkdown(e.target.value)}
+                    rows={15}
+                    fullWidth
+                    style={{ fontFamily: 'monospace', fontSize: '13px' }}
+                  />
+                </EuiFormRow>
+              </>
+            ) : (
+              <EuiCodeBlock language="markdown" isCopyable>
+                {skill.markdown}
+              </EuiCodeBlock>
+            )}
           </EuiPanel>
 
           <EuiSpacer />
@@ -180,11 +601,11 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
               listItems={[
                 {
                   title: 'Pattern Frequency',
-                  description: `${skill.source.pattern_frequency} instances`,
+                  description: `${skill.source?.pattern_frequency ?? 'N/A'} instances`,
                 },
                 {
                   title: 'Rationale',
-                  description: skill.source.rationale,
+                  description: skill.source?.rationale ?? 'N/A',
                 },
                 {
                   title: 'Confidence',
@@ -196,11 +617,11 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
                 },
                 {
                   title: 'Discovered',
-                  description: new Date(skill.metadata.created_at).toLocaleString(),
+                  description: new Date(skill.metadata?.created_at).toLocaleString(),
                 },
                 {
                   title: 'Indices Explored',
-                  description: skill.metadata.indices_explored,
+                  description: skill.metadata?.indices_explored ?? 'N/A',
                 },
               ]}
             />
@@ -208,70 +629,120 @@ export const SkillReviewFlyout = ({ skill, onClose }: SkillReviewFlyoutProps) =>
 
           <EuiSpacer />
 
-          {/* Review Notes */}
-          <EuiFormRow
-            label="Review Notes (optional)"
-            helpText="Add notes about this skill for the team"
-          >
-            <EuiTextArea
-              value={reviewNotes}
-              onChange={(e) => setReviewNotes(e.target.value)}
-              placeholder="e.g., Approved for production use. Addresses common triage workflow."
-            />
-          </EuiFormRow>
+          {/* Review status banner for already-decided skills */}
+          {skill.review?.status === 'rejected' && (
+            <>
+              <EuiCallOut title="This skill has been rejected" color="danger" iconType="cross">
+                {skill.review.review_notes && <p>{skill.review.review_notes}</p>}
+                {skill.review.reviewed_at && (
+                  <EuiText size="xs" color="subdued">
+                    Rejected by {skill.review.reviewed_by || 'unknown'} on{' '}
+                    {new Date(skill.review.reviewed_at).toLocaleString()}
+                  </EuiText>
+                )}
+                <EuiSpacer size="s" />
+                <EuiButton
+                  size="s"
+                  color="warning"
+                  onClick={() => unrejectMutation.mutate()}
+                  isLoading={unrejectMutation.isPending}
+                >
+                  Restore to Pending Review
+                </EuiButton>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {skill.review?.status === 'approved' && (
+            <>
+              <EuiCallOut title="This skill has been approved and deployed" color="success" iconType="check">
+                {skill.review.review_notes && <p>{skill.review.review_notes}</p>}
+                {skill.review.reviewed_at && (
+                  <EuiText size="xs" color="subdued">
+                    Approved by {skill.review.reviewed_by || 'unknown'} on{' '}
+                    {new Date(skill.review.reviewed_at).toLocaleString()}
+                  </EuiText>
+                )}
+                {skill.deployment?.agent_builder_skill_id && (
+                  <EuiText size="xs" color="subdued">
+                    Agent Builder skill ID: {skill.deployment.agent_builder_skill_id}
+                  </EuiText>
+                )}
+                <EuiSpacer size="s" />
+                <EuiButton
+                  size="s"
+                  iconType="refresh"
+                  onClick={() => redeployMutation.mutate()}
+                  isLoading={redeployMutation.isPending}
+                >
+                  Re-deploy to Agent Builder
+                </EuiButton>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+
+          {/* Review Notes — only for pending skills */}
+          {isReviewable && (
+            <EuiFormRow
+              label="Review Notes (optional)"
+              helpText="Add notes about this skill for the team"
+            >
+              <EuiTextArea
+                value={reviewNotes}
+                onChange={(e) => setReviewNotes(e.target.value)}
+                placeholder="e.g., Approved for production use. Addresses common triage workflow."
+              />
+            </EuiFormRow>
+          )}
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => rejectMutation.mutate()}
-                color="danger"
-                isLoading={rejectMutation.isPending}
-              >
-                Reject
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose}>
-                    Cancel
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="success"
-                    onClick={() => approveMutation.mutate()}
-                    disabled={!canApprove}
-                    isLoading={approveMutation.isPending}
-                  >
-                    Approve & Deploy to Agent Builder
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {isReviewable ? (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={!reviewNotes.trim() ? 'Review notes are required to reject' : ''}>
+                <EuiButtonEmpty
+                  onClick={() => rejectMutation.mutate()}
+                  color="danger"
+                  isLoading={rejectMutation.isPending}
+                  disabled={!reviewNotes.trim()}
+                >
+                  Reject
+                </EuiButtonEmpty>
+              </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={onClose}>
+                      Cancel
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      color="success"
+                      onClick={() => approveMutation.mutate()}
+                      disabled={!canApprove}
+                      isLoading={approveMutation.isPending}
+                    >
+                      Approve & Deploy to Agent Builder
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onClose}>Close</EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlyoutFooter>
       </EuiFlyout>
 
-      {/* Trace Waterfall Flyout (Nested) */}
-      {showTraceFlyout && skill.validation?.eval_trace_id && (
-        <EuiFlyout
-          onClose={() => setShowTraceFlyout(false)}
-          size="l"
-          ownFocus
-        >
-          <EuiFlyoutHeader>
-            <EuiTitle><h2>Skill Execution Trace</h2></EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {/* Reuse TraceWaterfall component from evals plugin! */}
-            <TraceWaterfall traceId={skill.validation.eval_trace_id} />
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
     </>
   );
 };

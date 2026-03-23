@@ -7,7 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { EvalsRequestHandlerContext } from '../../types';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
 
 /**
  * GET /internal/aesop/exploration/executions/{executionId}
@@ -19,14 +21,15 @@ import type { EvalsRequestHandlerContext } from '../../types';
  * - Performance metrics
  * - O11y trace ID
  */
-export function registerGetExecutionDetailRoute(router: IRouter<EvalsRequestHandlerContext>) {
+export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .get({
       path: '/internal/aesop/exploration/executions/{executionId}',
       access: 'internal',
       security: {
         authz: {
-          enabled: false, // Internal route, RBAC deferred
+          enabled: false,
+          reason: 'Internal route for AESOP exploration execution details, RBAC handled by parent plugin',
         },
       },
     })
@@ -49,7 +52,7 @@ export function registerGetExecutionDetailRoute(router: IRouter<EvalsRequestHand
 
         try {
           const { executionId } = request.params;
-          const { asCurrentUser: esClient } = context.core.elasticsearch.client;
+          const coreContext = await context.core; const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
           // Fetch workflow execution state
           const workflowState = await esClient.get({
@@ -90,7 +93,7 @@ export function registerGetExecutionDetailRoute(router: IRouter<EvalsRequestHand
               index: '.aesop-discovered-relationships',
               query: {
                 term: {
-                  exploration_execution_id: executionId,
+                  'exploration_execution_id': executionId,
                 },
               },
               size: 100,
@@ -107,7 +110,7 @@ export function registerGetExecutionDetailRoute(router: IRouter<EvalsRequestHand
               index: '.aesop-discovered-patterns',
               query: {
                 term: {
-                  exploration_execution_id: executionId,
+                  'exploration_execution_id': executionId,
                 },
               },
               size: 100,
@@ -135,11 +138,17 @@ export function registerGetExecutionDetailRoute(router: IRouter<EvalsRequestHand
             exploration_depth: executionState.config?.exploration_depth || 100,
             min_pattern_frequency: executionState.config?.min_pattern_frequency || 10,
 
-            // Workflow trace
-            workflow_steps: executionState.phases || [],
+            // Workflow trace — map phase_name → step_name for frontend
+            workflow_steps: (executionState.phases || []).map((phase: any) => ({
+              step_name: phase.phase_name,
+              status: phase.status,
+              started_at: phase.started_at,
+              completed_at: phase.completed_at,
+              duration_ms: phase.duration_ms,
+            })),
 
-            // Discoveries (from separate indices)
-            schemas_discovered: [], // TODO: Parse from workflow output or separate index
+            // Discoveries
+            schemas_discovered: executionState.schemas_discovered || [],
             patterns_identified: discoveredPatterns,
             relationships_discovered: discoveredRelationships,
 
@@ -158,10 +167,10 @@ export function registerGetExecutionDetailRoute(router: IRouter<EvalsRequestHand
                 ? new Date(executionState.completed_at).getTime() -
                   new Date(executionState.started_at).getTime()
                 : undefined,
-              indices_explored: executionState.config?.scoped_indices?.length || 0,
-              relationships_discovered: discoveredRelationships.length,
-              patterns_found: discoveredPatterns.length,
-              skills_generated: proposedSkills.length,
+              indices_explored: executionState.metrics?.indices_explored || executionState.config?.scoped_indices?.length || 0,
+              relationships_discovered: executionState.metrics?.relationships_discovered || discoveredRelationships.length,
+              patterns_found: executionState.metrics?.patterns_found || discoveredPatterns.length,
+              skills_generated: executionState.metrics?.skills_generated || proposedSkills.length,
               total_tokens_used: executionState.metrics?.total_tokens,
               total_cost_usd: executionState.metrics?.total_cost_usd,
             },

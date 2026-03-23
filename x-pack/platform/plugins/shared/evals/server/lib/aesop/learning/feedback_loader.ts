@@ -27,6 +27,7 @@ export interface RejectionFeedback {
     | 'overlaps_existing'
     | 'not_useful'
     | 'security_concern'
+    | 'invalid_index_reference'
     | 'too_generic'
     | 'other';
   review_notes: string;
@@ -204,6 +205,12 @@ export class FeedbackLoaderService {
     // If any "security_concern" rejections, add security focus
     if ((reasonCounts.security_concern || 0) > 0) {
       signals.focusAreas.push('security_focused_patterns');
+    }
+
+    // If any "invalid_index_reference" rejections, add index resolution focus
+    // Skills must reference data streams/aliases, never backing indices
+    if ((reasonCounts.invalid_index_reference || 0) > 0) {
+      signals.focusAreas.push('resolve_backing_indices_to_aliases');
     }
 
     // If >3 "too_generic" rejections, add specific focus areas

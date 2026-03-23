@@ -5,239 +5,338 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { EvalsRequestHandlerContext } from '../../types';
+import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { registerRunExplorationRoute } from './run_exploration';
-import type { IRouter } from '@kbn/core/server';
+import { discoverIndices } from '../../services/index_discovery';
+import { inferAnalystRole, describeRole } from '../../services/analyst_role_inference';
+import { calibrateSamplingStrategy } from '../../services/sampling_strategy';
+import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
+import { RateLimiterService } from '../../lib/aesop/security/rate_limiter';
+import { APMInstrumentationService } from '../../lib/aesop/monitoring/apm_instrumentation';
+
+jest.mock('../../services/index_discovery');
+jest.mock('../../services/analyst_role_inference');
+jest.mock('../../services/sampling_strategy');
+jest.mock('../../lib/aesop/workflows/workflow_state_tracker');
+jest.mock('../../lib/aesop/security/rate_limiter');
+jest.mock('../../lib/aesop/monitoring/apm_instrumentation');
+
+const mockDiscoverIndices = discoverIndices as jest.MockedFunction<typeof discoverIndices>;
+const mockInferAnalystRole = inferAnalystRole as jest.MockedFunction<typeof inferAnalystRole>;
+const mockDescribeRole = describeRole as jest.MockedFunction<typeof describeRole>;
+const mockCalibrateSamplingStrategy = calibrateSamplingStrategy as jest.MockedFunction<
+  typeof calibrateSamplingStrategy
+>;
+
+const MockWorkflowStateTracker = WorkflowStateTracker as jest.MockedClass<
+  typeof WorkflowStateTracker
+>;
+const MockRateLimiterService = RateLimiterService as jest.MockedClass<typeof RateLimiterService>;
+const MockAPMInstrumentationService = APMInstrumentationService as jest.MockedClass<
+  typeof APMInstrumentationService
+>;
 
 describe('POST /internal/aesop/exploration/run', () => {
-  let mockContext: jest.Mocked<EvalsRequestHandlerContext>;
-  let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
-  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let mockRouter: jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
-  let routeHandler: any;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let routeHandler: Function;
+  let mockRouter: any;
+
+  const mockScopedClient = () => ({
+    asCurrentUser: mockEsClient,
+    asInternalUser: mockEsClient,
+  });
+
+  const createMockContext = () =>
+    ({
+      core: Promise.resolve({
+        elasticsearch: {
+          client: mockScopedClient(),
+        },
+      }),
+    }) as any;
+
+  const createMockRequest = (overrides: Record<string, any> = {}) => {
+    const request = httpServerMock.createKibanaRequest({
+      body: { include_sample_data: true },
+      ...overrides,
+    });
+    // KibanaRequest.auth is not settable via constructor — override directly
+    (request as any).auth = { credentials: { username: 'test-user' } };
+    return request;
+  };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockLogger = loggingSystemMock.createLogger();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    mockContext = {
-      core: {
-        elasticsearch: {
-          client: {
-            asCurrentUser: mockEsClient,
-          },
-        },
-      },
-      evals: {
-        datasetService: {} as any,
-      },
-      logger: {
-        info: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
-        debug: jest.fn(),
-      } as any,
-      workflowsManagement: {
-        management: {
-          runWorkflow: jest.fn().mockResolvedValue('exec-123'),
-        },
-      } as any,
-    } as any;
-
-    mockRequest = httpServerMock.createKibanaRequest({
-      body: {
-        agent_role: 'SOC analyst',
-        scoped_indices: ['.alerts-*'],
-        exploration_depth: 50,
-        min_pattern_frequency: 5,
-      },
-    });
-
     mockResponse = httpServerMock.createResponseFactory();
 
-    // Mock router to capture handler
     mockRouter = {
       versioned: {
-        post: jest.fn().mockReturnThis(),
+        post: jest.fn().mockReturnValue({
+          addVersion: jest.fn((_config: any, handler: Function) => {
+            routeHandler = handler;
+          }),
+        }),
       },
     } as any;
 
-    const mockAddVersion = jest.fn((config) => {
-      routeHandler = config;
+    // Default mock implementations for a successful flow
+    MockRateLimiterService.prototype.checkRateLimit = jest.fn().mockResolvedValue({
+      allowed: true,
+      limit: 1,
+      remaining: 0,
+      resetAt: Date.now() + 3600000,
     });
 
-    mockRouter.versioned.post.mockReturnValue({
-      addVersion: mockAddVersion,
+    mockDiscoverIndices.mockResolvedValue({
+      indices: [
+        {
+          name: '.alerts-security.alerts-default',
+          type: 'alerts',
+          isDataStream: false,
+          docCount: 5000,
+          ageRange: { oldest: new Date(), newest: new Date() },
+          fields: ['@timestamp', 'event.action'],
+          relevanceScore: 95,
+        },
+        {
+          name: 'logs-endpoint.events.process-default',
+          type: 'logs',
+          isDataStream: true,
+          docCount: 100000,
+          ageRange: { oldest: new Date(), newest: new Date() },
+          fields: ['@timestamp', 'process.name'],
+          relevanceScore: 80,
+        },
+      ],
+      totalDocCount: 105000,
+      discoveredAt: new Date(),
+      securityRelevantCount: 2,
     });
 
-    registerRunExplorationRoute(mockRouter);
+    mockInferAnalystRole.mockResolvedValue({
+      role: 'soc_analyst',
+      confidence: 0.85,
+      scores: {
+        soc_analyst: 10,
+        threat_hunter: 3,
+        security_engineer: 2,
+        ops_analyst: 1,
+        unknown: 0,
+      },
+      eventCount: 150,
+    });
+
+    mockDescribeRole.mockReturnValue('SOC Analyst (alert triage and response)');
+
+    mockCalibrateSamplingStrategy.mockResolvedValue({
+      sampleRate: 0.1,
+      strategyName: 'Time-Based Sampling (10%)',
+      estimatedDocsSampled: 10500,
+      depthLevel: 'standard',
+      description: 'Medium dataset',
+    });
+
+    MockWorkflowStateTracker.prototype.initializeExecution = jest.fn().mockResolvedValue(undefined);
+    MockAPMInstrumentationService.prototype.ensureMetricsIndex = jest
+      .fn()
+      .mockResolvedValue(undefined);
+    MockAPMInstrumentationService.prototype.instrumentWorkflowStep = jest
+      .fn()
+      .mockImplementation(async (_name, _meta, op) => op());
+
+    registerRunExplorationRoute({ router: mockRouter, logger: mockLogger });
   });
 
   describe('successful exploration', () => {
-    it('should trigger workflow execution', async () => {
-      const result = await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockContext.workflowsManagement.management.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'aesop.self_exploration',
-          name: 'AESOP Self-Exploration',
-        }),
-        'default',
-        {
-          agent_role: 'SOC analyst',
-          scoped_indices: ['.alerts-*'],
-          exploration_depth: 50,
-          min_pattern_frequency: 5,
-        },
-        mockRequest,
-        undefined,
-        expect.objectContaining({
-          triggered_by: 'aesop_ui',
-          agent_role: 'SOC analyst',
-        })
-      );
-
-      expect(mockContext.logger.info).toHaveBeenCalledWith(
-        '[AESOP] Starting self-exploration workflow',
-        expect.any(Object)
-      );
-    });
-
-    it('should initialize workflow state tracker', async () => {
-      mockEsClient.indices.exists.mockResolvedValue(false);
-      mockEsClient.indices.create.mockResolvedValue({} as any);
-      mockEsClient.index.mockResolvedValue({ _id: 'exec-123' } as any);
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.aesop-workflow-executions',
-          id: 'exec-123',
-          document: expect.objectContaining({
-            execution_id: 'exec-123',
-            workflow_name: 'aesop.self_exploration',
-            status: 'running',
-            current_phase: 1,
-          }),
-          refresh: 'wait_for',
-        })
-      );
-    });
-
-    it('should return execution details in response', async () => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
-      mockEsClient.index.mockResolvedValue({} as any);
+    it('should return 200 with execution details on success', async () => {
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
           success: true,
-          execution_id: 'exec-123',
+          execution_id: expect.stringMatching(/^aesop-/),
           workflow_name: 'aesop.self_exploration',
           status: 'running',
           started_at: expect.any(String),
-          message: expect.stringContaining('exec-123'),
+          message: expect.stringContaining('Autonomous exploration started'),
         }),
       });
     });
 
-    it('should use default values when optional parameters omitted', async () => {
-      const minimalRequest = httpServerMock.createKibanaRequest({
-        body: {},
-      });
-
-      mockEsClient.indices.exists.mockResolvedValue(true);
-      mockEsClient.index.mockResolvedValue({} as any);
-
-      await routeHandler(mockContext, minimalRequest, mockResponse);
-
-      expect(mockContext.workflowsManagement.management.runWorkflow).toHaveBeenCalledWith(
-        expect.any(Object),
-        'default',
-        expect.objectContaining({
-          agent_role: 'SOC analyst',
-          scoped_indices: [
-            '.alerts-security.alerts-*',
-            '.siem-signals-*',
-            'logs-endpoint.*',
-          ],
-          exploration_depth: 100,
-          min_pattern_frequency: 10,
+    it('should pass the scoped client (with asCurrentUser and asInternalUser) to discoverIndices', async () => {
+      const scopedClient = mockScopedClient();
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: { client: scopedClient },
         }),
-        expect.any(Object),
-        undefined,
-        expect.any(Object)
+      } as any;
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockDiscoverIndices).toHaveBeenCalledWith(scopedClient, mockLogger);
+      // Verify the client has both properties (IScopedClusterClient)
+      const passedClient = mockDiscoverIndices.mock.calls[0][0] as any;
+      expect(passedClient.asCurrentUser).toBeDefined();
+      expect(passedClient.asInternalUser).toBeDefined();
+    });
+
+    it('should pass esClient.asCurrentUser to WorkflowStateTracker', async () => {
+      const scopedClient = mockScopedClient();
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: { client: scopedClient },
+        }),
+      } as any;
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(MockWorkflowStateTracker).toHaveBeenCalledWith(
+        scopedClient.asCurrentUser,
+        mockLogger
       );
     });
+
+    it('should pass esClient.asCurrentUser to APMInstrumentationService', async () => {
+      const scopedClient = mockScopedClient();
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: { client: scopedClient },
+        }),
+      } as any;
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(MockAPMInstrumentationService).toHaveBeenCalledWith(
+        scopedClient.asCurrentUser,
+        mockLogger
+      );
+    });
+
+    it('should pass userId from request to inferAnalystRole', async () => {
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
+      (mockRequest as any).auth = { credentials: { username: 'soc-analyst-jane' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockInferAnalystRole).toHaveBeenCalledWith(
+        expect.anything(),
+        mockLogger,
+        'soc-analyst-jane'
+      );
+    });
+
+    it('should pass discovered indices to calibrateSamplingStrategy', async () => {
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const expectedIndices = (await mockDiscoverIndices.mock.results[0].value).indices;
+      expect(mockCalibrateSamplingStrategy).toHaveBeenCalledWith(
+        expect.anything(),
+        mockLogger,
+        expectedIndices
+      );
+    });
+
+    it('should initialize the workflow state tracker with the execution id', async () => {
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(MockWorkflowStateTracker.prototype.initializeExecution).toHaveBeenCalledWith(
+        expect.stringMatching(/^aesop-/),
+        'aesop.self_exploration'
+      );
+    });
+
+    it('should ensure the APM metrics index exists', async () => {
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(MockAPMInstrumentationService.prototype.ensureMetricsIndex).toHaveBeenCalled();
+    });
   });
 
-  describe('validation', () => {
-    it('should reject empty scoped_indices', async () => {
-      const invalidRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agent_role: 'SOC analyst',
-          scoped_indices: [],
-        },
+  describe('no indices found', () => {
+    it('should return 400 when no indices are discovered', async () => {
+      mockDiscoverIndices.mockResolvedValue({
+        indices: [],
+        totalDocCount: 0,
+        discoveredAt: new Date(),
+        securityRelevantCount: 0,
       });
 
-      // Note: Zod validation happens at route level, not in handler
-      // This test verifies the schema would reject it
-      expect(invalidRequest.body.scoped_indices).toEqual([]);
-    });
-
-    it('should validate exploration_depth minimum', async () => {
-      const invalidRequest = httpServerMock.createKibanaRequest({
-        body: {
-          exploration_depth: 5, // Below min of 10
-        },
-      });
-
-      // Schema validation would reject this
-      expect(invalidRequest.body.exploration_depth).toBe(5);
-    });
-
-    it('should validate exploration_depth maximum', async () => {
-      const invalidRequest = httpServerMock.createKibanaRequest({
-        body: {
-          exploration_depth: 2000, // Above max of 1000
-        },
-      });
-
-      expect(invalidRequest.body.exploration_depth).toBe(2000);
-    });
-
-    it('should validate min_pattern_frequency range', async () => {
-      const invalidRequest = httpServerMock.createKibanaRequest({
-        body: {
-          min_pattern_frequency: 0, // Below min of 1
-        },
-      });
-
-      expect(invalidRequest.body.min_pattern_frequency).toBe(0);
-    });
-  });
-
-  describe('error handling', () => {
-    it('should return 400 if workflows plugin not available', async () => {
-      mockContext.workflowsManagement = undefined;
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
-          message: expect.stringContaining('Workflows Management plugin not available'),
+          message: expect.stringContaining('No security-relevant indices found'),
         },
       });
+      // Should not proceed to role inference or sampling
+      expect(mockInferAnalystRole).not.toHaveBeenCalled();
+      expect(mockCalibrateSamplingStrategy).not.toHaveBeenCalled();
     });
+  });
 
-    it('should return 500 if workflow fails to start', async () => {
-      mockContext.workflowsManagement.management.runWorkflow.mockRejectedValue(
-        new Error('Workflow YAML not found')
+  describe('rate limiting', () => {
+    it('should return 429 when rate limited', async () => {
+      MockRateLimiterService.prototype.checkRateLimit = jest.fn().mockResolvedValue({
+        allowed: false,
+        limit: 1,
+        remaining: 0,
+        retryAfterSeconds: 3200,
+        resetAt: Date.now() + 3200000,
+      });
+
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 429,
+          body: {
+            message: expect.stringContaining('Rate limit exceeded'),
+          },
+          headers: expect.objectContaining({
+            'Retry-After': '3200',
+            'X-RateLimit-Limit': '1',
+            'X-RateLimit-Remaining': '0',
+          }),
+        })
       );
+      // Should not proceed to discovery
+      expect(mockDiscoverIndices).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should return 500 on unexpected errors from discoverIndices', async () => {
+      mockDiscoverIndices.mockRejectedValue(new Error('Cluster unavailable'));
+
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -247,15 +346,17 @@ describe('POST /internal/aesop/exploration/run', () => {
           message: expect.stringContaining('Failed to start exploration'),
         },
       });
-
-      expect(mockContext.logger.error).toHaveBeenCalledWith(
+      expect(mockLogger.error).toHaveBeenCalledWith(
         '[AESOP] Failed to start exploration',
-        expect.any(Object)
+        expect.objectContaining({ error: expect.any(Error) })
       );
     });
 
-    it('should handle ES client errors gracefully', async () => {
-      mockEsClient.indices.exists.mockRejectedValue(new Error('ES connection failed'));
+    it('should return 500 on unexpected errors from inferAnalystRole', async () => {
+      mockInferAnalystRole.mockRejectedValue(new Error('Event log index missing'));
+
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -267,81 +368,76 @@ describe('POST /internal/aesop/exploration/run', () => {
       });
     });
 
-    it('should handle workflow timeout errors', async () => {
-      mockContext.workflowsManagement.management.runWorkflow.mockRejectedValue(
-        new Error('Workflow execution timeout')
-      );
+    it('should return 500 on unexpected errors from workflow state tracker', async () => {
+      MockWorkflowStateTracker.prototype.initializeExecution = jest
+        .fn()
+        .mockRejectedValue(new Error('ES write blocked'));
+
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockResponse.customError).toHaveBeenCalled();
-      expect(mockContext.logger.error).toHaveBeenCalled();
-    });
-  });
-
-  describe('logging', () => {
-    it('should log workflow start parameters', async () => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
-      mockEsClient.index.mockResolvedValue({} as any);
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockContext.logger.info).toHaveBeenCalledWith(
-        '[AESOP] Starting self-exploration workflow',
-        {
-          agent_role: 'SOC analyst',
-          scoped_indices: ['.alerts-*'],
-          exploration_depth: 50,
-        }
-      );
-    });
-
-    it('should log execution ID after workflow starts', async () => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
-      mockEsClient.index.mockResolvedValue({} as any);
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockContext.logger.info).toHaveBeenCalledWith(
-        '[AESOP] Workflow started',
-        { execution_id: 'exec-123' }
-      );
-    });
-
-    it('should log state tracker initialization', async () => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
-      mockEsClient.index.mockResolvedValue({} as any);
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockContext.logger.debug).toHaveBeenCalledWith(
-        '[AESOP] Workflow state tracking initialized',
-        { execution_id: 'exec-123' }
-      );
-    });
-  });
-
-  describe('security', () => {
-    it('should require evals privilege', () => {
-      const [[routeConfig]] = mockRouter.versioned.post.mock.calls;
-
-      expect(routeConfig.security).toEqual({
-        authz: {
-          requiredPrivileges: ['evals'],
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('Failed to start exploration'),
         },
       });
     });
 
-    it('should have internal access level', () => {
-      const [[routeConfig]] = mockRouter.versioned.post.mock.calls;
+    it('should handle non-Error thrown values gracefully', async () => {
+      mockDiscoverIndices.mockRejectedValue('string error');
 
-      expect(routeConfig.access).toBe('internal');
+      const mockContext = createMockContext();
+      const mockRequest = createMockRequest();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('string error'),
+        },
+      });
     });
+  });
 
-    it('should have proper tags', () => {
-      const [[routeConfig]] = mockRouter.versioned.post.mock.calls;
+  describe('userId handling', () => {
+    it('should use "anonymous" when username is not available', async () => {
+      const mockContext = createMockContext();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { include_sample_data: true },
+      });
+      (mockRequest as any).auth = { credentials: {} };
 
-      expect(routeConfig.options?.tags).toContain('access:evals');
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // The handler does: request.auth.credentials?.username || 'anonymous'
+      expect(mockInferAnalystRole).toHaveBeenCalledWith(
+        expect.anything(),
+        mockLogger,
+        'anonymous'
+      );
+    });
+  });
+
+  describe('route registration', () => {
+    it('should register POST route for /internal/aesop/exploration/run', () => {
+      expect(mockRouter.versioned.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/aesop/exploration/run',
+          access: 'internal',
+          security: {
+            authz: {
+              requiredPrivileges: ['evals'],
+            },
+          },
+          options: {
+            tags: ['access:evals'],
+          },
+        })
+      );
     });
   });
 });

@@ -118,7 +118,9 @@ export const ExecutionDetailPage = () => {
   const { data: execution, isLoading, error } = useQuery({
     queryKey: ['aesop', 'execution', executionId],
     queryFn: async () => {
-      const response = await api.http.get(`/internal/aesop/exploration/executions/${executionId}`);
+      const response = await api.http.get(`/internal/aesop/exploration/executions/${executionId}`, {
+        version: '1',
+      });
       return response as ExecutionDetail;
     },
     refetchInterval: (data) => {

@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { IRouter } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { EvalsRequestHandlerContext } from '../../types';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { DashboardGeneratorService } from '../../lib/aesop/monitoring/dashboard_generator';
-
-const deployDashboardResponseSchema = z.object({
-  success: z.boolean(),
-  dashboard_id: z.string(),
-  url: z.string(),
-  message: z.string().optional(),
-});
 
 /**
  * POST /internal/aesop/monitoring/dashboard/deploy
@@ -27,9 +17,7 @@ const deployDashboardResponseSchema = z.object({
  * - dashboard_id: ID of created/updated dashboard
  * - url: Direct link to dashboard in Kibana
  */
-export function registerDeployMonitoringDashboardRoute(
-  router: IRouter<EvalsRequestHandlerContext>
-) {
+export function registerDeployMonitoringDashboardRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/monitoring/dashboard/deploy',
@@ -48,11 +36,6 @@ export function registerDeployMonitoringDashboardRoute(
         version: '1',
         validate: {
           request: {},
-          response: {
-            200: {
-              body: () => deployDashboardResponseSchema,
-            },
-          },
         },
       },
       async (context, request, response) => {
