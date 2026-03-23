@@ -412,7 +412,7 @@ export const buildDatasourceStates = (
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
-      if ('type' in layer && layer.type === 'annotations' && 'group_id' in layer) {
+      if ('type' in layer && layer.type === 'annotation_group' && 'group_id' in layer) {
         // by-ref annotation layers don't require a dataset
         continue;
       }

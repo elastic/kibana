@@ -743,7 +743,7 @@ const annotationLayerByValueSchema = schema.object(
  */
 const annotationByRefLayerSchema = schema.object(
   {
-    type: schema.literal('annotations'),
+    type: schema.literal('annotation_group'),
     group_id: schema.string({
       meta: { description: 'ID of the linked annotation group from the library' },
     }),
@@ -785,7 +785,6 @@ export const xyStateSchema = schema.object(
         referenceLineLayerSchemaNoESQL,
         referenceLineLayerSchemaESQL,
         annotationLayerSchema,
-        annotationByRefLayerSchema,
       ]),
       {
         minSize: 1,

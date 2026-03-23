@@ -408,7 +408,7 @@ export function buildAPIAnnotationsLayer(
     }
 
     return {
-      type: 'annotations',
+      type: 'annotation_group',
       group_id: annotationGroupId,
     };
   }

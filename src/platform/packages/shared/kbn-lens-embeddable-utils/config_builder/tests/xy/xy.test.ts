@@ -537,7 +537,7 @@ describe('XY', () => {
               y: [{ operation: 'count', empty_as_null: false }],
             },
             {
-              type: 'annotations',
+              type: 'annotation_group',
               group_id: 'my-library-annotation-group',
             },
           ],
