@@ -62,13 +62,12 @@ describe('timelineEventsAllSchema', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"boolean\\",
-          \\"received\\": \\"string\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"excludeEcsData\\"
           ],
-          \\"message\\": \\"Expected boolean, received string\\"
+          \\"message\\": \\"Invalid input: expected boolean, received string\\"
         }
       ]"
     `);
