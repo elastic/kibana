@@ -29,11 +29,18 @@ export const getLatestAlertEventStateQuery = ({
 }: GetLatestAlertEventStateQueryParams): ComposerQuery => {
   let query = esql.from(ALERT_EVENTS_DATA_STREAM);
 
-  query = query.where`rule.id == ${{ ruleId }} AND group_hash IN (${{ groupHashes }})`;
+  // Only consider director-processed events (type "alert" with episode state).
+  // Without this, docs without episode or with null episode.status can be included
+  // in STATS and LAST(episode.status, @timestamp) may yield null, so the next
+  // run would see no previous state and keep outputting pending.
+  const groupHashValues = groupHashes.map((hash) => esql.str(hash));
+  query = query.where`rule.id == ${{
+    ruleId,
+  }} AND group_hash IN (${groupHashValues}) AND type == "alert" AND episode.status IS NOT NULL`;
 
-  query = query.pipe`STATS 
-      last_status = LAST(status, @timestamp), 
-      last_episode_id = LAST(episode.id, @timestamp), 
+  query = query.pipe`STATS
+      last_status = LAST(status, @timestamp),
+      last_episode_id = LAST(episode.id, @timestamp),
       last_episode_status = LAST(episode.status, @timestamp),
       last_episode_status_count = LAST(episode.status_count, @timestamp),
       last_episode_timestamp = MAX(@timestamp)

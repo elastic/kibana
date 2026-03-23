@@ -3,6 +3,7 @@ plugins:
   enabled:
     - advanced_settings
     - alerting
+    - alerting_v2
     - apm
     - banners
     - cloud_security_posture

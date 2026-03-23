@@ -421,6 +421,8 @@ describe('DispatcherService integration tests', () => {
       new StoreActionsStep(storageService),
     ]);
     dispatcherService = new DispatcherService(pipeline);
+
+    await setNotificationPolicyThrottle(npSoService, null);
   });
 
   describe('when there are no alert events', () => {
@@ -479,6 +481,53 @@ describe('DispatcherService integration tests', () => {
         '2026-01-22T07:25:00.000Z', // Episode 2
         '2026-01-22T07:50:00.000Z', // Episode 3
       ]);
+
+      const notifiedActionsResponse = await esClient.search({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        query: { term: { action_type: 'notified' } },
+        size: 100,
+      });
+
+      expect(notifiedActionsResponse.hits.hits).toHaveLength(0);
+    });
+  });
+
+  describe('when the notification policy has a throttle interval', () => {
+    it('should persist notified actions for dispatched notification groups', async () => {
+      await setNotificationPolicyThrottle(npSoService, { interval: '1h' });
+      await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
+      });
+
+      expect(result.startedAt).toBeDefined();
+
+      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
+
+      const notifiedActionsResponse = await esClient.search({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        query: { term: { action_type: 'notified' } },
+        size: 100,
+      });
+
+      const notifiedActions = notifiedActionsResponse.hits.hits.map(
+        (hit) => hit._source as Record<string, unknown>
+      );
+
+      expect(notifiedActions).toHaveLength(3);
+      notifiedActions.forEach((action) => {
+        expect(action).toMatchObject({
+          '@timestamp': expect.any(String),
+          actor: 'system',
+          action_type: 'notified',
+          rule_id: 'rule-1',
+          group_hash: 'irrelevant',
+          source: 'internal',
+          reason: 'notified by policy np-1 with throttle interval',
+        });
+        expect(action.notification_group_id).toEqual(expect.any(String));
+      });
     });
   });
 
@@ -704,7 +753,9 @@ async function seedRulesAndPolicies(
       createdByUser: false,
     },
     createdBy: null,
+    createdByUsername: null,
     updatedBy: null,
+    updatedByUsername: null,
     createdAt: '2026-01-20T00:00:00.000Z',
     updatedAt: '2026-01-20T00:00:00.000Z',
   };
@@ -726,6 +777,19 @@ async function seedRulesAndPolicies(
   await Promise.all(
     TEST_RULE_IDS.map((ruleId) => rulesSoService.create({ attrs: ruleAttrs, id: ruleId }))
   );
+}
+
+async function setNotificationPolicyThrottle(
+  npSoService: NotificationPolicySavedObjectServiceContract,
+  throttle: NotificationPolicySavedObjectAttributes['throttle']
+): Promise<void> {
+  const policy = await npSoService.get(NOTIFICATION_POLICY_ID);
+
+  await npSoService.update({
+    id: NOTIFICATION_POLICY_ID,
+    version: policy.version,
+    attrs: { throttle },
+  });
 }
 
 async function seedAlertActions(

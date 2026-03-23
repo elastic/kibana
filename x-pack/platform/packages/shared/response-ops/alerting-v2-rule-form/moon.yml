@@ -39,6 +39,10 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/react-hooks'
+  - '@kbn/field-types'
+  - '@kbn/lens-plugin'
+  - '@kbn/visualization-utils'
+  - '@kbn/expressions-plugin'
 tags:
   - shared-browser
   - package

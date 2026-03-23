@@ -450,7 +450,7 @@
         "\nPublic-side plugin setup contract.\nExposes methods for other plugins to register public-side step and trigger definitions."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 23,
+      "lineNumber": 27,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -472,7 +472,7 @@
             "<Input, Output, Config>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 28,
+          "lineNumber": 32,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -491,7 +491,7 @@
                 "<Input, Output, Config>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 40,
+              "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -513,17 +513,11 @@
           ],
           "signature": [
             "<EventSchema extends z.ZodType = z.ZodType>(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "public",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-public.PublicTriggerDefinition",
-              "text": "PublicTriggerDefinition"
-            },
+            "PublicTriggerDefinitionOrLoader",
             "<EventSchema>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 43,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -531,24 +525,18 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-public.WorkflowsExtensionsPublicPluginSetup.registerTriggerDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
                 "- The public-side trigger definition"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "public",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-public.PublicTriggerDefinition",
-                  "text": "PublicTriggerDefinition"
-                },
+                "PublicTriggerDefinitionOrLoader",
                 "<EventSchema>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 52,
+              "lineNumber": 56,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -585,7 +573,7 @@
         " & { isReady(): Promise<void>; }"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 65,
+      "lineNumber": 69,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

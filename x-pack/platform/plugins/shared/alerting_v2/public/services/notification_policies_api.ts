@@ -9,11 +9,18 @@ import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import type {
+  BulkActionNotificationPoliciesBody,
   CreateNotificationPolicyData,
   NotificationPolicyResponse,
   UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+
+export interface BulkActionNotificationPoliciesResponse {
+  processed: number;
+  total: number;
+  errors: Array<{ id: string; message: string }>;
+}
 
 export interface FindNotificationPoliciesResponse {
   items: NotificationPolicyResponse[];
@@ -36,7 +43,6 @@ export class NotificationPoliciesApi {
     page?: number;
     perPage?: number;
     search?: string;
-    destinationType?: string;
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -48,7 +54,6 @@ export class NotificationPoliciesApi {
           page: params.page,
           perPage: params.perPage,
           search: params.search || undefined,
-          destinationType: params.destinationType || undefined,
           enabled: params.enabled,
           sortField: params.sortField,
           sortOrder: params.sortOrder,
@@ -90,13 +95,20 @@ export class NotificationPoliciesApi {
   public async snoozeNotificationPolicy(id: string, snoozedUntil: string) {
     return this.http.post<NotificationPolicyResponse>(
       `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`,
-      { body: JSON.stringify({ snoozed_until: snoozedUntil }) }
+      { body: JSON.stringify({ snoozedUntil }) }
     );
   }
 
   public async unsnoozeNotificationPolicy(id: string) {
     return this.http.post<NotificationPolicyResponse>(
       `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_unsnooze`
+    );
+  }
+
+  public async bulkActionNotificationPolicies(body: BulkActionNotificationPoliciesBody) {
+    return this.http.post<BulkActionNotificationPoliciesResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/_bulk`,
+      { body: JSON.stringify(body) }
     );
   }
 }

@@ -49,6 +49,7 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name', 'service.name'],
         },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       };
 
       const result = formValuesToYamlObject(formValues);
@@ -75,6 +76,7 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name', 'service.name'],
         },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       });
     });
 
@@ -156,6 +158,10 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name'],
         },
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'artifact-2', type: 'service', value: 'service-a' },
+        ],
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -183,7 +189,26 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name'],
         },
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'artifact-2', type: 'service', value: 'service-a' },
+        ],
       });
+    });
+
+    it('ignores invalid artifacts entries', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with mixed artifacts' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }, { id: 1 }, 'bad'],
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+      ]);
     });
 
     it('returns error for invalid YAML syntax', () => {

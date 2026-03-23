@@ -73,7 +73,10 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/es-query'
   - '@kbn/react-hooks'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/lens-plugin'
   - '@kbn/core-security-server-mocks'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -85,6 +88,7 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - public/**/*
+    - test/scout_alerting_v2/**/*
     - '!target/**/*'
 tasks:
   jest:

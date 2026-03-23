@@ -48,6 +48,14 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
             },
           },
           no_data: { type: 'object', enabled: false },
+          artifacts: {
+            type: 'nested',
+            properties: {
+              id: { type: 'keyword' },
+              type: { type: 'keyword' },
+              value: { type: 'keyword' },
+            },
+          },
           enabled: { type: 'boolean' },
           createdBy: { type: 'keyword' },
           createdAt: { type: 'date' },
