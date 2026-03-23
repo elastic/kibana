@@ -55,14 +55,20 @@ const fieldEvaluationSchema = z.object({
   whenClauses: z.array(fieldEvaluationWhenClauseSchema),
 });
 
-const euidCompositionSchema = z.array(z.union([euidFieldSchema, euidSeparatorSchema]));
+const euidCompositionSchema = z
+  .array(z.union([euidFieldSchema, euidSeparatorSchema]))
+  .min(1)
+  .refine((parts) => parts.some((part) => 'field' in part), {
+    message: 'Each EUID composition must contain at least one field part',
+  });
+
 const euidRankingBranchSchema = z.object({
   when: streamlangConditionSchema.optional(),
-  ranking: z.array(euidCompositionSchema),
+  ranking: z.array(euidCompositionSchema).min(1),
 });
 
-const euidRankingSchema = z.object({
-  branches: z.array(euidRankingBranchSchema),
+export const euidRankingSchema = z.object({
+  branches: z.array(euidRankingBranchSchema).min(1),
 });
 
 // Any field used in the euid calculation must be mapped in the fields array,
@@ -105,14 +111,21 @@ const identityFieldSchema = z.union([
 const fieldValueSchema = z.union([
   z.string(),
   z.object({ source: z.string() }),
-  z.object({ composition: z.object({ fields: z.array(z.string()), sep: z.string() }) }),
+  z.object({
+    composition: z.object({
+      fields: z.array(z.string()).min(1),
+      sep: z.string(),
+    }),
+  }),
 ]);
 export type FieldValueSchema = z.infer<typeof fieldValueSchema>;
 
 // Schema for "when condition true set fields" (condition + field overrides). Used e.g. for pre-agg overrides.
 export const setFieldsByConditionSchema = z.object({
   condition: streamlangConditionSchema,
-  fields: z.record(z.string(), fieldValueSchema),
+  fields: z.record(z.string(), fieldValueSchema).refine((value) => Object.keys(value).length > 0, {
+    message: 'At least one field override is required',
+  }),
 });
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 

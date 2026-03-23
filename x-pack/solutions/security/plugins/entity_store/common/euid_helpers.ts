@@ -13,7 +13,7 @@
  * @example
  * import { euid } from '@kbn/entity-store/common/euid_helpers';
  * euid.getEuidFromObject('host', doc);
- * euid.dsl.getEuidDslDocumentsContainsIdFilter('host');
+ * euid.dsl.getEuidDocumentsContainsIdFilter('host');
  */
 
 import * as euidModule from './domain/euid';
@@ -34,13 +34,13 @@ export const euid = {
      * Builds the Painless expression text that computes the same EUID as `getEuidFromObject` at search time.
      * Input: entity type. Output: a Painless snippet string to embed in scripts or runtime fields.
      */
-    getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
+    getEuidEvaluation: euidModule.getEuidPainlessEvaluation,
 
     /**
      * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
      * Input: entity type. Output: mapping object suitable for the Search API `runtime_mappings` map.
      */
-    getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
+    getEuidRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
   },
 
   /**
@@ -51,19 +51,19 @@ export const euid = {
      * Broad predicate: documents allowed into the entity pipeline and that could carry an EUID for this type.
      * Input: entity type only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
      */
-    getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
+    getEuidDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
 
     /**
      * Full ESQL expression used in extraction to compute the typed EUID (e.g. inside `EVAL` / `STATS`).
      * Input: entity type. Output: ESQL expression string (often a `CONCAT`/`CASE` around identity fields).
      */
-    getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
+    getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
 
     /**
      * ESQL predicate that locates documents matching one sample document’s identity (mirrors per-doc DSL).
      * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
-    getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
+    getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
   },
 
   /**
@@ -74,12 +74,12 @@ export const euid = {
      * Query DSL that should match documents sharing the same identity fields as the given sample document.
      * Input: entity type and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
      */
-    getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+    getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
 
     /**
      * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for this type.
      * Input: entity type only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
      */
-    getEuidDslDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
+    getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   },
 };

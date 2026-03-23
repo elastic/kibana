@@ -413,12 +413,12 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
   });
 
   apiTest(
-    'Should store user entities from both IDP and non-IDP sources with and without existing latest',
+    'Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-01T10:00:00Z';
       const to = '2026-03-01T12:00:00Z';
 
-      // 1. IDP entity (asset kind) without existing entity in latest → extracted!
+      // 1. IDP: asset event (Okta) — matches idpDocumentFilter + idpPostAggFilter → extracted without prior latest.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:01:00Z',
         event: { kind: 'asset', module: 'okta' },
@@ -441,7 +441,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         },
       });
 
-      // 2. IDP entity (asset kind) with existing entity in latest → extracted and updated!
+      // 2. IDP: asset event — same user id; second doc updates latest (idpPostAggFilter still matches).
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:02:00Z',
         event: { kind: 'asset', module: 'okta' },
@@ -473,61 +473,64 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         },
       });
 
-      // 3. Non-IDP entity without existing entity in latest → not extracted!
+      // 3. Not non-IDP (no host.id). Matches idpDocumentFilter (user.id/name) but not idpPostAggFilter (not asset/iam)
+      //    and not nonIdpPostAggFilter (no host.id) and no entity.id yet → no postAgg keep branch → not extracted.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:04:00Z',
         event: { kind: 'random-kind', module: 'okta' },
         user: {
-          id: 'postagg-nonidp-nolatest',
-          name: 'NonIDP NoLatest',
+          id: 'postagg-nopostaggkeep-nolatest',
+          name: 'NoPostAggKeep NoLatest',
         },
       });
       const ext3 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext3.statusCode).toBe(200);
-      const hit3 = await searchDocById(esClient, 'user:postagg-nonidp-nolatest@okta');
+      const hit3 = await searchDocById(esClient, 'user:postagg-nopostaggkeep-nolatest@okta');
       expect(hit3.hits.hits).toHaveLength(0);
 
-      // 4. NonIDP entity (iam/user) with existing entity in latest → extracted and updated!
+      // 4. IDP: IAM user event (entityanalytics_ad) — matches idpPostAggFilter; namespace active_directory from fieldEvaluations.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:05:00Z',
         event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
         user: {
-          id: 'postagg-nonidp-inlatest',
-          name: 'NonIDP InLatest',
+          id: 'postagg-idp-iam-ad-inlatest',
+          name: 'IDP IAM AD InLatest',
         },
       });
       const ext4 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext4.statusCode).toBe(200);
-      const hit4 = await searchDocById(esClient, 'user:postagg-nonidp-inlatest@active_directory');
+      const hit4 = await searchDocById(esClient, 'user:postagg-idp-iam-ad-inlatest@active_directory');
       expect(hit4.hits.hits).toHaveLength(1);
       expect(hit4.hits.hits[0]._source).toMatchObject({
         entity: {
-          id: 'user:postagg-nonidp-inlatest@active_directory',
+          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'NonIDP InLatest',
+          name: 'IDP IAM AD InLatest',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },
       });
 
+      // 5. Follow-up doc is not asset/iam (no idpPostAggFilter) and has no host.id (no nonIdpPostAggFilter);
+      //    row is kept via entity.id after LOOKUP (prior latest from step 4) → still extracted/updated.
       await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:06:00Z',
-        event: { kind: 'not-idp-kind', module: 'entityanalytics_ad' },
+        event: { kind: 'not-asset-or-iam', module: 'entityanalytics_ad' },
         user: {
-          id: 'postagg-nonidp-inlatest',
-          name: 'NonIDP InLatest Updated',
+          id: 'postagg-idp-iam-ad-inlatest',
+          name: 'IDP IAM AD InLatest Updated',
         },
       });
       const ext5 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext5.statusCode).toBe(200);
-      const hit5 = await searchDocById(esClient, 'user:postagg-nonidp-inlatest@active_directory');
+      const hit5 = await searchDocById(esClient, 'user:postagg-idp-iam-ad-inlatest@active_directory');
       expect(hit5.hits.hits).toHaveLength(1);
       expect(hit5.hits.hits[0]._source).toMatchObject({
         entity: {
-          id: 'user:postagg-nonidp-inlatest@active_directory',
+          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'NonIDP InLatest Updated',
+          name: 'IDP IAM AD InLatest Updated',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },
@@ -930,7 +933,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         host: { id: 'omitted-root-host', name: 'server-01' },
       });
 
-      // 4. user.name without host.id, event.kind='event' → postAggFilter omits (non-IDP needs host.id; IDP needs asset/iam)
+      // 4. user.name only, plain network event (no host.id) — idpDocumentFilter passes but postAggFilter omits
+      //    (not idpPostAgg asset/iam shape, not nonIdpPostAgg without host.id, no entity.id).
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:04:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
