@@ -50,6 +50,13 @@ jest.mock('../../../../common/lib/api', () => ({
   ),
 }));
 
+const mockReportAnalyzeLogsTriggered = jest.fn();
+jest.mock('../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    reportAnalyzeLogsTriggered: mockReportAnalyzeLogsTriggered,
+  }),
+}));
+
 const mockUseFetchIndices = useFetchIndices as jest.Mock;
 const mockUseValidateIndex = useValidateIndex as jest.Mock;
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
@@ -58,7 +65,9 @@ const mockRefetch = jest.fn();
 
 const mockServices = coreMock.createStart();
 
-const createWrapper = () => {
+const createWrapper = (
+  initialValue?: React.ComponentProps<typeof IntegrationFormProvider>['initialValue']
+) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -75,7 +84,9 @@ const createWrapper = () => {
           <MemoryRouter initialEntries={['/create']}>
             <Route path={['/edit/:integrationId', '/create']}>
               <UIStateProvider>
-                <IntegrationFormProvider onSubmit={jest.fn()}>{children}</IntegrationFormProvider>
+                <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
+                  {children}
+                </IntegrationFormProvider>
               </UIStateProvider>
             </Route>
           </MemoryRouter>
@@ -471,6 +482,21 @@ describe('CreateDataStreamFlyout', () => {
 
       const titleInput = getByTestId('dataStreamTitleInput');
       expect(titleInput.getAttribute('aria-invalid')).not.toBe('true');
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should render without telemetry errors', async () => {
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('createDataStreamFlyout')).toBeInTheDocument();
+      });
     });
   });
 });

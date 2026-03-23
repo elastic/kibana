@@ -73,6 +73,10 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
   esClient: ElasticsearchClient;
+  reportTelemetryEvent: <TEventType extends string>(
+    eventType: TEventType,
+    eventData: Record<string, unknown>
+  ) => void;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 

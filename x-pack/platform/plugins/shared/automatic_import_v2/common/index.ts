@@ -44,3 +44,25 @@ export type {
   OriginalSourceType,
   LangSmithOptions,
 } from './model/common_attributes.gen';
+
+export {
+  AIV2TelemetryEventType,
+  type CreateIntegrationPageLoadedPayload,
+  type DataStreamFlyoutOpenedPayload,
+  type EditDataStreamFlyoutOpenedPayload,
+  type AnalyzeLogsTriggeredPayload,
+  type EditPipelineTabOpenedPayload,
+  type CodeEditorCopyClickedPayload,
+  type DataStreamCreationCompletePayload,
+  type IntegrationInstalledPayload,
+  type ManageIntegrationsTableViewedPayload,
+  type UploadIntegrationClickedPayload,
+  type ReviewApproveMenuClickedPayload,
+  type ApproveModalCancelClickedPayload,
+  type ApproveModalApproveClickedPayload,
+  type IntegrationDeleteConfirmedPayload,
+  type DataStreamDeleteConfirmedPayload,
+  type DataStreamRefreshConfirmedPayload,
+  type PipelineEditedPayload,
+  type AIV2EventPayload,
+} from './telemetry/types';

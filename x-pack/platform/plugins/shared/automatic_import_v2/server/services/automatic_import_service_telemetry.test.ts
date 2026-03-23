@@ -55,11 +55,17 @@ describe('AutomaticImportSetupService', () => {
       ensureScheduled: jest.fn(),
     } as unknown as jest.Mocked<TaskManagerStartContract>;
 
+    const mockAnalytics = {
+      reportEvent: jest.fn(),
+      registerEventType: jest.fn(),
+    } as any;
+
     service = new AutomaticImportService(
       mockLoggerFactory,
       mockSavedObjectsSetup,
       mockTaskManagerSetup,
-      mockCoreSetup as any
+      mockCoreSetup as any,
+      mockAnalytics
     );
   });
 
