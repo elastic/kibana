@@ -17,7 +17,6 @@ import type {
   AgentPolicy,
   EnrollmentSettingsFleetServerPolicy,
   FleetProxy,
-  FleetServerHost,
   Output,
   DownloadSource,
 } from '../../../common/types';
@@ -68,6 +67,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // ignore errors if the download source is not found
   try {
     const downloadSource = await getDownloadSource(
+      soClient,
       scopedAgentPolicy.download_source_id ?? undefined
     );
     settingsResponse.download_source = downloadSource
@@ -92,7 +92,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
   try {
     const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, scopedAgentPolicy);
-    settingsResponse.fleet_server.host = sanitizeEnrollmentFleetServerHost(fleetServerHost);
+    settingsResponse.fleet_server.host = fleetServerHost;
   } catch (e) {
     settingsResponse.fleet_server.host = undefined;
   }
@@ -176,7 +176,7 @@ export const getDownloadSource = async (
   soClient: SavedObjectsClientContract,
   downloadSourceId?: string
 ): Promise<GetEnrollmentSettingsResponse['download_source'] | undefined> => {
-  const sources = await downloadSourceService.list();
+  const sources = await downloadSourceService.list(soClient);
   const foundSource = downloadSourceId
     ? sources.items.find((s) => s.id === downloadSourceId)
     : undefined;
@@ -187,13 +187,6 @@ function sanitizeEnrollmentProxy(
   proxy: FleetProxy
 ): NonNullable<GetEnrollmentSettingsResponse['download_source_proxy']> {
   return pick(proxy, ['id', 'name', 'url']);
-}
-
-function sanitizeEnrollmentFleetServerHost(host: FleetServerHost): FleetServerHost {
-  return {
-    ...omit(host, ['secrets']),
-    ssl: host.ssl ? omit(host.ssl, ['key', 'es_key', 'agent_key']) : host.ssl,
-  };
 }
 
 function sanitizeEnrollmentOutput(output: Output): Output {
@@ -214,11 +207,5 @@ function sanitizeEnrollmentOutput(output: Output): Output {
 }
 
 function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
-  return {
-    ...omit(downloadSource, ['secrets']),
-    ssl: downloadSource.ssl ? omit(downloadSource.ssl, ['key']) : downloadSource.ssl,
-    auth: downloadSource.auth
-      ? omit(downloadSource.auth, ['password', 'api_key'])
-      : downloadSource.auth,
-  };
+  return pick(downloadSource, ['id', 'name', 'host', 'is_default', 'proxy_id']);
 }

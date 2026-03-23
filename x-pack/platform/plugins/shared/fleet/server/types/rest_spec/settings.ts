@@ -23,22 +23,6 @@ const EnrollmentSettingsFleetServerHostSchema = schema.object({
   is_preconfigured: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  ssl: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-        certificate: schema.maybe(schema.string()),
-        es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-        es_certificate: schema.maybe(schema.string()),
-        agent_certificate_authorities: schema.maybe(
-          schema.arrayOf(schema.string(), { maxSize: 10 })
-        ),
-        agent_certificate: schema.maybe(schema.string()),
-        client_auth: schema.maybe(schema.string()),
-      }),
-    ])
-  ),
 });
 
 const EnrollmentSettingsOutputSchema = schema.object({
@@ -84,25 +68,6 @@ const EnrollmentSettingsDownloadSourceSchema = schema.maybe(
     host: schema.uri({ scheme: ['http', 'https'] }),
     is_default: schema.boolean(),
     proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    ssl: schema.maybe(
-      schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-        certificate: schema.maybe(schema.string()),
-      })
-    ),
-    auth: schema.maybe(
-      schema.oneOf([
-        schema.literal(null),
-        schema.object({
-          username: schema.maybe(schema.string()),
-          headers: schema.maybe(
-            schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
-              maxSize: 100,
-            })
-          ),
-        }),
-      ])
-    ),
   })
 );
 

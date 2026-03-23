@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../../services';
 import { getFleetServerPolicies } from '../../services/fleet_server';
 
-import { getFleetServerOrAgentPolicies, getDownloadSource } from './enrollment_settings_handler';
+import type { FleetRequestHandlerContext } from '../../types';
+import { GetEnrollmentSettingsResponseSchema } from '../../types';
+import { xpackMocks } from '../../mocks';
+
+import {
+  getFleetServerOrAgentPolicies,
+  getDownloadSource,
+  getEnrollmentSettingsHandler,
+} from './enrollment_settings_handler';
 
 jest.mock('../../services', () => ({
   agentPolicyService: {
@@ -68,22 +76,6 @@ jest.mock('../../services/fleet_server_host', () => ({
     name: 'Host 1',
     host_urls: ['http://localhost:8220'],
     proxy_id: 'proxy-1',
-    ssl: {
-      certificate: '/path/to/cert',
-      certificate_authorities: ['/path/to/ca'],
-      key: '/path/to/key',
-      es_certificate: '/path/to/es-cert',
-      es_key: '/path/to/es-key',
-      agent_certificate: '/path/to/agent-cert',
-      agent_key: '/path/to/agent-key',
-    },
-    secrets: {
-      ssl: {
-        key: { id: 'host-key-secret' },
-        es_key: { id: 'host-es-key-secret' },
-        agent_key: { id: 'host-agent-key-secret' },
-      },
-    },
   }),
 }));
 
@@ -257,7 +249,7 @@ describe('EnrollmentSettingsHandler utils', () => {
 
   describe('getDownloadSource', () => {
     it('returns the default download source when no id is specified', async () => {
-      const source = await getDownloadSource();
+      const source = await getDownloadSource(mockSoClient);
       expect(source).toMatchObject({
         id: 'source-1',
         name: 'Source 1',
@@ -267,7 +259,7 @@ describe('EnrollmentSettingsHandler utils', () => {
     });
 
     it('returns the default download source when the specified id is not found', async () => {
-      const source = await getDownloadSource('some-id');
+      const source = await getDownloadSource(mockSoClient, 'some-id');
       expect(source).toMatchObject({
         id: 'source-1',
         name: 'Source 1',
@@ -325,12 +317,6 @@ describe('EnrollmentSettingsHandler utils', () => {
               is_preconfigured: true,
               name: 'Host 1',
               proxy_id: 'proxy-1',
-              ssl: {
-                certificate: '/path/to/cert',
-                certificate_authorities: ['/path/to/ca'],
-                es_certificate: '/path/to/es-cert',
-                agent_certificate: '/path/to/agent-cert',
-              },
             },
             es_output: {
               id: 'output-1',
@@ -369,13 +355,6 @@ describe('EnrollmentSettingsHandler utils', () => {
             id: 'source-1',
             is_default: true,
             name: 'Source 1',
-            auth: {
-              username: 'elastic',
-            },
-            ssl: {
-              certificate_authorities: ['/path/to/source-ca'],
-              certificate: '/path/to/source-cert',
-            },
           },
         };
         await getEnrollmentSettingsHandler(context, {} as any, response);
@@ -384,18 +363,11 @@ describe('EnrollmentSettingsHandler utils', () => {
         });
 
         const actualBody = (response.ok as jest.Mock).mock.calls[0][0].body;
-        expect(actualBody.download_source?.auth?.password).toBeUndefined();
-        expect(actualBody.download_source?.auth?.api_key).toBeUndefined();
-        expect(actualBody.download_source?.ssl?.key).toBeUndefined();
         expect(actualBody.download_source?.secrets).toBeUndefined();
         expect(actualBody.download_source_proxy?.proxy_headers).toBeUndefined();
         expect(actualBody.download_source_proxy?.certificate).toBeUndefined();
         expect(actualBody.download_source_proxy?.certificate_authorities).toBeUndefined();
         expect(actualBody.download_source_proxy?.certificate_key).toBeUndefined();
-        expect(actualBody.fleet_server.host?.ssl?.key).toBeUndefined();
-        expect(actualBody.fleet_server.host?.ssl?.es_key).toBeUndefined();
-        expect(actualBody.fleet_server.host?.ssl?.agent_key).toBeUndefined();
-        expect(actualBody.fleet_server.host?.secrets).toBeUndefined();
         expect(actualBody.fleet_server.es_output?.ssl?.key).toBeUndefined();
         expect(actualBody.fleet_server.es_output?.secrets).toBeUndefined();
         expect(actualBody.fleet_server.host_proxy?.proxy_headers).toBeUndefined();

@@ -82,7 +82,7 @@ export const ManualInstructions = ({
   gcpOrganizationId?: string;
   gcpAccountType?: string;
 }) => {
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHost, fleetProxy);
+  const enrollArgs = getFleetServerHostsEnrollArgs({ apiKey, fleetServerHost, fleetProxy });
 
   const downloadBaseUrl = getDownloadBaseUrl(downloadSource);
 
