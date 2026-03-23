@@ -44,6 +44,64 @@ export async function runCli() {
   }, options);
 }
 
+
+async function collectDependenciesAndWriteFile(
+  dependencies: string[],
+  outputFilePath: string,
+  { transitive }: { transitive: boolean }
+) {
+  const rootPackageJson = path.join(REPO_ROOT, 'package.json');
+  const yarnLockPath = path.join(REPO_ROOT, 'yarn.lock');
+
+  const [packageJsonContent, yarnLockContent] = await Promise.all([
+    fs.readFile(rootPackageJson, 'utf-8'),
+    fs.readFile(yarnLockPath, 'utf-8'),
+  ]);
+
+  const outputLines = collectDependencyVersionLines({
+    dependencies,
+    rootPackageJsonContent: packageJsonContent,
+    transitive,
+    yarnLockContent,
+  });
+
+  await fs.writeFile(outputFilePath, outputLines.join('\n') + '\n', 'utf-8');
+}
+
+
+export const collectDependencyVersionLines = ({
+  dependencies,
+  rootPackageJsonContent,
+  transitive,
+  yarnLockContent,
+}: {
+  dependencies: string[];
+  rootPackageJsonContent: string;
+  transitive: boolean;
+  yarnLockContent: string;
+}) => {
+  const pkgJson = JSON.parse(rootPackageJsonContent);
+  const yarnLockEntries = Object.values(parseYarnLock(yarnLockContent));
+  const requestedVersionIndex = createRequestedVersionIndex(yarnLockEntries);
+
+  const allRequestedDependencies = {
+    ...pkgJson.devDependencies,
+    ...pkgJson.dependencies,
+  };
+
+  const rootDependencies = resolveRootDependencies(
+    dependencies,
+    requestedVersionIndex,
+    allRequestedDependencies
+  );
+
+  const resolvedDependencyKeys = transitive
+    ? collectTransitiveDependencies(rootDependencies, requestedVersionIndex)
+    : new Set(rootDependencies.map((pkg) => `${pkg.name}@${pkg.resolvedVersion}`));
+
+  return Array.from(resolvedDependencyKeys).sort((a, b) => a.localeCompare(b));
+};
+
 const createRequestedVersionIndex = (packages: PackageInfo[]) => {
   const index = new Map<string, PackageInfo>();
 
@@ -111,60 +169,4 @@ const collectTransitiveDependencies = (
   }
 
   return visited;
-};
-
-async function collectDependenciesAndWriteFile(
-  dependencies: string[],
-  outputFilePath: string,
-  { transitive }: { transitive: boolean }
-) {
-  const rootPackageJson = path.join(REPO_ROOT, 'package.json');
-  const yarnLockPath = path.join(REPO_ROOT, 'yarn.lock');
-
-  const [packageJsonContent, yarnLockContent] = await Promise.all([
-    fs.readFile(rootPackageJson, 'utf-8'),
-    fs.readFile(yarnLockPath, 'utf-8'),
-  ]);
-
-  const outputLines = collectDependencyVersionLines({
-    dependencies,
-    rootPackageJsonContent: packageJsonContent,
-    transitive,
-    yarnLockContent,
-  });
-
-  await fs.writeFile(outputFilePath, outputLines.join('\n') + '\n', 'utf-8');
-}
-
-export const collectDependencyVersionLines = ({
-  dependencies,
-  rootPackageJsonContent,
-  transitive,
-  yarnLockContent,
-}: {
-  dependencies: string[];
-  rootPackageJsonContent: string;
-  transitive: boolean;
-  yarnLockContent: string;
-}) => {
-  const pkgJson = JSON.parse(rootPackageJsonContent);
-  const yarnLockEntries = Object.values(parseYarnLock(yarnLockContent));
-  const requestedVersionIndex = createRequestedVersionIndex(yarnLockEntries);
-
-  const allRequestedDependencies = {
-    ...pkgJson.devDependencies,
-    ...pkgJson.dependencies,
-  };
-
-  const rootDependencies = resolveRootDependencies(
-    dependencies,
-    requestedVersionIndex,
-    allRequestedDependencies
-  );
-
-  const resolvedDependencyKeys = transitive
-    ? collectTransitiveDependencies(rootDependencies, requestedVersionIndex)
-    : new Set(rootDependencies.map((pkg) => `${pkg.name}@${pkg.resolvedVersion}`));
-
-  return Array.from(resolvedDependencyKeys).sort((a, b) => a.localeCompare(b));
 };
