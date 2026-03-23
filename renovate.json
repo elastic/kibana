@@ -572,7 +572,6 @@
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
         "mock-fs",
-        "node-fetch",
         "react-intl",
         "reflect-metadata",
         "type-detect",
@@ -580,7 +579,6 @@
         "@types/fetch-mock",
         "@types/getos",
         "@types/mock-fs",
-        "@types/node-fetch",
         "@types/type-detect"
       ],
       "reviewers": ["team:kibana-core"],

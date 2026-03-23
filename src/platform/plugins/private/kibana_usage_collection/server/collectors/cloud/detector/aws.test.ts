@@ -8,13 +8,11 @@
  */
 
 /* eslint-disable dot-notation */
-jest.mock('node-fetch');
 jest.mock('fs/promises');
 import type { AWSResponse } from './aws';
 import { AWSCloudService } from './aws';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+const fetchMock = jest.spyOn(global, 'fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { readFile } = require('fs/promises') as { readFile: jest.Mock };
 
@@ -34,11 +32,13 @@ describe('AWS', () => {
       const id = 'abcdef';
 
       fetchMock.mockResolvedValue({
-        json: () =>
-          `{"instanceId": "${id}","availabilityZone":"us-fake-2c", "imageId" : "ami-6df1e514"}`,
+        json: async () =>
+          JSON.parse(
+            `{"instanceId": "${id}","availabilityZone":"us-fake-2c", "imageId" : "ami-6df1e514"}`
+          ),
         status: 200,
         ok: true,
-      });
+      } as unknown as Response);
 
       const response = await awsService['_checkIfService']();
       expect(readFile).toBeCalledTimes(0);
@@ -67,10 +67,10 @@ describe('AWS', () => {
 
     it('handles request without a usable body by downgrading to UUID detection', async () => {
       fetchMock.mockResolvedValue({
-        json: () => null,
+        json: async () => null,
         status: 200,
         ok: true,
-      });
+      } as unknown as Response);
 
       const response = await awsService['_checkIfService']();
 
@@ -91,7 +91,7 @@ describe('AWS', () => {
       fetchMock.mockResolvedValue({
         status: 404,
         ok: false,
-      });
+      } as unknown as Response);
 
       const response = await awsService['_checkIfService']();
 
@@ -110,10 +110,10 @@ describe('AWS', () => {
 
     it('handles not running on AWS', async () => {
       fetchMock.mockResolvedValue({
-        json: () => null,
+        json: async () => null,
         status: 404,
         ok: false,
-      });
+      } as unknown as Response);
 
       mockIsWindows.mockReturnValue(true);
 

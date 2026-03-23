@@ -8,10 +8,9 @@
  */
 
 /* eslint-disable dot-notation */
-jest.mock('node-fetch');
 import { GCPCloudService } from './gcp';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+
+const fetchMock = jest.spyOn(global, 'fetch');
 
 describe('GCP', () => {
   const gcpService = new GCPCloudService();
@@ -23,7 +22,7 @@ describe('GCP', () => {
 
   describe('_checkIfService', () => {
     // GCP responds with the header that they expect (and request lowercases the header's name)
-    const headers = new Map();
+    const headers = new Headers();
     headers.set('metadata-flavor', 'Google');
 
     it('handles expected responses', async () => {
@@ -34,19 +33,19 @@ describe('GCP', () => {
         zone: 'projects/441331612345/zones/us-fake4-c',
       };
 
-      fetchMock.mockImplementation((url: string) => {
-        const requestKey = url.substring(basePath.length);
+      fetchMock.mockImplementation((url) => {
+        const requestKey = String(url).substring(basePath.length);
         let body: string | null = null;
 
         if (metadata[requestKey]) {
           body = metadata[requestKey];
         }
-        return {
+        return Promise.resolve({
           status: 200,
           ok: true,
-          text: () => body,
+          text: async () => body,
           headers,
-        };
+        } as unknown as Response);
       });
 
       const response = await gcpService['_checkIfService']();
@@ -78,8 +77,8 @@ describe('GCP', () => {
         status: 200,
         ok: true,
         headers,
-        text: () => undefined,
-      });
+        text: async () => undefined,
+      } as unknown as Response);
 
       await expect(() =>
         gcpService['_checkIfService']()
@@ -90,9 +89,9 @@ describe('GCP', () => {
       fetchMock.mockResolvedValue({
         status: 200,
         ok: true,
-        headers: new Map(),
-        text: () => 'xyz',
-      });
+        headers: new Headers(),
+        text: async () => 'xyz',
+      } as unknown as Response);
 
       await expect(() =>
         gcpService['_checkIfService']()
@@ -113,8 +112,8 @@ describe('GCP', () => {
         status: 404,
         ok: false,
         headers,
-        text: () => 'This is some random error text',
-      });
+        text: async () => 'This is some random error text',
+      } as unknown as Response);
 
       await expect(() =>
         gcpService['_checkIfService']()
@@ -127,20 +126,20 @@ describe('GCP', () => {
           status: 200,
           ok: true,
           headers,
-          text: () => 'some_id',
-        })
+          text: async () => 'some_id',
+        } as unknown as Response)
         .mockRejectedValueOnce({
           status: 500,
           ok: false,
           headers,
-          text: () => 'This is some random error text',
+          text: async () => 'This is some random error text',
         })
         .mockResolvedValueOnce({
           status: 404,
           ok: false,
           headers,
-          text: () => 'URI Not found',
-        });
+          text: async () => 'URI Not found',
+        } as unknown as Response);
       const response = await gcpService['_checkIfService']();
 
       expect(fetchMock).toBeCalledTimes(3);
