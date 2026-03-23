@@ -36,14 +36,20 @@ describe('initializeDataStream', () => {
   });
 
   it('does not update lifecycle when only key ordering differs', async () => {
+    const newLifecycle = {
+      enabled: true,
+      data_retention: '30d',
+    } as const;
+    const existingLifecycle = {
+      enabled: true,
+      data_retention: '30d',
+    } as const;
     const dataStream: DataStreamDefinition<typeof testMappings> = {
       name: 'test-data-stream',
       version: 2,
       template: {
         mappings: testMappings,
-        lifecycle: {
-          data_retention: '30d',
-        },
+        lifecycle: newLifecycle,
       },
     };
 
@@ -76,10 +82,7 @@ describe('initializeDataStream', () => {
             version: 1,
           },
           template: {
-            lifecycle: {
-              enabled: true,
-              data_retention: '30d',
-            },
+            lifecycle: existingLifecycle,
           },
         },
       } as any,
