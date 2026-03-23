@@ -425,6 +425,48 @@ export const registerZodV4Component = (schema: z.ZodType, name: string): void =>
   zodV4OasComponentRegistry.set(schema as object, name);
 };
 
+interface ZodSchemaMeta {
+  id?: string;
+  openapi?: OasMetaExtensions;
+}
+
+const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
+  (z.globalRegistry.get(schema) ?? {}) as ZodSchemaMeta;
+
+const getStableComponentName = (schema: z.ZodType): string | undefined =>
+  zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
+
+/**
+ * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator
+ * with property name and (when every variant has a stable component name) a
+ * mapping.  Returns `null` for non-discriminated schemas.
+ */
+function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
+  const { discriminator: key, options } = (schema as any)._zod?.def ?? {};
+  if (typeof key !== 'string' || !Array.isArray(options)) return null;
+
+  const mapping: Record<string, string> = {};
+  let allNamed = true;
+
+  for (const opt of options) {
+    const name = getStableComponentName(opt);
+    if (!name) {
+      allNamed = false;
+      continue;
+    }
+    const litValues = opt._zod?.def?.shape?.[key]?._zod?.def?.values;
+    if (Array.isArray(litValues) && litValues.length === 1) {
+      mapping[String(litValues[0])] = `#/components/schemas/${name}`;
+    }
+  }
+
+  const disc: OpenAPIV3.DiscriminatorObject = { propertyName: key };
+  if (allNamed && Object.keys(mapping).length > 0) {
+    disc.mapping = mapping;
+  }
+  return { discriminator: disc };
+}
+
 /**
  * Recursively rewrite every `$ref` value that starts with `#/$defs/`
  * to point to `#/components/schemas/<uniqueKey>` instead.
@@ -661,13 +703,28 @@ export const convert = (schema: z.ZodTypeAny) => {
         return;
       }
 
-      // Inject the stable OAS component name for registered schemas.
-      // This marker is picked up by extractDefsToShared (for $defs entries)
-      // and hoistMarkedSchemas (for inline, single-use schemas).
-      const componentName = zodV4OasComponentRegistry.get(zodSchema as object);
+      const zSchema = zodSchema as unknown as z.ZodType;
 
-      if (componentName) {
-        (js as any)[COMPONENT_ID_MARKER] = componentName;
+      const stableName = getStableComponentName(zSchema);
+      if (stableName) {
+        (js as any)[COMPONENT_ID_MARKER] = stableName;
+        delete (js as any).id;
+      }
+
+      const { openapi } = getZodMeta(zSchema);
+      if (openapi) {
+        (js as any)[OAS_EXTENSIONS_MARKER] = openapi;
+        delete (js as any).openapi;
+      }
+
+      if (!openapi?.discriminator) {
+        const autoDisc = buildAutoDiscriminator(zSchema);
+        if (autoDisc) {
+          (js as any)[OAS_EXTENSIONS_MARKER] = {
+            ...((js as any)[OAS_EXTENSIONS_MARKER] ?? {}),
+            ...autoDisc,
+          };
+        }
       }
     },
   }) as Record<string, any>;
