@@ -36,7 +36,7 @@ export async function getDiverseSampleDocuments({
   const timeRangeFilter = dateRangeQuery(start, end);
 
   const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, start, end }),
+    detectMessageField({ esClient, index, timeRangeFilter }),
     countDocs({ esClient, index, timeRangeFilter }),
   ]);
 
@@ -127,20 +127,18 @@ export async function getDiverseSampleDocuments({
 async function detectMessageField({
   esClient,
   index,
-  start,
-  end,
+  timeRangeFilter,
 }: {
   esClient: ElasticsearchClient;
   index: string;
-  start: number;
-  end: number;
+  timeRangeFilter: ReturnType<typeof dateRangeQuery>;
 }): Promise<string | undefined> {
   const fieldCapsResponse = await esClient.fieldCaps({
     index,
     fields: MESSAGE_FIELD_CANDIDATES,
     index_filter: {
       bool: {
-        filter: dateRangeQuery(start, end),
+        filter: timeRangeFilter,
       },
     },
     types: ['text', 'match_only_text'],

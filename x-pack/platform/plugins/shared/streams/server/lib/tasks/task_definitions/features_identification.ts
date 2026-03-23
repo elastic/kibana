@@ -47,6 +47,7 @@ import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_f
 const DEFAULT_MAX_ITERATIONS = 5;
 const DOCUMENTS_BATCH_SIZE = 20;
 const MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
+const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 
 export interface IterationTelemetry {
   iteration: number;
@@ -219,8 +220,6 @@ export async function identifyStreamFeatures({
     tokensUsed: totalTokensUsed,
   };
 }
-
-const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 
 export interface FeaturesIdentificationTaskParams {
   start: number;

@@ -98,7 +98,10 @@ export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): bo
   return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
 }
 
-const mergeArrays = (a: string[] = [], b: string[] = []) => uniq([...a, ...b]);
+const mergeArrays = (a: string[] | undefined, b: string[] | undefined): string[] | undefined => {
+  const merged = uniq([...(a ?? []), ...(b ?? [])]);
+  return merged.length > 0 ? merged : undefined;
+};
 
 export function toBaseFeature(feature: Feature): BaseFeature {
   return {
@@ -119,13 +122,8 @@ export function toBaseFeature(feature: Feature): BaseFeature {
 }
 
 export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): BaseFeature {
-  const mergedEvidence = mergeArrays(existing.evidence, incoming.evidence);
-  const mergedEvidenceDocIds = mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids);
-  const mergedTags = mergeArrays(existing.tags, incoming.tags);
   const mergedMeta = { ...(existing.meta ?? {}), ...(incoming.meta ?? {}) };
   const mergedProperties = { ...(existing.properties ?? {}), ...(incoming.properties ?? {}) };
-  const confidence = Math.round((existing.confidence + incoming.confidence) / 2);
-  const filter = incoming.filter ?? existing.filter;
 
   return {
     id: existing.id,
@@ -135,11 +133,11 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
     title: incoming.title,
     description: incoming.description,
     properties: mergedProperties,
-    confidence,
-    evidence: mergedEvidence.length > 0 ? mergedEvidence : undefined,
-    evidence_doc_ids: mergedEvidenceDocIds.length > 0 ? mergedEvidenceDocIds : undefined,
-    tags: mergedTags.length > 0 ? mergedTags : undefined,
-    filter,
+    confidence: Math.round((existing.confidence + incoming.confidence) / 2),
+    evidence: mergeArrays(existing.evidence, incoming.evidence),
+    evidence_doc_ids: mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids),
+    tags: mergeArrays(existing.tags, incoming.tags),
+    filter: incoming.filter ?? existing.filter,
     meta: Object.keys(mergedMeta).length > 0 ? mergedMeta : undefined,
   };
 }
