@@ -10,9 +10,18 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
+import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
 import { Session } from './saml_auth';
 import type { SupportedRoles } from './session_manager';
 import { SamlSessionManager } from './session_manager';
+
+jest.mock('./fetch_kibana_version', () => ({
+  fetchKibanaVersionHeaderString: jest.fn(),
+}));
+
+const mockedFetchKibanaVersionHeaderString = fetchKibanaVersionHeaderString as jest.MockedFunction<
+  typeof fetchKibanaVersionHeaderString
+>;
 import * as samlAuth from './saml_auth';
 import * as helper from './helper';
 import type { Role, User, UserProfile } from './types';
@@ -236,7 +245,6 @@ describe('SamlSessionManager', () => {
       isCloud,
       log,
       cloudUsersFilePath,
-      kbnVersion: '8.12.0',
     };
 
     const cloudCookieInstance = Cookie.parse(
@@ -279,6 +287,7 @@ describe('SamlSessionManager', () => {
     beforeEach(() => {
       jest.resetAllMocks();
 
+      mockedFetchKibanaVersionHeaderString.mockResolvedValue('8.12.0');
       createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
       readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
       delete process.env.TEST_CLOUD_HOST_NAME;

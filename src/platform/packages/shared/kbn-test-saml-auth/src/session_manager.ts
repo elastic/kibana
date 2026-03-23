@@ -33,11 +33,6 @@ export interface SamlSessionManagerOptions {
   cloudUsersFilePath: string;
   serverless?: SamlSessionManagerServerlessOptions;
   log: ToolingLog;
-  /**
-   * Kibana version string for the `kbn-version` header on cloud SAML requests.
-   * When omitted in cloud mode, the version is fetched once via GET /api/status (same as @kbn/kbn-client).
-   */
-  kbnVersion?: string;
 }
 
 export interface SamlSessionManagerServerlessOptions {
@@ -64,7 +59,6 @@ export class SamlSessionManager {
   private readonly kbnHost: string;
   private readonly kbnUsername: string;
   private readonly kbnPassword: string;
-  private readonly kbnVersionOverride?: string;
   private kbnVersionResolved?: string;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
@@ -84,7 +78,6 @@ export class SamlSessionManager {
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
     this.kbnUsername = options.hostOptions.username;
     this.kbnPassword = options.hostOptions.password;
-    this.kbnVersionOverride = options.kbnVersion;
     this.isCloud = options.isCloud;
     this.cloudHostName = options.cloudHostName || process.env.TEST_CLOUD_HOST_NAME;
     if (this.isCloud) {
@@ -99,9 +92,6 @@ export class SamlSessionManager {
   }
 
   private async getKibanaVersionForCloudSaml(): Promise<string> {
-    if (this.kbnVersionOverride !== undefined) {
-      return this.kbnVersionOverride;
-    }
     if (this.kbnVersionResolved !== undefined) {
       return this.kbnVersionResolved;
     }
