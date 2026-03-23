@@ -631,3 +631,12 @@ export interface GetAvailableConnectorsResponse {
   connectorTypes: Record<string, ConnectorTypeInfo>;
   totalConnectors: number;
 }
+
+export interface ChildWorkflowExecutionItem {
+  parentStepExecutionId: string;
+  workflowId: string;
+  workflowName: string;
+  executionId: string;
+  status: ExecutionStatus;
+  stepExecutions: WorkflowStepExecutionDto[];
+}

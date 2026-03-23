@@ -53,7 +53,7 @@ describe('Workflow routes', () => {
       getWorkflows: jest.fn(),
       getWorkflow: jest.fn(),
       getWorkflowsByIds: jest.fn(),
-      checkWorkflowConflicts: jest.fn(),
+      getWorkflowsSourceByIds: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
       deleteWorkflows: jest.fn(),
@@ -105,7 +105,7 @@ describe('Workflow routes', () => {
       api: mockApi as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
-    } as RouteDependencies);
+    } as unknown as RouteDependencies);
   });
 
   describe('GET:/api/workflows', () => {
@@ -358,25 +358,28 @@ describe('Workflow routes', () => {
     });
   });
 
-  describe('POST:/api/workflows/batch (conflicts)', () => {
+  describe('POST:/api/workflows/batch (get by IDs)', () => {
     const key = 'POST:/api/workflows/batch';
 
     it('should register route handler', () => {
       expect(routeHandlers[key]).toBeDefined();
     });
 
-    it('should call api.checkWorkflowConflicts with ids and space id', async () => {
-      mockApi.checkWorkflowConflicts.mockResolvedValue([{ id: 'a', name: 'Existing' }]);
+    it('should call api.getWorkflowsSourceByIds with ids, space id, and source', async () => {
+      const workflows = [{ id: 'a', name: 'Existing' }];
+      mockApi.getWorkflowsSourceByIds.mockResolvedValue(workflows);
       const request = httpServerMock.createKibanaRequest({ body: { ids: ['a'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.checkWorkflowConflicts).toHaveBeenCalledWith(['a'], 'default-space');
-      expect(response.ok).toHaveBeenCalledWith({
-        body: { conflicts: [{ id: 'a', existingName: 'Existing' }] },
-      });
+      expect(mockApi.getWorkflowsSourceByIds).toHaveBeenCalledWith(
+        ['a'],
+        'default-space',
+        undefined
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: workflows });
     });
   });
 
@@ -539,7 +542,7 @@ describe('Workflow routes', () => {
 
     it('should call api.getAvailableConnectors with space id and request', async () => {
       mockApi.getAvailableConnectors.mockResolvedValue({
-        connectorsByType: { slack: {} },
+        connectorTypes: { slack: {} },
         totalConnectors: 1,
       });
       const request = httpServerMock.createKibanaRequest();

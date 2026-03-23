@@ -104,7 +104,7 @@ describe('Execution Routes', () => {
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
-    } as RouteDependencies);
+    } as unknown as RouteDependencies);
   });
 
   const handler = (method: string, path: string) => routeHandlers[`${method}:${path}`]?.handler;

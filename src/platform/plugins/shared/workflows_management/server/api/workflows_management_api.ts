@@ -27,7 +27,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -35,7 +35,6 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
-import type { ChildWorkflowExecutionItem } from './lib/get_child_workflow_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   SearchWorkflowExecutionsParams,

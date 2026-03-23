@@ -42,6 +42,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import type {
+  ChildWorkflowExecutionItem,
   ConnectorInstanceConfig,
   GetAvailableConnectorsResponse,
   WorkflowPartialDetailDto,
@@ -57,10 +58,7 @@ import type {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
-import {
-  type ChildWorkflowExecutionItem,
-  getChildWorkflowExecutions,
-} from './lib/get_child_workflow_executions';
+import { getChildWorkflowExecutions } from './lib/get_child_workflow_executions';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';

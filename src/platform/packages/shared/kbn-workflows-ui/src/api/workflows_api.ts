@@ -9,6 +9,7 @@
 
 import type { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import type {
+  ChildWorkflowExecutionItem,
   CreateWorkflowCommand,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
@@ -260,7 +261,7 @@ export class WorkflowApi {
     });
   }
 
-  async getChildrenExecutions(executionId: string): Promise<WorkflowExecutionListDto> {
+  async getChildrenExecutions(executionId: string): Promise<ChildWorkflowExecutionItem[]> {
     return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/children`, {
       version: API_VERSION,
     });

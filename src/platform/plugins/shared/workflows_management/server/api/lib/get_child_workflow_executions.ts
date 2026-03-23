@@ -8,23 +8,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type {
+  ChildWorkflowExecutionItem,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
-
-export interface ChildWorkflowExecutionItem {
-  parentStepExecutionId: string;
-  workflowId: string;
-  workflowName: string;
-  executionId: string;
-  status: string;
-  stepExecutions: WorkflowStepExecutionDto[];
-}
-
 interface GetChildWorkflowExecutionsParams {
   esClient: ElasticsearchClient;
   workflowExecutionIndex: string;

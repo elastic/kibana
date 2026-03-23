@@ -9,24 +9,11 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type {
-  ExecutionStatus,
-  WorkflowExecutionDto,
-  WorkflowStepExecutionDto,
-} from '@kbn/workflows';
+import type { ChildWorkflowExecutionItem, WorkflowExecutionDto } from '@kbn/workflows';
 import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 
-export interface ChildWorkflowExecutionInfo {
-  parentStepExecutionId: string;
-  workflowId: string;
-  workflowName: string;
-  executionId: string;
-  status: ExecutionStatus;
-  stepExecutions: WorkflowStepExecutionDto[];
-}
-
-export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionInfo>;
+export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionItem>;
 
 export function useChildWorkflowExecutions(
   parentExecution: WorkflowExecutionDto | undefined | null
@@ -47,7 +34,7 @@ export function useChildWorkflowExecutions(
     queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
       const executionId = parentExecution?.id ?? '';
-      const items = (await api.getChildrenExecutions(executionId)) as ChildWorkflowExecutionInfo[];
+      const items = await api.getChildrenExecutions(executionId);
       const map: ChildWorkflowExecutionsMap = new Map();
       for (const item of items) {
         map.set(item.parentStepExecutionId, item);

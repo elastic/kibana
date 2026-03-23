@@ -51,7 +51,6 @@ export interface PreflightImportResult {
 export interface ImportWorkflowsResult {
   created: WorkflowDetailDto[];
   failed: Array<{ index: number; id: string; error: string }>;
-  parseErrors: string[];
 }
 
 export interface ImportWorkflowsParams {
