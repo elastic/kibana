@@ -286,6 +286,10 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * The state for data table visibility toggle
+   */
+  hideTable?: boolean;
 }
 
 /**
