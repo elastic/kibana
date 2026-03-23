@@ -18,7 +18,7 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
-import { AnalyzerGraph } from '../../analyzer/analyzer_graph';
+import { AnalyzerGraph } from '../../analyzer';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;

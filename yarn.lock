@@ -2434,10 +2434,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.10.0.tgz#e03738608457dfa1718394e51eb6879a00586d6e"
   integrity sha512-kVk1YOZZt3QaSMfQ+pXM+xAQLtAmsDqTW5YL17SsKZUUX6YKsF4s1GS2szwrx2Q/UAyaaxmtOSn4RM/qopUbvw==
 
-"@elastic/esql@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.5.0.tgz#3c30ba18dbf6559115c236a548e4421cca8f7e5b"
-  integrity sha512-bV3Fb+tawiVOev8igqk5rwbPnBmB/h3fHFTYMobFGhLI6bOFPVDkNeJ3NiMHuIlMOkmNvRnyqjapJX9PPM0WvQ==
+"@elastic/esql@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.6.0.tgz#da68c13c2bd14b975eb85c32c83bddde8b858438"
+  integrity sha512-2pyj6bWNSf5XuaP3LfwHdoYW+VyejgMnmaDMmbNKLJ9F16n7ySaHRDEVk8riSwRPdSlgGwiRvYgrcNz8ccOo0A==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -4988,6 +4988,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-history@link:x-pack/platform/packages/shared/kbn-change-history":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
@@ -5425,10 +5429,6 @@
   uid ""
 
 "@kbn/core-chrome-layout-constants@link:src/core/packages/chrome/layout/core-chrome-layout-constants":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core-chrome-layout-feature-flags":
   version "0.0.0"
   uid ""
 
@@ -7433,6 +7433,10 @@
   uid ""
 
 "@kbn/json-schemas@link:x-pack/platform/packages/private/ml/json_schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kbn-client@link:src/platform/packages/shared/kbn-kbn-client":
   version "0.0.0"
   uid ""
 
@@ -21672,14 +21676,14 @@ fast-xml-builder@^1.1.4:
   dependencies:
     path-expression-matcher "^1.1.3"
 
-fast-xml-parser@5.2.5, fast-xml-parser@5.5.6, fast-xml-parser@^5.5.1:
-  version "5.5.6"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.5.6.tgz#6fc61f5ae06a55a1f058abd6a4f4b5d3e9972cd0"
-  integrity sha512-3+fdZyBRVg29n4rXP0joHthhcHdPUHaIC16cuyyd1iLsuaO6Vea36MPrxgAzbZna8lhvZeRL8Bc9GP56/J9xEw==
+fast-xml-parser@5.2.5, fast-xml-parser@5.5.7, fast-xml-parser@^5.5.1:
+  version "5.5.7"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.5.7.tgz#e1ddc86662d808450a19cf2fb6ccc9c3c9933c5d"
+  integrity sha512-LteOsISQ2GEiDHZch6L9hB0+MLoYVLToR7xotrzU0opCICBkxOPgHAy1HxAvtxfJNXDJpgAsQN30mkrfpO2Prg==
   dependencies:
     fast-xml-builder "^1.1.4"
     path-expression-matcher "^1.1.3"
-    strnum "^2.1.2"
+    strnum "^2.2.0"
 
 fastest-levenshtein@1.0.16, fastest-levenshtein@^1.0.12, fastest-levenshtein@^1.0.16:
   version "1.0.16"
@@ -21986,9 +21990,9 @@ flatbuffers@^25.1.24:
   integrity sha512-7JlN9ZvLDG1McO3kbX0k4v+SUAg48L1rIwEvN6ZQl/eCtgJz9UylTMzE9wrmYrcorgxm3CX/3T/w5VAub99UUw==
 
 flatted@^3.1.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.4.0.tgz#92ab2efec9b272eb85a3a25a106c3afbbc990d8b"
-  integrity sha512-kC6Bb+ooptOIvWj5B63EQWkF0FEnNjV2ZNkLMLZRDDduIiWeFF4iKnslwhiWxjAdbg4NzTNo6h0qLuvFrcx+Sw==
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.4.2.tgz#f5c23c107f0f37de8dbdf24f13722b3b98d52726"
+  integrity sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==
 
 fn.name@1.x.x:
   version "1.1.0"
@@ -32918,10 +32922,10 @@ strip-json-comments@^5.0.3:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-5.0.3.tgz#b7304249dd402ee67fd518ada993ab3593458bcf"
   integrity sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==
 
-strnum@^2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/strnum/-/strnum-2.1.2.tgz#a5e00ba66ab25f9cafa3726b567ce7a49170937a"
-  integrity sha512-l63NF9y/cLROq/yqKXSLtcMeeyOfnSQlfMSlzFt/K73oIaD8DGaQWd7Z34X9GPiKqP5rbSh84Hl4bOlLcjiSrQ==
+strnum@^2.2.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/strnum/-/strnum-2.2.1.tgz#d28f896b4ef9985212494ce8bcf7ca304fad8368"
+  integrity sha512-BwRvNd5/QoAtyW1na1y1LsJGQNvRlkde6Q/ipqqEaivoMdV+B1OMOTVdwR+N/cwVUcIt9PYyHmV8HyexCZSupg==
 
 stubborn-fs@^1.2.5:
   version "1.2.5"
