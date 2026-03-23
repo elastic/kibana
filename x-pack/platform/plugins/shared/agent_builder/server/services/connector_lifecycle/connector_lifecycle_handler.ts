@@ -19,25 +19,18 @@ import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
 } from '@kbn/actions-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreStart } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { SmlIndexAction } from '../sml';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ServiceManager } from '..';
 
 const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
-
-type SmlIndexAttachmentFn = (params: {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: AttachmentType;
-  action: SmlIndexAction;
-}) => Promise<void>;
 
 interface ConnectorLifecycleHandlerDeps {
   serviceManager: ServiceManager;
   workflowsManagement?: WorkflowsServerPluginSetup;
   logger: Logger;
-  smlIndexAttachmentFn?: SmlIndexAttachmentFn;
+  getStartServices: () => Promise<[CoreStart, { spaces?: SpacesPluginStart }, unknown]>;
 }
 
 function renderWorkflowTemplate(
@@ -60,7 +53,7 @@ function slugify(input: string): string {
 }
 
 export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerDeps) {
-  const { serviceManager, workflowsManagement, logger, smlIndexAttachmentFn } = deps;
+  const { serviceManager, workflowsManagement, logger, getStartServices } = deps;
 
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
@@ -171,13 +164,19 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         );
 
         // Index the connector into SML for immediate discoverability
-        if (smlIndexAttachmentFn) {
+        const sml = serviceManager.internalStart?.sml;
+        if (sml) {
           try {
-            await smlIndexAttachmentFn({
-              request,
+            const [coreStart, startDeps] = await getStartServices();
+            const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+            await sml.indexAttachment({
               originId: connectorId,
               attachmentType: AttachmentType.connector,
               action: 'create',
+              spaces: [spaceId],
+              esClient: coreStart.elasticsearch.client.asInternalUser,
+              savedObjectsClient: coreStart.savedObjects.createInternalRepository(['action']),
+              logger,
             });
             logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
           } catch (smlError) {
@@ -240,13 +239,19 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         await Promise.all([deleteToolsPromise, deleteWorkflowsPromise]);
 
         // Remove the connector from SML
-        if (smlIndexAttachmentFn) {
+        const sml = serviceManager.internalStart?.sml;
+        if (sml) {
           try {
-            await smlIndexAttachmentFn({
-              request,
+            const [coreStart, startDeps] = await getStartServices();
+            const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+            await sml.indexAttachment({
               originId: connectorId,
               attachmentType: AttachmentType.connector,
               action: 'delete',
+              spaces: [spaceId],
+              esClient: coreStart.elasticsearch.client.asInternalUser,
+              savedObjectsClient: coreStart.savedObjects.createInternalRepository(['action']),
+              logger,
             });
             logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
           } catch (smlError) {
