@@ -74,6 +74,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       rawExpect(apiResponse).toEqual({
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
@@ -147,6 +149,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ],
       });
       rawExpect(apiResponse).toEqual({
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
