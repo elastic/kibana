@@ -19,7 +19,7 @@ interface IncrementalRunnerParams {
     previousInsights: AttackDiscovery[]
   ) => Promise<{
     insights: AttackDiscovery[];
-    usage: { inputTokens: number; outputTokens: number };
+    usage?: { inputTokens: number; outputTokens: number };
   }>;
 }
 
@@ -96,16 +96,16 @@ export const runIncrementalProgressive = async ({
     currentInsights = mergeInsights(currentInsights, newInsights);
 
     const roundDuration = Date.now() - roundStart;
-    totalInputTokens += usage.inputTokens;
-    totalOutputTokens += usage.outputTokens;
+    totalInputTokens += usage?.inputTokens ?? 0;
+    totalOutputTokens += usage?.outputTokens ?? 0;
 
     rounds.push({
       roundNumber,
       alertCount: roundAlerts.length,
       insightCount: newInsights.length,
       durationMs: roundDuration,
-      inputTokens: usage.inputTokens,
-      outputTokens: usage.outputTokens,
+      inputTokens: usage?.inputTokens ?? 0,
+      outputTokens: usage?.outputTokens ?? 0,
     });
 
     log.info(
