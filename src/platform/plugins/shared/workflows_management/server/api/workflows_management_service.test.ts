@@ -976,18 +976,17 @@ describe('WorkflowsService', () => {
     });
   });
 
-  describe('checkWorkflowConflicts', () => {
-    it('should return matching IDs with names for existing workflows', async () => {
+  describe('getWorkflowsSourceByIds', () => {
+    it('should return matching workflows for existing IDs', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
           hits: [{ _id: 'w-1', _source: { name: 'Existing One' } }],
-          total: { value: 1 },
         },
       } as any);
 
-      const result = await service.checkWorkflowConflicts(['w-1', 'w-new'], 'my-space');
+      const result = await service.getWorkflowsSourceByIds(['w-1', 'w-new'], 'my-space', ['name']);
 
-      expect(result).toEqual([{ id: 'w-1', name: 'Existing One' }]);
+      expect(result).toEqual([expect.objectContaining({ id: 'w-1', name: 'Existing One' })]);
 
       const searchCall = mockEsClient.search.mock.calls[0][0] as Record<string, unknown>;
       const query = searchCall.query as { bool: { must: unknown[]; must_not: unknown[] } };
@@ -1001,34 +1000,34 @@ describe('WorkflowsService', () => {
       expect(searchCall._source).toEqual(['name']);
     });
 
-    it('should return empty array when no IDs exist', async () => {
+    it('should default _source to true when source parameter is omitted', async () => {
       mockEsClient.search.mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
+        hits: {
+          hits: [{ _id: 'w-1', _source: { name: 'Workflow' } }],
+        },
       } as any);
 
-      const result = await service.checkWorkflowConflicts(['w-1'], 'default');
+      await service.getWorkflowsSourceByIds(['w-1'], 'default');
+
+      const searchCall = mockEsClient.search.mock.calls[0][0] as Record<string, unknown>;
+      expect(searchCall._source).toBe(true);
+    });
+
+    it('should return empty array when no IDs exist', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as any);
+
+      const result = await service.getWorkflowsSourceByIds(['w-1'], 'default', ['name']);
 
       expect(result).toEqual([]);
     });
 
     it('should return empty array when given no IDs', async () => {
-      const result = await service.checkWorkflowConflicts([], 'default');
+      const result = await service.getWorkflowsSourceByIds([], 'default');
 
       expect(result).toEqual([]);
       expect(mockEsClient.search).not.toHaveBeenCalled();
-    });
-
-    it('should fall back to _id when _source.name is missing', async () => {
-      mockEsClient.search.mockResolvedValueOnce({
-        hits: {
-          hits: [{ _id: 'w-1', _source: {} }],
-          total: { value: 1 },
-        },
-      } as any);
-
-      const result = await service.checkWorkflowConflicts(['w-1'], 'default');
-
-      expect(result).toEqual([{ id: 'w-1', name: 'w-1' }]);
     });
   });
 
@@ -2711,10 +2710,10 @@ steps:
       const result = await service.getAvailableConnectors('default', mockRequest);
 
       expect(result.totalConnectors).toBe(2);
-      expect(result.connectorsByType['.slack']).toBeDefined();
-      expect(result.connectorsByType['.email']).toBeDefined();
+      expect(result.connectorTypes['.slack']).toBeDefined();
+      expect(result.connectorTypes['.email']).toBeDefined();
 
-      expect(result.connectorsByType['.slack']).toEqual({
+      expect(result.connectorTypes['.slack']).toEqual({
         actionTypeId: '.slack',
         displayName: 'Slack',
         instances: [
@@ -2731,7 +2730,7 @@ steps:
         minimumLicenseRequired: 'basic',
       });
 
-      expect(result.connectorsByType['.email']).toEqual({
+      expect(result.connectorTypes['.email']).toEqual({
         actionTypeId: '.email',
         displayName: 'Email',
         instances: [
@@ -2791,16 +2790,16 @@ steps:
       const result = await service.getAvailableConnectors('default', mockRequest);
 
       expect(result.totalConnectors).toBe(1);
-      expect(result.connectorsByType['.slack']).toBeDefined();
-      expect(result.connectorsByType['.email']).toBeDefined();
+      expect(result.connectorTypes['.slack']).toBeDefined();
+      expect(result.connectorTypes['.email']).toBeDefined();
 
       // Slack has an instance
-      expect(result.connectorsByType['.slack'].instances).toHaveLength(1);
+      expect(result.connectorTypes['.slack'].instances).toHaveLength(1);
 
       // Email has no instances but still appears
-      expect(result.connectorsByType['.email'].instances).toHaveLength(0);
-      expect(result.connectorsByType['.email'].actionTypeId).toBe('.email');
-      expect(result.connectorsByType['.email'].displayName).toBe('Email');
+      expect(result.connectorTypes['.email'].instances).toHaveLength(0);
+      expect(result.connectorTypes['.email'].actionTypeId).toBe('.email');
+      expect(result.connectorTypes['.email'].displayName).toBe('Email');
     });
 
     it('should handle multiple connectors of the same type', async () => {
@@ -2845,8 +2844,8 @@ steps:
       const result = await service.getAvailableConnectors('default', mockRequest);
 
       expect(result.totalConnectors).toBe(3);
-      expect(result.connectorsByType['.slack'].instances).toHaveLength(3);
-      expect(result.connectorsByType['.slack'].instances).toEqual([
+      expect(result.connectorTypes['.slack'].instances).toHaveLength(3);
+      expect(result.connectorTypes['.slack'].instances).toEqual([
         {
           id: 'connector-1',
           name: 'Slack Connector 1',
@@ -2875,7 +2874,7 @@ steps:
       const result = await service.getAvailableConnectors('default', mockRequest);
 
       expect(result.totalConnectors).toBe(0);
-      expect(result.connectorsByType).toEqual({});
+      expect(result.connectorTypes).toEqual({});
     });
 
     it('should handle connectors with action types not in the list', async () => {
@@ -2913,11 +2912,11 @@ steps:
       const result = await service.getAvailableConnectors('default', mockRequest);
 
       expect(result.totalConnectors).toBe(2);
-      // Only .slack should be in connectorsByType since .unknown is not in actionTypes
-      expect(result.connectorsByType['.slack']).toBeDefined();
-      expect(result.connectorsByType['.unknown']).toBeUndefined();
+      // Only .slack should be in connectorTypes since .unknown is not in actionTypes
+      expect(result.connectorTypes['.slack']).toBeDefined();
+      expect(result.connectorTypes['.unknown']).toBeUndefined();
       // The .slack connector should still be included
-      expect(result.connectorsByType['.slack'].instances).toHaveLength(1);
+      expect(result.connectorTypes['.slack'].instances).toHaveLength(1);
     });
 
     it('should call both getAll and listTypes in parallel', async () => {
