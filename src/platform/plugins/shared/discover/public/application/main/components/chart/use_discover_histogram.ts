@@ -409,14 +409,30 @@ export const useDiscoverHistogram = (
           },
         })
       );
+      dispatch(
+        updateAttributes({
+          attributes: { secondaryVisContext: undefined },
+        })
+      );
     }
     previousQueryEsqlRef.current = nextEsql;
-  }, [dispatch, query, updateAppState]);
+  }, [dispatch, query, updateAppState, updateAttributes]);
+
+  const secondaryVisContext = useCurrentTabSelector((tab) => tab.attributes.secondaryVisContext);
 
   const onEsqlTransformationalChartModeChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onEsqlTransformationalChartModeChange']>
   >(
     (mode) => {
+      // Swap visContext and secondaryVisContext so each mode preserves its chart config
+      dispatch(
+        updateAttributes({
+          attributes: {
+            visContext: secondaryVisContext,
+            secondaryVisContext: visContext,
+          },
+        })
+      );
       dispatch(
         updateAppState({
           appState: {
@@ -425,7 +441,7 @@ export const useDiscoverHistogram = (
         })
       );
     },
-    [dispatch, updateAppState]
+    [dispatch, updateAppState, updateAttributes, visContext, secondaryVisContext]
   );
 
   return useMemo(

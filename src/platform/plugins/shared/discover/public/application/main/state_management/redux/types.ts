@@ -24,8 +24,10 @@ import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import type { EsqlTransformationalChartToggleMode } from '@kbn/unified-histogram';
+import type {
+  EsqlTransformationalChartToggleMode,
+  UnifiedHistogramVisContext,
+} from '@kbn/unified-histogram';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -152,6 +154,7 @@ export interface TabState extends TabItem {
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
   attributes: {
     visContext: UnifiedHistogramVisContext | {} | undefined;
+    secondaryVisContext: UnifiedHistogramVisContext | {} | undefined;
     controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
     timeRestore: boolean;
   };

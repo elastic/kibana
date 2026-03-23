@@ -129,6 +129,8 @@ export interface DiscoverSessionTab {
   chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
+  secondaryVisContext?: VisContextUnmapped;
+  esqlTransformationalChartMode?: string;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
 }
 

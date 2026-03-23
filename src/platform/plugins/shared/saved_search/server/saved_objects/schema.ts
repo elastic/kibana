@@ -100,26 +100,28 @@ export const SCHEMA_SEARCH_MODEL_VERSION_2 = SCHEMA_SEARCH_MODEL_VERSION_1.exten
   headerRowHeight: schema.maybe(schema.number()),
 });
 
-export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.extends({
-  visContext: schema.maybe(
-    schema.oneOf([
-      // existing value
-      schema.object({
-        // unified histogram state
-        suggestionType: schema.string(),
-        requestData: schema.object({
-          dataViewId: schema.maybe(schema.string()),
-          timeField: schema.maybe(schema.string()),
-          timeInterval: schema.maybe(schema.string()),
-          breakdownField: schema.maybe(schema.string()),
-        }),
-        // lens attributes
-        attributes: schema.recordOf(schema.string(), schema.any()),
+const visContextSchema = schema.maybe(
+  schema.oneOf([
+    // existing value
+    schema.object({
+      // unified histogram state
+      suggestionType: schema.string(),
+      requestData: schema.object({
+        dataViewId: schema.maybe(schema.string()),
+        timeField: schema.maybe(schema.string()),
+        timeInterval: schema.maybe(schema.string()),
+        breakdownField: schema.maybe(schema.string()),
       }),
-      // cleared previous value
-      schema.object({}),
-    ])
-  ),
+      // lens attributes
+      attributes: schema.recordOf(schema.string(), schema.any()),
+    }),
+    // cleared previous value
+    schema.object({}),
+  ])
+);
+
+export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.extends({
+  visContext: visContextSchema,
 });
 
 export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.extends({
@@ -233,7 +235,28 @@ export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
   tabs: schema.maybe(tabsV11),
 });
 
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10.extends({
+    secondaryVisContext: visContextSchema,
+    esqlTransformationalChartMode: schema.maybe(schema.string()),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_12 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_10.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_12 = SCHEMA_SEARCH_MODEL_VERSION_11.extends({
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_12, { minSize: 1 }),
+});
+
+const { tabs: tabsV12, ...restV12Props } = SCHEMA_SEARCH_MODEL_VERSION_12.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND = schema.object({
+  ...restV12Props,
+  tabs: schema.maybe(tabsV12),
+});
+
 export type DiscoverSessionTabAttributes = TypeOf<
-  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12
 >;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_10>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_12>;

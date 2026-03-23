@@ -121,12 +121,19 @@ export const saveDiscoverSession = async (
         chartInterval: tab.chartInterval,
         density: tab.density,
         visContext: tab.visContext,
+        secondaryVisContext: tab.secondaryVisContext,
+        esqlTransformationalChartMode: tab.esqlTransformationalChartMode,
         controlGroupJson: tab.controlGroupJson,
       },
     };
   });
 
-  const { chartInterval, ...firstTabAttributes } = tabs[0].attributes;
+  const {
+    chartInterval,
+    secondaryVisContext: _secondaryVisContext,
+    esqlTransformationalChartMode: _esqlTransformationalChartMode,
+    ...firstTabAttributes
+  } = tabs[0].attributes;
 
   const attributes: SavedSearchAttributes = {
     title: discoverSession.title,
