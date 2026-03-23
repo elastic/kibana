@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { injectable } from 'inversify';
+import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
+import { injectable } from 'inversify';
 import type {
   AlertEpisode,
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
   MatchedPair,
   NotificationPolicy,
   NotificationPolicyId,
   Rule,
   RuleId,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
 } from '../types';
 
 @injectable()
@@ -51,6 +52,8 @@ export function evaluateMatchers(
     if (!rule) continue;
 
     const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
+    let context: MatcherContext | undefined;
+
     for (const policy of spacePolicies) {
       if (!policy.enabled) continue;
       if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
@@ -60,7 +63,8 @@ export function evaluateMatchers(
         continue;
       }
 
-      const isMatch = evaluateKql(policy.matcher, { ...episode, rule });
+      context ??= createMatcherContext(episode, rule);
+      const isMatch = evaluateKql(policy.matcher, context);
       if (isMatch) {
         matched.push({ episode, policy });
       }
@@ -68,4 +72,22 @@ export function evaluateMatchers(
   }
 
   return matched;
+}
+
+function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
+  return {
+    last_event_timestamp: episode.last_event_timestamp,
+    group_hash: episode.group_hash,
+    episode_id: episode.episode_id,
+    episode_status: episode.episode_status,
+    rule: {
+      id: rule.id,
+      name: rule.name,
+      description: rule.description,
+      labels: rule.labels,
+      enabled: rule.enabled,
+      createdAt: rule.createdAt,
+      updatedAt: rule.updatedAt,
+    },
+  };
 }

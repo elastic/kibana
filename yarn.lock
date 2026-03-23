@@ -4768,6 +4768,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-episodes-ui@link:x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""

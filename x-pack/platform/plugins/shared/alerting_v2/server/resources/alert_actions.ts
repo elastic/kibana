@@ -40,6 +40,7 @@ const mappings: MappingsDefinition = {
     group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
     rule_id: { type: 'keyword' },
+    tags: { type: 'keyword' },
     notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
     reason: { type: 'text' },

@@ -8,28 +8,44 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getEsqlDataView } from './get_esql_data_view';
-import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { dataViewMock } from '../__mocks__';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+
+const dataViewAdHoc = {
+  id: 'ad-hoc-id',
+  title: 'data-view-ad-hoc-title',
+  name: 'ES|QL ad-hoc data view',
+  isPersisted: () => false,
+  getIndexPattern: () => 'data-view-ad-hoc-title',
+  timeFieldName: '@timestamp',
+} as unknown as DataView;
+
+const mockDataViewsService = dataViewPluginMocks.createStartContract();
+jest.mocked(mockDataViewsService.create).mockImplementation((spec) => {
+  return Promise.resolve({
+    ...dataViewMock,
+    isPersisted: () => false,
+    id: 'ad-hoc-id',
+    title: 'test',
+    timeFieldName: spec.timeFieldName,
+  } as DataView);
+});
 
 describe('getEsqlDataView', () => {
-  discoverServiceMock.dataViews.create = jest.fn().mockImplementation((spec) => {
-    return Promise.resolve({
-      ...dataViewMock,
-      isPersisted: () => false,
-      id: 'ad-hoc-id',
-      title: 'test',
-      timeFieldName: spec.timeFieldName,
-    });
-  });
-
   const dataViewAdHocNoAtTimestamp = {
     ...dataViewAdHoc,
     timeFieldName: undefined,
   } as DataView;
-  const services = discoverServiceMock;
+
+  const services = {
+    dataViews: mockDataViewsService,
+    http: {
+      get: jest.fn(),
+    } as unknown as HttpStart,
+  };
 
   const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
     const originalHttpGet = services.http.get;
@@ -68,7 +84,7 @@ describe('getEsqlDataView', () => {
   });
 
   it('creates an adhoc dataview if the current dataview is ad hoc and query index pattern is different from the dataview index pattern', async () => {
-    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+    services.dataViews.create = jest.fn().mockReturnValue({
       ...dataViewAdHoc,
       isPersisted: () => false,
       id: 'ad-hoc-id-1',
@@ -82,7 +98,7 @@ describe('getEsqlDataView', () => {
   });
 
   it('creates an adhoc ES|QL dataview if the query doesnt have from command', async () => {
-    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+    services.dataViews.create = jest.fn().mockReturnValue({
       ...dataViewAdHoc,
       isPersisted: () => false,
       id: 'ad-hoc-id-1',
