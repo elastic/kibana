@@ -1,12 +1,6 @@
 version: '1'
 name: 'sources.sharepoint-server.list'
-description: >
-  Browse SharePoint Server resources. REQUIRED: always provide list_action — calling without it will fail.
-  list_action options:
-  "getWeb" — site metadata, no other inputs needed;
-  "getLists" — all lists and document libraries, no other inputs needed;
-  "getListItems" — items in a named list, requires list_title (exact Title from getLists);
-  "getFolderContents" — files and subfolders at a path, requires path (ServerRelativeUrl from getLists or a previous getFolderContents result, starts with /).
+description: 'Browse SharePoint Server resources. REQUIRED: always provide list_action — calling without it will fail. list_action options: "getWeb" — site metadata, no other inputs needed; "getLists" — all lists and document libraries, no other inputs needed; "getListItems" — items in a named list, requires list_title (exact Title from getLists); "getFolderContents" — files and subfolders at a path, requires path (ServerRelativeUrl from getLists or a previous getFolderContents result, starts with /).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
