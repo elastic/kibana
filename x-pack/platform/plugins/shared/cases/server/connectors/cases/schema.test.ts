@@ -193,15 +193,11 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
-    it('does not accept maximumCasesToOpen to be more than 20', () => {
-      const params = getParams();
-
-      expect(() =>
-        CasesConnectorRunParamsSchema.validate({
-          ...params,
-          maximumCasesToOpen: 21,
-        })
-      ).toThrow();
+    it('accepts maximumCasesToOpen values above the default ceiling', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ maximumCasesToOpen: 21 }))
+          .maximumCasesToOpen
+      ).toBe(21);
     });
   });
 

@@ -12,7 +12,10 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CasesConnector } from './cases_connector';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CASES_CONNECTOR_ID } from '../../../common/constants';
+import {
+  CASES_CONNECTOR_ID,
+  MAX_OPEN_CASES_ADVANCED_SETTING,
+} from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
@@ -52,6 +55,10 @@ describe('CasesConnector', () => {
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
   const getSpaceId = jest.fn().mockReturnValue('default');
   const getUnsecuredSavedObjectsClient = jest.fn();
+  const mockUiSettingsGet = jest.fn().mockResolvedValue(20);
+  const getUiSettingsClient = jest.fn().mockResolvedValue({
+    get: mockUiSettingsGet,
+  });
   // 1ms delay before retrying
   const nextBackOff = jest.fn().mockReturnValue(1);
 
@@ -63,6 +70,7 @@ describe('CasesConnector', () => {
     getCasesClient,
     getSpaceId,
     getUnsecuredSavedObjectsClient,
+    getUiSettingsClient,
     isCasesAttachmentsEnabled: false,
   };
   const connectorParams = {
@@ -82,6 +90,7 @@ describe('CasesConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockExecute.mockResolvedValue({});
+    mockUiSettingsGet.mockResolvedValue(20);
 
     CasesConnectorExecutorMock.mockImplementation(() => {
       return {
@@ -150,6 +159,76 @@ describe('CasesConnector', () => {
       templateId,
       autoPushCase,
     });
+  });
+
+  it('reads the configured maximum from ui settings', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      autoPushCase,
+    });
+
+    expect(mockUiSettingsGet).toHaveBeenCalledWith(MAX_OPEN_CASES_ADVANCED_SETTING);
+  });
+
+  it('throws when maximumCasesToOpen exceeds the configured maximum', async () => {
+    mockUiSettingsGet.mockResolvedValue(10);
+
+    await expect(() =>
+      connector.run({
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        internallyManagedAlerts,
+        reopenClosedCases,
+        maximumCasesToOpen: 11,
+        templateId,
+        autoPushCase,
+      })
+    ).rejects.toMatchObject({
+      message: 'Maximum cases to open must be between 1 and 10.',
+    });
+  });
+
+  it('overrides maximumCasesToOpen for internally managed alerts', async () => {
+    mockUiSettingsGet.mockResolvedValue(25);
+
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts: [
+        {
+          alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+          grouping: { attack_discovery: 'attack-discovery-id' },
+        },
+      ],
+      groupingBy: [],
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts: true,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      autoPushCase,
+    });
+
+    expect(mockExecute).toBeCalledWith(
+      expect.objectContaining({
+        internallyManagedAlerts: true,
+        maximumCasesToOpen: 25,
+      })
+    );
   });
 
   it('creates the cases client correctly', async () => {

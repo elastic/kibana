@@ -29,6 +29,7 @@ describe('getCasesConnectorType', () => {
     caseConnectorType = getCasesConnectorType({
       getCasesClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
+      getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
     });
@@ -133,6 +134,14 @@ describe('getCasesConnectorType', () => {
           adapter.ruleActionParamsSchema.validate(getParams({ timeWindow: '10d+3d' }))
         ).toThrow();
       });
+
+      it('accepts maximumCasesToOpen values above the default ceiling', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        expect(adapter.ruleActionParamsSchema.validate(getParams({ maximumCasesToOpen: 22 }))).toEqual(
+          getParams({ maximumCasesToOpen: 22 })
+        );
+      });
     });
 
     describe('buildActionParams', () => {
@@ -184,7 +193,7 @@ describe('getCasesConnectorType', () => {
         `);
       });
 
-      it('builds the action getParams() and maximumCasesToOpen correctly', () => {
+      it('builds the action getParams() and preserves maximumCasesToOpen', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(
@@ -192,7 +201,6 @@ describe('getCasesConnectorType', () => {
             // @ts-expect-error: not all fields are needed
             alerts,
             rule,
-            // 22 is too high, it will get clamped to MAX_OPEN_CASES
             params: getParams({ maximumCasesToOpen: 22 }),
             spaceId: 'default',
             ruleUrl: 'https://example.com',
@@ -215,7 +223,7 @@ describe('getCasesConnectorType', () => {
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
-              "maximumCasesToOpen": 20,
+              "maximumCasesToOpen": 22,
               "owner": "cases",
               "reopenClosedCases": false,
               "rule": Object {
@@ -586,7 +594,7 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
       });
 
-      it('correctly fallsback to general flow if alerts count is above the limit', () => {
+      it('keeps attack discovery grouping when alerts count is above the default ceiling', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         const manyAttackDiscoveryAlerts = new Array<AttackDiscoveryExpandedAlert>(
@@ -607,12 +615,14 @@ describe('getCasesConnectorType', () => {
           spaceId: 'default',
         });
 
-        expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
-        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
-        expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
-        expect(mockLogger.error).toBeCalledWith(
-          'Could not setup grouped Attack Discovery alerts, because of error: Error: Circuit breaker: Attack discovery alerts grouping would create more than the maximum number of allowed cases 20.'
+        expect(connectorParams.subActionParams.groupedAlerts).toHaveLength(
+          ATTACK_DISCOVERY_MAX_OPEN_CASES + 1
         );
+        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(
+          ATTACK_DISCOVERY_MAX_OPEN_CASES
+        );
+        expect(mockLogger.error).not.toBeCalled();
       });
 
       it('correctly fallsback to general flow if alerts schema does not pass validation', () => {

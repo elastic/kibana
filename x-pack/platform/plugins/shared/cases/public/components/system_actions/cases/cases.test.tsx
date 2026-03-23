@@ -9,12 +9,25 @@ import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/typ
 import { MAX_OPEN_CASES } from '../../../../common/constants';
 import { getConnectorType } from './cases';
 import { MAX_CASES_TO_OPEN_ERROR } from './translations';
+import { KibanaServices } from '../../../common/lib/kibana';
+
+jest.mock('../../../common/lib/kibana');
+
 const CONNECTOR_TYPE_ID = '.cases';
 const MAX_CASES_ERROR_MESSAGE = MAX_CASES_TO_OPEN_ERROR(MAX_OPEN_CASES);
 let connectorTypeModel: ActionTypeModel;
+const mockKibanaServices = jest.mocked(KibanaServices);
 
 beforeAll(() => {
   connectorTypeModel = getConnectorType();
+});
+
+beforeEach(() => {
+  mockKibanaServices.get.mockReturnValue({
+    uiSettings: {
+      get: jest.fn().mockReturnValue(MAX_OPEN_CASES),
+    },
+  } as never);
 });
 
 describe('has correct connector id', () => {
@@ -117,6 +130,23 @@ describe('action params validation', () => {
 
     expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: [], maximumCasesToOpen: [MAX_CASES_ERROR_MESSAGE] },
+    });
+  });
+
+  test('params validation uses the configured advanced setting ceiling', async () => {
+    mockKibanaServices.get.mockReturnValue({
+      uiSettings: {
+        get: jest.fn().mockReturnValue(30),
+      },
+    } as never);
+
+    expect(
+      await connectorTypeModel.validateParams(
+        { subActionParams: { timeWindow: '7d', maximumCasesToOpen: 31 } },
+        null
+      )
+    ).toEqual({
+      errors: { timeWindow: [], maximumCasesToOpen: [MAX_CASES_TO_OPEN_ERROR(30)] },
     });
   });
 });
