@@ -273,17 +273,19 @@ const getDataGridFilter = (filter: Filter | null) => {
   };
 };
 
-export const extractMatchPhraseValue = (filter: Filter): string | undefined => {
+export const extractMatchPhraseValue = (filter: Filter, field?: string): string | undefined => {
   const matchPhrase = filter?.query?.match_phrase as MatchPhraseQuery | undefined;
   if (!matchPhrase) return undefined;
-  const firstValue = Object.values(matchPhrase)[0];
-  return firstValue ? getMatchPhraseStringValue(firstValue) : undefined;
+  const value = field ? matchPhrase[field] : Object.values(matchPhrase)[0];
+  return value ? getMatchPhraseStringValue(value) : undefined;
 };
 
 export const buildResolutionGroupFilter = (
   filters: Filter[]
 ): Array<NonNullable<Filter['query']>> | undefined => {
-  const targetEntityId = filters.map(extractMatchPhraseValue).find(Boolean);
+  const targetEntityId = filters
+    .map((f) => extractMatchPhraseValue(f, ENTITY_FIELDS.RESOLVED_TO))
+    .find(Boolean);
   if (!targetEntityId) return undefined;
 
   return [buildResolutionBoolQuery(targetEntityId)];

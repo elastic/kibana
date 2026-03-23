@@ -111,6 +111,15 @@ describe('extractMatchPhraseValue', () => {
 
     expect(extractMatchPhraseValue(filter)).toBeUndefined();
   });
+
+  it('extracts value only from specified field when field param is provided', () => {
+    const filter = createFilter({
+      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
+    });
+
+    expect(extractMatchPhraseValue(filter, ENTITY_FIELDS.RESOLVED_TO)).toBeUndefined();
+    expect(extractMatchPhraseValue(filter, 'entity.EngineMetadata.Type')).toBe('user');
+  });
 });
 
 describe('buildResolutionGroupFilter', () => {
@@ -148,6 +157,16 @@ describe('buildResolutionGroupFilter', () => {
 
   it('returns undefined for empty filter array', () => {
     expect(buildResolutionGroupFilter([])).toBeUndefined();
+  });
+
+  it('ignores non-resolution match_phrase filters', () => {
+    const filters = [
+      createFilter({
+        match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
+      }),
+    ];
+
+    expect(buildResolutionGroupFilter(filters)).toBeUndefined();
   });
 
   it('uses first match_phrase value when multiple filters present', () => {
