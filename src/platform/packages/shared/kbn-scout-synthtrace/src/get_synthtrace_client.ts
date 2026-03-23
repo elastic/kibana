@@ -6,20 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import Url from 'url';
+import type { Client } from '@elastic/elasticsearch';
 import type { SynthtraceClientTypes, GetClientsReturn } from '@kbn/synthtrace';
 import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/synthtrace';
-import type { Client } from '@elastic/elasticsearch';
-import type { ScoutLogger } from './logger';
-import type { ScoutTestConfig } from '../../types';
+import type { ScoutLogger, ScoutTestConfig } from '@kbn/scout';
 
 export interface SynthtraceClientOptions {
   kbnUrl?: string;
-
   esClient: Client;
-
   log: ScoutLogger;
-
   config: ScoutTestConfig;
 }
 
@@ -38,6 +35,7 @@ const instantiatedClients: Record<
   string,
   GetClientsReturn<SynthtraceClientTypes>[SynthtraceClientTypes]
 > = {};
+
 export async function getSynthtraceClient<
   TClient extends SynthtraceClientTypes = SynthtraceClientTypes
 >(

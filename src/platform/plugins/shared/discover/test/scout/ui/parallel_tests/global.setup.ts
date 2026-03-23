@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalSetupHook, getSynthtraceClient } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
+import { getSynthtraceClient } from '@kbn/scout-synthtrace';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
 import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
 
