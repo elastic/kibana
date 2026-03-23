@@ -14,7 +14,7 @@ import {
   getGroupingQuery,
   useGrouping,
 } from '@kbn/grouping';
-import { parseGroupingQuery } from '@kbn/grouping/src';
+import { parseGroupingQuery, MAX_QUERY_SIZE } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
@@ -133,7 +133,7 @@ const buildResolutionGroupingQuery = ({
     groupByFields: {
       terms: {
         field: 'groupByField',
-        size: 10000,
+        size: MAX_QUERY_SIZE,
         order: [{ resolutionRiskScore: 'desc' as const }, { _count: 'desc' as const }],
       },
       aggs: {
