@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { asyncMap } from '@kbn/std';
 import type { AttachmentsService } from '../../services/attachments/attachements_service';
 
 interface UseAttachmentLifecycleParams {
@@ -31,6 +32,7 @@ export const useAttachmentLifecycle = ({
   const previousAttachmentIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    let canceled = false;
     if (!conversationId) {
       return;
     }
@@ -38,57 +40,73 @@ export const useAttachmentLifecycle = ({
     const currentAttachmentIds = new Set(attachments?.map((a) => a.id) ?? []);
     const previousAttachmentIds = previousAttachmentIdsRef.current;
 
-    // Find new attachments (in current but not in previous)
-    for (const attachment of attachments ?? []) {
-      if (!previousAttachmentIds.has(attachment.id)) {
-        const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+    asyncMap(attachments ?? [], async (attachment) => {
+      let uiDefinition;
+      try {
+        uiDefinition = await attachmentsService.getAttachmentUiDefinition(attachment.type);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(`Unable to get UI Attachement definition for type:${attachment.type}`);
+      }
+      return { attachment, uiDefinition };
+    }).then((items) => {
+      if (canceled) return;
 
-        if (uiDefinition?.onAttachmentMount) {
-          const attachmentId = attachment.id;
-          const cleanup = uiDefinition.onAttachmentMount({
-            getAttachment: () => {
-              const current = attachments?.find((a) => a.id === attachmentId);
-              if (!current) {
-                throw new Error(`Attachment ${attachmentId} not found`);
-              }
-              return {
-                id: current.id,
-                type: current.type,
-                data: current.versions[current.current_version - 1]?.data,
-                origin: current.origin,
-                hidden: current.hidden,
-              };
-            },
-            updateOrigin: async (origin: string) => {
-              const result = await attachmentsService.updateOrigin(
-                conversationId,
-                attachmentId,
-                origin
-              );
-              invalidateConversation();
-              return result;
-            },
-          });
+      // Find new attachments (in current but not in previous)
+      for (const item of items ?? []) {
+        const { attachment, uiDefinition } = item;
+        if (!previousAttachmentIds.has(attachment.id)) {
+          if (uiDefinition?.onAttachmentMount) {
+            const attachmentId = attachment.id;
+            const cleanup = uiDefinition.onAttachmentMount({
+              getAttachment: () => {
+                const current = attachments?.find((a) => a.id === attachmentId);
+                if (!current) {
+                  throw new Error(`Attachment ${attachmentId} not found`);
+                }
+                return {
+                  id: current.id,
+                  type: current.type,
+                  data: current.versions[current.current_version - 1]?.data,
+                  origin: current.origin,
+                  hidden: current.hidden,
+                };
+              },
+              updateOrigin: async (origin: string) => {
+                const result = await attachmentsService.updateOrigin(
+                  conversationId,
+                  attachmentId,
+                  origin
+                );
+                invalidateConversation();
+                return result;
+              },
+            });
 
-          if (cleanup) {
-            cleanupFunctionsRef.current.set(attachment.id, cleanup);
+            if (cleanup) {
+              cleanupFunctionsRef.current.set(attachment.id, cleanup);
+            }
           }
         }
       }
-    }
 
-    // Find removed attachments (in previous but not in current)
-    for (const attachmentId of previousAttachmentIds) {
-      if (!currentAttachmentIds.has(attachmentId)) {
-        const cleanup = cleanupFunctionsRef.current.get(attachmentId);
-        if (cleanup) {
-          cleanup();
-          cleanupFunctionsRef.current.delete(attachmentId);
+      // Find removed attachments (in previous but not in current)
+      for (const attachmentId of previousAttachmentIds) {
+        if (!currentAttachmentIds.has(attachmentId)) {
+          const cleanup = cleanupFunctionsRef.current.get(attachmentId);
+          if (cleanup) {
+            cleanup();
+            cleanupFunctionsRef.current.delete(attachmentId);
+          }
         }
       }
-    }
 
-    previousAttachmentIdsRef.current = currentAttachmentIds;
+      previousAttachmentIdsRef.current = currentAttachmentIds;
+    });
+
+    return () => {
+      canceled = true;
+    };
   }, [attachments, conversationId, attachmentsService, invalidateConversation]);
 
   // Cleanup all on unmount
