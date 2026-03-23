@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@kbn/react-query';
@@ -16,7 +16,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
 import { DataViewContext } from '..';
 
-export type EntitiesGroupingQuery = GroupingQuery | Record<string, unknown>;
+export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
 
 export interface EntitiesGroupingAggregation {
   entityType?: {
