@@ -33,6 +33,9 @@ export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
 export const TABS_EVENT_TYPE = 'discover_tabs';
 
+/** METRICS_INFO response telemetry when the Discover metrics experience grid loads or refetches. */
+export const METRICS_INFO_TELEMETRY_EVENT_TYPE = 'discover_metrics_info_telemetry';
+
 /**
  * This function is statically imported since analytics registrations must happen at setup,
  * while the EBT manager is loaded dynamically when needed to avoid page load bundle bloat
@@ -187,6 +190,58 @@ export const registerDiscoverEBTManagerAnalytics = (
         _meta: {
           description: 'The keyboard key used for tab navigation',
           optional: true,
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: METRICS_INFO_TELEMETRY_EVENT_TYPE,
+    schema: {
+      total_number_of_metrics: {
+        type: 'integer',
+        _meta: {
+          description: 'Number of metric rows returned with METRICS_INFO query',
+        },
+      },
+      total_number_of_dimensions: {
+        type: 'integer',
+        _meta: {
+          description: 'Distinct dimension field names across returned metrics',
+        },
+      },
+      metrics_by_type: {
+        type: 'pass_through',
+        _meta: {
+          description: 'Counts per metric type observed in METRICS_INFO rows',
+        },
+      },
+      units: {
+        type: 'pass_through',
+        _meta: {
+          description: 'Counts per units observed in METRICS_INFO rows',
+        },
+      },
+      multi_value_counts: {
+        properties: {
+          data_streams: {
+            type: 'integer',
+            _meta: {
+              description: 'Count of METRICS_INFO rows where data_stream had more than one value',
+            },
+          },
+          field_types: {
+            type: 'integer',
+            _meta: {
+              description: 'Count of METRICS_INFO rows where field_type had more than one value',
+            },
+          },
+          metric_types: {
+            type: 'integer',
+            _meta: {
+              description: 'Count of METRICS_INFO rows where metric_type had more than one value',
+            },
+          },
         },
       },
     },

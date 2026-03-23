@@ -9,21 +9,14 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MetricsESQLResponse } from '../../../../types';
-import { parseMetricsResponse } from './parse_metrics_response';
+import { createInitialMetricsTelemetry, parseMetricsResponse } from './parse_metrics_response';
 
 describe('parseMetricsResponse', () => {
   it('returns empty metricItems and allDimensions for empty input', () => {
     expect(parseMetricsResponse([])).toEqual({
       metricItems: [],
       allDimensions: [],
-    });
-  });
-
-  it('returns empty metricItems and allDimensions for empty array', () => {
-    const response: MetricsESQLResponse[] = [];
-    expect(parseMetricsResponse(response)).toEqual({
-      metricItems: [],
-      allDimensions: [],
+      telemetry: createInitialMetricsTelemetry(),
     });
   });
 
@@ -51,6 +44,17 @@ describe('parseMetricsResponse', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      telemetry: {
+        total_number_of_metrics: 1,
+        total_number_of_dimensions: 1,
+        metrics_by_type: { gauge: 1 },
+        units: {},
+        multi_value_counts: {
+          data_streams: 0,
+          field_types: 0,
+          metric_types: 0,
+        },
+      },
     });
   });
 
@@ -78,6 +82,17 @@ describe('parseMetricsResponse', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      telemetry: {
+        total_number_of_metrics: 1,
+        total_number_of_dimensions: 1,
+        metrics_by_type: { gauge: 1 },
+        units: { percent: 1 },
+        multi_value_counts: {
+          data_streams: 0,
+          field_types: 0,
+          metric_types: 0,
+        },
+      },
     });
   });
 
@@ -113,7 +128,19 @@ describe('parseMetricsResponse', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      telemetry: {
+        total_number_of_metrics: 2,
+        total_number_of_dimensions: 1,
+        metrics_by_type: { gauge: 1 },
+        units: { percent: 1 },
+        multi_value_counts: {
+          data_streams: 1,
+          field_types: 0,
+          metric_types: 0,
+        },
+      },
     });
+    expect(result.telemetry.total_number_of_metrics).toBe(result.metricItems.length);
   });
 
   it('normalises single string metric_type, field_type and dimension_fields to one-element arrays', () => {
@@ -140,6 +167,17 @@ describe('parseMetricsResponse', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      telemetry: {
+        total_number_of_metrics: 1,
+        total_number_of_dimensions: 1,
+        metrics_by_type: { gauge: 1 },
+        units: { bytes: 1 },
+        multi_value_counts: {
+          data_streams: 0,
+          field_types: 0,
+          metric_types: 0,
+        },
+      },
     });
   });
 
@@ -167,6 +205,17 @@ describe('parseMetricsResponse', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }, { name: 'pod.name' }],
+      telemetry: {
+        total_number_of_metrics: 1,
+        total_number_of_dimensions: 2,
+        metrics_by_type: { gauge: 1, counter: 1 },
+        units: { bytes: 1 },
+        multi_value_counts: {
+          data_streams: 0,
+          field_types: 1,
+          metric_types: 1,
+        },
+      },
     });
   });
 
@@ -196,6 +245,14 @@ describe('parseMetricsResponse', () => {
         field_type: ES_FIELD_TYPES.LONG,
         dimension_fields: [],
       },
+      {
+        metric_name: 'unsupported.row',
+        data_stream: 'ds-unsupported',
+        unit: ['bytes'],
+        metric_type: 'summary' as unknown as MetricsESQLResponse['metric_type'],
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: ['host.name'],
+      },
     ];
     const result = parseMetricsResponse(response);
     expect(result.allDimensions).toHaveLength(3);
@@ -203,5 +260,18 @@ describe('parseMetricsResponse', () => {
     expect(dimensionNames).toContain('host.name');
     expect(dimensionNames).toContain('pod.name');
     expect(dimensionNames).toContain('container.id');
+    expect(result.metricItems).toHaveLength(3);
+    expect(result.telemetry.total_number_of_metrics).toBe(result.metricItems.length);
+    expect(result.telemetry).toEqual({
+      total_number_of_metrics: 3,
+      total_number_of_dimensions: 3,
+      metrics_by_type: { gauge: 1, counter: 2, summary: 1 },
+      units: { percent: 1, bytes: 3 },
+      multi_value_counts: {
+        data_streams: 0,
+        field_types: 0,
+        metric_types: 0,
+      },
+    });
   });
 });

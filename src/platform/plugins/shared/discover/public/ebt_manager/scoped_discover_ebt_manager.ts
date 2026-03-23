@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MetricsTelemetry } from '@kbn/unified-chart-section-viewer';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -30,6 +31,7 @@ import {
   FIELD_USAGE_FILTER_OPERATION,
   TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
+  METRICS_INFO_TELEMETRY_EVENT_TYPE,
 } from './discover_ebt_manager_registrations';
 import {
   analyzeMultiMatchTypesRequest,
@@ -412,5 +414,13 @@ export class ScopedDiscoverEBTManager {
     };
 
     this.reportEvent(TABS_EVENT_TYPE, eventData);
+  }
+
+  public trackMetricsInfoTelemetry(telemetry: MetricsTelemetry) {
+    if (!this.reportEvent) {
+      return;
+    }
+
+    this.reportEvent(METRICS_INFO_TELEMETRY_EVENT_TYPE, telemetry);
   }
 }

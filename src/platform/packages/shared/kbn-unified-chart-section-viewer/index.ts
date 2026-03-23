@@ -13,6 +13,7 @@ export type { UnifiedMetricsGridRestorableState } from './src/restorable_state';
 export type {
   ParsedMetricItem,
   MetricsInfoResponse,
+  MetricsTelemetry,
   ParsedMetricsResult,
   MetricsESQLResponse,
   Dimension,

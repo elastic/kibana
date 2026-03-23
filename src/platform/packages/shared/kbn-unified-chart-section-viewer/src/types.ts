@@ -30,6 +30,10 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Optional callback used to push toolbar breakdown selections back to Discover app state.
    */
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  /**
+   * Called once after each successful METRICS_INFO fetch
+   */
+  onMetricsTelemetryReported?: (telemetry: MetricsTelemetry) => void;
 }
 
 export interface Dimension {
@@ -67,9 +71,22 @@ export interface ParsedMetricItem {
   readonly dimensionFields: Dimension[];
 }
 
+export interface MetricsTelemetry {
+  total_number_of_metrics: number;
+  total_number_of_dimensions: number;
+  metrics_by_type: Partial<Record<MappingTimeSeriesMetricType, number>>;
+  units: Partial<Record<MetricUnit, number>>;
+  multi_value_counts: {
+    data_streams: number;
+    field_types: number;
+    metric_types: number;
+  };
+}
+
 export interface ParsedMetricsResult {
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
+  telemetry: MetricsTelemetry;
 }
 
 export interface MetricsInfoResponse {
@@ -77,4 +94,5 @@ export interface MetricsInfoResponse {
   error: Error | null;
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
+  telemetry: MetricsTelemetry;
 }

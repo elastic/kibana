@@ -8,18 +8,22 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   Dimension,
   MetricsESQLResponse,
+  MetricsTelemetry,
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { parseMetricsResponse } from '../utils/parse_metrics_response';
+import {
+  createInitialMetricsTelemetry,
+  parseMetricsResponse,
+} from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
@@ -33,12 +37,17 @@ export function useFetchMetricsData({
   services,
   isComponentVisible,
   selectedDimensionNames,
+  onMetricsTelemetryReported,
 }: {
   fetchParams: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
+  onMetricsTelemetryReported?: (telemetry: MetricsTelemetry) => void;
 }): MetricsInfoResponse {
+  const onMetricsTelemetryReportedRef = useRef(onMetricsTelemetryReported);
+  onMetricsTelemetryReportedRef.current = onMetricsTelemetryReported;
+
   const esql = getEsqlQuery(fetchParams.query);
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
@@ -67,6 +76,9 @@ export function useFetchMetricsData({
       });
 
       const parsed = parseMetricsResponse(result);
+      const telemetry = parsed?.telemetry ?? createInitialMetricsTelemetry();
+
+      onMetricsTelemetryReportedRef.current?.(telemetry);
 
       return {
         metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
@@ -75,6 +87,7 @@ export function useFetchMetricsData({
         allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
           a.name.localeCompare(b.name)
         ),
+        telemetry,
       };
     },
     [
@@ -113,5 +126,6 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
+    telemetry: value?.telemetry ?? createInitialMetricsTelemetry(),
   };
 }

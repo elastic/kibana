@@ -34,6 +34,7 @@ export const MetricsExperienceGrid = ({
   isComponentVisible,
   breakdownField,
   onBreakdownFieldChange,
+  onMetricsTelemetryReported,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -53,6 +54,7 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
+    onMetricsTelemetryReported,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({

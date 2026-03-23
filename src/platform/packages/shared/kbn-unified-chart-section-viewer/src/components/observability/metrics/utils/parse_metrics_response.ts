@@ -7,18 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsESQLResponse, ParsedMetricItem, ParsedMetricsResult } from '../../../../types';
+import type {
+  MetricsESQLResponse,
+  MetricsTelemetry,
+  ParsedMetricItem,
+  ParsedMetricsResult,
+} from '../../../../types';
 import { toArray } from './to_array';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
+import { accumulateMetricsRowTelemetry } from './accumulate_metrics_row_telemetry';
 
 const ALLOWED_METRIC_TYPES_SET = new Set(ALLOWED_METRIC_TYPES);
 
+export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
+  total_number_of_metrics: 0,
+  total_number_of_dimensions: 0,
+  metrics_by_type: {},
+  units: {},
+  multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+});
+
 export const parseMetricsResponse = (response: MetricsESQLResponse[]): ParsedMetricsResult => {
   const result: ParsedMetricItem[] = [];
+  const telemetry = createInitialMetricsTelemetry();
+
   const allDimensionsSet = new Set<string>();
 
   for (const metric of response) {
     const metricTypes = toArray(metric.metric_type);
+    const dataStreams = toArray(metric.data_stream);
+    const units = toArray(metric.unit);
+    const fieldTypes = toArray(metric.field_type);
+    const dimensions = toArray(metric.dimension_fields);
+
+    accumulateMetricsRowTelemetry(telemetry, {
+      metricTypes,
+      dataStreams,
+      units,
+      fieldTypes,
+    });
 
     const isSupportedMetricType = metricTypes.every((metricType) =>
       ALLOWED_METRIC_TYPES_SET.has(metricType)
@@ -27,11 +54,6 @@ export const parseMetricsResponse = (response: MetricsESQLResponse[]): ParsedMet
     if (!isSupportedMetricType) {
       continue;
     }
-
-    const dataStreams = toArray(metric.data_stream);
-    const units = toArray(metric.unit);
-    const fieldTypes = toArray(metric.field_type);
-    const dimensions = toArray(metric.dimension_fields);
 
     const dimensionFields = dimensions.map((name) => {
       allDimensionsSet.add(name);
@@ -50,8 +72,12 @@ export const parseMetricsResponse = (response: MetricsESQLResponse[]): ParsedMet
     }
   }
 
+  telemetry.total_number_of_dimensions = allDimensionsSet.size;
+  telemetry.total_number_of_metrics = result.length;
+
   return {
     metricItems: result,
     allDimensions: Array.from(allDimensionsSet).map((name) => ({ name })),
+    telemetry,
   };
 };

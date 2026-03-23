@@ -29,11 +29,14 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
+import type { MetricsTelemetry } from '@kbn/unified-chart-section-viewer';
 
 type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  onMetricsTelemetryReported?: (payload: unknown) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -53,6 +56,12 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
   useCurrentTabAction: jest.fn(),
   useInternalStateDispatch: jest.fn(),
 }));
+
+jest.mock('../../../../../components/scoped_services_provider/scoped_services_provider', () => ({
+  useScopedServices: jest.fn(),
+}));
+
+const trackMetricsInfoTelemetryMock = jest.fn();
 
 const mockDispatch = jest.fn();
 const mockUpdateAppStateAction = jest.fn((payload) => ({ type: 'updateAppState', payload }));
@@ -95,7 +104,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
     throw new Error('Expected chart section configuration to replace the default chart.');
   }
 
-  render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
+  return render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -106,8 +115,14 @@ describe('MetricsExperienceGridWrapper', () => {
     );
     (useInternalStateDispatch as jest.Mock).mockReturnValue(mockDispatch);
     (useCurrentTabAction as jest.Mock).mockReturnValue(mockUpdateAppStateAction);
+    (useScopedServices as jest.Mock).mockReturnValue({
+      scopedEBTManager: {
+        trackMetricsInfoTelemetry: trackMetricsInfoTelemetryMock,
+      },
+    });
     mockDispatch.mockClear();
     mockUpdateAppStateAction.mockClear();
+    trackMetricsInfoTelemetryMock.mockClear();
   });
 
   it('should not prevent default when onFilter is provided', () => {
@@ -138,5 +153,26 @@ describe('MetricsExperienceGridWrapper', () => {
       type: 'updateAppState',
       payload: { appState: { breakdownField: 'service.name' } },
     });
+  });
+
+  it('calls trackMetricsInfoTelemetry only once when onMetricsTelemetryReported is invoked once', () => {
+    renderChartSection();
+
+    const telemetry: MetricsTelemetry = {
+      total_number_of_metrics: 2,
+      total_number_of_dimensions: 1,
+      metrics_by_type: {},
+      units: {},
+      multi_value_counts: {
+        data_streams: 0,
+        field_types: 0,
+        metric_types: 0,
+      },
+    };
+
+    unifiedGridProps?.onMetricsTelemetryReported?.(telemetry);
+
+    expect(trackMetricsInfoTelemetryMock).toHaveBeenCalledTimes(1);
+    expect(trackMetricsInfoTelemetryMock).toHaveBeenCalledWith(telemetry);
   });
 });
