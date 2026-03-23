@@ -8,9 +8,8 @@
     "public/**/*",
     "server/**/*.ts",
     "common/**/*.ts",
-    "test/scout/**/*",
-    "../../../../typings/**/*",
-    "test/scout_automatic_import_v2"
+    "test/scout_automatic_import_v2/**/*",
+    "../../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*"
