@@ -17,32 +17,10 @@ export interface ChartInteractions {
    *
    * Uses polling to verify the attribute stays `"true"` for a minimum
    * duration, guarding against transient flips that can occur when Lens
-   * re-renders (e.g. after a brush or filter action). This mirrors the
+   * re-renders (e.g. after a brush action). This mirrors the
    * approach used by `DiscoverApp.waitForDocTableRendered`.
    */
   waitForCardRenderComplete: (index: number) => Promise<void>;
-
-  /**
-   * Filters by the first visible legend series in a metric card chart.
-   *
-   * When a breakdown dimension is active, each series gets a legend entry.
-   * Elastic-charts renders legend action buttons with stable `data-test-subj`
-   * attributes: `legend-{seriesLabel}` opens the action popover and
-   * `legend-{seriesLabel}-filterIn` applies the "Filter for" action.
-   * This triggers the same `onFilter` callback path as clicking a data point
-   * directly, but is far more reliable because the legend is DOM-rendered
-   * rather than canvas-rendered (no hit-detection radius concerns).
-   *
-   * NOTE: This requires `onFilter` to be wired up for ES|QL mode in
-   * `use_discover_histogram.ts`. Without that product fix the filter action
-   * is a no-op and the WHERE clause will not be appended to the query.
-   */
-  filterByFirstLegendSeries: (cardIndex: number) => Promise<void>;
-
-  /**
-   * Returns the chart canvas locator within a metric card's Lens embeddable.
-   */
-  getChartCanvasForCard: (index: number) => Locator;
 
   /**
    * Performs a brush (click-and-drag) gesture on the chart canvas within a
@@ -94,27 +72,6 @@ export function createChartInteractions(
         )
         .toBe(true);
     },
-
-    filterByFirstLegendSeries: async (cardIndex: number): Promise<void> => {
-      const card = getCardByIndex(cardIndex);
-      // Read the data-test-subj of the first legend trigger in the card's DOM so
-      // we can build a fully specific selector, avoiding positional Playwright APIs.
-      // Legend triggers have data-test-subj="legend-{seriesValue}"; child action
-      // buttons share the same prefix so they are excluded from the query.
-      const triggerTestSubj = await card
-        .locator('[data-test-subj^="legend-"]:not([data-test-subj*="-filter"])')
-        .evaluateAll((els) => els[0]?.getAttribute('data-test-subj') ?? null);
-
-      if (!triggerTestSubj) {
-        throw new Error(`No legend items found in card ${cardIndex}`);
-      }
-
-      await card.locator(`[data-test-subj="${triggerTestSubj}"]`).click();
-      // The filter-in button renders in a portal; scope to the page not the card.
-      await page.locator(`[data-test-subj="${triggerTestSubj}-filterIn"]`).click();
-    },
-
-    getChartCanvasForCard,
 
     brushChartInCard: async (index: number): Promise<void> => {
       const canvas = getChartCanvasForCard(index);
