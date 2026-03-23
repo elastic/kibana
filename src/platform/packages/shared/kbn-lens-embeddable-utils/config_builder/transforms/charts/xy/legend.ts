@@ -71,7 +71,7 @@ function extractAlignment(legend: XYState['legend']):
     }
   | {} {
   if (legend?.inside) {
-    const [verticalAlignment, horizontalAlignment] = (legend.alignment?.split('_') ?? [
+    const [verticalAlignment, horizontalAlignment] = (legend.position?.split('_') ?? [
       'top',
       'right',
     ]) as ['top' | 'bottom' | undefined, 'left' | 'right' | undefined];
@@ -160,7 +160,7 @@ function getLegendAlignment(legend: XYLensState['legend']) {
     return {};
   }
   return {
-    alignment: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
+    position: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
   };
 }
 

@@ -61,10 +61,8 @@ export const App = (props: {
         column: 'totalBytes',
         label: 'Total Bytes Value',
         fit: false,
-        alignments: {
-          value: 'left',
-          labels: 'left',
-        },
+        values: { alignment: 'left' },
+        labels: { alignment: 'left' },
       },
     ],
     ignore_global_filters: true,

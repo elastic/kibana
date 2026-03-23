@@ -178,7 +178,7 @@ function buildReferenceLineLayer(
 ): XYReferenceLineLayerConfig {
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => ({
     icon: threshold.icon,
-    iconPosition: threshold.decoration_position,
+    iconPosition: threshold.position,
     lineWidth: threshold.stroke_width,
     lineStyle: threshold.stroke_dash,
     textVisibility: threshold.text ? threshold.text === 'label' : undefined,
