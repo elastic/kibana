@@ -987,7 +987,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; idPrefix?: string | undefined; } | undefined; http?: ",
+          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; id?: string | undefined; idPrefix?: string | undefined; } | undefined; http?: ",
           "HttpSetup",
           " | undefined; }) => Promise<",
           {
@@ -1000,7 +1000,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 35,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1013,7 +1013,7 @@
             "label": "{\n  dataViewsService,\n  query,\n  options,\n  http,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 65,
+            "lineNumber": 71,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1035,7 +1035,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 67,
+                "lineNumber": 73,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1048,7 +1048,7 @@
                 "label": "query",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 69,
+                "lineNumber": 75,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1061,10 +1061,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; idPrefix?: string | undefined; } | undefined"
+                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; id?: string | undefined; idPrefix?: string | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 70,
+                "lineNumber": 76,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1081,7 +1081,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 77,
+                "lineNumber": 84,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2745,7 +2745,7 @@
           "; }) => Promise<string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 126,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2758,7 +2758,7 @@
             "label": "deps",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 134,
+            "lineNumber": 141,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -2774,7 +2774,7 @@
                   "HttpSetup"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 134,
+                "lineNumber": 141,
                 "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
