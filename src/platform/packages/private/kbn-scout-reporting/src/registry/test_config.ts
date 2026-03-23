@@ -11,8 +11,13 @@ import { globSync } from 'fast-glob';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_CONFIG_PATH_GLOB, SCOUT_CONFIG_PATH_REGEX } from '@kbn/scout-info';
+import {
+  SCOUT_CONFIG_PATH_GLOB,
+  SCOUT_CONFIG_PATH_REGEX,
+  SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX,
+} from '@kbn/scout-info';
 import { existsSync, readFileSync } from 'node:fs';
+import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import type { ScoutTestableModule } from './testable_module';
 import type { ScoutConfigManifest } from './manifest';
 
@@ -27,6 +32,29 @@ export interface ScoutTestConfig {
   };
 }
 
+const loadScoutManifestFile = (
+  manifestPath: string
+): { exists: boolean } & Pick<ScoutConfigManifest, 'sha1' | 'tests'> => {
+  const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
+  const manifestExists = existsSync(absoluteManifestPath);
+  if (manifestExists) {
+    try {
+      return {
+        exists: true,
+        ...JSON.parse(readFileSync(absoluteManifestPath, 'utf8')),
+      };
+    } catch (e) {
+      e.message = `Failed while trying to load manifest file at '${manifestPath}': ${e.message}`;
+      throw e;
+    }
+  }
+  return {
+    exists: false,
+    sha1: '000000000000000-000000000000000',
+    tests: [],
+  };
+};
+
 export const testConfig = {
   fromPath(configPath: string): ScoutTestConfig {
     // Make sure we're working with a path relative to the repo root
@@ -39,6 +67,47 @@ export const testConfig = {
         `Failed to create Scout config from path '${configPath}': ` +
           `path ${path.resolve(configPath)} is not part of the Kibana repository at ${REPO_ROOT}`
       );
+    }
+
+    const examplesMatch = configPath.match(SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX);
+    if (examplesMatch) {
+      const [, , , serverConfigSet, testCategory, testConfigType] = examplesMatch;
+      const moduleRoot = configPath.split('/test/scout')[0];
+      const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
+      const manifestPath = path.join(
+        moduleRoot,
+        'test',
+        scoutDirName,
+        '.meta',
+        testCategory,
+        `${testConfigType || 'standard'}.json`
+      );
+      const manifestFileData = loadScoutManifestFile(manifestPath);
+      const kibanaManifest = readKibanaModuleManifest(
+        path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
+      );
+
+      return {
+        path: configPath,
+        category: testCategory,
+        type: testConfigType || 'standard',
+        module: {
+          name: kibanaManifest.id,
+          group: kibanaManifest.group,
+          type: kibanaManifest.type as ScoutTestableModule['type'],
+          visibility: kibanaManifest.visibility as ScoutTestableModule['visibility'],
+          root: moduleRoot,
+        },
+        manifest: {
+          path: manifestPath,
+          exists: manifestFileData.exists,
+          sha1: manifestFileData.sha1,
+          tests: manifestFileData.tests,
+        },
+        server: {
+          configSet: serverConfigSet || 'default',
+        },
+      };
     }
 
     const match = configPath.match(SCOUT_CONFIG_PATH_REGEX);
@@ -73,23 +142,7 @@ export const testConfig = {
       testCategory,
       `${testConfigType || 'standard'}.json`
     );
-    const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
-    const manifestExists = existsSync(absoluteManifestPath);
-    let manifestFileData;
-
-    if (manifestExists) {
-      try {
-        manifestFileData = JSON.parse(readFileSync(absoluteManifestPath, 'utf8'));
-      } catch (e) {
-        e.message = `Failed while trying to load manifest file at '${manifestPath}': ${e.message}`;
-        throw e;
-      }
-    } else {
-      manifestFileData = {
-        sha1: '000000000000000-000000000000000',
-        tests: [],
-      };
-    }
+    const manifestFileData = loadScoutManifestFile(manifestPath);
 
     return {
       path: configPath,
@@ -104,8 +157,9 @@ export const testConfig = {
       },
       manifest: {
         path: manifestPath,
-        exists: manifestExists,
-        ...manifestFileData,
+        exists: manifestFileData.exists,
+        sha1: manifestFileData.sha1,
+        tests: manifestFileData.tests,
       },
       server: {
         configSet: serverConfigSet || 'default',
