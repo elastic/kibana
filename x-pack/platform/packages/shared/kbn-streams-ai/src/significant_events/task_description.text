@@ -162,6 +162,6 @@ Use ES|QL to generate the queries. Refer to the ES|QL Query Reference at the end
 
 Available tools:
 - `get_stream_features`: Fetch stream features. For incremental retrieval, prefer `min_confidence` and `limit` (for example top 5 by confidence), and optionally pass `feature_types` to narrow by type. Returned features can include computed features (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) when they match the request. Supported `feature_types` values are injected at runtime in `available_feature_types`: `{{{available_feature_types}}}`.
-- `add_queries`: Add one or more query suggestions (`title`, `esql`, `category`, `severity_score`, optional `evidence`).
+- `add_queries`: Add one or more query suggestions (`title`, `description`, `esql`, `category`, `severity_score`, optional `evidence`).
 
 Every call to `add_queries` returns success/failure details for each query, including syntax errors. You can and should add multiple queries in one go. Only call `add_queries` again if you wish to retry invalid queries or add additional high-value queries. Once you're satisfied with the result, call `complete()`.

@@ -11,6 +11,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
@@ -29,8 +30,9 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         id: FIELD_FORMAT_IDS.DATE,
       });
 
-      const inputProps =
-        persistableStateAttachmentState as unknown as AnomalySwimLaneEmbeddableState;
+      const inputProps = transformTimeRangeOut(
+        persistableStateAttachmentState as unknown as AnomalySwimLaneEmbeddableState
+      );
 
       const listItems = [
         {
