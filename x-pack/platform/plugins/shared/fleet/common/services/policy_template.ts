@@ -217,7 +217,9 @@ export function getNormalizedDataStreams(
         {
           input: policyTemplate.input,
           vars,
-          template_path: policyTemplate.template_path,
+          ...(policyTemplate.template_paths?.length
+            ? { template_paths: policyTemplate.template_paths }
+            : { template_path: policyTemplate.template_path }),
           title: policyTemplate.title,
           description: policyTemplate.title,
           enabled: true,
