@@ -1,5 +1,5 @@
 {
-  "sha1": "4d22942e29a32fdf09ebf737f2d6f735c0f8a496",
+  "sha1": "31c46c0e9870b08a9453859533e895dce1bf5bbd",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -17,11 +17,12 @@
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 7
       }
     },
@@ -30,11 +31,12 @@
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 7
       }
     },
