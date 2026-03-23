@@ -2511,7 +2511,24 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ExecutionStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "ExecutionStatus",
+        "description": [
+          "\nPossible statuses for an agent execution."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_builder/server/services/execution/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "agentBuilder",
