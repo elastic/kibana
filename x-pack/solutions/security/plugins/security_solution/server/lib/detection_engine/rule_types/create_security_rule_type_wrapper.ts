@@ -295,6 +295,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
 
           wrapperWarnings.push(...warnings);
+          warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
 
           const {
             tuples,
@@ -315,6 +316,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           });
           if (rangeTuplesWarningMessage != null) {
             wrapperWarnings.push(rangeTuplesWarningMessage);
+            ruleExecutionLogger.warn(rangeTuplesWarningMessage);
           }
 
           agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
@@ -333,6 +335,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
             wrapperErrors.push(gapErrorMessage);
+            ruleExecutionLogger.error(gapErrorMessage);
           }
 
           try {
@@ -489,6 +492,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 disabledActions,
               });
               wrapperWarnings.push(disabledActionsWarning);
+              ruleExecutionLogger.warn(disabledActionsWarning);
             }
 
             let status: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded;
