@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BehaviorSubject, lastValueFrom, take } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -20,18 +21,18 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '@kbn/controls-constants';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { BehaviorSubject, lastValueFrom, take } from 'rxjs';
 import type { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { isDSLOptionsListApi } from '../../../utils';
-import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
+import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';

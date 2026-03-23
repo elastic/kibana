@@ -11,10 +11,11 @@ import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from '@kbn/controls-constants';
 import { controlSchema, dataControlSchema } from './control_schema';
 
-const OPTIONS_MAX = 100000;
+const SELECTIONS_MAX = 100000;
 
 export const optionsListDisplaySettingsSchema = schema.object({
   placeholder: schema.maybe(schema.string()),
@@ -56,7 +57,7 @@ export const optionsListDSLControlSchema = dataControlSchema
     search_technique: optionsListSearchTechniqueSchema,
     selected_options: schema.arrayOf(optionsListSelectionSchema, {
       defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
-      maxSize: OPTIONS_MAX,
+      maxSize: SELECTIONS_MAX,
     }),
     single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
     sort: optionsListSortSchema,
@@ -65,7 +66,7 @@ export const optionsListDSLControlSchema = dataControlSchema
 export const optionsListESQLControlSchema = controlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
-    selected_options: schema.arrayOf(schema.string(), { maxSize: OPTIONS_MAX }),
+    selected_options: schema.arrayOf(schema.string(), { maxSize: SELECTIONS_MAX }),
     single_select: schema.boolean({ defaultValue: DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select }),
     variable_name: schema.string(),
     variable_type: schema.oneOf([
@@ -80,5 +81,7 @@ export const optionsListESQLControlSchema = controlSchema
       schema.literal('STATIC_VALUES'),
       schema.literal('VALUES_FROM_QUERY'),
     ]),
-    available_options: schema.maybe(schema.arrayOf(schema.string(), { maxSize: OPTIONS_MAX })),
+    available_options: schema.maybe(
+      schema.arrayOf(schema.string(), { maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE })
+    ),
   });

@@ -9,6 +9,8 @@
 
 import { DEFAULT_DATA_CONTROL_STATE } from './control_constants';
 
+export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
+
 export const DEFAULT_DSL_OPTIONS_LIST_STATE = {
   ...DEFAULT_DATA_CONTROL_STATE,
   sort: {

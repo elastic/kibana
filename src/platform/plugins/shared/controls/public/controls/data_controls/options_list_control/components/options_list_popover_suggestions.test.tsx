@@ -13,10 +13,11 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '@kbn/controls-constants';
 
 import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 

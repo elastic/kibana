@@ -8,19 +8,19 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
-
 import { css } from '@emotion/react';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '@kbn/controls-constants';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { BehaviorSubject } from 'rxjs';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+
 import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { isDSLOptionsListApi } from '../../../utils';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 import type { DSLOptionsListComponentApi } from '../types';
