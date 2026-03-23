@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/es'
   - '@kbn/mock-idp-utils'
   - '@kbn/tooling-log'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
@@ -30,6 +31,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.js'
     - '!target/**/*'
 tasks:
   jest:
