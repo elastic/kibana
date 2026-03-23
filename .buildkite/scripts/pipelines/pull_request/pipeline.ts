@@ -613,6 +613,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(evalsYaml);
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/sync_model_labels.yml', cancelable)
+      );
+    }
+
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
