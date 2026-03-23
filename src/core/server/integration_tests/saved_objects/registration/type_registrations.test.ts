@@ -126,6 +126,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
@@ -187,6 +188,7 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'user-storage',
   'user-storage-global',
+  'user_connector_token',
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
