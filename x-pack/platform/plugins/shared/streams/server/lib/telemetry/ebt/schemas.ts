@@ -313,6 +313,25 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'Duration of this iteration in milliseconds',
     },
   },
+  excluded_features_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of excluded features present at the time of identification',
+    },
+  },
+  llm_ignored_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of features the LLM reported as matching excluded features',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
 };
 
 export {

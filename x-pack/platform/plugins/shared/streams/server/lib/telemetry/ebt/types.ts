@@ -63,6 +63,9 @@ interface StreamsFeaturesIdentifiedProps {
   total_tokens_used: number;
   cached_tokens_used: number;
   duration_ms: number;
+  excluded_features_count: number;
+  llm_ignored_count: number;
+  code_ignored_count: number;
   stream_name: string;
   stream_type: StreamType;
   state: 'success' | 'failure' | 'canceled';

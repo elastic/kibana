@@ -21,6 +21,8 @@ export {
   identifyFeatures,
   type IdentifyFeaturesOptions,
   type PreviouslyIdentifiedFeature,
+  type ExcludedFeatureSummary,
+  type IgnoredFeature,
 } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
 

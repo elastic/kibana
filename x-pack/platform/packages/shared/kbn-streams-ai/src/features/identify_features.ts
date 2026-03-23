@@ -9,7 +9,12 @@ import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
+import {
+  type BaseFeature,
+  type IgnoredFeature,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
+} from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
@@ -22,10 +27,21 @@ export interface PreviouslyIdentifiedFeature {
   subtype?: string;
   properties: Record<string, unknown>;
 }
+export type { IgnoredFeature } from '@kbn/streams-schema';
+
+export interface ExcludedFeatureSummary {
+  id: string;
+  type: string;
+  subtype?: string;
+  title?: string;
+  description?: string;
+  properties: Record<string, unknown>;
+}
 
 export interface IdentifyFeaturesOptions {
   streamName: string;
   sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  excludedFeatures?: ExcludedFeatureSummary[];
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
   logger: Logger;
@@ -36,6 +52,7 @@ export interface IdentifyFeaturesOptions {
 export async function identifyFeatures({
   streamName,
   sampleDocuments,
+  excludedFeatures,
   systemPrompt,
   inferenceClient,
   logger,
@@ -43,6 +60,7 @@ export async function identifyFeatures({
   previouslyIdentifiedFeatures = [],
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
+  ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
   logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
@@ -66,6 +84,7 @@ export async function identifyFeatures({
       input: {
         sample_documents: JSON.stringify(formattedDocuments),
         previously_identified_features: previousFeaturesContext,
+        excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
       },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
       abortSignal: signal,
@@ -83,7 +102,7 @@ export async function identifyFeatures({
         };
       })
       .filter((feature) => {
-        const result = baseFeatureSchema.safeParse(feature);
+        const result = identifiedFeatureSchema.safeParse(feature);
         if (!result.success) {
           return false;
         }
@@ -94,8 +113,13 @@ export async function identifyFeatures({
     (feature) => feature.id
   );
 
+  const ignoredFeatures = response.toolCalls
+    .flatMap((toolCall) => toolCall.function.arguments.ignored_features ?? [])
+    .filter((item): item is IgnoredFeature => ignoredFeatureSchema.safeParse(item).success);
+
   return {
     features,
+    ignoredFeatures,
     tokensUsed: sumTokens({ prompt: 0, completion: 0, total: 0, cached: 0 }, response.tokens),
   };
 }

@@ -17,17 +17,19 @@ import type { Feature } from '@kbn/streams-schema';
 import {
   type IdentifyFeaturesResult,
   type BaseFeature,
+  type Feature,
   isComputedFeature,
   isDuplicateFeature,
   mergeFeature,
   toBaseFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
-import { identifyFeatures, generateAllComputedFeatures, sumTokens } from '@kbn/streams-ai';
+import { identifyFeatures, generateAllComputedFeatures, sumTokens, type ExcludedFeatureSummary, type IgnoredFeature} from '@kbn/streams-ai';
 import { getDiverseSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_diverse_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
+import type { FeatureClient } from '../../streams/feature/feature_client';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
@@ -189,6 +191,8 @@ export async function identifyStreamFeatures({
   };
 }
 
+const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
+
 export interface FeaturesIdentificationTaskParams {
   start: number;
   end: number;
@@ -269,7 +273,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const [{ hits: sampleDocuments }, { hits: allExistingFeatures }] =
+                const [{ hits: sampleDocuments }, { hits: allExistingFeatures }, { hits: excludedFeatures }] =
                   await Promise.all([
                     getDiverseSampleDocuments({
                       esClient,
@@ -279,6 +283,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                       size: 100,
                     }),
                     featureClient.getFeatures(stream.name),
+                    featureClient.getExcludedFeatures(stream.name),
                   ]);
 
                 if (sampleDocuments.length === 0) {
@@ -290,12 +295,24 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 }
 
                 const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
+                
+                const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
+                  .slice(0, MAX_EXCLUDED_FEATURES_FOR_PROMPT)
+                  .map(({ id, type, subtype, title, description, properties }) => ({
+                    id,
+                    type,
+                    subtype,
+                    title,
+                    description,
+                    properties,
+                  }));
 
-                const [{ features: inferredFeatures }, computedFeatures] = await Promise.all([
+                const [{ features: inferredFeatures, ignoredFeatures }, computedFeatures] = await Promise.all([
                   identifyStreamFeatures({
                     streamName: stream.name,
                     sampleDocuments,
                     existingFeatures,
+                    excludedSummaries,
                     inferenceClient: boundInferenceClient,
                     logger: taskContext.logger.get('features_identification'),
                     signal: runContext.abortController.signal,
@@ -331,6 +348,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     esClient,
                     logger: taskContext.logger.get('computed_features'),
                   }),
+                  featureClient.getFeatures(stream.name),
                 ]);
 
                 const reconciledComputedFeatures = reconcileComputedFeatures({
@@ -416,12 +434,14 @@ function createFeatureMetadata() {
 function reconcileFeatures({
   rawFeatures,
   knownFeatures,
+  ignoredFeatures,
   knownByLowerId,
   existingFeatures,
   existingByLowerId,
 }: {
   rawFeatures: BaseFeature[];
   knownFeatures: Feature[];
+  ignoredFeatures: IgnoredFeature[];
   knownByLowerId: Map<string, Feature>;
   existingFeatures: Feature[];
   existingByLowerId: Map<string, Feature>;
@@ -429,8 +449,32 @@ function reconcileFeatures({
   const newFeatures: Feature[] = [];
   const updatedFeatures: Feature[] = [];
   const metadata = createFeatureMetadata();
+    // Log all LLM-reported ignored features
+  for (const ignored of ignoredFeatures) {
+    logger.debug(
+      () =>
+        `LLM ignored feature "${ignored.feature_id}" (matched excluded "${ignored.excluded_feature_id}"): ${ignored.reason}`
+    );
+  }
 
-  for (const raw of rawFeatures) {
+  // Server-side safety net: check against ALL excluded features (not just the subset sent to the LLM)
+  let codeIgnoredCount = 0;
+  const nonExcludedInferredFeatures = rawFeatures.filter((feature) => {
+    const matchingExcluded = excludedFeatures.find((excluded) =>
+      isDuplicateFeature(feature, excluded)
+    );
+    if (matchingExcluded) {
+      codeIgnoredCount++;
+      logger.debug(
+        () =>
+          `Dropping inferred feature [${feature.id}] because it matches excluded feature [${matchingExcluded.id}]`
+      );
+      return false;
+    }
+    return true;
+  });
+
+  for (const raw of nonExcludedInferredFeatures) {
     // 1. Intra-run match: merge features between iterations of this run
     const thisRunMatch =
       knownByLowerId.get(raw.id.toLowerCase()) ??
