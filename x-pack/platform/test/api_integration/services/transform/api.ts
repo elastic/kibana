@@ -123,7 +123,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
       await asyncForEach([...transformIdSet], async (transformId: string) => {
         const { body: stopRspBody, status: stopRspStatus } = await esSupertest.post(
-          `/_transform/${transformId}/_stop?force=true&wait_for_completion`
+          `/_transform/${transformId}/_stop?force=true&wait_for_completion=true`
         );
         this.assertResponseStatusCode(200, stopRspStatus, stopRspBody);
 
