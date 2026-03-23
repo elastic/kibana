@@ -6,6 +6,7 @@ Captures the current Streams/SigEvents environment into a GCS snapshot. `.kibana
 
 - The environment must already contain all the data you want to capture (logs, alerts, Streams features/assets, etc.). This script only snapshots existing indices — it does not generate or ingest any data. Run the appropriate data generation scripts (e.g. OTel demo, Significant Events scenarios) before capturing.
 - Local Elasticsearch with GCS credentials in the keystore.
+- A user with `manage` privilege on `.kibana_*` system indices (see [Creating a user with the required privileges](#creating-a-user-with-the-required-privileges)).
 
 ## Why
 
@@ -22,8 +23,8 @@ node scripts/capture_sigevents_env_snapshot.js --snapshot-name my-snapshot
 ```bash
 node scripts/capture_sigevents_env_snapshot.js \
   --snapshot-name my-snapshot \
-  --run-id test-run-2026-03-18 \
-  --indices logs.otel \
+  --run-id <run-id> \
+  --indices <custom-logs-index> \
   --indices .internal.alerts-streams.alerts-default-* \
   --system-indices .kibana_streams_features-* \
   --system-indices .kibana_streams_assets-* \
@@ -72,6 +73,27 @@ node scripts/restore_sigevents_env_snapshot.js \
 ```
 
 See [`restore_env_snapshot/README.md`](../restore_env_snapshot/README.md) for the full restore workflow and all available flags.
+
+## Creating a user with the required privileges
+
+Both capture and restore scripts need `manage` privilege on `.kibana_*` system indices with `allow_restricted_indices`. The simplest approach is to create a user with the built-in `system_indices_superuser` role:
+
+```bash
+curl -u elastic:changeme -X POST "http://localhost:9200/_security/user/<username>" \
+  -H 'Content-Type: application/json' -d '{
+  "password": <password>,
+  "roles": ["system_indices_superuser"]
+}'
+```
+
+Then pass the credentials to the script:
+
+```bash
+node scripts/capture_sigevents_env_snapshot.js \
+  --snapshot-name my-snapshot \
+  --es-username <username> \
+  --es-password <password>
+```
 
 ## Why aliases can't be baked into the snapshot
 

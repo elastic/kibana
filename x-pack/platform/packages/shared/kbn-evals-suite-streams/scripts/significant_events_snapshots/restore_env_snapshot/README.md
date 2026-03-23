@@ -5,8 +5,9 @@ Restores a Streams/SigEvents environment from a GCS snapshot. Automates the full
 ## Prerequisites
 
 - Local Elasticsearch running.
+- A clean environment: the destination data stream (e.g. `logs.otel`) must be preferably clean, and there must be no `.kibana_streams*` indices. If they exist, delete them before restoring.
 - Access to the GCS bucket containing the snapshot (credentials available in your environment or keystore).
-- A user with `manage` privilege on the `.kibana_*` system indices. Use a user with the `system_indices_superuser` role.
+- A user with `manage` privilege on the `.kibana_*` system indices (see [Creating a user with the required privileges](#creating-a-user-with-the-required-privileges)).
 
 ## Why
 
@@ -66,3 +67,26 @@ node scripts/restore_sigevents_env_snapshot.js \
 The capture script (`capture_sigevents_env_snapshot.js`) prints the exact restore command with the correct `--gcs-bucket`, `--gcs-base-path`, and `--snapshot-name` flags after a successful capture. Copy that command to restore the environment later.
 
 See [`capture_env_snapshot/README.md`](../capture_env_snapshot/README.md) for the capture workflow.
+
+## Creating a user with the required privileges
+
+Both capture and restore scripts need `manage` privilege on `.kibana_*` system indices with `allow_restricted_indices`. The simplest approach is to create a user with the built-in `system_indices_superuser` role:
+
+```bash
+# Create a user "test" with the system_indices_superuser role
+curl -u elastic:changeme -X POST "http://localhost:9200/_security/user/<username>" \
+  -H 'Content-Type: application/json' -d '{
+  "password": <password>,
+  "roles": ["system_indices_superuser"]
+}'
+```
+
+Then pass the credentials to the script:
+
+```bash
+node scripts/restore_sigevents_env_snapshot.js \
+  --snapshot-name my-snapshot \
+  --gcs-base-path <run-id>/<base-path> \
+  --es-username <username> \
+  --es-password <password>
+```

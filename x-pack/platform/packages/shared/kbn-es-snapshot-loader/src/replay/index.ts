@@ -88,8 +88,17 @@ async function recreateAliases({
   for (const [finalIndexName, aliases] of aliasMap) {
     for (const { aliasName, isWriteIndex, isHidden } of aliases) {
       try {
+        // Atomically remove from the still-existing temp index and add to the final index.
+        // Without the remove step, a write alias would exist on both simultaneously and ES
+        // would reject the request with "has more than one write index".
         await esClient.indices.updateAliases({
           actions: [
+            {
+              remove: {
+                index: `${TEMP_INDEX_PREFIX}${finalIndexName}`,
+                alias: aliasName,
+              },
+            },
             {
               add: {
                 index: finalIndexName,

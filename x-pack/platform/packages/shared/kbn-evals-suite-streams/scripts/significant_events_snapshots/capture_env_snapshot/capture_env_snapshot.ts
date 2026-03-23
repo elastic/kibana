@@ -11,16 +11,12 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET } from '../lib/constants';
+import { GCS_BUCKET, DEFAULT_INDICES, DEFAULT_SYSTEM_INDICES } from '../lib/constants';
 import {
   resolvePatterns,
   parseRepeatableFlag,
   validateIndexPrivileges,
 } from '../lib/snapshot_utils';
-
-const DEFAULT_SYSTEM_INDICES = ['.kibana_streams_features-*', '.kibana_streams_assets-*'];
-
-const DEFAULT_INDICES = ['logs.otel', '.internal.alerts-streams.alerts-default-*'];
 
 function toSnapshotName(index: string): string {
   return `snapshot-${index.slice(1)}`;
@@ -109,7 +105,7 @@ export async function captureEnvSnapshot({
     systemIndexPatterns,
     (missing) =>
       `Capture requires a user with manage privilege on system indices. ` +
-      `Pass superuser credentials via --es-username/--es-password (e.g. the elastic user). ` +
+      `Pass superuser credentials via --es-username/--es-password. ` +
       `Missing index:manage privilege on: ${missing}`
   );
 
@@ -125,7 +121,7 @@ export async function captureEnvSnapshot({
       if (err?.meta?.body?.error?.type === 'security_exception') {
         throw new Error(
           `Capture requires a user with manage privilege on system indices. ` +
-            `Pass superuser credentials via --es-username/--es-password (e.g. the elastic user). ` +
+            `Pass superuser credentials via --es-username/--es-password. ` +
             `Missing index:manage privilege on: ${idx}`
         );
       }

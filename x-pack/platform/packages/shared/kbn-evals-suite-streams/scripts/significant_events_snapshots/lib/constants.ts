@@ -20,3 +20,5 @@ export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
 export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
+export const DEFAULT_INDICES = ['logs.otel', '.internal.alerts-streams.alerts-default-*'];
+export const DEFAULT_SYSTEM_INDICES = ['.kibana_streams_features-*', '.kibana_streams_assets-*'];

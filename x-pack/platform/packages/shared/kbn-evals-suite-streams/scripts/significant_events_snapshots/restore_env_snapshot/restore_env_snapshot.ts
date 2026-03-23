@@ -9,15 +9,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { GCS_BUCKET } from '../lib/constants';
+import { GCS_BUCKET, DEFAULT_INDICES, DEFAULT_SYSTEM_INDICES } from '../lib/constants';
 import {
   createMissingAliases,
   parseRepeatableFlag,
   validateIndexPrivileges,
 } from '../lib/snapshot_utils';
-
-const DEFAULT_INDICES = ['logs.otel'];
-const DEFAULT_SYSTEM_INDICES = ['.kibana_streams_features-*', '.kibana_streams_assets-*'];
 
 export const restoreEnvSnapshot = async ({
   log,
@@ -84,6 +81,10 @@ export const restoreEnvSnapshot = async ({
     );
   }
 
+  // System indices are captured as snapshot-* (e.g. .kibana_streams_features → snapshot-kibana_streams_features)
+  // so we must match the snapshot-* names and rename them back on restore.
+  const snapshotSystemIndices = systemIndices.map((p) => `snapshot-${p.slice(1)}`);
+
   log.info('');
   log.info('Step 2/3 — Restoring system indices (with rename snapshot-* → .*)...');
   const restoreResult = await restoreSnapshot({
@@ -91,7 +92,7 @@ export const restoreEnvSnapshot = async ({
     log,
     repository,
     snapshotName,
-    indices: systemIndices,
+    indices: snapshotSystemIndices,
     renamePattern: 'snapshot-(.*)',
     renameReplacement: '.$1',
   });
