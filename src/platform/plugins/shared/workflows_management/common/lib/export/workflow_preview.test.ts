@@ -190,8 +190,6 @@ triggers:
     with:
       every: 5m
   - type: alert
-    with:
-      rule_id: test-rule
 steps:
   - name: step1
     type: console

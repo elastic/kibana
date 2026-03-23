@@ -94,7 +94,10 @@ describe('useStepExecution', () => {
     expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
-  it('should poll for non-terminal step status', async () => {
+  it('should poll when fetched data has non-terminal status', async () => {
+    const runningResponse = { ...stepResponse, status: 'running', output: undefined };
+    mockGetStepExecution.mockResolvedValue(runningResponse);
+
     const { result } = renderHook(
       () => useStepExecution('exec-1', 'step-doc-1', ExecutionStatus.RUNNING),
       { wrapper: createWrapper(queryClient) }
@@ -109,23 +112,45 @@ describe('useStepExecution', () => {
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
   });
 
-  it('should stop polling when step transitions to terminal status', async () => {
-    const { result, rerender } = renderHook(
-      ({ status }: { status: ExecutionStatus }) => useStepExecution('exec-1', 'step-doc-1', status),
-      {
-        wrapper: createWrapper(queryClient),
-        initialProps: { status: ExecutionStatus.RUNNING },
-      }
+  it('should stop polling when fetched data transitions to terminal status', async () => {
+    const runningResponse = { ...stepResponse, status: 'running', output: undefined };
+    mockGetStepExecution.mockResolvedValue(runningResponse);
+
+    const { result } = renderHook(
+      () => useStepExecution('exec-1', 'step-doc-1', ExecutionStatus.RUNNING),
+      { wrapper: createWrapper(queryClient) }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    // Transition to terminal
-    rerender({ status: ExecutionStatus.COMPLETED });
+    // Now the fetched data returns terminal status
+    mockGetStepExecution.mockResolvedValue(stepResponse);
+    mockGetStepExecution.mockClear();
+    jest.advanceTimersByTime(5_000);
+    await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalledTimes(1));
 
     mockGetStepExecution.mockClear();
     jest.advanceTimersByTime(15_000);
     expect(mockGetStepExecution).not.toHaveBeenCalled();
+  });
+
+  it('should keep polling when external status is terminal but fetched data is not yet', async () => {
+    // Simulates ES eventual consistency: lightweight polling says completed,
+    // but the full step document hasn't refreshed yet.
+    const runningResponse = { ...stepResponse, status: 'running', output: undefined };
+    mockGetStepExecution.mockResolvedValue(runningResponse);
+
+    const { result } = renderHook(
+      () => useStepExecution('exec-1', 'step-doc-1', ExecutionStatus.COMPLETED),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Should still poll because the fetched data is not terminal yet
+    mockGetStepExecution.mockClear();
+    jest.advanceTimersByTime(5_000);
+    await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
   });
 
   it('should use the correct query key structure', async () => {

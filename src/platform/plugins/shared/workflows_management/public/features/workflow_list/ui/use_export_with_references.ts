@@ -18,6 +18,8 @@ import {
   findMissingReferencedIds,
   resolveAllReferences,
 } from '../../../common/lib/export_workflows';
+import type { WorkflowExportReferenceResolution } from '../../../common/lib/telemetry/events/workflows/import_export/types';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 
 const TOAST_LIFE_TIME_MS = 3000;
 
@@ -37,10 +39,15 @@ export const useExportWithReferences = ({
 }: UseExportWithReferencesParams) => {
   const { notifications } = useKibana().services;
   const api = useWorkflowsApi();
+  const telemetry = useTelemetry();
   const [exportModalState, setExportModalState] = useState<ExportModalState | null>(null);
 
   const performExport = useCallback(
-    async (workflowsToExport: WorkflowListItemDto[]) => {
+    async (
+      workflowsToExport: WorkflowListItemDto[],
+      referenceResolution: WorkflowExportReferenceResolution
+    ) => {
+      let exportError: Error | undefined;
       try {
         const exportedCount = await exportWorkflows(workflowsToExport, api);
         const skippedCount = workflowsToExport.length - exportedCount;
@@ -66,17 +73,23 @@ export const useExportWithReferences = ({
           );
         }
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        notifications?.toasts.addError(error, {
+        exportError = err instanceof Error ? err : new Error(String(err));
+        notifications?.toasts.addError(exportError, {
           title: i18n.translate('workflows.export.error', {
             defaultMessage: 'Failed to export workflows',
           }),
           toastLifeTimeMs: TOAST_LIFE_TIME_MS,
         });
       }
+      telemetry.reportWorkflowExported({
+        workflowCount: workflowsToExport.length,
+        format: 'zip',
+        referenceResolution,
+        error: exportError,
+      });
       onComplete?.();
     },
-    [api, notifications, onComplete]
+    [api, notifications, onComplete, telemetry]
   );
 
   const exportWithoutReferences = useCallback(
@@ -89,12 +102,17 @@ export const useExportWithReferences = ({
           }),
           { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
         );
+        telemetry.reportWorkflowExported({
+          workflowCount: 1,
+          format: 'yaml',
+          referenceResolution: 'none',
+        });
         onComplete?.();
       } else {
-        performExport(workflowsToExport);
+        performExport(workflowsToExport, 'none');
       }
     },
-    [performExport, notifications, onComplete]
+    [performExport, notifications, onComplete, telemetry]
   );
 
   const startExport = useCallback(
@@ -122,7 +140,7 @@ export const useExportWithReferences = ({
 
   const handleIgnore = useCallback(() => {
     if (exportModalState) {
-      performExport(exportModalState.pendingExport);
+      performExport(exportModalState.pendingExport, 'ignore');
     }
     setExportModalState(null);
   }, [exportModalState, performExport]);
@@ -130,7 +148,7 @@ export const useExportWithReferences = ({
   const handleAddDirect = useCallback(() => {
     if (exportModalState) {
       const merged = [...exportModalState.pendingExport, ...exportModalState.missingWorkflows];
-      performExport(merged);
+      performExport(merged, 'add_direct');
     }
     setExportModalState(null);
   }, [exportModalState, performExport]);
@@ -139,7 +157,7 @@ export const useExportWithReferences = ({
     if (exportModalState) {
       const merged = [...exportModalState.pendingExport, ...exportModalState.missingWorkflows];
       const allResolved = resolveAllReferences(merged, allWorkflowsMap);
-      performExport(allResolved);
+      performExport(allResolved, 'add_all');
     }
     setExportModalState(null);
   }, [exportModalState, performExport, allWorkflowsMap]);
