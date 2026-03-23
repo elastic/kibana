@@ -571,7 +571,6 @@
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
-        "load-json-file",
         "mock-fs",
         "node-fetch",
         "react-intl",
@@ -1100,6 +1099,15 @@
         "vscode-languageserver-textdocument",
         "yaml-language-server"
       ],
+      "reviewers": ["team:workflows-eng"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:One Workflow", "backport:all-open", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "jszip",
+      "matchDepNames": ["jszip"],
       "reviewers": ["team:workflows-eng"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:One Workflow", "backport:all-open", "release_note:skip"],

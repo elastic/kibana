@@ -6,17 +6,23 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { GetScopedClients } from '../routes/types';
-import { registerStreamsTools } from './tools/register_tools';
+import type { StreamsServer } from '../types';
+import { registerAgentBuilderTools } from './tools/register_tools';
 import { streamExplorationSkill } from './skills/stream_exploration_skill';
 
 export const registerStreamsAgentBuilder = ({
   agentBuilder,
   getScopedClients,
+  server,
+  logger,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
+  server: StreamsServer;
+  logger: Logger;
 }) => {
-  registerStreamsTools({ tools: agentBuilder.tools, getScopedClients });
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
   agentBuilder.skills.register(streamExplorationSkill);
 };
