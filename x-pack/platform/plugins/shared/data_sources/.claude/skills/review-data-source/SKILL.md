@@ -85,6 +85,7 @@ validation against the vendor API.
 - Generator scaffold docs are filled in (no remaining `TODO:` placeholders)
 - `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` entry filled in
 - `docs/reference/toc.yml` entry exists in the correct section
+- Main landing page (`docs/reference/connectors-kibana.md`) **"Data and context sources" dropdown** — because this dropdown includes the snippet, it updates automatically; verify the snippet entry was added so the landing page reflects the new connector
 - **Icon**: Data source has an icon (ConnectorIconsMap entry and, if custom, spec icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
 
