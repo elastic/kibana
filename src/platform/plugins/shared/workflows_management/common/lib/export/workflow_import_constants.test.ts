@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { detectFileFormat, isDynamicWorkflowReference, isValidWorkflowId } from './workflow_import_constants';
+import {
+  detectFileFormat,
+  isDynamicWorkflowReference,
+  isValidWorkflowId,
+} from './workflow_import_constants';
 
 describe('isValidWorkflowId', () => {
   it('should accept a simple alphanumeric ID', () => {
@@ -19,7 +23,7 @@ describe('isValidWorkflowId', () => {
   });
 
   it('should accept an ID of exactly 255 characters', () => {
-    const id = 'a' + 'b'.repeat(254);
+    const id = `a${'b'.repeat(254)}`;
     expect(id).toHaveLength(255);
     expect(isValidWorkflowId(id)).toBe(true);
   });
