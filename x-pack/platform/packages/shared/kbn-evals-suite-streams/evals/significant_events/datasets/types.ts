@@ -64,10 +64,21 @@ export interface KIFeatureExtractionScenario {
  * 3. Register it in `index.ts`
  * 4. Run evals with: `SIGEVENTS_DATASET=my-app node scripts/evals run ...`
  */
+export interface KIFeatureExclusionScenario {
+  input: {
+    scenario_id: string;
+    sample_document_count: number;
+    exclude_count: number;
+    follow_up_runs: number;
+  };
+  snapshot_source?: SnapshotSourceOverride;
+}
+
 export interface DatasetConfig {
   id: string;
   description: string;
   gcs: GcsConfig;
   kiQueryGeneration: KIQueryGenerationScenario[];
   kiFeatureExtraction: KIFeatureExtractionScenario[];
+  kiFeatureExclusion: KIFeatureExclusionScenario[];
 }
