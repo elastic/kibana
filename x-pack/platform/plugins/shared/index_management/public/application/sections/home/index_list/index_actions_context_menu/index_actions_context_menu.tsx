@@ -469,7 +469,6 @@ export const IndexActionsContextMenu = ({
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        ownFocus={false}
         panelPaddingSize="none"
         anchorPosition={computedAnchorPosition}
         repositionOnScroll
