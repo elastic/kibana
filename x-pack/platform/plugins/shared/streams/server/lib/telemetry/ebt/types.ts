@@ -58,6 +58,9 @@ interface StreamsFeaturesIdentifiedProps {
   docs_count: number;
   features_new: number;
   features_updated: number;
+  total_filters: number;
+  filters_capped: boolean;
+  has_filtered_documents: boolean;
   input_tokens_used: number;
   output_tokens_used: number;
   total_tokens_used: number;

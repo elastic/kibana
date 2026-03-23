@@ -22,6 +22,7 @@ import {
   mergeFeature,
   toBaseFeature,
   getStreamTypeFromDefinition,
+  isFeatureWithFilter,
 } from '@kbn/streams-schema';
 import {
   identifyFeatures,
@@ -34,15 +35,16 @@ import { getDiverseSampleDocuments } from '@kbn/ai-tools/src/tools/describe_data
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
-import { getErrorMessage } from '../../streams/errors/parse_error';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
-import type { TaskContext } from '.';
-import type { TaskParams } from '../types';
-import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
-import { cancellableTask } from '../cancellable_task';
-import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
-import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
+import { getErrorMessage } from '../../../streams/errors/parse_error';
+import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
+import type { TaskContext } from '..';
+import type { TaskParams } from '../../types';
+import { PromptsConfigService } from '../../../saved_objects/significant_events/prompts_config_service';
+import { cancellableTask } from '../../cancellable_task';
+import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
+import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
+import { fetchSampleDocuments } from './fetch_sample_documents';
 
 const DEFAULT_MAX_ITERATIONS = 5;
 const DOCUMENTS_BATCH_SIZE = 20;
@@ -290,6 +292,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   total_tokens_used: 0,
                   cached_tokens_used: 0,
                   duration_ms: 0,
+                  total_filters: 0,
+                  filters_capped: false,
+                  has_filtered_documents: false,
                   excluded_features_count: 0,
                   llm_ignored_count: 0,
                   code_ignored_count: 0,
@@ -319,8 +324,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               try {
-                const [stream, { featurePromptOverride }] = await Promise.all([
+                const [
+                  stream,
+                  { hits: allExistingFeatures },
+                  { hits: excludedFeatures },
+                  { featurePromptOverride },
+                ] = await Promise.all([
                   streamsClient.getStream(streamName),
+                  featureClient.getFeatures(streamName),
+                  featureClient.getExcludedFeatures(streamName),
                   new PromptsConfigService({
                     soClient,
                     logger: taskContext.logger,
@@ -332,20 +344,33 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const esClient = scopedClusterClient.asCurrentUser;
 
                 const [
-                  { hits: sampleDocuments },
-                  { hits: allExistingFeatures },
-                  { hits: excludedFeatures },
+                  { hits: diverseSampleDocuments },
+                  {
+                    documents: filteredSampleDocuments,
+                    totalFilters,
+                    filtersCapped,
+                    hasFilteredDocuments,
+                  },
                 ] = await Promise.all([
                   getDiverseSampleDocuments({
                     esClient,
                     index: stream.name,
                     start,
                     end,
-                    size: 100,
+                    size: 80,
                   }),
-                  featureClient.getFeatures(stream.name),
-                  featureClient.getExcludedFeatures(stream.name),
+                  fetchSampleDocuments({
+                    esClient,
+                    index: stream.name,
+                    start,
+                    end,
+                    features: allExistingFeatures.filter(isFeatureWithFilter),
+                    logger: taskContext.logger,
+                    size: 20,
+                  }),
                 ]);
+
+                const sampleDocuments = [...diverseSampleDocuments, ...filteredSampleDocuments];
 
                 if (sampleDocuments.length === 0) {
                   taskContext.logger.debug(
@@ -391,6 +416,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                         excluded_features_count: excludedFeatures.length,
                         llm_ignored_count: it.ignoredFeaturesCount,
                         code_ignored_count: it.codeIgnoredCount,
+                        total_filters: totalFilters,
+                        filters_capped: filtersCapped,
+                        has_filtered_documents: hasFilteredDocuments,
                       });
                     },
                   }),

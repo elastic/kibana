@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { isEqual, uniq } from 'lodash';
-import { conditionSchema } from '@kbn/streamlang';
+import { conditionSchema, type Condition } from '@kbn/streamlang';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
@@ -77,9 +77,15 @@ export const featureSchema = baseFeatureSchema.and(
 );
 
 export type Feature = z.infer<typeof featureSchema>;
+export type FeatureWithFilter = Feature & { filter: Condition };
 
 export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;
+}
+
+export function isFeatureWithFilter(feature: unknown): feature is FeatureWithFilter {
+  const result = featureSchema.safeParse(feature);
+  return result.success && Boolean(result.data.filter);
 }
 
 export function isComputedFeature(feature: BaseFeature): boolean {
