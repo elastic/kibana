@@ -22,6 +22,7 @@ export enum RuleDetailTabs {
   exceptions = 'rule_exceptions',
   endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
+  executionResultsPoc = 'execution_results_poc',
   executionEvents = 'execution_events',
 }
 
@@ -31,6 +32,7 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
+  [RuleDetailTabs.executionResultsPoc]: i18n.EXECUTION_RESULTS_POC_TAB,
   [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
 };
 
@@ -82,6 +84,12 @@ export const useRuleDetailsTabs = ({
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
         disabled: !isExistingRule,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
+      },
+      [RuleDetailTabs.executionResultsPoc]: {
+        id: RuleDetailTabs.executionResultsPoc,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResultsPoc],
+        disabled: !isExistingRule,
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResultsPoc}`,
       },
       [RuleDetailTabs.executionEvents]: {
         id: RuleDetailTabs.executionEvents,

@@ -60,6 +60,13 @@ export const EXECUTION_RESULTS_TAB = i18n.translate(
   }
 );
 
+export const EXECUTION_RESULTS_POC_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionResultsPocTab',
+  {
+    defaultMessage: 'Execution results PoC',
+  }
+);
+
 export const EXECUTION_EVENTS_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab',
   {
