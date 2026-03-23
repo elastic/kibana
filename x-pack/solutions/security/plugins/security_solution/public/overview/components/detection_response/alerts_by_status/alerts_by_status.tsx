@@ -173,7 +173,7 @@ export const AlertsByStatus = ({
     updatedAt,
   } = useAlertsByStatus({
     additionalFilters,
-    identityFields: entityIdentifiersResolved,
+    identityFields: entityIdentifiersResolved ?? identityFields ?? {},
     signalIndexName,
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,

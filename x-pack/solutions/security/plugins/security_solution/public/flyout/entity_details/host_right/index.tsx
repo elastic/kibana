@@ -92,8 +92,15 @@ export const HostPanel = ({
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
+  const hostStoreIdentityFields = useMemo(
+    () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
+    [entityId, hostName]
+  );
+
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
   });
