@@ -142,7 +142,6 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi)
   );
-  console.log('documentEntityIdentifiers', documentEntityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     to,

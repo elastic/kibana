@@ -155,7 +155,6 @@ export const UserPanel = ({
     buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi)
   );
 
-  console.log('documentEntityIdentifiers', documentEntityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     to,

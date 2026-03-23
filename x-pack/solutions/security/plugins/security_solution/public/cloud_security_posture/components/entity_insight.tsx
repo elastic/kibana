@@ -47,7 +47,6 @@ export const EntityInsight = <T,>({
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
   const insightContent: React.ReactElement[] = [];
-  console.log('identityFields', identityFields);
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
