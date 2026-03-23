@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ProcessEvent } from '@kbn/session-view-plugin/common';
@@ -16,17 +16,13 @@ import { AlertsTab } from '../../../flyout_v2/session_view/components/alerts_tab
 import { ALERTS_TAB_TEST_ID, METADATA_TAB_TEST_ID, PROCESS_TAB_TEST_ID } from './test_ids';
 import type { SessionViewPanelPaths } from '.';
 import { useSessionViewPanelContext } from './context';
-import { PageScope } from '../../../data_view_manager/constants';
 import { LeftPanelVisualizeTab } from '../left';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SESSION_VIEW_ID } from '../left/components/session_view';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
 } from '../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../preview/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface SessionViewPanelTabType {
   id: SessionViewPanelPaths;
@@ -51,28 +47,21 @@ const AlertsTabContent = () => {
   const { eventId, indexName, investigatedAlertId, sessionEntityId, sessionStartTime, scopeId } =
     useSessionViewPanelContext();
   const { openPreviewPanel, openLeftPanel } = useExpandableFlyoutApi();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.alerts);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.alerts);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const onShowAlertDetails = useCallback(
-    (alertId: string) => {
+    (alertId: string, alertIndex: string) => {
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
         params: {
           id: alertId,
-          indexName: alertsIndex,
+          indexName: alertIndex,
           scopeId,
           banner: ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });
     },
-    [alertsIndex, openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId]
   );
 
   const onJumpToEvent = useCallback(

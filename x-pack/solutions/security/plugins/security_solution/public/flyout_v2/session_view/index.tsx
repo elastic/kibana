@@ -91,6 +91,7 @@ export const SessionView: FC<SessionViewProps> = memo(
             resizable: true,
             session: 'inherit',
             size: 's',
+            type: 'overlay',
           }
         ),
       [history, overlays, renderCellActions, services, store]
@@ -152,6 +153,7 @@ export const SessionView: FC<SessionViewProps> = memo(
             resizable: true,
             session: 'inherit',
             size: 's',
+            type: 'overlay',
           }
         );
       },
