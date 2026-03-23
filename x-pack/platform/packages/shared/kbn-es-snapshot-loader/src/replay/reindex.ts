@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkIndexByScrollFailure,
+  ReindexResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName, getErrorMessage } from '../utils';
 
@@ -30,6 +33,24 @@ export function getDestinationInfo(originalIndex: string): DestinationInfo {
     destIndex: dataStreamName ?? originalIndex,
     isDataStream: dataStreamName != null,
   };
+}
+
+function logReindexFailures(
+  failures: Array<BulkIndexByScrollFailure>,
+  destIndex: string,
+  log: ToolingLog
+): void {
+  log.warning(`Reindex had ${failures.length} failures`);
+  const sampleFailures = failures.slice(0, 3);
+  for (const failure of sampleFailures) {
+    const cause = failure.cause;
+    const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
+    log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
+  }
+  if (failures.length > 3) {
+    log.debug(`  ... and ${failures.length - 3} more`);
+  }
+  throw new Error(`Reindex had failures for ${destIndex}`);
 }
 
 function isPipelineRejected(error: unknown): boolean {
@@ -182,17 +203,7 @@ async function reindexWithDefaultPipeline({
     }
 
     if (failures.length > 0) {
-      log.warning(`Reindex had ${failures.length} failures`);
-      const sampleFailures = failures.slice(0, 3);
-      for (const failure of sampleFailures) {
-        const cause = failure.cause;
-        const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
-        log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
-      }
-      if (failures.length > 3) {
-        log.debug(`  ... and ${failures.length - 3} more`);
-      }
-      throw new Error(`Reindex had failures for ${destIndex}`);
+      logReindexFailures(failures, destIndex, log);
     }
 
     log.debug(`Reindexed ${created} documents to ${destIndex} (via default_pipeline fallback)`);
@@ -254,17 +265,7 @@ export async function reindexThroughPipeline({
     }
 
     if (failures.length > 0) {
-      log.warning(`Reindex had ${failures.length} failures`);
-      const sampleFailures = failures.slice(0, 3);
-      for (const failure of sampleFailures) {
-        const cause = failure.cause;
-        const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
-        log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
-      }
-      if (failures.length > 3) {
-        log.debug(`  ... and ${failures.length - 3} more`);
-      }
-      throw new Error(`Reindex had failures for ${destIndex}`);
+      logReindexFailures(failures, destIndex, log);
     }
 
     log.debug(`Reindexed ${created} documents to ${destIndex}`);

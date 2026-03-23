@@ -58,7 +58,12 @@ async function getTempIndexAliases({
 
     log.debug(`Captured aliases for ${aliasMap.size} indices from temp indices`);
   } catch (error) {
-    log.debug(`No aliases found on temp indices: ${getErrorMessage(error)}`);
+    const statusCode = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (statusCode === 404) {
+      log.debug('No temp indices found — skipping alias capture');
+    } else {
+      throw error;
+    }
   }
 
   return aliasMap;
