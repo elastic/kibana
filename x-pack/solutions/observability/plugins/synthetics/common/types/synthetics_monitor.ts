@@ -21,3 +21,10 @@ export interface AgentPolicyInfo {
   namespace?: string;
   spaceIds?: string[];
 }
+
+export interface PackagePolicyLink {
+  locationId: string;
+  locationLabel: string;
+  agentPolicyId: string;
+  packagePolicyId: string;
+}

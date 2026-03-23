@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.3.2 [kibana-9.3.2-release-notes]
 
+:::{important}
+The 9.3.2 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Features and enhancements [kibana-9.3.2-features-enhancements]
 
 **Elastic Security solution**:
@@ -467,6 +471,10 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
 ## 9.2.7 [kibana-9.2.7-release-notes]
+
+:::{important}
+The 9.2.7 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
 
 ### Features and enhancements [kibana-9.2.7-features-enhancements]
 
