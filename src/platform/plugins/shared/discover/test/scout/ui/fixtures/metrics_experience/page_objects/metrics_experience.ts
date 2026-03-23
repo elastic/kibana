@@ -8,13 +8,14 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
 import { createFlyout } from './flyout';
 import type { ChartActions } from './chart_actions';
 import { createChartActions } from './chart_actions';
+import type { ChartInteractions } from './chart_interactions';
+import { createChartInteractions } from './chart_interactions';
 import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
 import type { ShareHelper } from './share_helper';
@@ -31,13 +32,12 @@ export class MetricsExperiencePage {
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
   public readonly chartActions: ChartActions;
+  public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
-  private readonly page: ScoutPage;
 
   constructor(page: ScoutPage) {
-    this.page = page;
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
@@ -46,6 +46,7 @@ export class MetricsExperiencePage {
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
     this.chartActions = createChartActions(page);
+    this.chartInteractions = createChartInteractions(page, (index) => this.getCardByIndex(index));
     this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
@@ -112,112 +113,6 @@ export class MetricsExperiencePage {
   public async openInsightsFlyout(cardIndex: number): Promise<void> {
     await this.openCardContextMenu(cardIndex);
     await this.chartActions.viewDetails.click();
-  }
-
-  /**
-   * Waits for the embeddable panel inside a card to signal that rendering is
-   * complete via the `data-render-complete="true"` attribute set by Lens.
-   *
-   * Uses polling to verify the attribute stays `"true"` for a minimum
-   * duration, guarding against transient flips that can occur when Lens
-   * re-renders (e.g. after a brush or filter action). This mirrors the
-   * approach used by `DiscoverApp.waitForDocTableRendered`.
-   */
-  public async waitForCardRenderComplete(index: number): Promise<void> {
-    const panel = this.getCardByIndex(index).locator('[data-test-subj="embeddablePanel"]');
-    await expect(panel).toBeVisible();
-
-    const minDurationMs = 2_000;
-    const pollIntervalMs = 100;
-    const totalTimeoutMs = 30_000;
-
-    let stableSince: number | null = null;
-
-    await expect
-      .poll(
-        async () => {
-          const attr = await panel.getAttribute('data-render-complete');
-          const now = Date.now();
-
-          if (attr === 'true') {
-            if (!stableSince) {
-              stableSince = now;
-            }
-            return now - stableSince >= minDurationMs;
-          }
-          // Reset if it flips away from 'true'
-          stableSince = null;
-          return false;
-        },
-        {
-          message: `data-render-complete on card ${index} did not stay 'true' for ${minDurationMs}ms`,
-          timeout: totalTimeoutMs,
-          intervals: [pollIntervalMs],
-        }
-      )
-      .toBe(true);
-  }
-
-  /**
-   * Filters by the first visible legend series in a metric card chart.
-   *
-   * When a breakdown dimension is active, each series gets a legend entry.
-   * Elastic-charts renders legend action buttons with stable `data-test-subj`
-   * attributes: `legend-{seriesLabel}` opens the action popover and
-   * `legend-{seriesLabel}-filterIn` applies the "Filter for" action.
-   * This triggers the same `onFilter` callback path as clicking a data point
-   * directly, but is far more reliable because the legend is DOM-rendered
-   * rather than canvas-rendered (no hit-detection radius concerns).
-   *
-   * NOTE: This requires `onFilter` to be wired up for ES|QL mode in
-   * `use_discover_histogram.ts`. Without that product fix the filter action
-   * is a no-op and the WHERE clause will not be appended to the query.
-   */
-  public async filterByFirstLegendSeries(cardIndex: number): Promise<void> {
-    const card = this.getCardByIndex(cardIndex);
-    // Read the data-test-subj of the first legend trigger in the card's DOM so
-    // we can build a fully specific selector, avoiding positional Playwright APIs.
-    // Legend triggers have data-test-subj="legend-{seriesValue}"; child action
-    // buttons share the same prefix so they are excluded from the query.
-    const triggerTestSubj = await card
-      .locator('[data-test-subj^="legend-"]:not([data-test-subj*="-filter"])')
-      .evaluateAll((els) => els[0]?.getAttribute('data-test-subj') ?? null);
-
-    if (!triggerTestSubj) {
-      throw new Error(`No legend items found in card ${cardIndex}`);
-    }
-
-    await card.locator(`[data-test-subj="${triggerTestSubj}"]`).click();
-    // The filter-in button renders in a portal; scope to the page not the card.
-    await this.page.locator(`[data-test-subj="${triggerTestSubj}-filterIn"]`).click();
-  }
-
-  /**
-   * Returns the chart canvas locator within a metric card's Lens embeddable.
-   */
-  public getChartCanvasForCard(index: number): Locator {
-    return this.getCardByIndex(index).locator('canvas');
-  }
-
-  /**
-   * Performs a brush (click-and-drag) gesture on the chart canvas within a
-   * metric card. Drags from ~25% to ~75% of the canvas width horizontally.
-   */
-  public async brushChartInCard(index: number): Promise<void> {
-    const canvas = this.getChartCanvasForCard(index);
-    await canvas.waitFor({ state: 'visible' });
-    const box = await canvas.boundingBox();
-    if (!box) {
-      throw new Error(`Could not get bounding box for chart canvas in card ${index}`);
-    }
-    const y = box.y + box.height / 2;
-    const startX = box.x + box.width * 0.25;
-    const endX = box.x + box.width * 0.75;
-
-    await this.page.mouse.move(startX, y);
-    await this.page.mouse.down();
-    await this.page.mouse.move(endX, y, { steps: 10 });
-    await this.page.mouse.up();
   }
 
   /**

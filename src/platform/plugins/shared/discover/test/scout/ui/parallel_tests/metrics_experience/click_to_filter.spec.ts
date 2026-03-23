@@ -81,13 +81,13 @@ spaceTest.describe(
         });
 
         await spaceTest.step('wait for chart to render with breakdown', async () => {
-          await metricsExperience.waitForCardRenderComplete(0);
+          await metricsExperience.chartInteractions.waitForCardRenderComplete(0);
         });
 
         const queryBefore = await discover.getEsqlQueryValue();
 
         await spaceTest.step('click a legend series to trigger filter', async () => {
-          await metricsExperience.filterByFirstLegendSeries(0);
+          await metricsExperience.chartInteractions.filterByFirstLegendSeries(0);
           await discover.waitUntilSearchingHasFinished();
         });
 
@@ -98,7 +98,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('chart should re-render with the filtered query', async () => {
-          await metricsExperience.waitForCardRenderComplete(0);
+          await metricsExperience.chartInteractions.waitForCardRenderComplete(0);
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
         });
       }

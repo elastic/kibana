@@ -55,14 +55,14 @@ spaceTest.describe(
         const timeConfigBefore = await pageObjects.datePicker.getTimeConfig();
 
         await spaceTest.step('brush the first chart card', async () => {
-          await metricsExperience.brushChartInCard(0);
+          await metricsExperience.chartInteractions.brushChartInCard(0);
           await pageObjects.discover.waitUntilSearchingHasFinished();
         });
 
         await spaceTest.step(
           'first chart should re-render with the narrowed time range',
           async () => {
-            await metricsExperience.waitForCardRenderComplete(0);
+            await metricsExperience.chartInteractions.waitForCardRenderComplete(0);
             await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
 
             const timeConfigAfter = await pageObjects.datePicker.getTimeConfig();
