@@ -8,6 +8,7 @@
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 
 export class PackagePolicyService {
@@ -206,10 +207,15 @@ export class PackagePolicyService {
     const spacePackagePolicies: NewPackagePolicyWithId[] = [];
 
     for (const pkgPolicy of policies) {
-      // Each package policy is associated with a single agent policy
-      const agentPolicy = agentPolicyById.get(pkgPolicy.policy_ids[0]);
-      if (agentPolicy?.space_ids?.includes(spaceId)) {
-        spacePackagePolicies.push(pkgPolicy);
+      if (pkgPolicy.policy_ids) {
+        pkgPolicy.policy_ids?.forEach((policyId) => {
+          const agentPolicy = agentPolicyById.get(policyId);
+          if (agentPolicy?.space_ids?.includes(spaceId)) {
+            spacePackagePolicies.push(pkgPolicy);
+          } else {
+            defaultSpacePackagePolicies.push(pkgPolicy);
+          }
+        });
       } else {
         defaultSpacePackagePolicies.push(pkgPolicy);
       }
@@ -221,10 +227,13 @@ export class PackagePolicyService {
     }[] = [];
 
     if (defaultSpacePackagePolicies.length > 0) {
-      res.push({ client: defaultSpaceSoClient, policies: defaultSpacePackagePolicies });
+      res.push({
+        client: defaultSpaceSoClient,
+        policies: uniqBy(defaultSpacePackagePolicies, 'id'),
+      });
     }
     if (spacePackagePolicies.length > 0) {
-      res.push({ client: spaceSoClient, policies: spacePackagePolicies });
+      res.push({ client: spaceSoClient, policies: uniqBy(spacePackagePolicies, 'id') });
     }
 
     return res;

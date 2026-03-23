@@ -568,7 +568,7 @@ export class SyntheticsPrivateLocation {
           spaceId,
         });
         const failedPolicies = result?.filter((policy) => {
-          return !policy.success && policy?.statusCode !== 404;
+          return policy && !policy.success && policy?.statusCode !== 404;
         });
         if (failedPolicies?.length === policyIdsToDelete.size) {
           throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
