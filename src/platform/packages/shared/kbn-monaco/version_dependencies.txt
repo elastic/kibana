@@ -4,8 +4,8 @@
 @jridgewell/source-map@0.3.5
 @jridgewell/sourcemap-codec@1.5.5
 @jridgewell/trace-mapping@0.3.25
-@types/eslint@8.44.2
 @types/eslint-scope@3.7.7
+@types/eslint@8.44.2
 @types/estree@0.0.50
 @types/estree@1.0.8
 @types/json-schema@7.0.11
@@ -28,11 +28,11 @@
 @xtuc/ieee754@1.2.0
 @xtuc/long@4.2.2
 acorn@8.15.0
-ajv@6.14.0
-ajv@8.18.0
 ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
+ajv@6.14.0
+ajv@8.18.0
 babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
 browserslist@4.28.0
@@ -87,12 +87,12 @@ punycode@2.3.1
 require-from-string@2.0.2
 schema-utils@3.3.0
 schema-utils@4.3.2
-source-map@0.6.1
 source-map-support@0.5.21
+source-map@0.6.1
 supports-color@8.1.1
 tapable@2.3.0
-terser@5.40.0
 terser-webpack-plugin@5.3.17
+terser@5.40.0
 tslib@1.14.1
 undici-types@6.21.0
 update-browserslist-db@1.1.4
@@ -103,7 +103,7 @@ vscode-languageserver-textdocument@1.0.12
 vscode-languageserver-types@3.17.5
 vscode-uri@3.1.0
 watchpack@2.4.1
-webpack@5.96.1
 webpack-sources@3.2.3
+webpack@5.96.1
 yaml@2.3.4
 yocto-queue@1.1.1
