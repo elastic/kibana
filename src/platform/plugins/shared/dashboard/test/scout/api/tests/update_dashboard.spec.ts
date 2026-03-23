@@ -101,7 +101,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.access_control]: definition for this key is missing'
+      "[request body.access_control]: a value wasn't expected to be present"
     );
   });
 
