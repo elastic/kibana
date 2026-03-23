@@ -36,6 +36,15 @@ export function useStepExecution(
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
     staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS, // will be cleared when switching to a different execution
-    refetchInterval: isStepFinished ? false : REFETCH_INTERVAL_MS,
+    // Use the fetched data's own status to decide when to stop polling, rather than
+    // relying solely on the lightweight polling status. This handles the case where
+    // the execution polling already reports the step as finished, but ES hasn't
+    // refreshed the full step document (with input/output) for the detailed fetch yet.
+    refetchInterval: (data) => {
+      if (data && isTerminalStatus(data.status)) {
+        return false;
+      }
+      return REFETCH_INTERVAL_MS;
+    },
   });
 }
