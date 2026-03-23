@@ -233,7 +233,7 @@ export interface KibanaRequest<
    * API for recording custom timing events during request processing.
    * These events are automatically included in the Server-Timing response header.
    */
-  readonly timing: RequestTiming;
+  readonly publicallyAvailableTiming: RequestTiming;
 
   /**
    * Opt-in flag to enable Elasticsearch request timing tracking.
