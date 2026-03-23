@@ -5,15 +5,8 @@ Object {
   "dsl": Array [
     "{
   \\"index\\": [
-    \\".entities.v2.latest.security_default\\"
-  ],
-  \\"body\\": {
-    \\"terms\\": {
-      \\"entity.EngineMetadata.Type\\": [
-        \\"host\\"
-      ]
-    }
-  }
+    \\".entities.v1.latest.security_host_default\\"
+  ]
 }",
   ],
   "response": Array [
