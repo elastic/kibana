@@ -86,7 +86,11 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
     (config.get('kbnTestServer.serverArgs') as string[] | undefined) || [];
 
   let kbnFlags = parseRawFlags([
+    // When installDir is passed, we run from a built version of Kibana which uses different command line
+    // arguments. If installDir is not passed, we run from source code.
     ...(installDir ? [...buildArgs, ...serverArgs] : [...sourceArgs, ...serverArgs]),
+
+    // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
     ...(options.extraKbnOpts ?? []),
   ]);
 
@@ -96,6 +100,7 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
 
   const mainName = (useTaskRunner ? 'kbn-ui' : 'kibana') + (options.remote ? '-remote' : '');
   const promises = [
+    // main process
     procs.run(mainName, {
       ...procRunnerOpts,
       writeLogsToPath: options.logsDir
@@ -121,6 +126,7 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
     const tasksProcName = 'kbn-tasks' + (options.remote ? '-remote' : '');
     const kibanaPort = config.get('servers.kibana.port') as number;
 
+    // dedicated task runner
     promises.push(
       procs.run(tasksProcName, {
         ...procRunnerOpts,
