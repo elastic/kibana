@@ -42,3 +42,10 @@ export const TOOLS_WRITE_SECURITY: RouteSecurity = {
 export const SKILLS_WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.manageSkills] },
 };
+
+/**
+ * Security configuration object for write access to memory.
+ */
+export const MEMORY_WRITE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [apiPrivileges.manageMemory] },
+};

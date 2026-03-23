@@ -47,6 +47,13 @@ const BASE_DEEP_LINKS = [
       defaultMessage: 'Connectors',
     }),
   },
+  {
+    id: 'memory',
+    path: '/memory',
+    title: i18n.translate('xpack.agentBuilder.memory.title', {
+      defaultMessage: 'Memory',
+    }),
+  },
 ];
 
 const SKILLS_DEEP_LINK = {

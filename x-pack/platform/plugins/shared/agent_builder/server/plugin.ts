@@ -35,6 +35,10 @@ import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
+import { createMemoryTools } from './services/tools/builtin/memory';
+import { registerMemoryContextHook } from './hooks/memory/register_memory_context_hook';
+import { registerMemoryLearningHook } from './hooks/memory/register_memory_learning_hook';
+import { registerSigeventsMemoryHook } from './hooks/memory/register_sigevents_memory_hook';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 
 export class AgentBuilderPlugin
@@ -53,6 +57,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private coreStart?: CoreStart;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -172,6 +177,21 @@ export class AgentBuilderPlugin
 
     registerSkillToolsLoaderHook(serviceSetups);
 
+    registerMemoryContextHook(serviceSetups, {
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerMemoryLearningHook(serviceSetups, {
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerSigeventsMemoryHook(serviceSetups, {
+      logger: this.logger,
+      getInternalServices,
+    });
+
     const smlTools = createSmlTools({
       getSmlService: () => {
         const services = this.serviceManager.internalStart;
@@ -182,6 +202,25 @@ export class AgentBuilderPlugin
       },
     });
     smlTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
+    });
+
+    const memoryTools = createMemoryTools({
+      getMemoryService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Memory service not available — plugin has not started');
+        }
+        return services.memory;
+      },
+      getSecurity: () => {
+        if (!this.coreStart) {
+          throw new Error('Security service not available — plugin has not started');
+        }
+        return this.coreStart.security;
+      },
+    });
+    memoryTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 
@@ -227,6 +266,7 @@ export class AgentBuilderPlugin
     coreStart: CoreStart,
     { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
+    this.coreStart = coreStart;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
     const startServices = this.serviceManager.startServices({

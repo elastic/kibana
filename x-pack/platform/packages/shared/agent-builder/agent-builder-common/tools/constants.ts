@@ -33,6 +33,13 @@ export const platformCoreTools = {
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
   smlAttach: platformCoreTool('sml_attach'),
+  // Memory tools
+  memorySearch: platformCoreTool('memory_search'),
+  memoryRead: platformCoreTool('memory_read'),
+  memoryWrite: platformCoreTool('memory_write'),
+  memoryPatch: platformCoreTool('memory_patch'),
+  memoryList: platformCoreTool('memory_list'),
+  memoryDelete: platformCoreTool('memory_delete'),
 } as const;
 
 export const platformStreamsSigEventsTools = {
@@ -83,6 +90,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
+  platformCoreTools.memorySearch,
+  platformCoreTools.memoryRead,
 ];
 
 /**

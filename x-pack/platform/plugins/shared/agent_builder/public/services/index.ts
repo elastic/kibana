@@ -15,5 +15,6 @@ export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
 export { SkillsService } from './skills/skills_service';
 export { PluginsService } from './plugins/plugins_service';
+export { MemoryService } from './memory/memory_service';
 export { EventsService } from './events';
 export type { AgentBuilderInternalService } from './types';

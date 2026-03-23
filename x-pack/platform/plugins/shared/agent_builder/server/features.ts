@@ -95,6 +95,17 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 savedObject: { all: [], read: [] },
                 ui: [uiPrivileges.manageSkills],
               },
+              {
+                id: subFeaturePrivilegeIds.manageMemory,
+                name: i18n.translate(
+                  'xpack.agentBuilder.featureRegistry.subFeatures.manageMemory.privilege',
+                  { defaultMessage: 'Manage memory' }
+                ),
+                includeIn: 'all',
+                api: [apiPrivileges.manageMemory],
+                savedObject: { all: [], read: [] },
+                ui: [uiPrivileges.manageMemory],
+              },
             ],
           },
         ],

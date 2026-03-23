@@ -21,6 +21,9 @@ import { AgentBuilderSkillCreatePage } from './pages/skill_create';
 import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
+import { AgentBuilderMemoryPage } from './pages/memory';
+import { AgentBuilderMemoryEntryPage } from './pages/memory_entry';
+import { AgentBuilderMemoryHistoryPage } from './pages/memory_history';
 import { useExperimentalFeatures } from './hooks/use_experimental_features';
 import { useKibana } from './hooks/use_kibana';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
@@ -99,6 +102,16 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
             </Route>,
           ]
         : null}
+
+      <Route path="/memory/:entryId/history">
+        <AgentBuilderMemoryHistoryPage />
+      </Route>
+      <Route path="/memory/:entryId">
+        <AgentBuilderMemoryEntryPage />
+      </Route>
+      <Route path="/memory">
+        <AgentBuilderMemoryPage />
+      </Route>
 
       {/* Default to conversations page */}
       <Route path="/">
