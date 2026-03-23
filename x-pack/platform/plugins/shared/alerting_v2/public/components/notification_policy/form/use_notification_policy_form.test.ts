@@ -17,12 +17,15 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: 'data.severity : "critical"',
-  group_by: ['host.name', 'service.name'],
+  groupBy: ['host.name', 'service.name'],
   throttle: { interval: '5m' },
+  snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
+  createdByUsername: 'elastic',
   createdAt: '2026-03-01T10:00:00.000Z',
   updatedBy: 'elastic',
+  updatedByUsername: 'elastic',
   updatedAt: '2026-03-01T10:00:00.000Z',
   auth: {
     owner: 'elastic',
@@ -102,7 +105,7 @@ describe('useNotificationPolicyForm', () => {
 
       const payload = onSubmitCreate.mock.calls[0][0];
       expect(payload).not.toHaveProperty('matcher');
-      expect(payload).not.toHaveProperty('group_by');
+      expect(payload).not.toHaveProperty('groupBy');
       expect(payload).not.toHaveProperty('throttle');
     });
   });
@@ -142,7 +145,7 @@ describe('useNotificationPolicyForm', () => {
     it('maps immediate frequency when no throttle is present', () => {
       const policyWithoutThrottle: NotificationPolicyResponse = {
         ...EXISTING_POLICY,
-        throttle: undefined,
+        throttle: null,
       };
       const { result } = renderHook(() =>
         useNotificationPolicyForm({
@@ -175,7 +178,7 @@ describe('useNotificationPolicyForm', () => {
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
         matcher: 'data.severity : "critical"',
-        group_by: ['host.name', 'service.name'],
+        groupBy: ['host.name', 'service.name'],
         throttle: { interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
       });

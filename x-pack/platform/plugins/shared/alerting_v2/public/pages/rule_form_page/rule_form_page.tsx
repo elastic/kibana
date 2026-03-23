@@ -11,6 +11,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
@@ -116,6 +117,7 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const lens = useService(PluginStart('lens')) as LensPublicStart;
   const queryClient = useQueryClient();
 
   useBreadcrumbs(isEditing ? 'edit' : 'create');
@@ -127,8 +129,9 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
       dataViews,
       notifications,
       application,
+      lens,
     }),
-    [http, data, dataViews, notifications, application]
+    [http, data, dataViews, notifications, application, lens]
   );
 
   const onSuccess = useCallback(() => {

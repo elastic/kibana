@@ -19,11 +19,11 @@ export const JiraConnector: ConnectorSpec = {
     id: '.jira-cloud',
     displayName: 'Jira Cloud',
     description: i18n.translate('core.kibanaConnectorSpecs.jira.metadata.description', {
-      defaultMessage: 'Connect to Jira to pull data from your project.',
+      defaultMessage: 'Search issues, browse projects, and look up users in Jira Cloud',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: [

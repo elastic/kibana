@@ -57,6 +57,7 @@ const mockServices = {
       subscribe: () => ({ unsubscribe: () => {} }),
     },
   } as any,
+  lens: {} as any,
 };
 
 const mockFormServices: RuleFormServices = {
@@ -65,6 +66,7 @@ const mockFormServices: RuleFormServices = {
   dataViews: mockServices.dataViews,
   application: mockServices.application,
   notifications: mockServices.notifications,
+  lens: mockServices.lens,
 };
 
 // =============================================================================

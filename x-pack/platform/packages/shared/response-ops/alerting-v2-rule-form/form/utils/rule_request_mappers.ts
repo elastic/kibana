@@ -13,6 +13,11 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 
+const RUNBOOK_ARTIFACT_TYPE = 'runbook';
+const createRunbookArtifactId = () =>
+  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
+
 // ---------------------------------------------------------------------------
 // FormValues → API request
 // ---------------------------------------------------------------------------
@@ -130,7 +135,38 @@ export interface RuleRequestCommon {
     recovering_count?: number;
     recovering_timeframe?: string;
   };
+  artifacts?: RuleArtifactPayload;
 }
+
+const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
+  const currentArtifacts = artifacts ?? [];
+  const runbookArtifact = currentArtifacts.find(
+    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+  );
+  const runbookValue = runbookArtifact?.value.trim();
+
+  if (runbookArtifact && !runbookValue) {
+    const artifactsWithoutRunbook = currentArtifacts.filter(
+      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
+    );
+    return artifactsWithoutRunbook.length ? artifactsWithoutRunbook : undefined;
+  }
+
+  if (runbookArtifact && runbookValue) {
+    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
+    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
+      return currentArtifacts.length ? currentArtifacts : undefined;
+    }
+
+    return currentArtifacts.map((artifact) =>
+      artifact.type === RUNBOOK_ARTIFACT_TYPE
+        ? { ...artifact, id: runbookId, value: runbookValue }
+        : artifact
+    );
+  }
+
+  return currentArtifacts.length ? currentArtifacts : undefined;
+};
 
 /**
  * Maps `FormValues` to the common API request shape (snake_case) shared by
@@ -145,8 +181,10 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     grouping,
     recoveryPolicy,
     stateTransition,
+    artifacts,
     kind,
   } = formValues;
+  const mappedArtifacts = mapArtifacts(artifacts);
 
   return {
     metadata: mapMetadata(metadata),
@@ -156,6 +194,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     grouping: mapGrouping(grouping),
     recovery_policy: mapRecoveryPolicy(recoveryPolicy, evaluation),
     state_transition: mapStateTransition(kind, stateTransition),
+    ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
 };
 
@@ -174,7 +213,7 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
  * explicit removals (as opposed to `undefined` which omits the key entirely).
  */
 export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, recovery_policy, state_transition, ...rest } =
+  const { grouping, recovery_policy, state_transition, artifacts, ...rest } =
     mapFormValuesToRuleRequest(formValues);
 
   return {
@@ -182,6 +221,7 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
     grouping: grouping ?? null,
     recovery_policy: recovery_policy ?? null,
     state_transition: state_transition ?? null,
+    artifacts: artifacts ?? null,
   };
 };
 
@@ -241,4 +281,5 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
         },
       }
     : {}),
+  ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
 });

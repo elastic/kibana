@@ -62,6 +62,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       });
 
       expect(result).toEqual(
@@ -78,6 +79,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
+          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
         })
       );
     });
@@ -591,6 +593,18 @@ describe('updateRuleDataSchema', () => {
       metadata: { description: 'updated description' },
     });
     expect(result.metadata?.description).toBe('updated description');
+  });
+
+  it('accepts artifacts in update payload and supports null removal', () => {
+    const withArtifacts = updateRuleDataSchema.parse({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+    expect(withArtifacts).toMatchObject({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+
+    const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
+    expect(nullArtifacts).toMatchObject({ artifacts: null });
   });
 
   it('accepts an enabled field set to true', () => {

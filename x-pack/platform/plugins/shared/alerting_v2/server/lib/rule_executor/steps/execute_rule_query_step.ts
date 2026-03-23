@@ -71,10 +71,20 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         abortSignal: input.executionContext.signal,
       });
 
+      let yielded = false;
+
       for await (const batch of esqlRowBatchStream) {
+        yielded = true;
         yield {
           type: 'continue',
           state: { ...state, queryPayload, esqlRowBatch: batch },
+        };
+      }
+
+      if (!yielded) {
+        yield {
+          type: 'continue',
+          state: { ...state, queryPayload, esqlRowBatch: [] },
         };
       }
     });

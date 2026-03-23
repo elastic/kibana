@@ -12,6 +12,7 @@ import {
   createDispatcherPipelineState,
   createAlertEpisode,
   createNotificationGroup,
+  createNotificationPolicy,
 } from '../fixtures/test_utils';
 
 const createMockStorageService = (): jest.Mocked<StorageServiceContract> => ({
@@ -156,7 +157,7 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  it('records dispatched episodes with fire and notified action types', async () => {
+  it('records dispatched episodes with fire action type when policy has no throttle interval', async () => {
     const mockService = createMockStorageService();
     const step = new StoreActionsStep(mockService);
 
@@ -177,6 +178,51 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [group],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs: [
+        {
+          '@timestamp': mockDate.toISOString(),
+          group_hash: 'hash-1',
+          last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
+          actor: 'system',
+          action_type: 'fire',
+          rule_id: 'rule-1',
+          source: 'internal',
+          reason: 'dispatched by policy policy-1',
+        },
+      ],
+    });
+  });
+
+  it('records notified action when dispatch policy has a throttle interval', async () => {
+    const mockService = createMockStorageService();
+    const step = new StoreActionsStep(mockService);
+
+    const episode = createAlertEpisode({
+      rule_id: 'rule-1',
+      group_hash: 'hash-1',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    const group = createNotificationGroup({
+      id: 'group-1',
+      ruleId: 'rule-1',
+      policyId: 'policy-1',
+      episodes: [episode],
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([
+        ['policy-1', createNotificationPolicy({ id: 'policy-1', throttle: { interval: '1h' } })],
+      ]),
     });
 
     const result = await step.execute(state);
@@ -253,6 +299,12 @@ describe('StoreActionsStep', () => {
       suppressed: [{ ...suppressedEpisode, reason: 'manually suppressed' }],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
+      policies: new Map([
+        [
+          'dispatch-policy',
+          createNotificationPolicy({ id: 'dispatch-policy', throttle: { interval: '1h' } }),
+        ],
+      ]),
     });
 
     const result = await step.execute(state);
@@ -439,7 +491,6 @@ describe('StoreActionsStep', () => {
     );
     expect(actionTypes).toContain('suppress');
     expect(actionTypes).toContain('fire');
-    expect(actionTypes).toContain('notified');
     expect(actionTypes).toContain('unmatched');
 
     const noActionDocs = callArgs.docs.filter(
@@ -493,12 +544,10 @@ describe('StoreActionsStep', () => {
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(3);
+    expect(callArgs.docs).toHaveLength(2);
     expect(callArgs.docs[0].action_type).toBe('fire');
     expect(callArgs.docs[0].group_hash).toBe('hash-1');
     expect(callArgs.docs[1].action_type).toBe('fire');
     expect(callArgs.docs[1].group_hash).toBe('hash-2');
-    expect(callArgs.docs[2].action_type).toBe('notified');
-    expect(callArgs.docs[2].notification_group_id).toBe('group-1');
   });
 });
