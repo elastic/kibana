@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 
 /**
@@ -51,33 +51,48 @@ export function getEcsInfoTool(fieldsMetadataClient: IFieldsMetadataClient): Dyn
       if (rootFields && rootFields.length > 0) {
         result.root_fields_results = await Promise.all(
           rootFields.map(async (rf: string) => {
-            const childrenDict = await fieldsMetadataClient.getFieldChildren(rf, {
-              source: ['ecs'],
-            });
-            const children = childrenDict.pick(['type', 'short']);
-            const directFields = Object.entries(children).map(([field, meta]) => ({
-              field,
-              type: meta.type ?? 'unknown',
-              short: meta.short ?? '',
-            }));
+            try {
+              const childrenDict = await fieldsMetadataClient.getFieldChildren(rf, {
+                source: ['ecs'],
+              });
+              const children = childrenDict.pick(['type', 'short']);
+              const directFields = Object.entries(children).map(([field, meta]) => ({
+                field,
+                type: meta.type ?? 'unknown',
+                short: meta.short ?? '',
+              }));
 
-            if (directFields.length === 0) {
+              if (directFields.length === 0) {
+                return {
+                  root_field: rf,
+                  error: `No ECS fields found under "${rf}". Check spelling against the ECS root fields list provided in your context.`,
+                };
+              }
+
+              return { root_field: rf, direct_fields: directFields };
+            } catch (err) {
               return {
                 root_field: rf,
-                error: `No ECS fields found under "${rf}". Check spelling against the ECS root fields list provided in your context.`,
+                error: `Failed to fetch ECS children for "${rf}": ${(err as Error).message}`,
               };
             }
-
-            return { root_field: rf, direct_fields: directFields };
           })
         );
       }
 
       if (fieldPaths && fieldPaths.length > 0) {
-        const dict = await fieldsMetadataClient.find({
-          fieldNames: fieldPaths,
-          source: ['ecs'],
-        });
+        let dict;
+        try {
+          dict = await fieldsMetadataClient.find({
+            fieldNames: fieldPaths,
+            source: ['ecs'],
+          });
+        } catch (err) {
+          return JSON.stringify({
+            error: `Failed to fetch ECS field metadata: ${(err as Error).message}`,
+          });
+        }
+
         const fields = dict.pick([
           'type',
           'description',

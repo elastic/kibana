@@ -9,12 +9,12 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { AutomaticImportAgentState } from '../state';
+import type { AutomaticImportAgentStateType } from '../state';
 import {
   BOILERPLATE_PIPELINE,
   BOILERPLATE_PROCESSOR_COUNT,
@@ -36,7 +36,7 @@ interface Operation {
 
 const PROTECTED_FIELD = 'event.original';
 
-const checksEventOriginalMutation = (processor: unknown): string | null => {
+const detectEventOriginalMutation = (processor: unknown): string | null => {
   if (processor == null || typeof processor !== 'object') return null;
   const proc = processor as Record<string, unknown>;
   const type = getProcessorType(proc);
@@ -62,50 +62,51 @@ const checksEventOriginalMutation = (processor: unknown): string | null => {
   return null;
 };
 
+/**
+ * Applies a batch of operations against the original processor array in a single pass.
+ * All indices reference the ORIGINAL snapshot — no sequential offset tracking.
+ *
+ * Resolution order:
+ *  1. Classify each operation into remove/replace/insert maps keyed by original index.
+ *  2. Single-pass build: iterate the original array, emitting replacements / skipping removes /
+ *     appending inserts at the correct positions.
+ */
 const applyOperations = (
   processors: unknown[],
   operations: Operation[]
 ): { processors: unknown[]; applied: string[]; warnings: string[] } => {
-  const result = [...processors];
   const applied: string[] = [];
   const warnings: string[] = [];
-  let offset = 0;
+
+  const removeIndices = new Set<number>();
+  const replaceMap = new Map<number, unknown[]>();
+  const insertAfterMap = new Map<number, unknown[][]>();
 
   for (const op of operations) {
-    const adjustedIndex = op.index + offset;
+    const idx = op.index;
+    const label = `${op.action}@${idx}`;
 
     if (
       (op.action === 'replace' || op.action === 'remove') &&
-      op.index >= 0 &&
-      op.index < BOILERPLATE_PROCESSOR_COUNT
+      idx >= 0 &&
+      idx < BOILERPLATE_PROCESSOR_COUNT
     ) {
       warnings.push(
-        `${op.action}@${op.index}: targets a boilerplate processor (indices 0-${
+        `${label}: targets a boilerplate processor (indices 0–${
           BOILERPLATE_PROCESSOR_COUNT - 1
         } are pre-seeded). ` +
           `Skipped — do not modify ecs.version, message→event.original rename, or message remove.`
       );
-      applied.push(`${op.action}@${op.index}: skipped (boilerplate processor is protected)`);
+      applied.push(`${label}: skipped (boilerplate protected)`);
       continue;
     }
 
-    if (op.action === 'insert' && op.processors) {
+    if ((op.action === 'insert' || op.action === 'replace') && op.processors) {
       for (const proc of op.processors) {
-        const mutationWarning = checksEventOriginalMutation(proc);
+        const mutationWarning = detectEventOriginalMutation(proc);
         if (mutationWarning) {
           warnings.push(
-            `insert@${op.index}: processor ${mutationWarning}. ` +
-              `event.original is read-only and must never be modified, renamed, removed, or gsub'd.`
-          );
-        }
-      }
-    }
-    if (op.action === 'replace' && op.processors) {
-      for (const proc of op.processors) {
-        const mutationWarning = checksEventOriginalMutation(proc);
-        if (mutationWarning) {
-          warnings.push(
-            `replace@${op.index}: processor ${mutationWarning}. ` +
+            `${label}: processor ${mutationWarning}. ` +
               `event.original is read-only and must never be modified, renamed, removed, or gsub'd.`
           );
         }
@@ -113,47 +114,92 @@ const applyOperations = (
     }
 
     switch (op.action) {
-      case 'insert': {
-        const items = op.processors ?? [];
-        if (items.length === 0) {
-          applied.push(`insert@${op.index}: skipped (no processors provided)`);
+      case 'remove': {
+        if (idx < 0 || idx >= processors.length) {
+          applied.push(`${label}: skipped (index ${idx} out of range)`);
           break;
         }
-        const insertAt = adjustedIndex + 1;
-        const clampedInsertAt = Math.max(0, Math.min(insertAt, result.length));
-        result.splice(clampedInsertAt, 0, ...items);
-        applied.push(
-          `insert@${op.index}: inserted ${items.length} processor(s) after index ${op.index}`
-        );
-        offset += items.length;
+        if (removeIndices.has(idx)) {
+          warnings.push(`${label}: duplicate remove at index ${idx} — already scheduled`);
+        }
+        removeIndices.add(idx);
+        applied.push(`${label}: removed`);
         break;
       }
       case 'replace': {
         const items = op.processors ?? [];
         if (items.length === 0) {
-          applied.push(`replace@${op.index}: skipped (no processors provided)`);
+          applied.push(`${label}: skipped (no processors provided)`);
           break;
         }
-        if (adjustedIndex < 0 || adjustedIndex >= result.length) {
-          applied.push(`replace@${op.index}: skipped (index out of range)`);
+        if (idx < 0 || idx >= processors.length) {
+          applied.push(`${label}: skipped (index ${idx} out of range)`);
           break;
         }
-        result.splice(adjustedIndex, 1, ...items);
-        applied.push(
-          `replace@${op.index}: replaced processor at index ${op.index} with ${items.length} processor(s)`
-        );
-        offset += items.length - 1;
+        if (replaceMap.has(idx)) {
+          warnings.push(`${label}: duplicate replace at index ${idx} — last one wins`);
+        }
+        replaceMap.set(idx, items);
+        applied.push(`${label}: replaced with ${items.length} processor(s)`);
         break;
       }
-      case 'remove': {
-        if (adjustedIndex < 0 || adjustedIndex >= result.length) {
-          applied.push(`remove@${op.index}: skipped (index out of range)`);
+      case 'insert': {
+        const items = op.processors ?? [];
+        if (items.length === 0) {
+          applied.push(`${label}: skipped (no processors provided)`);
           break;
         }
-        result.splice(adjustedIndex, 1);
-        applied.push(`remove@${op.index}: removed processor at index ${op.index}`);
-        offset -= 1;
+        const existing = insertAfterMap.get(idx);
+        if (existing) {
+          existing.push(items);
+        } else {
+          insertAfterMap.set(idx, [items]);
+        }
+        applied.push(`${label}: inserted ${items.length} processor(s) after index ${idx}`);
         break;
+      }
+    }
+  }
+
+  for (const idx of removeIndices) {
+    if (replaceMap.has(idx)) {
+      warnings.push(
+        `Conflict at index ${idx}: remove + replace — replace takes precedence`
+      );
+      removeIndices.delete(idx);
+    }
+  }
+
+  const result: unknown[] = [];
+
+  const prependGroups = insertAfterMap.get(-1);
+  if (prependGroups) {
+    for (const group of prependGroups) {
+      result.push(...group);
+    }
+  }
+
+  for (let i = 0; i < processors.length; i++) {
+    if (removeIndices.has(i)) {
+      // removed — skip
+    } else if (replaceMap.has(i)) {
+      result.push(...replaceMap.get(i)!);
+    } else {
+      result.push(processors[i]);
+    }
+
+    const groups = insertAfterMap.get(i);
+    if (groups) {
+      for (const group of groups) {
+        result.push(...group);
+      }
+    }
+  }
+
+  for (const [idx, groups] of insertAfterMap.entries()) {
+    if (idx >= processors.length) {
+      for (const group of groups) {
+        result.push(...group);
       }
     }
   }
@@ -173,9 +219,9 @@ export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicS
           index: z
             .number()
             .describe(
-              'Processor index (0-based). For insert: processors are inserted AFTER this index. ' +
-                'Use -1 to insert at position 0 (beginning of the pipeline). ' +
-                'For replace/remove: the processor at this index is targeted.'
+              'Processor position (0-based) in the ORIGINAL pipeline snapshot (before this batch). ' +
+                'For insert: processors are placed AFTER this position. Use -1 to insert at position 0 (beginning of the pipeline). ' +
+                'For replace/remove: the processor at this position is targeted.'
             ),
           processors: z
             .array(z.any())
@@ -187,11 +233,9 @@ export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicS
       )
       .describe(
         'Batch of operations to apply to the pipeline processors array. ' +
-          `Every index is interpreted against the pipeline BEFORE this batch (not the array mid-batch). ` +
-          `Operations run in order; the implementation tracks an offset so removes/inserts/replaces compose correctly. ` +
-          `Prefer batching several related operations in one call (e.g. parsing + first renames, or a block of ECS renames) to save tokens — ` +
-          `typically 2–4 logical steps per call, not one processor per call and not the entire pipeline in a single huge batch unless you are confident. ` +
-          `The first ${BOILERPLATE_PROCESSOR_COUNT} processors (ecs.version, message rename/remove) are boilerplate — avoid modifying them unless you need to.`
+          `Every index refers to the ORIGINAL pipeline snapshot before this batch — all operations are resolved in a single pass with no index drift between operations. ` +
+          `Prefer batching 2–4 logical steps per call to save tokens. ` +
+          `The first ${BOILERPLATE_PROCESSOR_COUNT} processors (ecs.version, message rename/remove) are boilerplate — avoid modifying them.`
       ),
   });
 
@@ -199,7 +243,7 @@ export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicS
     name: 'modify_pipeline',
     description:
       'Modify the current ingest pipeline by inserting, replacing, or removing processors. ' +
-      'Accepts a batch of operations applied in order; all indices refer to the pipeline BEFORE the batch, with internal offset correction. ' +
+      'Accepts a batch of operations; all indices refer to the ORIGINAL pipeline snapshot before the batch — resolved in a single pass with no index drift between operations. ' +
       'After each call, runs a quick ingest simulation on all samples (not persisted) and returns success/failure summary plus example outputs. ' +
       'Also returns a compact list of custom processors (after boilerplate). ' +
       'The pipeline is automatically initialized with boilerplate processors (ecs.version, message->event.original, on_failure) if empty.',
@@ -209,14 +253,15 @@ export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicS
       _runManager?: CallbackManagerForToolRun,
       config?: ToolRunnableConfig
     ) => {
-      const state = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
+      const state = getCurrentTaskInput<AutomaticImportAgentStateType>();
       let currentPipeline = state.current_pipeline;
 
       if (!currentPipeline?.processors || currentPipeline.processors.length === 0) {
         currentPipeline = { ...BOILERPLATE_PIPELINE };
       }
 
-      const processorsBefore = currentPipeline.processors.length;
+      const processors = currentPipeline.processors ?? BOILERPLATE_PIPELINE.processors;
+      const processorsBefore = processors.length;
       const {
         processors: updatedProcessors,
         applied,

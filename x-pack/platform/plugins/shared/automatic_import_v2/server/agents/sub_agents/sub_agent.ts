@@ -32,168 +32,182 @@ interface TaskToolParams {
   recursionLimit?: number;
 }
 
+type ContextBuilder = (
+  taskDescription: string,
+  state: AutomaticImportAgentStateType,
+  samples?: string[]
+) => string;
+
+const hasPipelineProcessors = (state: AutomaticImportAgentStateType): boolean =>
+  Array.isArray(state.current_pipeline?.processors) &&
+  state.current_pipeline.processors.length > 0;
+
+const wrapTask = (taskDescription: string, ...extraBlocks: string[]): string =>
+  ['<task>', taskDescription, '</task>', ...extraBlocks].join('\n');
+
+const buildAnalyzerContext: ContextBuilder = (taskDescription, _state, samples) => {
+  if (!samples || samples.length === 0) return taskDescription;
+
+  const injectedSamples = samples.slice(0, DEFAULT_ANALYZER_SAMPLE_COUNT);
+  const sampleLines = injectedSamples
+    .map((s, i) => `### Sample ${i + 1}\n\`\`\`\n${s}\n\`\`\``)
+    .join('\n\n');
+
+  return wrapTask(
+    taskDescription,
+    '',
+    `<log_samples injected="${injectedSamples.length}" total_available="${samples.length}">`,
+    sampleLines,
+    '</log_samples>'
+  );
+};
+
+const buildGeneratorContext: ContextBuilder = (taskDescription, state) => {
+  const isReviewIteration = Boolean(state.review);
+  const parts: string[] = ['<task>', taskDescription, '</task>'];
+
+  if (!isReviewIteration && state.analysis) {
+    parts.push('', '<log_format_analysis>', state.analysis, '</log_format_analysis>');
+  }
+
+  if (isReviewIteration && state.review) {
+    parts.push('', '<review_feedback>', state.review, '</review_feedback>');
+  }
+
+  if (hasPipelineProcessors(state)) {
+    const validationResults = state.pipeline_validation_results;
+    if (validationResults?.total_samples != null) {
+      parts.push(
+        '',
+        '<validation_summary>',
+        JSON.stringify(
+          {
+            success_rate: validationResults.success_rate,
+            successful_samples: validationResults.successful_samples,
+            failed_samples: validationResults.failed_samples,
+            total_samples: validationResults.total_samples,
+          },
+          null,
+          2
+        ),
+        '</validation_summary>'
+      );
+    }
+
+    const processors = state.current_pipeline.processors as Array<Record<string, unknown>>;
+    if (isReviewIteration) {
+      parts.push(
+        '',
+        '<current_pipeline format="json">',
+        '<![CDATA[',
+        JSON.stringify(state.current_pipeline, null, 2),
+        ']]>',
+        '</current_pipeline>',
+        '',
+        '<context_note>',
+        'The full pipeline is above (last block). Do NOT call fetch_pipeline — use it directly for indices and processor JSON.',
+        '</context_note>'
+      );
+    } else {
+      const compactToc = formatCompactCustomProcessorToc(processors, BOILERPLATE_PROCESSOR_COUNT);
+      parts.push(
+        '',
+        '<pipeline_overview mode="initial">',
+        `<processor_count>${processors.length}</processor_count>`,
+        '<custom_processors_compact_toc>',
+        compactToc,
+        '</custom_processors_compact_toc>',
+        '</pipeline_overview>'
+      );
+    }
+  }
+
+  return parts.join('\n');
+};
+
+const buildReviewContext: ContextBuilder = (taskDescription, state, samples) => {
+  const parts: string[] = ['<task>', taskDescription, '</task>'];
+
+  parts.push(
+    '',
+    '<validation_results>',
+    JSON.stringify(state.pipeline_validation_results ?? {}, null, 2),
+    '</validation_results>'
+  );
+
+  if (samples && samples.length > 0) {
+    const slice = samples.slice(0, MAX_INJECTED_SAMPLES);
+    parts.push(
+      '',
+      `<sample_logs count="${slice.length}" total_available="${samples.length}">`,
+      JSON.stringify(slice, null, 2),
+      '</sample_logs>'
+    );
+  }
+
+  const generationResults = state.pipeline_generation_results;
+  if (generationResults && generationResults.length > 0) {
+    parts.push(
+      '',
+      '<successful_simulation_outputs>',
+      JSON.stringify(
+        {
+          total_successful_count: generationResults.length,
+          sample_outputs: generationResults.slice(0, MAX_INJECTED_SUCCESSFUL_OUTPUTS),
+        },
+        null,
+        2
+      ),
+      '</successful_simulation_outputs>'
+    );
+  }
+
+  const failureDetails = state.pipeline_validation_results?.failure_details;
+  if (failureDetails && failureDetails.length > 0) {
+    const slice = failureDetails.slice(0, MAX_INJECTED_FAILURE_DETAILS);
+    parts.push(
+      '',
+      '<failure_details>',
+      JSON.stringify(
+        {
+          total_failure_count: failureDetails.length,
+          failures: slice,
+        },
+        null,
+        2
+      ),
+      '</failure_details>'
+    );
+  }
+
+  parts.push(
+    '',
+    '<current_pipeline format="json">',
+    '<![CDATA[',
+    JSON.stringify(state.current_pipeline ?? {}, null, 2),
+    ']]>',
+    '</current_pipeline>'
+  );
+
+  return parts.join('\n');
+};
+
+const CONTEXT_BUILDERS: Record<string, ContextBuilder> = {
+  log_and_ecs_analyzer: buildAnalyzerContext,
+  ingest_pipeline_generator: buildGeneratorContext,
+  review_agent: buildReviewContext,
+};
+
 const injectPipelineState = (
   taskDescription: string,
   agentName: string,
   samples?: string[]
 ): string => {
   try {
-    const currentState = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
-    const hasPipeline =
-      currentState.current_pipeline?.processors &&
-      currentState.current_pipeline.processors.length > 0;
-
-    if (agentName === 'log_and_ecs_analyzer' && samples && samples.length > 0) {
-      const injectedSamples = samples.slice(0, DEFAULT_ANALYZER_SAMPLE_COUNT);
-      const sampleLines = injectedSamples
-        .map((s, i) => `### Sample ${i + 1}\n\`\`\`\n${s}\n\`\`\``)
-        .join('\n\n');
-      return [
-        '<task>',
-        taskDescription,
-        '</task>',
-        '',
-        `<log_samples injected="${injectedSamples.length}" total_available="${samples.length}">`,
-        sampleLines,
-        '</log_samples>',
-      ].join('\n');
-    }
-
-    if (agentName === 'ingest_pipeline_generator') {
-      const isReviewIteration = Boolean(currentState.review);
-      const parts: string[] = ['<task>', taskDescription, '</task>'];
-
-      if (currentState.analysis) {
-        parts.push('', '<log_format_analysis>', currentState.analysis, '</log_format_analysis>');
-      }
-
-      if (isReviewIteration && currentState.review) {
-        parts.push('', '<review_feedback>', currentState.review, '</review_feedback>');
-      }
-
-      if (hasPipeline) {
-        const validationResults = currentState.pipeline_validation_results;
-        if (validationResults?.total_samples != null) {
-          parts.push(
-            '',
-            '<validation_summary>',
-            JSON.stringify(
-              {
-                success_rate: validationResults.success_rate,
-                successful_samples: validationResults.successful_samples,
-                failed_samples: validationResults.failed_samples,
-                total_samples: validationResults.total_samples,
-              },
-              null,
-              2
-            ),
-            '</validation_summary>'
-          );
-        }
-      }
-
-      if (hasPipeline) {
-        const processors = currentState.current_pipeline.processors as Array<
-          Record<string, unknown>
-        >;
-        if (isReviewIteration) {
-          parts.push(
-            '',
-            '<current_pipeline format="json">',
-            '<![CDATA[',
-            JSON.stringify(currentState.current_pipeline, null, 2),
-            ']]>',
-            '</current_pipeline>',
-            '',
-            '<context_note>',
-            'The full pipeline is above (last block). Do NOT call fetch_pipeline — use it directly for indices and processor JSON.',
-            '</context_note>'
-          );
-        } else {
-          const compactToc = formatCompactCustomProcessorToc(
-            processors,
-            BOILERPLATE_PROCESSOR_COUNT
-          );
-          parts.push(
-            '',
-            '<pipeline_overview mode="initial">',
-            `<processor_count>${processors.length}</processor_count>`,
-            '<custom_processors_compact_toc>',
-            compactToc,
-            '</custom_processors_compact_toc>',
-            '</pipeline_overview>'
-          );
-        }
-      }
-
-      return parts.join('\n');
-    }
-
-    if (agentName === 'review_agent') {
-      const parts: string[] = ['<task>', taskDescription, '</task>'];
-
-      parts.push(
-        '',
-        '<validation_results>',
-        JSON.stringify(currentState.pipeline_validation_results ?? {}, null, 2),
-        '</validation_results>'
-      );
-
-      if (samples && samples.length > 0) {
-        const slice = samples.slice(0, MAX_INJECTED_SAMPLES);
-        parts.push(
-          '',
-          `<sample_logs count="${slice.length}" total_available="${samples.length}">`,
-          JSON.stringify(slice, null, 2),
-          '</sample_logs>'
-        );
-      }
-
-      const generationResults = currentState.pipeline_generation_results;
-      if (generationResults && generationResults.length > 0) {
-        parts.push(
-          '',
-          '<successful_simulation_outputs>',
-          JSON.stringify(
-            {
-              total_successful_count: generationResults.length,
-              sample_outputs: generationResults.slice(0, MAX_INJECTED_SUCCESSFUL_OUTPUTS),
-            },
-            null,
-            2
-          ),
-          '</successful_simulation_outputs>'
-        );
-      }
-
-      const failureDetails = currentState.pipeline_validation_results?.failure_details;
-      if (failureDetails && failureDetails.length > 0) {
-        const slice = failureDetails.slice(0, MAX_INJECTED_FAILURE_DETAILS);
-        parts.push(
-          '',
-          '<failure_details>',
-          JSON.stringify(
-            {
-              total_failure_count: failureDetails.length,
-              failures: slice,
-            },
-            null,
-            2
-          ),
-          '</failure_details>'
-        );
-      }
-
-      parts.push(
-        '',
-        '<current_pipeline format="json">',
-        '<![CDATA[',
-        JSON.stringify(currentState.current_pipeline ?? {}, null, 2),
-        ']]>',
-        '</current_pipeline>'
-      );
-
-      return parts.join('\n');
+    const currentState = getCurrentTaskInput<AutomaticImportAgentStateType>();
+    const builder = CONTEXT_BUILDERS[agentName];
+    if (builder) {
+      return builder(taskDescription, currentState, samples);
     }
   } catch {
     // State injection is best-effort; proceed without if unavailable
@@ -237,23 +251,18 @@ export const createTaskTool = (params: TaskToolParams) => {
       };
 
       if (parentState) {
-        if (parentState.current_pipeline) {
-          modifiedState.current_pipeline = parentState.current_pipeline;
-        }
-        if (parentState.analysis) {
-          modifiedState.analysis = parentState.analysis;
-        }
-        if (parentState.review) {
-          modifiedState.review = parentState.review;
-        }
-        if (parentState.pipeline_generation_results) {
-          modifiedState.pipeline_generation_results = parentState.pipeline_generation_results;
-        }
-        if (parentState.pipeline_validation_results) {
-          modifiedState.pipeline_validation_results = parentState.pipeline_validation_results;
-        }
-        if (parentState.failure_count != null) {
-          modifiedState.failure_count = parentState.failure_count;
+        const propagatedFields = [
+          'current_pipeline',
+          'analysis',
+          'review',
+          'pipeline_generation_results',
+          'pipeline_validation_results',
+          'failure_count',
+        ] as const;
+        for (const field of propagatedFields) {
+          if (parentState[field] != null) {
+            modifiedState[field] = parentState[field];
+          }
         }
       }
 

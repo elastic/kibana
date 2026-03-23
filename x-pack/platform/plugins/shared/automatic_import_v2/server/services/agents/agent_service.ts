@@ -59,30 +59,27 @@ export class AgentService {
     );
 
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
+    const modifyPipelineToolInstance = modifyPipelineTool({ esClient, samples });
+    const testPipelineToolInstance = testPipelineTool({ esClient, samples });
+    const fetchPipelineToolInstance = fetchCurrentPipelineTool();
+    const ecsInfoTool = getEcsInfoTool(fieldsMetadataClient);
+
+    const [ecsDict, ecsFieldsets] = await Promise.all([
+      fieldsMetadataClient.find({ source: ['ecs'] }),
+      fieldsMetadataClient.getECSFieldsets(),
+    ]);
+    const ecsFieldSet = new Set(Object.keys(ecsDict.toPlain()));
+    const ecsRootSet = new Set(ecsFieldsets);
+    const ecsRootFieldsSummary = ecsFieldsets.map((fieldset) => `- **${fieldset}**`).join('\n');
+
     const validatorTool = ingestPipelineValidatorTool({
       esClient,
       samples,
       packageName: integrationId,
       dataStreamName: dataStreamId,
       fieldsMetadataClient,
+      ecsFieldSets: { ecsFieldSet, ecsRootSet },
     });
-    const modifyPipelineToolInstance = modifyPipelineTool({ esClient, samples });
-    const testPipelineToolInstance = testPipelineTool({ esClient, samples });
-    const fetchPipelineToolInstance = fetchCurrentPipelineTool();
-    const ecsInfoTool = getEcsInfoTool(fieldsMetadataClient);
-
-    const ecsDict = await fieldsMetadataClient.find({ source: ['ecs'] });
-    const rootCounts = new Map<string, number>();
-    for (const key of Object.keys(ecsDict.toPlain())) {
-      const dotIndex = key.indexOf('.');
-      if (dotIndex === -1) continue;
-      const root = key.substring(0, dotIndex);
-      rootCounts.set(root, (rootCounts.get(root) ?? 0) + 1);
-    }
-    const ecsRootFieldsSummary = Array.from(rootCounts.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([root, count]) => `- **${root}** (${count} fields)`)
-      .join('\n');
 
     const logAndEcsAnalyzerSubAgent = createLogAndEcsAnalyzerAgent({
       prompt: `You have access to fetch_log_samples, get_ecs_info, and submit_analysis tools.

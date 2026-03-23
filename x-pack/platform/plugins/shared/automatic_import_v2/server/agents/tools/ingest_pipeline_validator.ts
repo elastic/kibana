@@ -15,11 +15,15 @@ import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manage
 import type { estypes } from '@elastic/elasticsearch';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import type { AutomaticImportAgentStateType } from '../state';
+import {
+  formatSimulateDoc,
+  groupErrors,
+  stripBoilerplateFields,
+  processSimulationResults,
+} from './pipeline_utils';
 
 const MAX_UNIQUE_ERROR_TYPES = 10;
 const MAX_SAMPLE_OUTPUTS = 3;
-
-const STRIPPED_OUTPUT_FIELDS = new Set(['event.original', 'ecs.version']);
 
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
   const parts = path.split('.');
@@ -38,8 +42,6 @@ const asArray = (value: unknown): string[] => {
   return [];
 };
 
-const IGNORED_FIELDS: string[] = [];
-
 const flattenKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
   const keys: string[] = [];
   for (const [key, value] of Object.entries(obj)) {
@@ -53,63 +55,19 @@ const flattenKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
   return keys;
 };
 
-interface ValidatorToolOptions {
+export interface EcsFieldSets {
+  ecsFieldSet: Set<string>;
+  ecsRootSet: Set<string>;
+}
+
+export interface ValidatorToolOptions {
   esClient: ElasticsearchClient;
   samples: string[];
   packageName: string;
   dataStreamName: string;
   fieldsMetadataClient: IFieldsMetadataClient;
+  ecsFieldSets?: EcsFieldSets;
 }
-
-interface DocTemplate {
-  _index: string;
-  _id: string;
-  _source: {
-    message: string;
-    [key: string]: unknown;
-  };
-}
-
-function formatSample(sample: string): DocTemplate {
-  return {
-    _index: 'index',
-    _id: 'id',
-    _source: { message: sample },
-  };
-}
-
-interface FailedSample {
-  sample: string;
-  error: string;
-}
-
-interface ErrorGroup {
-  error: string;
-  count: number;
-  example_sample: string;
-}
-
-const groupErrors = (failedSamples: FailedSample[]): ErrorGroup[] => {
-  const groups = new Map<string, { count: number; example: string }>();
-
-  for (const { error, sample } of failedSamples) {
-    const existing = groups.get(error);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      groups.set(error, { count: 1, example: sample.substring(0, 300) });
-    }
-  }
-
-  return [...groups.entries()]
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, MAX_UNIQUE_ERROR_TYPES)
-    .map(([error, { count, example }]) => ({
-      error,
-      count,
-      example_sample: example,
-    }));
-};
 
 const pickRandomSamples = <T>(items: T[], count: number): T[] => {
   if (items.length <= count) return items;
@@ -121,11 +79,7 @@ const pickRandomSamples = <T>(items: T[], count: number): T[] => {
   return shuffled.slice(0, count);
 };
 
-function makeErrorCommand(
-  message: string,
-  totalSamples: number,
-  toolCallId: string
-): Command {
+function makeErrorCommand(message: string, totalSamples: number, toolCallId: string): Command {
   return new Command({
     update: {
       pipeline_generation_results: [],
@@ -148,9 +102,15 @@ function makeErrorCommand(
 }
 
 export function ingestPipelineValidatorTool(options: ValidatorToolOptions): DynamicStructuredTool {
-  const { esClient, samples, packageName, dataStreamName, fieldsMetadataClient } = options;
+  const {
+    esClient,
+    samples,
+    packageName,
+    dataStreamName,
+    fieldsMetadataClient,
+    ecsFieldSets: precomputedEcsFieldSets,
+  } = options;
 
-  const ignoredFieldSet = new Set(IGNORED_FIELDS);
   const customFieldPrefix = `${packageName}.${dataStreamName}.`;
 
   const validatorSchema = z.object({});
@@ -173,10 +133,7 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       const state = getCurrentTaskInput<AutomaticImportAgentStateType>();
       const currentPipeline = state.current_pipeline;
 
-      if (
-        !currentPipeline?.processors ||
-        currentPipeline.processors.length === 0
-      ) {
+      if (!currentPipeline?.processors || currentPipeline.processors.length === 0) {
         return makeErrorCommand(
           'No pipeline in state. Use modify_pipeline to build one first.',
           samples.length,
@@ -206,9 +163,9 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
         });
       }
 
-      const docs = samples.map((sample: string) => formatSample(sample));
+      const docs = samples.map(formatSimulateDoc);
 
-      let response: estypes.IngestSimulateResponse;
+      let response;
       try {
         response = await esClient.ingest.simulate({
           docs,
@@ -222,30 +179,10 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
         );
       }
 
-      const failedSamples: FailedSample[] = [];
-      const successfulDocuments: Array<estypes.IngestDocumentSimulation['doc']> = [];
-      let successfulCount = 0;
-
-      response.docs.forEach((doc, index) => {
-        if (!doc) {
-          failedSamples.push({
-            sample: samples[index],
-            error: 'Document was dropped by the pipeline',
-          });
-        } else if (doc.doc?._source?.error) {
-          const errorDetail =
-            typeof doc.doc._source.error === 'string'
-              ? doc.doc._source.error
-              : JSON.stringify(doc.doc._source.error);
-          failedSamples.push({
-            sample: samples[index],
-            error: errorDetail,
-          });
-        } else if (doc.doc?._source) {
-          successfulCount++;
-          successfulDocuments.push(doc.doc._source);
-        }
-      });
+      const { failedSamples, successfulDocuments, successfulCount } = processSimulationResults(
+        response,
+        samples
+      );
 
       const failedCount = failedSamples.length;
       const totalSamples = samples.length;
@@ -254,35 +191,18 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       const summaryMessage =
         failedCount === 0
           ? `Pipeline validation successful! All ${totalSamples} samples processed correctly.`
-          : `Pipeline validation completed with ${successfulCount}/${totalSamples} successful (${successRate.toFixed(1)}%).`;
+          : `Pipeline validation completed with ${successfulCount}/${totalSamples} successful (${successRate.toFixed(
+              1
+            )}%).`;
 
       const sampledOutputs = pickRandomSamples(successfulDocuments, MAX_SAMPLE_OUTPUTS).map(
-        (doc, i) => {
-          const source = { ...(doc as Record<string, unknown>) };
-          for (const strippedField of STRIPPED_OUTPUT_FIELDS) {
-            const dotIdx = strippedField.indexOf('.');
-            if (dotIdx !== -1) {
-              const root = strippedField.substring(0, dotIdx);
-              const child = strippedField.substring(dotIdx + 1);
-              const rootObj = source[root];
-              if (rootObj != null && typeof rootObj === 'object' && !Array.isArray(rootObj)) {
-                const copy = { ...(rootObj as Record<string, unknown>) };
-                delete copy[child];
-                if (Object.keys(copy).length === 0) {
-                  delete source[root];
-                } else {
-                  source[root] = copy;
-                }
-              }
-            } else {
-              delete source[strippedField];
-            }
-          }
-          return { sample_index: i, source };
-        }
+        (doc, i) => ({
+          sample_index: i,
+          source: stripBoilerplateFields(doc as Record<string, unknown>),
+        })
       );
 
-      const errorGroups = groupErrors(failedSamples);
+      const errorGroups = groupErrors(failedSamples, MAX_UNIQUE_ERROR_TYPES);
 
       // Fetch event field metadata once for the whole validation pass
       const eventFieldsDict = await fieldsMetadataClient.find({
@@ -307,8 +227,9 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
         const categories = asArray(getNestedValue(source, 'event.category'));
         const types = asArray(getNestedValue(source, 'event.type'));
         for (const cat of categories) {
-          if (!uniqueCombos.has(cat)) uniqueCombos.set(cat, new Set());
-          for (const t of types) uniqueCombos.get(cat)!.add(t);
+          const catSet = uniqueCombos.get(cat) ?? new Set<string>();
+          uniqueCombos.set(cat, catSet);
+          for (const t of types) catSet.add(t);
         }
         const eventKind = getNestedValue(source, 'event.kind');
         if (typeof eventKind === 'string') uniqueEventKinds.add(eventKind);
@@ -324,7 +245,9 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
           for (const type of types) {
             if (!allowedTypes.includes(type)) {
               ecsWarnings.push(
-                `event.type "${type}" is not valid for event.category "${category}". Allowed: ${allowedTypes.join(', ')}`
+                `event.type "${type}" is not valid for event.category "${category}". Allowed: ${allowedTypes.join(
+                  ', '
+                )}`
               );
             }
           }
@@ -356,18 +279,21 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
         }
       }
 
-      const ecsDict = await fieldsMetadataClient.find({ source: ['ecs'] });
-      const allEcsKeys = Object.keys(ecsDict.toPlain());
-      const ecsFieldSet = new Set(allEcsKeys);
-      const ecsRootSet = new Set<string>();
-      for (const key of allEcsKeys) {
-        const dotIndex = key.indexOf('.');
-        if (dotIndex !== -1) ecsRootSet.add(key.substring(0, dotIndex));
+      let ecsFieldSet: Set<string>;
+      let ecsRootSet: Set<string>;
+      if (precomputedEcsFieldSets) {
+        ({ ecsFieldSet, ecsRootSet } = precomputedEcsFieldSets);
+      } else {
+        const [ecsDict, ecsFieldsets] = await Promise.all([
+          fieldsMetadataClient.find({ source: ['ecs'] }),
+          fieldsMetadataClient.getECSFieldsets(),
+        ]);
+        ecsFieldSet = new Set(Object.keys(ecsDict.toPlain()));
+        ecsRootSet = new Set(ecsFieldsets);
       }
 
       const fieldNamingErrors: string[] = [];
       for (const fieldPath of allFieldPaths) {
-        if (ignoredFieldSet.has(fieldPath)) continue;
         if (ecsFieldSet.has(fieldPath)) continue;
 
         const dotIndex = fieldPath.indexOf('.');
@@ -377,7 +303,9 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
           fieldNamingErrors.push(
             `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
               `Custom fields under ECS paths are not allowed. ` +
-              `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(dotIndex + 1)}'.`
+              `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(
+                dotIndex + 1
+              )}'.`
           );
         } else if (!fieldPath.startsWith(customFieldPrefix)) {
           fieldNamingErrors.push(

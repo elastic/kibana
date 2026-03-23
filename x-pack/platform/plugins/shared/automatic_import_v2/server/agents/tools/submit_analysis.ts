@@ -9,44 +9,58 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 
-export function submitAnalysisTool(): DynamicStructuredTool {
+interface CreateSubmitToolConfig {
+  name: string;
+  description: string;
+  stateField: string;
+  contentLabel: string;
+  contentDescription: string;
+  summaryDescription: string;
+}
+
+export const createSubmitTool = (config: CreateSubmitToolConfig): DynamicStructuredTool => {
   const schema = z.object({
-    full_analysis: z
-      .string()
-      .describe('The complete log format analysis in markdown format'),
-    summary: z
-      .string()
-      .describe(
-        'A concise 2-4 sentence summary of key findings: format type, number of fields found, number of ECS mappings, notable edge cases'
-      ),
+    content: z.string().describe(config.contentDescription),
+    summary: z.string().describe(config.summaryDescription),
   });
 
   return new DynamicStructuredTool({
-    name: 'submit_analysis',
-    description:
-      'Submit your completed analysis. Stores the full analysis in shared state for the ' +
-      'pipeline generator and returns a summary to the orchestrator. ' +
-      'You MUST call this as your final action after composing your analysis.',
+    name: config.name,
+    description: config.description,
     schema,
     func: async (
       input: z.infer<typeof schema>,
       _runManager?: CallbackManagerForToolRun,
-      config?: ToolRunnableConfig
+      toolConfig?: ToolRunnableConfig
     ) => {
       return new Command({
         update: {
-          analysis: input.full_analysis,
+          [config.stateField]: input.content,
           messages: [
             new ToolMessage({
-              content: `Analysis stored. Summary: ${input.summary}`,
-              tool_call_id: config?.toolCall?.id as string,
+              content: `${config.contentLabel} stored. Summary: ${input.summary}`,
+              tool_call_id: toolConfig?.toolCall?.id as string,
             }),
           ],
         },
       });
     },
   });
-}
+};
+
+export const submitAnalysisTool = (): DynamicStructuredTool =>
+  createSubmitTool({
+    name: 'submit_analysis',
+    description:
+      'Submit your completed analysis. Stores the full analysis in shared state for the ' +
+      'pipeline generator and returns a summary to the orchestrator. ' +
+      'You MUST call this as your final action after composing your analysis.',
+    stateField: 'analysis',
+    contentLabel: 'Analysis',
+    contentDescription: 'The complete log format analysis in markdown format',
+    summaryDescription:
+      'A concise 2-4 sentence summary of key findings: format type, number of fields found, number of ECS mappings, notable edge cases',
+  });

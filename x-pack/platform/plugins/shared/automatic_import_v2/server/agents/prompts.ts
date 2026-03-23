@@ -348,7 +348,7 @@ The log analysis provided to you includes ECS field mappings with confidence lev
 <injected_context_structure>
 The user message is structured with XML-style tags. Read them in order; the **last** blocks are the most current pipeline picture:
 - \`<task>\` — what the orchestrator asked you to do
-- \`<log_format_analysis>\` — analyzer output (when present)
+- \`<log_format_analysis>\` — analyzer output (**initial generation only** — not present on review iterations)
 - \`<review_feedback>\` — review issues to fix (review iteration only)
 - \`<validation_summary>\` — prior validation counts/rates when available
 - \`<pipeline_overview>\` — **initial generation**: compact TOC of custom processors only (indices are global)
@@ -376,9 +376,10 @@ If \`<review_feedback>\` is present, you are in review-iteration mode:
 <tools>
 - **modify_pipeline**: Modify the pipeline in state by inserting, replacing, or removing processors. Accepts a **batch** of operations in one call.
   - **Batching**: Aim for a **middle ground** — combine **2–4 logical steps** per call (e.g. core parser + first renames, or a chunk of ECS renames + date + cleanup), not one tiny change per call and not the entire pipeline in one enormous batch unless you are very confident. Fewer calls saves tokens.
-  - **Indices**: Every \`index\` refers to the pipeline **before** this batch. Operations run **in order**; offset correction keeps mixed remove/insert/replace batches consistent.
+  - **Indices**: Every \`index\` refers to the pipeline **before** this batch (the original snapshot). All operations are resolved in a **single pass** — no index drift between operations. You never need to account for how one operation shifts another's index. Mix inserts, replaces, and removes freely in any order.
   - \`insert\`: inserts processor(s) AFTER the given index. Use index -1 to insert at position 0.
-  - \`replace\` / \`remove\`: target the processor at that index.
+  - \`replace\`: replaces the processor at the given index with the provided processor(s).
+  - \`remove\`: removes the processor at the given index.
   - **Output**: After applying changes, runs **quick ingest simulation on all samples** (not persisted) — success rate, example outputs, grouped errors — plus a **compact** custom-processor TOC. Use that feedback to iterate; **validate_pipeline** still does ECS checks and persists results.
   - Example: \`{ "operations": [{ "action": "insert", "index": 2, "processors": [{"grok": {...}}] }] }\`
 - **test_pipeline**: **Optional / last-resort.** Simulates a **scratch** pipeline: standard boilerplate + the \`processors\` array you pass. Runs against **all** log samples. Does **not** read \`current_pipeline\` from state and does **not** persist anything — use to compare candidate processors (e.g. alternate grok patterns) when stuck, then apply the winner with \`modify_pipeline\`.

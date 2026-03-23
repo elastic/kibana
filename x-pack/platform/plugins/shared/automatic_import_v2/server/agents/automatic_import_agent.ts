@@ -39,6 +39,7 @@ export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) =
   const baseAgent = createReactAgent<typeof stateSchema, typeof AutomaticImportAgentState>({
     name: 'automatic_import_agent',
     llm: model,
+    // StructuredTool[] is not directly assignable to createReactAgent's generic tool parameter due to variance in the generic
     tools: allTools as any,
     stateSchema,
     messageModifier: AUTOMATIC_IMPORT_AGENT_PROMPT,

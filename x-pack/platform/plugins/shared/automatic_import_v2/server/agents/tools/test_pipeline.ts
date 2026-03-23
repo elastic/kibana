@@ -6,13 +6,19 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { ToolRunnableConfig } from '@langchain/core/tools';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { BOILERPLATE_PIPELINE } from './pipeline_constants';
+import {
+  formatSimulateDoc,
+  groupErrors,
+  stripBoilerplateFields,
+  processSimulationResults,
+} from './pipeline_utils';
 
 const MAX_SUCCESSFUL_OUTPUTS = 2;
 const MAX_ERROR_GROUPS_DEFAULT = 5;
@@ -20,85 +26,10 @@ const MAX_ERROR_GROUPS_ERRORS_ONLY = 10;
 const MAX_VERBOSE_SAMPLES = 2;
 const SAMPLE_TRUNCATE_LENGTH = 200;
 
-const STRIPPED_OUTPUT_FIELDS = new Set(['event.original', 'ecs.version']);
-
 interface TestPipelineToolOptions {
   esClient: ElasticsearchClient;
   samples: string[];
 }
-
-interface DocTemplate {
-  _index: string;
-  _id: string;
-  _source: {
-    message: string;
-    [key: string]: unknown;
-  };
-}
-
-const formatDoc = (sample: string): DocTemplate => ({
-  _index: 'index',
-  _id: 'id',
-  _source: { message: sample },
-});
-
-interface FailedSample {
-  sampleIndex: number;
-  sample: string;
-  error: string;
-}
-
-interface ErrorGroup {
-  error: string;
-  count: number;
-  exampleSample: string;
-}
-
-const groupErrors = (failedSamples: FailedSample[], maxGroups: number): ErrorGroup[] => {
-  const groups = new Map<string, { count: number; example: string }>();
-
-  for (const { error, sample } of failedSamples) {
-    const existing = groups.get(error);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      groups.set(error, { count: 1, example: sample.substring(0, SAMPLE_TRUNCATE_LENGTH) });
-    }
-  }
-
-  return [...groups.entries()]
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, maxGroups)
-    .map(([error, { count, example }]) => ({
-      error,
-      count,
-      exampleSample: example,
-    }));
-};
-
-const stripBoilerplateFields = (source: Record<string, unknown>): Record<string, unknown> => {
-  const result = { ...source };
-  for (const field of STRIPPED_OUTPUT_FIELDS) {
-    const dotIdx = field.indexOf('.');
-    if (dotIdx !== -1) {
-      const root = field.substring(0, dotIdx);
-      const child = field.substring(dotIdx + 1);
-      const rootObj = result[root];
-      if (rootObj != null && typeof rootObj === 'object' && !Array.isArray(rootObj)) {
-        const copy = { ...(rootObj as Record<string, unknown>) };
-        delete copy[child];
-        if (Object.keys(copy).length === 0) {
-          delete result[root];
-        } else {
-          result[root] = copy;
-        }
-      }
-    } else {
-      delete result[field];
-    }
-  }
-  return result;
-};
 
 const formatVerboseResults = (
   processorResults: estypes.IngestPipelineProcessorResult[]
@@ -198,7 +129,7 @@ export function testPipelineTool(options: TestPipelineToolOptions): DynamicStruc
         ...(BOILERPLATE_PIPELINE.on_failure ? { on_failure: BOILERPLATE_PIPELINE.on_failure } : {}),
       };
 
-      const docs = samples.map((sample) => formatDoc(sample));
+      const docs = samples.map(formatSimulateDoc);
 
       let response: estypes.IngestSimulateResponse;
       try {
@@ -210,34 +141,18 @@ export function testPipelineTool(options: TestPipelineToolOptions): DynamicStruc
         return `Pipeline simulation failed: ${(simulateError as Error).message}`;
       }
 
-      const failedSamples: FailedSample[] = [];
-      const successfulOutputs: Array<Record<string, unknown>> = [];
-      let successfulCount = 0;
+      const { failedSamples, successfulCount } = processSimulationResults(response, samples);
 
-      response.docs.forEach((doc, index) => {
-        if (!doc) {
-          failedSamples.push({
-            sampleIndex: index,
-            sample: samples[index],
-            error: 'Document was dropped by the pipeline',
-          });
-        } else if (doc.doc?._source?.error) {
-          const errorDetail =
-            typeof doc.doc._source.error === 'string'
-              ? doc.doc._source.error
-              : JSON.stringify(doc.doc._source.error);
-          failedSamples.push({
-            sampleIndex: index,
-            sample: samples[index],
-            error: errorDetail,
-          });
-        } else if (doc.doc?._source) {
-          successfulCount++;
-          if (successfulOutputs.length < MAX_SUCCESSFUL_OUTPUTS) {
-            successfulOutputs.push(
-              stripBoilerplateFields(doc.doc._source as Record<string, unknown>)
-            );
-          }
+      const successfulOutputs: Array<Record<string, unknown>> = [];
+      response.docs.forEach((doc) => {
+        if (
+          doc?.doc?._source &&
+          !doc.doc._source.error &&
+          successfulOutputs.length < MAX_SUCCESSFUL_OUTPUTS
+        ) {
+          successfulOutputs.push(
+            stripBoilerplateFields(doc.doc._source as Record<string, unknown>)
+          );
         }
       });
 
@@ -269,7 +184,7 @@ export function testPipelineTool(options: TestPipelineToolOptions): DynamicStruc
 
       if (failedCount > 0) {
         const maxGroups = errorsOnly ? MAX_ERROR_GROUPS_ERRORS_ONLY : MAX_ERROR_GROUPS_DEFAULT;
-        const errorGroups = groupErrors(failedSamples, maxGroups);
+        const errorGroups = groupErrors(failedSamples, maxGroups, SAMPLE_TRUNCATE_LENGTH);
         const uniqueErrorCount = new Set(failedSamples.map((f) => f.error)).size;
 
         lines.push('');
@@ -290,7 +205,7 @@ export function testPipelineTool(options: TestPipelineToolOptions): DynamicStruc
 
         for (const failed of failedSamples) {
           if (verboseIndices.length >= MAX_VERBOSE_SAMPLES) break;
-          verboseIndices.push(failed.sampleIndex);
+          if (failed.sampleIndex != null) verboseIndices.push(failed.sampleIndex);
         }
         if (verboseIndices.length < MAX_VERBOSE_SAMPLES && successfulCount > 0) {
           for (
@@ -309,7 +224,7 @@ export function testPipelineTool(options: TestPipelineToolOptions): DynamicStruc
         }
 
         if (verboseIndices.length > 0) {
-          const verboseDocs = verboseIndices.map((idx) => formatDoc(samples[idx]));
+          const verboseDocs = verboseIndices.map((idx) => formatSimulateDoc(samples[idx]));
 
           try {
             const verboseResponse = await esClient.ingest.simulate({

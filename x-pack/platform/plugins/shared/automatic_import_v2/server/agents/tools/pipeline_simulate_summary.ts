@@ -8,88 +8,16 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 
+import {
+  formatSimulateDoc,
+  groupErrors,
+  stripBoilerplateFields,
+  processSimulationResults,
+} from './pipeline_utils';
+
 const DEFAULT_MAX_SUCCESS_OUTPUTS = 2;
 const DEFAULT_MAX_ERROR_GROUPS = 5;
 const DEFAULT_SAMPLE_TRUNCATE = 200;
-
-const STRIPPED_OUTPUT_FIELDS = new Set(['event.original', 'ecs.version']);
-
-interface DocTemplate {
-  _index: string;
-  _id: string;
-  _source: {
-    message: string;
-    [key: string]: unknown;
-  };
-}
-
-const formatDoc = (sample: string): DocTemplate => ({
-  _index: 'index',
-  _id: 'id',
-  _source: { message: sample },
-});
-
-interface FailedSample {
-  sampleIndex: number;
-  sample: string;
-  error: string;
-}
-
-interface ErrorGroup {
-  error: string;
-  count: number;
-  exampleSample: string;
-}
-
-const groupErrors = (
-  failedSamples: FailedSample[],
-  maxGroups: number,
-  sampleTruncate: number
-): ErrorGroup[] => {
-  const groups = new Map<string, { count: number; example: string }>();
-
-  for (const { error, sample } of failedSamples) {
-    const existing = groups.get(error);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      groups.set(error, { count: 1, example: sample.substring(0, sampleTruncate) });
-    }
-  }
-
-  return [...groups.entries()]
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, maxGroups)
-    .map(([error, { count, example }]) => ({
-      error,
-      count,
-      exampleSample: example,
-    }));
-};
-
-const stripBoilerplateFields = (source: Record<string, unknown>): Record<string, unknown> => {
-  const result = { ...source };
-  for (const field of STRIPPED_OUTPUT_FIELDS) {
-    const dotIdx = field.indexOf('.');
-    if (dotIdx !== -1) {
-      const root = field.substring(0, dotIdx);
-      const child = field.substring(dotIdx + 1);
-      const rootObj = result[root];
-      if (rootObj != null && typeof rootObj === 'object' && !Array.isArray(rootObj)) {
-        const copy = { ...(rootObj as Record<string, unknown>) };
-        delete copy[child];
-        if (Object.keys(copy).length === 0) {
-          delete result[root];
-        } else {
-          result[root] = copy;
-        }
-      }
-    } else {
-      delete result[field];
-    }
-  }
-  return result;
-};
 
 export interface LightweightSimulateSummaryOptions {
   esClient: ElasticsearchClient;
@@ -123,7 +51,7 @@ export async function runLightweightIngestSimulateSummary(
     return `${title}\nNo samples available — skipped simulation.`;
   }
 
-  const docs = samples.map((sample) => formatDoc(sample));
+  const docs = samples.map(formatSimulateDoc);
 
   let response: estypes.IngestSimulateResponse;
   try {
@@ -135,32 +63,12 @@ export async function runLightweightIngestSimulateSummary(
     return `${title}\nSimulation failed: ${(simulateError as Error).message}`;
   }
 
-  const failedSamples: FailedSample[] = [];
-  const successfulOutputs: Array<Record<string, unknown>> = [];
-  let successfulCount = 0;
+  const { failedSamples, successfulCount } = processSimulationResults(response, samples);
 
-  response.docs.forEach((doc, index) => {
-    if (!doc) {
-      failedSamples.push({
-        sampleIndex: index,
-        sample: samples[index],
-        error: 'Document was dropped by the pipeline',
-      });
-    } else if (doc.doc?._source?.error) {
-      const errorDetail =
-        typeof doc.doc._source.error === 'string'
-          ? doc.doc._source.error
-          : JSON.stringify(doc.doc._source.error);
-      failedSamples.push({
-        sampleIndex: index,
-        sample: samples[index],
-        error: errorDetail,
-      });
-    } else if (doc.doc?._source) {
-      successfulCount++;
-      if (successfulOutputs.length < maxSuccessOutputs) {
-        successfulOutputs.push(stripBoilerplateFields(doc.doc._source as Record<string, unknown>));
-      }
+  const successfulOutputs: Array<Record<string, unknown>> = [];
+  response.docs.forEach((doc) => {
+    if (doc?.doc?._source && !doc.doc._source.error && successfulOutputs.length < maxSuccessOutputs) {
+      successfulOutputs.push(stripBoilerplateFields(doc.doc._source as Record<string, unknown>));
     }
   });
 
