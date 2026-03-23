@@ -797,6 +797,24 @@ agentBuilder.skills.register({
 });
 ```
 
+### Marking a skill as experimental
+
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.skills.register({
+  id: 'my-experimental-skill',
+  name: 'my-experimental-skill',
+  basePath: 'skills/platform',
+  description: 'An experimental skill only visible when experimental features are on',
+  experimental: true,
+  content: 'Skill instructions...',
+});
+```
+
 ## Semantic Metadata Layer (SML) — Developer Guide
 
 ### 1. What is SML?

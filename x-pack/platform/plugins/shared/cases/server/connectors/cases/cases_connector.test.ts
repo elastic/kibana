@@ -59,7 +59,12 @@ describe('CasesConnector', () => {
     create: () => ({ nextBackOff }),
   };
 
-  const casesParams = { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient };
+  const casesParams = {
+    getCasesClient,
+    getSpaceId,
+    getUnsecuredSavedObjectsClient,
+    isCasesAttachmentsEnabled: false,
+  };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
     config: {},
@@ -113,6 +118,7 @@ describe('CasesConnector', () => {
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
       spaceId: 'default',
+      isCasesAttachmentsEnabled: false,
     });
   });
 
