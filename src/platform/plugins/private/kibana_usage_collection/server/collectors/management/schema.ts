@@ -147,7 +147,17 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in analyzer.',
+    },
+  },
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
+    },
   },
   'securitySolution:enableVisualizationsInFlyout': {
     type: 'boolean',
@@ -526,6 +536,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:connectorsEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -776,6 +790,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'elasticConsole:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
     },
   },
 };

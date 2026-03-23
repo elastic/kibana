@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/actions-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/storage-adapter",
+    "@kbn/agent-builder-server",
+    "@kbn/core-feature-flags-server",
+    "@kbn/logging"
+  ]
+}

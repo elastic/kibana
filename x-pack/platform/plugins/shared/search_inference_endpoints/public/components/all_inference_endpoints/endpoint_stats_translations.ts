@@ -7,24 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SERVICES_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.endpointStats.servicesLabel',
-  {
-    defaultMessage: 'Services:',
-  }
-);
-
 export const MODELS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.endpointStats.modelsLabel',
   {
     defaultMessage: 'Models:',
-  }
-);
-
-export const TYPES_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.endpointStats.typesLabel',
-  {
-    defaultMessage: 'Types:',
   }
 );
 

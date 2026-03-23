@@ -35,8 +35,13 @@ import {
 } from '@kbn/streamlang';
 import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
-import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import {
+  Streams,
+  isSchema,
+  type FieldDefinition,
+  type ClassicFieldDefinition,
+} from '@kbn/streams-schema';
+import type { IngestUpsertRequest } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -965,7 +970,8 @@ export const buildUpsertStreamRequestPayload = (
           ...(fields && {
             classic: {
               ...definition.stream.ingest.classic,
-              field_overrides: fields,
+              // Cast is safe: callers provide fields with types for classic streams
+              field_overrides: fields as ClassicFieldDefinition,
             },
           }),
         },

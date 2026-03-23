@@ -27,6 +27,7 @@ export function runCheckSavedObjectsCli() {
     async ({ log, flagsReader }) => {
       let exitCode = 0;
       const gitRev = flagsReader.string('gitRev');
+      const serverlessGitRev = flagsReader.string('serverlessGitRev');
       const fix = flagsReader.boolean('fix');
       const server = flagsReader.boolean('server');
       const client = flagsReader.boolean('client');
@@ -40,6 +41,7 @@ export function runCheckSavedObjectsCli() {
 
       const context: TaskContext = {
         gitRev: gitRev!,
+        serverlessGitRev,
         updatedTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
@@ -186,15 +188,17 @@ export function runCheckSavedObjectsCli() {
       flags: {
         alias: {
           baseline: 'gitRev',
+          'serverless-baseline': 'serverlessGitRev',
         },
         boolean: ['fix', 'server', 'client', 'test'],
-        string: ['gitRev'],
+        string: ['gitRev', 'serverlessGitRev'],
         default: {
           verify: true,
           mappings: true,
         },
         help: `
         --baseline <SHA>   Provide a commit SHA, to use as a baseline for comparing SO changes against
+        --serverless-baseline <SHA>  Optional commit SHA for current Serverless release baseline
         --fix              Generate templates for missing fixture files, and update outdated JSON files
         --server           Start ES in order to repeatedly execute the 'check_saved_objects' script
         --client           Do not start ES server (requires running the command above on a separate term)

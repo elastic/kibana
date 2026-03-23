@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, IUiSettingsClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from '../../types';
@@ -22,24 +22,25 @@ export class StreamsService {
     private readonly isDev: boolean
   ) {}
 
-  async getClientWithRequest({
-    request,
+  async getClient({
     attachmentClient,
     queryClient,
     featureClient,
+    esClient,
+    esClientAsInternalUser,
     uiSettingsClient,
   }: {
-    request: KibanaRequest;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     featureClient: FeatureClient;
+    esClient: ElasticsearchClient;
+    esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
-    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
     const isWiredStreamViewsEnabled = await uiSettingsClient.get<boolean>(
       OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
@@ -50,10 +51,10 @@ export class StreamsService {
       queryClient,
       logger,
       featureClient,
-      scopedClusterClient,
+      esClient,
+      esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
-      storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
-      request,
+      storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
       isWiredStreamViewsEnabled,
       isDev: this.isDev,

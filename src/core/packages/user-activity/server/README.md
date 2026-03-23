@@ -13,31 +13,41 @@ Use `trackUserAction` to record user actions:
 
 ```ts
 core.userActivity.trackUserAction({
-  event: { action: 'dashboard_created', type: 'creation' },
-  object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: ['production'] },
+  event: {
+    action: 'create_alerting_rule',
+    type: 'creation',
+    start: new Date().toISOString(),
+    end: new Date().toISOString(),
+    duration: 250000000, // 250ms in ns
+  },
+  object: { id: 'production-rule', name: 'My rule', type: 'rule', tags: ['production'] },
 });
 ```
 
-You can optionally provide a custom message:
+You can optionally provide a custom message and metadata:
 
 ```ts
 core.userActivity.trackUserAction({
-  message: 'User duplicated dashboard',
-  event: { action: 'dashboard_copied', type: 'creation' },
-  object: { id: 'dash-456', name: 'Copy of My Dashboard', type: 'dashboard', tags: [] },
+  message: 'User snoozed an alerting rule',
+  event: { action: 'snooze_alerting_rule', type: 'change' },
+  object: { id: 'rule-456', name: 'CPU usage threshold', type: 'rule', tags: ['production'] },
+  metadata: {
+    ui_surface: 'rules_table',
+    interaction_id: 'snooze_rule_flyout',
+  },
 });
 ```
 
 ## Registering new actions
 
-Every action must be registered in `userActivityActions` (`src/user_activity_actions.ts`).
+Every action must be registered in `userActivityActions` ([`src/user_activity_actions.ts`](./src/user_activity_actions.ts)).
 Each entry requires a `description`, an `ownerTeam` (GitHub team handle), and a `versionAddedAt` (Stack version when the action was introduced).
 
 ```ts
 export const userActivityActions = {
   // ... existing actions ...
-  archive_case: {
-    description: 'Archive a case',
+  create_cases_case: {
+    description: 'Create a case',
     ownerTeam: '@elastic/kibana-cases',
     groupName: 'Cases',
     versionAddedAt: '9.3',
@@ -70,7 +80,7 @@ user_activity:
         type: json
   filters:
     - policy: keep
-      actions: [user_logged_in]
+      actions: [create_security_rule]
 ```
 
 The `appenders` option uses the same schema as the core logging service.
@@ -108,7 +118,7 @@ Here's the current schema reference: [`docs/reference/user-activity.md`](../../.
 
 Some of the fields in the schema come from:
 
-- `trackUserAction()` params (for example `message`, `event.*`, and `object.*`)
+- `trackUserAction()` params (for example `message`, `event.*`, `object.*`, `metadata.*`)
 - Injected context (for example `user.*`, `session.*`, `client.*`, `kibana.space.id`, and `http.request.referrer`)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
 

@@ -11,14 +11,17 @@ import type { ParsedPart } from '@kbn/content-list-assembly';
 import { filter, type FilterContext } from './part';
 import { SortRenderer } from './sort';
 import { TagFilterRenderer } from './tags';
+import { StarredFilterRenderer } from './starred';
 
 // Ensure preset resolve callbacks are registered.
 import './sort/sort';
 import './tags/tag_filter';
+import './starred/starred_filter';
 
 const createContext = (overrides: Partial<FilterContext> = {}): FilterContext => ({
   hasSorting: false,
   hasTags: false,
+  hasStarred: false,
   ...overrides,
 });
 
@@ -35,6 +38,14 @@ const createTagsPart = (): ParsedPart => ({
   part: 'filter',
   preset: 'tags',
   instanceId: 'tags',
+  attributes: {},
+});
+
+const createStarredPart = (): ParsedPart => ({
+  type: 'part',
+  part: 'filter',
+  preset: 'starred',
+  instanceId: 'starred',
   attributes: {},
 });
 
@@ -66,6 +77,22 @@ describe('filter.resolve', () => {
 
     it('returns `undefined` for the tags preset when tags are unavailable.', () => {
       const result = filter.resolve(createTagsPart(), createContext({ hasTags: false }));
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('starred preset', () => {
+    it('returns a `SearchFilterConfig` for the starred preset when starred is available.', () => {
+      const result = filter.resolve(createStarredPart(), createContext({ hasStarred: true }));
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      expect((result as { component: unknown }).component).toBe(StarredFilterRenderer);
+    });
+
+    it('returns `undefined` for the starred preset when starred is unavailable.', () => {
+      const result = filter.resolve(createStarredPart(), createContext({ hasStarred: false }));
 
       expect(result).toBeUndefined();
     });

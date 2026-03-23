@@ -19,6 +19,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { PackQueryInput } from '../pack/utils';
 import { convertPackQueriesToSO } from '../pack/utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { fetchOsqueryPackagePolicyIds } from '../utils';
@@ -156,7 +157,9 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   {
                     name: packObject.name,
                     description: packObject.description,
-                    queries: convertPackQueriesToSO(packObject.queries),
+                    queries: convertPackQueriesToSO(
+                      packObject.queries as Record<string, PackQueryInput>
+                    ),
                     enabled: packObject.enabled,
                     created_at: new Date().toISOString(),
                     created_by: 'system',

@@ -263,9 +263,9 @@ export const SessionView = ({
   }, [openDetails, selectedProcess]);
 
   const onShowAlertDetails = useCallback(
-    (alertUuid: string) => {
+    (alertId: string, alertIndex: string) => {
       if (loadAlertDetails) {
-        loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+        loadAlertDetails(alertId, alertIndex, () => handleOnAlertDetailsClosed(alertId));
         trackEvent('alert_details_loaded');
       }
     },

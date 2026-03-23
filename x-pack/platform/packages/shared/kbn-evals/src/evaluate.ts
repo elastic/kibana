@@ -247,6 +247,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           config: connectorWithId.config,
           connectorId: connectorWithId.id,
           name: connectorWithId.name,
+          isInferenceEndpoint: false,
           capabilities: {
             contextWindowSize: 32000,
           },
@@ -255,7 +256,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         const model: Model = {
           family: getConnectorFamily(inferenceConnector),
           provider: getConnectorProvider(inferenceConnector),
-          id: getConnectorModel(inferenceConnector),
+          id: getConnectorModel(inferenceConnector) ?? connectorWithId.name,
         };
 
         return model;
@@ -265,6 +266,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+
+      const currentRunId = process.env.TEST_RUN_ID;
+      if (!currentRunId) {
+        throw new Error('runId must be provided via TEST_RUN_ID environment variable');
+      }
+
+      const shouldPreflightExport =
+        process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
+        Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
+      if (shouldPreflightExport) {
+        try {
+          log.info('Running evaluations Elasticsearch export preflight');
+          await scoreRepository.preflightExport();
+        } catch (error) {
+          throw new Error('Evaluation results export preflight failed', { cause: error });
+        }
+      }
 
       const upsertDataset = evaluationsPluginEnabled
         ? async (dataset: EvaluationDataset) => {
@@ -308,13 +326,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        runId: process.env.TEST_RUN_ID!,
+        runId: currentRunId,
         repetitions,
         upsertDataset,
         getDatasetByName,
       });
 
-      const currentRunId = process.env.TEST_RUN_ID;
       await use(executorClient);
 
       if (!currentRunId) {

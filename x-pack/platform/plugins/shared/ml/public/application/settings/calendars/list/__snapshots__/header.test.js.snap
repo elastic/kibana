@@ -77,7 +77,7 @@ exports[`CalendarListsHeader renders header 1`] = `
           Learn more
           <span
             class="emotion-EuiExternalLinkIcon"
-            data-euiicon-type="popout"
+            data-euiicon-type="external"
             role="presentation"
           />
           <span

@@ -28,14 +28,11 @@ export function hasSloGroupBy(groupBy: string[] | string | undefined): boolean {
 }
 
 export interface GroupOverviewPanelProps {
-  groupFilters: GroupFilters | undefined;
+  groupFilters: GroupFilters;
   reloadSubject: Subject<boolean>;
 }
 
 export function GroupOverviewPanel({ groupFilters, reloadSubject }: GroupOverviewPanelProps) {
-  const groupBy = groupFilters?.group_by ?? 'status';
-  const kqlQuery = groupFilters?.kql_query ?? '';
-  const groups = groupFilters?.groups ?? [];
   return (
     <div
       css={({ euiTheme }: UseEuiTheme) => css`
@@ -56,10 +53,10 @@ export function GroupOverviewPanel({ groupFilters, reloadSubject }: GroupOvervie
         >
           <GroupSloView
             view="cardView"
-            groupBy={groupBy}
-            groups={groups}
-            kqlQuery={kqlQuery}
-            filters={toStoredFilters(groupFilters?.filters) ?? []}
+            groupBy={groupFilters.group_by}
+            groups={groupFilters.groups ?? []}
+            kqlQuery={groupFilters.kql_query ?? ''}
+            filters={toStoredFilters(groupFilters.filters) ?? []}
             reloadSubject={reloadSubject}
           />
         </EuiFlexItem>
@@ -102,7 +99,7 @@ export function SloOverviewPanelContent({
     overviewMode === 'single' && sloInstanceId === ALL_VALUE && hasGroupBy && Boolean(sloId);
 
   if (overviewMode === 'groups') {
-    return <GroupOverviewPanel groupFilters={groupFilters} reloadSubject={reloadSubject} />;
+    return <GroupOverviewPanel groupFilters={groupFilters!} reloadSubject={reloadSubject} />;
   }
   if (showCardList && sloId) {
     return <SingleOverviewCardList sloId={sloId} />;

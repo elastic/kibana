@@ -12,10 +12,7 @@ import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './commo
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
-  identityField: {
-    requiresOneOfFields: ['entity.id'],
-    euidFields: [[{ field: 'entity.id' }]],
-  },
+  identityField: { singleField: 'entity.id', skipTypePrepend: true },
   indexPatterns: [],
   fields: [
     // We want this to make sure it's also extracted on CCS logs extraction

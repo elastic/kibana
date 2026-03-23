@@ -10,7 +10,11 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  OPTIONS_LIST_CONTROL,
+} from '@kbn/controls-constants';
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
@@ -42,18 +46,18 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const parentApi = {
-  getSerializedStateForChild: jest.fn().mockReturnValue({ type: 'optionsListControl' }),
+  getSerializedStateForChild: jest.fn().mockReturnValue({ type: OPTIONS_LIST_CONTROL }),
   viewMode$: new BehaviorSubject('view'),
   registerChildApi: jest.fn(),
 } as unknown as ControlsRendererParentApi;
 
-const mockOptionsListFactory: EmbeddableFactory<{ type: 'optionsListControl' }> = {
-  type: 'optionsListControl',
+const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONTROL }> = {
+  type: OPTIONS_LIST_CONTROL,
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
       parentApi,
       serializeState: () => ({
-        type: 'optionsListControl',
+        type: OPTIONS_LIST_CONTROL,
       }),
     });
     return {

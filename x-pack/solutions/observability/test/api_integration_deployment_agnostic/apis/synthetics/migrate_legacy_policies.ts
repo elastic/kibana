@@ -33,7 +33,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const roleScopedSupertest = getService('roleScopedSupertest');
     const samlAuth = getService('samlAuth');
     const retry = getService('retry');
-    const es = getService('es');
 
     let supertestAdmin: SupertestWithRoleScopeType;
     let editorUser: RoleCredentials;
@@ -83,20 +82,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       // Fleet's create API drops is_managed, but the cleanup task filters on it.
-      // Patch it directly via ES since the SO type varies across versions.
-      for (const soType of ['fleet-package-policies', 'ingest-package-policies']) {
-        try {
-          await es.update({
-            index: '.kibana_ingest',
-            id: `${soType}:${legacyPolicyId}`,
-            doc: { [soType]: { is_managed: true } },
-            refresh: true,
-          });
-          break;
-        } catch (e) {
-          // try the other SO type
-        }
-      }
+      // We need to set it manually.
+      await supertestAdmin.put(`/api/fleet/package_policies/${legacyPolicyId}`).send({
+        is_managed: true,
+        force: true,
+      });
 
       return legacyPolicyId;
     };
@@ -129,26 +119,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.eql(200, JSON.stringify(response.body));
     };
 
-    /** Waits for the sync task to be idle so triggerCleanup's runSoon doesn't hit pRetry backoff. */
-    const waitForSyncTaskIdle = async () => {
-      await retry.try(async () => {
-        let taskDoc;
-        try {
-          taskDoc = await es.get({
-            index: '.kibana_task_manager',
-            id: 'task:Synthetics:Sync-Private-Location-Monitors-single-instance',
-            _source_includes: ['task.status'],
-          });
-        } catch (e) {
-          return; // task doc doesn't exist yet — treat as idle
-        }
-        const status = (taskDoc._source as any)?.task?.status;
-        if (status !== 'idle') {
-          throw new Error(`Sync task not idle yet (status: ${status})`);
-        }
-      });
-    };
-
     before(async () => {
       supertestAdmin = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
@@ -166,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       privateLocation = locations[0];
 
       const pkgResponse = await supertestAdmin.get('/api/fleet/epm/packages/synthetics');
-      syntheticsPackageVersion = pkgResponse.body?.item?.version || '1.4.2';
+      syntheticsPackageVersion = pkgResponse.body?.item?.version || '1.5.0';
     });
 
     beforeEach(() => {
@@ -190,10 +160,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         let policies = await getPackagePolicies();
         expect(policies.find((p) => p.id === legacyPolicyId)).not.to.be(undefined);
 
-        const createdMonitorId = await createMonitor(monitorId, 'test-monitor');
+        const createdMonitorId = await createMonitor(monitorId, uuidv4());
         expect(createdMonitorId).to.eql(monitorId);
 
-        await editMonitor(createdMonitorId, { name: 'test-monitor-edited' });
+        await editMonitor(createdMonitorId, { name: uuidv4() });
 
         await retry.try(async () => {
           policies = await getPackagePolicies();
@@ -219,9 +189,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(policies.some((p) => p.id === legacyPolicy1)).to.be(true);
         expect(policies.some((p) => p.id === legacyPolicy2)).to.be(true);
 
-        await createMonitor(monitorId, 'test-monitor', { spaces: ['default', space2] });
+        await createMonitor(monitorId, uuidv4(), { spaces: ['default', space2] });
 
-        await editMonitor(monitorId, { name: 'test-monitor-edited' });
+        await editMonitor(monitorId, { name: uuidv4() });
 
         await retry.try(async () => {
           policies = await getPackagePolicies();
@@ -239,21 +209,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should clean up legacy policy from a space the monitor is no longer in', async () => {
         const monitorAId = uuidv4();
         const monitorBId = uuidv4();
-        const extraSpace = 'extra-space';
+        const extraSpace = `extra-space-${uuidv4().slice(0, 8)}`;
 
         await kibanaServer.spaces.create({ id: extraSpace, name: extraSpace });
 
-        await createMonitor(monitorBId, 'monitor-b', {
+        await createMonitor(monitorBId, uuidv4(), {
           spaces: ['default', extraSpace],
         });
 
-        await createMonitor(monitorAId, 'monitor-a');
+        await createMonitor(monitorAId, uuidv4());
         const staleLegacyPolicyId = await createLegacyPackagePolicy(monitorAId, extraSpace);
 
         let policies = await getPackagePolicies();
         expect(policies.some((p) => p.id === staleLegacyPolicyId)).to.be(true);
 
-        await editMonitor(monitorAId, { name: 'monitor-a-edited' });
+        await editMonitor(monitorAId, { name: uuidv4() });
 
         await retry.try(async () => {
           policies = await getPackagePolicies();
@@ -273,7 +243,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should clean up orphaned legacy policies via cleanup endpoint', async () => {
         const monitorId = uuidv4();
 
-        await createMonitor(monitorId, 'test-monitor');
+        await createMonitor(monitorId, uuidv4());
 
         const newFormatPolicyId = `${monitorId}-${privateLocation.id}`;
         await retry.try(async () => {
@@ -286,7 +256,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         let policies = await getPackagePolicies();
         expect(policies.some((p) => p.id === orphanedLegacyPolicyId)).to.be(true);
 
-        await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
@@ -301,7 +270,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should migrate legacy policies to new format when cleanup runs', async () => {
         const monitorId = uuidv4();
 
-        await createMonitor(monitorId, 'test-monitor');
+        await createMonitor(monitorId, uuidv4());
 
         const newFormatPolicyId = `${monitorId}-${privateLocation.id}`;
         await retry.try(async () => {
@@ -317,7 +286,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const legacyPolicy1 = await createLegacyPackagePolicy(monitorId, 'default');
         const legacyPolicy2 = await createLegacyPackagePolicy(monitorId, 'space-2');
 
-        await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
@@ -333,8 +301,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should clean up legacy policies from spaces with no monitors', async () => {
         const monitorId1 = uuidv4();
         const monitorId2 = uuidv4();
-        const emptySpace1 = 'empty-space-1';
-        const emptySpace2 = 'empty-space-2';
+        const emptySpace1 = `empty-space-1-${uuidv4().slice(0, 8)}`;
+        const emptySpace2 = `empty-space-2-${uuidv4().slice(0, 8)}`;
 
         await kibanaServer.spaces.create({ id: emptySpace1, name: emptySpace1 });
         await kibanaServer.spaces.create({ id: emptySpace2, name: emptySpace2 });
@@ -346,7 +314,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(policies.some((p) => p.id === legacyPolicy1)).to.be(true);
         expect(policies.some((p) => p.id === legacyPolicy2)).to.be(true);
 
-        await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
@@ -364,7 +331,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('creates new monitors with new format policy ID (without spaceId)', async () => {
         const monitorId = uuidv4();
 
-        await createMonitor(monitorId, 'test-monitor');
+        await createMonitor(monitorId, uuidv4());
 
         await retry.try(async () => {
           const policies = await getPackagePolicies();

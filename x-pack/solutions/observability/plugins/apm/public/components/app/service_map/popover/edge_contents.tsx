@@ -143,6 +143,7 @@ export function EdgeContents({
                 serviceName: sourceServiceName,
                 environment,
                 dependencyName,
+                sortDirection: 'DESC',
               }}
             />
           </EuiFlexItem>
