@@ -26,6 +26,7 @@ export interface ProcessingGrokSuggestionsParams {
   };
   body: {
     connector_id: string;
+    field_name: string;
     sample_messages: string[];
     review_fields: Record<
       string,
@@ -51,6 +52,7 @@ export const processingGrokSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
+    field_name: z.string(),
     sample_messages: z.array(z.string()),
     review_fields: z.record(
       z.string(),
@@ -75,6 +77,7 @@ export const handleProcessingGrokSuggestions = async ({
   logger,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
   const stream = await streamsClient.getStream(params.path.name);
+  const useOtelFieldNames = isOtelStream(stream);
 
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
@@ -94,16 +97,27 @@ export const handleProcessingGrokSuggestions = async ({
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, isOtelStream(stream)),
+    fields: mapFields(
+      reviewResult.fields,
+      fieldMetadata,
+      useOtelFieldNames,
+      params.body.field_name
+    ),
   };
 };
 
 export function mapFields(
   reviewResults: FieldReviewResults,
   fieldMetadata: Record<string, FieldMetadataPlain>,
-  useOtelFieldNames: boolean
+  useOtelFieldNames: boolean,
+  fieldName: string
 ) {
   return reviewResults.map((field) => {
+    // The LLM always uses "message" as the catch-all content field. Replace it with the actual
+    // target field name (e.g. "error.message" on ECS streams or "body.text" on OTel streams).
+    if (field.ecs_field === 'message') {
+      return { name: fieldName, columns: field.columns, grok_components: field.grok_components };
+    }
     const name = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
     return {
       name,

@@ -42,9 +42,11 @@ export interface MessageEditorController {
 const useMessageEditorInstance = ({
   ref,
   syncIsEmpty,
+  onEditorFocus,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
+  onEditorFocus?: () => void;
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
@@ -66,6 +68,7 @@ const useMessageEditorInstance = ({
       // Eagerly load command menu data and check for active commands once the cursor is ready
       onFocus: () => {
         prefetchCommandMenus();
+        onEditorFocus?.();
         // Must request animation frame as some browsers have not instantiated the user's cursor selection when the focus event fires
         requestAnimationFrame(() => {
           if (ref.current) {
@@ -99,7 +102,15 @@ const useMessageEditorInstance = ({
         dismissCommandMenu();
       },
     }),
-    [ref, syncIsEmpty, checkInputForCommand, prefetchCommandMenus, commandMatch, dismissCommandMenu]
+    [
+      ref,
+      syncIsEmpty,
+      checkInputForCommand,
+      prefetchCommandMenus,
+      commandMatch,
+      dismissCommandMenu,
+      onEditorFocus,
+    ]
   );
   return messageEditor;
 };
@@ -172,7 +183,7 @@ const useMessageEditorController = ({
  * `controller` can be used by consumer to imperatively control and access the state of a child message editor component.
  *
  * @example
- * const { messageEditor, controller } = useMessageEditor();
+ * const { messageEditor, controller } = useMessageEditor({ onEditorFocus: scheduleStaleCheck });
  * controller.focus();
  * const content = controller.getContent();
  * if (controller.isEmpty) {
@@ -181,10 +192,13 @@ const useMessageEditorController = ({
  *
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
-export const useMessageEditor = (): {
+export const useMessageEditor = (
+  options: { onEditorFocus?: () => void } = {}
+): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
 } => {
+  const { onEditorFocus } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -201,7 +215,7 @@ export const useMessageEditor = (): {
     setIsEmpty(nextIsEmpty);
   }, []);
 
-  const instance = useMessageEditorInstance({ ref, syncIsEmpty });
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus });
   const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
   const messageEditor = useMemo(
     () => ({
