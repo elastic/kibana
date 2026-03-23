@@ -10,14 +10,22 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import {
   type IdentifyFeaturesResult,
   type BaseFeature,
+  type Feature,
   isComputedFeature,
+  isDuplicateFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
-import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
+import {
+  identifyFeatures,
+  generateAllComputedFeatures,
+  type ExcludedFeatureSummary,
+  type IgnoredFeature,
+} from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LogMeta } from '@kbn/logging';
+import type { Logger, LogMeta } from '@kbn/logging';
+import type { FeatureClient } from '../../streams/feature/feature_client';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
@@ -28,6 +36,8 @@ import { cancellableTask } from '../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 import type { StreamsFeaturesIdentifiedProps } from '../../telemetry';
+
+const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 
 export interface FeaturesIdentificationTaskParams {
   start: number;
@@ -66,6 +76,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 total_tokens_used: 0,
                 inferred_total_count: 0,
                 inferred_dedup_count: 0,
+                excluded_features_count: 0,
+                llm_ignored_count: 0,
+                code_ignored_count: 0,
                 state: 'success',
               };
 
@@ -105,13 +118,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { hits: sampleDocuments } = await getSampleDocuments({
-                  esClient,
-                  index: stream.name,
-                  start,
-                  end,
-                  size: 20,
-                });
+                const [{ hits: sampleDocuments }, { hits: excludedFeatures }] = await Promise.all([
+                  getSampleDocuments({
+                    esClient,
+                    index: stream.name,
+                    start,
+                    end,
+                    size: 20,
+                  }),
+                  featureClient.getExcludedFeatures(stream.name),
+                ]);
 
                 if (sampleDocuments.length === 0) {
                   taskContext.logger.debug(
@@ -121,11 +137,29 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   return getDeleteTaskRunResult();
                 }
 
+                telemetryProps.excluded_features_count = excludedFeatures.length;
+
+                const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
+                  .slice(0, MAX_EXCLUDED_FEATURES_FOR_PROMPT)
+                  .map(({ id, type, subtype, title, description, properties }) => ({
+                    id,
+                    type,
+                    subtype,
+                    title,
+                    description,
+                    properties,
+                  }));
+
                 const identifyFeaturesStart = Date.now();
-                const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
+                const [
+                  { features: inferredBaseFeatures, ignoredFeatures },
+                  computedFeatures,
+                  { hits: existingFeatures },
+                ] = await Promise.all([
                   identifyFeatures({
                     streamName: stream.name,
                     sampleDocuments,
+                    excludedFeatures: excludedSummaries,
                     inferenceClient: boundInferenceClient,
                     logger: taskContext.logger.get('features_identification'),
                     signal: runContext.abortController.signal,
@@ -148,44 +182,22 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     esClient,
                     logger: taskContext.logger.get('computed_features'),
                   }),
+                  featureClient.getFeatures(stream.name),
                 ]);
 
-                const identifiedFeatures: BaseFeature[] = [
-                  ...inferredBaseFeatures,
-                  ...computedFeatures,
-                ];
-
-                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
-
-                let newFeaturesCount = inferredBaseFeatures.length;
-                const now = Date.now();
-                const features = identifiedFeatures.map((feature) => {
-                  const existing = featureClient.findDuplicateFeature({
-                    existingFeatures,
-                    feature,
-                  });
-                  const isComputed = isComputedFeature(feature);
-                  if (existing && !isComputed) {
-                    newFeaturesCount--;
-                    taskContext.logger.debug(
-                      () =>
-                        `Overwriting feature with id [${
-                          feature.id
-                        }] since it already exists.\nExisting feature: ${JSON.stringify(
-                          existing
-                        )}\nNew feature: ${JSON.stringify(feature)}`
-                    );
-                  }
-                  return {
-                    ...feature,
-                    status: 'active' as const,
-                    last_seen: new Date(now).toISOString(),
-                    expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
-                    uuid: isComputed
-                      ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
-                      : existing?.uuid ?? uuid(),
-                  };
+                const { features, newFeaturesCount, codeIgnoredCount } = reconcileFeatures({
+                  inferredBaseFeatures,
+                  ignoredFeatures,
+                  computedFeatures,
+                  existingFeatures,
+                  excludedFeatures,
+                  featureClient,
+                  logger: taskLogger,
+                  streamName,
                 });
+
+                telemetryProps.llm_ignored_count = ignoredFeatures.length;
+                telemetryProps.code_ignored_count = codeIgnoredCount;
 
                 await featureClient.bulk(
                   stream.name,
@@ -263,4 +275,80 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
       },
     },
   } satisfies TaskDefinitionRegistry;
+}
+
+function reconcileFeatures({
+  inferredBaseFeatures,
+  ignoredFeatures,
+  computedFeatures,
+  existingFeatures,
+  excludedFeatures,
+  featureClient,
+  logger,
+  streamName,
+}: {
+  inferredBaseFeatures: BaseFeature[];
+  ignoredFeatures: IgnoredFeature[];
+  computedFeatures: BaseFeature[];
+  existingFeatures: Feature[];
+  excludedFeatures: Feature[];
+  featureClient: FeatureClient;
+  logger: Logger;
+  streamName: string;
+}): { features: Feature[]; newFeaturesCount: number; codeIgnoredCount: number } {
+  // Log all LLM-reported ignored features
+  for (const ignored of ignoredFeatures) {
+    logger.debug(
+      () =>
+        `LLM ignored feature "${ignored.feature_id}" (matched excluded "${ignored.excluded_feature_id}"): ${ignored.reason}`
+    );
+  }
+
+  // Server-side safety net: check against ALL excluded features (not just the subset sent to the LLM)
+  let codeIgnoredCount = 0;
+  const nonExcludedInferredFeatures = inferredBaseFeatures.filter((feature) => {
+    const matchingExcluded = excludedFeatures.find((excluded) =>
+      isDuplicateFeature(feature, excluded)
+    );
+    if (matchingExcluded) {
+      codeIgnoredCount++;
+      logger.debug(
+        () =>
+          `Dropping inferred feature [${feature.id}] because it matches excluded feature [${matchingExcluded.id}]`
+      );
+      return false;
+    }
+    return true;
+  });
+
+  // Combine with computed features
+  const identifiedFeatures: BaseFeature[] = [...nonExcludedInferredFeatures, ...computedFeatures];
+
+  // Reconcile with existing features (UUID reuse, dedup tracking)
+  let newFeaturesCount = nonExcludedInferredFeatures.length;
+  const now = Date.now();
+  const features = identifiedFeatures.map((feature) => {
+    const existing = featureClient.findDuplicateFeature({
+      existingFeatures,
+      feature,
+    });
+    const isComputed = isComputedFeature(feature);
+    if (existing && !isComputed) {
+      newFeaturesCount--;
+      logger.debug(
+        () => `Overwriting duplicate feature [${feature.id}] with existing uuid [${existing.uuid}]`
+      );
+    }
+    return {
+      ...feature,
+      status: 'active' as const,
+      last_seen: new Date(now).toISOString(),
+      expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
+      uuid: isComputed
+        ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
+        : existing?.uuid ?? uuid(),
+    };
+  });
+
+  return { features, newFeaturesCount, codeIgnoredCount };
 }
