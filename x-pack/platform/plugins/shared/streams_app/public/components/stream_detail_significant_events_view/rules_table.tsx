@@ -8,27 +8,41 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { SignificantEventQueryRow } from '../../hooks/use_fetch_discovery_queries';
 
-interface RuleTableItem {
-  id: string;
+interface RulesTableProps {
+  rules: SignificantEventQueryRow[];
+  searchTerm: string;
 }
 
-const columns: Array<EuiBasicTableColumn<RuleTableItem>> = [];
+const columns: Array<EuiBasicTableColumn<SignificantEventQueryRow>> = [];
 
-export function RulesTable() {
+export function RulesTable({ rules, searchTerm }: RulesTableProps) {
+  const filteredRules = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearchTerm) {
+      return rules;
+    }
+
+    return rules.filter((rule) => {
+      const title = (rule.query.title ?? '').toLowerCase();
+      return title.includes(normalizedSearchTerm);
+    });
+  }, [rules, searchTerm]);
+
   return (
-    <>
-      <span>
-        {i18n.translate('xpack.streams.rulesTable.span.rulesLabel', { defaultMessage: 'Rules' })}
-      </span>
-      <EuiInMemoryTable<RuleTableItem>
-        items={[]}
-        columns={columns}
-        tableCaption={i18n.translate('xpack.streams.rulesTable.tableCaption', {
-          defaultMessage: 'Rules',
-        })}
-      />
-    </>
+    <EuiInMemoryTable<SignificantEventQueryRow>
+      items={filteredRules}
+      columns={columns}
+      pagination={{
+        initialPageSize: 10,
+        pageSizeOptions: [10, 25, 50],
+      }}
+      tableCaption={i18n.translate('xpack.streams.rulesTable.tableCaption', {
+        defaultMessage: 'Rules',
+      })}
+    />
   );
 }

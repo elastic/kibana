@@ -6,6 +6,7 @@
  */
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -17,20 +18,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import type { Streams } from '@kbn/streams-schema';
+import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { upperFirst } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { useAIFeatures } from '../../hooks/use_ai_features';
-import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
-import { useKibana } from '../../hooks/use_kibana';
-import { useTimeRange } from '../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
+import { useStreamFeatures } from '../../hooks/use_stream_features';
 import { LoadingPanel } from '../loading_panel';
-import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
-import type { Flow } from './add_significant_event_flyout/types';
 import { EmptyState } from './empty_state';
 import { RulesTable } from './rules_table';
 import { SignificantEventsTable } from './significant_events_table';
@@ -40,19 +35,13 @@ interface Props {
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
-  const { refresh } = useTimefilter();
-  const {
-    dependencies: {
-      start: { unifiedSearch },
-    },
-  } = useKibana();
-  const aiFeatures = useAIFeatures();
-
-  const [query, setQuery] = useState<string>('');
   const [tableSearchValue, setTableSearchValue] = useState('');
   const [isTypeFilterPopoverOpen, setIsTypeFilterPopoverOpen] = useState(false);
+  const [isKnowledgeIndicatorTypeFilterPopoverOpen, setIsKnowledgeIndicatorTypeFilterPopoverOpen] =
+    useState(false);
+  const [selectedKnowledgeIndicatorTypes, setSelectedKnowledgeIndicatorTypes] = useState<string[]>(
+    []
+  );
   const [typeFilterOptions, setTypeFilterOptions] = useState<EuiSelectableOption[]>([
     {
       key: 'knowledge_indicator',
@@ -71,118 +60,132 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       }),
     },
   ]);
-  const significantEventsFetchState = useFetchSignificantEvents({
+  const queriesFetchState = useFetchDiscoveryQueries({
     name: definition.stream.name,
-    query,
+    query: '',
+    page: 1,
+    perPage: 1000,
+    status: ['active', 'draft'],
   });
-  const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
-  const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
-
-  const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
-  const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
+  const { features, featuresLoading } = useStreamFeatures(definition.stream);
   const typeFilterPopoverId = useGeneratedHtmlId({
     prefix: 'significantEventsTypeFilterPopover',
   });
+  const knowledgeIndicatorTypeFilterPopoverId = useGeneratedHtmlId({
+    prefix: 'knowledgeIndicatorTypeFilterPopover',
+  });
+
+  const ruleQueries = useMemo(
+    () => (queriesFetchState.data?.queries ?? []).filter((queryRow) => queryRow.rule_backed),
+    [queriesFetchState.data?.queries]
+  );
+
+  const knowledgeIndicators = useMemo<KnowledgeIndicator[]>(() => {
+    const queryKnowledgeIndicators = (queriesFetchState.data?.queries ?? []).map((queryRow) => ({
+      kind: 'query' as const,
+      query: queryRow.query,
+      rule: {
+        backed: queryRow.rule_backed,
+        id: queryRow.query.id,
+      },
+      stream_name: queryRow.stream_name,
+    }));
+
+    return [
+      ...features.map((feature) => ({ kind: 'feature' as const, feature })),
+      ...queryKnowledgeIndicators,
+    ];
+  }, [features, queriesFetchState.data?.queries]);
 
   const isRulesSelected = useMemo(
     () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
     [typeFilterOptions]
   );
+  const selectedTypeFilterLabel = useMemo(
+    () => typeFilterOptions.find((option) => option.checked === 'on')?.label,
+    [typeFilterOptions]
+  );
+  const hasActiveKnowledgeIndicatorTypeFilters = selectedKnowledgeIndicatorTypes.length > 0;
+  const availableKnowledgeIndicatorTypes = useMemo(() => {
+    const types = new Set<string>();
 
-  if (!significantEventsFetchState.data && significantEventsFetchState.isLoading) {
+    knowledgeIndicators.forEach((knowledgeIndicator) => {
+      if (knowledgeIndicator.kind === 'feature') {
+        types.add(knowledgeIndicator.feature.type);
+      } else {
+        types.add('query');
+      }
+    });
+
+    return Array.from(types).sort((left, right) => left.localeCompare(right));
+  }, [knowledgeIndicators]);
+  const knowledgeIndicatorTypeCounts = useMemo(() => {
+    const normalizedSearchTerm = tableSearchValue.trim().toLowerCase();
+    const counts: Record<string, number> = {};
+
+    knowledgeIndicators.forEach((knowledgeIndicator) => {
+      const type =
+        knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
+
+      const title =
+        knowledgeIndicator.kind === 'feature'
+          ? (knowledgeIndicator.feature.title ?? '').toLowerCase()
+          : (knowledgeIndicator.query.title ?? '').toLowerCase();
+
+      if (!normalizedSearchTerm || title.includes(normalizedSearchTerm)) {
+        counts[type] = (counts[type] ?? 0) + 1;
+      }
+    });
+
+    return counts;
+  }, [knowledgeIndicators, tableSearchValue]);
+  const knowledgeIndicatorTypeFilterOptions = useMemo<EuiSelectableOption[]>(
+    () => [
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterGroupLabel',
+          {
+            defaultMessage: 'Filter by field type',
+          }
+        ),
+        isGroupLabel: true,
+      },
+      ...availableKnowledgeIndicatorTypes.map((type) => ({
+        key: type,
+        checked: selectedKnowledgeIndicatorTypes.includes(type) ? ('on' as const) : undefined,
+        label:
+          type === 'query'
+            ? i18n.translate('xpack.streams.significantEventsTable.knowledgeIndicatorType.query', {
+                defaultMessage: 'Query',
+              })
+            : upperFirst(type),
+        append: <EuiBadge>{knowledgeIndicatorTypeCounts[type] ?? 0}</EuiBadge>,
+      })),
+    ],
+    [
+      availableKnowledgeIndicatorTypes,
+      knowledgeIndicatorTypeCounts,
+      selectedKnowledgeIndicatorTypes,
+    ]
+  );
+
+  if (queriesFetchState.isLoading || featuresLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
-  const editFlyout = (generateOnMount: boolean) => (
-    <EditSignificantEventFlyout
-      setIsEditFlyoutOpen={setIsEditFlyoutOpen}
-      isEditFlyoutOpen={isEditFlyoutOpen}
-      definition={definition}
-      refresh={significantEventsFetchState.refetch}
-      queryToEdit={queryToEdit}
-      setQueryToEdit={setQueryToEdit}
-      initialFlow={initialFlow}
-      generateOnMount={generateOnMount}
-      aiFeatures={aiFeatures}
-    />
-  );
-
   const noSignificantEvents =
-    !query &&
-    !significantEventsFetchState.isLoading &&
-    significantEventsFetchState.data &&
-    significantEventsFetchState.data.significant_events.length === 0;
+    !queriesFetchState.isLoading &&
+    !featuresLoading &&
+    features.length === 0 &&
+    (queriesFetchState.data?.queries.length ?? 0) === 0;
 
   if (noSignificantEvents) {
-    return (
-      <>
-        <EmptyState
-          onManualEntryClick={() => {
-            setQueryToEdit(undefined);
-            setInitialFlow('manual');
-            setIsEditFlyoutOpen(true);
-          }}
-          onGenerateSuggestionsClick={() => {
-            setInitialFlow('ai');
-            setIsEditFlyoutOpen(true);
-          }}
-        />
-        {editFlyout(true)}
-      </>
-    );
+    return <EmptyState onManualEntryClick={() => {}} onGenerateSuggestionsClick={() => {}} />;
   }
 
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem grow>
-              <unifiedSearch.ui.SearchBar
-                appName="streamsApp"
-                showFilterBar={false}
-                showQueryMenu={false}
-                showQueryInput={true}
-                submitButtonStyle="iconOnly"
-                displayStyle="inPage"
-                disableQueryLanguageSwitcher
-                onQuerySubmit={(queryN) => {
-                  setQuery(String(queryN.query?.query ?? ''));
-
-                  if (isEqual(queryN.dateRange, dateRange)) {
-                    refresh();
-                  } else if (queryN.dateRange) {
-                    updateTimeRange(queryN.dateRange);
-                    setDateRange(queryN.dateRange);
-                  }
-                }}
-                query={{
-                  query,
-                  language: 'text',
-                }}
-                isLoading={significantEventsFetchState.isLoading}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill={true}
-                size="s"
-                color="primary"
-                onClick={() => {
-                  setIsEditFlyoutOpen(true);
-                  setQueryToEdit(undefined);
-                }}
-                iconType="plus"
-                data-test-subj="significant_events_existing_queries_open_flyout_button"
-              >
-                {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Significant events',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
@@ -210,9 +213,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                       color="text"
                       onClick={() => setIsTypeFilterPopoverOpen((isOpen) => !isOpen)}
                     >
-                      {i18n.translate('xpack.streams.significantEventsTable.typeFilterLabel', {
-                        defaultMessage: 'Type',
-                      })}
+                      {selectedTypeFilterLabel ??
+                        i18n.translate('xpack.streams.significantEventsTable.typeFilterLabel', {
+                          defaultMessage: 'Knowledge Indicators',
+                        })}
                     </EuiButton>
                   }
                   isOpen={isTypeFilterPopoverOpen}
@@ -264,13 +268,81 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   )}
                 />
               </EuiFlexItem>
+              {!isRulesSelected ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    id={knowledgeIndicatorTypeFilterPopoverId}
+                    aria-label={i18n.translate(
+                      'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterPopoverLabel',
+                      {
+                        defaultMessage: 'Knowledge indicator type filter',
+                      }
+                    )}
+                    button={
+                      <EuiButton
+                        iconType="arrowDown"
+                        iconSide="right"
+                        color={hasActiveKnowledgeIndicatorTypeFilters ? 'primary' : 'text'}
+                        fill={hasActiveKnowledgeIndicatorTypeFilters}
+                        onClick={() =>
+                          setIsKnowledgeIndicatorTypeFilterPopoverOpen((isOpen) => !isOpen)
+                        }
+                      >
+                        {i18n.translate(
+                          'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterLabel',
+                          {
+                            defaultMessage: 'Type',
+                          }
+                        )}
+                      </EuiButton>
+                    }
+                    isOpen={isKnowledgeIndicatorTypeFilterPopoverOpen}
+                    closePopover={() => setIsKnowledgeIndicatorTypeFilterPopoverOpen(false)}
+                    panelPaddingSize="none"
+                  >
+                    <EuiSelectable
+                      aria-label={i18n.translate(
+                        'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterSelectableAriaLabel',
+                        {
+                          defaultMessage: 'Filter knowledge indicators by type',
+                        }
+                      )}
+                      options={knowledgeIndicatorTypeFilterOptions}
+                      onChange={(options) => {
+                        setSelectedKnowledgeIndicatorTypes(
+                          options
+                            .filter((option) => option.checked === 'on')
+                            .map((option) => String(option.key ?? option.label))
+                        );
+                      }}
+                    >
+                      {(list) => (
+                        <div
+                          css={css`
+                            min-width: 260px;
+                          `}
+                        >
+                          {list}
+                        </div>
+                      )}
+                    </EuiSelectable>
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            {isRulesSelected ? <RulesTable /> : <SignificantEventsTable />}
+            {isRulesSelected ? (
+              <RulesTable rules={ruleQueries} searchTerm={tableSearchValue} />
+            ) : (
+              <SignificantEventsTable
+                knowledgeIndicators={knowledgeIndicators}
+                searchTerm={tableSearchValue}
+                selectedTypes={selectedKnowledgeIndicatorTypes}
+              />
+            )}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(false)}
     </>
   );
 }
