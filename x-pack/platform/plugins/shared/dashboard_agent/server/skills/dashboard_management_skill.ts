@@ -84,16 +84,16 @@ If you omit metadata on a new dashboard, creation can fail.
    - \`add_panels_from_attachments\` with \`items[]\` to add visualization attachments with their dashboard grid layout, optionally targeting an existing section via \`sectionId\`
    - \`add_section\` to create a new section (server generates \`sectionId\`)
    - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
-   - \`remove_panels\` to remove by \`panelId\`
+   - \`remove_panels\` to remove by \`uid\`
    - \`set_metadata\` for dashboard metadata updates
-   - \`update_panels_from_attachments\` to refresh dashboard panels after updating their source visualization attachment via \`create_visualization\` with \`attachment_id\`. Pass the updated attachment IDs — matching panels are re-resolved with the latest attachment data, preserving their \`panelId\` and \`grid\` position.
+   - \`update_panels_from_attachments\` to refresh dashboard panels after updating their source visualization attachment via \`create_visualization\` with \`attachment_id\`. Pass the updated attachment IDs — matching panels are re-resolved with the latest attachment data, preserving their \`uid\` and \`grid\` position.
    - To update a markdown panel, use \`remove_panels\` to remove the old one, then \`add_markdown\` to add a new one with updated content and grid
 
 ### Step 2: Interpret results and report clearly
 
 After a successful call, the tool returns:
 - \`data.dashboardAttachment.id\`: the attachment ID needed for future updates.
-- \`data.dashboardAttachment.content.panels\`: array of \`{ type, panelId, title }\` for each panel on the dashboard.
+- \`data.dashboardAttachment.content.panels\`: array of \`{ type, uid, grid }\` for each panel on the dashboard.
 - \`data.dashboardAttachment.content.sections\`: ordered section list with \`sectionId\`, \`title\`, \`collapsed\`, \`grid.y\`, and section panels.
 - \`data.failures\`: array of \`{ type, identifier, error }\` for attachment resolution failures. Only present when there are failures.
 - \`data.version\`: the version number of the dashboard attachment, incrementing with each update.
@@ -101,7 +101,7 @@ After a successful call, the tool returns:
 See \`./examples/tool-result-format\` for the complete result structure with examples.
 
 **After a successful call:**
-- Summarize what was created or updated. List each panel by title so the user knows what is included.
+- Summarize what was created or updated.
 - If \`failures\` is present and non-empty, explain which attachments could not be resolved and include the error message. Offer to recreate those visualizations and retry adding them.
 - Remember the \`dashboardAttachment.id\` for follow-up updates. Do not ask the user for it again.
 - **Render the dashboard attachment inline** so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition — only the final dashboard attachment should be rendered.
@@ -265,7 +265,7 @@ Use this when the user wants to add a visualization that was already created ear
 
 ## Update a dashboard — refresh panels from updated attachments
 
-Use this after updating a visualization attachment via \`create_visualization\` with \`attachment_id\`. The operation re-resolves matching panels from their source attachments, preserving \`panelId\` and \`grid\`.
+Use this after updating a visualization attachment via \`create_visualization\` with \`attachment_id\`. The operation re-resolves matching panels from their source attachments, preserving \`uid\` and \`grid\`.
 
 \`\`\`json
 {
@@ -317,9 +317,9 @@ Use this after updating a visualization attachment via \`create_visualization\` 
         "title": "Web Server Performance",
         "description": "Overview of web server request traffic and host resource usage",
         "panels": [
-          { "type": "lens", "panelId": "viz-001", "title": "Total Requests", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
-          { "type": "lens", "panelId": "viz-002", "title": "Average CPU Usage", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
-          { "type": "lens", "panelId": "viz-003", "title": "Requests Over Time", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
+          { "type": "lens", "uid": "viz-001", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "uid": "viz-002", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "uid": "viz-003", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
         ]
       }
     }
@@ -329,7 +329,7 @@ Use this after updating a visualization attachment via \`create_visualization\` 
 
 Key fields to remember:
 - \`data.dashboardAttachment.id\` — save this value. Pass it as \`dashboardAttachmentId\` in follow-up update calls.
-- \`data.dashboardAttachment.content.panels[].panelId\` — use these when the user asks to remove a specific panel via \`remove_panels.panelIds\`.
+- \`data.dashboardAttachment.content.panels[].uid\` — use these when the user asks to remove a specific panel via \`remove_panels.panelIds\`.
 - \`data.dashboardAttachment.content.panels[].grid\` — current position and size of each panel. Use this to find gaps when adding new panels to an existing dashboard.
 - \`data.dashboardAttachment.content.sections[]\` — section metadata and section-level panel lists. Use each section's \`sectionId\` for section-targeted updates.
 - \`data.version\` — increments with each update to the dashboard.
@@ -356,7 +356,7 @@ Key fields to remember:
         "title": "Server Metrics",
         "description": "System performance overview",
         "panels": [
-          { "type": "lens", "panelId": "viz-001", "title": "CPU Usage Over Time" }
+          { "type": "lens", "uid": "viz-001", "grid": { "x": 0, "y": 0, "w": 24, "h": 10 } }
         ]
       }
     }

@@ -73,7 +73,7 @@ describe('resolvePanelsFromAttachments', () => {
     expect(result.panels).toHaveLength(1);
     expect(result.panels[0]).toMatchObject({
       type: 'lens',
-      title: 'Request count',
+      config: { type: 'metric', title: 'Request count' },
     });
   });
 

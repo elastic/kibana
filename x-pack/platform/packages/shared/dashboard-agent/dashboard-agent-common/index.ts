@@ -7,30 +7,22 @@
 
 export {
   DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
 } from './constants';
 
 export {
   panelGridSchema,
   sectionGridSchema,
-  lensAttachmentPanelSchema,
-  genericAttachmentPanelSchema,
   attachmentPanelSchema,
   dashboardSectionSchema,
   dashboardAttachmentDataSchema,
-  isLensAttachmentPanel,
-  isGenericAttachmentPanel,
+  isSection,
 } from './types';
 
 export type {
-  LensAttachmentPanel,
-  GenericAttachmentPanel,
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,
   DashboardAttachmentOrigin,
   PanelAddedEventData,
   PanelsRemovedEventData,
-  DashboardUiEvent,
 } from './types';

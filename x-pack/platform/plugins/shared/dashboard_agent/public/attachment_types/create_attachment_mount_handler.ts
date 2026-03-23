@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { filter, type Observable, type Subscription } from 'rxjs';
+import { auditTime, filter, map, merge, type Observable, type Subscription } from 'rxjs';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -14,10 +15,11 @@ import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { getStateFromAttachment } from './attachment_to_dashboard_state';
+import { getStateFromAttachment, toDashboardAttachmentData } from './attachment_to_dashboard_state';
 export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
   dashboardPlugin: DashboardStart;
   chat$: Observable<ChatEvent>;
+  addAttachment: (attachment: AttachmentInput) => void;
 }
 
 /**
@@ -32,9 +34,11 @@ export const onAttachmentMount = ({
   chat$,
   getAttachment,
   updateOrigin,
+  addAttachment,
 }: OnAttachmentMountParams) => {
   let savedObjectIdSubscription: Subscription | undefined;
   let liveChangesSubscription: Subscription | undefined;
+  let manualChangesSubscription: Subscription | undefined;
 
   // Subscribe to dashboard API changes to manage savedObjectId$ subscription lifecycle
   const apiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
@@ -42,6 +46,8 @@ export const onAttachmentMount = ({
     savedObjectIdSubscription = undefined;
     liveChangesSubscription?.unsubscribe();
     liveChangesSubscription = undefined;
+    manualChangesSubscription?.unsubscribe();
+    manualChangesSubscription = undefined;
     if (!api) return;
 
     let previousSavedObjectId = api.savedObjectId$.value;
@@ -103,11 +109,44 @@ export const onAttachmentMount = ({
       api.setState(getStateFromAttachment(attachment));
       setTimeout(() => api!.scrollToBottom(), 0);
     });
+
+    // Sync manual dashboard changes back to the attachment
+    manualChangesSubscription = merge(
+      // api.query$.pipe(map(() => undefined)),
+      // api.filters$.pipe(map(() => undefined)),
+      // api.timeRange$.pipe(map(() => undefined)),
+      api.layout$.pipe(map(() => undefined)),
+      api.title$.pipe(map(() => undefined)),
+      api.description$.pipe(map(() => undefined)),
+      api.hasUnsavedChanges$.pipe(map(() => undefined))
+    )
+      .pipe(auditTime(150))
+      .subscribe(() => {
+        const currentAttachment = getAttachment();
+        const currentSavedObjectId = api.savedObjectId$.getValue();
+
+        // Only sync if: no saved dashboard OR saved dashboard matches attachment's origin
+        if (currentSavedObjectId && currentSavedObjectId !== currentAttachment.origin) {
+          return;
+        }
+
+        const currentDashboardState = api.getSerializedState().attributes;
+        if (!currentDashboardState) {
+          return;
+        }
+
+        addAttachment({
+          id: currentAttachment.id,
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          data: toDashboardAttachmentData(currentDashboardState),
+        });
+      });
   });
 
   return () => {
     apiSubscription.unsubscribe();
     savedObjectIdSubscription?.unsubscribe();
     liveChangesSubscription?.unsubscribe();
+    manualChangesSubscription?.unsubscribe();
   };
 };
