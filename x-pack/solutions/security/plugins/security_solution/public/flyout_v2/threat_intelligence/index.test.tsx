@@ -8,42 +8,29 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { DocumentDetailsContext } from '../../shared/context';
-import { TestProviders } from '../../../../common/mock';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../common/mock';
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
-} from './test_ids';
-import { ThreatIntelligenceDetails } from './threat_intelligence_details';
-import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
-import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
+} from './components/test_ids';
+import { ThreatIntelligenceDetails } from '.';
+import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
+import { buildEventEnrichmentMock } from '../../../common/search_strategy/security_solution/cti/index.mock';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
-      },
-    }),
-  };
-});
+jest.mock('./hooks/use_threat_intelligence_details');
 
-jest.mock('../hooks/use_threat_intelligence_details');
+const mockHit: DataTableRecord = {
+  id: '1',
+  raw: {},
+  flattened: {},
+  isAnchor: false,
+};
 
-const defaultContextValue = {
-  getFieldsData: () => 'id',
-} as unknown as DocumentDetailsContext;
-
-const renderThreatIntelligenceDetails = (contextValue: DocumentDetailsContext) =>
+const renderThreatIntelligenceDetails = () =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <ThreatIntelligenceDetails />
-      </DocumentDetailsContext.Provider>
+      <ThreatIntelligenceDetails hit={mockHit} />
     </TestProviders>
   );
 
@@ -59,7 +46,7 @@ describe('<ThreatIntelligenceDetails />', () => {
       eventFields: {},
     });
 
-    const { getByTestId } = renderThreatIntelligenceDetails(defaultContextValue);
+    const { getByTestId } = renderThreatIntelligenceDetails();
 
     expect(getByTestId(THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID)).toBeInTheDocument();
     expect(useThreatIntelligenceDetails).toHaveBeenCalled();
@@ -76,7 +63,7 @@ describe('<ThreatIntelligenceDetails />', () => {
       eventFields: {},
     });
 
-    const { getByTestId } = renderThreatIntelligenceDetails(defaultContextValue);
+    const { getByTestId } = renderThreatIntelligenceDetails();
 
     expect(getByTestId(THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
     expect(useThreatIntelligenceDetails).toHaveBeenCalled();
@@ -100,7 +87,7 @@ describe('<ThreatIntelligenceDetails />', () => {
       },
     });
 
-    const { getByTestId } = renderThreatIntelligenceDetails(defaultContextValue);
+    const { getByTestId } = renderThreatIntelligenceDetails();
 
     expect(getByTestId(THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID)).toBeInTheDocument();
   });

@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { isEmpty, isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import { i18n } from '@kbn/i18n';
-import { useEventEnrichmentComplete } from '../services/threat_intelligence';
+import { useEventEnrichmentComplete } from '../../document/services/threat_intelligence';
 import type {
   CtiEventEnrichmentStrategyResponse,
   EventFields,
@@ -24,7 +24,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../document/constants/local_storage';
 
 const INVESTIGATION_ENRICHMENT_REQUEST_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.threatIntelligence.requestError',

@@ -7,14 +7,19 @@
 
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
 import { renderHook } from '@testing-library/react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useInvestigationTimeEnrichment } from '../../../../flyout_v2/document/hooks/use_investigation_enrichment';
-import { mockContextValue } from '../../shared/mocks/mock_context';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 
-jest.mock('@kbn/discover-utils');
-jest.mock('../../shared/context');
-jest.mock('../../../../flyout_v2/document/hooks/use_investigation_enrichment');
+jest.mock('./use_investigation_enrichment');
+
+const mockHit: DataTableRecord = {
+  id: '1',
+  raw: {},
+  flattened: {
+    'kibana.alert.rule.uuid': ['ruleId'],
+  },
+  isAnchor: false,
+};
 
 describe('useThreatIntelligenceDetails', () => {
   beforeEach(() => {
@@ -24,16 +29,6 @@ describe('useThreatIntelligenceDetails', () => {
       setRange: jest.fn(),
       range: { from: '2023-04-27T00:00:00Z', to: '2023-04-27T23:59:59Z' },
     });
-
-    jest.mocked(useDocumentDetailsContext).mockReturnValue(mockContextValue);
-    jest.mocked(buildDataTableRecord).mockReturnValue({
-      id: '1',
-      raw: {},
-      flattened: {
-        'kibana.alert.rule.uuid': ['ruleId'],
-      },
-      isAnchor: false,
-    });
   });
 
   afterEach(() => {
@@ -41,7 +36,7 @@ describe('useThreatIntelligenceDetails', () => {
   });
 
   it('returns the expected values', () => {
-    const { result } = renderHook(() => useThreatIntelligenceDetails());
+    const { result } = renderHook(() => useThreatIntelligenceDetails({ hit: mockHit }));
 
     expect(result.current.enrichments).toEqual([]);
     expect(result.current.eventFields).toEqual({});
