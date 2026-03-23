@@ -20,6 +20,7 @@ import {
   getDatasourceLayers,
   getLegendTruncateAfterLines,
   getSharedChartLensStateToAPI,
+  getScaleTypeFromColumnType,
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
@@ -52,7 +53,8 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 }
 
 function getGridConfigProps(
-  gridConfig: HeatmapVisualizationState['gridConfig']
+  gridConfig: HeatmapVisualizationState['gridConfig'],
+  xAxisScale?: 'temporal' | 'linear' | 'ordinal'
 ): HeatmapState['axis'] {
   return {
     x: {
@@ -67,6 +69,7 @@ function getGridConfigProps(
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
+      ...(xAxisScale ? { scale: xAxisScale } : {}),
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
@@ -92,11 +95,17 @@ function reverseBuildVisualizationState(
     throw new Error('Value accessor is missing in the visualization state');
   }
 
+  let xAxisScale: 'temporal' | 'linear' | 'ordinal' | undefined;
+  if (isTextBasedLayer(layer) && visualization.xAccessor) {
+    const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
+  }
+
   const sharedProps = {
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig),
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },

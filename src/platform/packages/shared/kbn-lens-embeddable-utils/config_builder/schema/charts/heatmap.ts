@@ -51,6 +51,16 @@ const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.l
   meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
 });
 
+const xScaleSchema = schema.maybe(
+  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
+    meta: {
+      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
+      description:
+        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
+    },
+  })
+);
+
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
@@ -73,6 +83,7 @@ const heatmapSharedStateSchema = {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
               sort: schema.maybe(heatmapSortPredicateSchema),
+              scale: xScaleSchema,
             },
             {
               meta: {
