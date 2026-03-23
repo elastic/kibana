@@ -30,7 +30,7 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
     return { root };
   }, [euiTheme]);
 
-export const AppMenuBar = () => {
+export const AppMenuBar = React.memo(() => {
   const hasLegacyActionMenu = useHasLegacyActionMenu();
   const { euiTheme } = useEuiTheme();
 
@@ -49,4 +49,4 @@ export const AppMenuBar = () => {
       {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
     </div>
   );
-};
+});

@@ -212,6 +212,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
     resolveRefs: jest.fn(),
+    evaluateStalenessForActiveAttachments: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),
