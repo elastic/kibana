@@ -42,7 +42,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
-  public async _run(withInputs?: Record<string, unknown>): Promise<RunStepResult> {
+  public async _run(withInputs?: any): Promise<RunStepResult> {
     try {
       const stepType = this.node.configuration.type;
       // Use rendered inputs if provided, otherwise fall back to raw configuration.with
