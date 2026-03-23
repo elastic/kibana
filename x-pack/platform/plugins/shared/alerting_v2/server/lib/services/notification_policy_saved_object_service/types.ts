@@ -14,6 +14,7 @@ export type NotificationPolicySavedObjectBulkGetItem =
       id: string;
       attributes: NotificationPolicySavedObjectAttributes;
       version?: string;
+      namespaces?: string[];
     }
   | {
       id: string;

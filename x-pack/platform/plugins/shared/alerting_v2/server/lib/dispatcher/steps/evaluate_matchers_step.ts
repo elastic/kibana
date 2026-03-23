@@ -38,13 +38,20 @@ export function evaluateMatchers(
   policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
-  const allPolicies = Array.from(policies.values());
+
+  const policiesBySpace = new Map<string, NotificationPolicy[]>();
+  for (const policy of policies.values()) {
+    const list = policiesBySpace.get(policy.spaceId) ?? [];
+    list.push(policy);
+    policiesBySpace.set(policy.spaceId, list);
+  }
 
   for (const episode of dispatchable) {
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 
-    for (const policy of allPolicies) {
+    const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
+    for (const policy of spacePolicies) {
       if (!policy.enabled) continue;
       if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
 

@@ -8,6 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
+import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -37,6 +38,7 @@ export class FetchPoliciesStep implements DispatcherStep {
 
       policies.set(doc.id, {
         id: doc.id,
+        spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.name,
         enabled: doc.attributes.enabled,
         destinations: doc.attributes.destinations ?? [],

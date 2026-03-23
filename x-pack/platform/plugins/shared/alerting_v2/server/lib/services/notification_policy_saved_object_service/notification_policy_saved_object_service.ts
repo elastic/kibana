@@ -169,7 +169,7 @@ export class NotificationPolicySavedObjectService
         if (doc.error) {
           results.push({ id: doc.id, error: doc.error });
         } else {
-          results.push({ id: doc.id, attributes: doc.attributes });
+          results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
         }
       }
     }
