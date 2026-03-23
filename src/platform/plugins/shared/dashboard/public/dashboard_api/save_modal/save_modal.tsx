@@ -187,7 +187,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
                   content={
                     <FormattedMessage
                       id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowHelpText"
-                      defaultMessage="Saves the current CPS scope with the dashboard. Anyone who opens the dashboard will start with that scope."
+                      defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
                     />
                   }
                   position="top"
