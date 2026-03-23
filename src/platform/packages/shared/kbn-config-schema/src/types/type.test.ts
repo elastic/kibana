@@ -11,7 +11,11 @@ import { get } from 'lodash';
 import { internals } from '../internals';
 import type { TypeOptions } from './type';
 import { Type } from './type';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
+import {
+  META_FIELD_X_OAS_AVAILABILITY,
+  META_FIELD_X_OAS_DEPRECATED,
+  META_FIELD_X_OAS_DISCONTINUED,
+} from '../oas_meta_fields';
 
 class MyType extends Type<any> {
   constructor(opts: TypeOptions<any> = {}) {
@@ -32,7 +36,12 @@ describe('meta', () => {
 
   it('sets meta with all fields provided', () => {
     const type = new MyType({
-      meta: { description: 'my description', deprecated: true, 'x-discontinued': '9.0.0' },
+      meta: {
+        description: 'my description',
+        deprecated: true,
+        'x-discontinued': '9.0.0',
+        availability: { stability: 'stable', since: '9.4.0' },
+      },
     });
     const meta = type.getSchema().describe();
     expect(get(meta, 'flags.description')).toBe('my description');
@@ -40,6 +49,10 @@ describe('meta', () => {
     expect(get(meta, `metas[0].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
 
     expect(get(meta, `metas[1].${META_FIELD_X_OAS_DISCONTINUED}`)).toBe('9.0.0');
+    expect(get(meta, `metas[2].${META_FIELD_X_OAS_AVAILABILITY}`)).toEqual({
+      stability: 'stable',
+      since: '9.4.0',
+    });
   });
 
   it('does not set meta when no provided', () => {
