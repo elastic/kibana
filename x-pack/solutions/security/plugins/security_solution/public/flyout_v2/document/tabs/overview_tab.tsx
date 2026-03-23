@@ -36,13 +36,7 @@ export interface OverviewTabProps {
  */
 export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => {
   return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      paddingSize="none"
-      aria-label={OVERVIEW_ARIA_LABEL}
-    >
-      <EuiSpacer size="m" />
+    <>
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection hit={hit} />
@@ -50,7 +44,7 @@ export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) =
       <VisualizationsSection hit={hit} renderCellActions={renderCellActions} />
       <EuiHorizontalRule margin="m" />
       <InsightsSection hit={hit} />
-    </EuiPanel>
+    </>
   );
 });
 

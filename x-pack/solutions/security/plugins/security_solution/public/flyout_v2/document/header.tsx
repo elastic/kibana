@@ -15,7 +15,7 @@ import { HeaderTitle } from './components/header_title';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 
-export interface DocumentHeaderProps {
+export interface HeaderProps {
   /**
    * The document to display
    */
@@ -26,7 +26,7 @@ export interface DocumentHeaderProps {
  * Document header container for the flyout.
  * Currently renders only the title; future PRs will add severity, timestamp, and metadata blocks.
  */
-export const DocumentHeader: FC<DocumentHeaderProps> = memo(({ hit }) => {
+export const Header: FC<HeaderProps> = memo(({ hit }) => {
   const { services } = useKibana();
 
   const ruleId = useMemo(
@@ -46,4 +46,4 @@ export const DocumentHeader: FC<DocumentHeaderProps> = memo(({ hit }) => {
   return <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />;
 });
 
-DocumentHeader.displayName = 'DocumentHeader';
+Header.displayName = 'Header';

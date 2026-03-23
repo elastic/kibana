@@ -9,7 +9,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DocumentHeader } from './header';
+import { Header } from './header';
 
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -50,23 +50,23 @@ const eventHit = createMockHit({
   'event.kind': 'event',
 });
 
-const renderDocumentHeader = (props: Parameters<typeof DocumentHeader>[0]) =>
+const renderHeader = (props: Parameters<typeof Header>[0]) =>
   render(
     <IntlProvider locale="en">
-      <DocumentHeader {...props} />
+      <Header {...props} />
     </IntlProvider>
   );
 
 describe('<DocumentHeader />', () => {
   it('should pass the hit to the header title', () => {
-    const { getByTestId } = renderDocumentHeader({ hit: alertHit });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
   it('should resolve and pass titleHref for alerts with a rule id', () => {
-    const { getByTestId } = renderDocumentHeader({ hit: alertHit });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute(
       'data-title-href',
@@ -75,7 +75,7 @@ describe('<DocumentHeader />', () => {
   });
 
   it('should not pass titleHref when there is no rule id', () => {
-    const { getByTestId } = renderDocumentHeader({ hit: eventHit });
+    const { getByTestId } = renderHeader({ hit: eventHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-title-href', '');
   });

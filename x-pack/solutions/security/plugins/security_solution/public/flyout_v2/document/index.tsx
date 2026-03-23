@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
-import { DocumentHeader } from './header';
+import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 
 export interface DocumentFlyoutProps {
@@ -31,7 +31,7 @@ export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(({ hit, renderCellAc
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DocumentHeader hit={hit} />
+        <Header hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <OverviewTab hit={hit} renderCellActions={renderCellActions} />
