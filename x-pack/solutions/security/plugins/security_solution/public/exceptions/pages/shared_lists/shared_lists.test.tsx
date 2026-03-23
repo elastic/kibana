@@ -50,6 +50,11 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
+jest.mock('@kbn/cps-utils', () => ({
+  useCpsPickerAccess: jest.fn(),
+  ProjectRoutingAccess: { READONLY: 'readonly' },
+}));
+
 jest.mock('../../hooks/use_endpoint_exceptions_capability');
 jest.mock('../../components/create_shared_exception_list', () => ({
   CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
