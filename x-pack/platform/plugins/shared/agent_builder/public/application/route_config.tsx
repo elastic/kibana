@@ -38,6 +38,7 @@ export interface RouteDefinition {
   navLabel?: string;
   navIcon?: string;
   navSection?: string;
+  isAgentDisplayName?: boolean;
 }
 
 const navLabels = {
@@ -71,9 +72,10 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/overview',
     sidebarView: 'agentSettings',
-    navLabel: navLabels.overview,
+    navSection: 'About',
+    navIcon: 'sparkles',
+    isAgentDisplayName: true,
     element: <RouteDisplay />,
-    navIcon: 'info',
   },
   {
     path: '/agents/:agentId/skills',
@@ -217,17 +219,22 @@ export interface SidebarNavItem {
   section?: string;
   isExperimental?: boolean;
   isConnectors?: boolean;
+  isAgentDisplayName?: boolean;
 }
 
 export const getAgentSettingsNavItems = (agentId: string): SidebarNavItem[] => {
   return agentRoutes
-    .filter((route) => route.navLabel && route.sidebarView === 'agentSettings')
+    .filter(
+      (route) =>
+        (route.navLabel ?? route.isAgentDisplayName) && route.sidebarView === 'agentSettings'
+    )
     .map((route) => ({
       label: route.navLabel!,
       path: route.path.replace(':agentId', agentId),
       icon: route.navIcon,
       section: route.navSection,
       isConnectors: route.isConnectors,
+      isAgentDisplayName: route.isAgentDisplayName,
     }));
 };
 
