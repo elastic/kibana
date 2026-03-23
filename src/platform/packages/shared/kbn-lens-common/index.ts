@@ -257,6 +257,7 @@ export {
   isPersistedAnnotationsLayer,
   isPersistedByReferenceAnnotationsLayer,
   isPersistedByValueAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
 } from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,

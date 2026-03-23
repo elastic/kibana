@@ -24,8 +24,8 @@ import type {
 import {
   AvailableReferenceLineIcons,
   isPersistedByReferenceAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
 } from '@kbn/lens-common';
-import { isPersistedLinkedByValueAnnotationsLayer } from '@kbn/lens-common/visualizations/xy/persistence';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
