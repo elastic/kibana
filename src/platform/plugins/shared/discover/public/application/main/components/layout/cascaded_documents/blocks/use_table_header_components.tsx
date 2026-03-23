@@ -93,7 +93,9 @@ function CascadeGroupingSelectionPopover({
 
   return (
     <EuiPopover
-      aria-label="Cascade grouping selection popover"
+      aria-label={i18n.translate('discover.dataCascade.header.groupBySelectorAriaLabel', {
+        defaultMessage: 'Select groups to group by',
+      })}
       isOpen={cascadeSelectOpen}
       closePopover={closeSelectionPopover}
       panelPaddingSize="none"
