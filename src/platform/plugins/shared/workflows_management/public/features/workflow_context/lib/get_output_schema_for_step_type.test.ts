@@ -336,7 +336,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'dynamic-step',
-        inputSchema: {} as any,
         outputSchema: { def: { type: 'unknown' } } as any,
         editorHandlers: {
           dynamicSchema: {
@@ -382,7 +381,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'error-step',
-        inputSchema: {} as any,
         outputSchema: mockStaticSchema,
         editorHandlers: {
           dynamicSchema: {
@@ -428,7 +426,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'static-step',
-        inputSchema: {} as any,
         outputSchema: mockStaticSchema,
         // no getOutputSchema property
       };
@@ -455,7 +452,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'waitForInput',
-        inputSchema: {} as any,
         outputSchema: z.record(z.string(), z.unknown()),
         editorHandlers: {
           dynamicSchema: {
