@@ -9,7 +9,8 @@
   "kbn_references": [
     "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
-    "@kbn/apm-types",
+    "@kbn/scout-synthtrace",
+    "@kbn/apm-types"
   ],
   "exclude": [
     "target/**/*"

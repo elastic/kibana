@@ -133,6 +133,7 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/synthtrace-client'
   - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
   - '@kbn/licensing-types'
   - '@kbn/deeplinks-management'
   - '@kbn/content-management-content-editor'
