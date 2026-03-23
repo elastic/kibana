@@ -13,6 +13,7 @@ import type {
   TextBasedLayerColumn,
   DataType,
 } from '@kbn/lens-common';
+import type { $Values } from 'utility-types';
 import { ACCESSOR } from './constants';
 import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
@@ -29,10 +30,11 @@ const API_TO_COLOR_MODE = {
   background: 'cell',
 } as const;
 
-type ApiColorTarget = (typeof COLOR_MODE_TO_API)[keyof typeof COLOR_MODE_TO_API];
+type ApiColorTarget = $Values<typeof COLOR_MODE_TO_API>;
 
-export const colorModeToApplyColorTo = (mode: ColumnState['colorMode']): ApiColorTarget =>
-  COLOR_MODE_TO_API[mode as keyof typeof COLOR_MODE_TO_API] ?? 'background';
+export const colorModeToApplyColorTo = (
+  mode: Exclude<NonNullable<ColumnState['colorMode']>, 'none'>
+): ApiColorTarget => COLOR_MODE_TO_API[mode];
 
 export const applyColorToToColorMode = (
   target: ApiColorTarget
