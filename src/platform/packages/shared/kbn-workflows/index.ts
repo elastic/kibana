@@ -45,6 +45,18 @@ export * from './common/kibana_request_builder';
 export * from './server/constants';
 export * from './server/repositories/workflow_repository';
 
+// Trigger schemas
+export {
+  AlertRuleTriggerSchema,
+  ScheduledTriggerSchema,
+  SCHEDULED_INTERVAL_ERROR,
+  SCHEDULED_INTERVAL_PATTERN,
+  ManualTriggerSchema,
+  TriggerSchema,
+  getTriggerSchema,
+  TriggerTypes,
+  type TriggerType,
+} from './spec/schema/triggers';
+
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
-export type { TriggerType } from './spec/schema/triggers/trigger_schema';
