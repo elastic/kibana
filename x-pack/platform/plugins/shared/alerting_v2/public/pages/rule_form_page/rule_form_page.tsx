@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +22,8 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
+import { createUpdateRuleFormTool } from '../../agent_builder/update_rule_form_tool';
+import { ruleFormClientApi$ } from '../../services/rule_form_client_api';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
@@ -120,6 +123,9 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const agentBuilder = useService(PluginStart<AgentBuilderPluginStart>('agentBuilder'), {
+    optional: true,
+  });
   const { navigateToUrl } = application;
   const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
@@ -127,6 +133,34 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const queryClient = useQueryClient();
 
   useBreadcrumbs(isEditing ? 'edit' : 'create');
+
+  const [currentValues, setCurrentValues] = useState<Partial<FormValues> | undefined>(
+    initialValues
+  );
+  const [currentQuery, setCurrentQuery] = useState(initialQuery ?? DEFAULT_QUERY);
+  const [formKey, setFormKey] = useState(0);
+
+  const setFormValues = useCallback((values: Partial<FormValues>, query?: string) => {
+    setCurrentValues((prev) => ({ ...prev, ...values }));
+    if (query) {
+      setCurrentQuery(query);
+    }
+    setFormKey((k) => k + 1);
+  }, []);
+
+  useEffect(() => {
+    ruleFormClientApi$.next({ setFormValues });
+    return () => ruleFormClientApi$.next(undefined);
+  }, [setFormValues]);
+
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+    const tool = createUpdateRuleFormTool(setFormValues);
+    agentBuilder.setChatConfig({ browserApiTools: [tool] });
+    return () => agentBuilder.clearChatConfig();
+  }, [agentBuilder, setFormValues]);
 
   const ruleFormServices = useMemo(
     () => ({
@@ -168,7 +202,8 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
       <EuiPageHeader pageTitle={pageTitle} />
       <EuiSpacer size="m" />
       <StandaloneRuleForm
-        query={initialQuery ?? DEFAULT_QUERY}
+        key={formKey}
+        query={currentQuery}
         services={ruleFormServices}
         includeYaml
         isDisabled={false}
@@ -176,7 +211,7 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
         onSuccess={onSuccess}
         onCancel={onCancel}
         ruleId={ruleId}
-        initialValues={initialValues}
+        initialValues={currentValues}
         submitLabel={submitLabel}
       />
     </>

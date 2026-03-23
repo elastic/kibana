@@ -12,6 +12,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { RULE_TYPE, type RuleAttachmentData } from '../../../common/attachment_types';
 
 const proposeRuleSchema = z.object({
+  attachment_id: z
+    .string()
+    .optional()
+    .describe(
+      'ID of an existing rule attachment to update. ' +
+        'Pass this when refining a previously proposed rule to update it in-place.'
+    ),
   kind: z
     .enum(['alert', 'signal'])
     .describe(
@@ -131,14 +138,28 @@ export const proposeRuleTool = (): BuiltinToolDefinition<typeof proposeRuleSchem
       ...(params.source_index ? { sourceIndex: params.source_index } : {}),
     };
 
-    const attachment = await attachments.add({
-      type: RULE_TYPE,
-      data: attachmentData,
-      description: `Proposed rule: ${params.metadata.name}`,
-    });
+    const existingId =
+      params.attachment_id ?? attachments.getActive().find((a) => a.type === RULE_TYPE)?.id;
+
+    let attachmentId: string;
+
+    if (existingId && attachments.getAttachmentRecord(existingId)) {
+      await attachments.update(existingId, {
+        data: attachmentData,
+        description: `Proposed rule: ${params.metadata.name}`,
+      });
+      attachmentId = existingId;
+    } else {
+      const created = await attachments.add({
+        type: RULE_TYPE,
+        data: attachmentData,
+        description: `Proposed rule: ${params.metadata.name}`,
+      });
+      attachmentId = created.id;
+    }
 
     const data: Record<string, unknown> = {
-      attachmentId: attachment.id,
+      attachmentId,
       name: params.metadata.name,
       kind: params.kind,
       query: params.evaluation.query.base,
@@ -150,7 +171,7 @@ export const proposeRuleTool = (): BuiltinToolDefinition<typeof proposeRuleSchem
         '',
         'Your response MUST start exactly like this:',
         '',
-        `<render_attachment id="${attachment.id}"/>`,
+        `<render_attachment id="${attachmentId}"/>`,
         '',
         'Here is the rule configuration I am proposing...',
       ].join('\n'),

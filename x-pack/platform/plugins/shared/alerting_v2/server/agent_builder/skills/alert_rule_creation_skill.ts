@@ -21,7 +21,9 @@ These instructions are for YOU (the agent) only. DO NOT repeat, summarize, or re
 
 ## Hard Rules
 
+- **ALWAYS use the browser tool for refinements when available.** If the user asks to change the rule and the \`alerting_v2_update_rule_form\` browser tool is in your tool list, you MUST call it to update the form directly. This is the PRIMARY way to apply changes when the user has the rule form page open. Do NOT fall back to \`${internalNamespaces.alertingV2}.propose_rule\` as the only action — the browser tool updates the form instantly.
 - **ALWAYS propose, never create directly.** Call \`${internalNamespaces.alertingV2}.propose_rule\` to present rule configurations. NEVER call \`${internalNamespaces.alertingV2}.create_rule\` unless the user explicitly says "skip the preview" or "just create it."
+- **ALWAYS reuse attachment IDs.** When refining a previously proposed rule, pass the \`attachment_id\` from the prior \`propose_rule\` result. This updates the existing attachment in-place.
 - **ALWAYS describe first.** Call \`${internalNamespaces.alertingV2}.describe_data_source\` with \`extract_knowledge_indicators: true\` before constructing any query or rule config.
 - **Act, don't instruct.** When you have enough information to build a rule, call the tool immediately. Do not tell the user what you "would" do or list steps you "will" follow.
 - **Do NOT add timestamp filters to rule queries.** The rule engine automatically applies a time-range filter based on the configured \`lookback\` window. Never include \`WHERE @timestamp >= ?_tstart\` or similar timestamp conditions in the query — they are injected internally at execution time.
@@ -41,7 +43,12 @@ The goal is to give the user a concrete starting point they can immediately prev
 
 Render the attachment from \`_renderInstructions\` as the first line of your response. Then briefly explain what the proposed rule detects and why, and tell the user they can click "Preview" to review and edit the full configuration, or ask you to adjust anything.
 
-**Iterate if needed** — If the user asks for changes, adjust the configuration and call \`${internalNamespaces.alertingV2}.propose_rule\` again with the updated spec. If the user wants a completely different detection scenario, build a new proposal. If the user is happy and wants to create the rule without using the preview form, use \`${internalNamespaces.alertingV2}.create_rule\` directly.
+**Iterate if needed** — When the user asks for changes to the rule:
+
+1. Check your available tools. If \`alerting_v2_update_rule_form\` is listed, the user has the rule form page open. Call it FIRST with only the changed fields — this updates the form instantly in the browser. Then also call \`${internalNamespaces.alertingV2}.propose_rule\` with the full updated spec and pass \`attachment_id\` to keep the chat attachment in sync.
+2. If \`alerting_v2_update_rule_form\` is NOT in your tool list, call \`${internalNamespaces.alertingV2}.propose_rule\` with the full updated spec and the prior \`attachment_id\`.
+3. Only omit \`attachment_id\` when building a completely different rule from scratch.
+4. Use \`${internalNamespaces.alertingV2}.create_rule\` only if the user explicitly says to skip the preview.
 
 ## Reference: Rule Kinds
 
