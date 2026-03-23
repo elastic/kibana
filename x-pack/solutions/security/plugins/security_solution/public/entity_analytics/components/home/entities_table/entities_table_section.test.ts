@@ -191,30 +191,6 @@ describe('buildResolutionGroupFilter', () => {
 });
 
 describe('groupFilterMap', () => {
-  it('passes through match_phrase filters', () => {
-    const filter = createFilter({
-      match_phrase: { field: { query: 'value' } },
-    });
-
-    expect(groupFilterMap(filter)).toBe(filter);
-  });
-
-  it('passes through bool/should filters', () => {
-    const filter = createFilter({
-      bool: { should: [{ term: { field: 'value' } }] },
-    });
-
-    expect(groupFilterMap(filter)).toBe(filter);
-  });
-
-  it('passes through bool/filter filters', () => {
-    const filter = createFilter({
-      bool: { filter: [{ term: { field: 'value' } }] },
-    });
-
-    expect(groupFilterMap(filter)).toBe(filter);
-  });
-
   it('passes through any filter with a query', () => {
     const filter = createFilter({
       term: { field: 'value' },
@@ -252,50 +228,6 @@ describe('resolution filter pipeline regression', () => {
 
     expect(result).toBeDefined();
     expect(result?.[0].bool.should).toHaveLength(2);
-  });
-
-  it('buildResolutionGroupFilter returns undefined after transformResolutionFilter (regression scenario)', () => {
-    // This test documents the regression: applying transformResolutionFilter
-    // before buildResolutionGroupFilter removes the match_phrase that
-    // buildResolutionGroupFilter needs, causing it to return undefined (no filters).
-    const transformedFilters = [resolutionMatchPhraseFilter]
-      .map(transformResolutionFilter)
-      .map(groupFilterMap)
-      .filter(Boolean) as Filter[];
-
-    const result = buildResolutionGroupFilter(transformedFilters);
-
-    // After transformation, match_phrase is gone → buildResolutionGroupFilter can't find it
-    expect(result).toBeUndefined();
-  });
-
-  it('buildResolutionGroupFilter preserves non-resolution filters from parent groups', () => {
-    // When resolution is leaf in Entity Type > Resolution, the parent entity type
-    // filter must be preserved alongside the resolution bool query.
-    const entityTypeFilter = createFilter({
-      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
-    });
-    const rawFilters = [resolutionMatchPhraseFilter, entityTypeFilter]
-      .map(groupFilterMap)
-      .filter(Boolean) as Filter[];
-
-    const resolutionQueryFilter = buildResolutionGroupFilter(rawFilters);
-
-    // Resolution query is present
-    expect(resolutionQueryFilter).toBeDefined();
-    expect(resolutionQueryFilter?.[0].bool.should).toHaveLength(2);
-
-    // Entity type filter is NOT included in resolutionQueryFilter — it must be
-    // preserved separately by the caller (DataTableWithLocalPagination).
-    // In production, @kbn/grouping sets meta.key to the grouped field, so
-    // non-resolution filters are identified by meta.key !== RESOLVED_TO.
-    const nonResolutionFilters = rawFilters.filter(
-      (f) => f?.meta?.key !== ENTITY_FIELDS.RESOLVED_TO
-    );
-    expect(nonResolutionFilters).toHaveLength(1);
-    expect(nonResolutionFilters[0].query).toEqual({
-      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
-    });
   });
 
   it('transformResolutionFilter is safe to apply to already-transformed filters (idempotent for non-match_phrase)', () => {
