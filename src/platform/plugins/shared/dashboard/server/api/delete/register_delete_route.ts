@@ -53,7 +53,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         return res.badRequest();
       }
 
-      return res.ok();
+      return res.noContent();
     }
   );
 }

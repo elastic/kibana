@@ -372,6 +372,7 @@ export class LensPlugin {
             nowProvider: plugins.data.nowProvider,
             forceDSL,
             eventAnnotationService,
+            http: coreStart.http,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
@@ -420,7 +421,7 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                savedObjectId: savedObject.id,
+                ref_id: savedObject.id,
               } satisfies LensByRefSerializedState,
             },
             {
