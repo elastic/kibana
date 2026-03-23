@@ -25,7 +25,10 @@ import type {
 } from '../../../../common/endpoint/types';
 import { waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../common';
 
+jest.mock('../../../common/experimental_features_service');
 jest.mock('../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
@@ -38,8 +41,13 @@ describe('Automated Response actions - Runscript Configuration', () => {
 
   beforeEach(() => {
     testContext = createAppRootMockRenderer();
-    testContext.setExperimentalFlag({ responseActionsEndpointAutomatedRunScript: true });
-    testContext.setExperimentalFlag({ responseActionsScriptLibraryManagement: true });
+
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
+      responseActionsEndpointAutomatedRunScript: true,
+      responseActionsScriptLibraryManagement: true,
+    });
+
     testContext.getUserPrivilegesMockSetter(useUserPrivilegesMock).set({
       canWriteExecuteOperations: true,
     });
@@ -76,7 +84,12 @@ describe('Automated Response actions - Runscript Configuration', () => {
   });
 
   it('should render nothing if feature flag is disabled', () => {
-    testContext.setExperimentalFlag({ responseActionsEndpointAutomatedRunScript: false });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
+      responseActionsEndpointAutomatedRunScript: false,
+      responseActionsScriptLibraryManagement: true,
+    });
+
     const { queryByTestId } = render();
 
     expect(queryByTestId('runscript-config-field')).toBeNull();

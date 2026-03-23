@@ -19,8 +19,8 @@ import {
   isRangeFilter,
   isScriptedRangeFilter,
 } from '@kbn/es-query';
-
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PageScope } from '../../../data_view_manager/constants';
 import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
 import { sourcererSelectors } from '../../../sourcerer/store';
@@ -81,8 +81,9 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       storeState
     );
 
-    const experimentalIsDataViewEnabled =
-      storeState.app.enableExperimental.newDataViewPickerEnabled;
+    const experimentalIsDataViewEnabled = useIsExperimentalFeatureEnabled(
+      'newDataViewPickerEnabled'
+    );
 
     let experimentalSelectedPatterns: string[] = [];
     let dataViewId: string | null = null;

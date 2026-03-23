@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
@@ -16,6 +16,10 @@ import { createFleetContextRendererMock } from '../mocks';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../../common';
+
+jest.mock('../../../../../../common/experimental_features_service');
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -35,7 +39,8 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
     mockedTestContext = createFleetContextRendererMock();
 
     // Enable endpoint exceptions feature
-    mockedTestContext.setExperimentalFlag({
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
       endpointExceptionsMovedUnderManagement: true,
     });
 
@@ -106,9 +111,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
   );
 
   it('should not display endpoint exceptions card when feature flag is disabled', () => {
-    mockedTestContext.setExperimentalFlag({
-      endpointExceptionsMovedUnderManagement: false,
-    });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
 
     const renderResult = render();
 

@@ -6,19 +6,15 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
 import type { Note } from '../../lib/note';
-
-import { addError, addErrorHash, addNotes, removeError, updateNote, deleteNote } from './actions';
+import { addError, addErrorHash, addNotes, deleteNote, removeError, updateNote } from './actions';
 import type { AppModel, NotesById } from './model';
-import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 export type AppState = AppModel;
 
 export const initialAppState: AppState = {
   notesById: {},
   errors: [],
-  enableExperimental: { ...allowedExperimentalValues },
 };
 
 interface UpdateNotesByIdParams {

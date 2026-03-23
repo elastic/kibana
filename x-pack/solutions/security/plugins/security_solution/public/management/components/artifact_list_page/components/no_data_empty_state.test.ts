@@ -13,6 +13,10 @@ import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { artifactListPageLabels } from '../translations';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
+
+jest.mock('../../../../common/experimental_features_service');
 
 describe('When showing the Empty State in ArtifactListPage', () => {
   let render: (
@@ -20,7 +24,6 @@ describe('When showing the Empty State in ArtifactListPage', () => {
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
-  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getLastFormComponentProps: ReturnType<
     typeof getFormComponentMock
@@ -30,7 +33,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getLastFormComponentProps, setExperimentalFlag } = renderSetup);
+    ({ history, mockedApi, getLastFormComponentProps } = renderSetup);
 
     originalListApiResponseProvider =
       mockedApi.responseProvider.trustedAppsList.getMockImplementation()!;
@@ -64,7 +67,10 @@ describe('When showing the Empty State in ArtifactListPage', () => {
 
   describe('and user is allowed to Create entries', () => {
     it('should show title, about info, add and import buttons', async () => {
-      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+        ...allowedExperimentalValues,
+        endpointExceptionsMovedUnderManagement: true,
+      });
 
       const { getByTestId, queryByTestId } = render();
 
@@ -90,7 +96,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     });
 
     it('should not show import button when experimental flag is disabled', async () => {
-      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
 
       const { getByTestId, queryByTestId } = render();
 
@@ -113,7 +119,10 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     });
 
     it('should open import flyout when import button is clicked', async () => {
-      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+        ...allowedExperimentalValues,
+        endpointExceptionsMovedUnderManagement: true,
+      });
 
       render();
       const importButton = await renderResult.findByTestId('testPage-emptyState-importButton');
@@ -158,7 +167,10 @@ describe('When showing the Empty State in ArtifactListPage', () => {
 
   describe('and user is not allowed to Create entries', () => {
     it('should hide title, about info and add/import buttons promoting entry creation', async () => {
-      setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+        ...allowedExperimentalValues,
+        endpointExceptionsMovedUnderManagement: true,
+      });
 
       render({ allowCardCreateAction: false });
 

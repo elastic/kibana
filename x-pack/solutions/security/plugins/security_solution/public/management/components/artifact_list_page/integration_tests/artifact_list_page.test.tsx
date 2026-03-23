@@ -13,13 +13,17 @@ import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-lib
 import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
 import {
-  getArtifactImportFlyoutUiMocks,
   getArtifactImportExportUiMocks,
+  getArtifactImportFlyoutUiMocks,
   getArtifactListPageRenderingSetup,
 } from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
+
+jest.mock('../../../../common/experimental_features_service');
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -38,12 +42,11 @@ describe('When using the ArtifactListPage component', () => {
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
   let importExportUi: ReturnType<typeof getArtifactImportExportUiMocks>;
   let importFlyoutUi: ReturnType<typeof getArtifactImportFlyoutUiMocks>;
-  let setExperimentalFlag: ArtifactListPageRenderingSetup['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
+    ({ history, mockedApi, getFirstCard } = renderSetup);
 
     mockUseGetEndpointSpecificPolicies.mockReturnValue({
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
@@ -164,11 +167,17 @@ describe('When using the ArtifactListPage component', () => {
 
     describe('Import and export', () => {
       beforeEach(() => {
-        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+        (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+          ...allowedExperimentalValues,
+          endpointExceptionsMovedUnderManagement: true,
+        });
       });
 
       it('should not show import and export actions with feature flag disabled', async () => {
-        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+        (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+          ...allowedExperimentalValues,
+          endpointExceptionsMovedUnderManagement: false,
+        });
 
         await renderWithListData();
 
@@ -218,7 +227,10 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       it('should not display the import flyout if it is requested via URL param without FF enabled', async () => {
-        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+        (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+          ...allowedExperimentalValues,
+          endpointExceptionsMovedUnderManagement: false,
+        });
         history.push('somepage?show=import');
         await renderWithListData();
 
@@ -297,7 +309,10 @@ describe('When using the ArtifactListPage component', () => {
       ])(
         'should NOT show flyout if url has a show param of %s but the action is not allowed',
         async (_, urlParam) => {
-          setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+            ...allowedExperimentalValues,
+            endpointExceptionsMovedUnderManagement: true,
+          });
           history.push(`somepage?${urlParam}`);
           const { queryByTestId } = await renderWithListData({
             allowCardCreateAction: false,

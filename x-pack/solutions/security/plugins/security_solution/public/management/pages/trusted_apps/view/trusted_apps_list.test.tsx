@@ -19,7 +19,10 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
 
+jest.mock('../../../../common/experimental_features_service');
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
@@ -45,7 +48,10 @@ describe('When on the trusted applications page', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
     // enable process descendants feature flag
-    mockedContext.setExperimentalFlag({ filterProcessDescendantsForTrustedAppsEnabled: true });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
+      filterProcessDescendantsForTrustedAppsEnabled: true,
+    });
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<TrustedAppsList />));
 

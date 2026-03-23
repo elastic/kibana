@@ -61,6 +61,10 @@ import { agentStatusMocks } from '../../../../../common/endpoint/service/respons
 import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 import type { PartialEndpointPolicyData } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
+
+jest.mock('../../../../common/experimental_features_service');
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -901,6 +905,8 @@ describe('when on the endpoint list page', () => {
         });
 
         it('should show the activity log content when selected', async () => {
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
+
           render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.getByTestId(

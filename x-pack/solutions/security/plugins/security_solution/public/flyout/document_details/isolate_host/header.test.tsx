@@ -9,14 +9,17 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { IsolateHostPanelContext } from './context';
 import { useIsolateHostPanelContext } from './context';
-import { PanelHeader, IsolateHostPanelHeader } from './header';
+import { IsolateHostPanelHeader, PanelHeader } from './header';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../common';
 
 jest.mock('./context');
+jest.mock('../../../common/experimental_features_service');
 
 describe('Isolation Flyout PanelHeader', () => {
   let renderComponent: () => ReturnType<AppContextTestRender['render']>;
@@ -35,8 +38,9 @@ describe('Isolation Flyout PanelHeader', () => {
   };
 
   beforeEach(() => {
-    const appContextMock = createAppRootMockRenderer();
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
 
+    const appContextMock = createAppRootMockRenderer();
     renderComponent = () => appContextMock.render(<PanelHeader />);
 
     setUseIsolateHostPanelContext({

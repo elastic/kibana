@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -25,7 +26,10 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/api_cli
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../../common';
 
+jest.mock('../../../../../../common/experimental_features_service');
 jest.mock('../../../../../../common/components/user_privileges');
 
 interface MockedAPIArgs {
@@ -39,7 +43,6 @@ let policyItem: ImmutableObject<PolicyData>;
 const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
-let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const getEventFiltersLabels = () => ({
@@ -62,7 +65,7 @@ describe('Policy artifacts layout', () => {
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     mockedApi.responseProvider.eventFiltersList.mockClear();
     policyItem = generator.generatePolicyPackagePolicy();
-    ({ history, setExperimentalFlag } = mockedContext);
+    ({ history } = mockedContext);
 
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: {
@@ -108,7 +111,10 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should render layout with no assigned artifacts data when there are no artifacts', async () => {
-    setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
+      endpointExceptionsMovedUnderManagement: true,
+    });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );
@@ -124,7 +130,7 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should not render import button when experimental flag is disabled', async () => {
-    setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );

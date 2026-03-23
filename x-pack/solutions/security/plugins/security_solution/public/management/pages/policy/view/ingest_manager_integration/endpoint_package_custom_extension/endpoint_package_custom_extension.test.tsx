@@ -12,7 +12,10 @@ import { EndpointPackageCustomExtension } from './endpoint_package_custom_extens
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
+import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../../common';
 
+jest.mock('../../../../../../common/experimental_features_service');
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
@@ -31,8 +34,8 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   beforeEach(() => {
     mockedTestContext = createFleetContextRendererMock();
 
-    // Mock experimental feature flag
-    mockedTestContext.setExperimentalFlag({
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
       endpointExceptionsMovedUnderManagement: true,
     });
 
@@ -94,9 +97,8 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   it('should hide endpoint exceptions card when feature flag is disabled', () => {
-    mockedTestContext.setExperimentalFlag({
-      endpointExceptionsMovedUnderManagement: false,
-    });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
+
     render();
 
     // Verify endpoint exceptions card is not present
