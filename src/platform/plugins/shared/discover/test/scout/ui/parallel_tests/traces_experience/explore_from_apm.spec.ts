@@ -254,7 +254,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'Transaction Detail - Waterfall size warning "view in Discover" link opens traces experience',
+      'Transaction Detail - Legacy waterfall size warning "view in Discover" link opens traces experience',
       async ({ page, pageObjects, scoutSpace }) => {
         const transactionDetailParams = {
           ...APM_TIME_RANGE,
@@ -293,6 +293,46 @@ spaceTest.describe(
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
             await scoutSpace.uiSettings.unset('observability:apmUseUnifiedTraceWaterfall');
+          }
+        );
+      }
+    );
+
+    spaceTest(
+      'Transaction Detail - Unified waterfall size warning "view in Discover" link opens traces experience',
+      async ({ page, pageObjects }) => {
+        const transactionDetailParams = {
+          ...APM_TIME_RANGE,
+          transactionName: RICH_TRACE.TRANSACTION_NAME,
+          transactionType: 'request',
+        };
+
+        await spaceTest.step(
+          'intercept unified trace API to force exceedsMax condition',
+          async () => {
+            await page.route('**/internal/apm/unified_traces/**', async (route) => {
+              const url = new URL(route.request().url());
+              url.searchParams.set('maxTraceItems', '2');
+              await route.continue({ url: url.toString() });
+            });
+          }
+        );
+
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: transactionDetailParams,
+          });
+        });
+
+        await spaceTest.step('unified waterfall size warning is visible', async () => {
+          await expect(page.testSubj.locator('unifiedWaterfallSizeWarning')).toBeVisible();
+        });
+
+        await spaceTest.step(
+          'warning "view in Discover" link opens traces experience',
+          async () => {
+            await page.testSubj.locator('unifiedWaterfallSizeWarningDiscoverLink').click();
+            await expectTracesExperienceEnabled(pageObjects);
           }
         );
       }
