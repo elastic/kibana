@@ -30,7 +30,14 @@ const LEGACY_TO_AS_CODE_TYPES: { [key: string]: string} = {
   SLO_ERROR_BUDGET_EMBEDDABLE: 'slo_error_budget',
   SLO_BURN_RATE_EMBEDDABLE: 'slo_burn_rate',
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE: 'synthetics_stats_overview',
-  SYNTHETICS_MONITORS_EMBEDDABLE: 'synthetics_monitors'
+  SYNTHETICS_MONITORS_EMBEDDABLE: 'synthetics_monitors',
+  //
+  // lens gets converted to legacy visualization stored type
+  // to avoid name collisions between types,
+  // all embeddable types must be converted to stored type when persisting
+  //
+  lens: 'visualization',
+  visualization: 'legacy_visualization',
 };
 
 const AS_CODE_TO_LEGACY_TYPES = Object.fromEntries(
