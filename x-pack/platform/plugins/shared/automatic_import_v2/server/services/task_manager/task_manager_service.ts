@@ -250,11 +250,14 @@ export class TaskManagerService {
         },
       });
 
+      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+
       const result = await this.agentService.invokeAutomaticImportAgent(
         integrationId,
         dataStreamId,
         esClient,
         model,
+        fieldsMetadataClient,
         langSmithOptions
       );
 
@@ -271,8 +274,6 @@ export class TaskManagerService {
       this.logger.debug(
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
-
-      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
         fieldsMetadataClient

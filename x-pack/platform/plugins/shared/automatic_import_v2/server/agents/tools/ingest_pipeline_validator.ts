@@ -13,58 +13,13 @@ import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { estypes } from '@elastic/elasticsearch';
-import type { EcsFlatEntry } from './get_ecs_info';
-import type { AutomaticImportAgentState } from '../state';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
+import type { AutomaticImportAgentStateType } from '../state';
 
 const MAX_UNIQUE_ERROR_TYPES = 10;
 const MAX_SAMPLE_OUTPUTS = 3;
 
 const STRIPPED_OUTPUT_FIELDS = new Set(['event.original', 'ecs.version']);
-
-const ECS_EVENT_TYPES_PER_CATEGORY: Record<string, string[]> = {
-  api: [
-    'access',
-    'admin',
-    'allowed',
-    'change',
-    'creation',
-    'deletion',
-    'denied',
-    'end',
-    'info',
-    'start',
-    'user',
-  ],
-  authentication: ['start', 'end', 'info'],
-  configuration: ['access', 'change', 'creation', 'deletion', 'info'],
-  database: ['access', 'change', 'info', 'error'],
-  driver: ['change', 'end', 'info', 'start'],
-  email: ['info'],
-  file: ['access', 'change', 'creation', 'deletion', 'info'],
-  host: ['access', 'change', 'end', 'info', 'start'],
-  iam: ['admin', 'change', 'creation', 'deletion', 'group', 'info', 'user'],
-  intrusion_detection: ['allowed', 'denied', 'info'],
-  library: ['start'],
-  malware: ['info'],
-  network: ['access', 'allowed', 'connection', 'denied', 'end', 'info', 'protocol', 'start'],
-  package: ['access', 'change', 'deletion', 'info', 'installation', 'start'],
-  process: ['access', 'change', 'end', 'info', 'start'],
-  registry: ['access', 'change', 'creation', 'deletion'],
-  session: ['start', 'end', 'info'],
-  threat: ['indicator'],
-  vulnerability: ['info'],
-  web: ['access', 'error', 'info'],
-};
-
-const VALID_EVENT_KINDS = new Set([
-  'alert',
-  'enrichment',
-  'event',
-  'metric',
-  'state',
-  'pipeline_error',
-  'signal',
-]);
 
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
   const parts = path.split('.');
@@ -103,7 +58,7 @@ interface ValidatorToolOptions {
   samples: string[];
   packageName: string;
   dataStreamName: string;
-  ecsFlatData: Record<string, EcsFlatEntry>;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 interface DocTemplate {
@@ -193,16 +148,8 @@ function makeErrorCommand(
 }
 
 export function ingestPipelineValidatorTool(options: ValidatorToolOptions): DynamicStructuredTool {
-  const { esClient, samples, packageName, dataStreamName, ecsFlatData } = options;
+  const { esClient, samples, packageName, dataStreamName, fieldsMetadataClient } = options;
 
-  const ecsFieldSet = new Set(Object.keys(ecsFlatData));
-  const ecsRootSet = new Set<string>();
-  for (const key of ecsFieldSet) {
-    const dotIndex = key.indexOf('.');
-    if (dotIndex !== -1) {
-      ecsRootSet.add(key.substring(0, dotIndex));
-    }
-  }
   const ignoredFieldSet = new Set(IGNORED_FIELDS);
   const customFieldPrefix = `${packageName}.${dataStreamName}.`;
 
@@ -223,7 +170,7 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       config?: ToolRunnableConfig
     ) => {
       const toolCallId = config?.toolCall?.id as string;
-      const state = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
+      const state = getCurrentTaskInput<AutomaticImportAgentStateType>();
       const currentPipeline = state.current_pipeline;
 
       if (
@@ -337,31 +284,57 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
 
       const errorGroups = groupErrors(failedSamples);
 
-      const ecsWarnings: string[] = [];
+      // Fetch event field metadata once for the whole validation pass
+      const eventFieldsDict = await fieldsMetadataClient.find({
+        fieldNames: ['event.category', 'event.kind'],
+        source: ['ecs'],
+      });
+      const eventFieldsMeta = eventFieldsDict.pick(['allowed_values']);
+
+      const validCategoryTypes = new Map<string, string[]>();
+      for (const av of eventFieldsMeta['event.category']?.allowed_values ?? []) {
+        validCategoryTypes.set(av.name, av.expected_event_types ?? []);
+      }
+      const validEventKinds = new Set(
+        (eventFieldsMeta['event.kind']?.allowed_values ?? []).map((av) => av.name)
+      );
+
+      // Collect unique category→types combos across sampled docs
+      const uniqueCombos = new Map<string, Set<string>>();
+      const uniqueEventKinds = new Set<string>();
       for (const doc of successfulDocuments.slice(0, 20)) {
         const source = doc as Record<string, unknown>;
         const categories = asArray(getNestedValue(source, 'event.category'));
         const types = asArray(getNestedValue(source, 'event.type'));
+        for (const cat of categories) {
+          if (!uniqueCombos.has(cat)) uniqueCombos.set(cat, new Set());
+          for (const t of types) uniqueCombos.get(cat)!.add(t);
+        }
+        const eventKind = getNestedValue(source, 'event.kind');
+        if (typeof eventKind === 'string') uniqueEventKinds.add(eventKind);
+      }
 
-        for (const category of categories) {
-          const allowed = ECS_EVENT_TYPES_PER_CATEGORY[category];
-          if (!allowed) {
-            ecsWarnings.push(`Invalid event.category: "${category}"`);
-          } else {
-            for (const type of types) {
-              if (!allowed.includes(type)) {
-                ecsWarnings.push(
-                  `event.type "${type}" is not valid for event.category "${category}". Allowed: ${allowed.join(', ')}`
-                );
-              }
+      const ecsWarnings: string[] = [];
+
+      for (const [category, types] of uniqueCombos) {
+        const allowedTypes = validCategoryTypes.get(category);
+        if (allowedTypes === undefined) {
+          ecsWarnings.push(`Invalid event.category: "${category}"`);
+        } else {
+          for (const type of types) {
+            if (!allowedTypes.includes(type)) {
+              ecsWarnings.push(
+                `event.type "${type}" is not valid for event.category "${category}". Allowed: ${allowedTypes.join(', ')}`
+              );
             }
           }
         }
+      }
 
-        const eventKind = getNestedValue(source, 'event.kind');
-        if (typeof eventKind === 'string' && !VALID_EVENT_KINDS.has(eventKind)) {
+      for (const eventKind of uniqueEventKinds) {
+        if (!validEventKinds.has(eventKind)) {
           ecsWarnings.push(
-            `Invalid event.kind: "${eventKind}". Valid values: ${[...VALID_EVENT_KINDS].join(', ')}`
+            `Invalid event.kind: "${eventKind}". Valid values: ${[...validEventKinds].join(', ')}`
           );
         }
       }
@@ -375,30 +348,42 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
 
       const uniqueEcsWarnings = [...new Set(ecsWarnings)];
 
-      const fieldNamingErrors: string[] = [];
+      // Collect all unique field paths from sampled docs, then batch-lookup against ECS
+      const allFieldPaths = new Set<string>();
       for (const doc of successfulDocuments.slice(0, 20)) {
-        const source = doc as Record<string, unknown>;
-        const fieldPaths = flattenKeys(source);
+        for (const fp of flattenKeys(doc as Record<string, unknown>)) {
+          allFieldPaths.add(fp);
+        }
+      }
 
-        for (const fieldPath of fieldPaths) {
-          if (ignoredFieldSet.has(fieldPath)) continue;
-          if (ecsFieldSet.has(fieldPath)) continue;
+      const ecsDict = await fieldsMetadataClient.find({ source: ['ecs'] });
+      const allEcsKeys = Object.keys(ecsDict.toPlain());
+      const ecsFieldSet = new Set(allEcsKeys);
+      const ecsRootSet = new Set<string>();
+      for (const key of allEcsKeys) {
+        const dotIndex = key.indexOf('.');
+        if (dotIndex !== -1) ecsRootSet.add(key.substring(0, dotIndex));
+      }
 
-          const dotIndex = fieldPath.indexOf('.');
-          const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
+      const fieldNamingErrors: string[] = [];
+      for (const fieldPath of allFieldPaths) {
+        if (ignoredFieldSet.has(fieldPath)) continue;
+        if (ecsFieldSet.has(fieldPath)) continue;
 
-          if (ecsRootSet.has(root)) {
-            fieldNamingErrors.push(
-              `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
-                `Custom fields under ECS paths are not allowed. ` +
-                `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(dotIndex + 1)}'.`
-            );
-          } else if (!fieldPath.startsWith(customFieldPrefix)) {
-            fieldNamingErrors.push(
-              `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
-                `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
-            );
-          }
+        const dotIndex = fieldPath.indexOf('.');
+        const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
+
+        if (ecsRootSet.has(root)) {
+          fieldNamingErrors.push(
+            `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
+              `Custom fields under ECS paths are not allowed. ` +
+              `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(dotIndex + 1)}'.`
+          );
+        } else if (!fieldPath.startsWith(customFieldPrefix)) {
+          fieldNamingErrors.push(
+            `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
+              `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
+          );
         }
       }
 

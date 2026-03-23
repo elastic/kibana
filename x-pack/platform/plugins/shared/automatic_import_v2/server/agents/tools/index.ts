@@ -15,5 +15,4 @@ export { fetchCurrentPipelineTool } from './fetch_current_pipeline';
 export { getEcsInfoTool } from './get_ecs_info';
 export { submitAnalysisTool } from './submit_analysis';
 export { submitReviewTool } from './submit_review';
-export { loadEcsFlatData, getEcsRootFieldsSummary } from './ecs_data';
 export { BOILERPLATE_PIPELINE } from './pipeline_constants';

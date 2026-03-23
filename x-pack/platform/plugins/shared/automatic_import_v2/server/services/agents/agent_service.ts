@@ -9,6 +9,7 @@ import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/serve
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { HumanMessage } from '@langchain/core/messages';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import { createAutomaticImportAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
@@ -24,8 +25,6 @@ import {
   testPipelineTool,
   submitAnalysisTool,
   submitReviewTool,
-  loadEcsFlatData,
-  getEcsRootFieldsSummary,
   BOILERPLATE_PIPELINE,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
@@ -47,6 +46,7 @@ export class AgentService {
     dataStreamId: string,
     esClient: ElasticsearchClient,
     model: InferenceChatModel,
+    fieldsMetadataClient: IFieldsMetadataClient,
     langSmithOptions?: LangSmithOptions
   ) {
     this.logger.debug(
@@ -59,19 +59,30 @@ export class AgentService {
     );
 
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
-    const ecsFlatData = await loadEcsFlatData();
     const validatorTool = ingestPipelineValidatorTool({
       esClient,
       samples,
       packageName: integrationId,
       dataStreamName: dataStreamId,
-      ecsFlatData,
+      fieldsMetadataClient,
     });
     const modifyPipelineToolInstance = modifyPipelineTool({ esClient, samples });
     const testPipelineToolInstance = testPipelineTool({ esClient, samples });
     const fetchPipelineToolInstance = fetchCurrentPipelineTool();
-    const ecsInfoTool = getEcsInfoTool(ecsFlatData);
-    const ecsRootFieldsSummary = getEcsRootFieldsSummary(ecsFlatData);
+    const ecsInfoTool = getEcsInfoTool(fieldsMetadataClient);
+
+    const ecsDict = await fieldsMetadataClient.find({ source: ['ecs'] });
+    const rootCounts = new Map<string, number>();
+    for (const key of Object.keys(ecsDict.toPlain())) {
+      const dotIndex = key.indexOf('.');
+      if (dotIndex === -1) continue;
+      const root = key.substring(0, dotIndex);
+      rootCounts.set(root, (rootCounts.get(root) ?? 0) + 1);
+    }
+    const ecsRootFieldsSummary = Array.from(rootCounts.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([root, count]) => `- **${root}** (${count} fields)`)
+      .join('\n');
 
     const logAndEcsAnalyzerSubAgent = createLogAndEcsAnalyzerAgent({
       prompt: `You have access to fetch_log_samples, get_ecs_info, and submit_analysis tools.
