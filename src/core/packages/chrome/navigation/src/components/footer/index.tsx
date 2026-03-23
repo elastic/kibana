@@ -16,7 +16,6 @@ import {
   EuiScreenReaderOnly,
   useEuiTheme,
   useGeneratedHtmlId,
-  useIsWithinBreakpoints,
   type UseEuiTheme,
 } from '@elastic/eui';
 
@@ -70,7 +69,6 @@ interface FooterComponent
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
   ({ children, isCollapsed, collapseButton }, ref) => {
     const euiThemeContext = useEuiTheme();
-    const isSmall = useIsWithinBreakpoints(['xs', 's']);
     const footerNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'footer-navigation-instructions',
     });
@@ -122,7 +120,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
           {renderChildren()}
-          {!isSmall && (
+          {collapseButton && (
             <>
               <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
               {collapseButton}
