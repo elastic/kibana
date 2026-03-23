@@ -5538,6 +5538,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dev-validation-runner@link:src/platform/packages/shared/kbn-dev-validation-runner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/developer-examples-plugin@link:examples/developer_examples":
   version "0.0.0"
   uid ""
