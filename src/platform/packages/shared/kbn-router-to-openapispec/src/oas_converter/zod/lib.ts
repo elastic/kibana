@@ -386,6 +386,8 @@ const COMPONENT_ID_MARKER = 'x-kbn-oas-component-id';
  * Maps Zod schema instances to their desired OAS `components/schemas` names.
  * Uses a WeakMap so schema objects can be GC-ed when no longer referenced.
  */
+const zodV4OasComponentRegistry = new WeakMap<object, string>();
+
 const OAS_EXTENSIONS_MARKER = 'x-kbn-oas-extensions';
 
 /**

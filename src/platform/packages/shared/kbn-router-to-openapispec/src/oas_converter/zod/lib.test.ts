@@ -8,9 +8,16 @@
  */
 
 import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
-import { convert, convertPathParameters, convertQuery, resetDefsCounter } from './lib';
+import {
+  convert,
+  convertPathParameters,
+  convertQuery,
+  registerZodV4Component,
+  resetDefsCounter,
+} from './lib';
 
 import { createLargeSchema } from './lib.test.util';
 
