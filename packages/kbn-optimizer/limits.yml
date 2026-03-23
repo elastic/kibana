@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilder: 96771
-  agentBuilderPlatform: 53350
+  agentBuilderPlatform: 53921
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardAgent: 5135
+  dashboardAgent: 5256
   dashboardMarkdown: 6219
   data: 496646
   dataQuality: 11469
