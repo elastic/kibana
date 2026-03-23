@@ -59,7 +59,7 @@ export const SessionPreviewContainer = ({
       header={{
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTitle"
+            id="xpack.securitySolution.flyout.document.visualizations.sessionPreview.sessionPreviewTitle"
             defaultMessage="Session viewer preview"
           />
         ),
@@ -69,7 +69,7 @@ export const SessionPreviewContainer = ({
             callback: onShowSessionView,
             tooltip: (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
+                id="xpack.securitySolution.flyout.document.visualizations.sessionPreview.sessionPreviewTooltip"
                 defaultMessage="Investigate in timeline"
               />
             ),

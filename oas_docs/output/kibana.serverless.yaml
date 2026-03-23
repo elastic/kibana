@@ -1397,6 +1397,13 @@ paths:
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
+                    plugin_ids:
+                      description: Array of plugin IDs to assign to the agent.
+                      items:
+                        description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -1877,6 +1884,13 @@ paths:
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
+                    plugin_ids:
+                      description: Array of plugin IDs to assign to the agent.
+                      items:
+                        description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -2702,6 +2716,54 @@ paths:
                     success: true
           description: Indicates a successful response
       summary: Update attachment origin
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/conversations/{conversation_id}/attachments/stale:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/stale</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Checks staleness for the latest version of all conversation attachments against their origin snapshot.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-conversations-conversation-id-attachments-stale
+      parameters:
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                checkStaleAttachmentsResponseExample:
+                  description: 'Mixed conversation: attachments without a stale source return only id and is_stale. When a staleness check fails for one attachment, is_stale is false and an error explains why. When an origin-backed attachment is out of date, the response includes type, origin, and resolved data (here a simple text body) for resync.'
+                  value:
+                    attachments:
+                      - id: att-text-meeting-notes
+                        is_stale: false
+                      - id: att-lens-active-users
+                        is_stale: false
+                      - error: Origin could not be resolved
+                        id: att-query-attachment
+                        is_stale: false
+                      - data: This is the content of my text attachment
+                        hidden: false
+                        id: att-text-runbook
+                        is_stale: true
+                        origin: document:hr-onboarding-v2
+                        type: text
+          description: Indicates a successful response
+      summary: Check attachment staleness
       tags:
         - agent builder
       x-state: Technical Preview
@@ -3641,7 +3703,14 @@ paths:
 
         List all available skills (built-in and user-created).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-skills
-      parameters: []
+      parameters:
+        - description: Set to true to include skills from plugins.
+          in: query
+          name: include_plugins
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses: {}
       summary: List skills
       tags:
@@ -24359,6 +24428,9 @@ paths:
                           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                           nullable: true
                           type: boolean
+                        min_agent_version:
+                          nullable: true
+                          type: string
                         monitoring_diagnostics:
                           additionalProperties: false
                           type: object
@@ -24425,6 +24497,24 @@ paths:
                           description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                           nullable: true
                           type: object
+                        package_agent_version_conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              title:
+                                type: string
+                              version_condition:
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - version_condition
+                          maxItems: 1000
+                          nullable: true
+                          type: array
                         package_policies:
                           anyOf:
                             - items:
@@ -24521,6 +24611,8 @@ paths:
                                               type: string
                                             keep_enabled:
                                               type: boolean
+                                            migrate_from:
+                                              type: string
                                             policy_template:
                                               type: string
                                             streams:
@@ -24591,6 +24683,8 @@ paths:
                                                     type: string
                                                   keep_enabled:
                                                     type: boolean
+                                                  migrate_from:
+                                                    type: string
                                                   release:
                                                     enum:
                                                       - ga
@@ -24816,6 +24910,8 @@ paths:
                                     required:
                                       - name
                                       - version
+                                  package_agent_version_condition:
+                                    type: string
                                   policy_id:
                                     deprecated: true
                                     description: ID of the agent policy which the package policy will be added to.
@@ -25435,6 +25531,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -25501,6 +25600,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -25597,6 +25714,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -25667,6 +25786,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -25892,6 +26013,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -26291,6 +26414,9 @@ paths:
                           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                           nullable: true
                           type: boolean
+                        min_agent_version:
+                          nullable: true
+                          type: string
                         monitoring_diagnostics:
                           additionalProperties: false
                           type: object
@@ -26357,6 +26483,24 @@ paths:
                           description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                           nullable: true
                           type: object
+                        package_agent_version_conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              title:
+                                type: string
+                              version_condition:
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - version_condition
+                          maxItems: 1000
+                          nullable: true
+                          type: array
                         package_policies:
                           anyOf:
                             - items:
@@ -26453,6 +26597,8 @@ paths:
                                               type: string
                                             keep_enabled:
                                               type: boolean
+                                            migrate_from:
+                                              type: string
                                             policy_template:
                                               type: string
                                             streams:
@@ -26523,6 +26669,8 @@ paths:
                                                     type: string
                                                   keep_enabled:
                                                     type: boolean
+                                                  migrate_from:
+                                                    type: string
                                                   release:
                                                     enum:
                                                       - ga
@@ -26748,6 +26896,8 @@ paths:
                                     required:
                                       - name
                                       - version
+                                  package_agent_version_condition:
+                                    type: string
                                   policy_id:
                                     deprecated: true
                                     description: ID of the agent policy which the package policy will be added to.
@@ -27126,6 +27276,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -27192,6 +27345,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -27288,6 +27459,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -27358,6 +27531,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -27583,6 +27758,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -28201,6 +28378,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -28267,6 +28447,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -28363,6 +28561,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -28433,6 +28633,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -28658,6 +28860,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -29149,6 +29353,9 @@ paths:
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
                         nullable: true
                         type: boolean
+                      min_agent_version:
+                        nullable: true
+                        type: string
                       monitoring_diagnostics:
                         additionalProperties: false
                         type: object
@@ -29215,6 +29422,24 @@ paths:
                         description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                         nullable: true
                         type: object
+                      package_agent_version_conditions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            title:
+                              type: string
+                            version_condition:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - version_condition
+                        maxItems: 1000
+                        nullable: true
+                        type: array
                       package_policies:
                         anyOf:
                           - items:
@@ -29311,6 +29536,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -29381,6 +29608,8 @@ paths:
                                                   type: string
                                                 keep_enabled:
                                                   type: boolean
+                                                migrate_from:
+                                                  type: string
                                                 release:
                                                   enum:
                                                     - ga
@@ -29606,6 +29835,8 @@ paths:
                                   required:
                                     - name
                                     - version
+                                package_agent_version_condition:
+                                  type: string
                                 policy_id:
                                   deprecated: true
                                   description: ID of the agent policy which the package policy will be added to.
@@ -31637,6 +31868,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -31707,6 +31940,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -31932,6 +32167,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -48197,6 +48434,8 @@ paths:
                                     type: string
                                   keep_enabled:
                                     type: boolean
+                                  migrate_from:
+                                    type: string
                                   policy_template:
                                     type: string
                                   streams:
@@ -48267,6 +48506,8 @@ paths:
                                           type: string
                                         keep_enabled:
                                           type: boolean
+                                        migrate_from:
+                                          type: string
                                         release:
                                           enum:
                                             - ga
@@ -48492,6 +48733,8 @@ paths:
                           required:
                             - name
                             - version
+                        package_agent_version_condition:
+                          type: string
                         policy_id:
                           deprecated: true
                           description: ID of the agent policy which the package policy will be added to.
@@ -48737,6 +48980,8 @@ paths:
                             type: string
                           keep_enabled:
                             type: boolean
+                          migrate_from:
+                            type: string
                           policy_template:
                             type: string
                           streams:
@@ -48807,6 +49052,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 release:
                                   enum:
                                     - ga
@@ -48922,6 +49169,8 @@ paths:
                       required:
                         - name
                         - version
+                    package_agent_version_condition:
+                      type: string
                     policy_id:
                       deprecated: true
                       description: ID of the agent policy which the package policy will be added to.
@@ -49299,6 +49548,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -49369,6 +49620,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -49594,6 +49847,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -49890,6 +50145,8 @@ paths:
                                     type: string
                                   keep_enabled:
                                     type: boolean
+                                  migrate_from:
+                                    type: string
                                   policy_template:
                                     type: string
                                   streams:
@@ -49960,6 +50217,8 @@ paths:
                                           type: string
                                         keep_enabled:
                                           type: boolean
+                                        migrate_from:
+                                          type: string
                                         release:
                                           enum:
                                             - ga
@@ -50185,6 +50444,8 @@ paths:
                           required:
                             - name
                             - version
+                        package_agent_version_condition:
+                          type: string
                         policy_id:
                           deprecated: true
                           description: ID of the agent policy which the package policy will be added to.
@@ -50530,6 +50791,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -50600,6 +50863,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -50825,6 +51090,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -51074,6 +51341,8 @@ paths:
                             type: string
                           keep_enabled:
                             type: boolean
+                          migrate_from:
+                            type: string
                           policy_template:
                             type: string
                           streams:
@@ -51144,6 +51413,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 release:
                                   enum:
                                     - ga
@@ -51258,6 +51529,8 @@ paths:
                       required:
                         - name
                         - version
+                    package_agent_version_condition:
+                      type: string
                     policy_id:
                       deprecated: true
                       description: ID of the agent policy which the package policy will be added to.
@@ -51632,6 +51905,8 @@ paths:
                                   type: string
                                 keep_enabled:
                                   type: boolean
+                                migrate_from:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -51702,6 +51977,8 @@ paths:
                                         type: string
                                       keep_enabled:
                                         type: boolean
+                                      migrate_from:
+                                        type: string
                                       release:
                                         enum:
                                           - ga
@@ -51927,6 +52204,8 @@ paths:
                         required:
                           - name
                           - version
+                      package_agent_version_condition:
+                        type: string
                       policy_id:
                         deprecated: true
                         description: ID of the agent policy which the package policy will be added to.
@@ -52567,6 +52846,8 @@ paths:
                                           type: string
                                         keep_enabled:
                                           type: boolean
+                                        migrate_from:
+                                          type: string
                                         policy_template:
                                           type: string
                                         streams:
@@ -52637,6 +52918,8 @@ paths:
                                                 type: string
                                               keep_enabled:
                                                 type: boolean
+                                              migrate_from:
+                                                type: string
                                               release:
                                                 enum:
                                                   - ga
@@ -52862,6 +53145,8 @@ paths:
                                 required:
                                   - name
                                   - version
+                              package_agent_version_condition:
+                                type: string
                               policy_id:
                                 deprecated: true
                                 description: ID of the agent policy which the package policy will be added to.
@@ -53065,6 +53350,8 @@ paths:
                                       type: string
                                     keep_enabled:
                                       type: boolean
+                                    migrate_from:
+                                      type: string
                                     policy_template:
                                       type: string
                                     streams:
@@ -53135,6 +53422,8 @@ paths:
                                             type: string
                                           keep_enabled:
                                             type: boolean
+                                          migrate_from:
+                                            type: string
                                           release:
                                             enum:
                                               - ga
@@ -53257,6 +53546,8 @@ paths:
                                 required:
                                   - name
                                   - version
+                              package_agent_version_condition:
+                                type: string
                               policy_id:
                                 deprecated: true
                                 description: ID of the agent policy which the package policy will be added to.
@@ -62646,9 +62937,14 @@ paths:
                             required:
                               - name
                           type: array
+                        type:
+                          enum:
+                            - wired
+                          type: string
                       required:
                         - description
                         - ingest
+                        - type
                   required:
                     - dashboards
                     - rules
@@ -62927,9 +63223,14 @@ paths:
                             required:
                               - name
                           type: array
+                        type:
+                          enum:
+                            - classic
+                          type: string
                       required:
                         - description
                         - ingest
+                        - type
                   required:
                     - dashboards
                     - rules
@@ -63005,8 +63306,13 @@ paths:
                             required:
                               - name
                           type: array
+                        type:
+                          enum:
+                            - query
+                          type: string
                       required:
                         - description
+                        - type
                         - query
                   required:
                     - dashboards

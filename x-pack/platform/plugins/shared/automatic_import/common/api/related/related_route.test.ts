@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { RelatedRequestBody } from './related_route.gen';
 import { getRelatedRequestMock } from '../model/api_test.mock';
 
 describe('Related request schema', () => {
-  test('full request validate', () => {
-    const payload: RelatedRequestBody = getRelatedRequestMock();
-
+  test('accepts valid full request', () => {
+    const payload = getRelatedRequestMock();
     const result = RelatedRequestBody.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toEqual(payload);
+  });
+
+  test('rejects rawSamples exceeding max items', () => {
+    expectParseError(
+      RelatedRequestBody.safeParse({
+        ...getRelatedRequestMock(),
+        rawSamples: new Array(101).fill('{}'),
+      })
+    );
   });
 });
