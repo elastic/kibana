@@ -259,7 +259,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
   );
 
   apiTest('should bulk create with explicit custom IDs', async ({ apiClient }) => {
-    const customId = `test-custom-${Date.now()}`;
+    const customId = `workflow-00000000-0000-4000-a000-000000000001`;
     const response = await apiClient.post('api/workflows/_bulk_create', {
       headers: {
         ...COMMON_HEADERS,
