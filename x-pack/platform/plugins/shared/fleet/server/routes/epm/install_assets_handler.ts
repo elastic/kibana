@@ -86,13 +86,15 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
 
   for (const spaceToInstallId of spaceIds) {
     const spaceScopedClient = appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId);
+    const installAsAdditionalSpace =
+      (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceToInstallId;
 
     await installKibanaAssetsAndReferences({
       savedObjectsClient: spaceScopedClient,
       logger,
       pkgName,
       pkgTitle: packageInfo.title,
-      installAsAdditionalSpace: true,
+      installAsAdditionalSpace,
       spaceId: spaceToInstallId,
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
@@ -105,7 +107,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
 
     await createInactivityMonitoringTemplate(
       { logger, savedObjectsClient: spaceScopedClient },
-      { packageInfo, spaceId: spaceToInstallId, installAsAdditionalSpace: true }
+      { packageInfo, spaceId: spaceToInstallId, installAsAdditionalSpace }
     );
   }
 
