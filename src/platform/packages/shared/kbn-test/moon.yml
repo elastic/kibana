@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/ci-stats-reporter'
   - '@kbn/repo-info'
   - '@kbn/es'
+  - '@kbn/test-es-server'
   - '@kbn/dev-proc-runner'
   - '@kbn/jest-serializers'
   - '@kbn/stdio-dev-helpers'

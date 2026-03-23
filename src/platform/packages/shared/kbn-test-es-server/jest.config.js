@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runKibanaServer } from './run_kibana_server';
-export { runElasticsearch } from './run_elasticsearch';
-export { cleanupElasticsearch } from '@kbn/test-es-server';
-export * from './run_ftr';
-export {
-  parseRawFlags,
-  getArgValue,
-  remapPluginPaths,
-  getKibanaCliArg,
-  getKibanaCliLoggers,
-} from './kibana_cli_args';
-export { initLogsDir } from './logs_dir';
-export { applyFipsOverrides, fipsIsEnabled } from './fips';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-test-es-server'],
+};
