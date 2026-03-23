@@ -15,7 +15,7 @@ import {
 } from '@kbn/controls-constants';
 import { controlSchema, dataControlSchema } from './control_schema';
 
-const SELECTIONS_MAX = 100000;
+const SELECTIONS_MAX = 10000;
 
 export const optionsListDisplaySettingsSchema = schema.object({
   placeholder: schema.maybe(schema.string()),
