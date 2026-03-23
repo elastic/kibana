@@ -145,8 +145,8 @@ export class ChangeTrackingService implements IChangeTrackingService {
           await client.logBulk(groupedChanges, {
             ...opts,
             correlationId,
-            ignoreFields: ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
-            maskFields: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
+            fieldsToIgnore: ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
+            fieldsToHash: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
           });
         } catch (err) {
           // Just catch the error.

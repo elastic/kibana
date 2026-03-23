@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { flatten } from 'flat';
+import { flattenObject as flatten } from '@kbn/object-utils';
 import moment from 'moment';
 import React, { useState } from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -62,12 +62,13 @@ export const ChangeHistoryFlyout = ({ isOpen, onClose, change }: ChangeHistoryFl
 
   if (!isOpen || !change) return null;
 
-  const flatSnapshot = flatten(change.snapshot, { safe: true }) as Record<string, unknown>;
+  const flatChanges = flatten(change?.oldvalues as Record<string, unknown>);
+  const flatSnapshot = flatten(change.snapshot as Record<string, unknown>);
   const filteredChanges = change.changes.filter((f) => !IGNORED_FIELDS.includes(f));
 
   const changeDetailsTabContent = filteredChanges.map((c) => {
     const fieldName = shortenFieldName(c);
-    const oldSource = prepareForDiff(change?.oldvalues?.[c]);
+    const oldSource = prepareForDiff(flatChanges[c]);
     const newSource = prepareForDiff(flatSnapshot[c]);
     return (
       <React.Fragment key={c}>
