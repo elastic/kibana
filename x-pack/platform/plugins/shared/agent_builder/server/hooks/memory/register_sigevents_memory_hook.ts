@@ -132,40 +132,47 @@ interface StreamGroup {
 
 /**
  * Extracts stream-grouped indicators from the search_knowledge_indicators output.
- * The output shape has `features` and `queries` arrays with `stream_name` on each item.
+ *
+ * The output shape is `{ knowledge_indicators: KnowledgeIndicator[] }` where each
+ * indicator is either:
+ *   - `{ kind: 'feature', feature: { stream_name, ... } }`
+ *   - `{ kind: 'query', query: {...}, stream_name, ... }`
  */
 const extractStreamGroups = (data: Record<string, unknown>): StreamGroup[] => {
   const byStream = new Map<string, unknown[]>();
 
-  const addItems = (items: unknown[]) => {
-    for (const item of items) {
-      if (typeof item === 'object' && item !== null) {
-        const record = item as Record<string, unknown>;
-        const streamName = (record.stream_name as string) ?? (record.streamName as string);
-        if (streamName) {
-          const existing = byStream.get(streamName) ?? [];
-          existing.push(item);
-          byStream.set(streamName, existing);
-        }
-      }
+  const indicators = data.knowledge_indicators;
+  if (!Array.isArray(indicators)) {
+    return [];
+  }
+
+  for (const indicator of indicators) {
+    if (typeof indicator !== 'object' || indicator === null) {
+      continue;
     }
-  };
+    const record = indicator as Record<string, unknown>;
+    // For 'query' kind, stream_name is on the indicator itself.
+    // For 'feature' kind, stream_name is on the nested feature object.
+    let streamName: string | undefined;
+    if (
+      record.kind === 'feature' &&
+      typeof record.feature === 'object' &&
+      record.feature !== null
+    ) {
+      streamName = (record.feature as Record<string, unknown>).stream_name as string | undefined;
+    } else {
+      streamName = record.stream_name as string | undefined;
+    }
 
-  if (Array.isArray(data.features)) {
-    addItems(data.features);
-  }
-  if (Array.isArray(data.queries)) {
-    addItems(data.queries);
-  }
-  if (Array.isArray(data.items)) {
-    addItems(data.items);
-  }
-  if (Array.isArray(data.results)) {
-    addItems(data.results);
+    if (streamName) {
+      const existing = byStream.get(streamName) ?? [];
+      existing.push(indicator);
+      byStream.set(streamName, existing);
+    }
   }
 
-  return Array.from(byStream.entries()).map(([streamName, indicators]) => ({
+  return Array.from(byStream.entries()).map(([streamName, items]) => ({
     streamName,
-    indicators,
+    indicators: items,
   }));
 };
