@@ -3,31 +3,31 @@ requestBody:
     application/json:
       examples:
         exportWorkflowsRequestExample:
-          description: "Example request to export workflows as a ZIP archive"
+          description: 'Example request to export workflows as a ZIP archive'
           value:
             ids:
-            - example-workflow
-            - second-workflow
+              - workflow-example_definition
+              - workflow-second_workflow
 responses:
   200:
-    description: "A ZIP archive containing the exported workflow YAML files"
+    description: 'A ZIP archive containing the exported workflow YAML files'
     content:
       application/zip: {}
 x-codeSamples:
-- lang: curl
-  source: |
-    curl \
-      -X POST "${KIBANA_URL}/api/workflows/export" \
-      -H "Authorization: ApiKey ${API_KEY}" \
-      -H "kbn-xsrf: true" \
-      -H "Content-Type: application/json" \
-      -o workflows_export.zip \
-      -d '{
-        "ids": ["example-workflow", "second-workflow"]
-      }'
-- lang: Console
-  source: |
-    POST kbn://api/workflows/export
-    {
-      "ids": ["example-workflow", "second-workflow"]
-    }
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/export" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -o workflows_export.zip \
+        -d '{
+          "ids": ["workflow-example_definition", "workflow-second_workflow"]
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/export
+      {
+        "ids": ["workflow-example_definition", "workflow-second_workflow"]
+      }

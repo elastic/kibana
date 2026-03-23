@@ -1,53 +1,53 @@
 responses:
   200:
-    description: "Indicates a successful response"
+    description: 'Indicates a successful response'
     content:
       application/json:
         examples:
           getWorkflowsResponseExample:
-            description: "Example response returning a paginated list of workflows"
+            description: 'Example response returning a paginated list of workflows'
             value:
               page: 1
               size: 20
               total: 1
               results:
-              - id: example-workflow
-                name: Example definition
-                description: This is a workflow example
-                enabled: true
-                definition:
+                - id: workflow-example_definition
                   name: Example definition
-                  enabled: true
                   description: This is a workflow example
-                  triggers:
-                  - type: manual
-                  inputs:
-                  - name: message
-                    type: string
-                    default: hello world
-                  steps:
-                  - name: hello_world_step
-                    type: console
-                    with:
-                      message: "{{ inputs.message }}"
-                createdAt: "2025-11-20T10:30:00.000Z"
-                history:
-                - id: exec-001
-                  workflowId: example-workflow
-                  workflowName: Example definition
-                  status: completed
-                  startedAt: "2025-11-20T12:00:00.000Z"
-                  finishedAt: "2025-11-20T12:00:05.000Z"
-                  duration: 5000
-                tags:
-                - example
-                valid: true
+                  enabled: true
+                  definition:
+                    name: Example definition
+                    enabled: true
+                    description: This is a workflow example
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: hello world
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: '{{ inputs.message }}'
+                  createdAt: '2025-11-20T10:30:00.000Z'
+                  history:
+                    - id: exec-001
+                      workflowId: workflow-example_definition
+                      workflowName: Example definition
+                      status: completed
+                      startedAt: '2025-11-20T12:00:00.000Z'
+                      finishedAt: '2025-11-20T12:00:05.000Z'
+                      duration: 5000
+                  tags:
+                    - example
+                  valid: true
 x-codeSamples:
-- lang: curl
-  source: |
-    curl \
-      -X GET "${KIBANA_URL}/api/workflows?size=20&page=1" \
-      -H "Authorization: ApiKey ${API_KEY}"
-- lang: Console
-  source: |
-    GET kbn://api/workflows?size=20&page=1
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows?size=20&page=1" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows?size=20&page=1
