@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
-import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
 import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import { getIndexForWatchlist } from './utils';
-import type { WatchlistEntityDoc } from './types';
+
 import type { IntegrationType } from '../../privilege_monitoring/data_sources';
 
 export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
@@ -53,27 +53,6 @@ export const createWatchlistEntitiesService = ({
   esClient,
   namespace,
 }: WatchlistEntitiesServiceDeps) => {
-  const list = async (
-    watchlist: WatchlistObject,
-    _rangeClauseKQL?: string
-  ): Promise<WatchlistEntityDoc[]> => {
-    const index = getIndexForWatchlist(watchlist.name, namespace);
-
-    const response = await esClient.search<WatchlistEntityDoc>({
-      index,
-      size: 10_000,
-      query: { match_all: {} },
-      // _source: ['@timestamp', 'entity', 'labels'],
-    });
-
-    return response.hits.hits
-      .map((hit) => hit._source)
-      .filter(
-        (source): source is WatchlistEntityDoc =>
-          source != null && source.entity != null && typeof source.entity.id === 'string'
-      );
-  };
-
   const listEntityStoreEntities = async (
     idp: IdentityProvider
   ): Promise<EntityStoreEntityIdsByType> => {
@@ -89,20 +68,37 @@ export const createWatchlistEntitiesService = ({
               field: idp.field,
             },
           };
-    const response = await esClient.search<EntityStoreEntity>({
-      index: getLatestEntitiesIndexName(namespace),
-      query,
-    });
 
     const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
 
-    for (const hit of response.hits.hits) {
-      const record = hit._source;
+    let searchAfter: SortResults | undefined;
+    let fetchMore = true;
 
-      if (record?.entity?.id) {
-        const entityType = getEntityType(record);
-        entityIdsByType[entityType].push(record.entity.id);
+    while (fetchMore) {
+      const response = await esClient.search<EntityStoreEntity>({
+        index: getLatestEntitiesIndexName(namespace),
+        size: 1000,
+        search_after: searchAfter,
+        query,
+      });
+
+      const hits = response.hits.hits;
+
+      if (hits.length === 0) {
+        fetchMore = false;
+        break; // We've reached the end!
       }
+
+      for (const hit of hits) {
+        const record = hit._source;
+        if (record?.entity?.id) {
+          const entityType = getEntityType(record);
+          entityIdsByType[entityType].push(record.entity.id);
+        }
+      }
+
+      // Grab the sort cursor from the very last hit to use in the next loop
+      searchAfter = hits[hits.length - 1].sort;
     }
 
     return Object.fromEntries(
@@ -113,5 +109,5 @@ export const createWatchlistEntitiesService = ({
     ) as EntityStoreEntityIdsByType;
   };
 
-  return { list, listEntityStoreEntities };
+  return { listEntityStoreEntities };
 };

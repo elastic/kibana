@@ -36,7 +36,7 @@ const getLastFullSyncMarkersIndex = (namespace: string, integration: Integration
 const buildIntegrationSourceAttributes = (
   namespace: string,
   integrationName: IntegrationType
-): WatchlistDataSources.CreateEntitySourceRequestBody => ({
+): WatchlistDataSources.CreateWatchlistEntitySourceRequestBody => ({
   type: 'entity_analytics_integration',
   name: integrationsSourceIndex(namespace, integrationName),
   indexPattern: getStreamPatternFor(integrationName, namespace),
@@ -82,7 +82,7 @@ export const createEntitySourceRoute = (
             const namespace = secSol.getSpaceId();
             const client = secSol.getMonitoringEntitySourceDataClient();
 
-            let body: WatchlistDataSources.CreateEntitySourceResponse;
+            let body: WatchlistDataSources.CreateWatchlistEntitySourceResponse;
 
             if (monitoringSource.type === 'entity_analytics_integration') {
               const integrationName = monitoringSource.integrationName;

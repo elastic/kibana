@@ -53,7 +53,7 @@ export const createEntitySourcesService = ({
         name: source.integrationName as IntegrationType,
       };
     };
-    const next = await Promise.all(
+    const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
@@ -64,8 +64,6 @@ export const createEntitySourcesService = ({
         })
     );
 
-    // watchlistEntitiesService.listEntityStoreEntities(idps);
-
     const indexSyncService = createIndexSyncService({
       esClient,
       logger,
@@ -73,7 +71,7 @@ export const createEntitySourcesService = ({
       descriptorClient,
     });
 
-    await indexSyncService.plainIndexSync(next);
+    await indexSyncService.plainIndexSync(entitiesBySource);
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };
