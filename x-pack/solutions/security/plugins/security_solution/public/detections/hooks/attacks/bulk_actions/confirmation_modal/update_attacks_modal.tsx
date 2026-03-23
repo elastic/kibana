@@ -51,13 +51,6 @@ export interface UpdateAttacksModalProps {
   onClose: () => void;
   /** Callback when user confirms the action */
   onConfirm: ({ updateAlerts }: { updateAlerts: boolean }) => Promise<void>;
-  /** Optional custom labels used to override defaults */
-  customLabels?: {
-    title: string;
-    body: string;
-    attackOnly: string;
-    attackAndAlert: string;
-  };
 }
 
 /**
@@ -65,12 +58,10 @@ export interface UpdateAttacksModalProps {
  * Allows users to choose whether to update only attacks or both attacks and related alerts.
  */
 export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
-  ({ alertsCount, attackDiscoveriesCount, onCancel, onClose, onConfirm, customLabels }) => {
+  ({ alertsCount, attackDiscoveriesCount, onCancel, onClose, onConfirm }) => {
     const { euiTheme } = useEuiTheme();
     const modalId = useGeneratedHtmlId({ prefix: 'updateAttacksModal' });
     const titleId = useGeneratedHtmlId();
-    const attackOnlyLabel = customLabels?.attackOnly;
-    const attackAndAlertLabel = customLabels?.attackAndAlert;
 
     const updateAttacksOnly = useCallback(() => onConfirm({ updateAlerts: false }), [onConfirm]);
 
@@ -92,7 +83,7 @@ export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
               data-test-subj={UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_ONLY_TEST_ID}
               onClick={updateAttacksOnly}
             >
-              {attackOnlyLabel ?? i18n.UPDATE_ATTACKS_ONLY({ attackDiscoveriesCount })}
+              {i18n.UPDATE_ATTACKS_ONLY({ attackDiscoveriesCount })}
             </EuiButton>
           </EuiFlexItem>
 
@@ -103,11 +94,10 @@ export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
               fill
               onClick={updateAttacksAndAlerts}
             >
-              {attackAndAlertLabel ??
-                i18n.UPDATE_ATTACKS_AND_ALERTS({
-                  alertsCount,
-                  attackDiscoveriesCount,
-                })}
+              {i18n.UPDATE_ATTACKS_AND_ALERTS({
+                alertsCount,
+                attackDiscoveriesCount,
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -116,8 +106,6 @@ export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
         alertsCount,
         attackDiscoveriesCount,
         euiTheme.size.m,
-        attackAndAlertLabel,
-        attackOnlyLabel,
         updateAttacksAndAlerts,
         updateAttacksOnly,
       ]
@@ -131,18 +119,15 @@ export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
         onClose={onClose}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle title={titleId}>
-            {customLabels?.title ?? i18n.UPDATE_ATTACKS_TITLE()}
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle title={titleId}>{i18n.UPDATE_ATTACKS_TITLE()}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           <div data-test-subj={UPDATE_ATTACKS_MODAL_BODY_TEST_ID}>
-            {customLabels?.body ??
-              i18n.UPDATE_ATTACKS_ASSOCIATED({
-                alertsCount,
-                attackDiscoveriesCount,
-              })}
+            {i18n.UPDATE_ATTACKS_ASSOCIATED({
+              alertsCount,
+              attackDiscoveriesCount,
+            })}
           </div>
         </EuiModalBody>
 
