@@ -175,5 +175,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.total).to.be(0);
       });
     });
+
+    describe('404 for non-existent resources', () => {
+      it('returns 404 when reading a non-existent saved query', async () => {
+        await getSavedQuery('non-existent-id').expect(404);
+      });
+
+      it('returns 404 when updating a non-existent saved query', async () => {
+        await updateSavedQuery('non-existent-id', 'updated-name').expect(404);
+      });
+
+      it('returns 404 when deleting a non-existent saved query', async () => {
+        await deleteSavedQuery('non-existent-id').expect(404);
+      });
+    });
   });
 }
