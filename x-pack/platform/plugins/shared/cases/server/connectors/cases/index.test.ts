@@ -30,6 +30,7 @@ describe('getCasesConnectorType', () => {
       getCasesClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getSpaceId: jest.fn(),
+      isCasesAttachmentsEnabled: false,
     });
   });
 
