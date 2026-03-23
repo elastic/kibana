@@ -280,5 +280,28 @@ export default function ({ getService }: FtrProviderContext) {
         inputs[0].config.osquery.value.packs['default--TestPack'].queries.testQuery.query
       ).to.be(singleLineQuery);
     });
+
+    describe('404 for non-existent resources', () => {
+      it('returns 404 when reading a non-existent pack', async () => {
+        await withOsqueryHeaders(supertest.get('/api/osquery/packs/non-existent-id')).expect(404);
+      });
+
+      it('returns 404 when updating a non-existent pack', async () => {
+        await withOsqueryHeaders(supertest.put('/api/osquery/packs/non-existent-id'))
+          .send({
+            name: 'Updated Pack',
+            description: 'Updated',
+            enabled: true,
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(404);
+      });
+
+      it('returns 404 when deleting a non-existent pack', async () => {
+        await withOsqueryHeaders(supertest.delete('/api/osquery/packs/non-existent-id')).expect(
+          404
+        );
+      });
+    });
   });
 }
