@@ -25,10 +25,10 @@ export const useLoadConnectors = (): UseLoadConnectorsResult => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
 
-  const areConnectorsActionEnabled = application.capabilities.actions?.show === true;
+  const areConnectorsActionAvailable = !!application.capabilities.actions?.show;
 
   const fetchConnectors = useCallback(async () => {
-    if (!areConnectorsActionEnabled) {
+    if (!areConnectorsActionAvailable) {
       setIsLoading(false);
       return;
     }
@@ -56,7 +56,7 @@ export const useLoadConnectors = (): UseLoadConnectorsResult => {
     } finally {
       setIsLoading(false);
     }
-  }, [areConnectorsActionEnabled, http, notifications.toasts]);
+  }, [areConnectorsActionAvailable, http, notifications.toasts]);
 
   useEffect(() => {
     fetchConnectors();
