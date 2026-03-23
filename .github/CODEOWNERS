@@ -2378,6 +2378,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/get_workflow_templates* @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
@@ -2385,10 +2386,10 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workflows-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
