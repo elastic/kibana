@@ -96,7 +96,7 @@ export const isInputPackageDatasetUsedByMultiplePolicies = (
 
 /**
  * Returns true when any policy template in the package contains a registry input
- * that allows dynamic signal types (OTel collector with dynamic_signal_types: true).
+ * that declares dynamic signal types (dynamic_signal_types: true).
  *
  * Covers both:
  *   - Input-only packages (top-level `input` key on the policy template)

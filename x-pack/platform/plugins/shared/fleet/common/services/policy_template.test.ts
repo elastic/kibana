@@ -520,7 +520,7 @@ describe('registryInputAllowsDynamicSignalTypes', () => {
     ).toBe(false);
   });
 
-  it('returns false for non-OTel input even with dynamic_signal_types: true', () => {
+  it('returns true for any input type with dynamic_signal_types: true', () => {
     expect(
       registryInputAllowsDynamicSignalTypes({
         type: 'logfile',
@@ -528,7 +528,7 @@ describe('registryInputAllowsDynamicSignalTypes', () => {
         description: 'Logfile',
         dynamic_signal_types: true,
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 

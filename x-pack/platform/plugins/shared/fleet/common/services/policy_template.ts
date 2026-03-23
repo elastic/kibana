@@ -121,11 +121,13 @@ export function getPolicyTemplateInputDefinition(
 }
 
 /**
- * Returns true when the given RegistryInput is an OTel collector input whose
- * data stream signal type is dynamic (determined at runtime by the agent).
+ * Returns true when the given RegistryInput declares dynamic signal types.
+ * The package-spec governs which inputs may set this flag; Fleet trusts the
+ * boolean without gating on the input type so future non-OTel inputs can use
+ * the same mechanism without requiring a Fleet change.
  */
 export function registryInputAllowsDynamicSignalTypes(input: RegistryInput): boolean {
-  return input.type === OTEL_COLLECTOR_INPUT_TYPE && input.dynamic_signal_types === true;
+  return input.dynamic_signal_types === true;
 }
 
 /**
