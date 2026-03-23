@@ -123,11 +123,7 @@ export function transformWorkpadOut(
         const embeddableConfig = decode(fn.arguments.config[0] as string);
         const embeddableType = fn.arguments.type[0] as string;
         fn.arguments.type[0] = embeddableType;
-        // Temporary escape hatch for lens as code
-        // TODO remove when lens as code transforms are ready for production
-        const transforms = embeddableService.getTransforms(
-          embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType
-        );
+        const transforms = embeddableService.getTransforms(embeddableType);
 
         try {
           // BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
