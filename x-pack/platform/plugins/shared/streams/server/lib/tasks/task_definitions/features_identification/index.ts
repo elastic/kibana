@@ -31,11 +31,12 @@ import {
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/streams-ai';
-import { getDiverseSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_diverse_sample_documents';
+import { getDiverseSampleDocuments } from '@kbn/ai-tools';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
-import { getErrorMessage } from '../../../streams/errors/parse_error';
+import { parseError } from '../../../streams/errors/parse_error';
+import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '..';
@@ -44,7 +45,6 @@ import { PromptsConfigService } from '../../../saved_objects/significant_events/
 import { cancellableTask } from '../../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
-import { fetchSampleDocuments } from './fetch_sample_documents';
 
 const DEFAULT_MAX_ITERATIONS = 5;
 const DOCUMENTS_BATCH_SIZE = 20;
@@ -52,7 +52,7 @@ const MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 
 class FeatureAccumulator {
-  private readonly features: Feature[] = [];
+  private readonly byUuid = new Map<string, Feature>();
   private readonly byLowerId = new Map<string, Feature>();
 
   constructor(initialFeatures: Feature[] = []) {
@@ -62,35 +62,37 @@ class FeatureAccumulator {
   }
 
   add(feature: Feature) {
+    this.byUuid.set(feature.uuid, feature);
     this.byLowerId.set(feature.id.toLowerCase(), feature);
-    this.features.push(feature);
   }
 
   update(feature: Feature) {
-    const idx = this.features.findIndex((f) => f.uuid === feature.uuid);
-    if (idx !== -1) {
-      this.features[idx] = feature;
-      this.byLowerId.set(feature.id.toLowerCase(), feature);
+    if (!this.byUuid.has(feature.uuid)) {
+      return;
     }
+    this.byUuid.set(feature.uuid, feature);
+    this.byLowerId.set(feature.id.toLowerCase(), feature);
   }
 
   findDuplicate(candidate: BaseFeature): Feature | undefined {
     return (
       this.byLowerId.get(candidate.id.toLowerCase()) ??
-      this.features.find((f) => isDuplicateFeature(f, candidate))
+      this.getAll().find((f) => isDuplicateFeature(f, candidate))
     );
   }
 
   getAll(): Feature[] {
-    return this.features;
+    return Array.from(this.byUuid.values());
   }
 
   getTopByConfidence(limit: number): Feature[] {
-    return [...this.features].sort((a, b) => b.confidence - a.confidence).slice(0, limit);
+    return this.getAll()
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, limit);
   }
 
   public get length(): number {
-    return this.features.length;
+    return this.byUuid.size;
   }
 }
 
@@ -464,7 +466,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                  : parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -559,16 +561,16 @@ function reconcileFeatures({
   });
 
   for (const raw of nonExcludedInferredFeatures) {
-    // Intra-run match: merge features between iterations of this run
     const thisRunMatch = known.findDuplicate(raw);
 
     if (thisRunMatch) {
+      // Intra-run: merge evidence/tags accumulated across iterations of this run
       const merged = mergeFeature(thisRunMatch, raw);
       if (hasChanged(merged, thisRunMatch)) {
         updatedFeatures.push({ ...merged, ...metadata, uuid: thisRunMatch.uuid });
       }
     } else {
-      // Cross-run match: check against features from prior runs
+      // Cross-run: reuse UUID for UI continuity but don't merge — prior data may be stale
       const existingMatch = existing.findDuplicate(raw);
 
       if (existingMatch) {
