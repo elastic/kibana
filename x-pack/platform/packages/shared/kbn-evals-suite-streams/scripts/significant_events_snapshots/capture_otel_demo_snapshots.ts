@@ -230,7 +230,7 @@ async function processScenario(
   demoType: DemoType,
   baselineWaitMs: number,
   failureWaitMs: number,
-  logsIndex: string
+  logsIndex: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
   const isFailure = isFailureScenario(scenario);
 
@@ -313,7 +313,7 @@ const parseDurationFlag = (
 async function ensureDataStream(
   esClient: Client,
   log: ToolingLog,
-  streamName: string
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
   try {
     await esClient.indices.getDataStream({ name: streamName });
