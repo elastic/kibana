@@ -64,7 +64,7 @@ export const getFieldFromSchema = ({
       const [{ value, path: formPath }] = args;
 
       try {
-        outerSchema.parse(value);
+        schema.parse(value);
         return undefined;
       } catch (error) {
         if (!(error instanceof ZodError)) {
