@@ -258,9 +258,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;

@@ -28,8 +28,6 @@ import {
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
-import { ExperimentalFeaturesService } from '../../../services';
-
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
@@ -287,9 +285,6 @@ describe('edit package policy page', () => {
     (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-      enableVarGroups: true,
-    } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
 
