@@ -58,7 +58,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'timepicker:useLegacyTimePicker': true,
       },
       globalDefaults: {
         // Disable tours globally for all tests
