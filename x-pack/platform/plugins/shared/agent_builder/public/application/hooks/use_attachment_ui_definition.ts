@@ -23,6 +23,8 @@ export const useAttachmentUiDefinition = (type?: string) => {
       if (!canceled) {
         setUiDefinition(definition);
       }
+    }).catch((e) => {
+      console.warn(`Unable to get UI Attachement definition for type:${type}`)
     });
     return () => {
       canceled = true;

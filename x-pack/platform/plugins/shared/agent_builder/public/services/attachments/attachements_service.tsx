@@ -31,7 +31,7 @@ export class AttachmentsService {
    * Registers a UI definition for a specific attachment type.
    *
    * @param attachmentType - The unique identifier for the attachment type
-   * @param definition - The UI definition for rendering this attachment type
+   * @param getDefinition - Async getter that returns UI definition for rendering this attachment type
    * @throws Error if the attachment type is already registered
    */
   addAttachmentType<TAttachment extends UnknownAttachment = UnknownAttachment>(
