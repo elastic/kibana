@@ -6,7 +6,11 @@
  */
 import type { TEcsFields, TMetadataFields, TOtelFields } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
-import { FieldsMetadataClient, isDirectChildFieldName } from './fields_metadata_client';
+import {
+  FieldsMetadataClient,
+  ecsFlatNameToRootFieldsetName,
+  isDirectChildFieldName,
+} from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
@@ -60,16 +64,6 @@ const ecsFields = {
         expected_event_types: ['connection', 'protocol'],
       },
     ],
-  },
-  host: {
-    dashed_name: 'host',
-    description: 'Host fields.',
-    flat_name: 'host',
-    level: 'core',
-    name: 'host',
-    normalize: [],
-    short: 'Host',
-    type: 'object',
   },
   'host.name': {
     dashed_name: 'host-name',
@@ -434,6 +428,22 @@ describe('FieldsMetadataClient class', () => {
     });
   });
 
+  describe('#getECSFieldsets', () => {
+    it('returns sorted unique ECS root field set names from static ECS fields only', async () => {
+      const fieldsets = await fieldsMetadataClient.getECSFieldsets();
+
+      expect(fieldsets).toEqual(['base', 'event', 'host', 'user']);
+    });
+
+    it('does not include OTel or metadata field sets', async () => {
+      const fieldsets = await fieldsMetadataClient.getECSFieldsets();
+
+      expect(fieldsets).not.toContain('otel');
+      expect(fieldsets).not.toContain('metadata');
+      expect(fieldsets).not.toContain('_index');
+    });
+  });
+
   describe('#matchesAnyTypeForEventCategory', () => {
     it('returns true when an expected type is listed for one of the categories', async () => {
       await expect(
@@ -660,6 +670,20 @@ describe('FieldsMetadataClient class', () => {
       // Verify it's a proper FieldMetadata instance
       expect(typeof field.toPlain).toBe('function');
     });
+  });
+});
+
+describe('ecsFlatNameToRootFieldsetName', () => {
+  it('maps root-level ECS fields to base', () => {
+    expect(ecsFlatNameToRootFieldsetName('@timestamp')).toBe('base');
+    expect(ecsFlatNameToRootFieldsetName('labels')).toBe('base');
+    expect(ecsFlatNameToRootFieldsetName('message')).toBe('base');
+  });
+
+  it('maps dotted flat names to the first segment', () => {
+    expect(ecsFlatNameToRootFieldsetName('host.name')).toBe('host');
+    expect(ecsFlatNameToRootFieldsetName('client.as.number')).toBe('client');
+    expect(ecsFlatNameToRootFieldsetName('event.category')).toBe('event');
   });
 });
 

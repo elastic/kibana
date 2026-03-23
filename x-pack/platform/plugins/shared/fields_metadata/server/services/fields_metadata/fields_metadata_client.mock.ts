@@ -11,5 +11,6 @@ export const createFieldsMetadataClientMock = (): jest.Mocked<IFieldsMetadataCli
   getByName: jest.fn(),
   find: jest.fn(),
   getFieldChildren: jest.fn(),
+  getECSFieldsets: jest.fn(),
   matchesAnyTypeForEventCategory: jest.fn(),
 });

@@ -173,6 +173,22 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     return FieldsMetadataDictionary.create(children);
   }
 
+  /**
+   * Lists distinct root ECS field set names from the static ECS schema (e.g. `agent`, `host`, `event`, and `base` for root-level fields such as `@timestamp` / `message`).
+   * @see https://www.elastic.co/docs/reference/ecs/ecs-field-reference
+   */
+  async getECSFieldsets(): Promise<string[]> {
+    const ecsFields = this.ecsFieldsRepository.find().getFields();
+    const fieldsets = new Set<string>();
+
+    for (const field of Object.values(ecsFields)) {
+      const flatName = field.flat_name ?? field.name;
+      fieldsets.add(ecsFlatNameToRootFieldsetName(flatName));
+    }
+
+    return [...fieldsets].sort((a, b) => a.localeCompare(b));
+  }
+
   private hasFleetPermissions(capabilities: FleetCapabilities) {
     const { fleet, fleetv2 } = capabilities;
 
@@ -213,4 +229,16 @@ export function isDirectChildFieldName(parentFieldName: string, fieldKey: string
   }
   const remainder = fieldKey.slice(prefix.length);
   return remainder.length > 0 && !remainder.includes('.');
+}
+
+/**
+ * Maps an ECS `flat_name` to its root field set: the segment before the first `.`, or `base` for
+ * fields defined at the root of the event (no dots), per the ECS field reference.
+ */
+export function ecsFlatNameToRootFieldsetName(flatName: string): string {
+  const dot = flatName.indexOf('.');
+  if (dot === -1) {
+    return 'base';
+  }
+  return flatName.slice(0, dot);
 }

@@ -48,4 +48,6 @@ export interface IFieldsMetadataClient {
     fieldName: FieldName,
     params?: GetFieldsMetadataOptions
   ): Promise<FieldsMetadataDictionary>;
+  /** Root ECS field set names (see ECS field reference). Derived from ECS flat field names only. */
+  getECSFieldsets(): Promise<string[]>;
 }
