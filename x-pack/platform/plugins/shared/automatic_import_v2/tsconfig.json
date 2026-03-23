@@ -56,5 +56,6 @@
     "@kbn/utility-types",
     "@kbn/code-editor",
     "@kbn/monaco",
+    "@kbn/scout",
   ]
 }
