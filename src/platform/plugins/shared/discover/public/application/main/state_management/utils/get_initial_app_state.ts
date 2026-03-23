@@ -68,6 +68,10 @@ export function getInitialAppState({
     mergedState.hideTable = undefined;
   }
 
+  if (mergedState.hideChart && mergedState.hideTable) {
+    mergedState.hideTable = false;
+  }
+
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
   if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
     mergedState.dataSource = createEsqlDataSource();

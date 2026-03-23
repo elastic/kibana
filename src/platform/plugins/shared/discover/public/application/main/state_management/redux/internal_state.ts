@@ -93,6 +93,17 @@ const withTab = <TPayload extends TabActionPayload>(
   }
 };
 
+const normalizeVisiblePanelsState = (appState: TabState['appState']) => {
+  if (appState.hideChart && appState.hideTable) {
+    return {
+      ...appState,
+      hideTable: false,
+    };
+  }
+
+  return appState;
+};
+
 export const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
@@ -237,7 +248,7 @@ export const internalStateSlice = createSlice({
      */
     setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
       withTab(state, action.payload, (tab) => {
-        let appState = action.payload.appState;
+        let appState = normalizeVisiblePanelsState(action.payload.appState);
 
         // When updating to an ES|QL query, sync the data source
         if (isOfAggregateQueryType(appState.query)) {
@@ -253,8 +264,9 @@ export const internalStateSlice = createSlice({
      */
     resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
       withTab(state, action.payload, (tab) => {
-        tab.previousAppState = action.payload.appState;
-        tab.appState = action.payload.appState;
+        const appState = normalizeVisiblePanelsState(action.payload.appState);
+        tab.previousAppState = appState;
+        tab.appState = appState;
       }),
 
     /**
