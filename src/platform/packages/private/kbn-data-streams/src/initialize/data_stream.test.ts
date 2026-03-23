@@ -41,8 +41,8 @@ describe('initializeDataStream', () => {
       data_retention: '30d',
     } as const;
     const existingLifecycle = {
-      enabled: true,
       data_retention: '30d',
+      enabled: true,
     } as const;
     const dataStream: DataStreamDefinition<typeof testMappings> = {
       name: 'test-data-stream',
