@@ -19,7 +19,7 @@ interface EsqlQueryTabProps {
 
 export const EsqlQueryTab = ({ esqlQuery, metricItem }: EsqlQueryTabProps) => {
   return (
-    <>
+    <div data-test-subj="metricsExperienceFlyoutEsqlQueryTabContent">
       <TabTitleAndDescription metricItem={metricItem} />
       <EuiCodeBlock
         language="esql"
@@ -30,6 +30,6 @@ export const EsqlQueryTab = ({ esqlQuery, metricItem }: EsqlQueryTabProps) => {
       >
         {esqlQuery}
       </EuiCodeBlock>
-    </>
+    </div>
   );
 };

@@ -1,5 +1,5 @@
 {
-  "sha1": "4c219ca6e3dc090b706bf0f9fd91cf3eca1262ab",
+  "sha1": "e5ed48fd3ce64189c2522300baee0831e0cb9274",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -73,11 +73,12 @@
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 7
       }
     },
@@ -86,11 +87,12 @@
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 7
       }
     },
@@ -419,12 +421,14 @@
       "title": "Stream data processing - condition filtering and match rate should display condition match rate badge on WHERE blocks",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 9
       }
     },
@@ -433,12 +437,14 @@
       "title": "Stream data processing - condition filtering and match rate should show 0% match rate when condition matches no documents",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 9
       }
     },
@@ -447,12 +453,14 @@
       "title": "Stream data processing - condition filtering and match rate should show 100% match rate when condition matches all documents",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 9
       }
     },
@@ -461,12 +469,14 @@
       "title": "Stream data processing - condition filtering and match rate should show selected documents percentage when editing processor under a condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 9
       }
     },
@@ -475,12 +485,14 @@
       "title": "Stream data processing - condition filtering and match rate should maintain match rate badge after saving condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 9
       }
     },
@@ -489,12 +501,14 @@
       "title": "Stream data processing - condition filtering and match rate should show match rate badge for nested conditions",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 9
       }
     },
@@ -526,7 +540,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 54,
+        "line": 58,
         "column": 9
       }
     },
@@ -542,7 +556,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 65,
+        "line": 69,
         "column": 9
       }
     },
@@ -558,7 +572,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 73,
+        "line": 77,
         "column": 9
       }
     },
@@ -574,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 94,
+        "line": 98,
         "column": 9
       }
     },
@@ -590,7 +604,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 116,
+        "line": 120,
         "column": 9
       }
     },
@@ -606,7 +620,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 135,
+        "line": 139,
         "column": 9
       }
     },
@@ -622,7 +636,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 158,
+        "line": 162,
         "column": 9
       }
     },
@@ -638,7 +652,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 174,
+        "line": 178,
         "column": 9
       }
     },
@@ -654,7 +668,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 194,
+        "line": 198,
         "column": 9
       }
     },
@@ -670,7 +684,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 209,
+        "line": 213,
         "column": 9
       }
     },
@@ -887,13 +901,15 @@
       "title": "Stream data processing - grok highlighting should display grok highlighting when pattern extracts into the same field it reads from (message → message)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 37,
+        "column": 9
       }
     },
     {
@@ -901,13 +917,15 @@
       "title": "Stream data processing - grok highlighting should display grok highlighting for additive patterns (non-overwriting)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 64,
+        "column": 9
       }
     },
     {
@@ -915,13 +933,15 @@
       "title": "Stream data processing - grok highlighting should use original field value for highlighting when pattern overwrites source field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 89,
+        "column": 9
       }
     },
     {
@@ -3351,42 +3371,42 @@
     {
       "id": "7ce2670a3e19b7c-cd54fa739417889",
       "title": "Query streams - Create query stream should properly handle errors for invalid query streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 7
       }
     },
     {
       "id": "7ce2670a3e19b7c-aed3b1699c34c31",
       "title": "Query streams - Create query stream should properly create a root query stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 7
       }
     },
     {
       "id": "7ce2670a3e19b7c-0f0cfefb9e93b08",
       "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 7
       }
     },
@@ -3407,14 +3427,14 @@
     {
       "id": "5ccc6d0f072c147-7490fc470cd2b93",
       "title": "Query streams - Edit query stream should support editing an existing query stream's ES|QL query from the partitioning tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream.spec.ts",
-        "line": 47,
+        "line": 48,
         "column": 7
       }
     },
