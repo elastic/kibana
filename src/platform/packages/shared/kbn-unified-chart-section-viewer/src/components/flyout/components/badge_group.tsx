@@ -12,7 +12,7 @@ import React from 'react';
 import { NoValueBadge } from './no_value_badge';
 
 interface BadgeGroupProps<T> {
-  items: T[] | undefined;
+  items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   isNoValue?: (item: T) => boolean;
 }

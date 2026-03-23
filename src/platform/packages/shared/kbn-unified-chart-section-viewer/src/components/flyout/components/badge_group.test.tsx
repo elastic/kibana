@@ -14,12 +14,6 @@ import { BadgeGroup } from './badge_group';
 describe('BadgeGroup', () => {
   const renderItem = (item: string, index: number) => <span key={index}>{item}</span>;
 
-  it('renders NoValueBadge when items is undefined', () => {
-    const { getByText } = render(<BadgeGroup items={undefined} renderItem={renderItem} />);
-
-    expect(getByText('No value')).toBeInTheDocument();
-  });
-
   it('renders NoValueBadge when items is an empty array', () => {
     const { getByText } = render(<BadgeGroup items={[]} renderItem={renderItem} />);
 
