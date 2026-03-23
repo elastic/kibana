@@ -170,7 +170,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           listItems={descriptionListItems}
           flush
           gutterSize="none"
-          wrapText={false}
+          wrapText
           maxWidth={false}
           css={css`
             .euiListGroupItem:not(:last-child) {
