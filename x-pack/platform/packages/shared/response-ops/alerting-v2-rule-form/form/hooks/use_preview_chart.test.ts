@@ -18,6 +18,8 @@ jest.mock('@kbn/react-hooks', () => ({
   useDebouncedValue: <T>(value: T) => value,
 }));
 
+const mockGetLensAttributesFromSuggestion = jest.fn();
+
 const mockLensAttributes = {
   visualizationType: 'lnsXY',
   title: '',
@@ -30,9 +32,14 @@ const mockLensAttributes = {
   references: [],
 };
 
-jest.mock('@kbn/visualization-utils', () => ({
-  getLensAttributesFromSuggestion: jest.fn().mockReturnValue(mockLensAttributes),
-}));
+jest.mock('@kbn/visualization-utils', () => {
+  const actual = jest.requireActual('@kbn/visualization-utils');
+  return {
+    ...actual,
+    getLensAttributesFromSuggestion: (...args: unknown[]) =>
+      mockGetLensAttributesFromSuggestion(...args),
+  };
+});
 
 const mockDataView = {
   id: 'test-id',
@@ -68,6 +75,7 @@ describe('usePreviewChart', () => {
     jest.spyOn(Date, 'now').mockReturnValue(MOCK_NOW);
 
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+    mockGetLensAttributesFromSuggestion.mockReturnValue(mockLensAttributes);
 
     // Get the suggestions mock from the lens plugin mock
     mockSuggestions = jest.fn().mockReturnValue([
