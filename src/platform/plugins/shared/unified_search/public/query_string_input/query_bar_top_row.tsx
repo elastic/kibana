@@ -699,15 +699,18 @@ export const QueryBarTopRow = React.memo(
           />
         );
       } else {
+        const noTimeFieldNameDisabled =
+          typeof isDisabled === 'object' && isDisabled.display !== undefined;
         datePicker = (
           <DateRangePicker
+            className="kbnQueryBar__datePicker"
             data-test-subj={props.dataTestSubj}
-            value={dateRangeValue}
+            value={noTimeFieldNameDisabled ? strings.getDisabledDatePickerLabel() : dateRangeValue}
             onChange={onDateRangeChange}
             onInputChange={onDateRangeInputChange}
             isInvalid={isDateRangeInvalid}
             isLoading={props.isLoading}
-            disabled={props.isDisabled}
+            disabled={props.isDisabled || noTimeFieldNameDisabled}
             width="full"
             compressed
             collapsed={false}

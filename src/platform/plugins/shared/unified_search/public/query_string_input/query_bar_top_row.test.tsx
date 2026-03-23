@@ -67,7 +67,7 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         to: 'now',
       };
     case UI_SETTINGS.TIMEPICKER_USE_LEGACY_TIME_PICKER:
-      return true;
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
@@ -345,7 +345,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(getByText(kqlQuery.query)).toBeInTheDocument();
-      expect(getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
     });
   });
 
@@ -375,7 +375,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -393,7 +393,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dateRangePickerControlButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -413,7 +413,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -435,7 +435,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(screen.queryByTestId('querySubmitButton')).not.toBeInTheDocument();
     });
   });
@@ -497,7 +497,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(screen.getByText(kqlQuery.query)).toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dateRangePickerControlButton')).not.toBeInTheDocument();
     });
   });
 
@@ -516,7 +516,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dateRangePickerControlButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -535,7 +535,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dateRangePickerControlButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -559,7 +559,7 @@ describe('QueryBarTopRowTopRow', () => {
     await waitFor(() => {
       // Check for ES|QL related elements instead
       expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -587,7 +587,9 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
-      expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+      // expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('All time');
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
@@ -623,7 +625,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeDisabled();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
     });
   });
 
