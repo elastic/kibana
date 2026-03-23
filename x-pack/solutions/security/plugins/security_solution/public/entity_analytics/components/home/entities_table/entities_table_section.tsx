@@ -180,7 +180,11 @@ const GroupContent = ({
     )
       .map(transformResolutionFilter)
       .map(groupFilterMap)
-      .filter(filterTypeGuard);
+      .filter(filterTypeGuard)
+      // Drop non-bool resolution filters (e.g., @kbn/grouping script filters
+      // that check field cardinality and incorrectly exclude the target entity).
+      // transformResolutionFilter already creates a correct bool/should replacement.
+      .filter((f) => f?.meta?.key !== ENTITY_FIELDS.RESOLVED_TO || Boolean(f?.query?.bool));
 
     return (
       <GroupWithLocalPagination
