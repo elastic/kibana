@@ -542,10 +542,10 @@ export class SyntheticsPrivateLocation {
       }
     }
 
-    const existingPolicies =
-      (await this.server.fleet.packagePolicyService.getByIDs(soClient, [...policyIdsToFetch], {
-        ignoreMissing: true,
-      })) ?? [];
+    const existingPolicies = await this.packagePolicyService.getByIds({
+      spaceId,
+      packagePolicyIds: Array.from(policyIdsToFetch),
+    });
 
     const policyIdsToDelete = new Set<string>();
     for (const config of configs) {
