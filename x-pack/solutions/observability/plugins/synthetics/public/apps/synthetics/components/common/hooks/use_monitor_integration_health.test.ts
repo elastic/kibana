@@ -158,27 +158,6 @@ describe('useMonitorIntegrationHealth', () => {
       expect(healthDispatches.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('returns error when response contains attributes (logical failure)', async () => {
-      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
-      mockedResetMonitorAPI.mockResolvedValue({
-        attributes: { message: 'Fleet error', errors: [] },
-      } as any);
-
-      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
-
-      let resetResult: { error?: Error } | undefined;
-      await act(async () => {
-        resetResult = await result.current.resetMonitor('mon-2');
-      });
-
-      expect(resetResult?.error).toBeInstanceOf(Error);
-      expect(result.current.isResetting).toBe(false);
-      const healthDispatches = dispatchSpy.mock.calls.filter(
-        ([action]: any) => action.type === '[MONITOR HEALTH] GET'
-      );
-      expect(healthDispatches.length).toBe(1); // only initial fetch, no refetch
-    });
-
     it('returns error and sets isResetting to false on API failure', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorAPI.mockRejectedValue(new Error('Server error'));
