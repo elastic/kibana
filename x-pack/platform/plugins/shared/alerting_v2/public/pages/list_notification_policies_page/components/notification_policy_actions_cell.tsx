@@ -128,6 +128,7 @@ export const NotificationPolicyActionsCell = ({
           icon: 'trash',
           css: css`
             color: ${euiTheme.colors.textDanger};
+            padding: ${euiTheme.size.s};
           `,
           onClick: () => {
             closePopover();
@@ -181,6 +182,7 @@ export const NotificationPolicyActionsCell = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="pencil"
+          color="text"
           aria-label={i18n.translate(
             'xpack.alertingV2.notificationPoliciesList.action.edit.description',
             { defaultMessage: 'Edit this notification policy' }
@@ -206,6 +208,7 @@ export const NotificationPolicyActionsCell = ({
           button={
             <EuiButtonIcon
               iconType="boxesHorizontal"
+              color="text"
               aria-label={i18n.translate('xpack.alertingV2.notificationPoliciesList.action.more', {
                 defaultMessage: 'More actions',
               })}

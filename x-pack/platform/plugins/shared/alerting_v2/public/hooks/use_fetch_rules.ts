@@ -11,13 +11,21 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
-export const useFetchRules = ({ page, perPage }: { page: number; perPage: number }) => {
+export const useFetchRules = ({
+  page,
+  perPage,
+  search,
+}: {
+  page: number;
+  perPage: number;
+  search?: string;
+}) => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery({
-    queryKey: ruleKeys.list({ page, perPage }),
-    queryFn: () => rulesApi.listRules({ page, perPage }),
+    queryKey: ruleKeys.list({ page, perPage, search }),
+    queryFn: () => rulesApi.listRules({ page, perPage, search }),
     onError: () => {
       toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useFetchRules.errorMessage', {
@@ -25,6 +33,7 @@ export const useFetchRules = ({ page, perPage }: { page: number; perPage: number
         })
       );
     },
-    keepPreviousData: true,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };

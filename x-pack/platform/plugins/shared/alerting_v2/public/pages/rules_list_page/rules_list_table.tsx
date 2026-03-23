@@ -142,6 +142,7 @@ export interface RulesListTableProps {
   totalItemCount: number;
   page: number;
   perPage: number;
+  search: string;
   isLoading: boolean;
 
   /** Bulk selection state */
@@ -174,6 +175,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   totalItemCount,
   page,
   perPage,
+  search,
   isLoading,
   selectedCount,
   isAllSelected,
@@ -381,6 +383,14 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     ]
   );
 
+  const noItemsMessage = search
+    ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
+        defaultMessage: 'No rules match your search.',
+      })
+    : i18n.translate('xpack.alertingV2.rulesList.noRules', {
+        defaultMessage: 'No rules found.',
+      });
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -514,6 +524,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         columns={columns}
         loading={isLoading}
         pagination={pagination}
+        noItemsMessage={noItemsMessage}
         onChange={onTableChange}
         responsiveBreakpoint={false}
         tableCaption={i18n.translate('xpack.alertingV2.rulesList.tableCaption', {

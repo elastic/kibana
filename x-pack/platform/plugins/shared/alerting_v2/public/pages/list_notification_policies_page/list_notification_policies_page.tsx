@@ -17,6 +17,7 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -48,6 +49,15 @@ import { NotificationPolicyActionsCell } from './components/notification_policy_
 
 const DEFAULT_PER_PAGE = 20;
 
+const descriptionTextStyle = css`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
+
 export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -58,6 +68,7 @@ export const ListNotificationPoliciesPage = () => {
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
   const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
 
+  const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const settings = useService(CoreStart('settings'));
@@ -114,7 +125,7 @@ export const ListNotificationPoliciesPage = () => {
     createNotificationPolicy(data);
   };
 
-  const { data, isLoading, isError, error } = useFetchNotificationPolicies({
+  const { data, isError, error, isFetching } = useFetchNotificationPolicies({
     page: page + 1,
     perPage,
     search: search || undefined,
@@ -123,15 +134,15 @@ export const ListNotificationPoliciesPage = () => {
     sortOrder: sortDirection,
   });
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
     setPage(0);
-  };
+  }, []);
 
-  const handleEnabledChange = (value: string) => {
+  const handleEnabledChange = useCallback((value: string) => {
     setEnabled(value);
     setPage(0);
-  };
+  }, []);
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -140,9 +151,11 @@ export const ListNotificationPoliciesPage = () => {
     page: tablePage,
     sort,
   }: CriteriaWithPagination<NotificationPolicyResponse>) => {
-    setPage(tablePage.index);
-    setPerPage(tablePage.size);
-    clearSelection();
+    if (tablePage) {
+      setPage(tablePage.index);
+      setPerPage(tablePage.size);
+    }
+
     if (sort) {
       setSortField(sort.field as 'name' | 'updatedAt' | 'updatedByUsername');
       setSortDirection(sort.direction);
@@ -187,10 +200,10 @@ export const ListNotificationPoliciesPage = () => {
 
   const selection: EuiTableSelectionType<NotificationPolicyResponse> = {
     onSelectionChange,
-    selected: selectedPolicies,
     selectable: () => {
       return !isBulkActionInProgress;
     },
+    selected: selectedPolicies,
   };
 
   const columns: Array<EuiBasicTableColumn<NotificationPolicyResponse>> = [
@@ -203,6 +216,16 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       sortable: true,
+      render: (name: string, policy: NotificationPolicyResponse) => (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{name}</EuiFlexItem>
+          {policy.description && (
+            <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+              {policy.description}
+            </EuiText>
+          )}
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'destinations',
@@ -214,6 +237,28 @@ export const ListNotificationPoliciesPage = () => {
       ),
       render: (destinations: NotificationPolicyResponse['destinations']) => (
         <NotificationPolicyDestinationsSummary destinations={destinations} />
+      ),
+    },
+    {
+      field: 'updatedAt',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.updatedAt"
+          defaultMessage="Last update"
+        />
+      ),
+      sortable: true,
+      render: (updatedAt: string) => moment(updatedAt).format(dateTimeFormat),
+    },
+    {
+      field: 'updatedByUsername',
+      sortable: true,
+      width: '200px',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.updatedByUsername"
+          defaultMessage="Updated by"
+        />
       ),
     },
     {
@@ -261,28 +306,6 @@ export const ListNotificationPoliciesPage = () => {
           />
         );
       },
-    },
-    {
-      field: 'updatedAt',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.updatedAt"
-          defaultMessage="Last update"
-        />
-      ),
-      sortable: true,
-      render: (updatedAt: string) => moment(updatedAt).format(dateTimeFormat),
-    },
-    {
-      field: 'updatedByUsername',
-      sortable: true,
-      width: '200px',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.updatedByUsername"
-          defaultMessage="Updated by"
-        />
-      ),
     },
     {
       name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
@@ -403,12 +426,16 @@ export const ListNotificationPoliciesPage = () => {
             columns={columns}
             itemId="id"
             selection={selection}
-            loading={isLoading}
+            loading={isFetching}
             pagination={pagination}
             responsiveBreakpoint={false}
             css={css`
               .euiTableHeaderMobile .euiCheckbox {
                 display: none;
+              }
+              .euiTableRowCellCheckbox {
+                vertical-align: top;
+                padding-top: ${euiTheme.size.xs};
               }
             `}
             sorting={{
