@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/apm-config-loader'
   - '@kbn/repo-info'
   - '@kbn/std'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
