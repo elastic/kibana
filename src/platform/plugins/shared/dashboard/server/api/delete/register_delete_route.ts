@@ -36,13 +36,13 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         },
         response: {
           200: {
-            description: 'Indicates the dashboard was deleted successfully',
+            description: 'Indicates the dashboard is deleted successfully',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates that the dashboard with the given ID was not found.',
+            description: 'Indicates that the dashboard with the given ID is not found.',
           },
         },
       },

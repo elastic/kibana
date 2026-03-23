@@ -48,7 +48,7 @@ export function registerCreateRoute(
         response: {
           201: {
             body: () => getCreateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard was created successfully',
+            description: 'Indicates the dashboard is created successfully',
           },
           400: {
             description: 'Indicates an invalid schema or parameters.',
