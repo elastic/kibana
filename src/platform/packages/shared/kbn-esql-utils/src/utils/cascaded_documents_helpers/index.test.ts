@@ -206,9 +206,7 @@ describe('cascaded documents helpers utils', () => {
 
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([{ field: 'casted', type: 'inlineCast' }]);
-      expect(result.appliedFunctions).toEqual([
-        { identifier: 'count', aggregation: 'COUNT' },
-      ]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
     });
 
     it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
