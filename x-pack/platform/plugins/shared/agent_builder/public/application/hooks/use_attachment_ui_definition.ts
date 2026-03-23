@@ -27,6 +27,7 @@ export const useAttachmentUiDefinition = (type?: string) => {
         }
       })
       .catch((e) => {
+        // eslint-disable-next-line no-console
         console.warn(`Unable to get UI Attachement definition for type:${type}`);
       });
     return () => {
