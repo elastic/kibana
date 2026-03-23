@@ -54,6 +54,13 @@ export class RequestContextFactory implements IRequestContextFactory {
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const fieldsMetadataClient = await startPlugins.fieldsMetadata.getClient(request);
 
+    const reportTelemetryEvent = <TEventType extends string>(
+      eventType: TEventType,
+      eventData: Record<string, unknown>
+    ) => {
+      core.analytics.reportEvent(eventType, eventData);
+    };
+
     return {
       core: coreContext,
       actions: startPlugins.actions,
@@ -82,6 +89,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       savedObjectsClient,
       esClient,
       fieldsMetadataClient,
+      reportTelemetryEvent,
     };
   }
 }

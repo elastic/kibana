@@ -68,6 +68,8 @@ import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
+import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
+import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 
 const BUTTON_MIN_WIDTH = 108;
 
@@ -173,7 +175,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  filters: Filter[];
+  filters?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
@@ -934,7 +936,8 @@ export const QueryBarTopRow = React.memo(
 
     function renderAddButton() {
       return (
-        Boolean(props.showAddFilter) && (
+        Boolean(props.showAddFilter) &&
+        props.filters && (
           <EuiFlexItem grow={false}>
             <AddFilterPopover
               indexPatterns={props.indexPatterns}
@@ -954,15 +957,24 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    function renderFilterBarToggleButton() {
+      return <FilterBarToggleButton />;
+    }
+
     function renderFilterButtonGroup() {
       return (
         (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
           <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
-            <FilterButtonGroup
-              items={[props.prepend, renderAddButton()]}
-              attached={renderFilterMenuOnly()}
-              size="s"
-            />
+            <EuiFlexGroup gutterSize="s">
+              <FilterButtonGroup
+                items={[renderAddButton(), props.prepend]}
+                attached={renderFilterMenuOnly()}
+                size="s"
+              />
+              {Boolean(props.showAddFilter && props.filters?.length) && (
+                <FilterButtonGroup items={[renderFilterBarToggleButton()]} size="s" />
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )
       );
@@ -1103,7 +1115,7 @@ export const QueryBarTopRow = React.memo(
     };
 
     return (
-      <>
+      <FilterBarContextProvider filters={props.filters} storage={storage}>
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
@@ -1146,7 +1158,7 @@ export const QueryBarTopRow = React.memo(
               {renderTextLangEditor()}
             </>
           ))}
-      </>
+      </FilterBarContextProvider>
     );
   },
   ({ query: prevQuery, ...prevProps }, { query: nextQuery, ...nextProps }) => {
