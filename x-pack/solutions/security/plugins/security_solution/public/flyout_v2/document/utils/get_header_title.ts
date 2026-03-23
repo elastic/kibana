@@ -10,7 +10,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_NAME, EVENT_KIND } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
-import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
+import { EventKind } from '../constants/event_kinds';
 
 const DEFAULT_DOCUMENT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.right.header.headerTitle',
