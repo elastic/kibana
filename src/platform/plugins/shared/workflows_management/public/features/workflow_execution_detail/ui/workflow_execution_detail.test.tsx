@@ -158,7 +158,7 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
     error: null,
     isTestRun: false,
     startedAt: '2024-01-01T00:00:00Z',
-    finishedAt: null,
+    finishedAt: '',
     workflowId: 'workflow-1',
     workflowName: 'Test Workflow',
     workflowDefinition: {
@@ -184,8 +184,7 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       activeTab: 'executions',
       setSelectedStepExecution: mockSetSelectedStepExecution,
       selectedStepExecutionId: 'step-exec-1',
-      clearResumeParam: jest.fn(),
-    });
+    } as any);
   });
 
   it('resolves resumeMessage and resumeSchema for a top-level waitForInput step', () => {
