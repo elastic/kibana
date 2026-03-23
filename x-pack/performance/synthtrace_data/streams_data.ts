@@ -6,10 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { Condition } from '@kbn/streamlang';
 import type { KibanaServer } from '@kbn/ftr-common-functional-services';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { generateArchive } from '@kbn/streams-plugin/server/lib/content';
-import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID, type ContentPackStream } from '@kbn/content-packs-schema';
 import { emptyAssets } from '@kbn/streams-schema';
 
 const PUBLIC_API_HEADERS = {
@@ -43,6 +44,12 @@ const MAX_RETRIES = 5;
 
 /** Base delay between retries in ms */
 const RETRY_BASE_DELAY_MS = 3000;
+
+interface WiredRoutingRule {
+  destination: string;
+  where: Condition;
+  status: 'enabled';
+}
 
 function isEsTimeoutError(error: unknown): boolean {
   const err = error as { name?: string; message?: string };
@@ -414,8 +421,8 @@ async function createLargeWiredHierarchyViaFork(
  * Build content pack entries for a batch.
  * Routing can only reference children present in the same batch.
  */
-function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
-  const batchRouting = [];
+function buildBatchedContentPackEntries(batchStart: number, batchEnd: number): ContentPackStream[] {
+  const batchRouting: WiredRoutingRule[] = [];
   for (let i = batchStart; i <= batchEnd; i++) {
     batchRouting.push({
       destination: `perf_child_${String(i).padStart(4, '0')}`,
@@ -424,13 +431,14 @@ function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
     });
   }
 
-  const childEntries = [];
+  const childEntries: ContentPackStream[] = [];
   for (let i = batchStart; i <= batchEnd; i++) {
     childEntries.push({
       type: 'stream' as const,
       name: `perf_child_${String(i).padStart(4, '0')}`,
       request: {
         stream: {
+          type: 'wired' as const,
           description: '',
           ingest: {
             processing: { steps: [] as never[] },
@@ -446,11 +454,12 @@ function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
     });
   }
 
-  const rootEntry = {
+  const rootEntry: ContentPackStream = {
     type: 'stream' as const,
     name: ROOT_STREAM_ID,
     request: {
       stream: {
+        type: 'wired' as const,
         description: '',
         ingest: {
           processing: { steps: [] as never[] },
@@ -534,7 +543,7 @@ async function updateRootRouting(
 ) {
   log.info(`Updating ${rootStreamName} routing to include all ${count} children...`);
 
-  const allRouting = [];
+  const allRouting: WiredRoutingRule[] = [];
   for (let i = 1; i <= count; i++) {
     allRouting.push({
       destination: `${rootStreamName}.perf_child_${String(i).padStart(4, '0')}`,
@@ -944,7 +953,7 @@ export async function setupDataQualityAtScale(
   let indexed = 0;
   for (let i = 0; i < DOC_COUNT; i += BULK_BATCH_SIZE) {
     const batchSize = Math.min(BULK_BATCH_SIZE, DOC_COUNT - i);
-    const operations = [];
+    const operations: Array<{ create: { _index: string } } | Record<string, string>> = [];
     for (let j = 0; j < batchSize; j++) {
       const doc: Record<string, string> = {
         '@timestamp': new Date().toISOString(),
