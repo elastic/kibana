@@ -13,7 +13,7 @@ import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
-export const useHiddenTimelineRoutes = () => {
+const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
   const hiddenTimelineRoutes = useMemo(
     () =>
