@@ -13,17 +13,23 @@ import { startCase } from 'lodash';
 import { EventKind } from '../constants/event_kinds';
 
 const DEFAULT_DOCUMENT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.right.header.headerTitle',
+  'xpack.securitySolution.flyout.document.header.headerTitle',
   { defaultMessage: 'Document details' }
 );
 
-const DEFAULT_EVENT_TITLE = i18n.translate('xpack.securitySolution.flyout.title.eventTitle', {
-  defaultMessage: 'Event details',
-});
+const DEFAULT_EVENT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.document.title.eventTitle',
+  {
+    defaultMessage: 'Event details',
+  }
+);
 
-const EXTERNAL_ALERT_TITLE = i18n.translate('xpack.securitySolution.flyout.title.alertEventTitle', {
-  defaultMessage: 'External alert details',
-});
+const EXTERNAL_ALERT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.document.title.alertEventTitle',
+  {
+    defaultMessage: 'External alert details',
+  }
+);
 
 /**
  * Mapping of event.category to the field used as the document title
@@ -80,7 +86,7 @@ export const getEventTitle = (
   }
 
   return eventKind
-    ? i18n.translate('xpack.securitySolution.flyout.title.otherEventTitle', {
+    ? i18n.translate('xpack.securitySolution.flyout.document.title.otherEventTitle', {
         defaultMessage: '{eventKind} details',
         values: { eventKind: startCase(eventKind) },
       })
