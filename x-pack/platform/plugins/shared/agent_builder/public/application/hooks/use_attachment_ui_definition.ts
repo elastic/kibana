@@ -19,13 +19,16 @@ export const useAttachmentUiDefinition = (type?: string) => {
     }
 
     let canceled = false;
-    attachmentsService.getAttachmentUiDefinition(type).then((definition) => {
-      if (!canceled) {
-        setUiDefinition(definition);
-      }
-    }).catch((e) => {
-      console.warn(`Unable to get UI Attachement definition for type:${type}`)
-    });
+    attachmentsService
+      .getAttachmentUiDefinition(type)
+      .then((definition) => {
+        if (!canceled) {
+          setUiDefinition(definition);
+        }
+      })
+      .catch((e) => {
+        console.warn(`Unable to get UI Attachement definition for type:${type}`);
+      });
     return () => {
       canceled = true;
     };

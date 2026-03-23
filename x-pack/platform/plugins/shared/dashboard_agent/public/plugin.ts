@@ -7,16 +7,16 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { Subscription } from 'rxjs';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import type { Subscription } from 'rxjs';
 
 export class DashboardAgentPlugin
   implements
@@ -46,17 +46,20 @@ export class DashboardAgentPlugin
     this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
       this.dashboardApi = api;
     });
-    plugins.agentBuilder.attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, async () => {
-      const { getDashboardAttachmentUiDefinition } = await import('./attachment_types');
+    plugins.agentBuilder.attachments.addAttachmentType<DashboardAttachment>(
+      DASHBOARD_ATTACHMENT_TYPE,
+      async () => {
+        const { getDashboardAttachmentUiDefinition } = await import('./attachment_types');
 
-      return getDashboardAttachmentUiDefinition({
-        agentBuilder: plugins.agentBuilder,
-        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
-        unifiedSearch: plugins.unifiedSearch,
-        dashboardPlugin: plugins.dashboard,
-        getDashboardApi: () => this.dashboardApi,
-      });
-    });
+        return getDashboardAttachmentUiDefinition({
+          agentBuilder: plugins.agentBuilder,
+          dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+          unifiedSearch: plugins.unifiedSearch,
+          dashboardPlugin: plugins.dashboard,
+          getDashboardApi: () => this.dashboardApi,
+        });
+      }
+    );
 
     return {};
   }

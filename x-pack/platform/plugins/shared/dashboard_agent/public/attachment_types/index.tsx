@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentLifecycleParams, AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type {
+  AttachmentLifecycleParams,
+  AttachmentUIDefinition,
+} from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type {
@@ -92,5 +95,5 @@ export const getDashboardAttachmentUiDefinition = ({
         },
       ];
     },
-  }
+  };
 };
