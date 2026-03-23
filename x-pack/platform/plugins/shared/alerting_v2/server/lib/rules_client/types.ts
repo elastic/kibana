@@ -18,6 +18,7 @@ export interface FindRulesParams {
   page?: number;
   perPage?: number;
   filter?: string;
+  search?: string;
 }
 
 export interface FindRulesResponse {
