@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const fetchIndexCounts = async (client: IScopedClusterClient, indicesNames: string[]) => {
   // TODO: is there way to batch this? Passing multiple index names or a pattern still returns a singular count

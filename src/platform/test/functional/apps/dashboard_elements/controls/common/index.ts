@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -44,11 +44,11 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   describe('Controls', function () {
     before(setup);
     after(teardown);
-    loadTestFile(require.resolve('./control_group_settings'));
     loadTestFile(require.resolve('./range_slider'));
     loadTestFile(require.resolve('./time_slider'));
-    loadTestFile(require.resolve('./control_group_chaining'));
+    loadTestFile(require.resolve('./control_chaining'));
     loadTestFile(require.resolve('./control_group_apply_button'));
+    loadTestFile(require.resolve('./pin_controls'));
     loadTestFile(require.resolve('./replace_controls'));
     loadTestFile(require.resolve('./multiple_data_views'));
   });

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compareFilters, Filter } from '@kbn/es-query';
-import React, { FC, useCallback, useState } from 'react';
+import type { Filter } from '@kbn/es-query';
+import { compareFilters } from '@kbn/es-query';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 
 interface QueryDslFilter {

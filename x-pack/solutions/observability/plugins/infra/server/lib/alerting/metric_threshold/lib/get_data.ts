@@ -238,7 +238,7 @@ export const getData = async (
             : false;
         return {
           [UNGROUPED_FACTORY_KEY]: {
-            value,
+            value: trigger || warn ? value : null,
             warn,
             trigger,
             bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },

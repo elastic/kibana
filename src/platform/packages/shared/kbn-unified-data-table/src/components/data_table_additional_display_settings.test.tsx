@@ -11,10 +11,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  UnifiedDataTableAdditionalDisplaySettings,
-  UnifiedDataTableAdditionalDisplaySettingsProps,
-} from './data_table_additional_display_settings';
+import type { UnifiedDataTableAdditionalDisplaySettingsProps } from './data_table_additional_display_settings';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import lodash from 'lodash';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -281,7 +279,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeightLines,
       });
       fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 5 } });
-      expect(onChangeRowHeightLines).toHaveBeenCalledWith(5);
+      expect(onChangeRowHeightLines).toHaveBeenCalledWith(5, true);
       await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
@@ -310,7 +308,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeightLines,
       });
       fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 3 } });
-      expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3);
+      expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3, true);
       await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });

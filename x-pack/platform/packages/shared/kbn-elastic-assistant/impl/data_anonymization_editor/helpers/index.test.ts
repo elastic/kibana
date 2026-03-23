@@ -7,7 +7,7 @@
 
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 import { getIsDataAnonymizable, updateSelectedPromptContext } from '.';
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 describe('helpers', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -316,9 +316,9 @@ describe('helpers', () => {
       });
       expect(result.contextAnonymizationFields).toEqual({
         data: [
+          { allowed: true, anonymized: false, field: 'user.name', id: 'user.name' },
           { allowed: false, anonymized: true, field: 'event.category', id: 'event.category' },
           { allowed: true, anonymized: false, field: 'event.action', id: 'event.action' },
-          { allowed: true, anonymized: false, field: 'user.name', id: 'user.name' },
         ],
         page: 1,
         perPage: 1000,

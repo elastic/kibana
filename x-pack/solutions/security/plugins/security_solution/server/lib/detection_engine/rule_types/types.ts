@@ -46,9 +46,9 @@ import type { Status } from '../../../../common/api/detection_engine';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
-  BaseFieldsLatest,
-  DetectionAlert,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  DetectionAlert800,
+  WrappedAlert,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {
   RuleAction,
@@ -70,6 +70,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   warning: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
@@ -237,7 +238,7 @@ export type SignalSearchResponse<
   TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
-export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert800>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
@@ -304,7 +305,7 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+) => Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>>;
 
 export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
@@ -342,6 +343,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 

@@ -53,6 +53,7 @@ export const AnnotationsSwitch: FC = () => {
       </Description>
       {showCallOut && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="mlJobWizardAlsoEnableAnnotationsRecommendationCallout"
           title={
             <FormattedMessage
@@ -61,7 +62,7 @@ export const AnnotationsSwitch: FC = () => {
             />
           }
           color="primary"
-          iconType="help"
+          iconType="question"
         />
       )}
     </>

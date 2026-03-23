@@ -8,17 +8,21 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { CreatePrivMonUserRequestBody } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
-import type { CreatePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import {
+  CreatePrivMonUserRequestBody,
+  type CreatePrivMonUserResponse,
+} from '../../../../../../common/api/entity_analytics';
+import { API_VERSIONS, APP_ID, MONITORING_USERS_URL } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users',
+      path: MONITORING_USERS_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -34,23 +38,35 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          const secSol = await context.securitySolution;
-          const body = await secSol
-            .getPrivilegeMonitoringDataClient()
-            .createUser(request.body, 'api');
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error creating user: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const secSol = await context.securitySolution;
+            const { elasticsearch } = await context.core;
+            const crudService = createPrivilegedUsersCrudService({
+              esClient: elasticsearch.client.asCurrentUser,
+              index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
+              logger: secSol.getLogger(),
+            });
+
+            const config = secSol.getConfig();
+            const maxUsersAllowed =
+              config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+
+            const body = await crudService.create(request.body, 'api', maxUsersAllowed);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error creating user: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

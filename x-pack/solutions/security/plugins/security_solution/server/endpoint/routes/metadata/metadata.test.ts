@@ -192,10 +192,10 @@ describe('test endpoint routes', () => {
                   },
                 },
                 filter: [
-                  { terms: { 'united.agent.policy_id': [] } },
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
                   { term: { 'united.agent.active': { value: true } } },
+                  { terms: { 'united.agent.policy_id': [] } },
                 ],
               },
             },

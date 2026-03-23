@@ -109,6 +109,7 @@ export const HoverPopover = React.memo<PropsWithChildren<HoverPopoverProps>>(
           panelStyle={{ minInlineSize: 'fit-content' }}
           panelClassName="HoverPopover__popover"
           repositionOnScroll={true}
+          offset={0}
         >
           {isOpen ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
         </EuiPopover>

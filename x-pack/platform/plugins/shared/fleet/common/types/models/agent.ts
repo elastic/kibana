@@ -11,12 +11,16 @@ import type {
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
   AgentStatuses,
+  AGENT_TYPE_OPAMP,
 } from '../../constants';
+
+import type { SecretReference, SOSecret } from './secret';
 
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
-  | typeof AGENT_TYPE_TEMPORARY;
+  | typeof AGENT_TYPE_TEMPORARY
+  | typeof AGENT_TYPE_OPAMP;
 
 type AgentStatusTuple = typeof AgentStatuses;
 export type AgentStatus = AgentStatusTuple[number];
@@ -34,6 +38,7 @@ export type SimplifiedAgentStatus =
 export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
+  | 'ROLLBACK'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'
@@ -41,7 +46,9 @@ export type AgentActionType =
   | 'UPDATE_TAGS'
   | 'REQUEST_DIAGNOSTICS'
   | 'POLICY_CHANGE'
-  | 'INPUT_ACTION';
+  | 'INPUT_ACTION'
+  | 'MIGRATE'
+  | 'PRIVILEGE_LEVEL_CHANGE';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -74,6 +81,12 @@ export interface NewAgentAction {
   total?: number;
   is_automatic?: boolean;
   policyId?: string;
+  secrets?: {
+    user_info?: {
+      password?: SOSecret;
+    };
+    enrollment_token?: SOSecret;
+  };
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -116,12 +129,32 @@ interface AgentBase {
   agent?: FleetServerAgentMetadata;
   unhealthy_reason?: UnhealthyReason[];
   namespaces?: string[];
+  upgrade?: AgentUpgrade;
+  identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  non_identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  sequence_num?: number;
+  capabilities?: string[];
+  health?: ComponentHealth;
+  effective_config?: any;
 }
 
 export enum UnhealthyReason {
   INPUT = 'input',
   OUTPUT = 'output',
   OTHER = 'other',
+}
+
+export interface AgentUpgrade {
+  rollbacks?: AgentRollback[];
+}
+
+export interface AgentRollback {
+  valid_until: string;
+  version: string;
 }
 
 export interface AgentMetrics {
@@ -147,6 +180,7 @@ export interface Agent extends AgentBase {
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;
+  last_known_status?: AgentStatus;
 }
 
 export interface CurrentUpgrade {
@@ -370,6 +404,36 @@ export interface FleetServerAgent {
    * Namespaces
    */
   namespaces?: string[];
+
+  /**
+   * The last known agent status
+   */
+  last_known_status?: AgentStatus;
+  /**
+   * Upgrade information including available upgrade rollbacks for the Elastic Agent
+   */
+  upgrade?: AgentUpgrade;
+  identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  non_identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  sequence_num?: number;
+  capabilities?: string[];
+  health?: ComponentHealth;
+  effective_config?: any;
+}
+
+export interface ComponentHealth {
+  healthy: boolean;
+  status: string;
+  status_time_unix_nano?: number;
+  start_time_unix_nano?: number;
+  last_error?: string;
+  component_health_map?: {
+    [key: string]: ComponentHealth;
+  };
 }
 
 /**
@@ -444,6 +508,7 @@ export interface FleetServerAgentAction {
 
   /**
    * The opaque payload.
+   * Secret properties contain a secret reference instead of a value.
    */
   data?: {
     [k: string]: unknown;
@@ -466,6 +531,11 @@ export interface FleetServerAgentAction {
 
   // the id of the policy associated with the action
   policyId?: string;
+
+  /**
+   * List of secret references associated with the action.
+   */
+  secret_references?: SecretReference[];
 
   [k: string]: unknown;
 }

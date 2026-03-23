@@ -11,7 +11,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import {
   buildDataViewMock,
   dataViewMock,
-  shallowMockedFields,
+  deepMockedFields,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { RangeFilter } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
@@ -21,7 +21,7 @@ import { updateSearchSource } from './update_search_source';
 
 const dataViewMockWithTimeField = buildDataViewMock({
   name: 'the-data-view',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
   timeFieldName: '@timestamp',
 });
 
@@ -32,6 +32,8 @@ const defaultFetchContext: FetchContext = {
   searchSessionId: 'id',
   timeRange: { from: 'now-30m', to: 'now', mode: 'relative' },
   timeslice: undefined,
+  esqlVariables: undefined,
+  projectRouting: undefined,
 };
 
 describe('updateSearchSource', () => {

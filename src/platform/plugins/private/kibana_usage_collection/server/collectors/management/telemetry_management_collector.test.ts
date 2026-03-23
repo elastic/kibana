@@ -18,7 +18,7 @@ import {
   registerManagementUsageCollector,
   createCollectorFetch,
 } from './telemetry_management_collector';
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 

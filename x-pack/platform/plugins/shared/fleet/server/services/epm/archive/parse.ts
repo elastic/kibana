@@ -119,6 +119,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'assets',
   'data_streams',
   'license',
+  'requires',
   'type',
   'categories',
   'conditions',
@@ -131,6 +132,9 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'elasticsearch',
   'description',
   'format_version',
+  'discovery',
+  'var_groups',
+  'deprecated',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -264,7 +268,7 @@ export function parseAndVerifyArchive(
   const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
 
   // Package name and version from the manifest must match those from the toplevel directory
-  logger.debug(`Verifying archive - parsing manifest: ${parsed}`);
+  logger.debug(`Verifying archive - parsing manifest: ${parsed.name} - ${parsed.version}`);
   const pkgKey = pkgToPkgKey({ name: parsed.name, version: parsed.version });
 
   if (!topLevelDirOverride && toplevelDir !== pkgKey) {
@@ -490,6 +494,7 @@ export function parseAndVerifyStreams(
         title: streamTitle,
         vars: manifestVars,
         template_path: templatePath,
+        template_paths: templatePaths,
         ...restOfProps
       } = manifestStream;
       if (!(input && streamTitle)) {
@@ -503,7 +508,9 @@ export function parseAndVerifyStreams(
       const streamObject: RegistryStream = {
         input,
         title: streamTitle,
-        template_path: templatePath || 'stream.yml.hbs',
+        ...(templatePaths?.length
+          ? { template_paths: templatePaths }
+          : { template_path: templatePath || 'stream.yml.hbs' }),
       };
 
       if (vars.length) {

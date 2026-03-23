@@ -12,7 +12,6 @@ import { DetailPanelAlertTab, useFetchSessionViewAlerts } from '@kbn/session-vie
 import type { ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelVisualizeTab } from '../../left';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import {
   DocumentDetailsLeftPanelKey,
@@ -20,9 +19,6 @@ import {
 } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useSessionViewPanelContext } from '../context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 /**
  * Tab displayed in the SessionView preview panel, shows alerts related to the session.
@@ -37,18 +33,6 @@ export const AlertsTab = memo(() => {
     isFetching: isFetchingAlerts,
     hasNextPage: hasNextPageAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
-
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
-  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file
   const alerts = useMemo(() => {
@@ -65,19 +49,19 @@ export const AlertsTab = memo(() => {
 
   const { openPreviewPanel, openLeftPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
-    (evtId?: string, onClose?: () => void) => {
+    (alertId: string, alertIndex: string) => {
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
         params: {
-          id: evtId,
-          indexName: alertsIndex,
+          id: alertId,
+          indexName: alertIndex,
           scopeId,
           banner: ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });
     },
-    [openPreviewPanel, scopeId, alertsIndex]
+    [openPreviewPanel, scopeId]
   );
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file

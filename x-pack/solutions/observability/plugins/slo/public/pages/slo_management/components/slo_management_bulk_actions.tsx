@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
-import React from 'react';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import React, { useState } from 'react';
 import { useActionModal } from '../../../context/action_modal';
 
-export function SloManagementBulkActions({
-  items,
-  setSelectedItems,
-}: {
+interface Props {
   items: SLODefinitionResponse[];
-  setSelectedItems: Function;
-}) {
+  setSelectedItems: (items: SLODefinitionResponse[]) => void;
+}
+
+export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
   const { triggerAction } = useActionModal();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const popoverId = useGeneratedHtmlId();
+  const [isOpen, setIsOpen] = useState(false);
 
   const resetSelectedItems = () => {
     setSelectedItems([]);
-  };
-
-  const SELECTED_SLOS = (count: number) => {
-    return i18n.translate('xpack.slo.sloManagementTable.selectedSLOsButton', {
-      values: { count },
-      defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
-    });
   };
 
   const panels = [
@@ -43,28 +42,42 @@ export function SloManagementBulkActions({
             triggerAction({ items, type: 'bulk_delete', onConfirm: () => resetSelectedItems() });
             setIsOpen(false);
           },
+          icon: 'trash',
           name: i18n.translate(
             'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
-            {
-              defaultMessage: 'Delete',
-            }
+            { defaultMessage: 'Delete' }
+          ),
+        },
+        {
+          'data-test-subj': 'sloSloManagementTableBulkPurgeInstancesButton',
+          icon: 'broom',
+          onClick: () => {
+            triggerAction({
+              items,
+              type: 'purge_instances',
+              onConfirm: () => resetSelectedItems(),
+            });
+            setIsOpen(false);
+          },
+          name: i18n.translate(
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeInstancesButtonLabel',
+            { defaultMessage: 'Purge stale instances' }
           ),
         },
         {
           'data-test-subj': 'sloSloManagementTableBulkPurgeButton',
+          icon: 'logstashOutput',
           onClick: () => {
             triggerAction({
               items,
-              type: 'bulk_purge',
+              type: 'bulk_purge_rollup',
               onConfirm: () => resetSelectedItems(),
             });
             setIsOpen(false);
           },
           name: i18n.translate(
             'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeButtonLabel',
-            {
-              defaultMessage: 'Purge Rollup Data',
-            }
+            { defaultMessage: 'Purge rollup data' }
           ),
         },
       ],
@@ -73,16 +86,23 @@ export function SloManagementBulkActions({
 
   return (
     <EuiPopover
-      id={`popover-slo-management-bulk-actions`}
+      id={popoverId}
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
           data-test-subj="sloManagementTableBulkMenuButton"
-          css={{ blockSize: '0px', marginBottom: '5px' }}
+          css={{
+            blockSize: '16px',
+            marginBottom: '5px',
+          }}
           size="xs"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((curr) => !curr)}
         >
-          {SELECTED_SLOS(items.length)} <EuiIcon type="arrowDown" size="s" />
+          {i18n.translate('xpack.slo.sloManagementTable.selectedSLOsButton', {
+            defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
+            values: { count: items.length },
+          })}{' '}
+          <EuiIcon type="arrowDown" size="s" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

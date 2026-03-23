@@ -51,7 +51,7 @@ describe('telemetry', () => {
       reportAttackDiscoveryGenerationFailure({
         apiConfig: mockApiConfig,
         errorMessage: 'Epic fail!',
-        schedule: { id: 'fake-id-1', interval: '21d' },
+        scheduleInfo: { id: 'fake-id-1', interval: '21d', actions: ['.slack', '.jest'] },
         telemetry: mockTelemetry,
       });
 
@@ -59,10 +59,7 @@ describe('telemetry', () => {
         actionTypeId: '.gen-ai',
         errorMessage: 'Epic fail!',
         model: 'gpt-4',
-        schedule: {
-          id: 'fake-id-1',
-          interval: '21d',
-        },
+        scheduleInfo: { id: 'fake-id-1', interval: '21d', actions: ['.slack', '.jest'] },
       });
     });
   });
@@ -95,10 +92,10 @@ describe('telemetry', () => {
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
         actionTypeId: '.gen-ai',
         alertsContextCount: 2,
-        alertsCount: 8,
+        alertsCount: 18,
         configuredAlertsCount: 10,
         dateRangeDuration: 24,
-        discoveriesGenerated: 1,
+        discoveriesGenerated: 2,
         durationMs: 123000,
         hasFilter: false,
         isDefaultDateRange: true,
@@ -114,7 +111,7 @@ describe('telemetry', () => {
         durationMs: 456000,
         end: 'now',
         hasFilter: false,
-        schedule: { id: 'fake-id-2', interval: '32m' },
+        scheduleInfo: { id: 'fake-id-2', interval: '32m', actions: ['.slack', '.jest'] },
         size: 10,
         start: 'now-24h',
         telemetry: mockTelemetry,
@@ -123,18 +120,15 @@ describe('telemetry', () => {
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
         actionTypeId: '.gen-ai',
         alertsContextCount: 2,
-        alertsCount: 8,
+        alertsCount: 18,
         configuredAlertsCount: 10,
         dateRangeDuration: 24,
-        discoveriesGenerated: 1,
+        discoveriesGenerated: 2,
         durationMs: 456000,
         hasFilter: false,
         isDefaultDateRange: true,
         model: 'gpt-4',
-        schedule: {
-          id: 'fake-id-2',
-          interval: '32m',
-        },
+        scheduleInfo: { id: 'fake-id-2', interval: '32m', actions: ['.slack', '.jest'] },
       });
     });
   });

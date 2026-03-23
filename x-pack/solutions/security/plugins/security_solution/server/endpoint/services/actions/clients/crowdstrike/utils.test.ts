@@ -17,7 +17,7 @@ describe('mapParametersToCrowdStrikeArguments', () => {
     const result = mapParametersToCrowdStrikeArguments('runscript', {
       commandLine: 'echo Hello World',
     });
-    expect(result).toBe('runscript --CommandLine=```echo Hello World```');
+    expect(result).toBe(`runscript --CommandLine='echo Hello World'`);
   });
 
   it('leaves parameter already wrapped in triple backticks unchanged', () => {
@@ -40,7 +40,7 @@ describe('mapParametersToCrowdStrikeArguments', () => {
       cloudFile: 'file.txt',
     });
     expect(result).toBe(
-      'runscript --Raw=```echo Hello``` --CommandLine=```echo Hello World``` --HostPath=/home/user --CloudFile=file.txt'
+      "runscript --Raw=```echo Hello``` --CommandLine='echo Hello World' --HostPath=/home/user --CloudFile=file.txt"
     );
   });
 

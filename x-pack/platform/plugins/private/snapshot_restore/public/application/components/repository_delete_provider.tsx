@@ -7,9 +7,9 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
-import { Repository } from '../../../common/types';
+import type { Repository } from '../../../common/types';
 import { useServices, useToastNotifications } from '../app_context';
 import { deleteRepositories } from '../services/http';
 
@@ -31,6 +31,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
   const [repositoryNames, setRepositoryNames] = useState<Array<Repository['name']>>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteRepositoryPrompt: DeleteRepository = (names, onSuccess = () => undefined) => {
     if (!names || !names.length) {
@@ -110,6 +111,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={
           isSingle ? (
             <FormattedMessage
@@ -125,6 +127,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
             />
           )
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={deleteRepository}
         cancelButtonText={

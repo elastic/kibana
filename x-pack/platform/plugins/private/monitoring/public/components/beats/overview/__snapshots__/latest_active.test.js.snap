@@ -45,6 +45,7 @@ exports[`Latest Active that latest active component renders normally 1`] = `
       token="euiBasicTable.noItemsMessage"
     />
   }
+  tableCaption="Latest active beats"
   tableLayout="fixed"
 />
 `;

@@ -9,11 +9,13 @@
 
 import React from 'react';
 import { partition } from 'lodash';
+import { Subject } from 'rxjs';
 import { queryToAst } from '@kbn/data-plugin/common';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
   defaultAnnotationColor,
@@ -51,6 +53,7 @@ export function getEventAnnotationService(
   contentManagement: ContentManagementPublicStart
 ): EventAnnotationServiceType {
   const client = contentManagement.client;
+  const annotationGroupUpdated$ = new Subject<string>();
 
   const mapSavedObjectToGroupConfig = (
     savedObject: EventAnnotationGroupSavedObject
@@ -171,7 +174,7 @@ export function getEventAnnotationService(
   const extractDataViewInformation = (group: EventAnnotationGroupConfig) => {
     let { dataViewSpec = null } = group;
 
-    let references: SavedObjectReference[];
+    let references: Reference[];
 
     if (dataViewSpec) {
       if (!dataViewSpec.id)
@@ -200,7 +203,7 @@ export function getEventAnnotationService(
     group: EventAnnotationGroupConfig
   ): {
     attributes: EventAnnotationGroupSavedObjectAttributes;
-    references: SavedObjectReference[];
+    references: Reference[];
   } => {
     const { references, dataViewSpec } = extractDataViewInformation(group);
     const { title, description, tags, ignoreGlobalFilters, annotations } = group;
@@ -261,6 +264,8 @@ export function getEventAnnotationService(
         references,
       },
     });
+
+    annotationGroupUpdated$.next(annotationGroupId);
   };
 
   const checkHasAnnotationGroups = async (): Promise<boolean> => {
@@ -278,6 +283,7 @@ export function getEventAnnotationService(
   };
 
   return {
+    annotationGroupUpdated$: annotationGroupUpdated$.asObservable(),
     loadAnnotationGroup,
     groupExistsWithTitle,
     updateAnnotationGroup,
@@ -311,6 +317,7 @@ export function getEventAnnotationService(
                 function: 'indexPatternLoad',
                 arguments: {
                   id: [indexPatternId],
+                  includeFields: [false],
                 },
               },
             ],

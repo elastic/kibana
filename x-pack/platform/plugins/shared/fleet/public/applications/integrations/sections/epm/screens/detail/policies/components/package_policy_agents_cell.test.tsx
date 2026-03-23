@@ -9,22 +9,23 @@ import React from 'react';
 
 import { act, fireEvent } from '@testing-library/react';
 
+import { useAuthz } from '../../../../../../../../hooks/use_authz';
+
+import { useMultipleAgentPolicies } from '../../../../../../../../hooks/use_multiple_agent_policies';
+
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
 import type { AgentPolicy } from '../../../../../../types';
-import { useAuthz, useMultipleAgentPolicies } from '../../../../../../hooks';
 
 import { PackagePolicyAgentsCell } from './package_policy_agents_cell';
 
-jest.mock('../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../hooks'),
-  useAuthz: jest.fn(),
-  useMultipleAgentPolicies: jest.fn(),
-  useConfirmForceInstall: jest.fn(),
-}));
+jest.mock('../../../../../../../../hooks/use_multiple_agent_policies');
+jest.mock('../../../../../../../../hooks/use_authz');
 
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies
 >;
+const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;
+
 function renderCell({
   agentPolicies = [] as AgentPolicy[],
   onAddAgent = () => {},
@@ -43,10 +44,13 @@ function renderCell({
 
 describe('PackagePolicyAgentsCell', () => {
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    mockedUseAuthz.mockReturnValue({
       fleet: {
         addAgents: true,
         addFleetServers: true,
+      },
+      integrations: {
+        writeIntegrationPolicies: true,
       },
     } as any);
   });
@@ -57,7 +61,9 @@ describe('PackagePolicyAgentsCell', () => {
 
   describe('when multiple agent policies is disabled', () => {
     beforeEach(() => {
-      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+      useMultipleAgentPoliciesMock.mockImplementation(() => {
+        return { canUseMultipleAgentPolicies: false };
+      });
     });
 
     test('it should display add agent button if count is 0', async () => {
@@ -68,7 +74,7 @@ describe('PackagePolicyAgentsCell', () => {
           } as AgentPolicy,
         ],
       });
-      utils.debug();
+
       await act(async () => {
         expect(utils.queryByText('Add agent')).toBeInTheDocument();
       });
@@ -89,10 +95,27 @@ describe('PackagePolicyAgentsCell', () => {
       });
     });
 
+    test('it should display only count policy is managed', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            agents: 0,
+            is_managed: true,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(utils.queryByText('0')).toBeInTheDocument();
+      });
+    });
+
     test('it should not display help popover if count is > 0 and hasHelpPopover=true', async () => {
       const utils = renderCell({
         agentPolicies: [
           {
+            id: 'policy-1',
             name: 'test Policy 1',
             agents: 999,
           } as AgentPolicy,
@@ -130,13 +153,14 @@ describe('PackagePolicyAgentsCell', () => {
       const utils = renderCell({
         agentPolicies: [
           {
+            id: 'policy-1',
             name: 'test Policy 1',
             agents: 999,
             is_managed: true,
           } as AgentPolicy,
         ],
       });
-      utils.debug();
+
       await act(async () => {
         expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
         expect(utils.queryByTestId('LinkedAgentCountLink')).toBeInTheDocument();
@@ -145,15 +169,19 @@ describe('PackagePolicyAgentsCell', () => {
     });
 
     test('Add agent button should be disabled if canAddAgents is false', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      mockedUseAuthz.mockReturnValue({
         fleet: {
           addAgents: false,
+        },
+        integrations: {
+          writeIntegrationPolicies: true,
         },
       } as any);
 
       const utils = renderCell({
         agentPolicies: [
           {
+            id: 'policy-1',
             name: 'test Policy 1',
           } as AgentPolicy,
         ],
@@ -166,28 +194,43 @@ describe('PackagePolicyAgentsCell', () => {
 
   describe('when multiple agent policies is enabled', () => {
     beforeEach(() => {
-      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+      useMultipleAgentPoliciesMock.mockImplementation(() => {
+        return { canUseMultipleAgentPolicies: true };
+      });
     });
 
-    test('it should display agent count sum and popover if agent count > 0', async () => {
-      jest.mocked(useAuthz).mockReturnValue({
-        fleet: {
-          addAgents: false,
-        },
-      } as any);
-
+    test('it should display only count policy is managed', async () => {
       const utils = renderCell({
         agentPolicies: [
           {
             name: 'test Policy 1',
+            agents: 0,
+            is_managed: true,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(utils.queryByText('0')).toBeInTheDocument();
+      });
+    });
+
+    test('it should display agent count sum and popover if agent count > 0', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            id: 'policy-1',
+            name: 'test Policy 1',
             agents: 100,
           } as AgentPolicy,
           {
+            id: 'policy-2',
             name: 'test Policy 2',
             agents: 200,
           } as AgentPolicy,
         ],
       });
+
       await act(async () => {
         expect(utils.queryByText('300')).toBeInTheDocument();
         expect(utils.queryByText('Add agent')).not.toBeInTheDocument();

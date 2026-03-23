@@ -9,11 +9,17 @@ import type { ReactNode } from 'react';
 import type { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { MB } from '@kbn/file-upload-common/src/constants';
+import { NdjsonReader } from '@kbn/file-upload-common';
+import type {
+  CreateDocsResponse,
+  ImportDoc,
+  ImportFailure,
+  ImportResponse,
+  ImportResults,
+} from '@kbn/file-upload-common';
 import type { GeoFileImporter, GeoFilePreview } from './types';
-import type { CreateDocsResponse, ImportResults } from '../types';
 import { Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import { MB } from '../../../common/constants';
-import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { createChunks } from './create_chunks';
 import { callImportRoute } from '../routes';
@@ -30,20 +36,33 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   private _blockSizeInBytes = 0;
   private _totalFeaturesRead = 0;
   private _totalFeaturesImported = 0;
+  private _totalFeaturesSent = 0;
   private _geometryTypesMap = new Map<string, boolean>();
   private _invalidFeatures: ImportFailure[] = [];
+  private _importFailures: ImportFailure[] = [];
   private _geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE =
     ES_FIELD_TYPES.GEO_SHAPE;
   private _smallChunks = false;
+  protected _reader: NdjsonReader;
 
   constructor(file: File) {
     super();
 
     this._file = file;
+    this._reader = new NdjsonReader();
   }
 
   public destroy() {
     this._isActive = false;
+  }
+
+  public getCurrentImportStats(): { docCount: number; failures: ImportFailure[] } {
+    const allFailures = [...this._invalidFeatures, ...this._importFailures];
+    const docCount = this._totalFeaturesSent + allFailures.length;
+    return {
+      docCount,
+      failures: allFailures,
+    };
   }
 
   public canPreview() {
@@ -94,6 +113,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
     }
 
+    this._importFailures = [];
+    this._totalFeaturesImported = 0;
+    this._totalFeaturesSent = 0;
+
     const maxChunkCharCount = this._smallChunks ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
@@ -107,6 +130,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
         return {
           success: false,
           failures,
+          docCount: this._totalFeaturesSent,
         };
       }
 
@@ -187,6 +211,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
       while (resp.success === false && retries > 0) {
         try {
+          if (retries === IMPORT_RETRIES) {
+            this._totalFeaturesSent += chunks[i].length;
+          }
+
           resp = await callImportRoute({
             index,
             ingestPipelineId: pipelineId,
@@ -197,6 +225,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
             return {
               success: false,
               failures,
+              docCount: this._totalFeaturesSent,
             };
           }
 
@@ -222,6 +251,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
           failure.item += this._totalFeaturesImported;
         }
         failures.push(...resp.failures);
+        this._importFailures.push(...resp.failures);
       }
 
       if (resp.success) {

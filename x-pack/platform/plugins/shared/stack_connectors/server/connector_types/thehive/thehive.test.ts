@@ -7,17 +7,17 @@
 
 import { TheHiveConnector } from './thehive';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { THEHIVE_CONNECTOR_ID } from '../../../common/thehive/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  CONNECTOR_ID,
   TheHiveIncidentResponseSchema,
   TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   PushToServiceIncidentSchema,
-} from '../../../common/thehive/schema';
-import type { ExecutorSubActionCreateAlertParams, Incident } from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
+import type { ExecutorSubActionCreateAlertParams, Incident } from '@kbn/connector-schemas/thehive';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const mockTime = new Date('2024-04-03T09:10:30.000');
@@ -28,7 +28,7 @@ describe('TheHiveConnector', () => {
   const connector = new TheHiveConnector(
     {
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: { url: 'https://example.com', organisation: null },
       secrets: { apiKey: 'test123' },
       logger,
@@ -390,7 +390,7 @@ describe('TheHiveConnector', () => {
         papLabel: 'AMBER',
         follow: true,
         customFields: [],
-        observableCount: 0,
+        observableCount: 1,
         status: 'New',
         stage: 'New',
         extraData: {},
@@ -413,9 +413,33 @@ describe('TheHiveConnector', () => {
       source: 'alert source',
       sourceRef: 'test123',
       severity: 1,
+      isRuleSeverity: false,
       tlp: 2,
       tags: ['tag1', 'tag2'],
+      body: JSON.stringify(
+        {
+          observables: [
+            {
+              dataType: 'url',
+              data: 'http://example.com',
+              tags: ['url'],
+            },
+          ],
+          procedures: [
+            {
+              patternId: 'T1132',
+              occurDate: 1640000000000,
+              tactic: 'command-and-control',
+            },
+          ],
+        },
+        null,
+        2
+      ),
     };
+
+    const { body, isRuleSeverity, ...restOfAlert } = alert;
+    const expectedAlertBody = { ...JSON.parse(body || '{}'), ...restOfAlert };
 
     it('TheHive API call is successful with correct parameters', async () => {
       await connector.createAlert(alert, connectorUsageCollector);
@@ -425,7 +449,7 @@ describe('TheHiveConnector', () => {
           url: 'https://example.com/api/v1/alert',
           method: 'post',
           responseSchema: TheHiveCreateAlertResponseSchema,
-          data: alert,
+          data: expectedAlertBody,
           headers: {
             Authorization: 'Bearer test123',
             'X-Organisation': null,
@@ -439,9 +463,9 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.createAlert(alert, connectorUsageCollector)).rejects.toThrow(
-        'API Error'
-      );
+      await expect(
+        connector.createAlert(expectedAlertBody, connectorUsageCollector)
+      ).rejects.toThrow('API Error');
     });
   });
 });

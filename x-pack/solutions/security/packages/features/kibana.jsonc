@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/security-solution-features",
   "owner": [
-    "@elastic/security-threat-hunting-explore"
+    "@elastic/security-threat-hunting-investigations"
   ],
   "group": "security",
   "visibility": "private"

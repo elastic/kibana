@@ -11,12 +11,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { PluginInitializer } from '@kbn/core-plugins-browser';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
+import type { ConfigType } from './config';
 import { RoleSwitcher } from './role_switcher';
 
 export interface PluginSetupDependencies {
@@ -32,7 +33,7 @@ export const plugin: PluginInitializer<
   void,
   PluginSetupDependencies,
   PluginStartDependencies
-> = () => ({
+> = (initializerContext: PluginInitializerContext<ConfigType>) => ({
   setup(coreSetup, plugins) {
     // Register Mock IDP login page
     coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
@@ -52,7 +53,7 @@ export const plugin: PluginInitializer<
           <KibanaThemeProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <LoginPage />
+                <LoginPage config={initializerContext.config.get()} />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
@@ -67,19 +68,11 @@ export const plugin: PluginInitializer<
     // Register role switcher dropdown menu in the top right navigation of the Kibana UI
     coreStart.chrome.navControls.registerRight({
       order: 4000 + 1, // Make sure it comes after the user menu
-      mount: (element: HTMLElement) => {
-        ReactDOM.render(
-          <KibanaThemeProvider {...coreStart}>
-            <KibanaContextProvider services={coreStart}>
-              <I18nProvider>
-                <RoleSwitcher />
-              </I18nProvider>
-            </KibanaContextProvider>
-          </KibanaThemeProvider>,
-          element
-        );
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
+      content: (
+        <KibanaContextProvider services={coreStart}>
+          <RoleSwitcher />
+        </KibanaContextProvider>
+      ),
     });
   },
   stop() {},

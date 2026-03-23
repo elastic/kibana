@@ -1,3 +1,5 @@
+name: Assign issues to project by label
+
 on:
   issues:
     types: [labeled, unlabeled]
@@ -13,7 +15,6 @@ jobs:
         with:
           issue-mappings: |
             [
-              {"label": "Team:DataDiscovery", "projectNumber": 44, "columnName": "Inbox"},
               {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
               {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},
               {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"},

@@ -9,28 +9,30 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
   EuiIcon,
   EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { ONBOARDING_VIDEO_SOURCE } from '../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AddDataSourcePanel } from './components/add_data_source';
+import privilegedUserMonitoringOnboardingPageIllustration from '../../../common/images/information_light.png';
+import { useKibana } from '../../../common/lib/kibana';
 
-const VIDEO_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.videoTitle',
-  {
-    defaultMessage: 'Onboarding Video',
-  }
-);
+interface PrivilegedUserMonitoringOnboardingPanelProps {
+  onComplete: (userCount: number) => void;
+}
 
-export const PrivilegedUserMonitoringOnboardingPanel = () => {
+export const PrivilegedUserMonitoringOnboardingPanel = ({
+  onComplete,
+}: PrivilegedUserMonitoringOnboardingPanelProps) => {
+  const { docLinks } = useKibana().services;
+
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj="privilegedUserMonitoringOnboardingPanel">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
         <EuiFlexGroup
           direction="row"
@@ -38,28 +40,26 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
           gutterSize="xl"
           alignItems="center"
         >
-          <EuiFlexItem grow={1} paddingSize="xl">
+          <EuiFlexItem grow={4}>
             <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="subdued">
               <EuiFlexGroup justifyContent="spaceBetween" direction="column">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle"
-                        defaultMessage="Privileged user monitoring"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
+                <EuiFlexGroup gutterSize="m" alignItems="baseline">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle"
+                          defaultMessage="Privileged user monitoring"
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m">
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageDescription"
-                      defaultMessage="The Privileged user monitoring provides visibility into privileged user
-                    activity, helping security teams analyze account usage, track access events, and
-                    spot potential risks. By continuously monitoring high-risk accounts, the
-                    dashboard enables early detection of potential threats, such as unauthorized
-                    access or lateral movement, before they escalate."
+                      defaultMessage="Gain visibility into privileged user activity to analyze account usage, track access events, and spot potential risks. By continuously monitoring high-risk users and identifying anomalous privileged behaviors, you can detect potential threats, such as unauthorized access or lateral movement, before they escalate."
                     />
                   </EuiText>
                 </EuiFlexItem>
@@ -77,10 +77,11 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
                         defaultMessage="Want to learn more?"
                       />
                       <EuiLink
-                        css={{ color: '#FF007F' }} // TODO DELETE THIS WHEN THE HREF LINK IS READY
                         external={true}
                         data-test-subj="learnMoreLink"
-                        href="??????" // TODO Add Link to docs
+                        href={
+                          docLinks?.links.securitySolution.entityAnalytics.privilegedUserMonitoring
+                        }
                         target="_blank"
                       >
                         <FormattedMessage
@@ -94,25 +95,20 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <iframe
-              css={css`
-                height: auto;
-                width: 100%;
-                aspect-ratio: 16 / 9;
-                max-width: 480px;
-              `}
-              className="eui-alignMiddle"
-              style={{ border: '8px solid #FF007F' }} // TODO DELETE THIS LINE WHEN THE VIDEO IS READY
-              referrerPolicy="no-referrer"
-              sandbox="allow-scripts allow-same-origin"
-              src={ONBOARDING_VIDEO_SOURCE}
-              title={VIDEO_TITLE}
+          <EuiFlexItem grow={3}>
+            <EuiImage
+              src={privilegedUserMonitoringOnboardingPageIllustration}
+              hasShadow={false}
+              alt={i18n.translate(
+                'xpack.securitySolution.privilegedUserMonitoring.onboarding.dashboardIllustrationAltText',
+                { defaultMessage: 'Privileged user monitoring dashboard illustration' }
+              )}
+              size="l"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <AddDataSourcePanel />
+      <AddDataSourcePanel onComplete={onComplete} />
     </EuiPanel>
   );
 };

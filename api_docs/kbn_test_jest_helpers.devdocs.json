@@ -36,6 +36,8 @@
           " implements Storage"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
             "label": "length",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,6 +65,8 @@
               "(i: number) => string"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,6 +81,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "lineNumber": 24,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -93,6 +101,8 @@
               "(key: string) => string | null"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -107,6 +117,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "lineNumber": 28,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -125,6 +137,8 @@
               "(key: string, value: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -139,6 +153,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "lineNumber": 38,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -154,6 +170,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "lineNumber": 38,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -172,6 +190,8 @@
               "(key: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -186,6 +206,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "lineNumber": 53,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -204,6 +226,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -220,6 +244,8 @@
               "(sizeLimit: number) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -234,6 +260,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "lineNumber": 76,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -252,6 +280,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -268,6 +298,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -291,6 +323,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -308,6 +342,8 @@
           "(time?: number) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -322,6 +358,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -334,11 +372,11 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.findTestSubject",
         "type": "Function",
-        "tags": [],
-        "label": "findTestSubject",
-        "description": [
-          "\nFind node which matches a specific test subject selector. Returns ReactWrappers around DOM element,\nhttps://github.com/airbnb/enzyme/tree/master/docs/api/ReactWrapper.\nCommon use cases include calling simulate or getDOMNode on the returned ReactWrapper.\n\nThe ~= matcher looks for the value in space-separated list, allowing support for multiple data-test-subj\nvalues on a single element. See https://www.w3.org/TR/selectors-3/#attribute-selectors for more\ninfo on the other possible matchers.\n"
+        "tags": [
+          "deprecated"
         ],
+        "label": "findTestSubject",
+        "description": [],
         "signature": [
           "<T = string>(reactWrapper: ",
           "ReactWrapper",
@@ -349,8 +387,72 @@
           ", {}, React.Component<{}, {}, any>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
-        "deprecated": false,
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/index.ts"
+          },
+          {
+            "plugin": "@kbn/security-ui-components",
+            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "@kbn/security-ui-components",
+            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "@kbn/security-ui-components",
+            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -366,6 +468,8 @@
               "<{}, {}, React.Component<{}, {}, any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -383,6 +487,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -400,6 +506,8 @@
               "Matcher"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -421,6 +529,8 @@
           "() => BroadcastChannel[]"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -440,6 +550,8 @@
           "(range?: { min: number; max: number; }) => number"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -451,6 +563,8 @@
             "label": "range",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
+            "lineNumber": 15,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -462,6 +576,8 @@
                 "label": "min",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
+                "lineNumber": 15,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -473,6 +589,8 @@
                 "label": "max",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
+                "lineNumber": 15,
+                "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -493,6 +611,8 @@
           "(options?: {}) => string"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -507,6 +627,8 @@
               "{}"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
+            "lineNumber": 18,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -520,18 +642,20 @@
         "id": "def-common.mountHook",
         "type": "Function",
         "tags": [
+          "deprecated",
           "return"
         ],
         "label": "mountHook",
-        "description": [
-          "\nAllows for execution of hooks inside of a test component which records the\nreturned values.\n"
-        ],
+        "description": [],
         "signature": [
           "<Args extends {}, HookValue extends unknown>(body: (args: Args) => HookValue, WrapperComponent?: React.ComponentType<{ children?: React.ReactNode; }> | undefined, initialArgs?: Args) => ReactHookWrapper<Args, HookValue>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 144,
+        "columnNumber": 14,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -546,6 +670,8 @@
               "(args: Args) => HookValue"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -557,12 +683,14 @@
             "tags": [],
             "label": "WrapperComponent",
             "description": [
-              "A component that, if provided, will be wrapped\naround the test component. This can be useful to provide context values."
+              "A component that, if provided, will be wrapped"
             ],
             "signature": [
               "React.ComponentType<{ children?: React.ReactNode; }> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -578,6 +706,8 @@
               "Args"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -592,11 +722,13 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.mountWithI18nProvider",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "mountWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "(child: React.ReactElement<T>, options: (Omit<",
           "MountRendererProps",
           ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
           "ComponentType",
@@ -605,8 +737,11 @@
           "<any, any, React.Component<{}, {}, any>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 205,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -619,6 +754,8 @@
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -638,6 +775,8 @@
               "<any> | undefined; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -651,22 +790,41 @@
         "id": "def-common.mountWithIntl",
         "type": "Function",
         "tags": [
+          "deprecated",
           "return"
         ],
         "label": "mountWithIntl",
-        "description": [
-          "\n Creates the wrapper instance using mount with provided intl object into context\n"
-        ],
+        "description": [],
         "signature": [
-          "(node: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options: ",
+          "(node: React.ReactElement<any>, options: ",
           "MountRendererProps",
           " | undefined) => ",
           "ReactWrapper",
           "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 73,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -681,6 +839,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 82,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -699,6 +859,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 82,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -720,6 +882,8 @@
           "() => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -736,11 +900,13 @@
           "\nWhen using @kbn/i18n `injectI18n` on components, props.intl is required."
         ],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => React.ReactElement<T & { intl: ",
+          "(node: React.ReactElement<T>) => React.ReactElement<T & { intl: ",
           "IntlShape",
-          "; }, string | React.JSXElementConstructor<any>>"
+          "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -755,6 +921,8 @@
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 33,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -767,11 +935,12 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.registerTestBed",
         "type": "Function",
-        "tags": [],
-        "label": "registerTestBed",
-        "description": [
-          "\nRegister a new Testbed to test a React Component.\n"
+        "tags": [
+          "deprecated",
+          "testing-library"
         ],
+        "label": "registerTestBed",
+        "description": [],
         "signature": [
           "(Component: React.ComponentType<P>, config: ",
           {
@@ -792,8 +961,48 @@
           "<T, Partial<P>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
-        "deprecated": false,
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "reporting",
+            "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
+          },
+          {
+            "plugin": "dataViewEditor",
+            "path": "src/platform/plugins/shared/data_view_editor/public/test_utils/test_utils.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor.helpers.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor.helpers.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_content.helpers.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_content.helpers.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_preview.helpers.ts"
+          },
+          {
+            "plugin": "dataViewFieldEditor",
+            "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_preview.helpers.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -808,6 +1017,8 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -832,6 +1043,8 @@
               "<P>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -867,6 +1080,8 @@
           "<T, Partial<P>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -881,6 +1096,8 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -903,6 +1120,8 @@
               "<P> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -946,6 +1165,8 @@
           "<T, Partial<P>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -960,6 +1181,8 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -990,9 +1213,60 @@
               "<P> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-common.renderWithEuiTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "renderWithEuiTheme",
+        "description": [],
+        "signature": [
+          "(ui: React.ReactNode, options?: Omit<",
+          "RenderOptions",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>, \"queries\"> | undefined) => ",
+          "RenderResult",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.renderWithEuiTheme.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "[ui: React.ReactNode, options?: Omit<",
+              "RenderOptions",
+              "<typeof ",
+              "node_modules/@testing-library/dom/types/queries",
+              ", HTMLElement, HTMLElement>, \"queries\"> | undefined]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+            "lineNumber": 31,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1017,6 +1291,8 @@
           ", HTMLElement, HTMLElement>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1035,6 +1311,8 @@
               ", HTMLElement, HTMLElement>, \"queries\"> | undefined]"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+            "lineNumber": 25,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1047,19 +1325,41 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.renderWithI18nProvider",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "renderWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "(child: React.ReactElement<T>, options: (Omit<",
           "MountRendererProps",
           ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
           "ComponentType",
           "<any> | undefined; }) | undefined) => cheerio.Cheerio"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 218,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1072,6 +1372,8 @@
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 222,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1091,6 +1393,8 @@
               "<any> | undefined; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1104,18 +1408,20 @@
         "id": "def-common.renderWithIntl",
         "type": "Function",
         "tags": [
+          "deprecated",
           "return"
         ],
         "label": "renderWithIntl",
-        "description": [
-          "\n Creates the wrapper instance using render with provided intl object into context\n"
-        ],
+        "description": [],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: any) => cheerio.Cheerio"
+          "(node: React.ReactElement<T>, options: any) => cheerio.Cheerio"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1130,6 +1436,8 @@
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 102,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1147,6 +1455,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 102,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1155,6 +1465,55 @@
         "returnComment": [
           "The wrapper instance around the rendered output with intl object in context"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-common.renderWithKibanaRenderContext",
+        "type": "Function",
+        "tags": [],
+        "label": "renderWithKibanaRenderContext",
+        "description": [],
+        "signature": [
+          "(ui: React.ReactNode, options?: Omit<",
+          "RenderOptions",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>, \"queries\"> | undefined) => ",
+          "RenderResult",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-common.renderWithKibanaRenderContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "[ui: React.ReactNode, options?: Omit<",
+              "RenderOptions",
+              "<typeof ",
+              "node_modules/@testing-library/dom/types/queries",
+              ", HTMLElement, HTMLElement>, \"queries\"> | undefined]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+            "lineNumber": 15,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1168,6 +1527,8 @@
           "(width: number, height: number) => { mockRestore: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1182,6 +1543,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 10,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1197,6 +1560,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 10,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1216,6 +1581,8 @@
           "(width: number, height: number) => { mockRestore: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1230,6 +1597,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 62,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1245,6 +1614,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 62,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1264,6 +1635,8 @@
           "(width: number, height: number, x?: number, y?: number) => { mockRestore: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1278,6 +1651,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1293,6 +1668,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1308,6 +1685,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1323,6 +1702,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1342,6 +1723,8 @@
           "(width: number) => { mockRestore: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1356,6 +1739,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "lineNumber": 48,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1368,11 +1753,13 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.shallowWithI18nProvider",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "shallowWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "(child: React.ReactElement<T>, options: (Omit<",
           "ShallowRendererProps",
           ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
           "ComponentType",
@@ -1381,8 +1768,11 @@
           "<Readonly<{}>, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 192,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1395,6 +1785,8 @@
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1414,6 +1806,8 @@
               "<any> | undefined; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1427,22 +1821,45 @@
         "id": "def-common.shallowWithIntl",
         "type": "Function",
         "tags": [
+          "deprecated",
           "return"
         ],
         "label": "shallowWithIntl",
-        "description": [
-          "\n Creates the wrapper instance using shallow with provided intl object into context\n"
-        ],
+        "description": [],
         "signature": [
-          "(node: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options: (",
+          "(node: React.ReactElement<any>, options: (",
           "ShallowRendererProps",
-          " & { wrappingComponent?: React.ComponentType<{}> | undefined; }) | undefined) => ",
+          " & { wrappingComponent?: React.ComponentType | undefined; }) | undefined) => ",
           "ShallowWrapper",
           "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
-        "deprecated": false,
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/lib/helper/enzyme_helpers.tsx"
+          },
+          {
+            "plugin": "telemetry",
+            "path": "src/platform/plugins/shared/telemetry/public/render_welcome_telemetry_notice.test.ts"
+          },
+          {
+            "plugin": "telemetry",
+            "path": "src/platform/plugins/shared/telemetry/public/render_welcome_telemetry_notice.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
@@ -1457,6 +1874,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1476,6 +1895,8 @@
               " & { wrappingComponent?: React.ComponentType<{}> | undefined; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1499,6 +1920,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1516,6 +1939,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_web_worker.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1532,9 +1957,11 @@
         "signature": [
           "(initialEntries?: ",
           "LocationDescriptor",
-          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => React.JSX.Element"
+          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType) => (props: any) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1550,6 +1977,8 @@
               "<unknown>[]"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "lineNumber": 37,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1565,6 +1994,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "lineNumber": 37,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1588,6 +2019,8 @@
           "<unknown>[], onRouter: (router: any) => void) => (WrappedComponent: React.ComponentType<T>) => (props: any) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1605,6 +2038,8 @@
               "<unknown>[]"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1620,6 +2055,8 @@
               "(router: any) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1639,6 +2076,8 @@
           "(store: any) => (WrappedComponent: React.ComponentType<T>) => (props: any) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/redux_helpers.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1653,6 +2092,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/redux_helpers.tsx",
+            "lineNumber": 14,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1683,6 +2124,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 146,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1697,6 +2140,8 @@
               "true"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1711,6 +2156,8 @@
         "label": "EuiTableMetaData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1731,6 +2178,8 @@
               "; value: string; }[]; }[]"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,6 +2196,8 @@
               "string[][]"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1771,6 +2222,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1788,6 +2241,8 @@
               "<any, {}, React.Component<{}, {}, any>>"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1804,6 +2259,8 @@
               "(testSubject: T, count?: number | undefined) => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1820,6 +2277,8 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+                "lineNumber": 42,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1837,6 +2296,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+                "lineNumber": 42,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1860,6 +2321,8 @@
               "ReactWrapper"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1876,6 +2339,8 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1892,6 +2357,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1912,6 +2379,8 @@
               "(updatedProps: any) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1928,6 +2397,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+                "lineNumber": 64,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1952,6 +2423,8 @@
               " | undefined) => string[]; }"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1974,6 +2447,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1988,6 +2463,8 @@
               "{ navigateTo: (url: string) => void; }"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2014,6 +2491,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 152,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2028,6 +2507,8 @@
               "false | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2056,6 +2537,8 @@
           "<T>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2071,6 +2554,8 @@
               "P | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2104,6 +2589,8 @@
           "<T>>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2119,6 +2606,8 @@
               "P | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2144,6 +2633,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2159,6 +2650,8 @@
               "P | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2175,6 +2668,8 @@
         "label": "reactRouterMock",
         "description": [],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2186,6 +2681,8 @@
             "label": "history",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2200,6 +2697,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "lineNumber": 85,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -2218,6 +2717,8 @@
                   "<unknown>) => string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "lineNumber": 86,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2233,6 +2734,8 @@
                       "<unknown>"
                     ],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 86,
+                    "columnNumber": 18,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -2248,6 +2751,8 @@
                 "label": "location",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "lineNumber": 87,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2259,6 +2764,8 @@
                     "label": "pathname",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 88,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2270,6 +2777,8 @@
                     "label": "search",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 89,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2281,6 +2790,8 @@
                     "label": "state",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 90,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2292,6 +2803,8 @@
                     "label": "hash",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 91,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2307,6 +2820,8 @@
             "label": "route",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2318,6 +2833,8 @@
                 "label": "location",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "lineNumber": 95,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2329,6 +2846,8 @@
                     "label": "pathname",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 96,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2340,6 +2859,8 @@
                     "label": "search",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 97,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2351,6 +2872,8 @@
                     "label": "state",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 98,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2362,6 +2885,8 @@
                     "label": "hash",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "lineNumber": 99,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }

@@ -111,6 +111,9 @@ export function EuiMonitoringSSPTable({
         onChange={onChange}
         columns={columns}
         loading={props.isLoading || isLoading}
+        tableCaption={i18n.translate('xpack.monitoring.euiSSPTable.tableCaption', {
+          defaultMessage: 'Monitored instances',
+        })}
       />
       {footerContent}
     </div>

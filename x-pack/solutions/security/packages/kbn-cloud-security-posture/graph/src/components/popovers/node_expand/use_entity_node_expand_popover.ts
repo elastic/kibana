@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback } from 'react';
+import { useNodeExpandPopover } from './use_node_expand_popover';
+import type { NodeProps, NodeViewModel } from '../../types';
+import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
+import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
+import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
+import {
+  emitFilterToggle,
+  isFilterActiveForScope,
+  emitEntityRelationshipToggle,
+  isEntityRelationshipExpandedForScope,
+} from '../../filters/filter_store';
+
+/**
+ * Hook to handle the entity node expand popover.
+ * This hook is used to show the popover when the user clicks on the expand button of an entity node.
+ * The popover contains the actions to show/hide the actions by entity, actions on entity, and related entities.
+ *
+ * Uses filter event bus for filter state management - emits events via emitFilterToggle().
+ * Uses entity relationship event bus for relationship state - emits events via emitEntityRelationshipToggle().
+ *
+ * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
+ * @param onOpenEventPreview - Optional callback to open event preview with full node data.
+ *                             If provided, clicking "Show entity details" calls this callback.
+ * @returns The entity node expand popover.
+ */
+export const useEntityNodeExpandPopover = (
+  scopeId: string,
+  onOpenEventPreview?: (node: NodeViewModel) => void
+) => {
+  const itemsFn = useCallback(
+    (node: NodeProps) => {
+      const docMode = getNodeDocumentMode(node.data);
+      const isSingleEntity = docMode === 'single-entity';
+      const isGroupedEntities = docMode === 'grouped-entities';
+      const isEnriched = isEntityNodeEnriched(node.data);
+
+      return getEntityExpandItems({
+        nodeId: node.id,
+        sourceNamespace: getSourceNamespaceFromNode(node.data),
+        onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
+        toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
+        shouldRender: {
+          // Entity relationships only for single-entity mode when full feature set is active
+          showEntityRelationships: isSingleEntity && onOpenEventPreview !== undefined,
+          // Filter actions only for single-entity mode
+          showActionsByEntity: isSingleEntity,
+          showActionsOnEntity: isSingleEntity,
+          showRelatedEvents: isSingleEntity,
+          // Entity details for both single and grouped, when handler available
+          showEntityDetails:
+            (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
+        },
+        isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, node.id),
+        toggleEntityRelationships: (action) =>
+          emitEntityRelationshipToggle(scopeId, node.id, action),
+        showEntityRelationshipsDisabled: !isEnriched,
+        showEntityDetailsDisabled: isSingleEntity && !isEnriched,
+      });
+    },
+    [scopeId, onOpenEventPreview]
+  );
+
+  return useNodeExpandPopover({
+    id: 'entity-node-expand-popover',
+    itemsFn,
+    testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
+  });
+};

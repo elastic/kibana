@@ -266,7 +266,6 @@ describe('When using processes action from response actions console', () => {
 
   describe('and when agent type is SentinelOne', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: true });
       setConsoleCommands([], 'sentinel_one');
 
       const processesResponse = apiMocks.responseProvider.processes();
@@ -294,10 +293,10 @@ describe('When using processes action from response actions console', () => {
             'Show all running processes' +
             'Usage' +
             'processes [--comment]' +
-            'Example' +
-            'processes --comment "get the processes"' +
             'Optional parameters' +
-            '--comment - A comment to go along with the action'
+            '--comment - A comment to go along with the action' +
+            'Example' +
+            'processes --comment "get the processes"'
         );
       });
     });
@@ -333,35 +332,6 @@ describe('When using processes action from response actions console', () => {
           'Click here to download' +
             'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
-      });
-    });
-
-    describe('and `responseActionsSentinelOneProcessesEnabled` feature flag is disabled', () => {
-      beforeEach(() => {
-        mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: false });
-        setConsoleCommands([], 'sentinel_one');
-      });
-
-      it('should not display `processes` command in console help', async () => {
-        await render();
-        consoleSelectors.openHelpPanel();
-
-        expect(renderResult.queryByTestId('test-commandList-Responseactions-processes')).toBeNull();
-      });
-
-      it('should error if user enters `process` command', async () => {
-        await render();
-        await enterConsoleCommand(renderResult, user, 'processes');
-
-        await waitFor(() => {
-          expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(
-            'Unsupported actionSupport for processes is not currently available for SentinelOne.'
-          );
-        });
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.processes).not.toHaveBeenCalled();
-        });
       });
     });
   });

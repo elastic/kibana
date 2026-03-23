@@ -56,8 +56,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
       ...sort,
       direction: sort.direction === 'asc' ? 'desc' : 'asc',
     });
-    closePopover();
-  }, [closePopover, sort, onChange]);
+  }, [sort, onChange]);
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [

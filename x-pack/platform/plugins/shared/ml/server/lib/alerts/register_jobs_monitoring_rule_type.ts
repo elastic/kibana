@@ -38,6 +38,7 @@ import {
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import { assertUserError } from './utils';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
 import type { JobMessage } from '../../../common/types/audit_message';
@@ -272,7 +273,7 @@ export function registerJobsMonitoringRuleType({
         fakeRequest,
         logger
       );
-      const executionResult = await getTestsResults(options);
+      const executionResult = await getTestsResults(options).catch(assertUserError);
 
       const unhealthyTests = executionResult.filter(({ isHealthy }) => !isHealthy);
 

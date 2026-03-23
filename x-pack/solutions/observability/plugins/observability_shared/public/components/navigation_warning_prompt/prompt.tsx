@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { useNavigationWarningPrompt } from './context';
 
 interface Props {

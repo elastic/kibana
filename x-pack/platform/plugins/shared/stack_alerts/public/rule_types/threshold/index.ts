@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateExpression } from './validation';
 import type { IndexThresholdRuleParams } from './types';
+import { getDescriptionFields } from './index_threshold_description_fields';
 
 export function getRuleType(): RuleTypeModel<IndexThresholdRuleParams> {
   return {
@@ -32,5 +33,6 @@ export function getRuleType(): RuleTypeModel<IndexThresholdRuleParams> {
       }
     ),
     requiresAppContext: false,
+    getDescriptionFields,
   };
 }

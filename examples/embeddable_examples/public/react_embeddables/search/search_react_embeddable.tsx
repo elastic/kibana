@@ -9,27 +9,27 @@
 
 import { EuiBadge, EuiStat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   fetch$,
   initializeTimeRangeManager,
   timeRangeComparators,
   useBatchedPublishingSubjects,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { getCount } from './get_count';
-import { SearchApi, Services, SearchSerializedState } from './types';
+import type { SearchApi, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
@@ -49,10 +49,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       function serializeState() {
         return {
-          rawState: {
-            ...timeRangeManager.getLatestState(),
-          },
-          // references: if this embeddable had any references - this is where we would extract them.
+          ...timeRangeManager.getLatestState(),
         };
       }
 
@@ -75,7 +72,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
            * function here before resetting. onReset can be async so to support a potential async deserialize function.
            */
 
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
         },
       });
 

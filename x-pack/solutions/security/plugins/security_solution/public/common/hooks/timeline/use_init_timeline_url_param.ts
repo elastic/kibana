@@ -29,10 +29,10 @@ export const useInitTimelineFromUrlParam = () => {
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,
-          graphEventId: initialState.graphEventId,
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
+          query: initialState.query,
         });
       }
     },
@@ -49,7 +49,7 @@ export const useInitTimelineFromUrlParam = () => {
 
       const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 
-      // Make sure we only re-initialize the timeline if there are siginificant changes to the active timeline.
+      // Make sure we only re-initialize the timeline if there are significant changes to the active timeline.
       // Without this check, we could potentially overwrite the timeline.
       if (!hasTimelineStateChanged(activeTimeline, parsedState)) {
         onInitialize(parsedState);
@@ -71,8 +71,6 @@ function hasTimelineStateChanged(
   return (
     activeTimeline &&
     newState &&
-    (activeTimeline.id !== newState.id ||
-      activeTimeline.savedSearchId !== newState.savedSearchId ||
-      activeTimeline.graphEventId !== newState.graphEventId)
+    (activeTimeline.id !== newState.id || activeTimeline.savedSearchId !== newState.savedSearchId)
   );
 }

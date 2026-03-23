@@ -8,7 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { TextField, UseField, FieldConfig } from '../../../shared_imports';
+import type { FieldConfig } from '../../../shared_imports';
+import { TextField, UseField } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
 import { useMappingsState } from '../../../mappings_state_context';
@@ -23,15 +24,22 @@ export const NameParameter: React.FC<NameParameterProps> = ({ isSemanticText }) 
   const {
     fields: { rootLevelFields, byId },
     documentFields: { fieldToAddFieldTo, fieldToEdit },
+    mappingViewFields,
   } = useMappingsState();
 
   const initialName = fieldToEdit ? byId[fieldToEdit].source.name : undefined;
   const parentId = fieldToEdit ? byId[fieldToEdit].parentId : fieldToAddFieldTo;
+  const isAddingNewField = !fieldToEdit;
   const uniqueNameValidator = useCallback(
     (arg: any) => {
-      return validateUniqueName({ rootLevelFields, byId }, initialName, parentId)(arg);
+      return validateUniqueName(
+        { rootLevelFields, byId },
+        initialName,
+        parentId,
+        isAddingNewField ? mappingViewFields : undefined
+      )(arg);
     },
-    [rootLevelFields, byId, initialName, parentId]
+    [rootLevelFields, byId, initialName, parentId, isAddingNewField, mappingViewFields]
   );
 
   const nameConfig: FieldConfig = useMemo(

@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
@@ -32,6 +32,10 @@ export function SloListView({ sloList, loading, error }: Props) {
       sloList,
     });
 
+  const historicalSummariesBySlo = new Map(
+    historicalSummaries.map((summary) => [`${summary.sloId}-${summary.instanceId}`, summary.data])
+  );
+
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
@@ -47,13 +51,7 @@ export function SloListView({ sloList, loading, error }: Props) {
           <SloListItem
             activeAlerts={activeAlertsBySlo.get(slo)}
             rules={rulesBySlo?.[slo.id]}
-            historicalSummary={
-              historicalSummaries.find(
-                (historicalSummary) =>
-                  historicalSummary.sloId === slo.id &&
-                  historicalSummary.instanceId === slo.instanceId
-              )?.data
-            }
+            historicalSummary={historicalSummariesBySlo.get(`${slo.id}-${slo.instanceId}`)}
             historicalSummaryLoading={historicalSummaryLoading}
             slo={slo}
             refetchRules={refetchRules}

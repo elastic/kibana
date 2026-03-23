@@ -17,6 +17,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
 import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
+import { useCasePageViewEbt } from './use_case_page_view_ebt';
 
 export const CaseViewLoading = () => (
   <EuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
@@ -36,10 +37,12 @@ export const CaseView = React.memo(
     onAlertsTableLoaded,
     refreshRef,
     renderAlertsTable,
+    renderEventsTable,
   }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
+    useCasePageViewEbt();
 
     const { data, isLoading, isError, refetch } = useGetCase(caseId);
 
@@ -90,6 +93,7 @@ export const CaseView = React.memo(
           onAlertsTableLoaded={onAlertsTableLoaded}
           refreshRef={refreshRef}
           renderAlertsTable={renderAlertsTable}
+          renderEventsTable={renderEventsTable}
         />
       </CasesTimelineIntegrationProvider>
     ) : null;

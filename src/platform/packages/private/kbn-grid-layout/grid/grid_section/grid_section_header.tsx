@@ -11,14 +11,8 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  UseEuiTheme,
-  euiCanAnimate,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -27,7 +21,8 @@ import { useGridLayoutSectionEvents } from '../use_grid_layout_events';
 import { deleteSection } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
 import { GridSectionTitle } from './grid_section_title';
-import { CollapsibleSection } from './types';
+import type { CollapsibleSection } from './types';
+import type { UserInteractionEvent } from '../use_grid_layout_events/types';
 
 export interface GridSectionHeaderProps {
   sectionId: string;
@@ -174,7 +169,23 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
     section.isCollapsed = !section.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
+
+    const buttonRef = collapseButtonRef.current;
+    if (!buttonRef) return;
+    buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
   }, [gridLayoutStateManager, sectionId]);
+
+  const handleSectionDragStart = useCallback(
+    (e: UserInteractionEvent) => {
+      const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
+
+      if (section && !section.isMainSection && !section.isCollapsed) {
+        toggleIsCollapsed();
+      }
+      startDrag(e);
+    },
+    [gridLayoutStateManager, sectionId, toggleIsCollapsed, startDrag]
+  );
 
   return (
     <>
@@ -243,10 +254,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem
-                    grow={false}
-                    css={[styles.floatToRight, styles.visibleOnlyWhenCollapsed]}
-                  >
+                  <EuiFlexItem grow={false} css={[styles.floatToRight]}>
                     <EuiButtonIcon
                       iconType="move"
                       color="text"
@@ -254,9 +262,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                         defaultMessage: 'Move section',
                       })}
-                      onMouseDown={startDrag}
-                      onTouchStart={startDrag}
-                      onKeyDown={startDrag}
+                      onMouseDown={handleSectionDragStart}
+                      onTouchStart={handleSectionDragStart}
+                      onKeyDown={handleSectionDragStart}
                       data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
                     />
                   </EuiFlexItem>
@@ -316,7 +324,7 @@ const styles = {
           transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
         },
       },
-      [`&:hover .kbnGridLayout--deleteSectionIcon, 
+      [`&:hover .kbnGridLayout--deleteSectionIcon,
         &:hover .kbnGridSection--dragHandle,
         &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
         &:has(:focus-visible) .kbnGridSection--dragHandle`]: {

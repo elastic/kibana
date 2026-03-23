@@ -62,12 +62,10 @@ export const AddDataTroubleshootingPopover = () => {
       button={
         <EuiBadge
           color="hollow"
-          iconType="iInCircle"
+          iconType="info"
           iconSide="left"
           onClick={onButtonClick}
           onClickAriaLabel={popoverContent.title}
-          iconOnClick={onButtonClick}
-          iconOnClickAriaLabel={popoverContent.title}
         >
           {badgeContent}
         </EuiBadge>

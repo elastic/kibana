@@ -6,10 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseSettingsRt } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const SettingsUserActionPayloadRt = rt.strict({ settings: CaseSettingsRt });
+// Settings payload accepts one or both settings
+export const SettingsUserActionPayloadRt = rt.strict({
+  settings: rt.partial({
+    syncAlerts: rt.boolean,
+    extractObservables: rt.boolean,
+  }),
+});
 
 export const SettingsUserActionRt = rt.strict({
   type: rt.literal(UserActionTypes.settings),

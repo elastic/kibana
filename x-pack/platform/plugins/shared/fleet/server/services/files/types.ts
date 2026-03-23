@@ -113,7 +113,7 @@ export interface HostUploadedFileMetadata {
 
 /**
  * The File metadata that is stored along with files uploaded to kibana (via the Files plugin)
- * @private
+ * @internal
  */
 export interface FileCustomMeta {
   target_agents: string[];

@@ -8,6 +8,8 @@
 import React from 'react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 
 export const MLEmptyPromptCard = ({
   title,
@@ -15,17 +17,34 @@ export const MLEmptyPromptCard = ({
   actions,
   iconSrc,
   iconAlt,
+  customCss,
+  iconSize = 'fullWidth',
   'data-test-subj': dataTestSubj,
-}: Omit<EuiEmptyPromptProps, 'title'> & { title: string; iconSrc: string; iconAlt: string }) => (
-  <EuiEmptyPrompt
-    layout="horizontal"
-    hasBorder={true}
-    hasShadow={false}
-    icon={<EuiImage size="fullWidth" src={iconSrc} alt={iconAlt} />}
-    title={<h3>{title}</h3>}
-    titleSize="s"
-    body={body}
-    actions={actions}
-    data-test-subj={dataTestSubj}
-  />
-);
+}: Omit<EuiEmptyPromptProps, 'title'> & {
+  title: string;
+  iconSrc: string;
+  iconAlt: string;
+  iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
+  customCss?: SerializedStyles;
+}) => {
+  return (
+    <EuiEmptyPrompt
+      css={css`
+        .euiEmptyPrompt__icon {
+          min-inline-size: 32px !important;
+        }
+        ${customCss ?? ''}
+      `}
+      layout="horizontal"
+      hasBorder={true}
+      hasShadow={false}
+      icon={<EuiImage size={iconSize} src={iconSrc} alt={iconAlt} />}
+      title={<h3>{title}</h3>}
+      titleSize="s"
+      body={body}
+      actions={actions}
+      data-test-subj={dataTestSubj}
+      paddingSize="m"
+    />
+  );
+};

@@ -12,15 +12,15 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
-  CROWDSTRIKE_TITLE,
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   SUB_ACTION,
-} from '../../../common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
   CrowdstrikeActionParams,
-} from '../../../common/crowdstrike/types';
+} from '@kbn/connector-schemas/crowdstrike';
 
 interface ValidationErrors {
   subAction: string[];
@@ -32,8 +32,8 @@ export function getConnectorType(): ConnectorTypeModel<
   CrowdstrikeActionParams
 > {
   return {
-    id: CROWDSTRIKE_CONNECTOR_ID,
-    actionTypeTitle: CROWDSTRIKE_TITLE,
+    id: CONNECTOR_ID,
+    actionTypeTitle: CONNECTOR_NAME,
     iconClass: lazy(() => import('./logo')),
     isExperimental: false,
     selectMessage: i18n.translate(

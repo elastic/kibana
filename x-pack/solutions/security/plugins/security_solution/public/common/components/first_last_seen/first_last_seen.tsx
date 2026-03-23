@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 
 import { useFirstLastSeen } from '../../containers/use_first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
@@ -41,15 +41,16 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(
 
     if (errorMessage != null) {
       return (
-        <EuiToolTip
+        <EuiIconTip
           position="top"
           content={errorMessage}
-          data-test-subj="firstLastSeenErrorToolTip"
+          iconProps={{
+            'data-test-subj': 'firstLastSeenErrorToolTip',
+          }}
           aria-label={`firstLastSeenError-${type}`}
           id={`firstLastSeenError-${field}-${type}`}
-        >
-          <EuiIcon aria-describedby={`firstLastSeenError-${field}-${type}`} type="warning" />
-        </EuiToolTip>
+          type="warning"
+        />
       );
     }
 

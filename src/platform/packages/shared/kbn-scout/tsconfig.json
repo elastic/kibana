@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -19,8 +19,10 @@
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
     "@kbn/es",
     "@kbn/dev-proc-runner",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/es-archiver",
     "@kbn/dev-utils",
@@ -28,8 +30,9 @@
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",
-    "@kbn/apm-synthtrace",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/projects-solutions-groups"
+    "@kbn/zod",
+    "@kbn/core-http-common",
+    "@kbn/axe-config",
+    "@kbn/peggy"
   ]
 }

@@ -10,6 +10,9 @@ import type { CoreSetup, IRouter } from '@kbn/core/server';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { registerChatCompleteRoute } from './chat_complete';
 import { registerConnectorsRoute } from './connectors';
+import { registerPromptRoute } from './prompt';
+import { registerReplacementsRoutes } from '../chat_complete/anonymization/replacements/replacements_routes';
+import { registerEndpointsRoute } from './endpoints';
 
 export const registerRoutes = ({
   router,
@@ -21,5 +24,10 @@ export const registerRoutes = ({
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
 }) => {
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
-  registerConnectorsRoute({ router, coreSetup });
+  registerPromptRoute({ router, coreSetup, logger: logger.get('prompt') });
+  registerConnectorsRoute({ router, coreSetup, logger: logger.get('connectors') });
+  registerReplacementsRoutes(router, logger.get('replacements'), {
+    coreSetup,
+  });
+  registerEndpointsRoute({ router, coreSetup });
 };

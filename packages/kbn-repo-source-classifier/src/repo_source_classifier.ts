@@ -17,7 +17,7 @@ import { RepoPath } from './repo_path';
 import { inferGroupAttrsFromPath } from './group';
 
 const STATIC_EXTS = new Set(
-  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml'
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml|yaml|yml'
     .split('|')
     .map((e) => `.${e}`)
 );
@@ -119,10 +119,6 @@ export class RepoSourceClassifier {
 
     if (root === 'i18n') {
       return 'common package';
-    }
-
-    if (root === 'shareable_runtime') {
-      return 'non-package';
     }
 
     if (root === 'tasks') {

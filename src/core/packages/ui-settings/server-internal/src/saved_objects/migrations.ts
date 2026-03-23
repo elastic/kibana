@@ -26,7 +26,15 @@ export const modelVersions: SavedObjectsModelVersionMap = {
   1: {
     changes: [],
   },
-  // 2: {
+  2: {
+    changes: [
+      {
+        type: 'data_removal',
+        removedAttributePaths: ['visualization:useLegacyTimeAxis'],
+      },
+    ],
+  },
+  // 3: {
   //   changes: [ /* Put future migration here */ ],
   // },
 };

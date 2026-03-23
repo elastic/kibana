@@ -27,6 +27,7 @@ import type { AppDependencies } from '../app_dependencies';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
@@ -34,9 +35,6 @@ const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
 const dataStart = dataPluginMock.createStartContract();
 const dataViewsStart = dataViewPluginMocks.createStartContract();
-
-// Replace mock to support syntax using `.then()` as used in transform code.
-coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects: [] });
 
 // Replace mock to support tests for `use_index_data`.
 dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
@@ -90,7 +88,6 @@ const appDependencies: AppDependencies = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   notifications: coreStart.notifications,
   uiSettings: coreStart.uiSettings,
-  savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
   theme: themeServiceMock.createStartContract(),
@@ -100,6 +97,7 @@ const appDependencies: AppDependencies = {
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
   settings: settingsServiceMock.createStartContract(),
   savedSearch: savedSearchPluginMock.createStartContract(),

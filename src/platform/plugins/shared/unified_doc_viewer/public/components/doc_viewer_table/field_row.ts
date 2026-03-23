@@ -9,11 +9,11 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
   formatFieldValue,
   getIgnoredReason,
-  IgnoredReason,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -22,6 +22,7 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
 export class FieldRow {
   readonly name: string;
+  readonly displayNameOverride: string | undefined;
   readonly flattenedValue: unknown;
   readonly dataViewField: DataViewField | undefined;
   readonly isPinned: boolean;
@@ -41,6 +42,7 @@ export class FieldRow {
 
   constructor({
     name,
+    displayNameOverride,
     flattenedValue,
     hit,
     dataView,
@@ -49,6 +51,7 @@ export class FieldRow {
     columnsMeta,
   }: {
     name: string;
+    displayNameOverride?: string;
     flattenedValue: unknown;
     hit: DataTableRecord;
     dataView: DataView;
@@ -63,6 +66,7 @@ export class FieldRow {
     this.#isFormattedAsText = false;
 
     this.name = name;
+    this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
     this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
       dataView,

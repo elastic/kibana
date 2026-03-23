@@ -10,10 +10,9 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -42,6 +41,19 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
         <FormattedMessage
           id="xpack.fleet.integrationSyncStatus.failedText"
           defaultMessage="Failed"
+        />
+      </EuiBadge>
+    ),
+    WARNING: (
+      <EuiBadge
+        color="warning"
+        data-test-subj="integrationSyncWarningBadge"
+        iconType="warning"
+        {...onClickProps}
+      >
+        <FormattedMessage
+          id="xpack.fleet.integrationSyncStatus.warningText"
+          defaultMessage="Warning"
         />
       </EuiBadge>
     ),
@@ -81,13 +93,13 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.fleet.integrationSyncStatus.naTooltip', {
               defaultMessage: 'Integration syncing only applies to remote outputs.',
             })}
-          >
-            <EuiIcon type="iInCircle" color="subdued" />
-          </EuiToolTip>
+            type="info"
+            color="subdued"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -102,14 +114,14 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.fleet.integrationSyncStatus.disabledTooltip', {
               defaultMessage:
                 'Integration syncing is disabled for this remote output. Enable it by clicking the edit icon and updating the output settings.',
             })}
-          >
-            <EuiIcon type="iInCircle" color="subdued" />
-          </EuiToolTip>
+            type="info"
+            color="subdued"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

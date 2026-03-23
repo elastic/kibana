@@ -93,7 +93,9 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
               defaultMessage: 'Choose a unique destination index name.',
             }
           )}
-          isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
+          isInvalid={
+            destinationIndexNameEmpty || (!destinationIndexNameEmpty && !destinationIndexNameValid)
+          }
           data-test-subj="mlCreationWizardUtilsDestinationIndexInput"
         />
       </EuiFormRow>

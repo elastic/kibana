@@ -27,6 +27,19 @@
         "0"
       ]
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "version",
+        "master_node",
+        "blocks",
+        "nodes",
+        "metadata",
+        "routing_table",
+        "routing_nodes",
+        "customs"
+      ]
+    },
     "methods": [
       "GET"
     ],
@@ -35,7 +48,7 @@
       "_cluster/state/{metric}",
       "_cluster/state/{metric}/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-state.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-state",
     "availability": {
       "stack": true,
       "serverless": false

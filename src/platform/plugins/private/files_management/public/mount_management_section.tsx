@@ -11,12 +11,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { StartDependencies } from './types';
 import { App } from './app';
 import { FilesManagementAppContextProvider } from './context';
@@ -33,14 +32,9 @@ export const mountManagementSection = (
   } = startDeps;
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...coreStart}>
+    coreStart.rendering.addContext(
       <QueryClientProvider client={queryClient}>
-        <TableListViewKibanaProvider
-          {...{
-            core: coreStart,
-            FormattedRelative,
-          }}
-        >
+        <TableListViewKibanaProvider {...{ core: coreStart, FormattedRelative }}>
           <FilesManagementAppContextProvider
             filesClient={filesClientFactory.asUnscoped()}
             getFileKindDefinition={getFileKindDefinition}
@@ -52,7 +46,7 @@ export const mountManagementSection = (
           </FilesManagementAppContextProvider>
         </TableListViewKibanaProvider>
       </QueryClientProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

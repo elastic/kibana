@@ -10,9 +10,9 @@ import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render, act } from '@testing-library/react';
 import { AssistantSettings } from './assistant_settings';
 import React from 'react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QUICK_PROMPTS_TAB, SYSTEM_PROMPTS_TAB } from './const';
 
 const mockSystemUpdater = {
@@ -153,7 +153,9 @@ describe('AssistantSettings', () => {
     expect(onSave).toHaveBeenCalled();
     expect(mockSystemUpdater.saveSystemPromptSettings).toHaveBeenCalled();
     expect(mockConversationsUpdater.saveConversationsSettings).toHaveBeenCalledWith({
-      updates: [],
+      bulkActions: {
+        updates: [],
+      },
     });
   });
 

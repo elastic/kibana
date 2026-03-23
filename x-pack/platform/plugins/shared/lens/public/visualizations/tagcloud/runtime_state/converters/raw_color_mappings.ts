@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
-  DeprecatedColorMappingConfig,
   convertToRawColorMappings,
   getColumnMetaFn,
 } from '../../../../runtime_state/converters/raw_color_mappings';
 import { isDeprecatedColorMapping } from '../../../../runtime_state/converters/raw_color_mappings/converter';
-import { GeneralDatasourceStates } from '../../../../state_management';
-import { TagcloudState } from '../../types';
+import type { TagcloudState } from '../../types';
 
 /**
  * Old color mapping state meant for type safety during runtime migrations of old configurations
@@ -35,7 +35,9 @@ export const convertToRawColorMappingsFn = (
 
     if (!hasDeprecatedColorMapping) return state as TagcloudState;
 
-    const columnMeta = state.tagAccessor ? getColumnMeta?.(state.layerId, state.tagAccessor) : null;
+    const columnMeta = state.tagAccessor
+      ? getColumnMeta?.(state.layerId, [state.tagAccessor])
+      : null;
 
     return {
       ...state,

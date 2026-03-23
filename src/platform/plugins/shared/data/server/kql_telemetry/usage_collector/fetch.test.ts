@@ -8,8 +8,8 @@
  */
 
 import { fetchProvider } from './fetch';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 jest.mock('../../../common', () => ({

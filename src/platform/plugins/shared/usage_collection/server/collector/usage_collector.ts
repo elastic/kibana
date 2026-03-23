@@ -21,7 +21,7 @@ export type UsageCollectorOptions<
   Required<Pick<CollectorOptions<TFetchReturn>, 'schema'>>;
 
 /**
- * @private Only used in fixtures as a type
+ * @internal Only used in fixtures as a type
  */
 export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> extends Collector<
   TFetchReturn,

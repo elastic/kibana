@@ -22,7 +22,7 @@
     "patterns": [
       "_ilm/policy/{policy}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-put-lifecycle.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle",
     "availability": {
       "stack": true,
       "serverless": false

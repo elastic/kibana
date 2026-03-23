@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/product-intercept-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "This plugin leverages the intercepts plugin to in soliciting app-wide product feedback from users.",
+  "plugin": {
+    "id": "productIntercept",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["intercepts", "cloud"],
+    "requiredBundles": [],
+    "configPath": ["xpack", "product_intercept"]
+  }
+}

@@ -11,9 +11,12 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, act, screen } from '@testing-library/react';
 import EditConnectorFlyout from '.';
-import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import type { ActionConnector, GenericValidationResult } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
+import type { AppMockRenderer } from '../../test_utils';
+import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -30,17 +33,13 @@ const executeConnectorResponse = {
   data: {},
 };
 
-const connector: ActionConnector = {
+const connector: ActionConnector = createMockActionConnector({
   id: '123',
   name: 'My test',
   actionTypeId: '.test',
   config: { testTextField: 'My text field' },
   secrets: { secretTextField: 'super secret' },
-  isDeprecated: false,
-  isPreconfigured: false,
-  isMissingSecrets: false,
-  isSystemAction: false,
-};
+});
 
 describe('EditConnectorFlyout', () => {
   let appMockRenderer: AppMockRenderer;
@@ -758,5 +757,63 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
       expect(getByTestId('executeActionButton')).toBeDisabled();
     });
+
+    it('should not disable the test tab', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('testConnectorTab')).toBeEnabled();
+    });
+  });
+});
+
+describe('is spec connector', () => {
+  let appMockRenderer: AppMockRenderer;
+  const onClose = jest.fn();
+  const onConnectorUpdated = jest.fn();
+
+  const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+    actionConnectorFields: lazy(() => import('../connector_mock')),
+    source: 'spec',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+  });
+
+  const actionTypeRegistry = actionTypeRegistryMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    actionTypeRegistry.has.mockReturnValue(true);
+    actionTypeRegistry.get.mockReturnValue(actionTypeModel);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.coreStart.application.capabilities = {
+      ...appMockRenderer.coreStart.application.capabilities,
+      actions: { save: true, show: true, execute: true },
+    };
+    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
+    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
+  });
+
+  it('should not render the test tab', async () => {
+    const { getByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
+    expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
   });
 });

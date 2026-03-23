@@ -17,7 +17,7 @@ var assignValue = require('lodash/_assignValue'),
 /**
  * The base implementation of `_.set`.
  *
- * @private
+ * @internal
  * @param {Object} object The object to modify.
  * @param {Array|string} path The path of the property to set.
  * @param {*} value The value to set.

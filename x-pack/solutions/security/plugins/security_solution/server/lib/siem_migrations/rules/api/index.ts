@@ -26,7 +26,12 @@ import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privilege
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
+import { registerSiemRuleMigrationsEnhanceRoute } from './rules/enhance';
+import { registerSiemRuleMigrationsCreateQRadarRulesRoute } from './rules/qradar/create';
 import { registerSiemRuleMigrationsDeleteRoute } from './delete';
+import { registerSiemRuleMigrationsIntegrationsStatsRoute } from './integrations_stats';
+import { registerSiemRuleMigrationsUpdateRoute } from './update';
+import { registerSiemRuleMigrationsUpdateIndexPatternRoute } from './update_index_pattern';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -37,12 +42,20 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsCreateRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsDeleteRoute(router, logger);
+  registerSiemRuleMigrationsUpdateRoute(router, logger);
   /** *******/
 
   /** Rules */
   registerSiemRuleMigrationsCreateRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
+
+  /** Qradar */
+  if (config.experimentalFeatures.qradarRulesMigration) {
+    registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
+    registerSiemRuleMigrationsEnhanceRoute(router, logger);
+  }
+  /** *******/
   /** *******/
 
   /** Tasks **/
@@ -52,11 +65,17 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsTranslationStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
+  registerSiemRuleMigrationsUpdateIndexPatternRoute(router, logger);
   /** *******/
 
+  /** Install */
   registerSiemRuleMigrationsInstallRoute(router, logger);
+  /** *******/
 
+  /** Integrations */
   registerSiemRuleMigrationsIntegrationsRoute(router, logger);
+  registerSiemRuleMigrationsIntegrationsStatsRoute(router, logger);
+  /** *******/
 
   /** Resources */
   registerSiemRuleMigrationsResourceUpsertRoute(router, logger);

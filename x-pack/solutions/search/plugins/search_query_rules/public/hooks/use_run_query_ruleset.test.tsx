@@ -41,6 +41,8 @@ describe('UseRunQueryRuleset', () => {
         console: mockConsole,
       },
     });
+
+    // Default mock for ruleset data
     (useFetchQueryRuleset as jest.Mock).mockReturnValue({
       data: {
         rules: [
@@ -53,6 +55,13 @@ describe('UseRunQueryRuleset', () => {
                 },
               ],
             },
+            criteria: [
+              {
+                metadata: 'user_query',
+                values: ['test-query'],
+                type: 'exact',
+              },
+            ],
           },
         ],
       },
@@ -76,9 +85,15 @@ describe('UseRunQueryRuleset', () => {
       expect.anything()
     );
 
-    // Verify that the request contains the index from the fetched data
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    // Verify that the request contains the index from the fetched data
     expect(buttonProps.request).toContain('test-index');
+    // Verify the request contains retriever structure
+    expect(buttonProps.request).toContain('retriever');
+    // Verify the request contains the expected query
+    expect(buttonProps.request).toContain('"match_all": {}');
+    // Verify ruleset_ids are included
+    expect(buttonProps.request).toContain('test-ruleset');
   });
 
   it('renders with custom type and content', () => {
@@ -107,11 +122,86 @@ describe('UseRunQueryRuleset', () => {
     expect(buttonProps.request).toContain('my_index');
   });
 
-  it('creates correct query with ruleset ID in the request', () => {
-    const rulesetId = 'special-test-ruleset';
-    render(<UseRunQueryRuleset rulesetId={rulesetId} />);
+  it('handles multiple indices from ruleset data', () => {
+    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+      data: {
+        rules: [
+          {
+            actions: {
+              docs: [
+                { _index: 'index1', _id: 'id1' },
+                { _index: 'index2', _id: 'id2' },
+              ],
+            },
+          },
+        ],
+      },
+      isInitialLoading: false,
+      isError: false,
+    });
+
+    render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
 
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
-    expect(buttonProps.request).toContain(`"ruleset_ids": [ "${rulesetId}" ]`);
+    expect(buttonProps.request).toContain('index1,index2');
+  });
+
+  it('creates match criteria from ruleset data', () => {
+    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+      data: {
+        rules: [
+          {
+            criteria: [
+              {
+                metadata: 'user_query',
+                values: ['search term'],
+                type: 'exact',
+              },
+              {
+                metadata: 'user_location',
+                values: ['US', 'UK'],
+                type: 'exact',
+              },
+            ],
+          },
+        ],
+      },
+      isInitialLoading: false,
+      isError: false,
+    });
+
+    render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
+
+    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    expect(buttonProps.request).toContain('"user_query": "search term"');
+    expect(buttonProps.request).toMatch(/"user_location":\s*"US"/);
+  });
+
+  it('handles complex nested criteria values', () => {
+    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+      data: {
+        rules: [
+          {
+            criteria: [
+              {
+                values: {
+                  nested_field: ['nested value'],
+                  another_field: ['array', 'of', 'values'],
+                },
+                type: 'exact',
+              },
+            ],
+          },
+        ],
+      },
+      isInitialLoading: false,
+      isError: false,
+    });
+
+    render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
+
+    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    expect(buttonProps.request).toContain('"nested_field": "nested value"');
+    expect(buttonProps.request).toMatch(/"another_field":\s*"array"s*/);
   });
 });

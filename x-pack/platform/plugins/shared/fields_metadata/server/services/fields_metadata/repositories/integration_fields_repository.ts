@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import { ANY_DATASET } from '../../../../common/fields_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
-import { FieldMetadata, IntegrationFieldName } from '../../../../common';
-import {
+import type { IntegrationFieldName } from '../../../../common';
+import type {
   ExtractedIntegration,
   ExtractedIntegrationFields,
   IntegrationFieldsExtractor,

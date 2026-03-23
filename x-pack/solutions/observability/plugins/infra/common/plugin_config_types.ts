@@ -27,13 +27,13 @@ export interface InfraConfig {
   };
   featureFlags: {
     customThresholdAlertsEnabled: boolean;
-    logsUIEnabled: boolean;
     metricsExplorerEnabled: boolean;
     osqueryEnabled: boolean;
     inventoryThresholdAlertRuleEnabled: boolean;
     metricThresholdAlertRuleEnabled: boolean;
     logThresholdAlertRuleEnabled: boolean;
     alertsAndRulesDropdownEnabled: boolean;
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: boolean;
     ruleFormV2Enabled: boolean;
   };

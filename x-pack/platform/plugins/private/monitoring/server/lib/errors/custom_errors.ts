@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
 import { boomify } from '@hapi/boom';
-import { ErrorTypes } from '../../types';
+import type { ErrorTypes } from '../../types';
 
 export class MonitoringCustomError extends Error {
   readonly description?: string;

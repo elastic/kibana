@@ -11,7 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
+import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
 
 const legendSizeOptions: Array<{ value: LegendSize; inputDisplay: string }> = [
   {

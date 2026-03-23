@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
   return (
     <div className="text-left">
-      <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="iInCircle" size="s" />
+      <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="info" size="s" />
       <EuiSpacer size="s" />
       <EuiText size="s">
         <strong>{API_KEY_LABEL}</strong>

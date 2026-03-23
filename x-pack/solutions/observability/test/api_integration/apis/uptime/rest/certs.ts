@@ -14,7 +14,7 @@ import {
 } from '@kbn/synthetics-plugin/common/requests/get_certs_request_body';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CertType } from '@kbn/uptime-plugin/common/runtime_types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -78,7 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
       after('unload test docs', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
       });
 
       it('retrieves expected cert data', async () => {

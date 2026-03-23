@@ -82,13 +82,28 @@ export function ActionMenuContent(): React.ReactElement {
           <AutoRefreshButton />
         </>
       )}
+      <InspectorHeaderLink />
+
+      <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+        <EuiHeaderLink
+          aria-label={i18n.translate('xpack.synthetics.page_header.analyzeData.label', {
+            defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
+          })}
+          href={syntheticExploratoryViewLink}
+          color="primary"
+          data-test-subj={'syntheticsExploreDataButton'}
+        >
+          {ANALYZE_DATA}
+        </EuiHeaderLink>
+      </EuiToolTip>
+
       <ToggleAlertFlyoutButton />
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.synthetics.page_header.settingsLink.label', {
           defaultMessage: 'Navigate to the Synthetics settings page',
         })}
-        color="text"
+        color="primary"
         data-test-subj="settings-page-link"
         href={history.createHref({
           pathname: SETTINGS_ROUTE,
@@ -100,21 +115,6 @@ export function ActionMenuContent(): React.ReactElement {
           defaultMessage="Settings"
         />
       </EuiHeaderLink>
-
-      <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
-        <EuiHeaderLink
-          aria-label={i18n.translate('xpack.synthetics.page_header.analyzeData.label', {
-            defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
-          })}
-          href={syntheticExploratoryViewLink}
-          color="text"
-          iconType="visBarVerticalStacked"
-          data-test-subj={'syntheticsExploreDataButton'}
-        >
-          {ANALYZE_DATA}
-        </EuiHeaderLink>
-      </EuiToolTip>
-      <InspectorHeaderLink />
     </EuiHeaderLinks>
   );
 }

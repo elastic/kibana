@@ -18,7 +18,8 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OPTIONAL_LABEL } from '../../../../../common/i18n_string';
@@ -71,15 +72,12 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
                 name: `${connector.index_name}-connector`,
                 role_descriptors: {
                   [`${connector.index_name}-connector-role`]: {
-                    cluster: ['monitor'],
+                    cluster: ['monitor', 'manage_connector'],
                     index: [
                       {
                         names: [
                           connector.index_name,
-                          connector.index_name.replace(
-                            /^(?:search-)?(.*)$/,
-                            '.search-acl-filter-$1'
-                          ),
+                          `.search-acl-filter-${connector.index_name}`,
                           `${CONNECTORS_INDEX}*`,
                         ],
                         privileges: ['all'],

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { Cert } from '../../../../../common/runtime_types';
+import type { Cert } from '../../../../../common/runtime_types';
 import { COPY_FINGERPRINT } from './translations';
 
 const StyledSpan = styled.span`

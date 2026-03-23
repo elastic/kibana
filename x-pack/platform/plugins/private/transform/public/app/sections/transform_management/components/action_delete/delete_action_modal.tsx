@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EUI_MODAL_CONFIRM_BUTTON,
@@ -15,10 +15,9 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DeleteAction } from './use_delete_action';
-import { isManagedTransform } from '../../../../common/managed_transforms_utils';
-import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
@@ -33,7 +32,8 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   userCanDeleteIndex,
   userCanDeleteDataView,
 }) => {
-  const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const isBulkAction = items.length > 1;
 
   const bulkDeleteModalTitle = i18n.translate(
@@ -50,19 +50,6 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   const bulkDeleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
-        {hasManagedTransforms ? (
-          <>
-            <ManagedTransformsWarningCallout
-              count={items.length}
-              action={i18n.translate(
-                'xpack.transform.transformList.deleteManagedTransformDescription',
-                { defaultMessage: 'deleting' }
-              )}
-            />
-            <EuiSpacer />
-          </>
-        ) : null}
-
         <EuiFlexItem>
           {
             <EuiSwitch
@@ -102,19 +89,6 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   const deleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
-        {hasManagedTransforms ? (
-          <>
-            <ManagedTransformsWarningCallout
-              count={1}
-              action={i18n.translate(
-                'xpack.transform.transformList.deleteManagedTransformDescription',
-                { defaultMessage: 'deleting' }
-              )}
-            />
-            <EuiSpacer />
-          </>
-        ) : null}
-
         <EuiFlexItem>
           {userCanDeleteIndex && (
             <EuiSwitch
@@ -167,6 +141,8 @@ export const DeleteActionModal: FC<DeleteAction> = ({
       })}
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       buttonColor="danger"
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
     >
       {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
     </EuiConfirmModal>

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type WarningSchema = z.infer<typeof WarningSchema>;
 export const WarningSchema = z.object({

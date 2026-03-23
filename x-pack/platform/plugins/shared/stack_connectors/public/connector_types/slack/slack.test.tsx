@@ -37,7 +37,7 @@ describe('slack action params validation', () => {
       message: 'message {test}',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { message: [] },
     });
   });
@@ -47,7 +47,7 @@ describe('slack action params validation', () => {
       message: '',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         message: ['Message is required.'],
       },

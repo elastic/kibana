@@ -24,14 +24,14 @@ export interface LabelOptionsProps {
   axisLabels: Labels;
   axisFilterCheckboxName: string;
   setAxisLabel: SetAxisLabel;
-  disableSingleLayerAxisControls?: boolean;
+  disableAxisControls?: boolean;
 }
 
 function LabelOptions({
   axisLabels,
   axisFilterCheckboxName,
   setAxisLabel,
-  disableSingleLayerAxisControls,
+  disableAxisControls,
 }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
@@ -42,7 +42,7 @@ function LabelOptions({
   );
 
   const rotateOptions = useMemo(getRotateOptions, []);
-  const multilayerAxisTooltipText = disableSingleLayerAxisControls
+  const axisTooltipText = disableAxisControls
     ? i18n.translate(
         'visTypeXy.controls.pointSeries.categoryAxis.axisLabelsOptionsMultilayer.disabled',
         {
@@ -50,8 +50,7 @@ function LabelOptions({
         }
       )
     : undefined;
-  const axisLabelControlDisabled = !axisLabels.show || disableSingleLayerAxisControls;
-
+  const axisLabelControlDisabled = !axisLabels.show || disableAxisControls;
   return (
     <>
       <EuiSpacer size="m" />
@@ -82,14 +81,14 @@ function LabelOptions({
         paramName="filter"
         value={axisLabels.filter}
         setValue={setAxisLabel}
-        tooltip={multilayerAxisTooltipText}
+        tooltip={axisTooltipText}
       />
 
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiToolTip content={multilayerAxisTooltipText} delay="long" position="right">
+          <EuiToolTip content={axisTooltipText} delay="long" position="right">
             <SelectOption
               disabled={axisLabelControlDisabled}
               label={i18n.translate('visTypeXy.controls.pointSeries.categoryAxis.alignLabel', {
@@ -104,7 +103,7 @@ function LabelOptions({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiToolTip content={multilayerAxisTooltipText} delay="long" position="right">
+          <EuiToolTip content={axisTooltipText} delay="long" position="right">
             <TruncateLabelsOption
               disabled={axisLabelControlDisabled}
               value={axisLabels.truncate}

@@ -36,7 +36,7 @@ import { ExpandedRowContent } from './expanded_row_content';
 import { ExpandedRowPanel } from './expanded_row_panel';
 import { useBarColor } from './use_bar_color';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 260;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 360;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
 
 interface SummaryTableItem {

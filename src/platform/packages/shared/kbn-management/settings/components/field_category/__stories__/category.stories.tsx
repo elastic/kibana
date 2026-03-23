@@ -17,7 +17,8 @@ import { categorizeFields } from '@kbn/management-settings-utilities';
 import { FieldRow } from '@kbn/management-settings-components-field-row';
 
 import { FieldCategory as Component, type FieldCategoryProps as ComponentProps } from '../category';
-import { Params, useCategoryStory } from './use_category_story';
+import type { Params } from './use_category_story';
+import { useCategoryStory } from './use_category_story';
 import { FieldCategoryProvider } from '../services';
 
 const settings = getSettingsMock();
@@ -56,9 +57,12 @@ export default {
 type FieldCategoryParams = Pick<ComponentProps, 'category'> & Params;
 
 const CategoryComponent = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
-  const { onClearQuery, onFieldChange, unsavedChanges } = useCategoryStory({
+  const onClearQuery = () => {};
+
+  const { onFieldChange, unsavedChanges } = useCategoryStory({
     isFiltered,
     isSavingEnabled,
+    onClearQuery,
   });
 
   const { count, fields } = categorizeFields(definitions)[category];

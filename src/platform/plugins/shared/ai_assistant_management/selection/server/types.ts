@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginServerDependenciesStart {}
+export interface AIAssistantManagementSelectionPluginServerDependenciesStart {
+  spaces?: SpacesPluginStart;
+}
 
 export interface AIAssistantManagementSelectionPluginServerDependenciesSetup {
   features?: FeaturesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

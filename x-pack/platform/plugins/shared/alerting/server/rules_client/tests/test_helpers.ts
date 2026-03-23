@@ -81,22 +81,8 @@ export const siemRule1 = {
   id: 'siem-id1',
 };
 
-export const siemRuleForBulkOps1 = {
-  ...defaultRuleForBulkDelete,
-  attributes: {
-    ...defaultRuleForBulkDelete.attributes,
-    consumer: AlertConsumers.SIEM,
-  },
-  id: 'siem-id1',
-};
-
 export const siemRule2 = {
   ...siemRule1,
-  id: 'siem-id2',
-};
-
-export const siemRuleForBulkOps2 = {
-  ...siemRuleForBulkOps1,
   id: 'siem-id2',
 };
 
@@ -194,6 +180,16 @@ export const enabledRuleForBulkOpsWithActions1 = {
   ],
 };
 
+export const enabledRuleForBulkOpsWithActions1WithUiam = {
+  ...enabledRuleForBulkOpsWithActions1,
+  id: 'uiam-1',
+  attributes: {
+    ...enabledRuleForBulkOpsWithActions1.attributes,
+    apiKey: Buffer.from('978:xyz').toString('base64'),
+    uiamApiKey: Buffer.from('123:essu_abc').toString('base64'),
+  },
+};
+
 export const enabledRuleForBulkOpsWithActions2 = {
   ...defaultRuleForBulkDelete,
   id: 'id2',
@@ -222,6 +218,16 @@ export const enabledRuleForBulkOpsWithActions2 = {
       type: 'action',
     },
   ],
+};
+
+export const enabledRuleForBulkOpsWithActions2WithUiam = {
+  ...enabledRuleForBulkOpsWithActions2,
+  id: 'uiam-2',
+  attributes: {
+    ...enabledRuleForBulkOpsWithActions2.attributes,
+    uiamApiKey: Buffer.from('123:essu_abc').toString('base64'),
+    apiKey: Buffer.from('576:xyz').toString('base64'),
+  },
 };
 
 export const disabledRuleForBulkOpsWithActions1 = {

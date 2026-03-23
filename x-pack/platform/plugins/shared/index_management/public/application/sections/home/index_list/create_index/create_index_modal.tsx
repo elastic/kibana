@@ -21,8 +21,10 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
@@ -43,6 +45,10 @@ export interface CreateIndexModalProps {
 }
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  const indexModeFormRowId = useGeneratedHtmlId({ prefix: 'indexMode' });
+
   const [indexName, setIndexName] = useState<string>('');
   const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
   const [indexNameError, setIndexNameError] = useState<string | undefined>();
@@ -88,9 +94,14 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   };
 
   return (
-    <EuiModal onClose={closeModal} initialFocus="[name=indexName]" css={{ width: 450 }}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
+      initialFocus="[name=indexName]"
+      css={{ width: 450 }}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.idxMgmt.createIndex.modal.title"
             defaultMessage="Create index"
@@ -101,6 +112,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
         {createError && (
           <>
             <EuiCallOut
+              announceOnMount
               color="danger"
               iconType="error"
               title={i18n.translate('xpack.idxMgmt.createIndex.modal.error.title', {
@@ -129,6 +141,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
             error={indexNameError}
           >
             <EuiFieldText
+              isInvalid={indexNameError !== undefined}
               fullWidth
               name="indexName"
               value={indexName}
@@ -137,15 +150,26 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
             />
           </EuiFormRow>
           <EuiFormRow
+            id={indexModeFormRowId}
             fullWidth
-            label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
-              defaultMessage: 'Index mode',
-            })}
+            label={
+              <>
+                {i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
+                  defaultMessage: 'Index mode',
+                })}
+                <EuiScreenReaderOnly>
+                  <span>{`, ${
+                    indexModeLabels[indexMode as keyof typeof indexModeLabels] ?? indexMode
+                  }`}</span>
+                </EuiScreenReaderOnly>
+              </>
+            }
             isDisabled={isSaving}
           >
             <EuiSuperSelect
               fullWidth
               hasDividers
+              aria-labelledby={`${indexModeFormRowId}-label`}
               name="indexMode"
               valueOfSelected={indexMode}
               onChange={(mode) => setIndexMode(mode)}

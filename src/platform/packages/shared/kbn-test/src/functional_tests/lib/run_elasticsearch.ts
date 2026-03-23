@@ -16,7 +16,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
 import type { Config } from '../../functional_test_runner';
-import { ICluster, createTestEsCluster, esTestConfig } from '../../es';
+import type { ICluster } from '../../es';
+import { createTestEsCluster, esTestConfig } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -55,6 +56,7 @@ function getEsConfig({
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
+  const secureFiles: string[] | undefined = config.get('esTestCluster.secureFiles');
 
   const esServerlessOptions = serverless
     ? getESServerlessOptions(esServerlessImage, config)
@@ -74,6 +76,7 @@ function getEsConfig({
     ccsConfig,
     serverless,
     files,
+    secureFiles,
   };
 }
 
@@ -173,6 +176,7 @@ async function startEsNode({
     onEarlyExit,
     serverless: config.serverless,
     files: config.files,
+    secureFiles: config.secureFiles,
   });
 
   await cluster.start();
@@ -220,6 +224,7 @@ function getESServerlessOptions(
     projectType,
     host: serverlessHost,
     resources: serverlessResources,
+    uiam: config.get('esServerlessOptions.uiam', false),
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),

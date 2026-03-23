@@ -19,6 +19,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -115,12 +116,14 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
     [tabs, selectedTabId]
   );
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <EuiFlyout
       size="l"
       ownFocus
       onClose={onClose}
-      aria-labelledby={'supplied-configurations-flyout'}
+      aria-labelledby={flyoutTitleId}
       data-test-subj={`mlSuppliedConfigurationsFlyout ${module.id}`}
     >
       <EuiFlyoutHeader hasBorder>
@@ -130,7 +133,7 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id={module.id}>{module.title}</h2>
+              <h2 id={flyoutTitleId}>{module.title}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -37,5 +37,6 @@ export enum AnalyticsEvents {
   createIndexCodeCopyInstall = 'create_index_copy_install',
   createIndexCodeCopy = 'create_index_code_copy',
   createIndexFileUploadClick = 'create_index_file_upload',
+  createIndexIngestSampleDataClick = 'create_index_ingest_sample_data',
   createIndexIndexCreatedRedirect = 'create_index_created_api',
 }

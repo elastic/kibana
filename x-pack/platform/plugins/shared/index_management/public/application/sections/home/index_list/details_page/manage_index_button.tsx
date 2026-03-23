@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
-import { Index } from '../../../../../../common';
+import type { Index } from '../../../../../../common';
 import {
   clearCacheIndices as clearCacheIndicesRequest,
   closeIndices as closeIndicesRequest,
@@ -22,10 +23,8 @@ import {
 import { notificationService } from '../../../../services/notification';
 import { httpService } from '../../../../services/http';
 
-import {
-  IndexActionsContextMenu,
-  IndexActionsContextMenuProps,
-} from '../index_actions_context_menu/index_actions_context_menu';
+import type { IndexActionsContextMenuProps } from '../index_actions_context_menu/index_actions_context_menu';
+import { IndexActionsContextMenu } from '../index_actions_context_menu/index_actions_context_menu';
 
 const getIndexStatusByName = (
   indexNames: string[],
@@ -43,6 +42,8 @@ interface Props {
   index: Index;
   reloadIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
+  onIndexRefresh?: () => Promise<void> | void;
+  fill?: boolean;
 }
 
 /**
@@ -55,6 +56,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
   index,
   reloadIndexDetails,
   navigateToIndicesList,
+  onIndexRefresh,
+  fill = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -130,6 +133,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     try {
       await refreshIndicesRequest(indexNames);
       await reloadIndices();
+      await onIndexRefresh?.();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.refreshIndicesAction.indexRefreshedMessage', {
@@ -141,7 +145,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames]);
+  }, [reloadIndices, indexNames, onIndexRefresh]);
 
   const clearCacheIndices = useCallback(async () => {
     setIsLoading(true);
@@ -224,7 +228,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       indexNames={indexNames}
       indices={indices}
       indexStatusByName={indexStatusByName}
-      fill={false}
+      fill={fill}
       isLoading={isLoading}
       // index actions
       closeIndices={closeIndices}

@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { SeriesConfig, SeriesUrl } from '../types';
+import type { SeriesConfig, SeriesUrl } from '../types';
 import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
@@ -76,7 +76,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
             />
           }
         >
-          <span>{label}</span>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       ) : (
         label
@@ -137,10 +137,12 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         (dataView ? (
           <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
             <EuiBadge
+              data-test-subj="o11yReportMetricBadge"
               iconType="cross"
               iconSide="right"
               iconOnClick={() => onChange(undefined)}
               iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+              tabIndex={0}
             >
               {seriesConfig?.metricOptions?.find(
                 (option) =>

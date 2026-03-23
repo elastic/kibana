@@ -35,6 +35,7 @@ export class ANTLRErrorListener extends ErrorListener<any> {
       endColumn,
       message,
       severity: 8,
+      code: 'syntaxError',
     });
   }
 

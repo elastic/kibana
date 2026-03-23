@@ -25,9 +25,7 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
   if (isLoading || !data) {
     return <AssetInventoryLoading />;
   }
-
   const { status, privileges } = data;
-
   // Render different screens based on the onboarding status.
   switch (status) {
     case 'inactive_feature':

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { get, isPlainObject } from 'lodash';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetadata } from '../../../../../common/http_api';
 
 export interface Field {
@@ -16,14 +17,24 @@ interface FieldsByCategory {
   [key: string]: string | boolean | string[] | { [key: string]: string };
 }
 
-export const getAllFields = (metadata?: InfraMetadata) => {
+type FieldCategory =
+  | 'cloud'
+  | 'host'
+  | 'agent'
+  | 'container'
+  | 'resource.attributes.os'
+  | 'resource.attributes.host'
+  | 'resource.attributes.agent'
+  | 'resource.attributes.cloud';
+
+export const getAllFields = (
+  metadata: InfraMetadata | undefined,
+  schema: DataSchemaFormat | null
+) => {
   if (!metadata?.info) return [];
 
-  const mapNestedProperties = (
-    category: 'cloud' | 'host' | 'agent' | 'container',
-    property: string
-  ) => {
-    const fieldsByCategory: FieldsByCategory = metadata?.info?.[`${category}`] ?? {};
+  const mapNestedProperties = (category: FieldCategory, property: string) => {
+    const fieldsByCategory: FieldsByCategory = get(metadata?.info, category) ?? {};
     if (Object.hasOwn(fieldsByCategory, property)) {
       const value = fieldsByCategory[property];
 
@@ -56,6 +67,31 @@ export const getAllFields = (metadata?: InfraMetadata) => {
     return [];
   };
 
+  const additionalCategories = [];
+  if (schema === 'semconv') {
+    const osResourceAttributes = Object.keys(
+      metadata?.info?.resource?.attributes?.os ?? {}
+    ).flatMap((prop) => mapNestedProperties('resource.attributes.os', prop));
+
+    const hostResourceAttributes = Object.keys(
+      metadata?.info?.resource?.attributes?.host ?? {}
+    ).flatMap((prop) => mapNestedProperties('resource.attributes.host', prop));
+
+    const agentResourceAttributes = Object.keys(
+      metadata?.info?.resource?.attributes?.agent ?? {}
+    ).flatMap((prop) => mapNestedProperties('resource.attributes.agent', prop));
+
+    const cloudResourceAttributes = Object.keys(
+      metadata?.info?.resource?.attributes?.cloud ?? {}
+    ).flatMap((prop) => mapNestedProperties('resource.attributes.cloud', prop));
+
+    additionalCategories.push(
+      ...osResourceAttributes,
+      ...hostResourceAttributes,
+      ...agentResourceAttributes,
+      ...cloudResourceAttributes
+    );
+  }
   const agent = Object.keys(metadata.info.agent ?? {}).flatMap((prop) =>
     mapNestedProperties('agent', prop)
   );
@@ -69,7 +105,7 @@ export const getAllFields = (metadata?: InfraMetadata) => {
     mapNestedProperties('container', prop)
   );
 
-  return prune([...host, ...container, ...agent, ...cloud]);
+  return prune([...host, ...container, ...agent, ...cloud, ...additionalCategories]);
 };
 
 const prune = (fields: Field[]) => fields.filter((f) => !!f?.value);

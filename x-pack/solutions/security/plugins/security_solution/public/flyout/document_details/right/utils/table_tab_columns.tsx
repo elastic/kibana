@@ -51,7 +51,7 @@ export type ColumnsProvider = (providerOptions: {
   /**
    * Whether the preview link is in preview mode
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
   /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
@@ -71,7 +71,7 @@ export const getTableTabColumns: ColumnsProvider = ({
   scopeId,
   getLinkValue,
   ruleId,
-  isPreview,
+  isRulePreview,
   onTogglePinned,
 }) => [
   {
@@ -124,7 +124,7 @@ export const getTableTabColumns: ColumnsProvider = ({
             fieldFromBrowserField={fieldFromBrowserField}
             getLinkValue={getLinkValue}
             ruleId={ruleId}
-            isPreview={isPreview}
+            isRulePreview={isRulePreview}
             values={values}
           />
         </CellActions>

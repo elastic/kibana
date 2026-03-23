@@ -36,7 +36,7 @@ describe('resilient action params validation', () => {
       subActionParams: { incident: { name: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { 'subActionParams.incident.name': [] },
     });
   });
@@ -46,7 +46,7 @@ describe('resilient action params validation', () => {
       subActionParams: { incident: { name: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.name': ['Name is required.'],
       },

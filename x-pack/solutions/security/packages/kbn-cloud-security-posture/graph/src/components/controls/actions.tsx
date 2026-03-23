@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
@@ -112,8 +113,10 @@ export const Actions = ({
     SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
     true
   );
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (shouldShowSearchBarButtonTour) {
+  if (shouldShowSearchBarButtonTour && isTourEnabled) {
     if (searchFilterCounter > 0) {
       setIsSearchBarTourOpen(true);
       setShouldShowSearchBarButtonTour(false);
@@ -133,7 +136,7 @@ export const Actions = ({
       : undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
+    <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       {showToggleSearch && (
         <EuiFlexItem grow={false}>
           <EuiTourStep
@@ -154,6 +157,7 @@ export const Actions = ({
                 css={[
                   css`
                     position: relative;
+                    overflow: visible;
                     width: 40px;
                   `,
                   !searchToggled
@@ -163,6 +167,11 @@ export const Actions = ({
                       `
                     : undefined,
                 ]}
+                contentProps={{
+                  css: css`
+                    position: initial;
+                  `,
+                }}
                 minWidth={false}
                 size="m"
                 aria-label={toggleSearchBarTooltip}
@@ -209,10 +218,18 @@ export const Actions = ({
           </EuiTourStep>
         </EuiFlexItem>
       )}
-      {showToggleSearch && showInvestigateInTimeline && <EuiHorizontalRule margin="xs" />}
+      {showToggleSearch && showInvestigateInTimeline && (
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+      )}
       {showInvestigateInTimeline && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={investigateInTimelineTooltip} position="left">
+          <EuiToolTip
+            content={investigateInTimelineTooltip}
+            position="left"
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               iconType="timeline"
               display="base"

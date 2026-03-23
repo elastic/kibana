@@ -15,12 +15,9 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
-  const { serviceEntitySummary } = useApmServiceContext();
 
   const {
     query: { environment, kuery, comparisonEnabled },
@@ -33,12 +30,10 @@ export function ErrorGroupOverview() {
     kuery,
   });
 
-  const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="errorGroupOverview" />;
-  }
+  const headerTitle = i18n.translate(
+    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+    { defaultMessage: 'Error occurrences' }
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -50,10 +45,7 @@ export function ErrorGroupOverview() {
                 <ErrorDistribution
                   fetchStatus={errorDistributionStatus}
                   distribution={errorDistributionData}
-                  title={i18n.translate(
-                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-                    { defaultMessage: 'Error occurrences' }
-                  )}
+                  title={headerTitle}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -79,6 +71,7 @@ export function ErrorGroupOverview() {
             serviceName={serviceName}
             comparisonEnabled={comparisonEnabled}
             initialPageSize={10}
+            tableCaption={headerTitle}
           />
         </EuiPanel>
       </EuiFlexItem>

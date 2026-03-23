@@ -6,7 +6,12 @@
  */
 
 import { getPieVisualization } from './visualization';
-import { PieVisualizationState } from '../../../common/types';
+import type {
+  LensPartitionVisualizationState,
+  FramePublicAPI,
+  OperationDescriptor,
+  Visualization,
+} from '@kbn/lens-common';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -17,14 +22,12 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { CollapseFunction } from '../../../common/expressions';
-import { PaletteOutput } from '@kbn/coloring';
+import type { CollapseFunction } from '../../../common/expressions';
+import type { PaletteOutput } from '@kbn/coloring';
 import { LegendValue } from '@elastic/charts';
-import { DeprecatedLegendValuePieVisualizationState } from './runtime_state/converters/legend_stats';
+import type { DeprecatedLegendValueLensPartitionVisualizationState } from './runtime_state/converters/legend_stats';
 
 jest.mock('../../id_generator');
 
@@ -44,7 +47,7 @@ const pieVisualization = getPieVisualization({
   formatFactory: fieldFormatsServiceMock.createStartContract().deserialize,
 });
 
-function getExampleState(): PieVisualizationState {
+function getExampleState(): LensPartitionVisualizationState {
   return {
     shape: PieChartTypes.PIE,
     layers: [
@@ -95,7 +98,7 @@ describe('pie_visualization', () => {
       });
 
       it("doesn't count collapsed dimensions", () => {
-        const localState = cloneDeep(state);
+        const localState = structuredClone(state);
         localState.layers[0].collapseFns = {
           [colIds[0]]: 'some-fn' as CollapseFunction,
         };
@@ -106,7 +109,7 @@ describe('pie_visualization', () => {
       });
 
       it('counts multiple metrics as an extra bucket dimension', () => {
-        const localState = cloneDeep(state);
+        const localState = structuredClone(state);
         localState.layers[0].primaryGroups.pop();
         expect(
           pieVisualization.getUserMessages!(localState, { frame: {} as FramePublicAPI })
@@ -136,7 +139,7 @@ describe('pie_visualization', () => {
 
   describe('#setDimension', () => {
     it('returns expected state', () => {
-      const prevState: PieVisualizationState = {
+      const prevState: LensPartitionVisualizationState = {
         layers: [
           {
             primaryGroups: ['a'],
@@ -179,7 +182,8 @@ describe('pie_visualization', () => {
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
       it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
-        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
+        const persistedState: DeprecatedLegendValueLensPartitionVisualizationState =
+          getExampleState();
         persistedState.layers[0].showValuesInLegend = false;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -189,7 +193,8 @@ describe('pie_visualization', () => {
       });
 
       it('loads a xy chart with `showValuesInLegend` property equal to true and converts to legendStats: [`values`]', () => {
-        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
+        const persistedState: DeprecatedLegendValueLensPartitionVisualizationState =
+          getExampleState();
         persistedState.layers[0].showValuesInLegend = true;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -582,7 +587,7 @@ describe('pie_visualization', () => {
         const state = getExampleState();
         state.layers[0].primaryGroups = colIds;
 
-        const getConfig = (_state: PieVisualizationState) =>
+        const getConfig = (_state: LensPartitionVisualizationState) =>
           pieVisualization.getConfiguration({
             state: _state,
             frame,
@@ -591,7 +596,7 @@ describe('pie_visualization', () => {
 
         expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeFalsy();
 
-        const stateWithCollapsed = cloneDeep(state);
+        const stateWithCollapsed = structuredClone(state);
         stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
 
         expect(findPrimaryGroup(getConfig(stateWithCollapsed))?.supportsMoreColumns).toBeTruthy();
@@ -610,7 +615,7 @@ describe('pie_visualization', () => {
         state.layers[0].primaryGroups = colIds;
         state.layers[0].allowMultipleMetrics = true;
 
-        const getConfig = (_state: PieVisualizationState) =>
+        const getConfig = (_state: LensPartitionVisualizationState) =>
           pieVisualization.getConfiguration({
             state: _state,
             frame,
@@ -619,7 +624,7 @@ describe('pie_visualization', () => {
 
         expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
 
-        const stateWithMultipleMetrics = cloneDeep(state);
+        const stateWithMultipleMetrics = structuredClone(state);
         stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
         expect(
@@ -636,7 +641,7 @@ describe('pie_visualization', () => {
         state.layers[0].primaryGroups = [];
         state.layers[0].allowMultipleMetrics = false; // always true for mosaic
 
-        const getConfig = (_state: PieVisualizationState) =>
+        const getConfig = (_state: LensPartitionVisualizationState) =>
           pieVisualization.getConfiguration({
             state: _state,
             frame,
@@ -645,7 +650,7 @@ describe('pie_visualization', () => {
 
         expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
 
-        const stateWithMultipleMetrics = cloneDeep(state);
+        const stateWithMultipleMetrics = structuredClone(state);
         stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
         expect(

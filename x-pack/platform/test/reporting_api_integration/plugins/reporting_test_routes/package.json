@@ -1,0 +1,14 @@
+{
+  "name": "@kbn/reporting-test-routes",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "main": "target/test/reporting_api_integration/plugins/reporting_api_integration",
+  "scripts": {
+    "kbn": "node ../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
+  },
+  "license": "Elastic License 2.0"
+}

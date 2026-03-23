@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/aad-fixtures-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "aadFixtures",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager",
+      "encryptedSavedObjects"
+    ],
+    "optionalPlugins": [
+      "spaces"
+    ]
+  }
+}

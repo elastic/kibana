@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';
+import type { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';
 
 const createSetupContract = (): ContentManagementPublicSetup => {
   return {

@@ -8,14 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
-import {
-  ExpressionValuePartitionLabels,
-  LabelPositions,
-  PartitionLabelsArguments,
-  ValueFormats,
-} from '../types';
+import type { ExpressionValuePartitionLabels, PartitionLabelsArguments } from '../types';
+import { LabelPositions, ValueFormats } from '../types';
 
 export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
   typeof PARTITION_LABELS_FUNCTION,

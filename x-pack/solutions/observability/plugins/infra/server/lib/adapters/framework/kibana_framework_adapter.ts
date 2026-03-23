@@ -133,7 +133,7 @@ export class KibanaFramework {
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'msearch',
-    options?: CallWithRequestParams,
+    options?: CallWithRequestParams | estypes.MsearchRequest,
     request?: KibanaRequest
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(

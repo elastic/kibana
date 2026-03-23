@@ -57,73 +57,78 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockImplementation((key) => {
-            const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
-              const x = {
-                dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-                'timepicker:quickRanges': [
-                  {
-                    from: 'now/d',
-                    to: 'now/d',
-                    display: 'Today',
-                  },
-                  {
-                    from: 'now/w',
-                    to: 'now/w',
-                    display: 'This week',
-                  },
-                  {
-                    from: 'now-15m',
-                    to: 'now',
-                    display: 'Last 15 minutes',
-                  },
-                  {
-                    from: 'now-30m',
-                    to: 'now',
-                    display: 'Last 30 minutes',
-                  },
-                  {
-                    from: 'now-1h',
-                    to: 'now',
-                    display: 'Last 1 hour',
-                  },
-                  {
-                    from: 'now-24h',
-                    to: 'now',
-                    display: 'Last 24 hours',
-                  },
-                  {
-                    from: 'now-7d',
-                    to: 'now',
-                    display: 'Last 7 days',
-                  },
-                  {
-                    from: 'now-30d',
-                    to: 'now',
-                    display: 'Last 30 days',
-                  },
-                  {
-                    from: 'now-90d',
-                    to: 'now',
-                    display: 'Last 90 days',
-                  },
-                  {
-                    from: 'now-1y',
-                    to: 'now',
-                    display: 'Last 1 year',
-                  },
-                ],
+    useKibana: () => {
+      const originalUseKibana = original.useKibana();
+      return {
+        ...originalUseKibana,
+        services: {
+          ...originalUseKibana.services,
+          uiSettings: {
+            get: jest.fn().mockImplementation((key) => {
+              const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
+                const x = {
+                  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+                  'timepicker:quickRanges': [
+                    {
+                      from: 'now/d',
+                      to: 'now/d',
+                      display: 'Today',
+                    },
+                    {
+                      from: 'now/w',
+                      to: 'now/w',
+                      display: 'This week',
+                    },
+                    {
+                      from: 'now-15m',
+                      to: 'now',
+                      display: 'Last 15 minutes',
+                    },
+                    {
+                      from: 'now-30m',
+                      to: 'now',
+                      display: 'Last 30 minutes',
+                    },
+                    {
+                      from: 'now-1h',
+                      to: 'now',
+                      display: 'Last 1 hour',
+                    },
+                    {
+                      from: 'now-24h',
+                      to: 'now',
+                      display: 'Last 24 hours',
+                    },
+                    {
+                      from: 'now-7d',
+                      to: 'now',
+                      display: 'Last 7 days',
+                    },
+                    {
+                      from: 'now-30d',
+                      to: 'now',
+                      display: 'Last 30 days',
+                    },
+                    {
+                      from: 'now-90d',
+                      to: 'now',
+                      display: 'Last 90 days',
+                    },
+                    {
+                      from: 'now-1y',
+                      to: 'now',
+                      display: 'Last 1 year',
+                    },
+                  ],
+                };
+                return x[k];
               };
-              return x[k];
-            };
-            return get(key);
-          }),
+              return get(key);
+            }),
+          },
         },
-      },
-    }),
+      };
+    },
   };
 });
 
@@ -588,7 +593,6 @@ describe('Response actions history', () => {
     });
 
     it('should contain agent type info in each expanded row', async () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
       render();
       const { getAllByTestId } = renderResult;
 
@@ -691,7 +695,7 @@ describe('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
+        const downloadLink = getByTestId(`${testPrefix}-output-getFileDownloadLink`);
         expect(downloadLink).toBeTruthy();
         expect(downloadLink.textContent).toEqual(
           'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -774,7 +778,9 @@ describe('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadExecuteLink = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
+        const downloadExecuteLink = getByTestId(
+          `${testPrefix}-output-actionsLogTray-getExecuteLink`
+        );
         expect(downloadExecuteLink).toBeTruthy();
         expect(downloadExecuteLink.textContent).toEqual(
           'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -818,9 +824,7 @@ describe('Response actions history', () => {
         });
 
         const accordionTitles = Array.from(
-          getByTestId(`${testPrefix}-executeDetails`).querySelectorAll(
-            '.euiAccordion__triggerWrapper'
-          )
+          getByTestId(`${testPrefix}-output`).querySelectorAll('.euiAccordion__triggerWrapper')
         ).map((el) => el.textContent);
 
         expect(accordionTitles).toEqual([
@@ -851,7 +855,7 @@ describe('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         await user.click(expandButton);
 
-        expect(getByTestId(`${testPrefix}-actionsLogTray-executeResponseOutput-output`));
+        expect(getByTestId(`${testPrefix}-output-actionsLogTray-executeResponseOutput-output`));
       });
 
       it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
@@ -910,7 +914,7 @@ describe('Response actions history', () => {
           const expandButton = getByTestId(`${testPrefix}-expand-button`);
           await user.click(expandButton);
 
-          const output = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
+          const output = getByTestId(`${testPrefix}-output-actionsLogTray-getExecuteLink`);
           expect(output).toBeTruthy();
           expect(output.textContent).toEqual(
             'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -943,6 +947,7 @@ describe('Response actions history', () => {
 
       it('should display pending output if action is not complete yet', async () => {
         action.isCompleted = false;
+        action.agentState[action.agents.at(0)!].isCompleted = false;
         const { getByTestId } = render();
         await user.click(getByTestId(`${testPrefix}-expand-button`));
 
@@ -955,7 +960,7 @@ describe('Response actions history', () => {
         const { getByTestId } = render();
         await user.click(getByTestId(`${testPrefix}-expand-button`));
 
-        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
+        expect(getByTestId(`${testPrefix}-output`)).toHaveTextContent(
           'upload completed successfully' +
             'File saved to: /path/to/uploaded/file' +
             'Free disk space on drive: 1.18MB'
@@ -986,12 +991,13 @@ describe('Response actions history', () => {
 
         await user.click(getByTestId(`${testPrefix}-expand-button`));
 
-        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
-          'upload completed successfully' +
-            'Host: Host-agent-a' +
+        expect(getByTestId(`${testPrefix}-output`)).toHaveTextContent(
+          'Host-agent-a: upload completed successfully' +
+            'Execution completed 2022-04-30T16:08:47.449Z' +
             'File saved to: /path/to/uploaded/file' +
             'Free disk space on drive: 1.18MB' +
-            'Host: host b' +
+            'host b: upload completed successfully' +
+            'Execution completed 2023-05-10T20:09:25.824Z' +
             'File saved to: some/path/to/file' +
             'Free disk space on drive: 120.55KB'
         );
@@ -1040,7 +1046,7 @@ describe('Response actions history', () => {
                 isCompleted: true,
                 completedAt: '2023-05-10T20:09:25.824Z',
               },
-            } as unknown as Pick<ActionDetails, 'agentState'>,
+            },
             outputs: (command === 'upload'
               ? {
                   'agent-a': {
@@ -1119,9 +1125,28 @@ describe('Response actions history', () => {
 
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
+
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
-          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
+          expect.stringMatching(
+            new RegExp(
+              `Host-agent-a: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred' +
+                `Host-agent-b: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred'
+            )
+          ),
+          expect.stringMatching(
+            new RegExp(
+              `Host-agent-a: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred' +
+                `Host-agent-b: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred'
+            )
+          ),
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1137,7 +1162,8 @@ describe('Response actions history', () => {
           data: await getActionListMock({
             actionCount: 2,
             commands: [command],
-            isCompleted: false,
+            isCompleted: true,
+            wasSuccessful: false,
             isExpired: true,
             status: 'failed',
           }),
@@ -1147,8 +1173,8 @@ describe('Response actions history', () => {
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failed: action expired`,
-          `${outputCommand} failed: action expired`,
+          `${outputCommand} failed: action expiredThe following errors were encountered:An unknown error occurred`,
+          `${outputCommand} failed: action expiredThe following errors were encountered:An unknown error occurred`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1206,7 +1232,7 @@ describe('Response actions history', () => {
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
-          } as unknown as Pick<ActionDetails, 'agentState'>,
+          },
           outputs: {},
         });
 
@@ -1244,7 +1270,7 @@ describe('Response actions history', () => {
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
-              } as unknown as Pick<ActionDetails, 'agentState'>,
+              },
               // just adding three commands for tests with respective error response codes
               outputs: ['get-file', 'scan'].includes(command)
                 ? ({
@@ -1309,7 +1335,7 @@ describe('Response actions history', () => {
                     isCompleted: true,
                     completedAt: '2023-05-10T20:09:25.824Z',
                   },
-                } as unknown as Pick<ActionDetails, 'agentState'>,
+                },
               }),
             });
             render();
@@ -1353,12 +1379,11 @@ describe('Response actions history', () => {
             },
             'agent-c': {
               errors: [''],
-              isExpired: true,
               wasSuccessful: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
-          } as unknown as Pick<ActionDetails, 'agentState'>,
+          },
           outputs: {},
         });
 
@@ -1405,7 +1430,7 @@ describe('Response actions history', () => {
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
-              } as unknown as Pick<ActionDetails, 'agentState'>,
+              },
               outputs: {
                 'agent-a': {
                   type: 'json',
@@ -1444,15 +1469,30 @@ describe('Response actions history', () => {
             const outputs = await expandRows();
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: The file specified was not found | Error with agent-a!Host: Host-agent-bErrors: The path defined is not valid | Error with agent-b!`,
+                'Host-agent-a: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:The file specified was not found | Error with agent-a!' +
+                  'Host-agent-b: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:The path defined is not valid | Error with agent-b!',
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Invalid absolute file path provided | Error with agent-a!Host: Host-agent-bErrors: Invalid absolute file path provided | Error with agent-b!`,
+                'Host-agent-a: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:Invalid absolute file path provided | Error with agent-a!' +
+                  'Host-agent-b: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:Invalid absolute file path provided | Error with agent-b!',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             }
           }
@@ -1484,7 +1524,7 @@ describe('Response actions history', () => {
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
-              } as unknown as Pick<ActionDetails, 'agentState'>,
+              },
               outputs: {},
             });
 
@@ -1498,15 +1538,30 @@ describe('Response actions history', () => {
             const outputs = await expandRows();
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                'Host-agent-a: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  'Host-agent-b: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                'Host-agent-a: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  'Host-agent-b: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             }
           }
@@ -1520,8 +1575,9 @@ describe('Response actions history', () => {
 
     beforeEach(() => {
       featureFlags = {
-        responseActionUploadEnabled: true,
         crowdstrikeRunScriptEnabled: true,
+        microsoftDefenderEndpointCancelEnabled: true,
+        responseActionsEndpointMemoryDump: true,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1541,7 +1597,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (with `runscript`) when opened', async () => {
+    it('should show a list of actions (with `runscript` and `cancel`) when opened', async () => {
       // Note: when we enable new commands, it might be needed to increase the height
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1563,6 +1619,40 @@ describe('Response actions history', () => {
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
         'runscript. To check this option, press Enter.',
+        'cancel. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
+      ]);
+    });
+
+    it('should show a list of actions (without `cancel`) when cancel feature flag is disabled', async () => {
+      // Set the cancel feature flag to false
+      const featureFlagsWithoutCancel = {
+        ...featureFlags,
+        microsoftDefenderEndpointCancelEnabled: false,
+      };
+      mockedContext.setExperimentalFlag(featureFlagsWithoutCancel);
+
+      render({ 'data-test-height': 350 });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
+        'scan. To check this option, press Enter.',
+        'runscript. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
       ]);
     });
 
@@ -1858,11 +1948,6 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agents and action types when opened in page view', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: true,
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-        responseActionsMSDefenderEndpointEnabled: true,
-      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 

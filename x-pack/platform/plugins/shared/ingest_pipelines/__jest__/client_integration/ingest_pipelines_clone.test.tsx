@@ -5,56 +5,100 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@kbn/code-editor-mock/jest_helper';
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import React from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
+
 import { API_BASE_PATH } from '../../common/constants';
-import { PIPELINE_TO_CLONE, PipelinesCloneTestBed } from './helpers/pipelines_clone.helpers';
-
-const { setup } = pageHelpers.pipelinesClone;
+import { PipelinesClone } from '../../public/application/sections/pipelines_clone';
+import { getClonePath, ROUTES } from '../../public/application/services/navigation';
+import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 
 describe('<PipelinesClone />', () => {
-  let testBed: PipelinesCloneTestBed;
-
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  const originalLocation = window.location;
 
-  beforeEach(async () => {
+  const PIPELINE_TO_CLONE = {
+    name: 'my_pipeline',
+    description: 'pipeline description',
+    processors: [
+      {
+        set: {
+          field: 'foo',
+          value: 'new',
+        },
+      },
+    ],
+  };
+
+  const renderPipelinesClone = async () => {
+    const history = createMemoryHistory({
+      initialEntries: [getClonePath({ clonedPipelineName: PIPELINE_TO_CLONE.name })],
+    });
+
+    const Wrapped = WithAppDependencies(PipelinesClone, httpSetup);
+    render(
+      <Router history={history}>
+        <Route path={ROUTES.clone} component={Wrapped} />
+      </Router>
+    );
+
+    await screen.findByTestId('pipelineForm');
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
     httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE.name, PIPELINE_TO_CLONE);
 
-    await act(async () => {
-      testBed = await setup(httpSetup);
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        ...originalLocation,
+        pathname: getClonePath({ clonedPipelineName: PIPELINE_TO_CLONE.name }),
+      },
     });
-
-    testBed.component.update();
   });
 
-  test('should render the correct page header', () => {
-    const { exists, find } = testBed;
-
-    // Verify page title
-    expect(exists('pageTitle')).toBe(true);
-    expect(find('pageTitle').text()).toEqual('Create pipeline');
-
-    // Verify documentation link
-    expect(exists('documentationLink')).toBe(true);
-    expect(find('documentationLink').text()).toBe('Create pipeline docs');
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
   });
 
-  describe('form submission', () => {
-    it('should send the correct payload', async () => {
-      const { actions } = testBed;
+  test('should render the correct page header', async () => {
+    await renderPipelinesClone();
 
-      await actions.clickSubmitButton();
+    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline');
+    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Create pipeline docs');
+  });
 
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
-        API_BASE_PATH,
-        expect.objectContaining({
-          body: JSON.stringify({
-            ...PIPELINE_TO_CLONE,
-            name: `${PIPELINE_TO_CLONE.name}-copy`,
-          }),
-        })
-      );
+  test('should send the correct payload', async () => {
+    await renderPipelinesClone();
+
+    const postCallsBefore = httpSetup.post.mock.calls.length;
+    fireEvent.click(screen.getByTestId('submitButton'));
+
+    await waitFor(() => expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore));
+    const createRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
+      | Promise<unknown>
+      | undefined;
+    expect(createRequest).toBeDefined();
+    await waitFor(async () => {
+      await createRequest;
     });
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      API_BASE_PATH,
+      expect.objectContaining({
+        body: JSON.stringify({
+          ...PIPELINE_TO_CLONE,
+          name: `${PIPELINE_TO_CLONE.name}-copy`,
+        }),
+      })
+    );
   });
 });

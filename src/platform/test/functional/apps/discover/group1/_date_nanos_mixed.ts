@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'timestamp-*',
-        hideAnnouncements: true, // should be enough vertical space to render rows
       });
       await browser.setWindowSize(1200, 900);
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);

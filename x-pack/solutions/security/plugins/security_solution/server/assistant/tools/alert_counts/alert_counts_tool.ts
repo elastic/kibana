@@ -10,12 +10,12 @@ import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { contentReferenceString, securityAlertsPageReference } from '@kbn/elastic-assistant-common';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
 
-export interface AlertCountsToolParams extends AssistantToolParams {
-  alertsIndexPattern: string;
-}
+export type AlertCountsToolParams = Require<AssistantToolParams, 'alertsIndexPattern'>;
+
 export const ALERT_COUNTS_TOOL_DESCRIPTION =
   'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status. The response will be JSON and from it you can summarize the information to answer the question.';
 
@@ -31,7 +31,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
     const { request, alertsIndexPattern } = params;
     return requestHasRequiredAnonymizationParams(request) && alertsIndexPattern != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
     const { alertsIndexPattern, esClient, contentReferencesStore } =
       params as AlertCountsToolParams;

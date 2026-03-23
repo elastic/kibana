@@ -6,8 +6,20 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiProgress,
+  EuiFlexItem,
+  EuiLoadingChart,
+  useEuiTheme,
+  EuiCodeBlock,
+  EuiIcon,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { IconChartLine } from '@kbn/chart-icons';
+import type { InfraHttpError } from '../../types';
 
 export const ChartLoadingProgress = ({ hasTopMargin = false }: { hasTopMargin?: boolean }) => {
   const { euiTheme } = useEuiTheme();
@@ -24,7 +36,60 @@ export const ChartLoadingProgress = ({ hasTopMargin = false }: { hasTopMargin?: 
   );
 };
 
-export const ChartPlaceholder = ({ style }: { style?: React.CSSProperties }) => {
+interface ChartPlaceholderProps {
+  style?: React.CSSProperties;
+  error?: InfraHttpError;
+  isEmpty?: boolean;
+}
+
+export const ChartPlaceholder = ({ style, error, isEmpty }: ChartPlaceholderProps) => {
+  if (error) {
+    return (
+      <>
+        <EuiFlexGroup
+          style={style}
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          direction="column"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'alert'} size="l" color={'danger'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {error.message && (
+              <EuiCodeBlock
+                paddingSize="s"
+                isCopyable
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                `}
+              >
+                {error.message}
+              </EuiCodeBlock>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+  if (isEmpty) {
+    return (
+      <>
+        <EmptyPlaceholder
+          icon={IconChartLine}
+          message={
+            <FormattedMessage
+              id="xpack.infra.lens.noResultsFound"
+              defaultMessage="No results found"
+            />
+          }
+        />
+      </>
+    );
+  }
   return (
     <>
       <ChartLoadingProgress hasTopMargin={false} />

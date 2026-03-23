@@ -5,14 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useReloadRequestTimeContext } from '../../../../../../hooks/use_reload_request_time';
-import { resolveDataView } from '../../../../../../utils/data_view';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HOST_NAME_FIELD } from '../../../../../../../common/constants';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
+import { ChartPlaceholder } from '../../../../../../components/lens/chart_placeholder';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
@@ -21,16 +23,14 @@ import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
 export type ChartProps = LensConfig & {
   id: string;
+  dataView: DataView | undefined;
 };
 
-export const Chart = ({ id, ...chartProps }: ChartProps) => {
+export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { loading } = useHostsViewContext();
+  const { loading, error, hostNodes } = useHostsViewContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
   const { currentPage } = useHostsTableContext();
-  const {
-    services: { dataViews },
-  } = useKibanaContextForPlugin();
 
   const shouldUseSearchCriteria = currentPage.length === 0;
 
@@ -44,10 +44,9 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
   });
 
   const { value: filters = [] } = useAsync(async () => {
-    const resolvedDataView = await resolveDataView({
-      dataViewId: (chartProps.dataset as LensDataviewDataset)?.index,
-      dataViewsService: dataViews,
-    });
+    if (!dataView?.id) {
+      return [];
+    }
 
     return shouldUseSearchCriteria
       ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
@@ -55,17 +54,34 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
           buildCombinedAssetFilter({
             field: HOST_NAME_FIELD,
             values: currentPage.map((p) => p.name),
-            dataView: resolvedDataView.dataViewReference,
+            dataView,
           }),
         ];
   }, [
     currentPage,
-    dataViews,
-    chartProps.dataset,
+    dataView,
     searchCriteria.filters,
     searchCriteria.panelFilters,
     shouldUseSearchCriteria,
   ]);
+
+  if (!loading && (!hostNodes.length || error)) {
+    return (
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+        css={css`
+          min-height: ${METRIC_CHART_HEIGHT}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `}
+      >
+        <ChartPlaceholder error={error} isEmpty={hostNodes.length === 0} />
+      </EuiPanel>
+    );
+  }
 
   return (
     <LensChart

@@ -6,8 +6,9 @@
  */
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import { DEFAULT_SYNTHETICS_VERSION } from '../services/private_location_test_service';
 import { commonVars } from './test_project_monitor_policy';
 
 interface PolicyProps {
@@ -22,16 +23,23 @@ interface PolicyProps {
   params?: Record<string, any>;
   isBrowser?: boolean;
   spaceId?: string;
+  mws?: MaintenanceWindow[];
+  packageVersion?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace } = props;
+  const { namespace, packageVersion } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+    spaceIds: ['default'],
+    package: {
+      name: 'synthetics',
+      title: 'Elastic Synthetics',
+      version: packageVersion ?? DEFAULT_SYNTHETICS_VERSION,
+    },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
@@ -133,6 +141,7 @@ export const getHttpInput = ({
   isBrowser,
   spaceId,
   namespace,
+  mws,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;
@@ -171,7 +180,10 @@ export const getHttpInput = ({
     'ssl.supported_protocols': { type: 'yaml' },
     location_id: { value: 'fleet_managed', type: 'text' },
     location_name: { value: 'Fleet managed', type: 'text' },
-    ...commonVars,
+    max_attempts: { type: 'integer', value: 2 },
+    maintenance_windows: {
+      type: 'yaml',
+    },
     id: { type: 'text' },
     origin: { type: 'text' },
     ipv4: { type: 'bool', value: true },
@@ -248,7 +260,7 @@ export const getHttpInput = ({
       value: JSON.stringify(location.name) ?? '"Test private location 0"',
       type: 'text',
     },
-    ...commonVars,
+    ...commonVars(mws),
     id: { value: JSON.stringify(id), type: 'text' },
     origin: { value: projectId ? 'project' : 'ui', type: 'text' },
     ipv4: { type: 'bool', value: true },
@@ -285,6 +297,7 @@ export const getHttpInput = ({
     'check.response.status': ['200', '201'],
     ipv4: true,
     ipv6: true,
+    maintenance_windows: null,
     mode: 'any',
     ...(isTLSEnabled
       ? {
@@ -358,7 +371,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
         'run_from.geo.name': 'Test private location 0',
         enabled: true,
         schedule: '@every 3m',
-        timeout: '16s',
+        timeout: '30s',
         throttling: { download: 5, upload: 3, latency: 20 },
         tags: ['cookie-test', 'browser'],
         'source.inline.script':
@@ -402,7 +415,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
         name: { value: 'Test HTTP Monitor 03', type: 'text' },
         schedule: { value: '"@every 3m"', type: 'text' },
         'service.name': { value: '', type: 'text' },
-        timeout: { value: '16s', type: 'text' },
+        timeout: { value: '30s', type: 'text' },
         tags: { value: '["cookie-test","browser"]', type: 'yaml' },
         'source.zip_url.url': { type: 'text' },
         'source.zip_url.username': { type: 'text' },
@@ -522,6 +535,7 @@ export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
 
   policy.inputs.forEach((input) => {
+    input.id = '';
     input.streams = sortBy(input.streams, 'data_stream.dataset');
     input.streams.forEach((stream) => {
       stream.id = '';

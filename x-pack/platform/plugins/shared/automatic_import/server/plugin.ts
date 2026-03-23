@@ -89,7 +89,9 @@ export class AutomaticImportPlugin
       this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
     });
 
-    return {};
+    return {
+      inference: dependencies.inference,
+    };
   }
 
   public stop() {}

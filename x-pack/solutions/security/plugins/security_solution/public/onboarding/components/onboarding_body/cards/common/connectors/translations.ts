@@ -20,13 +20,6 @@ export const SELECTED_PROVIDER = i18n.translate(
   }
 );
 
-export const PRECONFIGURED_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.onboarding.assistantCard.preconfiguredTitle',
-  {
-    defaultMessage: 'Preconfigured',
-  }
-);
-
 export const REQUIRED_PRIVILEGES_CONNECTORS_READ = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges.connectorsRead',
   { defaultMessage: 'Management > Actions & Connectors: Read' }
@@ -34,4 +27,11 @@ export const REQUIRED_PRIVILEGES_CONNECTORS_READ = i18n.translate(
 export const REQUIRED_PRIVILEGES_CONNECTORS_ALL = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges.connectorsAll',
   { defaultMessage: 'Management > Actions & Connectors: All' }
+);
+
+export const PRECONFIGURED_CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.preconfiguredConnectorLabel',
+  {
+    defaultMessage: 'Pre-configured',
+  }
 );

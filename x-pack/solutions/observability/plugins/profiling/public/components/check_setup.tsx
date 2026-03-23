@@ -4,19 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
@@ -87,127 +76,65 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displaySetupScreen =
     (status === AsyncStatus.Settled &&
+      data?.type !== 'serverless' &&
       data?.has_setup !== true &&
       data?.pre_8_9_1_data === false) ||
     !!error;
 
   if (displaySetupScreen) {
-    const isButtonDisabled = postSetupLoading || data?.has_required_role === false;
     return (
       <ProfilingAppPageTemplate
         tabs={[]}
         noDataConfig={{
-          docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
-          logo: 'logoObservability',
-          pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-            defaultMessage: 'Universal Profiling',
-          }),
           action: {
             elasticAgent: {
-              description: (
-                <EuiFlexGrid gutterSize="s">
-                  <EuiText>
-                    {i18n.translate('xpack.profiling.noDataConfig.action.title', {
-                      defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
-                Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
-                    })}
-                  </EuiText>
-                  <EuiCallOut
-                    size="s"
-                    color="warning"
-                    title={i18n.translate(
-                      'xpack.profiling.noDataConfig.action.permissionsWarning',
-                      {
-                        defaultMessage:
-                          'To setup Universal Profiling, you must be logged in as a superuser.',
-                      }
-                    )}
-                  />
-                  <EuiText size={'xs'}>
-                    <ul>
-                      <li>
-                        <FormattedMessage
-                          id="xpack.profiling.noDataConfig.action.dataRetention"
-                          defaultMessage="Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about {dataRetentionLink}."
-                          values={{
-                            dataRetentionLink: (
-                              <EuiLink
-                                data-test-subj="profilingCheckSetupControllingDataRetentionLink"
-                                href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/set-up-lifecycle-policy.html`}
-                                target="_blank"
-                              >
-                                {i18n.translate(
-                                  'xpack.profiling.noDataConfig.action.dataRetention.link',
-                                  { defaultMessage: 'controlling data retention' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </li>
-                    </ul>
-                  </EuiText>
-                  <EuiText size={'xs'} />
-                </EuiFlexGrid>
-              ),
+              title: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
+                defaultMessage: 'Universal Profiling',
+              }),
+              description: i18n.translate('xpack.profiling.noDataConfig.action.description', {
+                defaultMessage:
+                  'Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.',
+              }),
+              buttonText: postSetupLoading
+                ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
+                    defaultMessage: 'Setting up Universal Profiling...',
+                  })
+                : i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
+                    defaultMessage: 'Set up Universal Profiling',
+                  }),
+              buttonIsDisabled: (postSetupLoading && true) || data?.has_required_role === false,
+              disabledButtonTooltipText:
+                data?.has_required_role === false
+                  ? i18n.translate('xpack.profiling.noDataConfig.action.permissionsTooltip', {
+                      defaultMessage:
+                        'You need superuser permissions to set up Universal Profiling.',
+                    })
+                  : undefined,
               onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                 event.preventDefault();
+
+                setPostSetupLoading(true);
+
+                postSetupResources({ http })
+                  .then(() => refresh())
+                  .catch((err) => {
+                    const message = err?.body?.message ?? err.message ?? String(err);
+
+                    notifications.toasts.addError(err, {
+                      title: i18n.translate('xpack.profiling.checkSetup.setupFailureToastTitle', {
+                        defaultMessage: 'Failed to complete setup',
+                      }),
+                      toastMessage: message,
+                    });
+                  })
+                  .finally(() => {
+                    setPostSetupLoading(false);
+                  });
               },
-              button: (
-                <EuiToolTip
-                  content={
-                    data?.has_required_role === false
-                      ? i18n.translate('xpack.profiling.checkSetup.tooltip', {
-                          defaultMessage: 'You must be logged in as a superuser',
-                        })
-                      : ''
-                  }
-                >
-                  <EuiButton
-                    data-test-subj="profilingCheckSetupButton"
-                    disabled={isButtonDisabled}
-                    onClick={(event) => {
-                      event.preventDefault();
-
-                      setPostSetupLoading(true);
-
-                      postSetupResources({ http })
-                        .then(() => refresh())
-                        .catch((err) => {
-                          const message = err?.body?.message ?? err.message ?? String(err);
-
-                          notifications.toasts.addError(err, {
-                            title: i18n.translate(
-                              'xpack.profiling.checkSetup.setupFailureToastTitle',
-                              {
-                                defaultMessage: 'Failed to complete setup',
-                              }
-                            ),
-                            toastMessage: message,
-                          });
-                        })
-                        .finally(() => {
-                          setPostSetupLoading(false);
-                        });
-                    }}
-                    fill
-                    isLoading={postSetupLoading}
-                  >
-                    {!postSetupLoading
-                      ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                          defaultMessage: 'Set up Universal Profiling',
-                        })
-                      : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                          defaultMessage: 'Setting up Universal Profiling...',
-                        })}
-                  </EuiButton>
-                </EuiToolTip>
-              ),
+              docsLink: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
+              'data-test-subj': 'profilingCheckSetupCard',
             },
           },
-          solution: i18n.translate('xpack.profiling.noDataConfig.solutionName', {
-            defaultMessage: 'Universal Profiling',
-          }),
         }}
         hideSearchBar
       >
@@ -216,12 +143,26 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
+  if (
+    status === AsyncStatus.Settled &&
+    data?.type === 'serverless' &&
+    data?.profiling_enabled === false &&
+    history.location.pathname !== '/profiling-not-enabled'
+  ) {
+    router.push('/profiling-not-enabled', {
+      path: {},
+      query: {},
+    });
+    return null;
+  }
+
   const displayUi =
-    // Display UI if there's data or if the user is opening the add data instruction page.
+    // Display UI if there's data or if the user is opening one of the setup/disabled pages.
     // does not use profiling router because that breaks as at this point the route might not have all required params
     (data?.has_data === true && data?.pre_8_9_1_data === false) ||
     history.location.pathname === '/add-data-instructions' ||
-    history.location.pathname === '/delete_data_instructions';
+    history.location.pathname === '/delete_data_instructions' ||
+    history.location.pathname === '/profiling-not-enabled';
 
   if (displayUi) {
     return children;

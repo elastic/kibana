@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
+import type React from 'react';
+import type {
   UseFormReturn,
   ControllerRenderProps,
   ControllerFieldState,
@@ -14,7 +14,7 @@ import {
   UseControllerProps,
   FieldValues,
 } from 'react-hook-form';
-import {
+import type {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
@@ -22,7 +22,7 @@ import {
   ResponseCheckJSON,
   RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
-import { AlertConfigKey } from './constants';
+import type { AlertConfigKey } from './constants';
 
 export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
 
@@ -34,7 +34,7 @@ export interface Step {
 export type StepMap = Record<FormMonitorType, Step[]>;
 
 export * from '../../../../../common/runtime_types/monitor_management';
-export * from '../../../../../common/types/monitor_validation';
+export type * from '../../../../../common/types/monitor_validation';
 
 export interface FormLocation {
   id: string;
@@ -77,9 +77,10 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   fieldKey: keyof FormConfig;
   component: React.ComponentType<any>;
   label?: string | React.ReactNode;
+  labelAppend?: React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
-  hidden?: (depenencies: unknown[]) => boolean;
+  hidden?: (dependencies: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
@@ -166,4 +167,6 @@ export interface FieldMap {
   [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
   [ConfigKey.LABELS]: FieldMeta<ConfigKey.LABELS>;
+  [ConfigKey.MAINTENANCE_WINDOWS]: FieldMeta<ConfigKey.MAINTENANCE_WINDOWS>;
+  [ConfigKey.KIBANA_SPACES]: FieldMeta<ConfigKey.KIBANA_SPACES>;
 }

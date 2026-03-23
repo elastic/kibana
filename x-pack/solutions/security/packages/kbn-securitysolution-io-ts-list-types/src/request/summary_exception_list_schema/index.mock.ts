@@ -7,7 +7,7 @@
 
 import { FILTER, ID, LIST_ID, NAMESPACE_TYPE } from '../../constants/index.mock';
 
-import { SummaryExceptionListSchema } from '.';
+import type { SummaryExceptionListSchema } from '.';
 
 export const getSummaryExceptionListSchemaMock = (): SummaryExceptionListSchema => ({
   filter: FILTER,

@@ -5,39 +5,26 @@
  * 2.0.
  */
 
-/** @jsx jsx */
-// Needed for for testing out the css prop feature. See: https://emotion.sh/docs/css-prop#jsx-pragma
-import { css, jsx } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import React, { FunctionComponent, memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiIconTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { useKibana } from '../../../../../shared_imports';
 
-import { PhaseExceptDelete } from '../../../../../../common/types';
+import type { PhaseExceptDelete } from '../../../../../../common/types';
 
-import {
-  calculateRelativeFromAbsoluteMilliseconds,
-  PhaseAgeInMilliseconds,
-  AbsoluteTimings,
-} from '../../lib';
+import type { PhaseAgeInMilliseconds, AbsoluteTimings } from '../../lib';
+import { calculateRelativeFromAbsoluteMilliseconds } from '../../lib';
 
 import { InfinityIcon, LearnMoreLink } from '..';
 
 import { TimelinePhaseText } from './components';
+import { useStyles } from './timeline.styles';
 
 const exists = (v: unknown) => v != null;
-
-import './timeline.scss';
 
 const toPercent = (n: number, total: number) => (n / total) * 100;
 
@@ -89,8 +76,11 @@ const i18nTexts = {
   },
 };
 
-const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
-  const hotScore = msTimeToOverallPercent(inputs.phases.hot, inputs.total) + SCORE_BUFFER_AMOUNT;
+const calculateWidths = (inputs: PhaseAgeInMilliseconds, showHotPhase: boolean) => {
+  const hotScore =
+    showHotPhase && inputs.phases.hot != null
+      ? msTimeToOverallPercent(inputs.phases.hot, inputs.total) + SCORE_BUFFER_AMOUNT
+      : 0;
   const warmScore =
     inputs.phases.warm != null
       ? msTimeToOverallPercent(inputs.phases.warm, inputs.total) + SCORE_BUFFER_AMOUNT
@@ -105,6 +95,9 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
       : 0;
 
   const totalScore = hotScore + warmScore + coldScore + frozenScore;
+  if (totalScore === 0) {
+    return { hot: '0%', warm: '0%', cold: '0%', frozen: '0%' };
+  }
   return {
     hot: `${toPercent(hotScore, totalScore)}%`,
     warm: `${toPercent(warmScore, totalScore)}%`,
@@ -115,6 +108,7 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
 
 interface Props {
   hasDeletePhase: boolean;
+  showHotPhase?: boolean;
   /**
    * For now we assume the hot phase does not have a min age
    */
@@ -132,7 +126,7 @@ interface Props {
  * and should not rely directly on any application-specific context.
  */
 export const Timeline: FunctionComponent<Props> = memo(
-  ({ hasDeletePhase, isUsingRollover, showTitle = true, ...phasesMinAge }) => {
+  ({ hasDeletePhase, isUsingRollover, showHotPhase = true, showTitle = true, ...phasesMinAge }) => {
     const absoluteTimings: AbsoluteTimings = {
       hot: { min_age: phasesMinAge.hotPhaseMinAge },
       warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
@@ -145,20 +139,11 @@ export const Timeline: FunctionComponent<Props> = memo(
         : undefined,
     };
 
-    const { euiTheme } = useEuiTheme();
-
-    const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
-
-    const timelineIconColors = {
-      hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
-      warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
-      cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
-      frozen: euiTheme.colors.vis.euiColorVis4,
-    };
+    const styles = useStyles();
 
     const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
 
-    const widths = calculateWidths(phaseAgeInMilliseconds);
+    const widths = calculateWidths(phaseAgeInMilliseconds, showHotPhase);
 
     const getDurationInPhaseContent = (phase: PhaseExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
@@ -191,10 +176,14 @@ export const Timeline: FunctionComponent<Props> = memo(
         )}
         <EuiFlexItem>
           <div
-            className="ilmTimeline"
+            css={styles.container}
             ref={(el) => {
               if (el) {
-                el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
+                if (showHotPhase) {
+                  el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
+                } else {
+                  el.style.removeProperty('--ilm-timeline-hot-phase-width');
+                }
                 el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
                 el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
                 el.style.setProperty('--ilm-timeline-frozen-phase-width', widths.frozen ?? null);
@@ -203,34 +192,26 @@ export const Timeline: FunctionComponent<Props> = memo(
           >
             <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
               <EuiFlexItem>
-                <div className="ilmTimeline__phasesContainer">
+                <div css={styles.phasesContainer}>
                   {/* These are the actual color bars for the timeline */}
-                  <div
-                    data-test-subj="ilmTimelinePhase-hot"
-                    className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
-                  >
+                  {showHotPhase && (
                     <div
-                      className={`ilmTimeline__colorBar `}
-                      css={css`
-                        background-color: ${timelineIconColors.hot};
-                      `}
-                    />
-                    <TimelinePhaseText
-                      phaseName={i18nTexts.hotPhase}
-                      durationInPhase={getDurationInPhaseContent('hot')}
-                    />
-                  </div>
+                      data-test-subj="ilmTimelinePhase-hot"
+                      css={[styles.phase, styles.hotPhase]}
+                    >
+                      <div css={styles.hotColorBar} />
+                      <TimelinePhaseText
+                        phaseName={i18nTexts.hotPhase}
+                        durationInPhase={getDurationInPhaseContent('hot')}
+                      />
+                    </div>
+                  )}
                   {exists(phaseAgeInMilliseconds.phases.warm) && (
                     <div
                       data-test-subj="ilmTimelinePhase-warm"
-                      className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
+                      css={[styles.phase, styles.warmPhase]}
                     >
-                      <div
-                        className={`ilmTimeline__colorBar`}
-                        css={css`
-                          background-color: ${timelineIconColors.warm};
-                        `}
-                      />
+                      <div css={styles.warmColorBar} />
                       <TimelinePhaseText
                         phaseName={i18nTexts.warmPhase}
                         durationInPhase={getDurationInPhaseContent('warm')}
@@ -240,14 +221,9 @@ export const Timeline: FunctionComponent<Props> = memo(
                   {exists(phaseAgeInMilliseconds.phases.cold) && (
                     <div
                       data-test-subj="ilmTimelinePhase-cold"
-                      className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
+                      css={[styles.phase, styles.coldPhase]}
                     >
-                      <div
-                        className={`ilmTimeline__colorBar`}
-                        css={css`
-                          background-color: ${timelineIconColors.cold};
-                        `}
-                      />
+                      <div css={styles.coldColorBar} />
                       <TimelinePhaseText
                         phaseName={i18nTexts.coldPhase}
                         durationInPhase={getDurationInPhaseContent('cold')}
@@ -257,14 +233,9 @@ export const Timeline: FunctionComponent<Props> = memo(
                   {exists(phaseAgeInMilliseconds.phases.frozen) && (
                     <div
                       data-test-subj="ilmTimelinePhase-frozen"
-                      className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
+                      css={[styles.phase, styles.frozenPhase]}
                     >
-                      <div
-                        className="ilmTimeline__colorBar"
-                        css={css`
-                          background-color: ${timelineIconColors.frozen};
-                        `}
-                      />
+                      <div css={styles.frozenColorBar} />
                       <TimelinePhaseText
                         phaseName={i18nTexts.frozenPhase}
                         durationInPhase={getDurationInPhaseContent('frozen')}
@@ -275,10 +246,7 @@ export const Timeline: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               {hasDeletePhase && (
                 <EuiFlexItem grow={false}>
-                  <div
-                    data-test-subj="ilmTimelinePhase-delete"
-                    className="ilmTimeline__deleteIconContainer"
-                  >
+                  <div data-test-subj="ilmTimelinePhase-delete" css={styles.deleteIconContainer}>
                     <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
                   </div>
                 </EuiFlexItem>

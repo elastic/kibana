@@ -13,7 +13,10 @@ import { allFleetHttpMocks } from '../../mocks';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import {
+  packagePolicyRouteService,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { getPolicyDetailPath } from '../../common/routing';
@@ -157,8 +160,7 @@ describe('PolicySelector component', () => {
         packagePolicyRouteService.getListPath(),
         {
           query: {
-            kuery:
-              '(ingest-package-policies.package.name: endpoint) AND ((ingest-package-policies.name:*foo*) OR (ingest-package-policies.description:*foo*))',
+            kuery: `(${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint) AND ((${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:*foo*) OR (${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.description:*foo*))`,
             page: 1,
             perPage: 20,
             sortField: 'name',
@@ -167,6 +169,46 @@ describe('PolicySelector component', () => {
           },
           version: '2023-10-31',
         }
+      );
+    });
+  });
+
+  it('should maintain consistent total count display when searching/filtering', async () => {
+    props.selectedPolicyIds = [testPolicyId1, testPolicyId2];
+    const { getByTestId } = await render();
+
+    // Initially should show correct total
+    expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('2 of 50 selected');
+
+    // Mock filtered search response with fewer results
+    apiMocks.responseProvider.packagePolicies.mockImplementationOnce(() => ({
+      items: [apiMocks.responseProvider.packagePolicies().items[0]], // Only one result
+      total: 1, // Filtered total
+      page: 1,
+      perPage: 20,
+    }));
+
+    // Search for something
+    act(() => {
+      userEvent.type(getByTestId('test-searchbar'), 'foo');
+    });
+
+    // Wait for search to complete
+    await waitFor(() => {
+      expect(mockedContext.coreStart.http.get).toHaveBeenCalledWith(
+        packagePolicyRouteService.getListPath(),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            kuery: expect.stringContaining('foo'),
+          }),
+        })
+      );
+    });
+
+    // Total count should still show 50 (unfiltered total), not 1 (filtered total)
+    await waitFor(() => {
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '2 of 50 selected'
       );
     });
   });
@@ -251,6 +293,26 @@ describe('PolicySelector component', () => {
       expect(queryByTestId(endpointPolicyTestId)).toBeNull();
       expect(queryByTestId(nonEndpontPolicyTestId)).toBeNull();
     });
+
+    it('should not trigger selection when clicking View policy link', async () => {
+      const { getByTestId } = await render();
+
+      // Verify policy is not initially selected
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '0 of 2 selected'
+      );
+
+      // Click on the View policy link
+      act(() => {
+        fireEvent.click(getByTestId(endpointPolicyTestId));
+      });
+
+      // Policy should still not be selected after clicking the link
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '0 of 2 selected'
+      );
+      expect(props.onChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('and when the "Selected" policies button is clicked', () => {
@@ -330,6 +392,11 @@ describe('PolicySelector component', () => {
     beforeEach(() => {
       props.additionalListItems = [
         {
+          label: 'group 1',
+          isGroupLabel: true,
+          'data-test-subj': 'customGroupLabel',
+        },
+        {
           label: 'Item 1',
           checked: 'on', // << This one is selected
           'data-test-subj': 'customItem1',
@@ -338,6 +405,12 @@ describe('PolicySelector component', () => {
           label: 'Item 2',
           checked: undefined,
           'data-test-subj': 'customItem2',
+        },
+        {
+          label: 'Item 3',
+          checked: 'on',
+          disabled: true,
+          'data-test-subj': 'customItem3',
         },
       ];
     });
@@ -348,7 +421,7 @@ describe('PolicySelector component', () => {
       expect(getByTestId('customItem1')).toBeTruthy();
       expect(getByTestId('customItem2')).toBeTruthy();
       expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
-        '1 of 52 selected'
+        '2 of 53 selected'
       );
     });
 
@@ -371,6 +444,11 @@ describe('PolicySelector component', () => {
         [],
         [
           {
+            label: 'group 1',
+            isGroupLabel: true,
+            'data-test-subj': 'customGroupLabel',
+          },
+          {
             label: 'Item 1',
             checked: undefined,
             'data-test-subj': 'customItem1',
@@ -380,16 +458,118 @@ describe('PolicySelector component', () => {
             checked: undefined,
             'data-test-subj': 'customItem2',
           },
+          {
+            label: 'Item 3',
+            checked: 'on',
+            disabled: true,
+            'data-test-subj': 'customItem3',
+          },
+        ]
+      );
+    });
+
+    it('should not update disabled items when Select All is clicked', async () => {
+      await render();
+      testUtils.clickOnSelectAll();
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        [testPolicyId1, testPolicyId2, testPolicyId3],
+        [
+          {
+            label: 'group 1',
+            isGroupLabel: true,
+            'data-test-subj': 'customGroupLabel',
+          },
+          {
+            label: 'Item 1',
+            checked: 'on',
+            'data-test-subj': 'customItem1',
+          },
+          {
+            label: 'Item 2',
+            checked: 'on',
+            'data-test-subj': 'customItem2',
+          },
+          {
+            label: 'Item 3',
+            checked: 'on',
+            disabled: true,
+            'data-test-subj': 'customItem3',
+          },
+        ]
+      );
+    });
+
+    it('should not update disabled items when Un-Select All is clicked', async () => {
+      await render();
+      testUtils.clickOnUnSelectAll();
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            label: 'group 1',
+            isGroupLabel: true,
+            'data-test-subj': 'customGroupLabel',
+          },
+          {
+            label: 'Item 1',
+            checked: undefined,
+            'data-test-subj': 'customItem1',
+          },
+          {
+            label: 'Item 2',
+            checked: undefined,
+            'data-test-subj': 'customItem2',
+          },
+          {
+            label: 'Item 3',
+            checked: 'on',
+            disabled: true,
+            'data-test-subj': 'customItem3',
+          },
         ]
       );
     });
 
     it('should display with a checkbox when "useCheckbox" prop is true', async () => {
       props.useCheckbox = true;
-      const { getByTestId } = await render();
+      const { getByTestId, queryByTestId } = await render();
 
       expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
       expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
+
+      // EUI Selectable Group Label item should NOT have the checkbox
+      expect(queryByTestId('test-customGroupLabel-checkbox')).toBeNull();
+    });
+
+    it('should exclude group labels from total count calculation', async () => {
+      // Override additionalListItems to include a group label
+      props.additionalListItems = [
+        {
+          label: 'Additional filters',
+          isGroupLabel: true, // This should NOT be counted
+        },
+        {
+          label: 'Global entries',
+          checked: 'on',
+          'data-test-subj': 'globalOption',
+        },
+        {
+          label: 'Unassigned entries',
+          checked: undefined,
+          'data-test-subj': 'unassignedOption',
+        },
+      ];
+      props.selectedPolicyIds = [testPolicyId1];
+
+      const { getByTestId } = await render();
+
+      // Should be 1 policy + 2 selectable items = 52 total (50 + 2), not 53 (50 + 3)
+      // The group label "Additional filters" should be excluded from count
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '2 of 52 selected'
+      );
     });
   });
 
@@ -400,7 +580,7 @@ describe('PolicySelector component', () => {
       packagePolicyRouteService.getListPath(),
       {
         query: {
-          kuery: 'ingest-package-policies.package.name: endpoint',
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
           perPage: 20,
           sortField: 'name',

@@ -16,7 +16,7 @@ import * as installUtils from '../install';
 import * as waitClusterUtil from '../utils/wait_until_cluster_ready';
 import { Cluster } from '../cluster';
 import { ES_NOPASSWORD_P12_PATH } from '@kbn/dev-utils/src/certs';
-import {
+import type {
   DownloadSnapshotOptions,
   InstallArchiveOptions,
   InstallSnapshotOptions,

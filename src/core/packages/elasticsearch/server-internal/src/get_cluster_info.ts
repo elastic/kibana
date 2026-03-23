@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { defer, map, retry, shareReplay } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-/** @private */
+/** @internal */
 export interface ClusterInfo {
   cluster_name: string;
   cluster_uuid: string;
@@ -22,7 +22,7 @@ export interface ClusterInfo {
 /**
  * Returns the cluster info from the Elasticsearch cluster.
  * @param internalClient Elasticsearch client
- * @private
+ * @internal
  */
 export function getClusterInfo$(internalClient: ElasticsearchClient): Observable<ClusterInfo> {
   return defer(() => internalClient.info()).pipe(

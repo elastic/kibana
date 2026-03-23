@@ -7,16 +7,22 @@
 import { EuiAccordion, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/css';
-import type { FieldsGroupDiff } from '../../../model/rule_details/rule_field_diff';
+import type { DiffLayout, FieldsGroupDiff } from '../../../model/rule_details/rule_field_diff';
 import { FieldGroupDiffComponent } from './field_diff';
 
 interface RuleDiffSectionProps {
   title: string;
   fieldGroups: FieldsGroupDiff[];
   dataTestSubj?: string;
+  diffLayout?: DiffLayout;
 }
 
-export const RuleDiffSection = ({ title, fieldGroups, dataTestSubj }: RuleDiffSectionProps) => (
+export const RuleDiffSection = ({
+  title,
+  fieldGroups,
+  diffLayout,
+  dataTestSubj,
+}: RuleDiffSectionProps) => (
   <>
     <EuiSpacer size="m" />
     <EuiAccordion
@@ -36,7 +42,11 @@ export const RuleDiffSection = ({ title, fieldGroups, dataTestSubj }: RuleDiffSe
         return (
           <React.Fragment key={fieldsGroupName}>
             <EuiSpacer size="m" />
-            <FieldGroupDiffComponent ruleDiffs={formattedDiffs} fieldsGroupName={fieldsGroupName} />
+            <FieldGroupDiffComponent
+              ruleDiffs={formattedDiffs}
+              fieldsGroupName={fieldsGroupName}
+              diffLayout={diffLayout}
+            />
           </React.Fragment>
         );
       })}

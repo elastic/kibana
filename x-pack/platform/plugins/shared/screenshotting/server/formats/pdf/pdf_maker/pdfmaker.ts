@@ -6,10 +6,11 @@
  */
 
 import type { Logger, PackageInfo } from '@kbn/core/server';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
-import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
-import { MessageChannel, MessagePort, Worker } from 'worker_threads';
+import type { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
+import type { MessagePort } from 'worker_threads';
+import { MessageChannel, Worker } from 'worker_threads';
 import type { Layout } from '../../../layouts';
 import { errors } from '../../../../common';
 import {
@@ -22,12 +23,8 @@ import {
 } from './constants';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import {
-  GeneratePdfResponseType,
-  type GeneratePdfRequest,
-  type WorkerData,
-  GeneratePdfResponse,
-} from './worker';
+import type { GeneratePdfResponse } from './worker';
+import { GeneratePdfResponseType, type GeneratePdfRequest, type WorkerData } from './worker';
 
 // Ensure that all dependencies are included in the release bundle.
 import './worker_dependencies';
@@ -140,18 +137,24 @@ export class PdfMaker {
     image: Buffer,
     opts: { title?: string; description?: string } = { title: '', description: '' }
   ) {
-    this.logger.debug(`Adding image to PDF. Image size: ${image.byteLength}`); // prettier-ignore
+    // Convert the image buffer to a transferable buffer.
+    // See https://github.com/nodejs/node/issues/55593 for the rationale behind this decision.
+    const _transferableImage = new ArrayBuffer(image.byteLength);
+    new Uint8Array(_transferableImage).set(new Uint8Array(image));
+
+    this.logger.debug(`Adding image to PDF. Image size: ${_transferableImage.byteLength}`); // prettier-ignore
     const size = this.layout.getPdfImageSize();
     const img = {
       // The typings are incomplete for the image property.
       // It's possible to pass a Buffer as the image data.
       // @see https://github.com/bpampuch/pdfmake/blob/0.2/src/printer.js#L654
-      image,
+      image: _transferableImage,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,
     } as unknown as ContentImage;
-    this.transferList.push(image.buffer);
+
+    this.transferList.push(_transferableImage);
 
     if (this.layout.useReportingBranding) {
       return this.addBrandedImage(img, opts);
@@ -254,6 +257,7 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
+
         myPort.postMessage(generatePdfRequest, this.transferList);
       });
     } finally {

@@ -8,8 +8,9 @@
 import { isEqual } from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import moment from 'moment';
-import { isFilterPinned, Filter } from '@kbn/es-query';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 function createMockTimefilter() {
   const unsubscribe = jest.fn();

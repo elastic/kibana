@@ -1,6 +1,6 @@
 # ST_YMAX
 
-Extracts the maximum value of the `y` coordinates from the given geometry input.
+Extracts the maximum value of the `y` coordinates from the supplied geometry. For `geo_point` or `geo_shape` types, this is equivalent to extracting the maximum latitude value.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ Extracts the maximum value of the `y` coordinates from the given geometry input.
 
 #### point
 
-An expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function also returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-Here is an example of using the `ST_YMAX` function:
+Calculate the minimum and maximum x and y coordinates for the city boundary of the airport with abbreviation "CPH":
 
 ```esql
 FROM airport_city_boundaries
@@ -24,8 +24,8 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-The example above first uses the `ST_ENVELOPE` function to find the smaller rectangular polygon that contains `city_boundary`. Then it uses the `ST_XMIN`, `ST_XMAX`, `ST_YMIN`, and `ST_YMAX` functions to calculate the minimum and maximum `x` and `y` coordinates of the rectangle, respectively. Lastly, it keeps only the columns of interest: `abbrev`, `airport`, `xmin`, `xmax`, `ymin`, and `ymax`.
+**This example extracts the envelope of the city boundary geometry, then calculates the minimum and maximum x and y coordinates, including the maximum y (latitude) using `ST_YMAX`.**
 
-When the `point` parameter is of type `geo_point` or `geo_shape`, using the `ST_YMAX` function is equivalent to finding the maximum `latitude` value.
+## Limitations
 
-Where applicable, if there are limitations impacting this function, they will be mentioned in a "Limitations" section at the end of this document.
+Spatial types such as `geo_point`, `geo_shape`, `cartesian_point`, and `cartesian_shape` are not supported in the `SORT` processing command. Attempting to sort on these types will result in an error.

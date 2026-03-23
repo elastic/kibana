@@ -9,6 +9,7 @@ import type { InfluencersFilterQuery, EntityField } from '@kbn/ml-anomaly-utils'
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import type { MlApi } from '../ml_api_service';
+import type { SeverityThreshold } from '../../../../common/types/anomalies';
 
 export function resultsServiceProvider(mlApi: MlApi): {
   getScoresByBucket(
@@ -18,17 +19,7 @@ export function resultsServiceProvider(mlApi: MlApi): {
     intervalMs: number,
     perPage?: number,
     fromPage?: number,
-    swimLaneSeverity?: number,
-    influencersFilterQuery?: InfluencersFilterQuery
-  ): Promise<any>;
-  getTopInfluencers(
-    selectedJobIds: string[],
-    earliestMs: number,
-    latestMs: number,
-    maxFieldValues?: number,
-    perPage?: number,
-    fromPage?: number,
-    influencers?: EntityField[],
+    swimLaneSeverity?: SeverityThreshold[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
@@ -51,7 +42,7 @@ export function resultsServiceProvider(mlApi: MlApi): {
     perPage: number,
     fromPage: number,
     influencersFilterQuery: InfluencersFilterQuery,
-    swimLaneSeverity?: number
+    swimLaneSeverity?: SeverityThreshold[]
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
   getRecordsForDetector(): Promise<any>;

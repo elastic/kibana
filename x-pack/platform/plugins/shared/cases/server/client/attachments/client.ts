@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Case, Attachments, Attachment } from '../../../common/types/domain';
+import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/domain';
 import type {
-  AlertResponse,
+  DocumentResponse,
   AttachmentsFindResponse,
-  BulkGetAttachmentsResponse,
+  BulkGetAttachmentsResponseV2,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
@@ -22,7 +22,7 @@ import type {
   DeleteAllArgs,
   DeleteArgs,
   FindCommentsArgs,
-  GetAllAlertsAttachToCase,
+  GetAllDocumentsAttachedToCase,
   GetAllArgs,
   GetArgs,
   UpdateArgs,
@@ -32,7 +32,7 @@ import type {
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
-import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { find, get, getAll, getAllDocumentsAttachedToCase } from './get';
 import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
@@ -47,7 +47,7 @@ export interface AttachmentsSubClient {
    */
   add(params: AddArgs): Promise<Case>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
-  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponseV2>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -62,17 +62,17 @@ export interface AttachmentsSubClient {
    */
   find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponse>;
   /**
-   * Retrieves all alerts attach to a case given a single case ID
+   * Retrieves all documents attached to a case given a single case ID
    */
-  getAllAlertsAttachToCase(params: GetAllAlertsAttachToCase): Promise<AlertResponse>;
+  getAllDocumentsAttachedToCase(params: GetAllDocumentsAttachedToCase): Promise<DocumentResponse>;
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<Attachments>;
+  getAll(getAllArgs: GetAllArgs): Promise<AttachmentsV2>;
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<Attachment>;
+  get(getArgs: GetArgs): Promise<AttachmentV2>;
   /**
    * Updates a specific attachment.
    *
@@ -104,7 +104,8 @@ export const createAttachmentsSubClient = (
     bulkDeleteFileAttachments: (params) =>
       bulkDeleteFileAttachments(params, clientArgs, casesClient),
     find: (params) => find(params, clientArgs),
-    getAllAlertsAttachToCase: (params) => getAllAlertsAttachToCase(params, clientArgs, casesClient),
+    getAllDocumentsAttachedToCase: (params) =>
+      getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params) => getAll(params, clientArgs),
     get: (params) => get(params, clientArgs),
     update: (params) => update(params, clientArgs),

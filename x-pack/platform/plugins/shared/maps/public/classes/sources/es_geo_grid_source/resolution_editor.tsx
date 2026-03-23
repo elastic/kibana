@@ -6,10 +6,11 @@
  */
 
 import React, { Component } from 'react';
-import { EuiConfirmModal, EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
+import { EuiConfirmModal, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AggDescriptor } from '../../../../common/descriptor_types';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
 import { isMvt } from './is_mvt';
 
@@ -125,11 +126,15 @@ export class ResolutionEditor extends Component<Props, State> {
   };
 
   _renderModal() {
-    return this.state.showModal ? (
+    if (!this.state.showModal) return null;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+    return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('xpack.maps.source.esGrid.vectorTileModal.title', {
           defaultMessage: `'Top terms' metrics not supported`,
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this._closeModal}
         onConfirm={this._acceptModal}
         cancelButtonText={i18n.translate(
@@ -154,7 +159,7 @@ export class ResolutionEditor extends Component<Props, State> {
           />
         </p>
       </EuiConfirmModal>
-    ) : null;
+    );
   }
 
   render() {

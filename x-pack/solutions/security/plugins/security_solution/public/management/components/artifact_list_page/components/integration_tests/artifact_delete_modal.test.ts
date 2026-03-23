@@ -8,6 +8,8 @@
 import { getArtifactListPageRenderingSetup } from '../../mocks';
 import { waitFor } from '@testing-library/react';
 
+jest.mock('../../../../../common/components/user_privileges');
+
 const setupTest = async () => {
   const renderSetup = getArtifactListPageRenderingSetup();
 

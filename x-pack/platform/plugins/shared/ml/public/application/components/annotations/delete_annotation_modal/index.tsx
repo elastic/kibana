@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
-
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,16 +21,20 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
   deleteAction,
   isVisible,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <Fragment>
       {isVisible === true && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle',
             {
               defaultMessage: 'Delete this annotation?',
             }
           )}
+          titleProps={{ id: modalTitleId }}
           onCancel={cancelAction}
           onConfirm={deleteAction}
           cancelButtonText={i18n.translate(
@@ -55,10 +57,4 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
       )}
     </Fragment>
   );
-};
-
-DeleteAnnotationModal.propTypes = {
-  cancelAction: PropTypes.func.isRequired,
-  deleteAction: PropTypes.func.isRequired,
-  isVisible: PropTypes.bool.isRequired,
 };

@@ -5,33 +5,35 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/core/server';
-import type { RunnableConfig } from '@langchain/core/runnables';
-import type { LangSmithEvaluationSettings } from '../../../../../common/siem_migrations/model/common.gen';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
+import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { StoredRuleMigrationRule } from '../types';
 import type { getRuleMigrationAgent } from './agent';
-import type { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import type { ChatModel } from './util/actions_client_chat';
-import type { RuleMigrationResources } from './retrievers/rule_resource_retriever';
+import type { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
+import type { ChatModel } from '../../common/task/util/actions_client_chat';
+import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 import type { RuleMigrationsRetriever } from './retrievers';
+import type { MigrateRuleConfig } from './agent/types';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 
-export interface RuleMigrationInput extends Pick<StoredRuleMigration, 'id' | 'original_rule'> {
-  resources: RuleMigrationResources;
+export interface RuleMigrationInput extends Pick<StoredRuleMigrationRule, 'id' | 'original_rule'> {
+  resources: MigrationResources;
 }
 
 export interface RuleMigrationTaskCreateClientParams {
+  request: KibanaRequest;
   currentUser: AuthenticatedUser;
   dataClient: RuleMigrationsDataClient;
-  dependencies: SiemRuleMigrationsClientDependencies;
+  dependencies: SiemMigrationsClientDependencies;
 }
 
 export interface RuleMigrationTaskStartParams {
   migrationId: string;
   connectorId: string;
-  invocationConfig: RunnableConfig;
+  invocationConfig: MigrateRuleConfig;
 }
 
 export interface RuleMigrationTaskRunParams extends RuleMigrationTaskStartParams {
@@ -42,7 +44,7 @@ export interface RuleMigrationTaskRunParams extends RuleMigrationTaskStartParams
 export interface RuleMigrationTaskCreateAgentParams {
   connectorId: string;
   retriever: RuleMigrationsRetriever;
-  telemetryClient: SiemMigrationTelemetryClient;
+  telemetryClient: RuleMigrationTelemetryClient;
   model: ChatModel;
 }
 
@@ -59,7 +61,7 @@ export interface RuleMigrationTaskStopResult {
 export interface RuleMigrationTaskEvaluateParams {
   evaluationId: string;
   connectorId: string;
-  langsmithSettings: LangSmithEvaluationSettings;
-  invocationConfig: RunnableConfig;
+  langsmithOptions: LangSmithEvaluationOptions;
+  invocationConfig: MigrateRuleConfig;
   abortController: AbortController;
 }

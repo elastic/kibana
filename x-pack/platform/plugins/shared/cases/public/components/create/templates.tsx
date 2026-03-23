@@ -17,6 +17,7 @@ interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUI['templates'];
   initialTemplate?: CasesConfigurationUI['templates'][number];
+  isDisabled?: boolean;
   onTemplateChange: ({
     caseFields,
     key,
@@ -27,6 +28,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
   isLoading,
   templates,
   initialTemplate,
+  isDisabled,
   onTemplateChange,
 }) => {
   const [selectedTemplate, onSelectTemplate] = useState<string | undefined>(
@@ -72,7 +74,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
       <EuiSelect
         onChange={onChange}
         options={options}
-        disabled={isLoading}
+        disabled={isLoading || isDisabled}
         isLoading={isLoading}
         data-test-subj="create-case-template-select"
         fullWidth

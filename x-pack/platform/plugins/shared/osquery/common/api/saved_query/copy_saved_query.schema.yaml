@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Copy Saved Query Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    CopySavedQueryResponse:
+      type: object
+      properties: {}
+      example:
+        data:
+          saved_object_id: "42ba1280-2172-11ee-8523-5765fca79a3c"
+          id: "my_saved_query_copy"
+          query: "select * from uptime;"
+          description: "Saved query description"
+          platform: "linux,darwin"
+          version: "2.8.0"
+          interval: "60"
+          ecs_mapping:
+            host.uptime:
+              field: "total_seconds"
+          created_at: "2025-02-26T13:37:30.452Z"
+          created_by: "elastic"
+          updated_at: "2025-02-26T13:37:30.452Z"
+          updated_by: "elastic"

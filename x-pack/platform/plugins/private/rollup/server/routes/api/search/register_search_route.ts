@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 export const registerSearchRoute = ({
   router,
@@ -26,9 +26,10 @@ export const registerSearchRoute = ({
       validate: {
         body: schema.arrayOf(
           schema.object({
-            index: schema.string(),
+            index: schema.string({ maxLength: 1000 }),
             query: schema.any(),
-          })
+          }),
+          { maxSize: 1000 }
         ),
       },
     },

@@ -23,7 +23,10 @@ export function pickLevelFromFlags(
   return options.default || DEFAULT_LOG_LEVEL;
 }
 
-export const LOG_LEVEL_FLAGS = [
+export const LOG_LEVEL_FLAGS: Array<{
+  name: 'verbose' | 'info' | 'debug' | 'quiet' | 'silent';
+  help: string;
+}> = [
   {
     name: 'verbose',
     help: '--verbose, -v      Log verbosely',

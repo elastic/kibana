@@ -1,0 +1,29 @@
+{
+  "description": "Security: GCP Audit - Looks for a spike in the rate of an actions when the event outcome is a failure, which may simply indicate an impending service failure but these can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
+  "groups": ["security", "gcp"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects high distinct count of failing event actions.",
+        "function": "high_distinct_count",
+        "field_name": "gcp.audit.status.message",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["client.user.email", "source.ip", "source.geo.city_name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "16mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-gcp-audit",
+    "security_app_display_name": "Spike in GCP Audit Actions on failure",
+    "managed": true,
+    "job_revision": 4
+  }
+}

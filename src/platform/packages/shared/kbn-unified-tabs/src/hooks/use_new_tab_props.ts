@@ -29,7 +29,7 @@ export function getNewTabPropsForIndex(index: number): Pick<TabItem, 'id' | 'lab
   return {
     id: uuidv4(),
     label: i18n.translate('unifiedTabs.defaultNewTabLabel', {
-      defaultMessage: 'Untitled session {counter}',
+      defaultMessage: 'Untitled {counter}',
       values: { counter: index },
     }),
   };

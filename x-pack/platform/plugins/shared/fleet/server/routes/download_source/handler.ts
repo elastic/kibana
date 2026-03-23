@@ -26,15 +26,68 @@ import type {
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
 
-function ensureNoDuplicateSecrets(downloadSource: Partial<DownloadSource>) {
+// Support clearing auth via PUT requests
+export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
+  auth?: DownloadSource['auth'] | null;
+};
+
+/**
+ * Validates download source auth configuration.
+ *
+ * Allowed auth configurations:
+ * - auth headers only (no credentials)
+ * - username + password (together), optionally with headers (no api_key)
+ * - api_key, optionally with headers (no username/password)
+ * - auth: null (to clear all auth data)
+ * - auth: undefined (no changes to auth)
+ */
+export function validateDownloadSource(downloadSource: DownloadSourceWithNullableAuth) {
+  // For settings that can be stored as secrets, only allow either plain text or secret reference.
   if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+  if (downloadSource.auth?.password && downloadSource.secrets?.auth?.password) {
+    throw Boom.badRequest('Cannot specify both auth.password and secrets.auth.password');
+  }
+  if (downloadSource.auth?.api_key && downloadSource.secrets?.auth?.api_key) {
+    throw Boom.badRequest('Cannot specify both auth.api_key and secrets.auth.api_key');
+  }
+
+  // Disallow setting both username/password and api_key authentication.
+  const hasUsernameOrPassword =
+    downloadSource.auth?.username ||
+    downloadSource.auth?.password ||
+    downloadSource.secrets?.auth?.password;
+  const hasApiKey = downloadSource.auth?.api_key || downloadSource.secrets?.auth?.api_key;
+  if (hasUsernameOrPassword && hasApiKey) {
+    throw Boom.badRequest('Cannot specify both username/password and api_key authentication');
+  }
+
+  // Ensure username and password are provided together when username/password authentication is used.
+  const hasUsername = !!downloadSource.auth?.username;
+  const hasPassword = !!downloadSource.auth?.password || !!downloadSource.secrets?.auth?.password;
+  if (hasUsername && !hasPassword) {
+    throw Boom.badRequest('Username and password must be provided together');
+  }
+  if (hasPassword && !hasUsername) {
+    throw Boom.badRequest('Username and password must be provided together');
+  }
+
+  // Disallow "Authorization" custom header when credentials (username/password or api_key) are configured,
+  // as the credentials would overwrite the header value.
+  const hasCredentials = Boolean(hasUsernameOrPassword || hasApiKey);
+  const hasAuthorizationHeader = downloadSource.auth?.headers?.some(
+    (header) => header.key.toLowerCase() === 'authorization'
+  );
+  if (hasCredentials && hasAuthorizationHeader) {
+    throw Boom.badRequest(
+      'Cannot use "Authorization" custom header when username/password or api_key authentication is configured'
+    );
   }
 }
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
-  const downloadSources = await downloadSourceService.list(soClient);
+  const downloadSources = await downloadSourceService.list();
 
   const body: GetDownloadSourceResponse = {
     items: downloadSources.items,
@@ -49,9 +102,8 @@ export const getDownloadSourcesHandler: RequestHandler = async (context, request
 export const getOneDownloadSourcesHandler: RequestHandler<
   TypeOf<typeof GetOneDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    const downloadSource = await downloadSourceService.get(soClient, request.params.sourceId);
+    const downloadSource = await downloadSourceService.get(request.params.sourceId);
 
     const body: GetOneDownloadSourceResponse = {
       item: downloadSource,
@@ -77,11 +129,12 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  ensureNoDuplicateSecrets(request.body);
+  const data = request.body as DownloadSourceWithNullableAuth;
+  validateDownloadSource(data);
 
   try {
-    await downloadSourceService.update(soClient, esClient, request.params.sourceId, request.body);
-    const downloadSource = await downloadSourceService.get(soClient, request.params.sourceId);
+    await downloadSourceService.update(soClient, esClient, request.params.sourceId, data);
+    const downloadSource = await downloadSourceService.get(request.params.sourceId);
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
@@ -111,9 +164,10 @@ export const postDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { id, ...data } = request.body;
+  const { id, auth, ...restData } = request.body;
+  const data = { ...restData, ...(auth !== null && { auth }) };
 
-  ensureNoDuplicateSecrets(data);
+  validateDownloadSource(data);
 
   const downloadSource = await downloadSourceService.create(soClient, esClient, data, { id });
   if (downloadSource.is_default) {
@@ -129,9 +183,8 @@ export const postDownloadSourcesHandler: RequestHandler<
 export const deleteDownloadSourcesHandler: RequestHandler<
   TypeOf<typeof DeleteDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    await downloadSourceService.delete(soClient, request.params.sourceId);
+    await downloadSourceService.delete(request.params.sourceId);
 
     const body: DeleteDownloadSourceResponse = {
       id: request.params.sourceId,

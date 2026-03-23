@@ -75,11 +75,7 @@ const configSchema = schema.object({
     migrationToFleetAvailable: disabledOnServerless,
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
-    /**
-     * Depends on optional "profilingDataAccess" and "profiling"
-     * plugins. Enable both with `xpack.profiling.enabled: true` before
-     * enabling this feature flag.
-     */
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
     ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
   }),

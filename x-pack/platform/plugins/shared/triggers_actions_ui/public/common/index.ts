@@ -36,4 +36,3 @@ export {
   parseAggregationResults,
   NORMALIZED_FIELD_TYPES,
 } from '../../common';
-export type { ParsedAggregationGroup } from '../../common';

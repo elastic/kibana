@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+
+import type { GraphSavedObjectAttributes } from '../../../common/content_management';
 
 export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
+  attributes: GraphSavedObjectAttributes;
+  references: Reference[];
 }) {
   // For some reason, wsState comes in stringified 2x
   const state = JSON.parse(JSON.parse(String(attributes.wsState)));
@@ -38,10 +40,7 @@ export function extractReferences({
   };
 }
 
-export function injectReferences(
-  savedObject: { wsState?: string },
-  references: SavedObjectReference[]
-) {
+export function injectReferences(savedObject: { wsState?: string }, references: Reference[]) {
   // Skip if wsState is missing, at the time of development of this, there is no guarantee each
   // saved object has wsState.
   if (typeof savedObject.wsState !== 'string') {

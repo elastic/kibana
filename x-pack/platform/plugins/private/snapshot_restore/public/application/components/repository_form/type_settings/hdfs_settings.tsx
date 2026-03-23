@@ -12,15 +12,15 @@ import {
   EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFormPrepend,
   EuiFormRow,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { CodeEditor } from '@kbn/code-editor';
-import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
@@ -97,12 +97,8 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.uri}
         >
           <EuiFieldText
-            prepend={
-              <EuiText size="s" id="hdfsRepositoryUriProtocolDescription">
-                {/* Wrap as string due to prettier not parsing `//` inside JSX correctly (prettier/prettier#2347) */}
-                {'hdfs://'}
-              </EuiText>
-            }
+            isInvalid={Boolean(hasErrors && settingErrors.uri)}
+            prepend={<EuiFormPrepend id="hdfsRepositoryUriProtocolPrepend" label={'hdfs://'} />}
             defaultValue={uri ? uri.split('hdfs://')[1] : ''}
             fullWidth
             onChange={(e) => {
@@ -148,6 +144,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.path}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.path)}
             defaultValue={path || ''}
             fullWidth
             onChange={(e) => {
@@ -286,6 +283,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.securityPrincipal}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.securityPrincipal)}
             defaultValue={securityPrincipal || ''}
             fullWidth
             onChange={(e) => {

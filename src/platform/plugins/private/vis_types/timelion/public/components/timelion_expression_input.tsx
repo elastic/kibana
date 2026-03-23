@@ -8,18 +8,47 @@
  */
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
-import { EuiFormLabel } from '@elastic/eui';
+import { euiBreakpoint, EuiFormLabel, type UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
+import type { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 const LANGUAGE_ID = 'timelion_expression';
 monaco.languages.register({ id: LANGUAGE_ID });
+
+const timelionExpressionInputStyles = {
+  base: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: '1 1 auto',
+      display: 'flex',
+      flexDirection: 'column',
+      marginTop: euiTheme.size.base,
+    }),
+  editor: (euiThemeContext: UseEuiTheme) =>
+    css({
+      flex: '1',
+      position: 'relative',
+      paddingTop: euiThemeContext.euiTheme.size.s,
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        flex: 'auto',
+        height: ` calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+      },
+    }),
+  absolute: css({
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  }),
+};
 
 interface TimelionExpressionInputProps {
   value: string;
@@ -27,6 +56,7 @@ interface TimelionExpressionInputProps {
 }
 
 function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
+  const styles = useMemoCss(timelionExpressionInputStyles);
   const functionList = useRef<ITimelionFunction[]>([]);
   const kibana = useKibana();
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
@@ -101,12 +131,12 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   }, [kibana.services.http]);
 
   return (
-    <div className="timExpressionInput">
+    <div css={styles.base}>
       <EuiFormLabel>
         <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
       </EuiFormLabel>
-      <div className="timExpressionInput__editor">
-        <div className="timExpressionInput__absolute" data-test-subj="timelionCodeEditor">
+      <div css={styles.editor}>
+        <div data-test-subj="timelionCodeEditor" css={styles.absolute}>
           <CodeEditor
             languageId={LANGUAGE_ID}
             value={value}

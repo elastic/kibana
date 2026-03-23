@@ -7,12 +7,13 @@
 
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import type { PageScope } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../containers';
 import { useKibana } from '../../common/lib/kibana';
-import type { SourcererScopeName } from '../store/model';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export interface UseGetScopedSourcererDataViewArgs {
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
 }
 
 /*
@@ -27,15 +28,16 @@ export const useGetScopedSourcererDataView = ({
   const {
     services: { fieldFormats },
   } = useKibana();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { sourcererDataView } = useSourcererDataView(sourcererScope);
 
   const dataView = useMemo(() => {
-    if (Object.keys(sourcererDataView).length) {
+    if (!newDataViewPickerEnabled && Object.keys(sourcererDataView).length) {
       return new DataView({ spec: sourcererDataView, fieldFormats });
     } else {
       return undefined;
     }
-  }, [sourcererDataView, fieldFormats]);
+  }, [newDataViewPickerEnabled, sourcererDataView, fieldFormats]);
 
   return dataView;
 };

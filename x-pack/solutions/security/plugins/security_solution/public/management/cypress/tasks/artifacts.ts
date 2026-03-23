@@ -18,7 +18,11 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { APP_BLOCKLIST_PATH, APP_TRUSTED_APPS_PATH } from '../../../../common/constants';
+import {
+  APP_BLOCKLIST_PATH,
+  APP_TRUSTED_APPS_PATH,
+  APP_TRUSTED_DEVICES_PATH,
+} from '../../../../common/constants';
 import { loadPage, request } from './common';
 
 export const removeAllArtifacts = () => {
@@ -56,7 +60,9 @@ const removeExceptionsListPromise = (listId: string) => {
 };
 
 const ENDPOINT_ARTIFACT_LIST_TYPES = {
+  [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: ExceptionListTypeEnum.ENDPOINT,
   [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: ExceptionListTypeEnum.ENDPOINT,
+  [ENDPOINT_ARTIFACT_LISTS.trustedDevices.id]: ExceptionListTypeEnum.ENDPOINT_TRUSTED_DEVICES,
   [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: ExceptionListTypeEnum.ENDPOINT_EVENTS,
   [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]:
     ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS,
@@ -230,6 +236,88 @@ export const trustedAppsFormSelectors = {
   },
 };
 
+export const trustedDevicesFormSelectors = {
+  selectOs: (osOption: 'Windows and Mac' | 'Windows' | 'Mac') => {
+    cy.getByTestSubj('trustedDevices-form-osSelectField').click();
+    cy.get('[role="option"]')
+      .contains(new RegExp(`^${osOption}$`))
+      .click();
+  },
+
+  selectField: (field: 'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID') => {
+    cy.getByTestSubj('trustedDevices-form-fieldSelect').click();
+    cy.get('[role="option"]').contains(field).click();
+  },
+
+  selectOperator: (operator: 'is' | 'matches') => {
+    cy.getByTestSubj('trustedDevices-form-operatorSelect').click();
+    cy.get('[role="option"]')
+      .contains(operator === 'is' ? 'is' : 'matches')
+      .click();
+  },
+
+  fillValue: (value: string) => {
+    cy.getByTestSubj('trustedDevices-form-valueField').within(() => {
+      cy.get('input[role="combobox"]').click();
+      cy.get('input[role="combobox"]').should('be.focused');
+      cy.get('input[role="combobox"]').type(`{selectall}{backspace}`);
+      cy.get('input[role="combobox"]').should('have.value', '');
+      cy.get('input[role="combobox"]').type(`${value}{enter}`);
+    });
+  },
+
+  fillOutTrustedDevicesFlyout: (name = 'Test Trusted Device', description = 'Test Description') => {
+    cy.getByTestSubj('trustedDevices-form-nameTextField').clear();
+    cy.getByTestSubj('trustedDevices-form-nameTextField').type(name);
+    cy.getByTestSubj('trustedDevices-form-descriptionField').clear();
+    cy.getByTestSubj('trustedDevices-form-descriptionField').type(description);
+  },
+
+  submitForm: () => {
+    cy.getByTestSubj('trustedDevicesList-flyout-submitButton').click();
+  },
+
+  validateSuccessPopup: (action: 'create' | 'update' | 'delete') => {
+    const messages = {
+      create: 'has been added to your trusted devices list',
+      update: 'has been updated',
+      delete: 'has been removed from the trusted devices list',
+    };
+    cy.get('[data-test-subj="globalToastList"]').should('contain.text', messages[action]);
+  },
+
+  validateRenderedCondition: (expectedCondition: RegExp) => {
+    cy.getByTestSubj('trustedDevicesList-card')
+      .first()
+      .within(() => {
+        cy.getByTestSubj('trustedDevicesList-card-criteriaConditions-condition')
+          .invoke('text')
+          .should('match', expectedCondition);
+      });
+  },
+
+  deleteTrustedDeviceItem: () => {
+    cy.getByTestSubj('trustedDevicesList-card')
+      .first()
+      .within(() => {
+        cy.getByTestSubj('trustedDevicesList-card-header-actions-button').click();
+      });
+
+    cy.getByTestSubj('trustedDevicesList-card-cardDeleteAction').click();
+    cy.getByTestSubj('trustedDevicesList-deleteModal-submitButton').click();
+  },
+
+  openTrustedDevices: ({ create, itemId }: { create?: boolean; itemId?: string } = {}) => {
+    if (!create && !itemId) {
+      loadPage(APP_TRUSTED_DEVICES_PATH);
+    } else if (create) {
+      loadPage(`${APP_TRUSTED_DEVICES_PATH}?show=create`);
+    } else if (itemId) {
+      loadPage(`${APP_TRUSTED_DEVICES_PATH}?itemId=${itemId}&show=edit`);
+    }
+  },
+};
+
 export const blocklistFormSelectors = {
   expectSingleOperator: (field: 'Path' | 'Signature' | 'Hash') => {
     cy.getByTestSubj('blocklist-form-field-select').contains(field);
@@ -316,21 +404,23 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('comboBoxClearButton').click();
   },
   validateSuccessPopup: (type: 'create' | 'update' | 'delete') => {
-    let expectedTitle = '';
+    let expectedTitle: string | RegExp = '';
     switch (type) {
       case 'create':
         expectedTitle = '"Test Blocklist" has been added to your blocklist.';
         break;
       case 'update':
-        expectedTitle = '"Test Blocklist" has been updated';
+        expectedTitle = /"Test Blocklist" has been updated/;
         break;
       case 'delete':
-        expectedTitle = '"Test Blocklist" has been removed from blocklist.';
+        expectedTitle = /"Test Blocklist" has been removed from .*blocklist/i;
         break;
     }
     cy.getByTestSubj('euiToastHeader__title').contains(expectedTitle);
   },
   validateRenderedCondition: (expectedCondition: RegExp) => {
+    // Wait for flyout to close (after create/update) before looking for the card
+    cy.getByTestSubj('blocklistPage-flyout').should('not.exist');
     cy.getByTestSubj('blocklistPage-card')
       .first()
       .within(() => {
@@ -341,6 +431,8 @@ export const blocklistFormSelectors = {
       });
   },
   deleteBlocklistItem: () => {
+    // Wait for list to load and card to appear
+    cy.getByTestSubj('blocklistPage-card').should('exist');
     cy.getByTestSubj('blocklistPage-card')
       .first()
       .within(() => {

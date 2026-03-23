@@ -6,15 +6,11 @@
  */
 
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
-import { Document } from '@langchain/core/documents';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  AggregationsAggregate,
-  SearchHit,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { Document } from '@langchain/core/documents';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { contextDocumentHitMapper } from '../utils/context_document_mapper';
-import { ElasticsearchRetrieverContentField } from '../types';
+import type { ElasticsearchRetrieverContentField } from '../types';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
@@ -71,14 +67,11 @@ export class ElasticsearchRetriever extends BaseRetriever {
     try {
       const queryBody = this.query_body_fn(query);
 
-      const results = (await this.client.transport.request({
-        method: 'POST',
-        path: `/${this.index}/_search`,
-        body: {
-          ...queryBody,
-          size: this.k,
-        },
-      })) as SearchResponse<unknown, Record<string, AggregationsAggregate>>;
+      const results = await this.client.search({
+        index: this.index,
+        ...queryBody,
+        size: this.k,
+      });
 
       const hits = results.hits.hits;
 

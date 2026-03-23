@@ -28,9 +28,10 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { SlmPolicy } from '../../../../../../common/types';
+import type { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
-import { SectionError, Error } from '../../../../../shared_imports';
+import type { Error } from '../../../../../shared_imports';
+import { SectionError } from '../../../../../shared_imports';
 import {
   UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
@@ -205,7 +206,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                               data-test-subj="policyActionMenuButton"
                               iconSide="right"
                               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                              iconType="arrowDown"
+                              iconType="chevronSingleDown"
                               fill
                             >
                               <FormattedMessage

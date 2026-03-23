@@ -1,6 +1,6 @@
 # Graph app
 
-This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. `x-pack/test/functional/apps/graph` contains additional functional tests.
+This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. `x-pack/platform/test/functional/apps/graph` contains additional functional tests.
 
 Graph shows only up in the side bar if your server is running on a platinum or trial license. You can activate a trial license in `Management > License Management`.
 
@@ -10,8 +10,8 @@ Graph shows only up in the side bar if your server is running on a platinum or t
 * Run type check `node scripts/type_check.js --project=x-pack/tsconfig.json`
 * Run linter `node scripts/eslint.js x-pack/platform/plugins/private/graph`
 * Run functional tests (make sure to stop dev server)
-  * Server `node ./scripts/functional_tests_server.js --config x-pack/test/functional/apps/graph/config.ts`
-  * Tests `node scripts/functional_test_runner.js --config x-pack/test/functional/apps/graph/config.ts`
+  * Server `node ./scripts/functional_tests_server.js --config x-pack/platform/test/functional/apps/graph/config.ts`
+  * Tests `node scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/graph/config.ts`
 
 ## Folder structure
 

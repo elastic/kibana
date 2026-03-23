@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { History } from 'history';
@@ -14,15 +15,13 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -66,7 +65,16 @@ import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: 'always',
+    },
+    mutations: {
+      networkMode: 'always',
+    },
+  },
+});
 
 export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ children }) => {
   useBreadcrumbs('base');
@@ -201,7 +209,10 @@ export const FleetAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const isDarkMode = useKibanaIsDarkMode();
+    const isDarkMode = useObservable(
+      startServices.theme.theme$,
+      startServices.theme.getTheme()
+    ).darkMode;
 
     return (
       <KibanaRenderContextProvider
@@ -266,6 +277,7 @@ const FleetTopNav = memo(
     }, [euiTheme]);
 
     const { TopNavMenu } = services.navigation.ui;
+    const isFeedbackEnabled = services.notifications.feedback.isEnabled();
 
     const topNavConfig: TopNavMenuData[] = [];
 
@@ -284,13 +296,15 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-        defaultMessage: 'Send feedback',
-      }),
-      iconType: 'popout',
-      run: () => window.open(FEEDBACK_URL),
-    });
+    if (isFeedbackEnabled) {
+      topNavConfig.push({
+        label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+          defaultMessage: 'Give feedback',
+        }),
+        iconType: 'popout',
+        run: () => window.open(FEEDBACK_URL),
+      });
+    }
 
     return (
       <TopNavMenu

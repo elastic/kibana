@@ -11,8 +11,8 @@ import moment from 'moment';
 import Fsp from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
-import { ToolingLog } from '@kbn/tooling-log';
-import { PluginApi, PluginMetaInfo } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { PluginApi, PluginMetaInfo } from '../types';
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 

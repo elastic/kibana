@@ -18,18 +18,17 @@ import {
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { range, first, xor, debounce } from 'lodash';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { convertToApiThreshold } from '../../helpers/threshold_unit';
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 
-import { MetricExpression } from '../../types';
-import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
+import type { MetricExpression } from '../../types';
+import type { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
 import { ClosablePopoverTitle } from '../closable_popover_title';
 import { EQUATION_HELP_MESSAGE } from '../../i18n_strings';
@@ -41,6 +40,7 @@ export interface CustomEquationEditorProps {
   aggregationTypes: AggregationTypes;
   errors: IErrorObject;
   dataView: DataViewBase;
+  kql: KqlPluginStart;
 }
 
 const NEW_METRIC = {
@@ -59,6 +59,7 @@ export function CustomEquationEditor({
   aggregationTypes,
   errors,
   dataView,
+  kql,
 }: CustomEquationEditorProps) {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.metrics ?? [NEW_METRIC]
@@ -147,6 +148,7 @@ export function CustomEquationEditor({
       onChange={handleChange}
       errors={errors}
       dataView={dataView}
+      kql={kql}
     />
   ));
 

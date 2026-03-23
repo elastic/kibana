@@ -6,111 +6,144 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { HostMetricTypes } from '../charts/types';
+import {
+  AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
+  MAX_AS_FIRST_FUNCTION_PATTERN,
+} from '../constants';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 export const useHostCharts = ({
   metric,
-  dataViewId,
+  indexPattern,
   overview,
+  schema,
 }: {
   metric: HostMetricTypes;
-  dataViewId?: string;
+  indexPattern?: string;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
   const { value: charts = [], error } = useAsync(async () => {
-    const hostCharts = await getHostsCharts({ metric, overview });
+    const hostCharts = await getHostsCharts({
+      metric,
+      overview,
+      schema: schema ?? 'ecs',
+    });
+
     return hostCharts.map((chart) => ({
       ...chart,
-      ...(dataViewId && {
+      ...(indexPattern && {
         dataset: {
-          index: dataViewId,
+          index: indexPattern,
         },
       }),
     }));
-  }, [dataViewId, metric, overview]);
+  }, [indexPattern, metric, overview, schema]);
 
   return { charts, error };
 };
 
 export const useKubernetesCharts = ({
-  dataViewId,
+  indexPattern,
   overview,
 }: {
-  dataViewId?: string;
+  indexPattern?: string;
   overview?: boolean;
 }) => {
-  const model = useMemo(() => findInventoryModel('host'), []);
+  const model = findInventoryModel('host');
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kibernetesNode } = await model.metrics.getCharts();
+    const { kubernetesNode } = await model.metrics.getCharts();
+
+    if (!kubernetesNode) {
+      return [];
+    }
 
     const items = overview
-      ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
+      ? [kubernetesNode.xy.nodeCpuCapacity, kubernetesNode.xy.nodeMemoryCapacity]
       : [
-          kibernetesNode.xy.nodeCpuCapacity,
-          kibernetesNode.xy.nodeMemoryCapacity,
-          kibernetesNode.xy.nodeDiskCapacity,
-          kibernetesNode.xy.nodePodCapacity,
+          kubernetesNode.xy.nodeCpuCapacity,
+          kubernetesNode.xy.nodeMemoryCapacity,
+          kubernetesNode.xy.nodeDiskCapacity,
+          kubernetesNode.xy.nodePodCapacity,
         ];
 
     return items.map((chart) => {
       return {
         ...chart,
-        ...(dataViewId && {
+        ...(indexPattern && {
           dataset: {
-            index: dataViewId,
+            index: indexPattern,
           },
         }),
       };
     });
-  }, [dataViewId, overview, model.metrics]);
+  }, [model.metrics, overview, indexPattern]);
 
   return { charts, error };
 };
 
-const getSubtitleFromFormula = (value: string) =>
-  value.startsWith('max')
-    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
-    : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
-        defaultMessage: 'Average',
-      });
+export const getSubtitleFromFormula = (value: string) => {
+  // Check if 'avg' or 'average' is the first word/function in the formula
+  if (AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+      defaultMessage: 'Average',
+    });
+  }
+
+  // Check if 'max' is the first word/function in the formula
+  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+      defaultMessage: 'Max',
+    });
+  }
+
+  // remove the fallback subtitle to avoid confusion
+  return '';
+};
 
 export const useHostKpiCharts = ({
-  dataViewId,
+  indexPattern,
   seriesColor,
   getSubtitle,
+  schema,
 }: {
-  dataViewId?: string;
+  indexPattern?: string;
   seriesColor?: string;
   getSubtitle?: (formulaValue: string) => string;
+  schema?: DataSchemaFormat | null;
 }) => {
   seriesColor = useChartSeriesColor(seriesColor);
 
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, memory, disk } = await model.metrics.getCharts();
+    const { cpu, memory, disk } = await model.metrics.getCharts({
+      schema: schema ?? 'ecs',
+    });
 
-    return [
+    const hostKpiCharts = [
       cpu.metric.cpuUsage,
       cpu.metric.normalizedLoad1m,
       memory.metric.memoryUsage,
       disk.metric.diskUsage,
-    ].map((chart) => ({
+    ];
+
+    return hostKpiCharts.map((chart) => ({
       ...chart,
       seriesColor,
       decimals: 1,
       subtitle: getSubtitle ? getSubtitle(chart.value) : getSubtitleFromFormula(chart.value),
-      ...(dataViewId && {
+      ...(indexPattern && {
         dataset: {
-          index: dataViewId,
+          index: indexPattern,
         },
       }),
     }));
-  }, [dataViewId, seriesColor, getSubtitle]);
+  }, [indexPattern, seriesColor, getSubtitle, schema]);
 
   return charts;
 };
@@ -118,12 +151,17 @@ export const useHostKpiCharts = ({
 const getHostsCharts = async ({
   metric,
   overview,
+  schema,
 }: {
   metric: HostMetricTypes;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
-  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();
+
+  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
+    schema: schema ?? 'ecs',
+  });
 
   switch (metric) {
     case 'cpu':

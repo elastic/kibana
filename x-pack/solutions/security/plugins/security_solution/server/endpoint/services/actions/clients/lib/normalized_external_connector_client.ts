@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 
@@ -24,7 +25,6 @@ export interface NormalizedExternalConnectorClientExecuteOptions<
     subAction: TSubAction;
     subActionParams: TParams;
   };
-  spaceId?: string;
 }
 
 /**
@@ -121,7 +121,6 @@ export class NormalizedExternalConnectorClient {
     TResponse = unknown,
     TParams extends Record<string, any> = Record<string, any>
   >({
-    spaceId = 'default',
     params,
   }: NormalizedExternalConnectorClientExecuteOptions<TParams>): Promise<
     ActionTypeExecutorResult<TResponse>
@@ -142,6 +141,12 @@ export class NormalizedExternalConnectorClient {
     };
 
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
+      const spaceId = this.options?.spaceId ?? DEFAULT_SPACE_ID;
+
+      this.log.debug(
+        `Executing  action [${params.subAction}] of connector [${connectorTypeId}] (unsecured) in space [${this.options?.spaceId}]`
+      );
+
       return this.connectorsClient
         .execute({
           requesterId: 'background_task',
@@ -152,6 +157,8 @@ export class NormalizedExternalConnectorClient {
         })
         .catch(catchAndThrow) as Promise<ActionTypeExecutorResult<TResponse>>;
     }
+
+    this.log.debug(`Executing  action [${params.subAction}] of connector [${connectorTypeId}]`);
 
     return this.connectorsClient
       .execute({

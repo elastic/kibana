@@ -6,6 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
@@ -13,51 +16,131 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiFieldText,
-  EuiFieldTextProps,
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
   EuiInputPopover,
   EuiSpacer,
+  EuiTitle,
   keys,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { EisCloudConnectPromoTour } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as LABELS from '../translations';
-import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
-import { SelectableProvider } from './providers/selectable';
+import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
+import { FieldType, isMapWithStringValues } from '../types/types';
 import {
-  TaskTypeOption,
+  SERVICE_PROVIDERS,
+  solutionKeys,
+  type ProviderSolution,
+} from './providers/render_service_provider/service_provider';
+import type { ServiceProviderKeys } from '../constants';
+import {
+  DEFAULT_TASK_TYPE,
+  INTERNAL_OVERRIDE_FIELDS,
+  serviceProviderLinkComponents,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  TASK_TYPE_CONFIG,
+  PROVIDER_CONFIG,
+} from '../constants';
+import { SelectableProvider } from './providers/selectable';
+import type { TaskTypeOption } from '../utils/helpers';
+import {
   generateInferenceEndpointId,
   getTaskTypeOptions,
   mapProviderFields,
 } from '../utils/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
+import { MoreOptionsFields } from './more_options_fields';
 import { AdditionalOptionsFields } from './additional_options_fields';
+import { AuthenticationFormItems } from './configuration/authentication_form_items';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
-import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
+import {
+  ProviderConfigHiddenField,
+  TaskTypeConfigHiddenField,
+} from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
+import { useKibana } from '../hooks/use_kibana';
+
+// Custom trigger button CSS
+export const buttonCss = css`
+  &:hover {
+    text-decoration: none;
+  }
+`;
+export const accordionCss = css`
+  .euiAccordion__triggerWrapper {
+    display: inline-flex;
+  }
+`;
+
+const providerConfigConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
+      isBlocking: true,
+    },
+  ],
+};
+
+export function isProviderForSolutions(
+  filterBySolution: SolutionView,
+  provider: InferenceProvider
+) {
+  const providerSolutions =
+    SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
+  return (
+    !solutionKeys[filterBySolution] ||
+    (solutionKeys[filterBySolution] !== undefined &&
+      providerSolutions.includes(solutionKeys[filterBySolution] as ProviderSolution))
+  );
+}
 
 interface InferenceServicesProps {
+  config: {
+    isEdit?: boolean;
+    enforceAdaptiveAllocations?: boolean;
+    currentSolution?: SolutionView;
+    isPreconfigured?: boolean;
+    allowContextWindowLength?: boolean;
+    reenterSecretsOnEdit?: boolean;
+    allowTemperature?: boolean;
+    enableEisPromoTour?: boolean;
+    /** When set, only these task types will be available for selection in the form. */
+    allowedTaskTypes?: InferenceTaskType[];
+  };
   http: HttpSetup;
   toasts: IToasts;
-  isEdit?: boolean;
-  isPreconfigured?: boolean;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
-  isEdit,
-  isPreconfigured,
+  config: {
+    allowContextWindowLength,
+    allowTemperature,
+    isEdit,
+    enforceAdaptiveAllocations,
+    isPreconfigured,
+    currentSolution,
+    reenterSecretsOnEdit,
+    enableEisPromoTour,
+    allowedTaskTypes,
+  },
 }) => {
+  const {
+    services: { application, cloud },
+  } = useKibana();
   const { data: providers, isLoading } = useProviders(http, toasts);
+  const { euiTheme } = useEuiTheme();
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
     undefined
   );
@@ -65,21 +148,27 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
+  const [solutionFilter, setSolutionFilter] = useState<SolutionView | undefined>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
-  const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
-    []
-  );
   const [optionalProviderFormFields, setOptionalProviderFormFields] = useState<ConfigEntryView[]>(
     []
   );
+  const [providerSettingsFormFields, setProviderSettingsFormFields] = useState<ConfigEntryView[]>(
+    []
+  );
+  const [authenticationFormFields, setAuthenticationFormFields] = useState<ConfigEntryView[]>([]);
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'secrets.providerSecrets',
       'config.taskType',
       'config.inferenceId',
+      'config.contextWindowLength',
+      'config.temperature',
       'config.provider',
       'config.providerConfig',
+      'config.taskTypeConfig',
     ],
   });
 
@@ -96,6 +185,47 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       setProviderPopoverOpen(true);
     }
   }, []);
+
+  const toggleAndApplyFilter = (selectedFilter: SolutionView) => {
+    if (selectedFilter === solutionFilter) {
+      // If the selected filter is already active, toggle off by clearing filter and resetting providers
+      setUpdatedProviders(providers);
+      setSolutionFilter(undefined);
+      return;
+    }
+
+    setSolutionFilter(selectedFilter);
+    setUpdatedProviders(getUpdatedProviders(selectedFilter));
+  };
+
+  const getOverrides = useCallback(
+    (provider?: InferenceProvider) => {
+      let overrides = INTERNAL_OVERRIDE_FIELDS[provider?.service ?? ''];
+      // Return early if override only applies to serverless and this is not on serverless
+      if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
+        return;
+      }
+
+      const hiddenFields = [...(overrides?.hidden ?? [])];
+
+      if (provider?.configurations) {
+        Object.entries(provider.configurations).forEach(([field, configEntry]) => {
+          if (Object.values(FieldType).includes(configEntry.type) === false) {
+            // hide unknown type fields in form as they aren't handled yet
+            hiddenFields.push(field);
+          }
+        });
+      }
+
+      overrides = {
+        ...(overrides ?? {}),
+        hidden: hiddenFields,
+      };
+
+      return overrides;
+    },
+    [enforceAdaptiveAllocations]
+  );
 
   const providerName = useMemo(
     () =>
@@ -117,22 +247,46 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
+      const overrides = newProvider ? getOverrides(newProvider) : undefined;
+      const newProviderSchema: ConfigEntryView[] = newProvider
+        ? mapProviderFields(taskType, newProvider, overrides)
+        : [];
       if (newProvider) {
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(taskType, newProvider);
         setProviderSchema(newProviderSchema);
       }
 
       // Update config and secrets with the new set of fields + keeps the entered data for a common
-      const newConfig = { ...(config.providerConfig ?? {}) };
+      const newProviderConfig = { ...(config.providerConfig ?? {}) };
+      const newTaskTypeConfig = { ...(config.taskTypeConfig ?? {}) };
       const newSecrets = { ...(secrets?.providerSecrets ?? {}) };
-      Object.keys(config.providerConfig ?? {}).forEach((k) => {
+
+      // Iterate through the new provider configurations so we can ensure all fields supporting task type are added
+      Object.keys(newProvider?.configurations ?? {}).forEach((k) => {
+        const newConfigToUse =
+          newProvider?.configurations[k]?.location === TASK_SETTINGS
+            ? newTaskTypeConfig
+            : newProviderConfig;
         if (
-          newProvider?.configurations[k]?.supported_task_types &&
-          !newProvider?.configurations[k].supported_task_types.includes(taskType)
+          (newConfigToUse[k] !== undefined &&
+            newProvider?.configurations[k]?.supported_task_types &&
+            !newProvider?.configurations[k].supported_task_types.includes(taskType)) ||
+          // Remove fields of unknown and unhandled types
+          Object.values(FieldType).includes(
+            newProvider?.configurations[k]?.type ?? ('' as FieldType)
+          ) === false
         ) {
-          delete newConfig[k];
+          delete newConfigToUse[k];
+        } else if (
+          newConfigToUse[k] === undefined &&
+          newProvider?.configurations[k]?.supported_task_types &&
+          newProvider?.configurations[k].supported_task_types.includes(taskType)
+        ) {
+          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS)
+          const schemaField = newProviderSchema.find((f) => f.key === k);
+          newConfigToUse[k] = schemaField?.default_value ?? null;
         }
       });
+
       if (secrets && secrets?.providerSecrets) {
         Object.keys(secrets.providerSecrets).forEach((k) => {
           if (
@@ -148,42 +302,48 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         config: {
           taskType,
           inferenceId,
-          providerConfig: newConfig,
+          providerConfig: newProviderConfig,
+          taskTypeConfig: newTaskTypeConfig,
         },
         secrets: {
           providerSecrets: newSecrets,
         },
       });
     },
-    [config, secrets, updateFieldValues, updatedProviders]
+    [config, secrets, updateFieldValues, updatedProviders, getOverrides]
   );
 
   const onProviderChange = useCallback(
     (provider?: string) => {
       const newProvider = updatedProviders?.find((p) => p.service === provider);
 
-      setTaskTypeOptions(getTaskTypeOptions(newProvider?.task_types ?? []));
-      if (newProvider?.task_types && newProvider?.task_types.length > 0) {
-        onTaskTypeOptionsSelect(newProvider?.task_types[0], provider);
+      const availableTaskTypes = allowedTaskTypes
+        ? (newProvider?.task_types ?? []).filter((t) => (allowedTaskTypes as string[]).includes(t))
+        : newProvider?.task_types ?? [];
+      setTaskTypeOptions(getTaskTypeOptions(availableTaskTypes));
+      if (availableTaskTypes.length > 0) {
+        onTaskTypeOptionsSelect(availableTaskTypes[0], provider);
       }
 
       const defaultProviderConfig: Record<string, unknown> = {};
       const defaultProviderSecrets: Record<string, unknown> = {};
+      const defaultTaskTypeConfig: Record<string, unknown> = {};
+
+      const overrides = getOverrides(newProvider);
 
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(newProvider.task_types[0], newProvider)
+        ? mapProviderFields(newProvider.task_types[0], newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
       }
 
       newProviderSchema.forEach((fieldConfig) => {
+        const defaultConfigToUse =
+          fieldConfig.location === TASK_SETTINGS ? defaultTaskTypeConfig : defaultProviderConfig;
         if (!fieldConfig.sensitive) {
-          if (fieldConfig && !!fieldConfig.default_value) {
-            defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
-          } else {
-            defaultProviderConfig[fieldConfig.key] = null;
-          }
+          // default_value now includes overridden defaults from INTERNAL_OVERRIDE_FIELDS
+          defaultConfigToUse[fieldConfig.key] = fieldConfig.default_value;
         } else {
           defaultProviderSecrets[fieldConfig.key] = null;
         }
@@ -198,16 +358,26 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         config: {
           provider: newProvider?.service,
           providerConfig: defaultProviderConfig,
+          taskTypeConfig: defaultTaskTypeConfig,
           inferenceId,
+          contextWindowLength: '',
         },
         secrets: {
           providerSecrets: defaultProviderSecrets,
         },
       });
     },
-    [config, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders]
+    [
+      config,
+      onTaskTypeOptionsSelect,
+      updateFieldValues,
+      updatedProviders,
+      getOverrides,
+      allowedTaskTypes,
+    ]
   );
 
+  // Separate into providerConfig and taskTypeConfig depending on location
   const onSetProviderConfigEntry = useCallback(
     async (key: string, value: unknown) => {
       const entry: ConfigEntryView | undefined = providerSchema.find(
@@ -223,13 +393,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           setFieldValue('secrets.providerSecrets', newSecrets);
           await validateFields(['secrets.providerSecrets']);
         } else {
-          if (!config.providerConfig) {
-            config.providerConfig = {};
+          const fieldLocation =
+            entry.location === TASK_SETTINGS ? TASK_TYPE_CONFIG : PROVIDER_CONFIG;
+
+          if (!config[`${fieldLocation}`]) {
+            config[`${fieldLocation}`] = {};
           }
-          const newConfig = { ...config.providerConfig };
-          newConfig[key] = value;
-          setFieldValue('config.providerConfig', newConfig);
-          await validateFields(['config.providerConfig']);
+
+          const newConfigSection: Record<string, any> = { ...config[`${fieldLocation}`] };
+          newConfigSection[key] = value;
+          setFieldValue(`config.${fieldLocation}`, newConfigSection);
+          await validateFields([`config.${fieldLocation}`]);
         }
       }
     },
@@ -266,7 +440,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           role="combobox"
           onChange={() => {
             /* Intentionally left blank as onChange is required to avoid console error
-               but not used in this context
+              but not used in this context
             */
           }}
         />
@@ -283,38 +457,77 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     ]
   );
 
+  const getUpdatedProviders = useCallback(
+    (filterBySolution?: SolutionView) => {
+      if (providers) {
+        let filteredProviders = filterBySolution
+          ? providers.filter(isProviderForSolutions.bind(this, filterBySolution))
+          : providers;
+
+        if (allowedTaskTypes) {
+          filteredProviders = filteredProviders.filter((provider) =>
+            provider.task_types.some((t) => (allowedTaskTypes as string[]).includes(t))
+          );
+        }
+
+        // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
+        const elasticServiceIndex = filteredProviders.findIndex(
+          (provider) => provider.service === 'elastic'
+        );
+
+        if (elasticServiceIndex !== -1) {
+          const elasticService = filteredProviders[elasticServiceIndex];
+          const remainingProviders = filteredProviders.filter(
+            (_, index) => index !== elasticServiceIndex
+          );
+          return [elasticService, ...remainingProviders];
+        } else {
+          return filteredProviders;
+        }
+      }
+    },
+    [providers, allowedTaskTypes]
+  );
+
   useEffect(() => {
     if (providers) {
-      // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
-      const elasticServiceIndex = providers.findIndex((provider) => provider.service === 'elastic');
-      if (elasticServiceIndex !== -1) {
-        const elasticService = providers[elasticServiceIndex];
-        const remainingProviders = providers.filter((_, index) => index !== elasticServiceIndex);
-        setUpdatedProviders([elasticService, ...remainingProviders]);
-      } else {
-        setUpdatedProviders(providers);
+      // Set default filter if applicable
+      const inApplicableSolution =
+        currentSolution && Object.keys(solutionKeys).includes(currentSolution);
+
+      if (inApplicableSolution) {
+        setSolutionFilter(currentSolution);
       }
+      setUpdatedProviders(getUpdatedProviders(currentSolution));
     }
-  }, [providers]);
+  }, [providers, currentSolution, getUpdatedProviders]);
 
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
       const newProvider = updatedProviders?.find((p) => p.service === config.provider);
       // Update connector providerSchema
 
+      const overrides = getOverrides(newProvider);
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(config.taskType, newProvider)
+        ? mapProviderFields(config.taskType, newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
       }
       setSelectedTaskType(config.taskType);
     }
-  }, [config, config?.provider, config?.taskType, isEdit, selectedTaskType, updatedProviders]);
+  }, [
+    config?.provider,
+    config?.taskType,
+    isEdit,
+    selectedTaskType,
+    updatedProviders,
+    getOverrides,
+  ]);
 
   useEffect(() => {
     if (isSubmitting) {
-      validateFields(['config.providerConfig']);
+      validateFields(['config.providerConfig', 'config.taskTypeConfig']);
       validateFields(['secrets.providerSecrets']);
     }
   }, [isSubmitting, config, validateFields]);
@@ -335,12 +548,20 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             ) {
               itemValue.value = secretValue;
             }
-          } else if (config?.providerConfig) {
-            const configValue = config.providerConfig[item.key];
+          } else if (config?.providerConfig || config?.taskTypeConfig) {
+            let configValue = null;
+
+            if (item.location === SERVICE_SETTINGS && config?.providerConfig) {
+              configValue = config.providerConfig[item.key];
+            } else if (item.location === TASK_SETTINGS && config?.taskTypeConfig) {
+              configValue = config.taskTypeConfig[item.key];
+            }
+
             if (
               typeof configValue === 'string' ||
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
+              (typeof configValue === 'object' && isMapWithStringValues(configValue)) ||
               configValue === null ||
               configValue === undefined
             ) {
@@ -351,29 +572,31 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         })
       : [];
 
+    setProviderSettingsFormFields(existingConfiguration.filter((p) => p.required && !p.sensitive));
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
-    setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
-  }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
+    setAuthenticationFormFields(existingConfiguration.filter((p) => p.sensitive));
+  }, [config?.providerConfig, config?.taskTypeConfig, providerSchema, secrets, selectedTaskType]);
 
   const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
 
+  useEffect(() => {
+    // Trigger once on mount, then clean up
+    const delay = parseInt(euiTheme.animation.normal ?? '0', 10);
+
+    const timeout = window.setTimeout(() => {
+      setIsFlyoutOpen(true);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [euiTheme.animation.normal]);
+
   return !isLoading ? (
     <>
-      <UseField
-        path="config.provider"
-        config={{
-          validations: [
-            {
-              validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
-              isBlocking: true,
-            },
-          ],
-        }}
-      >
+      <UseField path="config.provider" config={providerConfigConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);
-          return (
+          const formRow = (
             <EuiFormRow
               id="providerSelectBox"
               fullWidth
@@ -386,56 +609,115 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               isInvalid={isInvalid}
               error={errorMessage}
             >
-              <EuiInputPopover
-                id={'popoverId'}
-                fullWidth
-                input={selectInput}
-                isOpen={isProviderPopoverOpen}
-                closePopover={closeProviderPopover}
-                className="rightArrowIcon"
-              >
-                <SelectableProvider
-                  providers={updatedProviders ?? []}
-                  onClosePopover={closeProviderPopover}
-                  onProviderChange={onProviderChange}
-                />
-              </EuiInputPopover>
+              <>
+                <EuiSpacer size="s" />
+                <EuiInputPopover
+                  id={'providerInputPopoverId'}
+                  fullWidth
+                  input={selectInput}
+                  isOpen={isProviderPopoverOpen}
+                  closePopover={closeProviderPopover}
+                  className="rightArrowIcon"
+                >
+                  <SelectableProvider
+                    currentSolution={currentSolution}
+                    providers={updatedProviders ?? []}
+                    onClosePopover={closeProviderPopover}
+                    onProviderChange={onProviderChange}
+                    onSolutionFilterChange={toggleAndApplyFilter}
+                    solutionFilter={solutionFilter}
+                  />
+                </EuiInputPopover>
+              </>
             </EuiFormRow>
+          );
+          return enableEisPromoTour ? (
+            <EisCloudConnectPromoTour
+              promoId="eisInferenceEndpointFlyout"
+              navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+              isSelfManaged={!cloud?.isCloudEnabled}
+              isReady={isFlyoutOpen}
+            >
+              {formRow}
+            </EisCloudConnectPromoTour>
+          ) : (
+            formRow
           );
         }}
       </UseField>
       {config?.provider ? (
         <>
+          <EuiHorizontalRule margin="m" />
+          {/* SETTINGS */}
+          <EuiTitle size="xxs" data-test-subj="settings-label">
+            <h4>
+              <FormattedMessage
+                id="xpack.inferenceEndpointUICommon.components.settingsLabel"
+                defaultMessage="Settings"
+              />
+            </h4>
+          </EuiTitle>
           <EuiSpacer size="m" />
           <ConfigurationFormItems
+            dataTestSubj="configuration-fields"
             isLoading={false}
             direction="column"
-            items={requiredProviderFormFields}
+            descriptionLinks={serviceProviderLinkComponents[config.provider as ServiceProviderKeys]}
+            items={providerSettingsFormFields}
             setConfigEntry={onSetProviderConfigEntry}
             isEdit={isEdit}
             isPreconfigured={isPreconfigured}
             isInternalProvider={isInternalProvider}
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
+          {optionalProviderFormFields.length > 0 ? (
+            <>
+              <MoreOptionsFields
+                optionalProviderFormFields={optionalProviderFormFields}
+                onSetProviderConfigEntry={onSetProviderConfigEntry}
+                isEdit={isEdit}
+              />
+              <EuiHorizontalRule margin="m" />
+            </>
+          ) : null}
+          {/* AUTHENTICATION */}
+          {authenticationFormFields.length > 0 ? (
+            <>
+              <AuthenticationFormItems
+                isLoading={false}
+                items={authenticationFormFields}
+                setConfigEntry={onSetProviderConfigEntry}
+                isEdit={isEdit}
+                isPreconfigured={isPreconfigured}
+                reenterSecretsOnEdit={reenterSecretsOnEdit}
+              />
+              <EuiHorizontalRule margin="m" />
+            </>
+          ) : null}
+          {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields
             config={config}
-            optionalProviderFormFields={optionalProviderFormFields}
-            onSetProviderConfigEntry={onSetProviderConfigEntry}
             onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
+            allowContextWindowLength={allowContextWindowLength}
+            allowTemperature={allowTemperature}
           />
-          <EuiSpacer size="m" />
-          <EuiHorizontalRule margin="xs" />
+          {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
-            providerSchema={providerSchema}
-            setRequiredProviderFormFields={setRequiredProviderFormFields}
+            requiredProviderFormFields={authenticationFormFields}
+            setRequiredProviderFormFields={setAuthenticationFormFields}
             isSubmitting={isSubmitting}
           />
           <ProviderConfigHiddenField
-            providerSchema={providerSchema}
-            setRequiredProviderFormFields={setRequiredProviderFormFields}
+            requiredProviderFormFields={providerSettingsFormFields}
+            setRequiredProviderFormFields={setProviderSettingsFormFields}
+            isSubmitting={isSubmitting}
+          />
+          <TaskTypeConfigHiddenField
+            requiredProviderFormFields={providerSettingsFormFields}
+            setRequiredProviderFormFields={setProviderSettingsFormFields}
             isSubmitting={isSubmitting}
           />
         </>

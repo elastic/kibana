@@ -8,110 +8,65 @@
  */
 
 import React from 'react';
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiAccordion,
-  useGeneratedHtmlId,
-  EuiTitle,
-} from '@elastic/eui';
-import {
-  LogDocumentOverview,
-  fieldConstants,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+import { useGeneratedHtmlId } from '@elastic/eui';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
+
 import { i18n } from '@kbn/i18n';
-import { Timestamp } from './sub_components/timestamp';
-import { HoverActionPopover } from './sub_components/hover_popover_action';
-import { LogLevel } from './sub_components/log_level';
+import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { ContentFrameworkSection } from '../..';
+import { LogsOverviewHighlights } from './logs_overview_highlights';
+import { ContentBreakdown } from './sub_components/content_breakdown/content_breakdown';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
 });
 
-export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
-  const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
-  const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
-    includeFormattedValue: true,
-  });
-  const messageCodeBlockProps = formattedValue
-    ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
-  const hasBadges = hasTimestamp || hasLogLevel;
-  const hasMessageField = field && value;
-  const hasFlyoutHeader = hasMessageField || hasBadges;
+interface LogsOverviewHeaderProps
+  extends Pick<
+    DocViewRenderProps,
+    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'hit' | 'dataView'
+  > {
+  formattedDoc: LogDocumentOverview;
+  renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+}
 
+export function LogsOverviewHeader({
+  hit,
+  formattedDoc,
+  dataView,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  renderFlyoutStreamProcessingLink,
+}: LogsOverviewHeaderProps) {
   const accordionId = useGeneratedHtmlId({
     prefix: contentLabel,
   });
 
-  const accordionTitle = (
-    <EuiTitle size="xxs">
-      <p>{contentLabel}</p>
-    </EuiTitle>
-  );
-
-  const logLevelAndTimestamp = hasBadges && (
-    <EuiFlexGroup responsive={false} gutterSize="m">
-      {doc[fieldConstants.LOG_LEVEL_FIELD] && (
-        <HoverActionPopover
-          value={doc[fieldConstants.LOG_LEVEL_FIELD]}
-          field={fieldConstants.LOG_LEVEL_FIELD}
-        >
-          <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
-        </HoverActionPopover>
-      )}
-      {hasTimestamp && <Timestamp timestamp={doc[fieldConstants.TIMESTAMP_FIELD]} />}
-    </EuiFlexGroup>
-  );
-
-  const contentField = hasMessageField && (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      data-test-subj="unifiedDocViewLogsOverviewMessage"
-    >
-      <EuiFlexGroup
-        alignItems="flexEnd"
-        gutterSize="none"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiText color="subdued" size="xs">
-          {field}
-        </EuiText>
-        <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
-      </EuiFlexGroup>
-      <HoverActionPopover
-        value={value}
-        formattedValue={formattedValue}
-        field={field}
-        anchorPosition="downCenter"
-        display="block"
-      >
-        <EuiCodeBlock
-          overflowHeight={100}
-          paddingSize="s"
-          isCopyable
-          fontSize="s"
-          {...messageCodeBlockProps}
-        />
-      </HoverActionPopover>
-    </EuiFlexGroup>
-  );
-
-  return hasFlyoutHeader ? (
-    <EuiAccordion
+  return (
+    <ContentFrameworkSection
       id={accordionId}
-      buttonContent={accordionTitle}
-      paddingSize="m"
-      initialIsOpen={true}
+      title={contentLabel}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
+      hasBorder={false}
+      hasPadding={false}
     >
-      {hasMessageField ? contentField : logLevelAndTimestamp}
-    </EuiAccordion>
-  ) : null;
+      <ContentBreakdown
+        dataView={dataView}
+        formattedDoc={formattedDoc}
+        hit={hit}
+        renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+      />
+
+      <LogsOverviewHighlights
+        formattedDoc={formattedDoc}
+        hit={hit}
+        dataView={dataView}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    </ContentFrameworkSection>
+  );
 }

@@ -10,8 +10,13 @@ import { camelCase, startCase } from 'lodash';
 import React from 'react';
 import { SplitAccordion } from '../../../../../common/components/split_accordion';
 import { DiffView } from '../json_diff/diff_view';
-import type { FormattedFieldDiff, FieldDiff } from '../../../model/rule_details/rule_field_diff';
+import {
+  type FormattedFieldDiff,
+  type FieldDiff,
+  DiffLayout,
+} from '../../../model/rule_details/rule_field_diff';
 import { fieldToDisplayNameMap } from './translations';
+import { convertFieldToDisplayName } from '../helpers';
 
 const SubFieldComponent = ({
   currentVersion,
@@ -19,18 +24,24 @@ const SubFieldComponent = ({
   fieldName,
   shouldShowSeparator,
   shouldShowSubtitles,
+  diffLayout,
 }: FieldDiff & {
   shouldShowSeparator: boolean;
   shouldShowSubtitles: boolean;
+  diffLayout: DiffLayout;
 }) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexGroup direction="column">
       {shouldShowSubtitles ? (
         <EuiTitle data-test-subj="ruleUpgradePerFieldDiffSubtitle" size="xxxs">
-          <h4>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h4>
+          <h4>{convertFieldToDisplayName(fieldName)}</h4>
         </EuiTitle>
       ) : null}
-      <DiffView oldSource={currentVersion} newSource={targetVersion} />
+      {diffLayout === DiffLayout.RightToLeft ? (
+        <DiffView oldSource={targetVersion} newSource={currentVersion} />
+      ) : (
+        <DiffView oldSource={currentVersion} newSource={targetVersion} />
+      )}
       {shouldShowSeparator ? <EuiHorizontalRule margin="s" size="full" /> : null}
     </EuiFlexGroup>
   </EuiFlexGroup>
@@ -39,11 +50,13 @@ const SubFieldComponent = ({
 export interface FieldDiffComponentProps {
   ruleDiffs: FormattedFieldDiff;
   fieldsGroupName: string;
+  diffLayout?: DiffLayout;
 }
 
 export const FieldGroupDiffComponent = ({
   ruleDiffs,
   fieldsGroupName,
+  diffLayout = DiffLayout.LeftToRight,
 }: FieldDiffComponentProps) => {
   const { fieldDiffs, shouldShowSubtitles } = ruleDiffs;
 
@@ -68,6 +81,7 @@ export const FieldGroupDiffComponent = ({
             currentVersion={currentVersion}
             targetVersion={targetVersion}
             fieldName={specificFieldName}
+            diffLayout={diffLayout}
           />
         );
       })}

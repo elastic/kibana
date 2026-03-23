@@ -84,6 +84,7 @@ export const PipelineDetails: FC<Props> = memo(
                 isInvalid={targetFieldError !== undefined}
               >
                 <EuiFieldText
+                  isInvalid={targetFieldError !== undefined}
                   fullWidth
                   data-test-subj="mlTrainedModelsInferencePipelineTargetFieldInput"
                   value={targetField}

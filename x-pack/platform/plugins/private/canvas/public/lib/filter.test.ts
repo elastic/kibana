@@ -6,8 +6,8 @@
  */
 
 import { fromExpression } from '@kbn/interpreter';
-import { FC } from 'react';
-import {
+import type { FC } from 'react';
+import type {
   Filter as FilterType,
   FilterViewInstance,
   FlattenFilterViewInstance,

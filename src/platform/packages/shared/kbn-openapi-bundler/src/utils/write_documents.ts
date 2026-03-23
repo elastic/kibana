@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { basename } from 'path';
 import { logger } from '../logger';
 import { writeYamlDocument } from './write_yaml_document';

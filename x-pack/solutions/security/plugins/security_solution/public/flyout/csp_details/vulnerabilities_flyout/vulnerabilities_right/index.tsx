@@ -9,8 +9,8 @@ import React from 'react';
 import {
   SeverityStatusBadge,
   getNormalizedSeverity,
-  type FindingVulnerabilityFlyoutProps,
   type FindingVulnerabilityFullFlyoutContentProps,
+  type FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,7 @@ import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
+import { FlyoutTitle } from '../../../shared/components/flyout_title';
 
 export const FindingsVulnerabilityPanel = ({
   vulnerabilityId,
@@ -27,13 +28,14 @@ export const FindingsVulnerabilityPanel = ({
   packageName,
   packageVersion,
   eventId,
-}: FindingVulnerabilityFlyoutProps) => {
+  isPreviewMode,
+}: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspVulnerabilityFlyout = cloudSecurityPosture.getCloudSecurityPostureVulnerabilityFlyout();
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspVulnerabilityFlyout.Component
         vulnerabilityId={vulnerabilityId}
         resourceId={resourceId}
@@ -42,6 +44,12 @@ export const FindingsVulnerabilityPanel = ({
         eventId={eventId}
       >
         {({ finding, createRuleFn }: FindingVulnerabilityFullFlyoutContentProps) => {
+          const vulnerabilityTitle =
+            finding?.vulnerability?.title ??
+            i18n.translate('xpack.securitySolution.csp.vulnerabilitiesFlyout.emptyTitleHolder', {
+              defaultMessage: 'No title available',
+            });
+
           return (
             <>
               <FlyoutHeader>
@@ -79,14 +87,18 @@ export const FindingsVulnerabilityPanel = ({
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
+                <FlyoutTitle title={vulnerabilityTitle} />
+                <EuiSpacer size="xs" />
                 <CspVulnerabilityFlyout.Header finding={finding} />
               </FlyoutHeader>
               <FlyoutBody>
                 <CspVulnerabilityFlyout.Body finding={finding} />
               </FlyoutBody>
-              <EuiFlyoutFooter>
-                <CspVulnerabilityFlyout.Footer createRuleFn={createRuleFn} />
-              </EuiFlyoutFooter>
+              {!isPreviewMode && (
+                <EuiFlyoutFooter>
+                  <CspVulnerabilityFlyout.Footer createRuleFn={createRuleFn} />
+                </EuiFlyoutFooter>
+              )}
             </>
           );
         }}

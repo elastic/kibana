@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { HttpSetup, ResponseErrorBody } from '@kbn/core/public';
+import type { HttpSetup, ResponseErrorBody } from '@kbn/core/public';
+import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
 
 import type { FieldCopyAction, GeoipDatabase, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
-import {
+import type {
   UseRequestConfig,
   SendRequestConfig,
   SendRequestResponse,
-  sendRequest as _sendRequest,
-  useRequest as _useRequest,
   Error as _Error,
 } from '../../shared_imports';
-import { UiMetricService } from './ui_metric';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../../shared_imports';
+import type { UiMetricService } from './ui_metric';
 import {
   UIM_PIPELINE_CREATE,
   UIM_PIPELINE_UPDATE,
@@ -72,11 +72,19 @@ export class ApiService {
     });
   }
 
+  public useLoadPipelineTree(name: string) {
+    return this.useRequest<{ pipelineStructureTree: PipelineTreeNode }>({
+      path: `${API_BASE_PATH}/structure_tree/${encodeURIComponent(name)}`,
+      method: 'get',
+    });
+  }
+
   public async createPipeline(pipeline: Pipeline) {
+    const { deprecated, isManaged, ...body } = pipeline;
     const result = await this.sendRequest({
       path: API_BASE_PATH,
       method: 'post',
-      body: JSON.stringify(pipeline),
+      body: JSON.stringify(body),
     });
 
     this.trackUiMetric(UIM_PIPELINE_CREATE);
@@ -85,7 +93,7 @@ export class ApiService {
   }
 
   public async updatePipeline(pipeline: Pipeline) {
-    const { name, ...body } = pipeline;
+    const { name, deprecated, isManaged, ...body } = pipeline;
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/${encodeURIComponent(name)}`,
       method: 'put',

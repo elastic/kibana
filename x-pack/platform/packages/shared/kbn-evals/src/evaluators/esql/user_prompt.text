@@ -1,0 +1,12 @@
+Here is the actual task:
+
+Gold ES|QL query:
+```esql
+{{{ground_truth}}}
+```
+
+Candidate ES|QL query:
+```esql
+{{{prediction}}}
+```
+

@@ -9,6 +9,7 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 
@@ -36,6 +37,16 @@ const createActionsConfigMock = () => {
     getMaxAttempts: jest.fn().mockReturnValue(3),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
     getMaxQueued: jest.fn().mockReturnValue(1000),
+    getWebhookSettings: jest.fn().mockReturnValue({
+      ssl: {
+        pfx: {
+          enabled: true,
+        },
+      },
+    }),
+    getAwsSesConfig: jest.fn().mockReturnValue(null),
+    getEnabledEmailServices: jest.fn().mockReturnValue(['*']),
+    getMaxEmailBodyLength: jest.fn().mockReturnValue(DEFAULT_EMAIL_BODY_LENGTH),
   };
   return mocked;
 };

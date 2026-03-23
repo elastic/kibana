@@ -23,6 +23,7 @@ import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
 import { CategoryUserActionBuilder } from './builders/category';
 import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
+import { ObservablesUserActionBuilder } from './builders/observables';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -39,6 +40,7 @@ const builderMap = {
   settings: SettingsUserActionBuilder,
   delete_case: NoopUserActionBuilder,
   customFields: CustomFieldsUserActionBuilder,
+  observables: ObservablesUserActionBuilder,
 };
 
 export class BuilderFactory {

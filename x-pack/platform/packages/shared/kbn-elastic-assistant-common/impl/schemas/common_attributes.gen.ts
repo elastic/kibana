@@ -14,8 +14,8 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * A string that does not contain only whitespace characters.
@@ -102,7 +102,7 @@ export const BulkActionBase = z.object({
 });
 
 /**
- * User screen context.
+ * IDs for a specific prompt within a group of prompts.
  */
 export type PromptIds = z.infer<typeof PromptIds>;
 export const PromptIds = z.object({

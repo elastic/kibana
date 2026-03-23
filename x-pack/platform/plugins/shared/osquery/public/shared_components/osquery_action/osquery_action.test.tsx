@@ -8,7 +8,10 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiProvider } from '@elastic/eui';
+import { ThemeProvider } from '@emotion/react';
 
 import { OsqueryAction } from '.';
 import { queryClient } from '../../query_client';
@@ -17,6 +20,10 @@ import { useKibana } from '../../common/lib/kibana';
 import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } from './translations';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/experimental_features_context', () => ({
+  ...jest.requireActual('../../common/experimental_features_context'),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -48,6 +55,13 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
       application: {
         capabilities: permissionType,
       },
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
+          remove: jest.fn(),
+        },
+      },
     },
   } as unknown as ReturnType<typeof useKibana>);
 };
@@ -68,9 +82,20 @@ const properPermissions = {
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
-    <IntlProvider locale={'en'}>
-      <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
-    </IntlProvider>
+    <EuiProvider>
+      <ThemeProvider
+        theme={{
+          euiTheme: {
+            colors: { success: '#00BFB3' },
+            border: { width: { thin: '1px', thick: '2px' } },
+          } as unknown as EuiThemeComputed<{}>,
+        }}
+      >
+        <IntlProvider locale={'en'}>
+          <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
+        </IntlProvider>
+      </ThemeProvider>
+    </EuiProvider>
   );
 
 describe('Osquery Action', () => {

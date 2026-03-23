@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IngestInferenceConfig, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestInferenceConfig, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
-import { FieldMapping } from '../ml_inference_pipeline';
+import type { FieldMapping } from '../ml_inference_pipeline';
 
 export interface InferencePipeline {
   modelId: string | undefined;

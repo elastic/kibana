@@ -6,11 +6,13 @@
  */
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { NewFormatExplicitInput } from './migrate_alert_page_controls';
 import {
   GET_PAGE_FILTER_STORAGE_KEY,
   migrateAlertPageControlsTo816,
 } from './migrate_alert_page_controls';
 import type { StartPlugins } from '../../../types';
+import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
 
 const OLD_FORMAT = {
   viewMode: 'view',
@@ -149,70 +151,80 @@ const OLD_FORMAT = {
   },
 };
 
-const NEW_FORMAT = {
+const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
   initialChildControlState: {
     '0': {
       type: 'optionsListControl',
       order: 0,
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        hideActionBar: true,
+        hideExists: true,
+        placeholder: '',
+      },
       width: 'small',
       dataViewId: 'security_solution_alerts_dv',
       title: 'Status',
       fieldName: 'kibana.alert.workflow_status',
       selectedOptions: ['open'],
-      hideActionBar: true,
       persist: true,
-      hideExists: true,
     },
     '1': {
       type: 'optionsListControl',
       order: 1,
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        hideActionBar: true,
+        hideExists: true,
+        placeholder: '',
+      },
       width: 'small',
       dataViewId: 'security_solution_alerts_dv',
       title: 'Severity',
       fieldName: 'kibana.alert.severity',
       selectedOptions: [],
-      hideActionBar: true,
-      hideExists: true,
+      persist: false,
     },
     '2': {
       type: 'optionsListControl',
       order: 2,
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        hideActionBar: false,
+        hideExists: false,
+        placeholder: '',
+      },
       width: 'small',
       dataViewId: 'security_solution_alerts_dv',
       title: 'User',
       fieldName: 'user.name',
+      selectedOptions: [],
+
+      persist: false,
     },
     '3': {
       type: 'optionsListControl',
       order: 3,
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        hideActionBar: false,
+        hideExists: false,
+        placeholder: '',
+      },
       width: 'small',
       dataViewId: 'security_solution_alerts_dv',
       title: 'Host',
       fieldName: 'host.name',
+      selectedOptions: [],
+      persist: false,
     },
   },
-  labelPosition: 'oneLine',
-  chainingSystem: 'HIERARCHICAL',
-  autoApplySelections: false,
   ignoreParentSettings: {
     ignoreValidations: false,
-  },
-  editorConfig: {
-    hideWidthSettings: true,
-    hideDataViewSelector: true,
-    hideAdditionalSettings: true,
   },
 };
 const storage = new Storage(localStorage);
@@ -261,8 +273,7 @@ describe('migrateAlertPageControlsTo816', () => {
       await migrateAlertPageControlsTo816(storage, mockPlugins);
       const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY());
       const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
-      EXPECTED_NEW_FORMAT.initialChildControlState['0'].hideExists = true;
-      EXPECTED_NEW_FORMAT.chainingSystem = 'NONE';
+      EXPECTED_NEW_FORMAT.initialChildControlState['0'].displaySettings.hideExists = true;
       expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
     });
   });
@@ -302,8 +313,7 @@ describe('migrateAlertPageControlsTo816', () => {
       await migrateAlertPageControlsTo816(storage, mockPlugins);
       const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId));
       const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
-      EXPECTED_NEW_FORMAT.initialChildControlState['0'].hideExists = true;
-      EXPECTED_NEW_FORMAT.chainingSystem = 'NONE';
+      EXPECTED_NEW_FORMAT.initialChildControlState['0'].displaySettings.hideExists = true;
       expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
     });
   });

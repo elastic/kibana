@@ -10,15 +10,15 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { RangeFilterParams } from '@kbn/es-query';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaExecutionContext } from '@kbn/core/public';
-import { TimelionVisDependencies } from './plugin';
-import { TimelionRenderValue } from './timelion_vis_fn';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { TimelionVisDependencies } from './plugin';
+import type { TimelionRenderValue } from './timelion_vis_fn';
 import { getCoreStart, getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>

@@ -10,7 +10,8 @@
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React, { ReactNode, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { compressToEncodedURIComponent } from 'lz-string';
 import { useKibana } from '../../../../../hooks/use_kibana';

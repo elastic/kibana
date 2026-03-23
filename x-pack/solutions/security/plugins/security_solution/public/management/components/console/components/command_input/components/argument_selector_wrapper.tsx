@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
 import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '../../../types';
@@ -59,7 +60,18 @@ export interface ArgumentSelectorWrapperProps {
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
   ({ argName, argIndex, argDefinition: { SelectorComponent } }) => {
     const dispatch = useConsoleStateDispatch();
+    const command = useInputCommand();
     const { valueText, value, store } = useWithCommandArgumentState(argName, argIndex);
+
+    if (!command) {
+      // FIXME: PT we should not throw here as that would likely crash the UI.
+      throw new Error('ArgumentSelectorWrapper should only be used when a command is entered');
+    }
+
+    // Create requestFocus callback that uses proper console dispatch instead of direct state manipulation
+    const requestFocus = useCallback(() => {
+      dispatch({ type: 'addFocusToKeyCapture' });
+    }, [dispatch]);
 
     const handleSelectorComponentOnChange = useCallback<
       CommandArgumentValueSelectorProps['onChange']
@@ -99,6 +111,8 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
                 argName={argName}
                 argIndex={argIndex}
                 store={store}
+                command={command}
+                requestFocus={requestFocus}
                 onChange={handleSelectorComponentOnChange}
               />
             </div>

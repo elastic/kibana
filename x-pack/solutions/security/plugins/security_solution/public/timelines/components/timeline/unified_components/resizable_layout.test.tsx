@@ -13,25 +13,12 @@ const TestSideBarPanel = <div data-test-subj="sidebar__panel">{'Sidebar Panel'}<
 
 const MainPanel = <div data-test-subj="main__panel">{'Main Panel'}</div>;
 
-const container = document.createElement('div');
-container.style.width = '1000px';
-container.style.height = '1000px';
-container.getBoundingClientRect = jest.fn(() => {
-  return {
-    width: 1000,
-    height: 1000,
-    x: 0,
-    y: 0,
-  } as DOMRect;
-});
-
 const TestComponent = () => {
   return (
     <TimelineResizableLayout
       sidebarPanel={TestSideBarPanel}
       mainPanel={MainPanel}
       unifiedFieldListSidebarContainerApi={null}
-      container={container}
     />
   );
 };

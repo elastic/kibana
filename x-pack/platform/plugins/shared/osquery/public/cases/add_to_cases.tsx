@@ -18,7 +18,7 @@ export const AddToCaseWrapper = React.memo<AddToCaseButtonProps>((props) => {
   const { cases } = useKibana().services;
   const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
 
-  if (isCasesAttachment || !props.actionId) {
+  if (isCasesAttachment || (!props.actionId && !props.scheduleId)) {
     return <></>;
   }
 

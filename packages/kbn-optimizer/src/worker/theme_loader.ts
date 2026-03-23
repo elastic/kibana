@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import {
   FALLBACK_THEME_TAG,
   parseThemeTags,

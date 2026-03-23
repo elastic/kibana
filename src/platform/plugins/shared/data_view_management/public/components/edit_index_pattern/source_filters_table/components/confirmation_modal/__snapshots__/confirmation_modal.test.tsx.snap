@@ -2,6 +2,7 @@
 
 exports[`Header should render normally 1`] = `
 <EuiConfirmModal
+  aria-labelledby="generated-id"
   buttonColor="danger"
   cancelButtonText={
     <Memo(MemoizedFormattedMessage)
@@ -28,6 +29,11 @@ exports[`Header should render normally 1`] = `
         }
       }
     />
+  }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
   }
 />
 `;

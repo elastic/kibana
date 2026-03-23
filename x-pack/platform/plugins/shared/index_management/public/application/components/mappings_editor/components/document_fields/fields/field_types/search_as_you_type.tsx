@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import type { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,

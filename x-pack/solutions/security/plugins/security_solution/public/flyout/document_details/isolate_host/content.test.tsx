@@ -17,11 +17,6 @@ describe('<IsolateHostPanelContent />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appContextMock = createAppRootMockRenderer();
-
-    appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    });
   });
 
   it('should display content with success banner when action is isolateHost', () => {

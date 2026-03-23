@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
+import { validateThreatMapping } from '../../../../../utils/request_validation/indicator_match';
 import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 
 /**
@@ -16,6 +18,7 @@ export const validatePatchRuleRequestBody = (rule: PatchRuleRequestBody): string
     ...validateTimelineId(rule),
     ...validateTimelineTitle(rule),
     ...validateThreshold(rule),
+    ...validateThreatMapping(rule),
   ];
 };
 
@@ -55,25 +58,4 @@ const validateTimelineTitle = (rule: PatchRuleRequestBody): string[] => {
   return [];
 };
 
-const validateThreshold = (rule: PatchRuleRequestBody): string[] => {
-  const errors: string[] = [];
-  if (rule.type === 'threshold') {
-    if (!rule.threshold) {
-      errors.push('when "type" is "threshold", "threshold" is required');
-    } else {
-      if (
-        rule.threshold.cardinality?.length &&
-        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
-      ) {
-        errors.push('Cardinality of a field that is being aggregated on is always 1');
-      }
-      if (rule.threshold.value <= 0) {
-        errors.push('"threshold.value" has to be bigger than 0');
-      }
-      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
-        errors.push('Number of fields must be 3 or less');
-      }
-    }
-  }
-  return errors;
-};
+const validateThreshold = (rule: PatchRuleRequestBody): string[] => validateThresholdBase(rule);

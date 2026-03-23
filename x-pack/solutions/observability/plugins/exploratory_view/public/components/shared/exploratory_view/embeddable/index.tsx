@@ -9,10 +9,9 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiErrorBoundary } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useAppDataView } from './use_app_data_view';
@@ -104,10 +103,18 @@ export function getExploratoryViewEmbeddable(
         newProps.legendIsVisible = false;
         newProps.hideTicks = true;
       }
-      if (props.id && lastRefreshed[props.id] && loadCount < 2) {
+      const cachedTime = props.id ? lastRefreshed[props.id] : undefined;
+      const timeRangeChanged = cachedTime
+        ? cachedTime.from !== series.time.from || cachedTime.to !== series.time.to
+        : false;
+
+      // Use cached time only during initial load (loadCount < 2) and when time range hasn't changed
+      const shouldUseCachedTime =
+        Boolean(props.id) && Boolean(cachedTime) && loadCount < 2 && !timeRangeChanged;
+      if (shouldUseCachedTime && cachedTime) {
         newProps.attributes = props.attributes?.map((seriesT) => ({
           ...seriesT,
-          time: lastRefreshed[props.id!],
+          time: cachedTime,
         }));
       } else if (props.id) {
         lastRefreshed[props.id] = series.time;
@@ -128,21 +135,18 @@ export function getExploratoryViewEmbeddable(
     }
 
     return (
-      <EuiErrorBoundary>
-        <KibanaContextProvider services={services}>
-          <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
-            <ExploratoryViewEmbeddable
-              {...embedProps}
-              dataViewState={dataViews}
-              lens={lens}
-              lensFormulaHelper={lensHelper?.formula}
-              searchSessionId={services.data.search.session.getSessionId()}
-              onLoad={onLensLoaded}
-              analytics={analytics}
-            />
-          </Wrapper>
-        </KibanaContextProvider>
-      </EuiErrorBoundary>
+      <KibanaContextProvider services={services}>
+        <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
+          <ExploratoryViewEmbeddable
+            {...embedProps}
+            dataViewState={dataViews}
+            lens={lens}
+            searchSessionId={services.data.search.session.getSessionId()}
+            onLoad={onLensLoaded}
+            analytics={analytics}
+          />
+        </Wrapper>
+      </KibanaContextProvider>
     );
   };
 }

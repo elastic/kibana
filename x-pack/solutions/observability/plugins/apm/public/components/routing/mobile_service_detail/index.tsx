@@ -162,15 +162,19 @@ export const mobileServiceDetailRoute = {
             element: <TransactionDetails />,
             params: t.type({
               query: t.intersection([
-                t.type({
-                  transactionName: t.string,
-                  comparisonEnabled: toBooleanRt,
-                  showCriticalPath: toBooleanRt,
-                }),
+                t.intersection([
+                  t.type({
+                    comparisonEnabled: toBooleanRt,
+                    showCriticalPath: toBooleanRt,
+                  }),
+                  t.partial({ transactionName: t.string }),
+                ]),
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
                   flyoutDetailTab: t.string,
+                  sampleRangeTo: toNumberRt,
+                  sampleRangeFrom: toNumberRt,
                 }),
                 offsetRt,
               ]),
@@ -248,7 +252,7 @@ export const mobileServiceDetailRoute = {
       '/mobile-services/{serviceName}/service-map': page({
         tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
@@ -263,7 +267,10 @@ export const mobileServiceDetailRoute = {
         element: <ServiceLogs />,
         searchBarOptions: {
           showMobileFilters: false,
-          showQueryInput: false,
+          showQueryInput: true,
+          searchBarPlaceholder: i18n.translate('xpack.apm.views.logs.searchBarPlaceholder', {
+            defaultMessage: 'Search for log entries',
+          }),
         },
       }),
       '/mobile-services/{serviceName}/alerts': {

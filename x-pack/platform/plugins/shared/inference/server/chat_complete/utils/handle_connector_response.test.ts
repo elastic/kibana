@@ -8,7 +8,7 @@
 import { firstValueFrom, of, take } from 'rxjs';
 import { Readable } from 'stream';
 import type { InferenceInvokeResult } from './inference_executor';
-import { handleConnectorResponse } from './handle_connector_response';
+import { handleConnectorStreamResponse } from './handle_connector_response';
 
 const stubResult = <T>(parts: Partial<InferenceInvokeResult<T>>): InferenceInvokeResult<T> => {
   return {
@@ -28,7 +28,7 @@ describe('handleConnectorResponse', () => {
     });
 
     const output = await firstValueFrom(
-      of(input).pipe(handleConnectorResponse({ processStream }), take(1))
+      of(input).pipe(handleConnectorStreamResponse({ processStream }), take(1))
     );
 
     expect(processStream).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ describe('handleConnectorResponse', () => {
     });
 
     await expect(
-      firstValueFrom(of(input).pipe(handleConnectorResponse({ processStream }), take(1)))
+      firstValueFrom(of(input).pipe(handleConnectorStreamResponse({ processStream }), take(1)))
     ).rejects.toThrowError(/something went bad/);
   });
 
@@ -64,7 +64,7 @@ describe('handleConnectorResponse', () => {
     });
 
     await expect(
-      firstValueFrom(of(input).pipe(handleConnectorResponse({ processStream }), take(1)))
+      firstValueFrom(of(input).pipe(handleConnectorStreamResponse({ processStream }), take(1)))
     ).rejects.toThrowError(/Unexpected error/);
   });
 });

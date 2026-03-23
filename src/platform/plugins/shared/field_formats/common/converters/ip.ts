@@ -10,7 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 /** @public */
 export class IpFormat extends FieldFormat {
@@ -21,7 +22,10 @@ export class IpFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.IP;
 
   textConvert: TextContextTypeConvert = (val: number) => {
-    if (val === undefined || val === null) return '-';
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
+    }
     if (!isFinite(val)) return String(val);
 
     // shazzam!

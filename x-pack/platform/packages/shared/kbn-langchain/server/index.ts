@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { ActionsClientBedrockChatModel } from './language_models/bedrock_chat';
 import { ActionsClientChatOpenAI } from './language_models/chat_openai';
 import { ActionsClientLlm } from './language_models/llm';
-import { ActionsClientSimpleChatModel } from './language_models/simple_chat_model';
-import { ActionsClientGeminiChatModel } from './language_models/gemini_chat';
 import { ActionsClientChatVertexAI } from './language_models/chat_vertex';
 import { ActionsClientChatBedrockConverse } from './language_models/chat_bedrock_converse';
 import { parseBedrockStream } from './utils/bedrock';
@@ -20,11 +17,8 @@ export {
   parseBedrockStream,
   parseGeminiResponse,
   getDefaultArguments,
-  ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,
-  ActionsClientGeminiChatModel,
   ActionsClientLlm,
-  ActionsClientSimpleChatModel,
   ActionsClientChatBedrockConverse,
 };

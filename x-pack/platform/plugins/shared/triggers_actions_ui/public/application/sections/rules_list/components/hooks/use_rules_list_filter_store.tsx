@@ -10,8 +10,8 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { isEmpty } from 'lodash';
-import { RuleStatus } from '../../../../../common';
-import { RulesListFilters, RulesListProps, UpdateFiltersProps } from '../../../../../types';
+import type { RuleStatus } from '../../../../../common';
+import type { RulesListFilters, RulesListProps, UpdateFiltersProps } from '../../../../../types';
 
 type FilterStoreProps = Pick<
   RulesListProps,

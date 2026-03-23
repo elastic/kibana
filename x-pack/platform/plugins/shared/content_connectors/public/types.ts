@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ConnectorDefinition, ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { Pagination } from '@elastic/eui';
 import type {
   IndexManagementPluginStart,
   IndexMappingProps,
 } from '@kbn/index-management-shared-types';
+import type { HomePublicPluginStart } from '@kbn/home-plugin/public';
 
 export interface SearchConnectorsPluginSetup {
   // we don't have docLinks here yet
@@ -33,12 +33,12 @@ export interface SearchConnectorsPluginSetupDependencies {
 }
 
 export interface SearchConnectorsPluginStartDependencies {
+  home: HomePublicPluginStart;
   share?: SharePublicStart;
   console?: ConsolePluginStart;
   discover?: DiscoverStart;
   fleet?: FleetStart;
   cloud?: CloudSetup & CloudStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
 }
 

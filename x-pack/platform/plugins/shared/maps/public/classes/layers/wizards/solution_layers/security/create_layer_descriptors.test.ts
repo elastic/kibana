@@ -259,7 +259,6 @@ describe('createLayerDescriptor', () => {
       {
         id: '12345',
         label: 'apm-*-transaction*',
-        sourceDescriptor: null,
         type: 'LAYER_GROUP',
         visible: true,
       },
@@ -485,7 +484,6 @@ describe('createLayerDescriptor', () => {
       {
         id: '12345',
         label: 'filebeat-*',
-        sourceDescriptor: null,
         type: 'LAYER_GROUP',
         visible: true,
       },
@@ -713,7 +711,6 @@ describe('createLayerDescriptor', () => {
       {
         id: '12345',
         label: 'traces-apm-opbean-node',
-        sourceDescriptor: null,
         type: 'LAYER_GROUP',
         visible: true,
       },

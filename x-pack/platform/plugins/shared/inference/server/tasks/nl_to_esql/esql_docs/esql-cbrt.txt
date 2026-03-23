@@ -1,6 +1,6 @@
 # CBRT
 
-The CBRT function calculates the cube root of a given number.
+The CBRT function returns the cube root of a numeric value. The result is always a double. If the input is infinity, the function returns null.
 
 ## Syntax
 
@@ -10,11 +10,13 @@ The CBRT function calculates the cube root of a given number.
 
 #### number
 
-This is a numeric expression. If the parameter is `null`, the function will also return `null`.
+Numeric expression. If the value is null, the function returns null.
 
 ## Examples
 
+Calculates the cube root of 1000.0 and stores the result in a new column.
+
 ```esql
 ROW d = 1000.0
-| EVAL c = cbrt(d)
+| EVAL c = CBRT(d)
 ```

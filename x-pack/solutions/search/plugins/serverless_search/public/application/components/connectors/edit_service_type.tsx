@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -14,14 +15,14 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiBadge,
-  EuiComboBoxOptionOption,
   EuiText,
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector as BaseConnector } from '@kbn/search-connectors';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 
 import { BETA_LABEL, TECH_PREVIEW_LABEL } from '../../../../common/i18n_string';
@@ -227,14 +228,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         isLoading={isLoading}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         prepend={
-          <EuiIcon
-            type={
+          <EuiFormPrepend
+            iconLeft={
               connector.service_type
                 ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
                     ?.iconPath ?? ''
                 : 'plugs'
             }
-            size="l"
           />
         }
         singleSelection={{ asPlainText: true }}

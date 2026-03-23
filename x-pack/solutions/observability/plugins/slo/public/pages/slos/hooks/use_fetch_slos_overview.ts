@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { GetSLOStatsOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_slo_stats_overview';
-import { useQuery } from '@tanstack/react-query';
+import type { GetSLOStatsOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_slo_stats_overview';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SearchState } from './use_url_search_state';
+import type { SearchState } from './use_url_search_state';
 
 interface SLOsOverviewParams {
   kqlQuery?: string;

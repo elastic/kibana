@@ -12,7 +12,7 @@ The UI settings service is available both server and client side.
 
 ## Overview [_overview]
 
-UI settings are configurable from the Advanced Settings page in Management and control the behavior of {{kib}}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other [Saved Objects](/extend/saved-objects-service.md).
+UI settings are configurable from the Advanced Settings page in Management and control the behavior of {{kib}}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other [Saved Objects](/extend/saved-objects.md).
 
 There are several ways to configure an advanced setting:
 
@@ -32,8 +32,11 @@ Configuration through the Advanced Settings UI is restricted to users authorised
 
 
 ## Configuration with UI settings overrides [uisettings-overrides]
+```{applies_to}
+stack: preview
+```
 
-[preview] When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
+When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
 
 Use the top-level `uiSettings` key for this, for example:
 
@@ -176,6 +179,3 @@ export const migrations = {
 Plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the [Configure Kibana](/reference/configuration-reference/general-settings.md) guide.
 
 ::::
-
-
-

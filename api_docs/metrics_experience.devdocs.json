@@ -1,0 +1,152 @@
+{
+  "id": "metricsExperience",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "metricsExperience",
+        "id": "def-public.MetricsExperienceClient",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricsExperienceClient",
+        "description": [],
+        "signature": [
+          "{ getFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+          "MetricField",
+          "[]; total: number; page: number; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/metrics_experience/public/api/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "metricsExperience",
+      "id": "def-public.MetricsExperiencePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "MetricsExperiencePluginStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/metrics_experience/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "metricsExperience",
+          "id": "def-public.MetricsExperiencePluginStart.metricsExperienceClient",
+          "type": "Object",
+          "tags": [],
+          "label": "metricsExperienceClient",
+          "description": [],
+          "signature": [
+            "{ getFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+            "MetricField",
+            "[]; total: number; page: number; }>; } | undefined"
+          ],
+          "path": "src/platform/plugins/shared/metrics_experience/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "metricsExperience",
+        "id": "def-server.MetricsExperienceRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricsExperienceRouteRepository",
+        "description": [],
+        "signature": [
+          "{ \"GET /internal/metrics_experience/fields\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/metrics_experience/fields\", ",
+          "ZodObject",
+          "<{ query: ",
+          "ZodObject",
+          "<{ index: ",
+          "ZodDefault",
+          "<",
+          "ZodString",
+          ">; to: ",
+          "ZodEffects",
+          "<",
+          "ZodDefault",
+          "<",
+          "ZodString",
+          ">, number, string | undefined>; from: ",
+          "ZodEffects",
+          "<",
+          "ZodDefault",
+          "<",
+          "ZodString",
+          ">, number, string | undefined>; fields: ",
+          "ZodDefault",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">]>>; page: ",
+          "ZodDefault",
+          "<",
+          "ZodNumber",
+          ">; size: ",
+          "ZodDefault",
+          "<",
+          "ZodNumber",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { index: string; page: number; size: number; fields: string | string[]; from: number; to: number; }, { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { query: { index: string; page: number; size: number; fields: string | string[]; from: number; to: number; }; }, { query: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }; }>, ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.DefaultRouteHandlerResources",
+            "text": "DefaultRouteHandlerResources"
+          },
+          ", { fields: ",
+          "MetricField",
+          "[]; total: number; page: number; }, undefined>; }"
+        ],
+        "path": "src/platform/plugins/shared/metrics_experience/server/routes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

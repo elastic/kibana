@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ESQLEditorProps } from './src/types';
-export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
+export type { DataErrorsControl } from './src/types';
+export type { ESQLEditorProps } from './src/esql_editor';
 import { ESQLEditor } from './src/esql_editor';
+export type { ESQLEditorRestorableState } from './src/restorable_state';
+export { ESQLMenu } from './src/editor_menu';
+export { EsqlEditorActionsProvider } from './src/editor_actions_context';
+export { helpLabel } from './src/editor_menu/menu_i18n';
+
+export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
+export { ESQLEditorTelemetryService } from './src/telemetry/telemetry_service';
 
 // React.lazy support
 // eslint-disable-next-line import/no-default-export

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
-import { ScopedHistory } from '@kbn/core/public';
-import { IFlashMessage } from './types';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { IFlashMessage } from './types';
 
 interface FlashMessagesValues {
   historyListener: Function | null;
@@ -50,7 +51,6 @@ export const FlashMessagesLogic = kea<
     historyListener: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setHistoryListener: (_, { historyListener }) => historyListener,
       },
     ],
@@ -58,7 +58,6 @@ export const FlashMessagesLogic = kea<
       [],
       {
         clearFlashMessages: () => [],
-        // @ts-expect-error upgrade typescript v5.1.6
         setFlashMessages: (_, { messages }) => messages,
       },
     ],
@@ -68,7 +67,6 @@ export const FlashMessagesLogic = kea<
       [],
       {
         clearQueuedMessages: () => [],
-        // @ts-expect-error upgrade typescript v5.1.6
         setQueuedMessages: (_, { messages }) => messages,
       },
     ],

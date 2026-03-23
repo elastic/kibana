@@ -103,7 +103,11 @@ describe('helpers', () => {
         },
         {
           label: 'host',
-          options: [{ label: 'host.name' }],
+          options: [{ label: 'host.name' }, { label: 'host.id' }],
+        },
+        {
+          label: 'mock',
+          options: [{ label: 'mock.attr' }],
         },
         {
           label: 'nestedField',
@@ -120,7 +124,17 @@ describe('helpers', () => {
           ],
         },
         { label: 'process', options: [{ label: 'process.args' }] },
-        { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
+        {
+          label: 'source',
+          options: [
+            { label: 'source.ip' },
+            { label: 'source.port' },
+            { label: 'source.geo.city_name' },
+            { label: 'source.geo.region_name' },
+            { label: 'source.as.number' },
+            { label: 'source.as.organization.name' },
+          ],
+        },
         {
           label: 'user',
           options: [{ label: 'user.name' }],

@@ -3,13 +3,16 @@
 exports[`OptInDetailsComponent renders as expected 1`] = `
 <EuiPortal>
   <EuiFlyout
+    aria-labelledby="generated-id_flyoutTitle"
     maxWidth={true}
     onClose={[MockFunction]}
     ownFocus={true}
   >
     <EuiFlyoutHeader>
       <EuiTitle>
-        <h2>
+        <h2
+          id="generated-id_flyoutTitle"
+        >
           <MemoizedFormattedMessage
             defaultMessage="Cluster statistics"
             id="telemetry.callout.clusterStatisticsTitle"

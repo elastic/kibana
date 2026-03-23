@@ -35,7 +35,7 @@ describe('MisconfigurationsPreview', () => {
         <MisconfigurationsPreview
           value="host1"
           field={EntityIdentifierFields.hostName}
-          isLinkEnabled={true}
+          isPreviewMode={false}
           openDetailsPanel={mockOpenLeftPanel}
         />
       </TestProviders>

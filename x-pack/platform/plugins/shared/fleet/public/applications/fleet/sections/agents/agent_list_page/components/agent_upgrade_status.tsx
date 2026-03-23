@@ -235,7 +235,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_ROLLBACK':
       return {
         Badge: (
-          <EuiBadge color="danger" iconType="returnKey">
+          <EuiBadge color="warning" iconType="returnKey">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeRolledBack"
               defaultMessage="Upgrade rolled back"
@@ -293,7 +293,7 @@ export const AgentUpgradeStatus: React.FC<{
         <EuiFlexItem grow={false}>{status.Badge}</EuiFlexItem>
         {status.TooltipText && (
           <EuiFlexItem grow={false}>
-            <EuiIconTip type="iInCircle" content={status.TooltipText} color="subdued" />
+            <EuiIconTip type="info" content={status.TooltipText} color="subdued" />
           </EuiFlexItem>
         )}
         {status.WarningTooltipText && (
@@ -341,7 +341,7 @@ export const AgentUpgradeStatus: React.FC<{
   if (isAgentUpgrading) {
     return (
       <EuiIconTip
-        type="iInCircle"
+        type="info"
         content={
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDetailsNotAvailable"
@@ -359,7 +359,7 @@ export const AgentUpgradeStatus: React.FC<{
   if (!isAgentUpgradable && notUpgradeableMessage) {
     return (
       <EuiIconTip
-        type="iInCircle"
+        type="info"
         content={
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusBadge.notUpgradeable"

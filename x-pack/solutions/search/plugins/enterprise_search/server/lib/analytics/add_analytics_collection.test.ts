@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 

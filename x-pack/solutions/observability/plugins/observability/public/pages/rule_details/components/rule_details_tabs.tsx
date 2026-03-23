@@ -6,14 +6,9 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
-} from '@elastic/eui';
-import { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -64,6 +59,14 @@ export function RuleDetailsTabs({
   controlApi,
 }: Props) {
   const {
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
   const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
@@ -115,6 +118,16 @@ export function RuleDetailsTabs({
                   consumers={observabilityAlertFeatureIds}
                   query={esQuery}
                   columns={tableColumns}
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    cases,
+                    settings,
+                  }}
                 />
               )}
             </EuiFlexItem>

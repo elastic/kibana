@@ -28,6 +28,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -53,6 +54,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
     enabled: true,
+    initiator: 'user',
     rule: {
       name: fakeRuleName,
       tags: ['foo'],
@@ -127,6 +129,8 @@ describe('getBackfill()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSO);
   });

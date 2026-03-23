@@ -8,15 +8,8 @@
 import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import {
-  EuiLink,
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  Pagination,
-  EuiTableSortingType,
-} from '@elastic/eui';
+import type { Pagination, EuiTableSortingType } from '@elastic/eui';
+import { EuiLink, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -68,7 +61,7 @@ export const ElasticsearchMLJobs = ({
               'xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription',
               {
                 defaultMessage:
-                  'There are no Machine Learning Jobs that match your query. Try changing the time range selection.',
+                  'There are no machine learning jobs that match your query. Try changing the time range selection.',
               }
             )}
             search={{

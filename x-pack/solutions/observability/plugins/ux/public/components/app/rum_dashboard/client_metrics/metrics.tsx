@@ -36,7 +36,7 @@ function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
     <>{numeral(pageViews).format('0,0')}</>
   ) : (
     <EuiToolTip content={numeral(pageViews).format('0,0')}>
-      <>{numeral(pageViews).format('0 a')}</>
+      <span tabIndex={0}>{numeral(pageViews).format('0 a')}</span>
     </EuiToolTip>
   );
 }
@@ -62,7 +62,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.totalPageLoad}
-              <EuiIconTip content={I18LABELS.totalPageLoadTooltip} type="questionInCircle" />
+              <EuiIconTip content={I18LABELS.totalPageLoadTooltip} type="question" />
             </>
           }
           isLoading={!!loading}
@@ -76,7 +76,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.backEnd}
-              <EuiIconTip content={I18LABELS.backEndTooltip} type="questionInCircle" />
+              <EuiIconTip content={I18LABELS.backEndTooltip} type="question" />
             </>
           }
           isLoading={!!loading}
@@ -90,7 +90,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.frontEnd}
-              <EuiIconTip content={I18LABELS.frontEndTooltip} type="questionInCircle" />
+              <EuiIconTip content={I18LABELS.frontEndTooltip} type="question" />
             </>
           }
           isLoading={!!loading}

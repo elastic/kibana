@@ -132,6 +132,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
     return (
       <EuiPanel grow={false}>
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
           })}

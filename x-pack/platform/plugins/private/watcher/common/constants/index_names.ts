@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export const INDEX_NAMES = {
+export const INDEX_NAMES: { [key: string]: string } = {
+  WATCHES: '.watches',
   WATCHER_HISTORY: '.watcher-history-*',
 };

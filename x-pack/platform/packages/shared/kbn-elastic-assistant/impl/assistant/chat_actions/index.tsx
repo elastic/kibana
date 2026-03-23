@@ -42,6 +42,7 @@ export const ChatActions: React.FC<Props> = ({
           content={SUBMIT_MESSAGE}
           display="block"
           onMouseOut={closeTooltip}
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             aria-label={SUBMIT_MESSAGE}

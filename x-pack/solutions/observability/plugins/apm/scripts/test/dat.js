@@ -96,7 +96,7 @@ const cmd = [
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   ...(bail ? [`--bail`] : []),
-  `--config ${REPO_ROOT}/x-pack/test/api_integration/deployment_agnostic/configs/${environment}/oblt.apm.${environment}.config.ts`,
+  `--config ${REPO_ROOT}/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/${environment}/oblt.apm.${environment}.config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

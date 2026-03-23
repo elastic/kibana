@@ -10,7 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { SetupAISearchButton } from './setup_ai_search_button';
-import { VectorFieldTypes } from './mappings_convertor';
+import type { VectorFieldTypes } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
 
 export interface AISearchQuickStatProps {

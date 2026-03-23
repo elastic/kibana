@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -55,26 +55,28 @@ export const registerFindRoute = (
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
           search: schema.maybe(schema.string()),
           default_search_operator: searchOperatorSchema,
           search_fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
           ),
           sort_field: schema.maybe(schema.string()),
           has_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
           ),
           has_reference_operator: searchOperatorSchema,
           has_no_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
           ),
           has_no_reference_operator: searchOperatorSchema,
-          fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          fields: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+          ),
           filter: schema.maybe(schema.string()),
           aggs: schema.maybe(schema.string()),
           namespaces: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
           ),
         }),
       },

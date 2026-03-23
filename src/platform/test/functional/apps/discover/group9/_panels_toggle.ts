@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   describe('discover panels toggle', function () {
@@ -63,11 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (shouldSidebarBeOpen) {
         expect(await discover.isSidebarPanelOpen()).to.be(true);
-        await testSubjects.existOrFail('unifiedFieldListSidebar__toggle-collapse');
+        await testSubjects.existOrFail('dscHideSidebarButton');
         await testSubjects.missingOrFail('dscShowSidebarButton');
       } else {
         expect(await discover.isSidebarPanelOpen()).to.be(false);
-        await testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+        await testSubjects.missingOrFail('dscHideSidebarButton');
         await testSubjects.existOrFail('dscShowSidebarButton');
       }
 
@@ -89,13 +88,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       } else {
         expect(await discover.isChartVisible()).to.be(false);
         await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
+        await testSubjects.existOrFail('dscPanelsToggleInPage');
+
         await testSubjects.missingOrFail('dscHideHistogramButton');
         await testSubjects.missingOrFail('dscShowHistogramButton');
 
         if (shouldSidebarBeOpen) {
-          await testSubjects.missingOrFail('dscPanelsToggleInPage');
+          await testSubjects.existOrFail('dscHideSidebarButton');
+          await testSubjects.missingOrFail('dscShowSidebarButton');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInPage');
+          await testSubjects.missingOrFail('dscHideSidebarButton');
+          await testSubjects.existOrFail('dscShowSidebarButton');
         }
       }
     }
@@ -234,7 +237,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      checkPanelsToggle({ isChartAvailable: true, totalHits: '10' });
+      checkPanelsToggle({ isChartAvailable: true, totalHits: '1,000' });
     });
 
     describe('ES|QL with aggs chart', function () {
@@ -271,7 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      checkPanelsToggle({ isChartAvailable: false, totalHits: '10' });
+      checkPanelsToggle({ isChartAvailable: false, totalHits: '1,000' });
     });
   });
 }

@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/iframe-embedded-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "iframeEmbedded",
+    "server": true,
+    "browser": false
+  }
+}

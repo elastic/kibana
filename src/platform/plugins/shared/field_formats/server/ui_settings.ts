@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core/server';
+import type { UiSettingsParams } from '@kbn/core/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
 import { FORMATS_UI_SETTINGS } from '../common';

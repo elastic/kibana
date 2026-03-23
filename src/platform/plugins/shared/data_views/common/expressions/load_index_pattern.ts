@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataViewsContract } from '../data_views';
-import { DataViewSpec } from '..';
+import type { DataViewsContract } from '../data_views';
+import type { DataViewSpec } from '..';
 
 const name = 'indexPatternLoad';
 const type = 'index_pattern';
@@ -36,6 +36,7 @@ type Output = Promise<IndexPatternExpressionType>;
 
 interface Arguments {
   id: string;
+  includeFields?: boolean;
 }
 
 /** @internal */
@@ -66,6 +67,14 @@ export const getIndexPatternLoadMeta = (): Omit<
       required: true,
       help: i18n.translate('dataViews.functions.dataViewLoad.id.help', {
         defaultMessage: 'data view id to load',
+      }),
+    },
+    includeFields: {
+      types: ['boolean'],
+      required: false,
+      default: true,
+      help: i18n.translate('dataViews.functions.dataViewLoad.includeFields.help', {
+        defaultMessage: 'Whether to include the field list in the serialized data view',
       }),
     },
   },

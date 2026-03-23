@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { discoverServiceMock } from '../../__mocks__/services';
-import type { GetProfilesOptions } from '../profiles_manager';
+import { createDiscoverServicesMock } from '../../__mocks__/services';
+import { type GetProfilesOptions } from '../profiles_manager';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { useProfiles } from './use_profiles';
 import type { CellRenderersExtensionParams } from '../types';
 import type { AppliedProfile } from '../composable_profile';
 import { SolutionType } from '../profiles';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 const {
   rootProfileProviderMock,
@@ -28,6 +28,7 @@ const {
   contextRecordMock,
   contextRecordMock2,
   profilesManagerMock,
+  scopedEbtManagerMock,
 } = createContextAwarenessMocks({ shouldRegisterProviders: false });
 
 rootProfileServiceMock.registerProvider({
@@ -46,19 +47,25 @@ rootProfileServiceMock.registerProvider(rootProfileProviderMock);
 dataSourceProfileServiceMock.registerProvider(dataSourceProfileProviderMock);
 documentProfileServiceMock.registerProvider(documentProfileProviderMock);
 
-const record = profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock });
-const record2 = profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock2 });
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
+  scopedEbtManager: scopedEbtManagerMock,
+});
+const record = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock });
+const record2 = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock2 });
+const services = createDiscoverServicesMock();
 
-discoverServiceMock.profilesManager = profilesManagerMock;
+services.profilesManager = profilesManagerMock;
 
-const getProfilesSpy = jest.spyOn(discoverServiceMock.profilesManager, 'getProfiles');
-const getProfiles$Spy = jest.spyOn(discoverServiceMock.profilesManager, 'getProfiles$');
+const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
+const getProfiles$Spy = jest.spyOn(scopedProfilesManager, 'getProfiles$');
 
 const render = () => {
   return renderHook((props) => useProfiles(props), {
     initialProps: { record } as React.PropsWithChildren<GetProfilesOptions>,
     wrapper: ({ children }) => (
-      <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+      <DiscoverTestProvider services={services} scopedProfilesManager={scopedProfilesManager}>
+        {children}
+      </DiscoverTestProvider>
     ),
   });
 };
@@ -67,7 +74,7 @@ describe('useProfiles', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await profilesManagerMock.resolveRootProfile({});
-    await profilesManagerMock.resolveDataSourceProfile({});
+    await scopedProfilesManager.resolveDataSourceProfile({});
   });
 
   it('should return profiles', () => {

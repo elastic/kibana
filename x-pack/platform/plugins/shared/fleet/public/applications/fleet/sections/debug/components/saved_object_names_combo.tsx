@@ -10,7 +10,7 @@ import { EuiComboBox } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { sendRequest } from '../../../hooks';
 import { debugRoutesService } from '../../../../../../common/services';

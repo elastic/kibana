@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomIntegrationsPluginSetup } from '.';
+import type { CustomIntegrationsPluginSetup } from '.';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsPluginSetup> {
   const mock: jest.Mocked<CustomIntegrationsPluginSetup> = {

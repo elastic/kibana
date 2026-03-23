@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
-import { ScreenshotModeRequestHandlerContext } from '@kbn/screenshot-mode-plugin/server';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import type { ScreenshotModeRequestHandlerContext } from '@kbn/screenshot-mode-plugin/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 
 export type ScreenshotModeExampleRouter = IRouter<ScreenshotModeRequestHandlerContext>;
 

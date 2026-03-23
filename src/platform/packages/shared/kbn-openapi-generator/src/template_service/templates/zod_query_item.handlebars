@@ -1,5 +1,5 @@
 {{~#if $ref~}}
-  {{referenceName}}
+  {{transformSchemaName referenceName}}
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
   {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
@@ -9,8 +9,8 @@
   z.object({
     {{#each properties}}
       {{#if description}}
-      /** 
-      * {{{description}}} 
+      /**
+      * {{{description}}}
       */
       {{/if}}
       {{@key}}: {{> zod_query_item requiredBool=(includes ../required @key)}},

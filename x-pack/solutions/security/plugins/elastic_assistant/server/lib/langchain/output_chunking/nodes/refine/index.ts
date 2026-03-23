@@ -7,7 +7,7 @@
 
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
-import type { ZodType } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../graphs';
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
@@ -118,7 +118,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       // LOCAL MUTATION:
       combinedResponse = getCombined({ combinedGenerations: combinedRefinements, partialResponse }); // combine the new response with the previous ones
 
-      const attackDiscoveries = parseCombinedOrThrow({
+      const insights = parseCombinedOrThrow({
         combinedResponse,
         generationAttempts,
         llmType,
@@ -129,7 +129,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        insights: attackDiscoveries, // the final, refined answer
+        insights, // the final, refined answer
         generationAttempts: generationAttempts + 1,
         combinedRefinements: combinedResponse,
         refinements: [...refinements, partialResponse],

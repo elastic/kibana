@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { css } from '@emotion/react';
@@ -15,6 +15,8 @@ import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-ta
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -28,7 +30,7 @@ import { TableTabSettingButton } from '../components/table_tab_setting_button';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import { TableTabTour } from '../components/table_tab_tour';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
@@ -115,14 +117,21 @@ export const TableTab = memo(() => {
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
-    isPreview,
+    isRulePreview,
     eventId,
     investigationFields,
+    searchHit,
   } = useDocumentDetailsContext();
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+
+  const { ruleId, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as EsHitRecord),
+    [searchHit]
+  );
 
   const highlightedFieldsResult = useHighlightedFields({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
   });
   const highlightedFields = useMemo(
@@ -151,9 +160,10 @@ export const TableTab = memo(() => {
         setTableTabState={setTableTabState}
         isPopoverOpen={isPopoverOpen}
         setIsPopoverOpen={setIsPopoverOpen}
+        isAlert={isAlert}
       />,
     ],
-    [tableTabState, setTableTabState, isPopoverOpen, setIsPopoverOpen]
+    [tableTabState, setTableTabState, isPopoverOpen, setIsPopoverOpen, isAlert]
   );
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
@@ -256,16 +266,15 @@ export const TableTab = memo(() => {
         scopeId,
         getLinkValue,
         ruleId,
-        isPreview,
+        isRulePreview,
         onTogglePinned,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview, onTogglePinned]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
   );
 
   const search = useMemo(() => {
     return { ...SEARCH_CONFIG, toolsRight: renderToolsRight() };
   }, [renderToolsRight]);
-
   return (
     <>
       <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />
@@ -279,6 +288,9 @@ export const TableTab = memo(() => {
         search={search}
         sorting={false}
         data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        tableCaption={i18n.translate('xpack.securitySolution.flyout.table.documentFieldsCaption', {
+          defaultMessage: 'Document fields',
+        })}
         css={css`
           .euiTableRow {
             font-size: ${smallFontSize};

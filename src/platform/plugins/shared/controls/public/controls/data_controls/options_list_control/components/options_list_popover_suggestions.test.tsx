@@ -8,16 +8,21 @@
  */
 
 import React from 'react';
-
-import { fireEvent, render, waitFor } from '@testing-library/react';
-
 import { take } from 'lodash';
+
+import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
+
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('Options list popover', () => {
   const allOptions = [

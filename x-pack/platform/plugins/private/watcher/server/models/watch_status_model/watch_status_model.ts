@@ -8,7 +8,7 @@
 import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   WatchStatusModelEs,
   ServerWatchStatusModel,
   ClientWatchStatusModel,

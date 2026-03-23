@@ -5,13 +5,14 @@
  * 2.0.
  */
 import type SuperTest from 'supertest';
-import {
+import type {
   AnalyzeApiRequestBody,
-  ANALYZE_API_PATH,
   AnalyzeApiResponse,
 } from '@kbn/automatic-import-plugin/common';
+import { ANALYZE_API_PATH } from '@kbn/automatic-import-plugin/common';
 import { superUser } from '../authentication/users';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
+import { BadRequestError } from '../error/error';
 
 export const postAnalyzeApi = async ({
   supertest,
@@ -23,7 +24,7 @@ export const postAnalyzeApi = async ({
   req: AnalyzeApiRequestBody;
   expectedHttpCode?: number;
   auth: { user: User };
-}): Promise<AnalyzeApiResponse> => {
+}): Promise<AnalyzeApiResponse | BadRequestError> => {
   const { body: response } = await supertest
     .post(`${ANALYZE_API_PATH}`)
     .send(req)
@@ -31,6 +32,10 @@ export const postAnalyzeApi = async ({
     .set('elastic-api-version', '1')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
+
+  if (response.statusCode === 400) {
+    return new BadRequestError(response.message);
+  }
 
   return response;
 };

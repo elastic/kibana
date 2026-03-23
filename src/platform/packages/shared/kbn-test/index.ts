@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_error';
-
 // @internal
 export { startServersCli, startServers } from './src/functional_tests/start_servers';
 
@@ -23,6 +21,7 @@ export {
   getKibanaCliArg,
   getKibanaCliLoggers,
   cleanupElasticsearch,
+  fipsIsEnabled,
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';
@@ -71,17 +70,18 @@ export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
 export { runJest } from './src/jest/run';
 
+export { runJestAll } from './src/jest/run_all';
+
 export * from './src/kbn_archiver_cli';
 
-export * from './src/kbn_client';
+export * from '@kbn/kbn-client';
 
 export * from './src/find_test_plugin_paths';
 
 export { getDockerFileMountPath } from '@kbn/es';
 
-// Docker image to use for Fleet API integration tests.
-// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
-// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
-export const fleetPackageRegistryDockerImage =
-  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
-  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
+export {
+  fleetPackageRegistryDockerImage,
+  packageRegistryDocker,
+  dockerRegistryPort,
+} from './src/functional_test_runner';

@@ -62,7 +62,7 @@ export interface DocumentDetailsContext {
   /**
    * Boolean to indicate whether flyout is opened in rule preview
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
   /**
    * Boolean to indicate whether it is a preview panel
    */
@@ -131,7 +131,7 @@ export const DocumentDetailsProvider = memo(
               investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
               refetchFlyoutData,
               getFieldsData,
-              isPreview: scopeId === TableId.rulePreview,
+              isRulePreview: scopeId === TableId.rulePreview,
               isPreviewMode: Boolean(isPreviewMode),
               jumpToEntityId,
               jumpToCursor,

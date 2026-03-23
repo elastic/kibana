@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 

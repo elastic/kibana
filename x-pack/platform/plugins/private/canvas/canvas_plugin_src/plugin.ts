@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { CanvasSetup } from '../public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
+import type { Reference } from '@kbn/content-management-utils';
+import type { CanvasSetup } from '../public';
 
 import { functions } from './functions/browser';
 import { initFunctions } from './functions/external';
@@ -44,9 +46,12 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     core.getStartServices().then(([coreStart, depsStart]) => {
       const externalFunctions = initFunctions({
         embeddablePersistableStateService: {
-          extract: depsStart.embeddable.extract,
-          inject: depsStart.embeddable.inject,
-          getAllMigrations: depsStart.embeddable.getAllMigrations,
+          extract: (state: EmbeddableStateWithType) => ({
+            state,
+            references: [],
+          }),
+          inject: (state: EmbeddableStateWithType, references: Reference[]) => state,
+          getAllMigrations: () => ({}),
         },
       });
       plugins.canvas.addFunctions(externalFunctions);

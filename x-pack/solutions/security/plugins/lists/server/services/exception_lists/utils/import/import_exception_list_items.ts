@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
+import type { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
 import { getAllListItemTypes } from './find_all_exception_list_item_types';
 import { getAllListTypes } from './find_all_exception_list_types';

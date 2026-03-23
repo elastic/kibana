@@ -9,7 +9,7 @@ import { EuiIcon } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import React from 'react';
 import { NONE } from '../../../common/constants';
-import { Integration } from '../../../common/data_streams_stats/integration';
+import type { Integration } from '../../../common/data_streams_stats/integration';
 import loggingIcon from '../../icons/logging.svg';
 
 interface IntegrationIconProps {

@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LocationsStatus } from '../../../hooks';
+import type { LocationsStatus } from '../../../hooks';
 import { useMonitorDetailLocator } from '../../../hooks/use_monitor_detail_locator';
 const DEFAULT_DISPLAY_COUNT = 3;
 

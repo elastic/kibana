@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } f
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useAuthz, useLink } from '../../../../hooks';
+import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
@@ -57,6 +57,9 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
   const authz = useAuthz();
   const { getHref } = useLink();
   const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
+  const { cloud } = useStartServices();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
     return [
@@ -121,7 +124,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           defaultMessage: 'Status',
         }),
       },
-      ...(enableSyncIntegrationsOnRemote
+      ...(enableSyncIntegrations
         ? [
             {
               render: (output: Output) => <IntegrationSyncStatus output={output} />,
@@ -158,6 +161,12 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                     title={i18n.translate('xpack.fleet.settings.outputSection.deleteButtonTitle', {
                       defaultMessage: 'Delete',
                     })}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.outputSection.deleteButtonTitle',
+                      {
+                        defaultMessage: 'Delete',
+                      }
+                    )}
                   />
                 )}
               </EuiFlexItem>
@@ -167,6 +176,9 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                   iconType="pencil"
                   href={getHref('settings_edit_outputs', { outputId: output.id })}
                   title={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
+                    defaultMessage: 'Edit',
+                  })}
+                  aria-label={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
                     defaultMessage: 'Edit',
                   })}
                   data-test-subj="editOutputBtn"
@@ -180,7 +192,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         }),
       },
     ];
-  }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrationsOnRemote]);
+  }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrations]);
 
-  return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={outputs}
+      data-test-subj="settingsOutputsTable"
+      tableCaption={i18n.translate('xpack.fleet.settings.outputsTable.tableCaption', {
+        defaultMessage: 'Fleet outputs',
+      })}
+    />
+  );
 };

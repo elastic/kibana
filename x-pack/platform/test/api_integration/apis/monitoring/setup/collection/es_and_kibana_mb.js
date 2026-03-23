@@ -15,9 +15,10 @@ export default function ({ getService }) {
 
   describe('es_and_kibana mb', () => {
     const { setup, tearDown } = getLifecycleMethods(getService);
-    const archive = 'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana';
+    const archive =
+      'x-pack/platform/test/fixtures/es_archives/monitoring/setup/collection/es_and_kibana';
     const archiveMb8 =
-      'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana_mb_8';
+      'x-pack/platform/test/fixtures/es_archives/monitoring/setup/collection/es_and_kibana_mb_8';
 
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',

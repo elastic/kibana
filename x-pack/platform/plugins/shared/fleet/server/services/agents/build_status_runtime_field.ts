@@ -20,6 +20,16 @@ export type InactivityTimeouts = Awaited<
   ReturnType<(typeof agentPolicyService)['getInactivityTimeouts']>
 >;
 
+type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
+  status: {
+    type: 'keyword';
+    script: {
+      lang: 'painless';
+      source: string;
+    };
+  };
+};
+
 let inactivityTimeoutsDisabled = false;
 const _buildInactiveCondition = (opts: {
   now: number;
@@ -162,7 +172,7 @@ export function _buildStatusRuntimeField(opts: {
   maxAgentPoliciesWithInactivityTimeout?: number;
   pathPrefix?: string;
   logger?: Logger;
-}): NonNullable<estypes.SearchRequest['runtime_mappings']> {
+}): StatusRuntimeMapping {
   const {
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout = DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,

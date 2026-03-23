@@ -22,6 +22,7 @@ import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
 import { getAgentStatusForAgentPolicy } from '../agents';
 import { appContextService } from '..';
+import { getValidSpaceId } from '../spaces/helpers';
 
 /**
  * Retrieve all agent policies which has a Fleet Server package policy
@@ -36,7 +37,8 @@ export const getFleetServerPolicies = async (
 
   // Extract associated fleet server agent policy IDs
   const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) => {
-    return p.policy_ids?.map((id) => ({ id, spaceId: p.spaceIds?.[0] ?? DEFAULT_SPACE_ID } ?? []));
+    // @ts-expect-error upgrade typescript v5.9.3
+    return p.policy_ids?.map((id) => ({ id, spaceId: getValidSpaceId(p.spaceIds) } ?? []));
   });
 
   // Retrieve associated agent policies
@@ -149,7 +151,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
   });
 
   if (fleetServerAgents.agents.length === 0) {
-    return false;
+    return true;
   }
 
   let result = true;

@@ -16,7 +16,6 @@ import type {
   HttpStart,
   IUiSettingsClient,
   OverlayStart,
-  SavedObjectsStart,
   ThemeServiceStart,
   ExecutionContextSetup,
   AnalyticsServiceStart,
@@ -31,7 +30,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -60,9 +59,6 @@ export const [getFieldsFormats, setFieldFormats] =
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
 export const [getEmbeddable, setEmbeddable] = createGetterSetter<EmbeddableStart>('Embeddable');
-
-export const [getSavedObjects, setSavedObjects] =
-  createGetterSetter<SavedObjectsStart>('SavedObjects');
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 

@@ -7,20 +7,22 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { isTextBasedLanguage } from '../helper';
-import {
+import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-} from '../types';
-import { PanelManagementApi } from './panel_management';
+  LensDatasourceId,
+} from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
+import { isTextBasedLanguage } from '../helper';
+import type { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
+import { saveUserChartTypeToSessionStorage } from '../../chart_type_session_storage';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function prepareInlineEditPanel(
   initialState: LensRuntimeState,
@@ -53,15 +55,24 @@ export function prepareInlineEditPanel(
   uuid?: string,
   parentApi?: unknown
 ) {
-  return async function openConfigPanel({
+  return async function getConfigPanel({
+    closeFlyout,
     onApply,
     onCancel,
-    hideTimeFilterInfo,
-  }: Partial<Pick<EditConfigPanelProps, 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>> = {}) {
+    applyButtonLabel,
+  }: Partial<
+    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'applyButtonLabel'>
+  > = {}) {
     const currentState = getState();
+    const isNewPanel = initialState.isNewPanel;
+
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
+    // Save the user's preferred chart type to session storage
+    if (!isNewPanel && attributes) {
+      saveUserChartTypeToSessionStorage(attributes.visualizationType);
+    }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
-      'formBased') as EditLensConfigurationProps['datasourceId'];
+      LENS_DATASOURCE_ID.FORM_BASED) as LensDatasourceId;
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,
@@ -77,8 +88,11 @@ export function prepareInlineEditPanel(
       startDependencies.data.query.filterManager.extract
     );
 
-    const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
-      updateState({ attributes, savedObjectId });
+    const updateByRefInput = (
+      savedObjectId: LensRuntimeState['savedObjectId'],
+      attrs: TypedLensSerializedState['attributes']
+    ) => {
+      updateState({ attributes: attrs, savedObjectId });
     };
 
     if (attributes?.visualizationType == null) {
@@ -100,11 +114,11 @@ export function prepareInlineEditPanel(
 
     return (
       <Component
+        closeFlyout={closeFlyout}
         attributes={attributes}
         updateByRefInput={updateByRefInput}
         updatePanelState={updatePanelState}
         updateSuggestion={updateSuggestion}
-        datasourceId={activeDatasourceId}
         lensAdapters={inspectorApi.getInspectorAdapters()}
         dataLoading$={dataLoading$}
         panelId={uuid}
@@ -121,7 +135,6 @@ export function prepareInlineEditPanel(
             : undefined
         }
         displayFlyoutHeader
-        canEditTextBasedQuery={isTextBasedLanguage(currentState)}
         isNewPanel={panelManagementApi.isNewPanel()}
         onCancel={() => {
           panelManagementApi.onStopEditing(
@@ -133,15 +146,23 @@ export function prepareInlineEditPanel(
           );
           onCancel?.();
         }}
-        onApply={(newAttributes) => {
-          panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
+        onApply={async (newAttributes) => {
+          let appliedAttributes = newAttributes;
           if (newAttributes.visualizationType != null) {
-            onApply?.(newAttributes);
+            const result = await onApply?.(newAttributes);
+            if (result) {
+              appliedAttributes = result;
+            }
           }
+          panelManagementApi.onStopEditing(false, {
+            ...getState(),
+            attributes: appliedAttributes,
+          });
+          return appliedAttributes;
         }}
-        hideTimeFilterInfo={hideTimeFilterInfo}
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}
+        applyButtonLabel={applyButtonLabel}
       />
     );
   };

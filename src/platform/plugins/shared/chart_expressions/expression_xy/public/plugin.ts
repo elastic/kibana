@@ -8,14 +8,13 @@
  */
 
 import moment from 'moment';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
   layeredXyVisFunction,
@@ -31,7 +30,8 @@ import {
   extendedAnnotationLayerFunction,
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import { GetStartDeps, getXyChartRenderer } from './expression_renderers';
+import type { GetStartDeps } from './expression_renderers';
+import { getXyChartRenderer } from './expression_renderers';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {
@@ -85,7 +85,6 @@ export class ExpressionXyPlugin {
 
       const { theme: kibanaTheme } = coreStart;
       const eventAnnotationService = await eventAnnotation.getService();
-      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
 
       return {
         data,
@@ -95,7 +94,6 @@ export class ExpressionXyPlugin {
         usageCollection,
         activeCursor,
         paletteService,
-        useLegacyTimeAxis,
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),

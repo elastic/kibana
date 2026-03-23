@@ -6,20 +6,21 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MonitorStatusCol } from '../components/monitor_status_col';
+import { selectOverviewState } from '../../../../../../state';
 import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
-import {
-  MonitorTypeEnum,
-  OverviewStatusMetaData,
-} from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
-import { BadgeStatus } from '../../../../../common/components/monitor_status';
-import { FlyoutParamProps } from '../../types';
+import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import {
   STATUS,
@@ -33,6 +34,8 @@ import {
   MONITOR_HISTORY,
 } from '../labels';
 import { MonitorsDuration } from '../components/monitors_duration';
+import { useKibanaSpace } from '../../../../../../../../hooks/use_kibana_space';
+import type { ClientPluginsStart } from '../../../../../../../../plugin';
 
 export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
@@ -43,6 +46,12 @@ export const useMonitorsTableColumns = ({
 }) => {
   const history = useHistory();
   const { histogramsById, minInterval } = useMonitorHistogram({ items });
+  const { space } = useKibanaSpace();
+  const { spaces } = useKibana<ClientPluginsStart>().services;
+
+  const {
+    pageState: { showFromAllSpaces },
+  } = useSelector(selectOverviewState);
 
   const onClickMonitorFilter = useCallback(
     (filterName: string, filterValue: string) => {
@@ -60,31 +69,28 @@ export const useMonitorsTableColumns = ({
 
   const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
-      const { configId, locationLabel, locationId, spaceId } = monitor;
+      const { configId, locationLabel, locationId } = monitor;
       dispatch(
         setFlyoutConfigCallback({
           configId,
           id: configId,
           location: locationLabel,
           locationId,
-          spaceId,
+          spaces: monitor.spaces,
         })
       );
     },
     [dispatch, setFlyoutConfigCallback]
   );
 
-  const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(() => {
+    const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
+
+    return [
       {
-        field: 'status',
         name: STATUS,
-        render: (status: OverviewStatusMetaData['status'], monitor) => (
-          <BadgeStatus
-            status={status}
-            isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
-            onClickBadge={() => openFlyout(monitor)}
-          />
+        render: (monitor: OverviewStatusMetaData) => (
+          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
         ),
       },
       {
@@ -174,15 +180,41 @@ export const useMonitorsTableColumns = ({
           );
         },
       },
+      ...(showFromAllSpaces
+        ? [
+            {
+              name: i18n.translate('xpack.synthetics.management.monitorList.spacesColumnTitle', {
+                defaultMessage: 'Spaces',
+              }),
+              field: 'spaces',
+              sortable: true,
+              render: (monSpaces: string[]) => {
+                return (
+                  <LazySpaceList
+                    namespaces={monSpaces ?? (space ? [space?.id] : [])}
+                    behaviorContext="outside-space"
+                  />
+                );
+              },
+            },
+          ]
+        : []),
       {
         name: ACTIONS,
         render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
         align: 'right',
         width: '40px',
       },
-    ],
-    [histogramsById, minInterval, onClickMonitorFilter, openFlyout]
-  );
+    ];
+  }, [
+    histogramsById,
+    minInterval,
+    onClickMonitorFilter,
+    openFlyout,
+    showFromAllSpaces,
+    space,
+    spaces?.ui.components.getSpaceList,
+  ]);
 
   return {
     columns,

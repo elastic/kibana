@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKubernetesCharts } from '../hooks/use_host_metrics_charts';
@@ -24,10 +25,14 @@ import type { KubernetesContainerMetrics, MetricsChartsFields } from './types';
 
 const FRAGMENT_BASE = 'key-metrics';
 
-export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChartsFields>(
-  ({ assetId, dataView, dateRange, onShowAll, overview }, ref) => {
+interface Props extends MetricsChartsFields {
+  schema?: DataSchemaFormat | null;
+}
+
+export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
+  ({ entityId, dataView, dateRange, onShowAll, overview }, ref) => {
     const { charts } = useKubernetesCharts({
-      dataViewId: dataView?.id,
+      indexPattern: dataView?.getIndexPattern(),
       overview,
     });
 
@@ -39,7 +44,12 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
 
     return (
       <Section
-        title={<SectionTitle title={HOST_METRIC_GROUP_TITLES.kubernetes} />}
+        title={
+          <SectionTitle
+            title={HOST_METRIC_GROUP_TITLES.kubernetes}
+            data-test-subj="infraAssetDetailsKubernetesChartsSectionTitle"
+          />
+        }
         data-test-subj="infraAssetDetailsKubernetesChartsSection"
         id="kubernetes"
         ref={ref}
@@ -72,9 +82,10 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
             <Chart
               id={chart.id}
               key={chart.id}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
               lensAttributes={chart}
+              dataView={dataView}
               queryField={findInventoryFields('host').id}
             />
           ))}
@@ -87,7 +98,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
 export const KubernetesContainerCharts = React.forwardRef<
   HTMLDivElement,
   MetricsChartsFields & { metric: KubernetesContainerMetrics }
->(({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
+>(({ entityId, dataView, dateRange, metric, onShowAll }, ref) => {
   const { charts } = useK8sContainerPageViewMetricsCharts({
     metric,
     metricsDataViewId: dataView?.id,
@@ -159,7 +170,7 @@ export const KubernetesContainerCharts = React.forwardRef<
             id={chart.id}
             key={chart.id}
             lensAttributes={chart}
-            assetId={assetId}
+            entityId={entityId}
             dateRange={dateRange}
             queryField={findInventoryFields('container').id}
           />

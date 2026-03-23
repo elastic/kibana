@@ -9,10 +9,11 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiToken, EuiTokenProps } from '@elastic/eui';
+import type { EuiTokenProps } from '@elastic/eui';
+import { EuiToken } from '@elastic/eui';
 
 // defaultIcon => a unknown datatype
-const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
+const defaultIcon = { iconType: 'question', color: 'gray' };
 
 export const typeToEuiIconMap = {
   binary: { iconType: 'tokenBinary' },
@@ -20,6 +21,7 @@ export const typeToEuiIconMap = {
   // icon for an index pattern mapping conflict in discover
   conflict: { iconType: 'warning', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
+  date_nanos: { iconType: 'tokenDate' },
   date_range: { iconType: 'tokenDate' },
   dense_vector: { iconType: 'tokenVectorDense' },
   geo_point: { iconType: 'tokenGeo' },
@@ -45,6 +47,8 @@ export const typeToEuiIconMap = {
   rank_feature: { iconType: 'tokenRankFeature' },
   rank_features: { iconType: 'tokenRankFeatures' },
   histogram: { iconType: 'tokenHistogram' },
+  exponential_histogram: { iconType: 'tokenHistogram' },
+  tdigest: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
@@ -52,11 +56,16 @@ export const typeToEuiIconMap = {
   semantic_text: { iconType: 'tokenSemanticText' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
+  wildcard: { iconType: 'tokenString' },
+  search_as_you_type: { iconType: 'tokenSearchType' },
   keyword: { iconType: 'tokenKeyword' },
+  constant_keyword: { iconType: 'tokenConstant' },
   gauge: { iconType: 'tokenMetricGauge' },
   counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
+  percolator: { iconType: 'tokenPercolator' },
+  null: { iconType: 'tokenNull' },
 } as const;
 
 type AllowedIconType = keyof typeof typeToEuiIconMap;

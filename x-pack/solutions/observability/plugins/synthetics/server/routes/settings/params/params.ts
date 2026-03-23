@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
+import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
 const RequestParamsSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -35,7 +36,7 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     try {
       const { id: paramId } = request.params;
 
-      if (await isAnAdminUser(routeContext)) {
+      if (await canReadDecryptedParams(routeContext)) {
         return getDecryptedParams(routeContext, paramId);
       } else {
         if (paramId) {
@@ -58,21 +59,14 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   },
 });
 
-const isAnAdminUser = async (routeContext: RouteContext) => {
+const canReadDecryptedParams = async (routeContext: RouteContext) => {
   const { request, server } = routeContext;
-  const user = server.coreStart.security.authc.getCurrentUser(request);
 
-  const isSuperUser = user?.roles.includes('superuser');
-  const isAdmin = user?.roles.includes('kibana_admin');
+  const capabilities = await server.coreStart.capabilities.resolveCapabilities(request, {
+    capabilityPath: 'uptime.*',
+  });
 
-  const canSave =
-    (
-      await server.coreStart?.capabilities.resolveCapabilities(request, {
-        capabilityPath: 'uptime.*',
-      })
-    ).uptime.save ?? false;
-
-  return (isSuperUser || isAdmin) && canSave;
+  return capabilities.uptime?.canReadParamValues ?? false;
 };
 
 const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: string) => {
@@ -96,14 +90,14 @@ const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: s
       }
     );
 
-  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  const hits: Array<ReturnType<typeof toClientResponse>> = [];
   for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
+    hits.push(...result.saved_objects.map(toClientResponse));
   }
 
   void finder.close();
 
-  return hits.map((savedObject) => toClientResponse(savedObject));
+  return hits;
 };
 
 const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
@@ -112,14 +106,14 @@ const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
     perPage: 1000,
   });
 
-  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  const hits: Array<ReturnType<typeof toClientResponse>> = [];
   for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
+    hits.push(...result.saved_objects.map(toClientResponse));
   }
 
   void finder.close();
 
-  return hits.map((savedObject) => toClientResponse(savedObject));
+  return hits;
 };
 
 const toClientResponse = (

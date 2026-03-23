@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   type PublishesBlockingError,
   type PublishesDataLoading,
   type PublishesDataViews,
   type PublishesSavedObjectId,
   type PublishesRendered,
-  StateComparators,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
-import { BehaviorSubject, Observable, map, merge } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
   IntegrationCallbacks,
   LensInternalApi,
   LensRuntimeState,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &

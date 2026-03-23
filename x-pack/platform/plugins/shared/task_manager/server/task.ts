@@ -11,9 +11,8 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Frequency, Weekday } from '@kbn/rrule';
+import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
-import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import type { DecoratedError } from './task_running';
 
@@ -21,6 +20,7 @@ export const DEFAULT_TIMEOUT = '5m';
 
 export enum TaskPriority {
   Low = 1,
+  NormalLongRunning = 40,
   Normal = 50,
 }
 
@@ -62,6 +62,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+  abortController: AbortController;
 }
 
 /**
@@ -77,6 +78,7 @@ export type SuccessfulRunResult = {
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -121,8 +123,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type AnyRunResult = RunResult | undefined | void;
+export type RunFunction = () => Promise<AnyRunResult>;
+export type CancelFunction = () => Promise<AnyRunResult>;
 export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;
@@ -251,46 +254,8 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
-export interface IntervalSchedule {
-  /**
-   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
-   * */
-  interval: Interval;
-  rrule?: never;
-}
 
-export interface RruleSchedule {
-  rrule: RruleMonthly | RruleWeekly | RruleDaily;
-  interval?: never;
-}
-
-interface RruleCommon {
-  freq: Frequency;
-  interval: number;
-  tzid: string;
-}
-
-interface RruleMonthly extends RruleCommon {
-  freq: Frequency.MONTHLY;
-  bymonthday?: number[];
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: Weekday[];
-}
-interface RruleWeekly extends RruleCommon {
-  freq: Frequency.WEEKLY;
-  byweekday?: Weekday[];
-  byhour?: number[];
-  byminute?: number[];
-  bymonthday?: never;
-}
-interface RruleDaily extends RruleCommon {
-  freq: Frequency.DAILY;
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: Weekday[];
-  bymonthday?: never;
-}
+export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface TaskUserScope {
   apiKeyId: string;
@@ -560,6 +525,7 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  regenerateApiKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

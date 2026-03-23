@@ -38,6 +38,9 @@ export const getConnectorRoute = (
             body: () => connectorResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },

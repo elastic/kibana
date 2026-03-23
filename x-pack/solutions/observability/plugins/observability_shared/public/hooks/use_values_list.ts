@@ -9,7 +9,7 @@ import { capitalize, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ESFilter } from '@kbn/es-types';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
 import { TRANSACTION_URL } from '../../common';
 import { useEsSearch, createEsParams } from './use_es_search';
 

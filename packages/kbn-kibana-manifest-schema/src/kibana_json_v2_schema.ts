@@ -15,7 +15,7 @@ export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
 
 export const MANIFEST_V2: JSONSchema = {
   type: 'object',
-  required: ['id', 'type', 'owner'],
+  required: ['id', 'type', 'owner', 'group', 'visibility'],
   // @ts-expect-error VSCode specific JSONSchema extension
   allowTrailingCommas: true,
   properties: {

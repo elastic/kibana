@@ -23,12 +23,14 @@ import type {
   FindRulesResponse,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
+import type { WarningSchema } from '../../../../../common/api/detection_engine';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
+import type { BulkActionError } from '../api/rules/bulk_actions/bulk_actions_response';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -62,7 +64,10 @@ export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] =
   return rules.map((rule) => internalRuleToAPIResponse(rule));
 };
 
-export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
+export const transformFindAlerts = (
+  ruleFindResults: FindResult<RuleParams>,
+  warnings?: WarningSchema[]
+): FindRulesResponse => {
   return {
     page: ruleFindResults.page,
     perPage: ruleFindResults.perPage,
@@ -70,6 +75,7 @@ export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): Fi
     data: ruleFindResults.data.map((rule) => {
       return internalRuleToAPIResponse(rule);
     }),
+    ...(warnings && warnings.length > 0 ? { warnings } : {}),
   };
 };
 
@@ -144,7 +150,7 @@ export const swapActionIds = async (
       return { ...action, id: foundAction.saved_objects[0].id };
     } else if (foundAction.saved_objects.length > 1) {
       return new Error(
-        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details`
+        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details`
       );
     }
     return action;
@@ -266,3 +272,20 @@ export const separateActionsAndSystemAction = (
   !isEmpty(actions)
     ? partition((action: RuleActionSchema) => actionsClient.isSystemAction(action.id))(actions)
     : [[], actions];
+
+export const createBulkActionError = ({
+  message,
+  statusCode,
+  id,
+}: {
+  message: string;
+  statusCode: number;
+  id: string;
+}): BulkActionError => {
+  const error: Error & { statusCode?: number } = new Error(message);
+  error.statusCode = statusCode;
+  return {
+    item: id,
+    error,
+  };
+};

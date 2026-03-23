@@ -6,6 +6,7 @@
  */
 
 import { EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -60,6 +61,9 @@ export const AlertsByRule: React.FC<AlertsByRuleProps> = ({ data, isLoading, sho
           loading={isLoading}
           sorting={SORTING}
           pagination={PAGINATION}
+          tableCaption={i18n.translate('xpack.securitySolution.alertsByRule.alertsByRuleCaption', {
+            defaultMessage: 'Alerts by rule',
+          })}
         />
       </TableWrapper>
     </Wrapper>

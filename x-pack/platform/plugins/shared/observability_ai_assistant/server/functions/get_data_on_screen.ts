@@ -7,11 +7,9 @@
 
 import { compact } from 'lodash';
 import dedent from 'dedent';
-import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
-import { FunctionVisibility } from '../../common';
-import { ChatFunctionClient } from '../service/chat_function_client';
-
-export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
+import type { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
+import type { ChatFunctionClient } from '../service/chat_function_client';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME, CONTEXT_FUNCTION_NAME } from '../../common';
 
 export function registerGetDataOnScreenFunction(
   functions: ChatFunctionClient,
@@ -27,7 +25,6 @@ export function registerGetDataOnScreenFunction(
     {
       name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
       description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
-      visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
         properties: {
@@ -51,11 +48,19 @@ export function registerGetDataOnScreenFunction(
     }
   );
 
-  functions.registerInstruction(({ availableFunctionNames }) =>
-    availableFunctionNames.includes(GET_DATA_ON_SCREEN_FUNCTION_NAME)
-      ? `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
+  functions.registerInstruction(({ availableFunctionNames }) => {
+    if (availableFunctionNames.includes(GET_DATA_ON_SCREEN_FUNCTION_NAME)) {
+      return `You have access to data on the screen by calling the "${GET_DATA_ON_SCREEN_FUNCTION_NAME}" tool.
+        Use it to help the user understand what they are looking at. 
+        
+        This tool will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
           allData.map((data) => `${data.name}: ${data.description}`).join('\n')
-        )}`
-      : undefined
-  );
+        )}
+
+        A short summary of what they are looking at is available in the return of the "${CONTEXT_FUNCTION_NAME}" function.
+        Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`;
+    }
+
+    return undefined;
+  });
 }

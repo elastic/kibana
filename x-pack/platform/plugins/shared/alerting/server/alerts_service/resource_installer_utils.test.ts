@@ -47,6 +47,8 @@ describe('getIndexTemplateAndPattern', () => {
         '.preview.alerts-',
         '.internal.preview.alerts-',
         '.reindexed-v8-internal.preview.alerts-',
+        '.adhoc.alerts-',
+        '.internal.adhoc.alerts-',
       ],
       name: '.internal.alerts-test.alerts-default-000001',
     });
@@ -67,6 +69,8 @@ describe('getIndexTemplateAndPattern', () => {
         '.preview.alerts-',
         '.internal.preview.alerts-',
         '.reindexed-v8-internal.preview.alerts-',
+        '.adhoc.alerts-',
+        '.internal.adhoc.alerts-',
       ],
       name: '.internal.alerts-test.alerts-special-000001',
     });
@@ -94,6 +98,8 @@ describe('getIndexTemplateAndPattern', () => {
         '.preview.alerts-',
         '.internal.preview.alerts-',
         '.reindexed-v8-internal.preview.alerts-',
+        '.adhoc.alerts-',
+        '.internal.adhoc.alerts-',
       ],
       secondaryAlias: `siem.signals-special`,
     });

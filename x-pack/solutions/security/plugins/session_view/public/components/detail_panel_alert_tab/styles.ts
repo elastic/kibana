@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -17,6 +17,7 @@ export const useStyles = () => {
 
     const container: CSSObject = {
       position: 'relative',
+      margin: size.base,
     };
 
     const stickyItem: CSSObject = {
@@ -24,10 +25,6 @@ export const useStyles = () => {
       top: 0,
       zIndex: 1,
       backgroundColor: colors.emptyShade,
-    };
-
-    const viewMode: CSSObject = {
-      margin: size.base,
     };
 
     const loadMoreBtn: CSSObject = {
@@ -38,7 +35,6 @@ export const useStyles = () => {
     return {
       container,
       stickyItem,
-      viewMode,
       loadMoreBtn,
     };
   }, [euiTheme]);

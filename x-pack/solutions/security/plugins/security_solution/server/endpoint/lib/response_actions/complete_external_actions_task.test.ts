@@ -27,11 +27,10 @@ describe('CompleteExternalActionsTask class', () => {
 
     endpointAppContextMock.experimentalFeatures = {
       ...endpointAppContextMock.experimentalFeatures,
-      responseActionsSentinelOneV2Enabled: true,
     };
   });
 
-  describe('##setup()', () => {
+  describe('#setup()', () => {
     let taskManagerSetupContractMock: ReturnType<typeof taskManagerMock.createSetup>;
 
     beforeEach(() => {
@@ -48,16 +47,6 @@ describe('CompleteExternalActionsTask class', () => {
           createTaskRunner: expect.any(Function),
         },
       });
-    });
-
-    it('should NOT register task with task manager if feature flag is disabled', async () => {
-      endpointAppContextMock.experimentalFeatures = {
-        ...endpointAppContextMock.experimentalFeatures,
-        responseActionsSentinelOneV2Enabled: false,
-      };
-      await taskInstance.setup({ taskManager: taskManagerSetupContractMock });
-
-      expect(taskManagerSetupContractMock.registerTaskDefinitions).not.toHaveBeenCalled();
     });
 
     it('should use timeout value from server config', async () => {
@@ -106,20 +95,6 @@ describe('CompleteExternalActionsTask class', () => {
         state: {},
         params: {},
       });
-    });
-
-    it('should NOT schedule task if feature flag is disabled', async () => {
-      endpointAppContextMock.experimentalFeatures = {
-        ...endpointAppContextMock.experimentalFeatures,
-        responseActionsSentinelOneV2Enabled: false,
-      };
-      await doTaskInstanceSetup();
-      await taskInstance.start({
-        taskManager: taskManagerStartContractMock,
-        esClient: esClientMock,
-      });
-
-      expect(taskManagerStartContractMock.ensureScheduled).not.toHaveBeenCalled();
     });
 
     it(`should use interval value from server config`, async () => {

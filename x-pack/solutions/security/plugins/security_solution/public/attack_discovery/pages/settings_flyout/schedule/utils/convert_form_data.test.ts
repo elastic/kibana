@@ -13,6 +13,7 @@ import { convertFormDataInBaseSchedule } from './convert_form_data';
 import { convertToBuildEsQuery } from '../../../../../common/lib/kuery';
 import { getGenAiConfig } from '../../../use_attack_discovery/helpers';
 import { parseFilterQuery } from '../../parse_filter_query';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../../../../common/lib/kuery');
 jest.mock('../../../use_attack_discovery/helpers');
@@ -50,7 +51,8 @@ describe('convertFormDataInBaseSchedule', () => {
       {} as DataViewSpec,
       {
         get: jest.fn(),
-      } as unknown as IUiSettingsClient
+      } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
     );
     expect(baseSchedule).toEqual({
       actions: [],

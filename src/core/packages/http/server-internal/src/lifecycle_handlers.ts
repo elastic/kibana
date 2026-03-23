@@ -9,6 +9,7 @@
 
 import type {
   OnPostAuthHandler,
+  OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreResponseInfo,
   KibanaRequest,
@@ -17,9 +18,9 @@ import {
   getWarningHeaderMessageFromRouteDeprecation,
   isSafeMethod,
 } from '@kbn/core-http-router-server-internal';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
@@ -42,6 +43,28 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
 
     if (!isSafeMethod(request.route.method) && !hasVersionHeader && !hasXsrfHeader) {
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
+    }
+
+    return toolkit.next();
+  };
+};
+
+export const createExcludeRoutesPreAuthHandler = (
+  config: HttpConfig,
+  log: Logger
+): OnPreAuthHandler => {
+  const excludedRoutes = new Set(config.excludeRoutes);
+  log = log.get('server', 'exclude_routes');
+
+  return (request, response, toolkit) => {
+    if (excludedRoutes.size === 0) {
+      return toolkit.next();
+    }
+
+    const routePath = request.route.routePath ?? request.route.path;
+    if (excludedRoutes.has(routePath)) {
+      log.warn(`Access to route [${routePath}] is blocked by server.excludeRoutes`);
+      return response.notFound();
     }
 
     return toolkit.next();
@@ -119,7 +142,7 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 
   return (request, response, toolkit) => {
-    return toolkit.next({ headers: { ...additionalHeaders } });
+    return toolkit.next({ headers: additionalHeaders });
   };
 };
 
@@ -137,7 +160,7 @@ export const createDeprecationWarningHeaderPreResponseHandler = (
         kibanaVersion
       ),
     };
-    return toolkit.next({ headers: { ...additionalHeaders } });
+    return toolkit.next({ headers: additionalHeaders });
   };
 };
 

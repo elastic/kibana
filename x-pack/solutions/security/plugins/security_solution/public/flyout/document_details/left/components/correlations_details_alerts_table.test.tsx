@@ -9,14 +9,17 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
+import {
+  CorrelationsDetailsAlertsTable,
+  type CorrelationsCustomTableColumn,
+} from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
-import { DocumentDetailsContext } from '../../shared/context';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../hooks/use_paginated_alerts');
 
@@ -25,19 +28,24 @@ jest.mock('@kbn/expandable-flyout');
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];
 
-const renderCorrelationsTable = (panelContext: DocumentDetailsContext) =>
+const renderCorrelationsTable = ({
+  scopeId = mockContextValue.scopeId,
+  columns,
+}: {
+  scopeId?: string;
+  columns?: Array<CorrelationsCustomTableColumn>;
+} = {}) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContext}>
-        <CorrelationsDetailsAlertsTable
-          title={<p>{'title'}</p>}
-          loading={false}
-          alertIds={alertIds}
-          scopeId={mockContextValue.scopeId}
-          eventId={mockContextValue.eventId}
-          data-test-subj={TEST_ID}
-        />
-      </DocumentDetailsContext.Provider>
+      <CorrelationsDetailsAlertsTable
+        title={<p>{'title'}</p>}
+        loading={false}
+        alertIds={alertIds}
+        scopeId={scopeId}
+        eventId={mockContextValue.eventId}
+        data-test-subj={TEST_ID}
+        columns={columns}
+      />
     </TestProviders>
   );
 
@@ -84,8 +92,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    const { getByTestId, getAllByTestId, queryAllByRole } =
-      renderCorrelationsTable(mockContextValue);
+    const { getByTestId, getAllByTestId, queryAllByRole } = renderCorrelationsTable();
 
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
     expect(getByTestId(`${TEST_ID}Table`)).toBeInTheDocument();
@@ -103,8 +110,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
 
   it('renders open preview button', () => {
     const { getByTestId, getAllByTestId } = renderCorrelationsTable({
-      ...mockContextValue,
-      isPreviewMode: true,
+      scopeId: TableId.rulePreview,
     });
 
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
@@ -116,15 +122,15 @@ describe('CorrelationsDetailsAlertsTable', () => {
       params: {
         id: '1',
         indexName: 'index',
-        scopeId: mockContextValue.scopeId,
+        scopeId: TableId.rulePreview,
         banner: ALERT_PREVIEW_BANNER,
         isPreviewMode: true,
       },
     });
   });
 
-  it('opens rule preview when isPreview is false', () => {
-    const { getAllByTestId } = renderCorrelationsTable(mockContextValue);
+  it('opens rule preview when isRulePreview is false', () => {
+    const { getAllByTestId } = renderCorrelationsTable();
 
     expect(getAllByTestId(`${TEST_ID}RulePreview`).length).toBe(2);
 
@@ -139,8 +145,58 @@ describe('CorrelationsDetailsAlertsTable', () => {
     });
   });
 
-  it('does not render preview link when isPreview is true', () => {
-    const { queryByTestId } = renderCorrelationsTable({ ...mockContextValue, isPreview: true });
+  it('does not render preview link when isRulePreview is true', () => {
+    const { queryByTestId } = renderCorrelationsTable({ scopeId: TableId.rulePreview });
     expect(queryByTestId(`${TEST_ID}RulePreview`)).not.toBeInTheDocument();
+  });
+
+  it('renders custom columns when columns prop is provided', () => {
+    const columns: Array<CorrelationsCustomTableColumn> = [
+      {
+        field: 'kibana.alert.attack_discovery.title',
+        name: 'Title',
+      },
+      {
+        field: 'kibana.alert.workflow_status',
+        name: 'Status',
+      },
+      {
+        field: 'kibana.alert.attack_discovery.alert_ids',
+        name: 'Alert count',
+        preserveArray: true,
+        render: (value: unknown) => (Array.isArray(value) ? value.length : ''),
+      },
+    ];
+
+    jest.mocked(usePaginatedAlerts).mockReturnValue({
+      setPagination: jest.fn(),
+      setSorting: jest.fn(),
+      data: [
+        {
+          _id: '1',
+          _index: 'index',
+          fields: {
+            'kibana.alert.attack_discovery.title': ['Attack 1'],
+            'kibana.alert.workflow_status': ['open'],
+            'kibana.alert.attack_discovery.alert_ids': ['a-1', 'a-2'],
+          },
+        },
+      ],
+      loading: false,
+      paginationConfig: {
+        pageIndex: 0,
+        pageSize: 5,
+        totalItemCount: 1,
+        pageSizeOptions: [5, 10, 20],
+      },
+      sorting: { sort: { field: '@timestamp', direction: 'asc' }, enableAllColumns: true },
+      error: false,
+    });
+
+    const { queryAllByRole, getByText } = renderCorrelationsTable({ columns });
+    expect(queryAllByRole('columnheader').length).toBe(3);
+    expect(getByText('Attack 1')).toBeInTheDocument();
+    expect(getByText('open')).toBeInTheDocument();
+    expect(getByText('2')).toBeInTheDocument();
   });
 });

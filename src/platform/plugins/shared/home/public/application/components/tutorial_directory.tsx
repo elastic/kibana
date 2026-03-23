@@ -9,14 +9,16 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TutorialsCategory } from '../../../common/constants';
 import { Synopsis } from './synopsis';
-import { HomeKibanaServices, getServices } from '../kibana_services';
+import type { HomeKibanaServices } from '../kibana_services';
+import { getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
 import type { TutorialType } from '../../services/tutorials/types';
 
@@ -55,6 +57,11 @@ class TutorialDirectoryUi extends React.Component<
     super(props);
     const extraTabs = getServices().addDataService.getAddDataTabs();
     this.tabs = [
+      ...extraTabs.map(({ id, name, getComponent }) => ({
+        id,
+        name,
+        content: getComponent(),
+      })),
       {
         id: SAMPLE_DATA_TAB_ID,
         name: this.props.intl.formatMessage({
@@ -63,11 +70,6 @@ class TutorialDirectoryUi extends React.Component<
         }),
         content: <SampleDataTab />,
       },
-      ...extraTabs.map(({ id, name, getComponent }) => ({
-        id,
-        name,
-        content: getComponent(),
-      })),
     ];
 
     this._isMounted = false;
@@ -152,6 +154,21 @@ class TutorialDirectoryUi extends React.Component<
     _prevProps: TutorialDirectoryUiProps,
     prevState: Readonly<TutorialDirectoryUiState>
   ) {
+    // Update selected tab when URL changes (e.g., browser back/forward)
+    if (_prevProps.openTab !== this.props.openTab) {
+      const newTab = this.props.openTab;
+      // Validate that the tab exists
+      const tabExists = this.tabs.some((tab) => tab.id === newTab);
+      if (!tabExists) {
+        // If the tab does not exist, redirect to the default tab
+        getServices().history.push(`#/tutorial_directory/${SAMPLE_DATA_TAB_ID}`);
+      } else if (newTab !== this.state.selectedTabId) {
+        this.setState({
+          selectedTabId: newTab,
+        });
+      }
+    }
+
     if (prevState.selectedTabId !== this.state.selectedTabId) {
       this.setBreadcrumbs();
     }
@@ -184,6 +201,8 @@ class TutorialDirectoryUi extends React.Component<
     this.setState({
       selectedTabId: id,
     });
+    // Update URL to reflect the selected tab
+    getServices().history.push(`#/tutorial_directory/${id}`);
   };
 
   getTabs = () => {
@@ -256,25 +275,12 @@ class TutorialDirectoryUi extends React.Component<
         restrictWidth={1200}
         pageHeader={{
           pageTitle: (
-            <FormattedMessage
-              id="home.tutorial.addDataToKibanaTitle"
-              defaultMessage="More ways to add data"
-            />
+            <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
           ),
           description: (
             <FormattedMessage
               id="home.tutorial.addDataToKibanaDescription"
-              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
-              values={{
-                integrationsLink: (
-                  <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
-                    <FormattedMessage
-                      id="home.tutorial.addDataToKibanaDescription.integrations"
-                      defaultMessage="integrations"
-                    />
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Try our sample data or upload your own data."
             />
           ),
           tabs,

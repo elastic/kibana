@@ -8,8 +8,8 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AnnotationsPermissions } from '../../hooks/use_annotation_permissions';
-import { Annotation } from '../../../../../common/annotations';
+import type { AnnotationsPermissions } from '../../hooks/use_annotation_permissions';
+import type { Annotation } from '../../../../../common/annotations';
 
 export function DeleteAnnotations({
   selection,

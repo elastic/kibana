@@ -17,7 +17,7 @@ import gulpBrotli from 'gulp-brotli';
 import zlib from 'zlib';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 

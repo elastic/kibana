@@ -48,3 +48,5 @@ jest.doMock('./register_analytics_context_provider', () => {
     registerAnalyticsContextProvider: registerAnalyticsContextProviderMock,
   };
 });
+
+window.performance.mark = jest.fn();

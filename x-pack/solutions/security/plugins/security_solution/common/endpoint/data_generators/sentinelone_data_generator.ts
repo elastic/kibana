@@ -17,7 +17,7 @@ import type {
   SentinelOneOsType,
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import { buildIndexNameWithNamespace } from '../utils/index_name_utilities';
 import { EndpointActionGenerator } from './endpoint_action_generator';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../..';

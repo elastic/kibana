@@ -9,13 +9,12 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFilterButton,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPanel,
@@ -29,6 +28,9 @@ import {
   useEuiTheme,
   EuiTitle,
   useGeneratedHtmlId,
+  logicalCSS,
+  mathWithUnits,
+  EuiFormAppend,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,11 +51,16 @@ const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after 
 const popoverTitleStyle = css`
   padding: ${EQUAL_HEIGHT_OFFSET}px 0;
 `;
-const filterButtonStyle = css`
-  &,
-  & .euiFilterButton__text {
-    min-width: 0;
-    line-height: 1;
+
+const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
+  .euiFilterButton__wrapper {
+    ${logicalCSS('left', `-${euiTheme.size.s}`)}
+    ${logicalCSS('min-width', '0')}
+    ${logicalCSS('width', `calc(100% + ${mathWithUnits(euiTheme.size.s, (x) => x * 2)})`)}
+
+    &::before {
+      display: none;
+    }
   }
 `;
 
@@ -166,22 +173,22 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       display="block"
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      css={filterPopoverStyle}
       button={
-        <EuiFilterButton
+        <EuiFormAppend
+          element="button"
+          iconLeft="filter"
+          onClick={() => setIsOpen((value) => !value)}
           aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel', {
             defaultMessage: 'Filter by type',
           })}
-          color="primary"
-          isSelected={isOpen}
-          numFilters={selectedFieldTypes.length}
-          hasActiveFilters={!!selectedFieldTypes.length}
-          numActiveFilters={selectedFieldTypes.length}
+          aria-expanded={isOpen}
           data-test-subj={`${testSubj}Toggle`}
-          css={filterButtonStyle}
-          onClick={() => setIsOpen((value) => !value)}
         >
-          <EuiIcon type="filter" />
-        </EuiFilterButton>
+          <EuiNotificationBadge color={!!selectedFieldTypes.length ? 'accent' : 'subdued'}>
+            {selectedFieldTypes.length}
+          </EuiNotificationBadge>
+        </EuiFormAppend>
       }
     >
       <>
@@ -255,7 +262,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                         <EuiFlexItem grow={false}>
                           <EuiIconTip
                             aria-label={getFieldTypeDescription(type)}
-                            type="questionInCircle"
+                            type="question"
                             color="subdued"
                             content={getFieldTypeDescription(type)}
                           />

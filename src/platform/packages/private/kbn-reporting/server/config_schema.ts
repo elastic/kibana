@@ -75,7 +75,7 @@ const CsvSchema = schema.object({
       { defaultValue: 'pit' }
     ),
     duration: schema.string({
-      defaultValue: '30s', // values other than "auto" are passed directly to ES, so string only format is preferred
+      defaultValue: '120s', // values other than "auto" are passed directly to ES, so string only format is preferred
       validate(value) {
         if (!/(^[0-9]+(d|h|m|s|ms|micros|nanos)|auto)$/.test(value)) {
           return 'must be either "auto" or a duration string';
@@ -85,6 +85,7 @@ const CsvSchema = schema.object({
     size: schema.number({ defaultValue: 500 }),
   }),
   maxConcurrentShardRequests: schema.number({ defaultValue: 5 }),
+  maxRows: schema.number({ min: 1, defaultValue: 10000 }),
 });
 
 const EncryptionKeySchema = schema.conditional(

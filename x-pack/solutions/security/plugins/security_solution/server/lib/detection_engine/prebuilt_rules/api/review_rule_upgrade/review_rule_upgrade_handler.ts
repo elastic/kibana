@@ -20,9 +20,11 @@ import type { IPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import type { RuleVersionSpecifier } from '../../logic/rule_versions/rule_version_specifier';
+import { type RuleVersionSpecifier } from '../../logic/rule_versions/rule_version_specifier';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleUpgradeInfo } from './calculate_rule_upgrade_info';
+import type { MlAuthz } from '../../../../machine_learning/authz';
+import { getPossibleUpgrades } from '../../logic/utils';
 
 const DEFAULT_SORT: ReviewRuleUpgradeSort = {
   field: 'name',
@@ -38,15 +40,17 @@ export const reviewRuleUpgradeHandler = async (
   const { page = 1, per_page: perPage = 20, sort = DEFAULT_SORT, filter } = request.body ?? {};
 
   try {
-    const ctx = await context.resolve(['core', 'alerting']);
+    const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+    const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const { diffResults, totalUpgradeableRules } = await calculateUpgradeableRulesDiff({
       ruleAssetsClient,
       ruleObjectsClient,
+      mlAuthz,
       page,
       perPage,
       sort,
@@ -79,6 +83,7 @@ export const reviewRuleUpgradeHandler = async (
 interface CalculateUpgradeableRulesDiffArgs {
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
+  mlAuthz: MlAuthz;
   page: number;
   perPage: number;
   sort: ReviewRuleUpgradeSort;
@@ -88,6 +93,7 @@ interface CalculateUpgradeableRulesDiffArgs {
 async function calculateUpgradeableRulesDiff({
   ruleAssetsClient,
   ruleObjectsClient,
+  mlAuthz,
   page,
   perPage,
   sort,
@@ -107,15 +113,19 @@ async function calculateUpgradeableRulesDiff({
         sortField: sort.field,
         sortOrder: sort.order,
       });
-  const upgradeableRuleIds = currentRuleVersions
-    .filter((rule) => {
-      const targetVersion = latestVersionsMap.get(rule.rule_id);
-      return targetVersion != null && rule.version < targetVersion.version;
-    })
-    .map((rule) => rule.rule_id);
-  const totalUpgradeableRules = upgradeableRuleIds.length;
 
-  const pagedRuleIds = upgradeableRuleIds.slice((page - 1) * perPage, page * perPage);
+  const upgradeableRules = await getPossibleUpgrades(
+    currentRuleVersions,
+    latestVersionsMap,
+    mlAuthz
+  );
+
+  const totalUpgradeableRules = upgradeableRules.length;
+
+  const pagedRuleIds = upgradeableRules
+    .slice((page - 1) * perPage, page * perPage)
+    .map((rule) => rule.rule_id);
+
   const currentRules = await ruleObjectsClient.fetchInstalledRulesByIds({
     ruleIds: pagedRuleIds,
     sortField: sort.field,

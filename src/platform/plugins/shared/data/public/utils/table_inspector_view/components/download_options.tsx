@@ -9,7 +9,6 @@
 
 import React, { Component } from 'react';
 import { memoize } from 'lodash';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -20,10 +19,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
 
 interface DataDownloadOptionsState {
@@ -43,13 +42,6 @@ const detectFormulasInTables = memoize((datatables: Datatable[]) =>
 );
 
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
-  static propTypes = {
-    title: PropTypes.string.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    datatables: PropTypes.array,
-    fieldFormats: PropTypes.object.isRequired,
-  };
-
   state = {
     isPopoverOpen: false,
   };

@@ -38,10 +38,8 @@ export function PopoverBadge({
         <EuiPopover
           button={
             <EuiBadge
-              iconType="iInCircle"
-              iconOnClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              iconType="info"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              iconOnClickAriaLabel={CLICK_ARIAL_LABEL}
               onClickAriaLabel={CLICK_ARIAL_LABEL}
               iconSide="left"
               color="hollow"

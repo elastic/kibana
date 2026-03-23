@@ -78,14 +78,12 @@ describe('queryTotalGroupings', () => {
   it('should query ES with a query filter', async () => {
     const options = {
       ...defaultOptions,
-      filters: [
-        {
-          bool: {
-            should: [{ match_phrase: { field1: 'value1' } }],
-            minimum_should_match: 1,
-          },
+      filters: {
+        bool: {
+          should: [{ match_phrase: { field1: 'value1' } }],
+          minimum_should_match: 1,
         },
-      ],
+      },
     };
 
     await queryTotalGroupings(ESSearchClientMock, options);

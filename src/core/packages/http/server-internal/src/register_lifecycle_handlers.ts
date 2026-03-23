@@ -8,7 +8,7 @@
  */
 
 import type { Env } from '@kbn/config';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { HttpConfig } from './http_config';
 import type { LifecycleRegistrar } from './http_server';
 import {
@@ -17,6 +17,7 @@ import {
   createVersionCheckPostAuthHandler,
   createBuildNrMismatchLoggerPreResponseHandler,
   createXsrfPostAuthHandler,
+  createExcludeRoutesPreAuthHandler,
   createDeprecationWarningHeaderPreResponseHandler,
 } from './lifecycle_handlers';
 
@@ -33,6 +34,7 @@ export const registerCoreHandlers = (
     createDeprecationWarningHeaderPreResponseHandler(env.packageInfo.version)
   );
   // add extra request checks stuff
+  registrar.registerOnPreAuth(createExcludeRoutesPreAuthHandler(config, log));
   registrar.registerOnPostAuth(createXsrfPostAuthHandler(config));
   if (config.versioned.strictClientVersionCheck !== false) {
     // add check on version

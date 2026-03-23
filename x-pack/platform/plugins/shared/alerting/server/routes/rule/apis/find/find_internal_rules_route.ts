@@ -51,7 +51,6 @@ export const findInternalRulesRoute = (
         const options = transformFindRulesInternalBodyV1({
           ...body,
           has_reference: body.has_reference || undefined,
-          search_fields: searchFieldsAsArray(body.search_fields),
         });
 
         if (req.body.fields) {
@@ -78,10 +77,3 @@ export const findInternalRulesRoute = (
     )
   );
 };
-
-function searchFieldsAsArray(searchFields: string | string[] | undefined): string[] | undefined {
-  if (!searchFields) {
-    return;
-  }
-  return Array.isArray(searchFields) ? searchFields : [searchFields];
-}

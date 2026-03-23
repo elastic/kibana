@@ -8,7 +8,8 @@
  */
 
 import * as Rx from 'rxjs';
-import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
+import type { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
+import { getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
 import type {
   FileKindBrowser,
   FileJSON,
@@ -18,7 +19,7 @@ import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
 
-interface FileState {
+export interface FileState {
   file: File;
   status: 'idle' | 'uploading' | 'uploaded' | 'upload_failed';
   id?: string;
@@ -100,6 +101,10 @@ export class UploadState {
 
   private readonly validateFile = (file: File): void => {
     const fileKind = this.fileKind;
+
+    if (!file.size) {
+      throw new Error(i18nTexts.fileEmpty);
+    }
 
     if (fileKind.maxSizeBytes != null && file.size > this.fileKind.maxSizeBytes!) {
       const message = i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));

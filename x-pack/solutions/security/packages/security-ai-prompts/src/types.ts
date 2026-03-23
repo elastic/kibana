@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 export interface Prompt {
   promptId: string;
@@ -24,9 +24,9 @@ export interface Prompt {
 export type PromptArray = Array<{ promptId: string; prompt: string }>;
 
 export interface GetPromptArgs {
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  actionsClient?: PublicMethodsOf<ActionsClient>;
   connector?: Connector;
-  connectorId: string;
+  connectorId?: string;
   localPrompts: Prompt[];
   model?: string;
   promptId: string;

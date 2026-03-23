@@ -29,11 +29,10 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-center-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
-          style="max-width: 283px;"
         >
           <div
             class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-center"
@@ -74,7 +73,7 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
                     class="emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate"
+                      class="eui-textTruncate css-13ifi6d-m"
                     >
                       Do Something
                     </span>
@@ -119,11 +118,10 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-center-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
-          style="max-width: 283px;"
         >
           <a
             class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
@@ -135,7 +133,7 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
               class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate"
+                class="eui-textTruncate css-13ifi6d-m"
               >
                 Do Something
               </span>

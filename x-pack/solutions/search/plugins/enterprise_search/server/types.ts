@@ -18,7 +18,6 @@ import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
-import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
@@ -37,7 +36,6 @@ export interface PluginsSetup {
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
-  guidedOnboarding?: GuidedOnboardingPluginSetup;
   licensing: LicensingPluginStart;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;

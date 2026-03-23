@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  convertHighlightedFieldsToPrevalenceFilters,
-  convertHighlightedFieldsToTableRow,
-} from './highlighted_fields_helpers';
+import { convertHighlightedFieldsToTableRow } from './highlighted_fields_helpers';
 
 const scopeId = 'scopeId';
-const isPreview = false;
 const showCellActions = false;
 
 describe('convertHighlightedFieldsToTableRow', () => {
@@ -21,20 +17,19 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(
-      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, showCellActions)
-    ).toEqual([
-      {
-        field: 'host.name',
-        description: {
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
+      [
+        {
           field: 'host.name',
-          values: ['host-1'],
-          scopeId: 'scopeId',
-          isPreview,
-          showCellActions,
+          description: {
+            field: 'host.name',
+            values: ['host-1'],
+            scopeId: 'scopeId',
+            showCellActions,
+          },
         },
-      },
-    ]);
+      ]
+    );
   });
 
   it('should convert take override name over default name and use original values if not present in the override', () => {
@@ -44,21 +39,20 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(
-      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, showCellActions)
-    ).toEqual([
-      {
-        field: 'host.name-override',
-        description: {
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
+      [
+        {
           field: 'host.name-override',
-          originalField: 'host.name',
-          values: ['host-1'],
-          scopeId: 'scopeId',
-          isPreview,
-          showCellActions,
+          description: {
+            field: 'host.name-override',
+            originalField: 'host.name',
+            values: ['host-1'],
+            scopeId: 'scopeId',
+            showCellActions,
+          },
         },
-      },
-    ]);
+      ]
+    );
   });
 
   it('should convert take override name over default name and use provided values', () => {
@@ -68,37 +62,19 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(
-      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, showCellActions)
-    ).toEqual([
-      {
-        field: 'host.name-override',
-        description: {
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
+      [
+        {
           field: 'host.name-override',
-          originalField: 'host.name',
-          values: ['value override!'],
-          scopeId: 'scopeId',
-          isPreview,
-          showCellActions,
+          description: {
+            field: 'host.name-override',
+            originalField: 'host.name',
+            values: ['value override!'],
+            scopeId: 'scopeId',
+            showCellActions,
+          },
         },
-      },
-    ]);
-  });
-});
-
-describe('convertHighlightedFieldsToPrevalenceFilters', () => {
-  it('should convert highlighted fields to prevalence filters', () => {
-    const highlightedFields = {
-      'host.name': {
-        values: ['host-1'],
-      },
-      'user.name': {
-        values: ['user-1', 'user-2'],
-      },
-    };
-    expect(convertHighlightedFieldsToPrevalenceFilters(highlightedFields)).toEqual({
-      'host.name': { terms: { 'host.name': ['host-1'] } },
-      'user.name': { terms: { 'user.name': ['user-1', 'user-2'] } },
-    });
+      ]
+    );
   });
 });

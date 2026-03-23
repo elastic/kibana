@@ -106,7 +106,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, autoFocus = false }:
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs" justifyContent="center" alignItems="center">
-              <EuiIcon type="iInCircle" size="s" />
+              <EuiIcon type="info" size="s" />
               <EuiText size="xs">{label}</EuiText>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -124,6 +124,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, autoFocus = false }:
       isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}
       fullWidth
+      compressed
       options={comboOptions}
       selectedOptions={selectedOptions}
       onChange={handleChange}

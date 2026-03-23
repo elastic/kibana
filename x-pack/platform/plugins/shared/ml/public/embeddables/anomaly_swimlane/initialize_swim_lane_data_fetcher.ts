@@ -13,6 +13,7 @@ import {
   catchError,
   combineLatest,
   debounceTime,
+  distinctUntilChanged,
   EMPTY,
   from,
   map,
@@ -24,10 +25,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import {
-  ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIMLANE_TYPE,
-} from '../../application/explorer/explorer_constants';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
+import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
@@ -64,7 +63,11 @@ export const initializeSwimLaneDataFetcher = (
     fromPage: swimLaneApi.fromPage,
   });
 
-  const bucketInterval$ = combineLatest([selectedJobs$, chartWidth$, appliedTimeRange$]).pipe(
+  const bucketInterval$ = combineLatest([
+    selectedJobs$,
+    chartWidth$.pipe(distinctUntilChanged()),
+    appliedTimeRange$,
+  ]).pipe(
     skipWhile(([jobs, width]) => {
       return !Array.isArray(jobs) || !width;
     }),

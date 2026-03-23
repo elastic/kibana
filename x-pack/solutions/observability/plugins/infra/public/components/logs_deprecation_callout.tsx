@@ -22,7 +22,7 @@ const pageConfigurations = {
     dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.stream.exploreWithDiscover', {
       defaultMessage:
-        'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover and enable the new Observability solution for an improved logs experience.',
+        'Logs Stream and Logs explorer are set to be deprecated. Switch to Discover and enable the new Observability solution for an improved logs experience.',
     }),
   },
   settings: {
@@ -65,7 +65,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
         defaultMessage: "There's a new, better way to explore your logs!",
       })}
       color="warning"
-      iconType="iInCircle"
+      iconType="info"
       heading="h2"
       onDismiss={() => setDismissed(true)}
       css={css`

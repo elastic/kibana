@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Links } from '../../links';
+import type { Links } from '../../links';
 
 interface Props {
   toggleRequestFlyout: () => void;
@@ -32,7 +32,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
   const items = [
     <EuiContextMenuItem
       key="walkthrough"
-      icon="popout"
+      icon="external"
       href={links.painlessWalkthrough}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -44,7 +44,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
 
     <EuiContextMenuItem
       key="api"
-      icon="popout"
+      icon="external"
       href={links.painlessAPIReference}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -56,7 +56,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
 
     <EuiContextMenuItem
       key="languageSpec"
-      icon="popout"
+      icon="external"
       href={links.painlessLangSpec}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -91,7 +91,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
                 button={
                   <EuiButtonEmpty
                     size="s"
-                    iconType="help"
+                    iconType="question"
                     iconSide="left"
                     color="text"
                     onClick={() => setIsHelpOpen(!isHelpOpen)}

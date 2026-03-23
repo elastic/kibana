@@ -33,8 +33,8 @@ const mockAssetDetailsLocator = {
   getRedirectUrl: jest
     .fn()
     .mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+      ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 

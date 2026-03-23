@@ -7,7 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   UpdateListItemRequestBody,
   UpdateListItemResponse,
@@ -24,7 +25,7 @@ export const updateListItemRoute = (router: ListsPluginRouter): void => {
       path: LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

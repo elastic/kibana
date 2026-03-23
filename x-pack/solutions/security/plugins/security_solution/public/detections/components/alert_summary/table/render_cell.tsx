@@ -6,7 +6,8 @@
  */
 
 import React, { type ComponentProps, memo } from 'react';
-import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { RELATED_INTEGRATION } from '../../../constants';
 import type { GetTableProp } from './types';
 import { DatetimeSchemaCellRenderer } from './datetime_schema_cell_renderer';
 import { BasicCellRenderer } from './basic_cell_renderer';
@@ -26,7 +27,7 @@ export type CellValueProps = Pick<
    */
   | 'columnId'
   /**
-   * List of installed AI for SOC integrations.
+   * List of installed EASE integrations.
    * This comes from the additionalContext property on the table.
    */
   | 'packages'
@@ -38,7 +39,7 @@ export type CellValueProps = Pick<
 >;
 
 /**
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  * It renders some of the value with custom renderers for some specific columns:
  *  - kibana.alert.rule.parameters
  *  - kibana.alert.severity
@@ -49,7 +50,7 @@ export type CellValueProps = Pick<
 export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueProps) => {
   let component;
 
-  if (columnId === ALERT_RULE_PARAMETERS) {
+  if (columnId === RELATED_INTEGRATION) {
     component = <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />;
   } else if (columnId === ALERT_SEVERITY) {
     component = <KibanaAlertSeverityCellRenderer alert={alert} />;

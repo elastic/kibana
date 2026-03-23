@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const MAX_ALERTS_PER_EXECUTION = 10000;
+export const MAX_ALERTS_PER_EXECUTION = 1_000;

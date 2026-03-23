@@ -9,11 +9,12 @@ import type { TimeRange } from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { isEmpty } from 'lodash';
 import { getGroupFilters } from './helpers/get_group';
-import { SearchConfigurationWithExtractedReferenceType } from './types';
+import type { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { CustomThresholdExpressionMetric } from './types';
-import { Group } from '../typings';
-
+import type { Group } from '../typings';
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
   dataViewId?: string;
@@ -25,18 +26,14 @@ export interface GetViewInAppUrlArgs {
   spaceId?: string;
 }
 
-export const getViewInAppUrl = ({
+export const getViewInAppLocatorParams = ({
   dataViewId,
   endedAt,
   groups,
-  logsLocator,
   metrics = [],
   searchConfiguration,
   startedAt = new Date().toISOString(),
-  spaceId,
 }: GetViewInAppUrlArgs) => {
-  if (!logsLocator) return '';
-
   const searchConfigurationQuery = searchConfiguration?.query.query;
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
@@ -56,15 +53,45 @@ export const getViewInAppUrl = ({
   } else if (searchConfigurationQuery) {
     query.query = searchConfigurationQuery;
   }
+  let dataViewSpec;
 
-  return logsLocator.getRedirectUrl(
-    {
-      dataViewId,
-      dataViewSpec: searchConfiguration?.index,
-      timeRange,
-      query,
-      filters: [...searchConfigurationFilters, ...groupFilters],
-    },
-    { spaceId }
-  );
+  if (
+    typeof searchConfiguration?.index === 'object' &&
+    searchConfiguration.index !== null &&
+    !isEmpty(searchConfiguration.index)
+  ) {
+    dataViewSpec = searchConfiguration.index as DataViewSpec;
+  }
+
+  return {
+    dataViewId,
+    dataViewSpec,
+    timeRange,
+    query,
+    filters: [...searchConfigurationFilters, ...groupFilters],
+  };
+};
+
+export const getViewInAppUrl = ({
+  dataViewId,
+  endedAt,
+  groups,
+  logsLocator,
+  metrics = [],
+  searchConfiguration,
+  startedAt = new Date().toISOString(),
+  spaceId,
+}: GetViewInAppUrlArgs) => {
+  if (!logsLocator) return '';
+
+  const params = getViewInAppLocatorParams({
+    dataViewId,
+    endedAt,
+    groups,
+    metrics,
+    searchConfiguration,
+    startedAt,
+  });
+
+  return logsLocator.getRedirectUrl(params, { spaceId });
 };

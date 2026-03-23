@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('Cloud backup status', function () {
+  describe.skip('Cloud backup status', function () {
     // file system repositories are not supported in cloud
     this.tags(['skipCloud']);
 

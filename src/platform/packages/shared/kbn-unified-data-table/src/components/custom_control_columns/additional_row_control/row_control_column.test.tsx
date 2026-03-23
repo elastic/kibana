@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getRowControlColumn } from './row_control_column';
@@ -24,14 +23,11 @@ describe('getRowControlColumn', () => {
     const mockClick = jest.fn();
     const props = {
       id: 'test_row_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
+      render: jest.fn((Control, rowProps) => (
         <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
       )),
     };
-    const rowControlColumn = getRowControlColumn(props);
-    const RowControlColumn =
-      rowControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+    const RowControlColumn = getRowControlColumn(props);
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowControlColumn
@@ -56,8 +52,7 @@ describe('getRowControlColumn', () => {
   it('should wrap the Control button with a tooltip when tooltipContent is passed', async () => {
     const props = {
       id: 'test_row_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
+      render: jest.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent="Control tooltip text!"
@@ -66,9 +61,7 @@ describe('getRowControlColumn', () => {
         />
       )),
     };
-    const rowControlColumn = getRowControlColumn(props);
-    const RowControlColumn =
-      rowControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+    const RowControlColumn = getRowControlColumn(props);
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowControlColumn

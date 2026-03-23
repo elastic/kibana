@@ -30,8 +30,7 @@ jest.mock('../monitoring/workload_statistics', () => {
   };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/208459
-describe.skip('unrecognized task types', () => {
+describe('unrecognized task types', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
@@ -127,9 +126,27 @@ describe.skip('unrecognized task types', () => {
       }
     });
 
+    // wait until the task finishes
     await retry(async () => {
-      const task = await getTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
-      expect(task?._source?.task?.status).toBe('unrecognized');
+      const hasRun = await taskManagerPlugin
+        .get('mark_removed_tasks_as_unrecognized')
+        .then((t) => t.runAt != null)
+        .catch(() => false);
+      expect(hasRun).toBe(true);
+    });
+
+    await retry(async () => {
+      const unregisteredTaskInstance = await getTask(
+        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+        notRegisteredTypeId
+      );
+      expect(unregisteredTaskInstance?.task?.status).toBe('idle');
+
+      const removedTaskInstance = await getTask(
+        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+        removeTypeId
+      );
+      expect(removedTaskInstance?.task?.status).toBe('unrecognized');
     });
 
     // monitored_aggregated_stats_refresh_rate is set to the minimum of 5 seconds
@@ -150,21 +167,10 @@ describe.skip('unrecognized task types', () => {
   });
 });
 
-async function getTask(esClient: ElasticsearchClient) {
-  const response = await esClient.search<{ task: ConcreteTaskInstance }>({
+async function getTask(esClient: ElasticsearchClient, id: string) {
+  const scheduledTask = await esClient.get<{ task: ConcreteTaskInstance }>({
+    id: `task:${id}`,
     index: '.kibana_task_manager',
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'task.taskType': 'sampleTaskRemovedType',
-            },
-          },
-        ],
-      },
-    },
   });
-
-  return response.hits.hits[0];
+  return scheduledTask._source!;
 }

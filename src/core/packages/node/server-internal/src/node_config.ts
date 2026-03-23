@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 /** @internal */
@@ -43,6 +44,7 @@ export const rolesConfig = schema.arrayOf(
   {
     defaultValue: [NODE_WILDCARD_CHAR],
     minSize: 1,
+    maxSize: 10,
     validate: (value) => {
       if (value.length > 1) {
         if (value.includes(NODE_WILDCARD_CHAR)) {

@@ -9,7 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
 import pRetry from 'p-retry';
 import { fetchActiveSpace } from '../common/spaces';
 import { dump } from '../common/utils';
@@ -211,10 +211,24 @@ export const installSentinelOneAgent = async ({
     await hostVm.exec(`sudo ${installPath} management token set ${siteToken}`);
     await hostVm.exec(`sudo ${installPath} control start`);
 
-    const status = (await hostVm.exec(`sudo ${installPath} control status`)).stdout;
+    const status = (
+      await pRetry(
+        async () => {
+          return hostVm.exec(`sudo ${installPath} control status`);
+        },
+        {
+          onFailedAttempt: (error) => {
+            log.debug(
+              `Attempt ${error.attemptNumber} to get S1 agent status failed. There are ${error.retriesLeft} retries left.`
+            );
+          },
+        }
+      )
+    ).stdout;
 
     try {
-      // Generate an alert in SentinelOne
+      // Generate an alert in SentinelOne (NOTE: this only works because there is a custom
+      // rule setup in S1 to trigger alert on `nslookup`)
       const command = 'nslookup elastic.co';
 
       log?.info(`Triggering alert using command: ${command}`);

@@ -12,16 +12,18 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { Index } from '../../../components/elasticsearch/index/index.js';
-import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
+import type { ComponentProps } from '../../route_init';
+import type { SetupModeProps } from '../../../components/renderers/setup_mode';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
 // @ts-ignore
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
+import { ensureShardLegendNodes } from '../../../components/elasticsearch/shard_allocation/lib/ensure_shard_legend_nodes';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
@@ -82,8 +84,9 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
         }),
       });
       setData(response);
+      const nodes = ensureShardLegendNodes(response);
       const transformer = indicesByNodes();
-      setNodesByIndicesData(transformer(response.shards, response.nodes));
+      setNodesByIndicesData(transformer(response.shards ?? [], nodes));
 
       const shards = response.shards;
       if (shards.some((shard: any) => shard.state === 'UNASSIGNED')) {

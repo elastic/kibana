@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormAppend, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Validation } from '../../../../../../../common/types';
-import {
-  ConfigKey,
+import type { Validation } from '../../../../../../../common/types';
+import type {
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { OptionalLabel } from '../optional_label';
 
 export const ThrottlingLatencyField = ({
@@ -40,17 +40,14 @@ export const ThrottlingLatencyField = ({
       error={LATENCY_NEGATIVE_ERROR}
     >
       <EuiFieldNumber
+        isInvalid={validate ? !!validate?.[ConfigKey.THROTTLING_CONFIG]?.(throttling) : false}
         fullWidth
         min={0}
         value={throttlingValue.latency}
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('latency')}
         data-test-subj="syntheticsBrowserLatency"
-        append={
-          <EuiText size="xs">
-            <strong>ms</strong>
-          </EuiText>
-        }
+        append={<EuiFormAppend label="ms" />}
         readOnly={readOnly}
       />
     </EuiFormRow>

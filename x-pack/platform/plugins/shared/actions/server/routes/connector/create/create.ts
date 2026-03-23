@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { errorHandler } from '../error_handler';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
@@ -42,18 +43,26 @@ export const createConnectorRoute = (
             description: 'Indicates a successful call.',
             body: () => connectorResponseSchemaV1,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = (await context.actions).getActionsClient();
-        const action = transformCreateConnectorBodyV1(req.body);
-        return res.ok({
-          body: transformConnectorResponseV1(
-            await actionsClient.create({ action, options: req.params })
-          ),
-        });
+        try {
+          const actionsClient = (await context.actions).getActionsClient();
+          const action = transformCreateConnectorBodyV1(req.body);
+          const resp = await actionsClient.create({ action, options: req.params });
+          const body = transformConnectorResponseV1(resp);
+
+          return res.ok({
+            body,
+          });
+        } catch (error) {
+          return errorHandler(res, error);
+        }
       })
     )
   );

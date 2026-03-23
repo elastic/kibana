@@ -7,13 +7,14 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Query, TimeRange, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 import { OptionalText } from './optional_text';
 import type { SearchBarProps } from './query_builder';
 

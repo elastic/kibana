@@ -16,8 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
-import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
-import { RestoreValidation, validateRestore } from '../../services/validation';
+import type { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import type { RestoreValidation } from '../../services/validation';
+import { validateRestore } from '../../services/validation';
 import {
   RestoreSnapshotStepLogistics,
   RestoreSnapshotStepSettings,
@@ -132,7 +133,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 onClick={() => onBack()}
                 disabled={!validation.isValid}
                 data-test-subj="backButton"
@@ -148,7 +149,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 onClick={() => onNext()}
                 disabled={!validation.isValid}
                 data-test-subj="nextButton"

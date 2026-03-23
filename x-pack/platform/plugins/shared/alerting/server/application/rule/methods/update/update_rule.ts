@@ -13,7 +13,7 @@ import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
+import { getMappedParams, addMissingUiamKeyTagIfNeeded } from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -27,8 +27,8 @@ import {
   addGeneratedActionValues,
   incrementRevision,
   createNewAPIKeySet,
-  migrateLegacyActions,
   updateMetaAttributes,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -41,36 +41,6 @@ import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 
-const validateCanUpdateFlapping = (
-  isFlappingEnabled: boolean,
-  originalFlapping: RawRule['flapping'],
-  updateFlapping: UpdateRuleParams['data']['flapping']
-) => {
-  // If flapping is enabled, allow rule flapping to be updated and do nothing
-  if (isFlappingEnabled) {
-    return;
-  }
-
-  // If updated flapping is undefined then don't do anything, it's not being updated
-  if (updateFlapping === undefined) {
-    return;
-  }
-
-  // If both versions are falsy, allow it even if its changing between undefined and null
-  if (!originalFlapping && !updateFlapping) {
-    return;
-  }
-
-  // If both values are equal, allow it because it's essentially not changing anything
-  if (isEqual(originalFlapping, updateFlapping)) {
-    return;
-  }
-
-  throw Boom.badRequest(
-    `Error updating rule: can not update rule flapping if global flapping is disabled`
-  );
-};
-
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
 export interface UpdateRuleParams<Params extends RuleParams = never> {
@@ -78,7 +48,6 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   data: UpdateRuleData<Params>;
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
-  isFlappingEnabled?: boolean;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -101,7 +70,6 @@ async function updateWithOCC<Params extends RuleParams = never>(
     data: initialData,
     allowMissingConnectorSecrets,
     id,
-    isFlappingEnabled = false,
     shouldIncrementRevision = () => true,
   } = updateParams;
 
@@ -153,11 +121,9 @@ async function updateWithOCC<Params extends RuleParams = never>(
     schedule,
     name,
     apiKey,
+    uiamApiKey,
     apiKeyCreatedByUser,
-    flapping: originalFlapping,
   } = originalRuleSavedObject.attributes;
-
-  validateCanUpdateFlapping(isFlappingEnabled, originalFlapping, initialData.flapping);
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -251,10 +217,20 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
+  const apiKeysToInvalidate = [];
+  if (apiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(apiKey);
+  }
+  if (uiamApiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(uiamApiKey);
+  }
+
   await Promise.all([
-    apiKey && !apiKeyCreatedByUser
+    apiKeysToInvalidate.length > 0
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKey] },
+          {
+            apiKeys: apiKeysToInvalidate,
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
@@ -302,12 +278,12 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   isSystemAction: (connectorId: string) => boolean;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
+  await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
   const originalRule = originalRuleSavedObject.attributes;
-  let updatedRule = { ...originalRule };
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
   const artifacts = updateRuleData.artifacts ?? {};
-  const ruleType = context.ruleTypeRegistry.get(updatedRule.alertTypeId);
+  const ruleType = context.ruleTypeRegistry.get(originalRule.alertTypeId);
 
   // Extract saved object references for this rule
   const {
@@ -332,20 +308,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       })
     : originalRule.revision;
 
-  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: originalRuleSavedObject.id,
-    attributes: originalRule as RawRule,
-  });
-
-  if (migratedActions.hasLegacyActions) {
-    updatedRule = {
-      ...updatedRule,
-      notifyWhen: undefined,
-      throttle: undefined,
-    };
-  }
-
   const username = await context.getUserName();
 
   const apiKeyAttributes = await createNewAPIKeySet(context, {
@@ -356,15 +318,24 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     errorMessage: 'Error updating rule: could not create API key',
   });
 
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    updateRuleData.tags,
+    apiKeyAttributes.uiamApiKey,
+    apiKeyAttributes.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   const notifyWhen = getRuleNotifyWhenType(
     updateRuleData.notifyWhen ?? null,
     updateRuleData.throttle ?? null
   );
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
-    ...updatedRule,
+    ...originalRule,
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
+    tags: tagsWithUiamCheck,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,
@@ -372,6 +343,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedBy: username,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
+    ...(originalRule.lastRun
+      ? { lastRun: migrateLegacyLastRunOutcomeMsg(originalRule.lastRun) }
+      : {}),
   });
 
   const mappedParams = getMappedParams(updatedParams);
@@ -383,6 +357,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -395,14 +370,19 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
+
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          updatedRuleAttributes.apiKey && !updatedRuleAttributes.apiKeyCreatedByUser
-            ? [updatedRuleAttributes.apiKey]
-            : [],
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );
@@ -434,4 +414,26 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
+}
+
+/**
+ * Migrates legacy lastRun.outcomeMsg from string to string[]
+ *
+ * Rule SO schema forces lastRun.outcomeMsg to be string[].
+ * However, some rules may have lastRun.outcomeMsg as string after upgrading from 7.x due to
+ * lack of migration. lastRun.outcomeMsg schema change from string to string[] happened after
+ * classical migrations were deprecated due to Serverless. And quite often it's not an issue
+ * as lastRun is absent.
+ */
+function migrateLegacyLastRunOutcomeMsg<LastRun extends { outcomeMsg?: unknown }>(
+  lastRun: LastRun
+): LastRun {
+  if (typeof lastRun.outcomeMsg === 'string') {
+    return {
+      ...lastRun,
+      outcomeMsg: [lastRun.outcomeMsg],
+    };
+  }
+
+  return lastRun;
 }

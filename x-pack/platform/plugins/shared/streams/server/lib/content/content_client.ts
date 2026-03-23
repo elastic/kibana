@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   ContentPackSavedObjectLinks,
   SavedObjectLinkWithReferences,
 } from '@kbn/content-packs-schema';
-import { IStorageClient, IndexStorageSettings, types } from '@kbn/storage-adapter';
+import type { IStorageClient, IndexStorageSettings } from '@kbn/storage-adapter';
+import { types } from '@kbn/storage-adapter';
 import objectHash from 'object-hash';
 import { CONTENT_NAME, STREAM_NAME } from './fields';
 

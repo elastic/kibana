@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../common/constants';
 import { getAttackDiscoveryGenerationsAggs } from '../get_attack_discovery_generations_aggs';

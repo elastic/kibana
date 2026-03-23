@@ -145,7 +145,8 @@ export function AgentExplorer() {
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
           {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
-            defaultMessage: 'Agent Explorer provides an inventory and details of deployed Agents.',
+            defaultMessage:
+              'Agent Explorer provides an inventory and details of deployed APM agents. EDOT SDKs are not currently listed.',
           })}
         </EuiText>
       </EuiFlexItem>
@@ -178,6 +179,7 @@ export function AgentExplorer() {
               })}
               start={start}
               end={end}
+              compressed
               dataTestSubj="agentExplorerServiceNameSelect"
             />
           </EuiFlexItem>
@@ -201,6 +203,7 @@ export function AgentExplorer() {
               )}
               start={start}
               end={end}
+              compressed
               dataTestSubj="agentExplorerAgentLanguageSelect"
             />
           </EuiFlexItem>

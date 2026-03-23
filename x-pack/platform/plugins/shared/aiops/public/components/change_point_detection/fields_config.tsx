@@ -34,11 +34,9 @@ import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_me
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import {
-  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointEmbeddableState } from '../../embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -58,7 +56,7 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-import { getDataviewReferences } from '../../embeddables/get_dataview_references';
+import { NoChangePointsCallout } from './no_change_points_callout';
 
 const selectControlCss = { width: '350px' };
 
@@ -213,9 +211,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState<boolean>(false);
 
   const {
-    results: annotations,
+    results,
     isLoading: annotationsLoading,
     progress,
+    isUsingSampleData,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
   const selectedPartitions = useMemo(() => {
@@ -431,7 +430,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 onClick={() => {
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
-                    timeRange,
+                    time_range: timeRange,
                     viewType: caseAttachment.viewType,
                     fn: fieldConfig.fn,
                     metricField: fieldConfig.metricField,
@@ -477,35 +476,30 @@ const FieldPanel: FC<FieldPanelProps> = ({
     timeRange,
   ]);
 
-  const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+  const onSaveCallback = useCallback<SaveModalDashboardProps['onSave']>(
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
-
-      const embeddableInput: Partial<ChangePointEmbeddableState> = {
-        title: newTitle,
-        description: newDescription,
-        viewType: dashboardAttachment.viewType,
-        dataViewId: dataView.id,
-        metricField: fieldConfig.metricField,
-        splitField: fieldConfig.splitField,
-        fn: fieldConfig.fn,
-        ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-        maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
-        ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
-      };
 
       const state = {
         serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
+          title: newTitle,
+          description: newDescription,
+          viewType: dashboardAttachment.viewType,
+          dataViewId: dataView.id,
+          metricField: fieldConfig.metricField,
+          splitField: fieldConfig.splitField,
+          fn: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
+          maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+          ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -597,9 +591,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
       {isExpanded ? (
         <ChangePointResults
           fieldConfig={fieldConfig}
-          isLoading={annotationsLoading}
-          annotations={annotations}
           splitFieldCardinality={splitFieldCardinality}
+          isLoading={annotationsLoading}
+          results={results}
+          isUsingSampleData={isUsingSampleData}
           onSelectionChange={onSelectionChange}
         />
       ) : null}
@@ -691,7 +686,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       }
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
-        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+        <EuiFlexItem grow={false} css={{ width: '224px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>
@@ -719,7 +714,8 @@ interface ChangePointResultsProps {
   fieldConfig: FieldConfig;
   splitFieldCardinality: number | null;
   isLoading: boolean;
-  annotations: ChangePointAnnotation[];
+  results: ChangePointAnnotation[];
+  isUsingSampleData: boolean;
   onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
@@ -730,8 +726,9 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   fieldConfig,
   splitFieldCardinality,
   isLoading,
-  annotations,
+  results,
   onSelectionChange,
+  isUsingSampleData,
 }) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
@@ -743,6 +740,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
       {cardinalityExceeded ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
               defaultMessage: 'Analysis has been limited',
             })}
@@ -765,8 +763,15 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
         </>
       ) : null}
 
+      {isUsingSampleData && (
+        <>
+          <NoChangePointsCallout reason={results[0]?.reason} />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       <ChangePointsTable
-        annotations={annotations}
+        annotations={results}
         fieldConfig={fieldConfig}
         isLoading={isLoading}
         onSelectionChange={onSelectionChange}

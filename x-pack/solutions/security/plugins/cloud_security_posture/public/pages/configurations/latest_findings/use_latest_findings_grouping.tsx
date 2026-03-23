@@ -5,33 +5,30 @@
  * 2.0.
  */
 import { getGroupingQuery } from '@kbn/grouping';
-import {
+import type {
   GroupingAggregation,
   GroupPanelRenderer,
   GetGroupStats,
-  isNoneGroup,
   NamedAggregation,
-  parseGroupingQuery,
 } from '@kbn/grouping/src';
+import { isNoneGroup, parseGroupingQuery } from '@kbn/grouping/src';
 import { useMemo } from 'react';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
   buildMutedRulesFilter,
 } from '@kbn/cloud-security-posture-common';
+import type { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import {
-  CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS,
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { Evaluation } from '../../../../common/types_old';
-import {
-  FindingsGroupingAggregation,
-  FindingsRootGroupingAggregation,
-  useGroupedFindings,
-} from './use_grouped_findings';
+import type { Evaluation } from '../../../../common/types_old';
+import type { FindingsRootGroupingAggregation } from './use_grouped_findings';
+import { useGroupedFindings } from './use_grouped_findings';
 import {
   FINDINGS_UNIT,
   groupingTitle,
@@ -101,6 +98,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
+        getTermAggregation('cloudProvider', 'cloud.provider'),
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
         getTermAggregation('accountName', 'cloud.account.name'),
@@ -114,28 +112,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       ];
   }
   return aggMetrics;
-};
-
-/**
- * Get runtime mappings for the given group field
- * Some fields require additional runtime mappings to aggregate additional information
- * Fallback to keyword type to support custom fields grouping
- */
-const getRuntimeMappingsByGroupField = (
-  field: string
-): Record<string, { type: 'keyword' }> | undefined => {
-  if (CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
-    return CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
-      (acc, runtimeField) => ({
-        ...acc,
-        [runtimeField]: {
-          type: 'keyword',
-        },
-      }),
-      {}
-    );
-  }
-  return {};
 };
 
 /**
@@ -208,14 +184,13 @@ export const useLatestFindingsGrouping = ({
     groupByField: currentSelectedGroup,
     uniqueValue,
     timeRange: {
-      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
       to: 'now',
     },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
-    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
     rootAggregations: [
       {
         failedFindings: {

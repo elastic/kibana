@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { EmbedContent } from './embed_content';
-import { useShareTabsContext } from '../../context';
+import { useShareTypeContext } from '../../context';
 
 type IEmbedTab = IModalTabDeclaration<{ url: string; isNotSaved: boolean }>;
 
@@ -25,7 +25,7 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
     allowShortUrl,
     shareableUrlLocatorParams,
     shareMenuItems,
-  } = useShareTabsContext('embed');
+  } = useShareTypeContext('embed');
 
   return (
     <EmbedContent

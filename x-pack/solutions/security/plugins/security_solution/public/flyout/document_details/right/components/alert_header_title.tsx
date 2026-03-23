@@ -9,7 +9,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
@@ -35,6 +34,8 @@ const blockStyles = {
   minWidth: 280,
 };
 
+const urlParamOverride = { timeline: { isOpen: false } };
+
 /**
  * Alert details flyout right section header
  */
@@ -43,17 +44,13 @@ export const AlertHeaderTitle = memo(() => {
     dataFormattedForFieldBrowser,
     eventId,
     scopeId,
-    isPreview,
+    isRulePreview,
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
-  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
   const ruleTitle = useMemo(
     () =>
       href ? (
@@ -119,11 +116,11 @@ export const AlertHeaderTitle = memo(() => {
           eventId={eventId}
           assignedUserIds={alertAssignees}
           onAssigneesUpdated={onAssigneesUpdated}
-          isPreview={isPreview}
+          showAssignees={!isRulePreview}
         />
       </AlertHeaderBlock>
     ),
-    [alertAssignees, eventId, isPreview, onAssigneesUpdated]
+    [alertAssignees, eventId, isRulePreview, onAssigneesUpdated]
   );
 
   return (
@@ -134,46 +131,30 @@ export const AlertHeaderTitle = memo(() => {
       <EuiSpacer size="xs" />
       {ruleTitle}
       <EuiSpacer size="m" />
-      {securitySolutionNotesDisabled ? (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem>
-            <DocumentStatus />
-          </EuiFlexItem>
-          <EuiFlexItem>{riskScore}</EuiFlexItem>
-          <EuiFlexItem>{assignees}</EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem css={blockStyles}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-              <EuiFlexItem>
-                <DocumentStatus />
-              </EuiFlexItem>
-              <EuiFlexItem>{riskScore}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem css={blockStyles}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-              <EuiFlexItem>{assignees}</EuiFlexItem>
-              <EuiFlexItem>
-                <Notes />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        responsive={false}
+        wrap
+        data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+      >
+        <EuiFlexItem css={blockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <DocumentStatus />
+            </EuiFlexItem>
+            <EuiFlexItem>{riskScore}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={blockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>{assignees}</EuiFlexItem>
+            <EuiFlexItem>
+              <Notes />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 });

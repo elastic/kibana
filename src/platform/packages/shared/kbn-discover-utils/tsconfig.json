@@ -1,13 +1,13 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom",
-      "../../../../../typings/emotion.d.ts"
+      "@testing-library/jest-dom"
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
@@ -17,14 +17,17 @@
     "@kbn/data-views-plugin",
     "@kbn/data-view-utils",
     "@kbn/es-query",
+    "@kbn/esql-types",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
     "@kbn/i18n",
     "@kbn/expressions-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/i18n-react",
-    "@kbn/navigation-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/data-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/apm-types",
+    "@kbn/core-chrome-app-menu-components"
   ]
 }

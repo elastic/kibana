@@ -11,7 +11,7 @@ import type { ActionCreator } from 'typescript-fsa';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { DETECTIONS_TABLE_IDS } from '../../../detections/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getScopedActions } from '../../../helpers';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -221,10 +221,9 @@ export const addFieldToColumns = ({
   const fieldId = getFieldIdFromDraggable(result);
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
-  const initColumnHeader =
-    scopeId === TableId.alertsOnAlertsPage || scopeId === TableId.alertsOnRuleDetailsPage
-      ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
-      : {};
+  const initColumnHeader = DETECTIONS_TABLE_IDS.some((tableId) => tableId === scopeId)
+    ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
+    : {};
 
   const scopedActions = getScopedActions(scopeId);
   if (column != null && scopedActions) {

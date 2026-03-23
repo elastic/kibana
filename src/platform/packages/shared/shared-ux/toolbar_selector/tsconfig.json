@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/i18n-react",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

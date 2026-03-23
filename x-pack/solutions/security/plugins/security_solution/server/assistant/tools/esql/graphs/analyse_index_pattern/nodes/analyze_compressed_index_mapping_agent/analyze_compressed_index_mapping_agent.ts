@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { mapFieldDescriptorToNestedObject } from '../../../../tools/inspect_index_mapping_tool/inspect_index_utils';
@@ -19,12 +19,12 @@ const structuredOutput = z.object({
     .describe('Whether the index pattern contains the required fields for the query'),
 });
 
-export const getAnalyzeCompressedIndexMappingAgent = ({
+export const getAnalyzeCompressedIndexMappingAgent = async ({
   createLlmInstance,
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { fieldDescriptors, input } = state;
     if (fieldDescriptors === undefined) {

@@ -71,12 +71,17 @@ export interface WaterfallSpan {
   child?: { id: string[] };
 }
 
+/**
+ * @deprecated Use Error instead
+ */
 export interface WaterfallError {
+  id: string;
   timestamp: TimestampUs;
   trace?: { id?: string };
   transaction?: { id?: string };
   parent?: { id?: string };
   span?: { id?: string };
+  eventName?: string;
   error: {
     id: string;
     log?: {
@@ -89,3 +94,5 @@ export interface WaterfallError {
     name: string;
   };
 }
+
+export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;

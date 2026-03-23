@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, IngestDataCodeDefinition, SearchCodeDefinition } from '../types';
-import { CreateIndexLanguageExamples } from './types';
+import type { CodeLanguage, IngestDataCodeDefinition, SearchCodeDefinition } from '../types';
+import type { CreateIndexLanguageExamples } from './types';
 
 export const CURL_INFO: CodeLanguage = {
   id: 'curl',

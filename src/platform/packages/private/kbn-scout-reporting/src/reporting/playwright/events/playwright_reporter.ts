@@ -20,7 +20,11 @@ import type {
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import {
+  SCOUT_REPORT_OUTPUT_ROOT,
+  ScoutTestRunConfigCategory,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -32,14 +36,14 @@ import {
 } from '@kbn/code-owners';
 import {
   ScoutEventsReport,
-  ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
-  uploadScoutReportEvents,
+  type ScoutFileInfo,
+  type ScoutReportEvent,
 } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
-import { generateTestRunId, getTestIDForTitle } from '../../../helpers';
+import { generateTestRunId, computeTestID } from '../../../helpers';
 
 /**
  * Scout Playwright reporter
@@ -48,9 +52,20 @@ export class ScoutPlaywrightReporter implements Reporter {
   readonly log: ToolingLog;
   readonly name: string;
   readonly runId: string;
+  private readonly captureSteps: boolean;
   private report: ScoutEventsReport;
   private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
+
+  private readonly testStats: {
+    passes: number;
+    failures: number;
+    pending: number;
+  } = {
+    passes: 0,
+    failures: 0,
+    pending: 0,
+  };
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -60,10 +75,20 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     this.name = this.reporterOptions.name || 'unknown';
     this.runId = this.reporterOptions.runId || generateTestRunId();
+    this.captureSteps = this.reporterOptions.captureSteps || false;
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
-    this.baseTestRunInfo = { id: this.runId };
+
+    const testTarget = ScoutTestTarget.tryFromEnv();
+
+    this.baseTestRunInfo = {
+      id: this.runId,
+      target: {
+        type: testTarget?.location || 'unknown',
+        mode: testTarget?.tagWithoutLocation || 'unknown',
+      },
+    };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -74,17 +99,68 @@ export class ScoutPlaywrightReporter implements Reporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
+    const areas = this.getOwnerAreas(fileOwners);
 
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
+  }
+
+  private getScoutConfigCategory(configPath: string): ScoutTestRunConfigCategory {
+    // Matches scout/{api|ui} or scout_<custom>/{api|ui} and captures api|ui
+    const pattern = /scout(?:_[^/]+)?\/(api|ui)\//;
+    const match = configPath.match(pattern);
+    if (match) {
+      return match[1] === 'api'
+        ? ScoutTestRunConfigCategory.API_TEST
+        : ScoutTestRunConfigCategory.UI_TEST;
+    }
+    return ScoutTestRunConfigCategory.UNKNOWN;
+  }
+
+  private getSuitePropsFromTest(test: TestCase): ScoutReportEvent['suite'] {
+    return {
+      title: test.parent.titlePath().slice(3).join(' '),
+      type: test.parent.type,
+    };
+  }
+
+  private getTestPropsFromTest(
+    test: TestCase,
+    step?: TestStep,
+    result?: TestResult
+  ): ScoutReportEvent['test'] {
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
+    const testFilePath = path.relative(REPO_ROOT, test.location.file);
+    const testProps: ScoutReportEvent['test'] = {
+      id: computeTestID(testFilePath, fullTestTitle),
+      title: test.title,
+      tags: test.tags,
+      annotations: test.annotations,
+      expected_status: test.expectedStatus,
+      file: this.getScoutFileInfoForPath(testFilePath),
+    };
+
+    if (step) {
+      testProps.step = {
+        title: testProps.title,
+        category: step.category,
+      };
+    }
+
+    if (result) {
+      testProps.status = result.status;
+      testProps.duration = result.duration;
+    }
+
+    return testProps;
   }
 
   /**
@@ -107,12 +183,13 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (config.configFile !== undefined) {
       configInfo = {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
-        category: ScoutTestRunConfigCategory.UI_TEST,
+        category: this.getScoutConfigCategory(config.configFile),
       };
     }
 
     this.baseTestRunInfo = {
       ...this.baseTestRunInfo,
+      fully_parallel: config.fullyParallel,
       config: configInfo,
     };
 
@@ -139,18 +216,8 @@ export class ScoutPlaywrightReporter implements Reporter {
         type: 'playwright',
       },
       test_run: this.baseTestRunInfo,
-      suite: {
-        title: test.parent.titlePath().join(' '),
-        type: test.parent.type,
-      },
-      test: {
-        id: getTestIDForTitle(test.titlePath().join(' ')),
-        title: test.title,
-        tags: test.tags,
-        annotations: test.annotations,
-        expected_status: test.expectedStatus,
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
-      },
+      suite: this.getSuitePropsFromTest(test),
+      test: this.getTestPropsFromTest(test),
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
       },
@@ -158,6 +225,8 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   onStepBegin(test: TestCase, _: TestResult, step: TestStep) {
+    if (!this.captureSteps) return;
+
     this.report.logEvent({
       '@timestamp': step.startTime,
       ...environmentMetadata,
@@ -166,22 +235,8 @@ export class ScoutPlaywrightReporter implements Reporter {
         type: 'playwright',
       },
       test_run: this.baseTestRunInfo,
-      suite: {
-        title: test.parent.titlePath().join(' '),
-        type: test.parent.type,
-      },
-      test: {
-        id: getTestIDForTitle(test.titlePath().join(' ')),
-        title: test.title,
-        tags: test.tags,
-        annotations: test.annotations,
-        expected_status: test.expectedStatus,
-        step: {
-          title: step.titlePath().join(' '),
-          category: step.category,
-        },
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
-      },
+      suite: this.getSuitePropsFromTest(test),
+      test: this.getTestPropsFromTest(test, step),
       event: {
         action: ScoutReportEventAction.TEST_STEP_BEGIN,
       },
@@ -189,6 +244,8 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   onStepEnd(test: TestCase, _: TestResult, step: TestStep) {
+    if (!this.captureSteps) return;
+
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -196,23 +253,8 @@ export class ScoutPlaywrightReporter implements Reporter {
         type: 'playwright',
       },
       test_run: this.baseTestRunInfo,
-      suite: {
-        title: test.parent.titlePath().join(' '),
-        type: test.parent.type,
-      },
-      test: {
-        id: getTestIDForTitle(test.titlePath().join(' ')),
-        title: test.title,
-        tags: test.tags,
-        annotations: test.annotations,
-        expected_status: test.expectedStatus,
-        step: {
-          title: step.titlePath().join(' '),
-          category: step.category,
-          duration: step.duration,
-        },
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
-      },
+      suite: this.getSuitePropsFromTest(test),
+      test: this.getTestPropsFromTest(test, step),
       event: {
         action: ScoutReportEventAction.TEST_STEP_END,
         error: {
@@ -224,6 +266,26 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
+    switch (result.status) {
+      case 'failed':
+        this.testStats.failures++;
+        break;
+      case 'interrupted':
+        this.testStats.failures++;
+        break;
+      case 'timedOut':
+        this.testStats.failures++;
+        break;
+
+      case 'passed':
+        this.testStats.passes++;
+        break;
+
+      case 'skipped':
+        this.testStats.pending++;
+        break;
+    }
+
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -231,20 +293,8 @@ export class ScoutPlaywrightReporter implements Reporter {
         type: 'playwright',
       },
       test_run: this.baseTestRunInfo,
-      suite: {
-        title: test.parent.titlePath().join(' '),
-        type: test.parent.type,
-      },
-      test: {
-        id: getTestIDForTitle(test.titlePath().join(' ')),
-        title: test.title,
-        tags: test.tags,
-        annotations: test.annotations,
-        expected_status: test.expectedStatus,
-        status: result.status,
-        duration: result.duration,
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.location.file)),
-      },
+      suite: this.getSuitePropsFromTest(test),
+      test: this.getTestPropsFromTest(test, undefined, result),
       event: {
         action: ScoutReportEventAction.TEST_END,
         error: {
@@ -266,16 +316,24 @@ export class ScoutPlaywrightReporter implements Reporter {
         ...this.baseTestRunInfo,
         status: result.status,
         duration: result.duration,
+        tests: {
+          failures: this.testStats.failures,
+          passes: this.testStats.passes,
+          pending: this.testStats.pending,
+          total: this.testStats.failures + this.testStats.passes + this.testStats.pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 
     // Save, upload events & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);

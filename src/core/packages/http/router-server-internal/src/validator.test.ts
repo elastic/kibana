@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import { RouteValidationError } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 
@@ -92,11 +93,11 @@ describe('Router validator', () => {
     expect(schemaValidation.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
     expect(schemaValidation.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
     expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
-      /Expected string, received number/
+      /Invalid input: expected string, received number/
     );
-    expect(() => schemaValidation.getParams({})).toThrowError(/Required/);
-    expect(() => schemaValidation.getParams(undefined)).toThrowError(/Required/);
-    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(/Required/);
+    expect(() => schemaValidation.getParams({})).toThrowError(/Invalid input/);
+    expect(() => schemaValidation.getParams(undefined)).toThrowError(/Invalid input/);
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(/Invalid input/);
   });
 
   it('should validate and infer the type from a config-schema non-ObjectType', () => {

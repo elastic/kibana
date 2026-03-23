@@ -64,7 +64,7 @@ export const StatusPopoverButton = memo(
       globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     }, [globalQueries]);
 
-    const { actionItems } = useAlertsActions({
+    const { actionItems, panels: actionItemsPanels } = useAlertsActions({
       closePopover: closeAfterAction,
       eventId,
       scopeId,
@@ -72,7 +72,10 @@ export const StatusPopoverButton = memo(
       refetch: refetchGlobalQuery,
     });
 
-    const panels = useMemo(() => [{ id: 0, items: actionItems }], [actionItems]);
+    const panels = useMemo(
+      () => [{ id: 0, items: actionItems }, ...actionItemsPanels],
+      [actionItems, actionItemsPanels]
+    );
 
     // statusPopoverVisible includes the logic for the visibility of the popover in
     // case actionItems is an empty array ( ex, when user has read access ).

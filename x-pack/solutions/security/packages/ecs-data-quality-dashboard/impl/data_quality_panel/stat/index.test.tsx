@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { Props, Stat, arePropsEqualOneLevelDeep } from '.';
+import type { Props } from '.';
+import { Stat, arePropsEqualOneLevelDeep } from '.';
 import { TestExternalProviders } from '../mock/test_providers/test_providers';
 
 describe('Stat', () => {

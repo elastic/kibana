@@ -16,4 +16,6 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
 
   // task types requiring a concurrency
   'report:execute',
+  'report:execute-scheduled',
+  'ad_hoc_run-backfill',
 ];

@@ -9,35 +9,33 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type {
   ITelemetryClient,
   SearchQuerySubmittedParams,
-  EntityInventoryAddDataParams,
-  EmptyStateClickParams,
+  SloOverviewFlyoutSearchQueriedParams,
+  SloOverviewFlyoutStatusFilteredParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
-  public reportSearchQuerySubmitted = ({
-    kueryFields,
-    timerange,
-    action,
-  }: SearchQuerySubmittedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, {
-      kueryFields,
-      timerange,
-      action,
-    });
+  public reportSearchQuerySubmitted = (params: SearchQuerySubmittedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, params);
   };
 
-  public reportEntityInventoryAddData = (params: EntityInventoryAddDataParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA, params);
+  public reportSloOverviewFlyoutViewed = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED, {});
   };
 
-  public reportTryItClick = (params: EmptyStateClickParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.TRY_IT_CLICK, params);
+  public reportSloOverviewFlyoutSearchQueried = (params: SloOverviewFlyoutSearchQueriedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED, params);
   };
 
-  public reportLearnMoreClick = (params: EmptyStateClickParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.LEARN_MORE_CLICK, params);
+  public reportSloOverviewFlyoutStatusFiltered = (
+    params: SloOverviewFlyoutStatusFilteredParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED, params);
+  };
+
+  public reportSloInfoShown = (): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_INFO_SHOWN, {});
   };
 }

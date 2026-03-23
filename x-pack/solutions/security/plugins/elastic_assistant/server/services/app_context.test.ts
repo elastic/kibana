@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { appContextService, ElasticAssistantAppContext } from './app_context';
+import type { ElasticAssistantAppContext } from './app_context';
+import { appContextService } from './app_context';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AssistantTool } from '../types';
-import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type { AssistantTool } from '../types';
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 // Mock Logger
 const mockLogger = loggerMock.create();
@@ -35,6 +37,14 @@ describe('AppContextService', () => {
     isSupported: jest.fn(),
     getTool: jest.fn(),
   };
+  const toolThree: AssistantTool = {
+    id: 'tool-three',
+    name: 'ToolThree',
+    description: 'Description 3',
+    sourceRegister: 'Source3',
+    isSupported: jest.fn(),
+    getTool: jest.fn(),
+  };
 
   beforeEach(() => {
     appContextService.stop();
@@ -54,7 +64,6 @@ describe('AppContextService', () => {
       appContextService.start(mockAppContext);
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
-        defendInsights: true,
       });
       appContextService.stop();
 
@@ -99,13 +108,23 @@ describe('AppContextService', () => {
     });
   });
 
+  it('get tools for multiple plugins', () => {
+    const pluginName1 = 'pluginName1';
+    const pluginName2 = 'pluginName2';
+
+    appContextService.start(mockAppContext);
+    appContextService.registerTools(pluginName2, [toolOne, toolThree]);
+    appContextService.registerTools(pluginName1, [toolOne]);
+
+    expect(appContextService.getRegisteredTools([pluginName1, pluginName2]).length).toEqual(2);
+  });
+
   describe('registering features', () => {
     it('should register and get features for a single plugin', () => {
       const pluginName = 'pluginName';
       const features: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
-        defendInsights: true,
       };
 
       appContextService.start(mockAppContext);
@@ -121,13 +140,11 @@ describe('AppContextService', () => {
       const featuresOne: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
-        defendInsights: true,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
-        defendInsights: false,
       };
 
       appContextService.start(mockAppContext);
@@ -143,12 +160,10 @@ describe('AppContextService', () => {
       const featuresOne: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
-        defendInsights: true,
       };
       const featuresTwo: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
-        defendInsights: false,
       };
 
       appContextService.start(mockAppContext);
@@ -170,7 +185,6 @@ describe('AppContextService', () => {
       const pluginName = 'pluginName';
       const featuresSubset: Partial<AssistantFeatures> = {
         assistantModelEvaluation: true,
-        defendInsights: true,
       };
 
       appContextService.start(mockAppContext);

@@ -17,7 +17,7 @@ export {
   startExternalEdrServerEmulator,
   type StartExternalEdrServerEmulatorOptions,
 } from './external_edr_server_emulator';
-export * from './external_edr_server_emulator.types';
+export type * from './external_edr_server_emulator.types';
 
 export const cli = () => {
   run(

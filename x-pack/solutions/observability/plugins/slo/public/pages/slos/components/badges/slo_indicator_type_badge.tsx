@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
+  ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
-import { euiLightVars } from '@kbn/ui-theme';
-import React, { MouseEvent } from 'react';
+import { SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export interface Props {
-  color?: EuiBadgeProps['color'];
-  slo: SLOWithSummaryResponse | SLODefinitionResponse;
+  slo: SLOWithSummaryResponse;
 }
 
-export function SloIndicatorTypeBadge({ slo, color }: Props) {
+export function SloIndicatorTypeBadge({ slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -48,7 +47,6 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
     <>
       <EuiFlexItem grow={false}>
         <EuiBadge
-          color={color ?? euiLightVars.euiColorDisabled}
           onClick={(_) => {
             if (isSloPage) {
               onStateChange({
@@ -69,8 +67,9 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
       </EuiFlexItem>
       {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
         apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) &&
-        slo.indicator.params.service !== '' && (
-          <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
+        slo.indicator.params.service !== '' &&
+        slo.indicator.params.service !== ALL_VALUE && (
+          <EuiFlexItem grow={false} css={{ maxWidth: 100 }}>
             <EuiToolTip
               position="top"
               content={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
@@ -79,7 +78,6 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
               })}
             >
               <EuiBadge
-                color={color ?? euiLightVars.euiColorDisabled}
                 onClick={handleNavigateToApm}
                 onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation(); // stops propagation of metric onElementClick

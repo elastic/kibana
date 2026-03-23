@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   const { dashboardControls, discover, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
@@ -90,7 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
-          width: 'medium',
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
@@ -114,14 +114,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
-        await dashboard.clickCancelOutOfEditMode();
-        const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
-        expect(valueNow).to.equal(valueBefore);
+        await dashboard.clickDiscardChanges();
+
+        // valueNow maybe grabbed before timeslider has reset
+        await retry.try(async () => {
+          const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
+          expect(valueNow).to.equal(valueBefore);
+        });
       });
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
-        await dashboard.switchToEditMode();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.loadDashboardInEditMode('test time slider control');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('deletes an existing control', async () => {

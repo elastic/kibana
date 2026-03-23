@@ -43,3 +43,5 @@ properties:
     type: array
     items:
       type: string
+  artifacts:
+    $ref: "artifacts.yaml"

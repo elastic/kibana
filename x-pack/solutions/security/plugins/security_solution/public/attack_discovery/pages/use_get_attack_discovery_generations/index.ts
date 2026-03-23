@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { API_VERSIONS, ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useRef } from 'react';
 import type {
   GetAttackDiscoveryGenerationsRequestQuery,
   GetAttackDiscoveryGenerationsResponse,
 } from '@kbn/elastic-assistant-common';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useCallback, useRef } from 'react';
 
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 interface Props extends GetAttackDiscoveryGenerationsRequestQuery {
   http: HttpSetup;
@@ -46,7 +45,7 @@ export const useGetAttackDiscoveryGenerations = ({
   start,
   refetchOnWindowFocus = false,
 }: Props): UseGetAttackDiscoveryGenerations => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const { addError } = useAppToasts();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -57,7 +56,7 @@ export const useGetAttackDiscoveryGenerations = ({
   const queryFn = useCallback(async () => {
     return http.fetch<GetAttackDiscoveryGenerationsResponse>(ATTACK_DISCOVERY_GENERATIONS, {
       method: 'GET',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       query: {
         end,
         size,
@@ -71,7 +70,12 @@ export const useGetAttackDiscoveryGenerations = ({
     ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, size, start],
     queryFn,
     {
-      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
+      enabled: isAssistantEnabled,
+      onError: (e: ServerError) => {
+        addError(e.body && e.body.message ? new Error(e.body.message) : e, {
+          title: i18n.ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS,
+        });
+      },
       refetchOnWindowFocus,
     }
   );

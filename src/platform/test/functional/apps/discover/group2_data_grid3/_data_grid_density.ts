@@ -8,14 +8,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const testSubjects = getService('testSubjects');
   const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const security = getService('security');
@@ -87,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Change density
       await dataGrid.clickGridSettings();
       await dataGrid.changeDensityValue('Normal');
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await discover.ensureHasUnsavedChangesIndicator();
 
       // Revert change
       await discover.revertUnsavedChanges();

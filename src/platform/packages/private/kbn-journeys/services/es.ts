@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
-import { createEsClientForFtrConfig, ProvidedType } from '@kbn/test';
-import { FtrProviderContext } from './ftr_context_provider';
+import type { ProvidedType } from '@kbn/test';
+import { createEsClientForFtrConfig } from '@kbn/test';
+import type { FtrProviderContext } from './ftr_context_provider';
 
 export function EsProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');

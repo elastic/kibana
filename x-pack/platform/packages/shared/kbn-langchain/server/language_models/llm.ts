@@ -6,16 +6,16 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
-import { TraceOptions } from './types';
+import type { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 

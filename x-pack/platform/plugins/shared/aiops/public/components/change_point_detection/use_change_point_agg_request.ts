@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -42,7 +42,8 @@ interface RequestOptions {
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
   query: QueryDslQueryContainer,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  projectRouting?: string
 ): SearchRequest {
   const timeSeriesAgg = {
     over_time: {
@@ -69,9 +70,11 @@ function getChangePointDetectionRequestBody(
           select: {
             bucket_selector: {
               buckets_path: { p_value: 'change_point_request.p_value' },
-              script: 'params.p_value < 1',
+              script: 'params.p_value <= 1',
             },
           },
+          // Note: This sorting only applies to buckets within a single request,
+          // not across all requests of the composite aggregation.
           sort: {
             bucket_sort: {
               sort: [{ 'change_point_request.p_value': { order: 'asc' } }],
@@ -107,6 +110,7 @@ function getChangePointDetectionRequestBody(
     size: 0,
     ...(query ? { query } : {}),
     ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
     aggregations,
   } as SearchRequest;
 }
@@ -121,6 +125,7 @@ export function useChangePointResults(
     notifications: { toasts },
     usageCollection,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
@@ -128,6 +133,9 @@ export function useChangePointResults(
   const { refreshTimestamp: refresh } = useReload();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
+  // Used to display a sample metric if no change points are found
+  const sampleChangePointResponse = useRef<ChangePointAnnotation | null>(null);
+
   /**
    * null also means the fetching has been complete
    */
@@ -146,12 +154,15 @@ export function useChangePointResults(
   const reset = useCallback(() => {
     cancelRequest();
     setResults([]);
+    sampleChangePointResponse.current = null;
   }, [cancelRequest]);
 
   const fetchResults = useCallback(
     async (pageNumber: number = 1, afterKey?: string) => {
       try {
+        // For split field with no cardinality, return empty results immediately
         if (!isSingleMetric && !totalAggPages) {
+          setResults([]);
           setProgress(null);
           return;
         }
@@ -183,7 +194,8 @@ export function useChangePointResults(
             afterKey,
           },
           query,
-          runtimeMappings
+          runtimeMappings,
+          cps?.cpsManager?.getDefaultProjectRouting()
         );
 
         if (usageCollection?.reportUiCounter && embeddingOrigin) {
@@ -223,43 +235,68 @@ export function useChangePointResults(
             : result.rawResponse.aggregations.groupings.buckets
         ) as ChangePointAggResponse['aggregations']['groupings']['buckets'];
 
+        const hasNoBuckets = isSingleMetric
+          ? !buckets || buckets[0].over_time.buckets.length === 0
+          : !buckets || buckets.length === 0;
+
+        // If there are no buckets on first page, it means there is no data for the selected time range
+        if (pageNumber === 1 && hasNoBuckets) {
+          setResults([]);
+          setProgress(null);
+          return;
+        }
+
         setProgress(
           isFetchCompleted ? null : Math.min(Math.round((pageNumber / totalAggPages) * 100), 100)
         );
 
-        let groups = buckets
-          .map((v) => {
-            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-            const timeAsString = v.change_point_request.bucket?.key;
-            const rawPValue = v.change_point_request.type[changePointType].p_value;
+        const currentRawChangePoints = buckets.map((v) => {
+          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+          const timeAsString = v.change_point_request.bucket?.key;
+          const rawPValue = v.change_point_request.type[changePointType].p_value;
 
-            return {
-              ...(isSingleMetric
-                ? {}
-                : {
-                    group: {
-                      name: fieldConfig.splitField,
-                      value: v.key.splitFieldTerm,
-                    },
-                  }),
-              type: changePointType,
-              p_value: rawPValue,
-              timestamp: timeAsString,
-              label: changePointType,
-              reason: v.change_point_request.type[changePointType].reason,
-              id: isSingleMetric
-                ? 'single_metric'
-                : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
-            } as ChangePointAnnotation;
-          })
-          .filter((v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type));
+          return {
+            ...(isSingleMetric
+              ? {}
+              : {
+                  group: {
+                    name: fieldConfig.splitField,
+                    value: v.key.splitFieldTerm,
+                  },
+                }),
+            type: changePointType,
+            p_value: rawPValue,
+            timestamp: timeAsString,
+            label: changePointType,
+            reason: v.change_point_request.type[changePointType].reason,
+            id: isSingleMetric
+              ? 'single_metric'
+              : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
+          } as ChangePointAnnotation;
+        });
+
+        // Store first sample change point from first request
+        if (
+          pageNumber === 1 &&
+          !sampleChangePointResponse.current &&
+          currentRawChangePoints.length > 0
+        ) {
+          sampleChangePointResponse.current = currentRawChangePoints[0];
+        }
+
+        // Filter for real change points
+        let currentValidChangePoints = currentRawChangePoints.filter(
+          (v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type)
+        );
 
         if (Array.isArray(requestParams.changePointType)) {
-          groups = groups.filter((v) => requestParams.changePointType!.includes(v.type));
+          currentValidChangePoints = currentValidChangePoints.filter((v) =>
+            requestParams.changePointType!.includes(v.type)
+          );
         }
 
         setResults((prev) => {
-          return (prev ?? []).concat(groups);
+          return (prev ?? []).concat(currentValidChangePoints);
         });
 
         if (
@@ -287,9 +324,10 @@ export function useChangePointResults(
       }
     },
     [
-      embeddingOrigin,
       isSingleMetric,
       totalAggPages,
+      metricFieldOptions,
+      splitFieldsOptions,
       dataView,
       fieldConfig.fn,
       fieldConfig.metricField,
@@ -297,11 +335,11 @@ export function useChangePointResults(
       requestParams.interval,
       requestParams.changePointType,
       query,
-      metricFieldOptions,
-      splitFieldsOptions,
+      cps?.cpsManager,
+      usageCollection,
+      embeddingOrigin,
       runRequest,
       toasts,
-      usageCollection,
     ]
   );
 
@@ -336,7 +374,23 @@ export function useChangePointResults(
     ]
   );
 
-  return { results, isLoading: progress !== null, reset, progress };
+  // Determine if we need to use the sample change point response
+  const finalResults = useMemo(() => {
+    if (results.length > 0) return results;
+    if (sampleChangePointResponse.current) return [sampleChangePointResponse.current];
+    return [];
+  }, [results]);
+
+  // Flag to indicate if we're using sample data
+  const isUsingSampleData = results.length === 0 && sampleChangePointResponse.current !== null;
+
+  return {
+    results: finalResults,
+    isLoading: progress !== null,
+    isUsingSampleData,
+    reset,
+    progress,
+  };
 }
 
 /**

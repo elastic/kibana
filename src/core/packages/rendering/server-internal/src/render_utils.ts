@@ -42,11 +42,7 @@ export const getScriptPaths = ({
   themeName: ThemeName;
 }) => {
   if (darkMode === 'system') {
-    return [
-      `${baseHref}/ui/bootstrap_system_theme_${
-        themeName === 'borealis' ? 'borealis' : 'amsterdam'
-      }.js`,
-    ];
+    return [`${baseHref}/ui/bootstrap_system_theme_borealis.js`];
   } else {
     return [];
   }
@@ -69,8 +65,14 @@ export const getThemeStylesheetPaths = ({
 }) => {
   return [
     ...(darkMode
-      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
-      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
+      ? [
+          `${baseHref}/ui/legacy_dark_theme.min.css`,
+          `${baseHref}/ui/charts/theme_only_dark.css`, // Elastic Charts' CSS (dark theme)
+        ]
+      : [
+          `${baseHref}/ui/legacy_light_theme.min.css`,
+          `${baseHref}/ui/charts/theme_only_light.css`, // Elastic Charts' CSS (light theme)
+        ]),
   ];
 };
 

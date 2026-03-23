@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { createAsyncAction } from '../utils/actions';
 
 export interface EsActionPayload {

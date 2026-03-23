@@ -25,10 +25,12 @@
       "usageCollection",
       "fleet",
       "cloud",
+      "cloudConnect",
       "ml",
       "streams",
       "console",
-      "licensing"
+      "licensing",
+      "reindexService"
     ],
     "requiredBundles": [
       "kibanaReact",

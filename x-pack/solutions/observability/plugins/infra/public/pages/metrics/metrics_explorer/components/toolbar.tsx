@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { UnifiedSearchBar } from '../../../../components/shared/unified_search_bar';
 import type {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -18,7 +20,6 @@ import type {
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { MetricsExplorerKueryBar } from './kuery_bar';
 import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
@@ -33,7 +34,7 @@ interface Props {
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
   onGroupByChange: (groupBy: string | null | string[]) => void;
-  onFilterQuerySubmit: (query: string) => void;
+  onFilterQuerySubmit: (payload: { query?: Query }) => void;
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
@@ -95,9 +96,9 @@ export const MetricsExplorerToolbar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup wrap alignItems="center">
           <EuiFlexItem>
-            <MetricsExplorerKueryBar onSubmit={onFilterQuerySubmit} value={options.filterQuery} />
+            <UnifiedSearchBar onQuerySubmit={onFilterQuerySubmit} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <MetricsExplorerChartOptionsComponent
@@ -105,10 +106,11 @@ export const MetricsExplorerToolbar = ({
               chartOptions={chartOptions}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
+          <EuiFlexItem grow={false} style={{ marginRight: 5, maxWidth: '100%' }}>
             <EuiSuperDatePicker
               start={timeRange.from}
               end={timeRange.to}
+              compressed
               onTimeChange={({ start, end }) => onTimeChange(start, end)}
               onRefresh={onRefresh}
               commonlyUsedRanges={commonlyUsedRanges}

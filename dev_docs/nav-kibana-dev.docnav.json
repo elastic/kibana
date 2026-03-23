@@ -47,6 +47,12 @@
           "id": "kibStyleGuide"
         },
         {
+          "id": "kibHttpApiGuidelines"
+        },
+        {
+          "id": "kibHttpApiTfGuidelines"
+        },
+        {
           "id": "ktRFCProcess"
         },
         {
@@ -162,6 +168,12 @@
           "id": "kibDevTutorialSavedObject"
         },
         {
+          "id": "kibDevTutorialSavedObjectsSearch"
+        },
+        {
+          "id": "kibDevTutorialElasticsearchClient"
+        },
+        {
           "id": "kibDevTutorialVersioningHTTPAPIs",
           "label": "Versioning HTTP APIs"
         },
@@ -234,9 +246,6 @@
         },
         {
           "id": "ktCustomServerlessImage"
-        },
-        {
-          "id": "kibDevTutorialsSolutionNavigation"
         }
       ]
     },
@@ -253,10 +262,6 @@
       "label": "Shared UX",
       "pageId": "kibDevDocsSharedUxOverview",
       "items": [
-        {
-          "label": "Solution Navigation (stateful solution nav and serverless navigation",
-          "id": "kibDevTutorialsSolutionNavigation"
-        },
         {
           "id": "kibDevTutorialFileService",
           "label": "File service"
@@ -287,8 +292,32 @@
           "label": "Core Rendering Service"
         },
         {
+          "id": "kibDevDocsChromeLayout",
+          "label": "Chrome Layout"
+        },
+        {
+          "id": "kibDevDocsChromeNavigation",
+          "label": "Chrome Navigation"
+        },
+        {
           "id": "kibDevDocsChromeRecentlyAccessed",
           "label": "Recently Viewed"
+        },
+        {
+          "id": "kibDevDocsFeedbackSnippet",
+          "label": "Feedback Snippet"
+        },
+        {
+          "id": "kibDevDocsChromeAppMenu",
+          "label": "App Menu"
+        },
+        {
+          "id": "kibDevDocsChromeSidebar",
+          "label": "Chrome Sidebar"
+        },
+        {
+          "id": "kibDevDocsFeedbackPlugin",
+          "label": "Feedback Plugin (One Feedback)"
         }
       ]
     },
@@ -629,9 +658,6 @@
         },
         {
           "id": "kibTelemetryPluginApi"
-        },
-        {
-          "id": "kibUiActionsEnhancedPluginApi"
         },
         {
           "id": "kibUiActionsPluginApi"

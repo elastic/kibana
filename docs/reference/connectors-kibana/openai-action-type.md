@@ -9,7 +9,11 @@ applies_to:
 
 # OpenAI connector and action [openai-action-type]
 
-The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider, either OpenAI or Azure OpenAI.
+The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider: 
+
+* OpenAI
+* Azure OpenAI
+* {applies_to}`stack: ga 9.1` Other (OpenAI-compatible service).
 
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
@@ -30,20 +34,40 @@ To validate that your connectivity problems are caused by using a proxy, you can
 
 OpenAI connectors have the following configuration properties:
 
-Name
-:   The name of the connector.
+| Field            | Required for         | Description                                                                                 |
+|------------------|---------------------|---------------------------------------------------------------------------------------------|
+| Name             | All                 | The name of the connector.                                                                  |
+| OpenAI provider  | All                 | The API provider: `OpenAI`, `Azure OpenAI`, or {applies_to}`stack: ga 9.1` `Other` (OpenAI-compatible service).         |
+| URL              | All                 | The API endpoint URL for the selected provider.                                             |
+| Default model    | OpenAI/Other        | The default model for requests. **Required** for `Other`, optional for `OpenAI`.            |
+| Headers          | Optional            | Custom HTTP headers to include in requests.                                                 |
+| Verification mode| Other (PKI only)    | SSL verification mode for PKI authentication. Default: `full`.                              |
+| API key          | OpenAI/Azure/Other  | The API key for authentication. **Required** for `OpenAI` and `Azure OpenAI`. For `Other`, required unless PKI authentication is used. |
+| PKI fields       | Other (PKI only)    | See below. Only available for `Other` provider.                                             |
 
-OpenAI provider
-:   The OpenAI API provider, either OpenAI or Azure OpenAI.
+#### PKI Authentication (Other provider only)
+```{applies_to}
+stack: ga 9.1
+serverless: ga
+```
 
-URL
-:   The OpenAI request URL.
+When using the `Other` provider (for example, to [connect a local LLM](#connect-a-local-llm)), you can use PKI (certificate-based) authentication. With PKI, you can also optionally include an API key if your OpenAI-compatible service supports or requires one. The following fields are supported for PKI:
 
-Default model
-:   (optional) The default model to use for requests. This option is available only when the provider is `OpenAI`.
+- **Certificate data** (`certificateData`): PEM-encoded certificate content, base64-encoded. (**Required for PKI**)
+- **Private key data** (`privateKeyData`): PEM-encoded private key content, base64-encoded. (**Required for PKI**)
+- **CA data** (`caData`, optional): PEM-encoded CA certificate content, base64-encoded.
+- **API key** (`apiKey`, optional): The API key for authentication, if required by your service.
+- **Verification mode** (`verificationMode`): SSL verification mode for PKI authentication. Options:
+  - `full` (default): Verify server's certificate and hostname
+  - `certificate`: Verify only the server's certificate
+  - `none`: Skip verification (not recommended for production)
 
-API key
-:   The OpenAI or Azure OpenAI API key for authentication.
+**Note:**
+- All PKI fields must be PEM-encoded and base64-encoded when sent via API.
+- If any PKI field is provided, both `certificateData` and `privateKeyData` are required and must be valid PEM.
+- With PKI, you may also include an API key if your provider supports or requires it.
+- If PKI is not used, `apiKey` is required for the `Other` provider.
+- For `OpenAI` and `Azure OpenAI`, only `apiKey` is supported for authentication.
 
 ## Test connectors [gen-ai-action-configuration]
 
@@ -82,3 +106,57 @@ Once you've created a OpenAI connector, you can monitor its token usage using th
 ::::{note}
 To view the dashboard, you need at least `read` and `view_index_metadata` privileges for the `.kibana-event-log-*` index and the `Read` feature privilege for {{kib}}. You can set up a role with these minimum privileges and assign it to non-admin users who need to view this dashboard.
 ::::
+
+## Connect a local LLM
+
+You can connect a locally hosted LLM to Elastic using the OpenAI connector. Your local LLM must be compatible with the OpenAI API format.
+
+When selecting a model:
+- Download models from trusted sources only
+- Consider parameter size, context window, and quantization format based on your requirements
+- Prefer "instruct" variants when available, as they are typically better tuned for following instructions
+
+### Prerequisites
+
+- A local LLM server running with an OpenAI-compatible API endpoint
+- For Elastic Cloud: A reverse proxy (such as `nginx`) to authenticate requests and forward them to your local LLM endpoint
+- For self-managed deployments on the same host: Direct localhost access to your LLM server
+- Authentication: Either an API key or [PKI authentication](#pki-authentication-other-provider-only) (certificate-based)
+
+### Configure the connector
+
+:::::{stepper}
+::::{step} Set up your local LLM server
+
+Ensure your local LLM is running and accessible via an OpenAI-compatible API endpoint.
+
+::::
+
+::::{step} Create the OpenAI connector
+
+1. Log in to your Elastic deployment
+2. Find connectors under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)
+3. Select **Create Connector** and select **OpenAI**
+4. Name your connector to help track the model version you're using
+5. Under **Select an OpenAI provider**, select **Other (OpenAI Compatible Service)**
+
+::::
+
+::::{step} Configure connection details
+
+1. Under **URL**, enter:
+   - For Elastic Cloud: Your reverse proxy URL with the `/v1/chat/completions` endpoint
+   - For self-managed on the same host: Your local LLM's API endpoint (for example, `http://localhost:1234/v1/chat/completions`)
+2. Under **Default model**, enter a model name. The connector sends this value to your LLM server in API requests. Use a value your LLM expects, or any placeholder value if your LLM doesn't validate it (for example, `local-model`).
+3. Under **API key** (required unless using [PKI authentication](#pki-authentication-other-provider-only)):
+   - For Elastic Cloud: Enter your reverse proxy authentication token
+   - For self-managed on the same host: Enter your LLM server's API key, or any placeholder value if your LLM server doesn't validate authentication
+4. Select **Save**
+
+::::
+
+:::::
+
+### Example
+
+For a concrete example, refer to [Connect to your own local LLM](docs-content://solutions/security/ai/connect-to-own-local-llm.md) in the Elastic Security solution documentation.

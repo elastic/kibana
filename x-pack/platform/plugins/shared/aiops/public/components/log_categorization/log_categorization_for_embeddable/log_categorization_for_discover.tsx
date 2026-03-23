@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { getCategorizationDataViewField } from '@kbn/aiops-utils';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -42,7 +43,7 @@ import { useValidateFieldRequest } from '../use_validate_category_field';
 import { FieldValidationCallout } from '../category_validation_callout';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
-import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
+import { createAdditionalConfigHash, createDocumentStatsHash } from '../utils';
 import { DiscoverTabs } from './discover_tabs';
 import { useRandomSamplerStorage } from '../sampling_menu';
 import { useActions } from '../category_table/use_actions';
@@ -65,6 +66,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     },
     uiSettings,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
   const tablePadding = useEuiPaddingSize('xs');
 
@@ -126,7 +128,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
       setCurrentDocumentStatsHash(null);
       setSelectedField(null);
       setLoading(null);
-      const { dataViewFields, messageField } = getMessageField(dataView);
+      const { dataViewFields, messageField } = getCategorizationDataViewField(dataView);
       setFields(dataViewFields);
       setSelectedField(messageField);
     },
@@ -274,6 +276,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
           timeRange,
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           {
             [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
@@ -285,6 +288,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
           { to: timeRange.to, from: timeRange.from },
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           intervalMs,
           timeRange.useSubAgg ? additionalFilter : undefined
         ),
@@ -344,6 +348,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     getMinimumTimeRange,
     searchQuery,
     runValidateFieldRequest,
+    cps?.cpsManager,
     embeddingOrigin,
     runCategorizeRequest,
     intervalMs,

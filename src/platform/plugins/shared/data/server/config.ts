@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
 export const searchSessionsConfigSchema = schema.object({
   /**
    * Turns the feature on \ off (incl. removing indicator and management screens)
    */
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 
   /**
    * notTouchedTimeout controls how long user can save a session after all searches completed.

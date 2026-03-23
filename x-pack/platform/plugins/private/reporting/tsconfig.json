@@ -1,14 +1,14 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/actions-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/screenshot-mode-plugin",
@@ -48,13 +48,31 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
     "@kbn/reporting-csv-share-panel",
-    "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
     "@kbn/core-http-server-utils",
+    "@kbn/core-saved-objects-server",
+    "@kbn/rrule",
     "@kbn/notifications-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/logging-mocks",
+    "@kbn/shared-ux-router",
+    "@kbn/controls-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-capabilities-common",
+    "@kbn/core-ui-settings-common",
+    "@kbn/licensing-types",
+    "@kbn/react-query",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerting-types",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/zod",
+    "@kbn/deeplinks-analytics"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

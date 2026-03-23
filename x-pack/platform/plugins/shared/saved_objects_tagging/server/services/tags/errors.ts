@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TagValidation } from '../../../common';
+import type { TagValidation } from '../../../common';
 
 /**
  * Error returned from {@link TagsClient#create} or {@link TagsClient#update} when tag

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,7 +22,7 @@ export const ReservedRoleBadge = (props: Props) => {
 
   if (isRoleReserved(role)) {
     return (
-      <EuiToolTip
+      <EuiIconTip
         data-test-subj="reservedRoleBadgeTooltip"
         content={
           <FormattedMessage
@@ -30,9 +30,11 @@ export const ReservedRoleBadge = (props: Props) => {
             defaultMessage="Reserved roles are built-in and cannot be removed or modified."
           />
         }
-      >
-        <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
-      </EuiToolTip>
+        iconProps={{
+          style: { verticalAlign: 'super' },
+        }}
+        type="lock"
+      />
     );
   }
   return null;

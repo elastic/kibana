@@ -18,7 +18,7 @@ const UiSharedDepsNpm = require('.');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 /** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
@@ -33,7 +33,6 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'whatwg-fetch',
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
@@ -61,13 +60,13 @@ module.exports = (_, argv) => {
         // modules from npm
         '@elastic/apm-rum-core',
         '@elastic/charts',
+        '@elastic/esql',
+        '@elastic/esql/types',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',
         '@elastic/eui/optimize/es/services/theme/warning',
-        '@elastic/eui/dist/eui_theme_amsterdam_light.json',
-        '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
-        '@elastic/eui/dist/eui_theme_borealis_light.json',
-        '@elastic/eui/dist/eui_theme_borealis_dark.json',
+        '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json',
+        '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json',
         '@elastic/eui-theme-borealis',
         '@elastic/numeral',
         '@emotion/cache',
@@ -174,6 +173,15 @@ module.exports = (_, argv) => {
       hints: false,
     },
 
+    // make Webpack listen to `node_modules/@elastic/eui*` changes
+    watchOptions: {
+      ignored: /[\\/]node_modules[\\/](?!@elastic[\\/]eui)/,
+    },
+
+    // disabling cache doesn't impact performance for regular Kibana users
+    // but it's needed for when running the watcher to watch for changes in `node_modules/@elastic/eui*`
+    cache: false,
+
     plugins: [
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({
@@ -191,6 +199,11 @@ module.exports = (_, argv) => {
         entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
+      }),
+      // adds a useful comment at the top of the DLL for debugging
+      new webpack.BannerPlugin({
+        banner: `/* Build: ${new Date().toLocaleString()} */`,
+        raw: true,
       }),
     ],
   };

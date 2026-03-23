@@ -6,8 +6,8 @@
  */
 
 import { some } from 'lodash';
-import { API_VERSIONS } from '../../common/constants';
-import type { UsePacksResponse } from '../../public/packs/use_packs';
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
+import type { UsePacksResponse } from '@kbn/osquery-plugin/public/packs/use_packs';
 import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
 import { cleanupPack } from './api_fixtures';

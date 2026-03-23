@@ -13,12 +13,12 @@ xpack.ruleRegistry.write.enabled: true
 
 When this is set to `true`, your alerts should show on the alerts page.
 
-
 ## Shared navigation
 
 The Observability plugin maintains a navigation registry for Observability solutions, and exposes a shared page template component. Please refer to the docs in [the component directory](public/components/shared/page_template) for more information on registering your solution's navigation structure, and rendering the navigation via the shared component.
 
 ## Exploratory view component
+
 A shared component for visualizing observability data types via lens embeddable. [For further details.](./public/components/shared/exploratory_view/README.md)
 
 ## Unit testing
@@ -58,25 +58,25 @@ This requires separate test servers and test runners.
 
 ```
 # Start server
-node scripts/functional_tests_server --config x-pack/test/observability_api_integration/basic/config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config x-pack/test/observability_api_integration/basic/config.ts
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
 ```
 
-The API tests for "basic" are located in `x-pack/test/observability_api_integration/basic/tests`.
+The API tests for "basic" are located in `x-pack/solutions/observability/test/observability_api_integration/basic/tests`.
 
 ### Trial
 
 ```
 # Start server
-node scripts/functional_tests_server --config x-pack/test/observability_api_integration/trial/config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config x-pack/test/observability_api_integration/trial/config.ts
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
 ```
 
-The API tests for "trial" are located in `x-pack/test/observability_api_integration/trial/tests`.
+The API tests for "trial" are located in `x-pack/solutions/observability/test/observability_api_integration/trial/tests`.
 
 ### API test tips
 

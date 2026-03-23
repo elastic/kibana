@@ -43,10 +43,7 @@ const RuleUpdateCalloutComponent = ({
       return actionButton;
     }
     return (
-      <EuiLink
-        onClick={() => openRulePreview(rule.rule_id)}
-        data-test-subj="ruleDetailsUpdateRuleCalloutButton"
-      >
+      <EuiLink onClick={() => openRulePreview(rule.rule_id)}>
         {i18n.HAS_RULE_UPDATE_CALLOUT_BUTTON}
       </EuiLink>
     );
@@ -58,7 +55,12 @@ const RuleUpdateCalloutComponent = ({
 
   return (
     <>
-      <EuiCallOut title={i18n.HAS_RULE_UPDATE_CALLOUT_TITLE} color="primary" iconType="gear">
+      <EuiCallOut
+        title={i18n.HAS_RULE_UPDATE_CALLOUT_TITLE}
+        color="primary"
+        iconType="gear"
+        data-test-subj="single-prebuilt-rule-upgrade-callout"
+      >
         <p>{message}</p>
         {updateCallToActionButton}
       </EuiCallOut>

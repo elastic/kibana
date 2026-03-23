@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -127,7 +128,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
       data-test-subj="autoFollowPatternActionMenuButton"
       aria-label={actionsAriaLabel}
       onClick={() => setShowPopover(!showPopover)}
-      iconType={arrowDirection === 'up' ? 'arrowUp' : 'arrowDown'}
+      iconType={arrowDirection === 'up' ? 'chevronSingleUp' : 'chevronSingleDown'}
       iconSide="right"
       fill
     >

@@ -7,21 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GrokCollection, GrokPattern } from './grok_collection_and_pattern';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { GrokCollection } from './grok_collection_and_pattern';
+import { GrokPattern } from './grok_collection_and_pattern';
 
 export class DraftGrokExpression {
-  private expression: string | undefined = undefined;
+  private expression: string = '';
   private grokPattern: GrokPattern;
+  private expression$: BehaviorSubject<string>;
+  private customPatternsSubscription: Subscription;
 
-  constructor(collection: GrokCollection, expression?: string) {
+  constructor(collection: GrokCollection, initialExpression?: string) {
+    const expression = initialExpression ?? '';
+    this.expression = expression;
     this.grokPattern = new GrokPattern(expression || '', 'DRAFT_GROK_EXPRESSION', collection);
     this.grokPattern.resolvePattern();
+    this.expression$ = new BehaviorSubject<string>(expression);
+    this.customPatternsSubscription = collection.customPatternsChanged$.subscribe(() => {
+      this.grokPattern.resolvePattern(true);
+      this.expression$.next(this.expression);
+    });
   }
 
   public updateExpression = (expression: string) => {
     this.expression = expression;
     this.grokPattern.updatePattern(this.expression);
     this.grokPattern.resolvePattern(true);
+    this.expression$.next(this.expression);
   };
 
   public parse = (samples: string[]) => {
@@ -38,5 +51,17 @@ export class DraftGrokExpression {
 
   public getFields = () => {
     return this.grokPattern.getFields();
+  };
+
+  public getExpression = () => {
+    return this.expression;
+  };
+
+  public getExpression$ = () => {
+    return this.expression$;
+  };
+
+  public destroy = () => {
+    this.customPatternsSubscription.unsubscribe();
   };
 }

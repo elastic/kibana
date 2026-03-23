@@ -565,6 +565,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -574,14 +575,15 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
+        'getGapAutoFillScheduler',
+        'findGapAutoFillSchedulerLogs',
       ],
       ...[
         'create',
         'delete',
         'update',
         'updateApiKey',
-        'enable',
-        'disable',
         'muteAll',
         'unmuteAll',
         'muteAlert',
@@ -589,13 +591,8 @@ describe('features', () => {
         'snooze',
         'bulkEdit',
         'bulkDelete',
-        'bulkEnable',
-        'bulkDisable',
         'unsnooze',
         'runSoon',
-        'scheduleBackfill',
-        'deleteBackfill',
-        'fillGaps',
       ],
     ];
 
@@ -741,6 +738,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -750,14 +748,15 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
+        'getGapAutoFillScheduler',
+        'findGapAutoFillSchedulerLogs',
       ],
       ...[
         'create',
         'delete',
         'update',
         'updateApiKey',
-        'enable',
-        'disable',
         'muteAll',
         'unmuteAll',
         'muteAlert',
@@ -765,13 +764,8 @@ describe('features', () => {
         'snooze',
         'bulkEdit',
         'bulkDelete',
-        'bulkEnable',
-        'bulkDisable',
         'unsnooze',
         'runSoon',
-        'scheduleBackfill',
-        'deleteBackfill',
-        'fillGaps',
       ],
     ];
 

@@ -24,6 +24,8 @@
           "() => void"
         ],
         "path": "packages/kbn-plugin-check/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

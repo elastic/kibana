@@ -10,8 +10,9 @@
 import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, EcsVersion } from '@elastic/ecs';
-import { LogRecord, Layout } from '@kbn/logging';
+import type { Ecs } from '@elastic/ecs';
+import { EcsVersion } from '@elastic/ecs';
+import type { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 
@@ -26,18 +27,6 @@ const jsonLayoutSchema = object({
 export class JsonLayout implements Layout {
   public static configSchema = jsonLayoutSchema;
 
-  private static errorToSerializableObject(error: Error | undefined) {
-    if (error === undefined) {
-      return error;
-    }
-
-    return {
-      message: error.message,
-      type: error.name,
-      stack_trace: error.stack,
-    };
-  }
-
   public format(record: LogRecord): string {
     const spanId = record.meta?.span?.id ?? record.spanId;
     const traceId = record.meta?.trace?.id ?? record.traceId;
@@ -47,7 +36,7 @@ export class JsonLayout implements Layout {
       ecs: { version: EcsVersion },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       message: record.message,
-      error: JsonLayout.errorToSerializableObject(record.error),
+      error: errorToSerializableObject(record.error),
       log: {
         level: record.level.id.toUpperCase(),
         logger: record.context,
@@ -62,12 +51,47 @@ export class JsonLayout implements Layout {
     };
 
     let output = log;
-    if (record.meta) {
-      // @ts-expect-error toJSON not defined on `LogMeta`, but some structured meta can have it defined
-      const serializedMeta = record.meta.toJSON ? record.meta.toJSON() : { ...record.meta };
+    if (record.meta != null) {
+      const serializedMeta = metaToSerializableObject(record.meta);
+      if (serializedMeta.error instanceof Error) {
+        serializedMeta.error = errorToSerializableObject(serializedMeta.error);
+      }
       output = merge(serializedMeta, log);
     }
 
     return JSON.stringify(output);
   }
+}
+
+/** Assumes non-nullish meta */
+function metaToSerializableObject(meta: unknown): Record<string, unknown> {
+  if (Array.isArray(meta) || typeof meta !== 'object') {
+    return { error: String(meta) };
+  }
+
+  const metaObject = meta as { toJSON?: () => unknown };
+  const serializedMeta =
+    typeof metaObject.toJSON === 'function' ? metaObject.toJSON() : { ...metaObject };
+
+  if (
+    serializedMeta == null ||
+    typeof serializedMeta !== 'object' ||
+    Array.isArray(serializedMeta)
+  ) {
+    return { error: String(serializedMeta) };
+  }
+
+  return serializedMeta as Record<string, unknown>;
+}
+
+function errorToSerializableObject(error: Error | undefined) {
+  if (error === undefined) {
+    return error;
+  }
+
+  return {
+    message: error.message,
+    type: error.name,
+    stack_trace: error.stack,
+  };
 }

@@ -1,0 +1,2 @@
+dependsOn:
+  - '@kbn/fleet-plugin'

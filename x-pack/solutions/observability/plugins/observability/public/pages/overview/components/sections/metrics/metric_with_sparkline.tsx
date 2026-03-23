@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
-import { NumberOrNull } from '../../../../..';
+import type { NumberOrNull } from '../../../../..';
 import { useChartThemes } from '../../../../../hooks/use_chart_themes';
 
 interface Props {

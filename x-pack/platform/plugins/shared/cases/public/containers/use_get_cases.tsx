@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { casesQueriesKeys, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
 import { useToasts } from '../common/lib/kibana';
@@ -16,6 +16,7 @@ import type { ServerError } from '../types';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../components/app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../utils/permissions';
+import { getIncrementalIdSearchOverrides } from './utils';
 
 export const initialData: CasesFindResponseUI = {
   cases: [],
@@ -45,6 +46,9 @@ export const useGetCases = (
       ? { owner: params.filterOptions.owner }
       : { owner: initialOwner };
 
+  // overrides for incremental_id search
+  const overrides = getIncrementalIdSearchOverrides(params.filterOptions?.search ?? '');
+
   return useQuery(
     casesQueriesKeys.cases(params),
     ({ signal }) => {
@@ -53,6 +57,7 @@ export const useGetCases = (
           ...DEFAULT_FILTER_OPTIONS,
           ...(params.filterOptions ?? {}),
           ...ownerFilter,
+          ...overrides,
         },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,

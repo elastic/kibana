@@ -20,8 +20,65 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { pluck } from 'rxjs';
+import { css } from '@emotion/react';
 
-import './_vis_editor_visualization.scss';
+export const editorVisualizationStyle = ({ euiTheme }) => css`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 100%;
+  height: calc(${euiTheme.size.l} * 10);
+  line-height: normal;
+  background-color: ${euiTheme.colors.emptyShade};
+  overflow: auto;
+`;
+
+export const applyStyle = ({ euiTheme }) => css`
+  padding: ${euiTheme.size.s};
+`;
+
+const dragHandleStyle = ({ euiTheme }) => {
+  // Implementing the kbnResizer mixin with vertical direction
+
+  // Default size calculation (euiSizeM + 2px)
+  const defaultSize = `calc(${euiTheme.size.m} + 2px)`;
+
+  // Implementation for vertical direction
+  return css`
+    position: relative;
+    display: flex;
+    flex: 0 0 ${defaultSize};
+    background-color: ${euiTheme.colors.body};
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    user-select: none;
+
+    height: ${defaultSize};
+    width: 100%;
+
+    &:hover {
+      background-color: ${euiTheme.colors.backgroundBasePrimary};
+    }
+
+    &:focus,
+    &:active {
+      background-color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.emptyShade};
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: ns-resize;
+    }
+  `;
+};
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -146,7 +203,7 @@ class VisEditorVisualizationUI extends Component {
       );
     }
     const applyButton = (
-      <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
+      <EuiFlexGroup className="tvbEditorVisualization__apply" css={applyStyle} alignItems="center">
         <EuiFlexItem grow={true}>
           <EuiSwitch
             id="tsvbAutoApplyInput"
@@ -192,6 +249,7 @@ class VisEditorVisualizationUI extends Component {
         <div
           style={style}
           className="tvbEditorVisualization"
+          css={editorVisualizationStyle}
           data-shared-items-container
           data-title={title}
           data-description={description}
@@ -201,6 +259,7 @@ class VisEditorVisualizationUI extends Component {
           {applyButton}
           <button
             className="tvbEditorVisualization__draghandle"
+            css={dragHandleStyle}
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
             onKeyDown={this.onSizeHandleKeyDown}

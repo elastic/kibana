@@ -15,7 +15,7 @@ import type {
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
-  type FieldsDiff,
+  type ThreeWayFieldsDiff,
   type DiffableAllFields,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
@@ -165,7 +165,7 @@ const NON_UPGRADEABLE_DIFFABLE_FIELDS_SET: Readonly<Set<string>> = new Set(
 );
 
 function calcFieldsState(
-  fieldsDiff: FieldsDiff<Record<string, unknown>>,
+  fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>,
   ruleResolvedConflicts: RuleResolvedConflicts
 ): FieldsUpgradeState {
   const fieldsState: FieldsUpgradeState = {};
@@ -215,7 +215,7 @@ function calcFieldsState(
 }
 
 function getWorstConflictLevelAmongFields(
-  fieldsDiff: FieldsDiff<Record<string, unknown>>
+  fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>
 ): ThreeWayDiffConflict {
   let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
 

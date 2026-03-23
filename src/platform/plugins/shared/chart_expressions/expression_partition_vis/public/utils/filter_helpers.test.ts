@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
   getFilterClickData,
@@ -17,7 +17,7 @@ import {
 } from './filter_helpers';
 import { createMockBucketColumns, createMockVisData, createMockPieParams } from '../mocks';
 import { consolidateMetricColumns } from '../../common/utils';
-import { LayerValue } from '@elastic/charts';
+import type { LayerValue } from '@elastic/charts';
 import { faker } from '@faker-js/faker';
 
 const bucketColumns = createMockBucketColumns();

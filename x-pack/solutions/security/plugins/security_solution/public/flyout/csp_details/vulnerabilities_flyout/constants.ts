@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { FindingVulnerabilityPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
+} from '@kbn/cloud-security-posture';
 
-export const VulnerabilityFindingsPanelKey: FindingVulnerabilityPanelExpandableFlyoutProps['key'] =
+export const VulnerabilityFindingsPanelKey: FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview['id'] =
   'findings-vulnerability-panel';
+
+export const VulnerabilityFindingsPreviewPanelKey: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview['id'] =
+  'findings-vulnerability-panel-preview';

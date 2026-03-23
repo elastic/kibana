@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+/**
+ * This file maintains backward compatibility for the legacy 'logs' stream.
+ * It re-exports all OTel-based definitions from logs_otel_layer.ts.
+ *
+ * The legacy 'logs' stream uses the same OTel structure with normalization,
+ * passthrough namespaces, and ECS aliases as 'logs.otel'.
+ */
 
-export const logsSettings: IndicesIndexSettings = {
-  index: {
-    mode: 'logsdb',
-    codec: 'best_compression',
-    mapping: {
-      total_fields: {
-        ignore_dynamic_beyond_limit: true,
-      },
-      ignore_malformed: true,
-    },
-  },
-};
+export {
+  otelEquivalentLookupMap,
+  NAMESPACE_PRIORITIES,
+  REQUIRED_RESOURCE_ATTRIBUTES_FIELDS,
+  addAliasesForNamespacedFields,
+  // Re-export with legacy names for backward compatibility
+  otelLogsSettings as logsSettings,
+  otelBaseFields as baseFields,
+  otelBaseMappings as baseMappings,
+} from './logs_otel_layer';

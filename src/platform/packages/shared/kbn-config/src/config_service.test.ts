@@ -19,10 +19,12 @@ import {
 import { createRawConfigServiceMock } from './internal_mocks';
 
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
-import { ConfigService, Env, RawPackageInfo } from '..';
+import type { RawPackageInfo } from '..';
+import { ConfigService, Env } from '..';
 
 import { getEnvOptions } from './internal_mocks';
 
@@ -400,7 +402,7 @@ test('throws if reading "enabled" when it is not present in the schema', async (
   await expect(
     async () => await configService.isEnabledAtPath('foo')
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[config validation of [foo].enabled]: definition for this key is missing"`
+    `"[foo]: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file."`
   );
 });
 

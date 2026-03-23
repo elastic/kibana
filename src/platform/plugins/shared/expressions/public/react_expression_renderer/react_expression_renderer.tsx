@@ -11,7 +11,7 @@ import React, { useRef } from 'react';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
-import { ExpressionRenderError } from '../types';
+import type { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
 
@@ -26,6 +26,7 @@ export interface ReactExpressionRendererProps
     error?: ExpressionRenderError | null
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
+  paddingTop?: boolean;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -35,6 +36,7 @@ export function ReactExpressionRenderer({
   className,
   dataAttrs,
   padding,
+  paddingTop = true,
   renderError,
   abortController,
   ...expressionRendererOptions
@@ -59,6 +61,7 @@ export function ReactExpressionRenderer({
           width: '100%',
           height: '100%',
           ...(padding ? { padding: euiTheme.size[padding] } : {}),
+          ...(!paddingTop ? { paddingTop: 0 } : {}),
           ...(isEmpty || !!error ? { display: 'none' } : {}),
         })}
         ref={nodeRef}

@@ -6,31 +6,21 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { InPortal } from 'react-reverse-portal';
 import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
-const FiltersGlobalContainer = styled.header<{ show: boolean }>`
-  display: ${({ show }) => (show ? 'block' : 'none')};
-`;
-
-FiltersGlobalContainer.displayName = 'FiltersGlobalContainer';
-
 export interface FiltersGlobalProps {
   children: React.ReactNode;
-  show?: boolean;
 }
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = true }) => {
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (
     <InPortal node={globalKQLHeaderPortalNode}>
       <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
-        <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
-          {children}
-        </FiltersGlobalContainer>
+        <header data-test-subj="filters-global-container">{children}</header>
       </EuiPanel>
     </InPortal>
   );

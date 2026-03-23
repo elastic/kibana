@@ -20,11 +20,11 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import useDebounce from 'react-use/lib/useDebounce';
 import { TableTitle } from '../../common/components/table_title';
 import { ParamsText } from './params_text';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
@@ -243,6 +243,9 @@ export const ParamsList = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiInMemoryTable<ListParamItem>
+        data-test-subj={
+          isLoading ? 'syntheticsParamsTable-loading' : 'syntheticsParamsTable-loaded'
+        }
         itemId="id"
         loading={isLoading}
         tableCaption={PARAMS_TABLE}
@@ -278,6 +281,7 @@ export const ParamsList = () => {
           toolsRight: renderToolRight(),
           box: {
             incremental: true,
+            'data-test-subj': 'syntheticsParamsSearchInput',
           },
           filters: [
             {
@@ -293,7 +297,7 @@ export const ParamsList = () => {
             },
           ],
         }}
-        message={isLoading ? LOADING_TEXT : undefined}
+        noItemsMessage={isLoading ? LOADING_TEXT : undefined}
       />
       {isDeleteModalVisible && deleteParam && (
         <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />

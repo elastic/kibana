@@ -6,6 +6,7 @@
  */
 
 import { parseAddressList } from 'email-addresses';
+import { matchWildcardPattern } from '@kbn/std/src/match_wildcard_pattern';
 import type { ValidatedEmail } from './types';
 import { InvalidEmailReason } from './types';
 import { hasMustacheTemplate } from './mustache_template';
@@ -14,7 +15,13 @@ import { hasMustacheTemplate } from './mustache_template';
 export interface ValidateEmailAddressesOptions {
   /** treat any address which contains a mustache template as valid */
   treatMustacheTemplatesAsValid?: boolean;
+  // addresses with this option won't be validated against the allowed recipient list
+  isSender?: boolean;
 }
+
+export const isAddressMatchingSomePattern = (address: string, patterns: string[]): boolean => {
+  return patterns.some((pattern) => matchWildcardPattern({ pattern, str: address }));
+};
 
 // this can be useful for cases where a plugin needs this function,
 // but the actions plugin may not be available.  This could be used
@@ -24,11 +31,14 @@ export function validateEmailAddressesAsAlwaysValid(addresses: string[]): Valida
 }
 
 export function validateEmailAddresses(
-  allowedDomains: string[] | null,
+  allowedDomains: string[] | null = null,
   addresses: string[],
-  options: ValidateEmailAddressesOptions = {}
+  options: ValidateEmailAddressesOptions = {},
+  recipientAllowlist: string[] | null = null
 ): ValidatedEmail[] {
-  return addresses.map((address) => validateEmailAddress(allowedDomains, address, options));
+  return addresses.map((address) =>
+    validateEmailAddress(allowedDomains, address, options, recipientAllowlist)
+  );
 }
 
 export function invalidEmailsAsMessage(validatedEmails: ValidatedEmail[]): string | undefined {
@@ -56,7 +66,8 @@ export function invalidEmailsAsMessage(validatedEmails: ValidatedEmail[]): strin
 function validateEmailAddress(
   allowedDomains: string[] | null,
   address: string,
-  options: ValidateEmailAddressesOptions
+  options: ValidateEmailAddressesOptions,
+  recipientAllowList: string[] | null
 ): ValidatedEmail {
   // The reason we bypass the validation in this case, is that email addresses
   // used in an alerting action could contain mustache templates which render
@@ -68,13 +79,18 @@ function validateEmailAddress(
   }
 
   try {
-    return validateEmailAddress_(allowedDomains, address);
+    return validateEmailAddress_(allowedDomains, address, recipientAllowList, options);
   } catch (err) {
     return { address, valid: false, reason: InvalidEmailReason.invalid };
   }
 }
 
-function validateEmailAddress_(allowedDomains: string[] | null, address: string): ValidatedEmail {
+function validateEmailAddress_(
+  allowedDomains: string[] | null,
+  address: string,
+  recipientAllowlist: string[] | null,
+  { isSender = false }
+): ValidatedEmail {
   const emailAddresses = parseAddressList(address);
   if (emailAddresses == null) {
     return { address, valid: false, reason: InvalidEmailReason.invalid };
@@ -101,6 +117,27 @@ function validateEmailAddress_(allowedDomains: string[] | null, address: string)
       }
     }
   }
+
+  if (!isSender && recipientAllowlist != null) {
+    for (const emailAddress of emailAddresses) {
+      let flattenEmailAddresses = [];
+
+      if (emailAddress.type === 'group') {
+        flattenEmailAddresses = emailAddress.addresses.map((groupAddress) => groupAddress.address);
+      } else if (emailAddress.type === 'mailbox') {
+        flattenEmailAddresses = [emailAddress.address];
+      } else {
+        return { address, valid: false, reason: InvalidEmailReason.invalid };
+      }
+
+      for (const _address of flattenEmailAddresses) {
+        if (!isAddressMatchingSomePattern(_address, recipientAllowlist)) {
+          return { address, valid: false, reason: InvalidEmailReason.notAllowed };
+        }
+      }
+    }
+  }
+
   return { address, valid: true };
 }
 

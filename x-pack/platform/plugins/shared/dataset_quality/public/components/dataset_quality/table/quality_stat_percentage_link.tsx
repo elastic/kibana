@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiLink, EuiSkeletonRectangle } from '@elastic/eui';
 import React from 'react';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { DataStreamSelector, TimeRangeConfig } from '../../../../common/types';
+import type { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import type { DataStreamSelector, TimeRangeConfig } from '../../../../common/types';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
 

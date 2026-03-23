@@ -7,20 +7,28 @@
 
 import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { set } from '@kbn/safer-lodash-set';
+import {
+  type Logger,
+  type SavedObjectsClientContract,
+  type ElasticsearchClient,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { PolicyData, PromiseResolvedValue } from '../../../../../common/endpoint/types';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { LicenseService } from '../../../../../common/license';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,
@@ -37,12 +45,10 @@ import {
   Manifest,
 } from '../../../lib/artifacts';
 
-import type {
-  InternalUnifiedManifestBaseSchema,
-  InternalUnifiedManifestSchema,
-  InternalUnifiedManifestUpdateSchema,
-} from '../../../schemas/artifacts';
 import {
+  type InternalUnifiedManifestBaseSchema,
+  type InternalUnifiedManifestSchema,
+  type InternalUnifiedManifestUpdateSchema,
   internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
   type InternalManifestSchema,
@@ -53,6 +59,7 @@ import { ManifestClient } from '../manifest_client';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
+import type { SavedObjectsClientFactory } from '../../saved_objects';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -81,6 +88,7 @@ const iterateArtifactsBuildResult = (
 };
 
 export interface ManifestManagerContext {
+  savedObjectsClientFactory: SavedObjectsClientFactory;
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
@@ -90,6 +98,7 @@ export interface ManifestManagerContext {
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
+  licenseService: LicenseService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -112,8 +121,12 @@ export class ManifestManager {
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
   protected productFeaturesService: ProductFeaturesService;
+  protected licenseService: LicenseService;
+  protected savedObjectsClientFactory: SavedObjectsClientFactory;
 
   constructor(context: ManifestManagerContext) {
+    this.savedObjectsClientFactory = context.savedObjectsClientFactory;
+
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -126,6 +139,7 @@ export class ManifestManager {
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
     this.productFeaturesService = context.productFeaturesService;
+    this.licenseService = context.licenseService;
   }
 
   /**
@@ -135,6 +149,39 @@ export class ManifestManager {
    */
   protected getManifestClient(): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
+  }
+
+  /**
+   * Determines if exceptions should be retrieved based on licensing conditions
+   * @private
+   */
+  private shouldRetrieveExceptions(listId: ArtifactListId): boolean {
+    // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
+    // Host Isolation Exceptions require feature enablement (serverless).
+    const isHostIsolationWithFeatureEnabled =
+      listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointHostIsolationExceptions);
+
+    // Trusted Devices requires enterprise license (ess) or feature enablement (serverless).
+    // In serverless .isEnterprise() will always yield true, in ESS feature check .isEnabled() will also always yield true.
+    // Therefore both conditions must be met in both environments.
+    const isTrustedDevicesWithFeatureAndEnterpriseLicense =
+      listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      this.experimentalFeatures.trustedDevices &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointTrustedDevices) &&
+      this.licenseService.isEnterprise();
+
+    // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
+    const isOtherArtifactWithFeatureEnabled =
+      listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+      listId !== ENDPOINT_ARTIFACT_LISTS.trustedDevices.id &&
+      this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement);
+
+    return (
+      isHostIsolationWithFeatureEnabled ||
+      isTrustedDevicesWithFeatureAndEnterpriseLicense ||
+      isOtherArtifactWithFeatureEnabled
+    );
   }
 
   /**
@@ -157,17 +204,9 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
-      // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
-      // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
-      // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
-      if (
-        (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(
-            ProductFeatureKey.endpointHostIsolationExceptions
-          )) ||
-        (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
-      ) {
+      // If there are host isolation exceptions in place but there is a downgrade scenario (serverless), those shouldn't be taken into account when generating artifacts.
+      // If there are trusted devices in place but there is a downgrade scenario (ess/serverless), those shouldn't be taken into account when generating artifacts.
+      if (this.shouldRetrieveExceptions(listId)) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
           os,
@@ -191,8 +230,17 @@ export class ManifestManager {
         ? exception.tags.includes('policy:all') || exception.tags.includes(`policy:${policyId}`)
         : exception.tags.includes('policy:all');
 
-    const exceptions: ExceptionListItemSchema[] =
-      listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
+    let exceptions: ExceptionListItemSchema[];
+
+    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      // with the feature enabled, we do not make an 'exception' with endpoint exceptions - it's filtered per-policy
+      exceptions = allExceptionsByListId.filter(filter);
+    } else {
+      exceptions =
+        listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          ? allExceptionsByListId
+          : allExceptionsByListId.filter(filter);
+    }
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
@@ -260,7 +308,6 @@ export class ManifestManager {
     allPolicyIds: string[]
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
     const decorateWildcardOnlyExceptionItem = (item: ExceptionListItemSchema) => {
       const isWildcardOnly = item.entries.every(({ type }) => type === 'wildcard');
@@ -279,18 +326,28 @@ export class ManifestManager {
     };
 
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_LIST_ID,
-      name: ArtifactConstants.GLOBAL_ALLOWLIST_NAME,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      name: ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME,
       exceptionItemDecorator: decorateWildcardOnlyExceptionItem,
     };
 
-    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
+    for (const os of ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS) {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    allPolicyIds.forEach((policyId) => {
-      policySpecificArtifacts[policyId] = defaultArtifacts;
-    });
+    let policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      policySpecificArtifacts = await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+    } else {
+      allPolicyIds.forEach((policyId) => {
+        policySpecificArtifacts[policyId] = defaultArtifacts;
+      });
+    }
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -314,6 +371,34 @@ export class ManifestManager {
       await this.buildArtifactsByPolicy(
         allPolicyIds,
         ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an array of artifacts (one per supported OS) based on the current state of the
+   * Trusted Devices list
+   * @protected
+   */
+  protected async buildTrustedDevicesArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      name: ArtifactConstants.GLOBAL_TRUSTED_DEVICES_NAME,
+    };
+
+    for (const os of ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    }
+
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS,
         buildArtifactsForOsOptions
       );
 
@@ -527,23 +612,19 @@ export class ManifestManager {
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
       let manifestSo;
-      if (this.experimentalFeatures.unifiedManifestEnabled) {
-        const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
-        // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
-        // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
-        // behind for package policy to pick it up.
-        if (unifiedManifestsSo.length === 0) {
-          const legacyManifestSo = await this.getManifestClient().getManifest();
-          const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
-          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
-            unifiedManifestsSo,
-            legacySemanticVersion
-          );
-        } else {
-          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
-        }
+      const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
+      // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+      // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+      // behind for package policy to pick it up.
+      if (unifiedManifestsSo.length === 0) {
+        const legacyManifestSo = await this.getManifestClient().getManifest();
+        const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
+        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
+          unifiedManifestsSo,
+          legacySemanticVersion
+        );
       } else {
-        manifestSo = await this.getManifestClient().getManifest();
+        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
       }
 
       if (manifestSo.version === undefined) {
@@ -622,6 +703,9 @@ export class ManifestManager {
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
     ]);
 
     // Clear cache as the ManifestManager instance is reused on every run.
@@ -658,75 +742,230 @@ export class ManifestManager {
     const unChangedPolicies: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
     const execId = Math.random().toString(32).substring(3, 8);
+    const savedObjects = this.savedObjectsClientFactory;
+    const wasPolicyUpdateRetried = new Set<string>();
+    // inflightRequests: stores promises that may be curently processing that are outside of the batch processor (ex. retries)
+    const inflightRequests = new Set<Promise<unknown>>();
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
       key: `tryDispatch.${execId}`,
       batchHandler: async ({ data: currentBatch }) => {
-        const response = await this.packagePolicyService.bulkUpdate(
-          this.savedObjectsClient,
-          this.esClient,
-          currentBatch
-        );
+        try {
+          // With spaces, we need to group the updates by Space ID so that a properly scoped
+          // SO client is used for the update.
+          const updatesBySpace: Record<string, PackagePolicy[]> = {};
 
-        if (!isEmpty(response.failedPolicies)) {
-          errors.push(
-            ...response.failedPolicies.map((failedPolicy) => {
-              if (failedPolicy.error instanceof Error) {
-                return failedPolicy.error;
+          for (const packagePolicy of currentBatch) {
+            const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
+
+            if (!updatesBySpace[packagePolicySpace]) {
+              updatesBySpace[packagePolicySpace] = [];
+            }
+
+            updatesBySpace[packagePolicySpace].push(packagePolicy);
+          }
+
+          const response: Required<
+            PromiseResolvedValue<ReturnType<typeof this.packagePolicyService.bulkUpdate>>
+          > = {
+            updatedPolicies: [],
+            failedPolicies: [],
+          };
+
+          for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
+            this.logger.debug(
+              `updating [${spaceUpdates.length}] package policies for space id [${spaceId}]`
+            );
+
+            const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
+              savedObjects.createInternalScopedSoClient({ spaceId, readonly: false }),
+              this.esClient,
+              spaceUpdates
+            );
+
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            response.updatedPolicies!.push(...(bulkUpdateResponse.updatedPolicies ?? []));
+
+            const updateErrors: (typeof bulkUpdateResponse)['failedPolicies'] = [];
+
+            for (const failedPolicy of bulkUpdateResponse.failedPolicies) {
+              // We retry the update 1 more time for SO conflict. It's possible that a policy could have
+              // been updated while manifest manager was in progress. In these cases, we try the update
+              // again to ensure that the policy receives the updated manifest.
+              if (
+                SavedObjectsErrorHelpers.isConflictError(failedPolicy.error as Error) &&
+                !wasPolicyUpdateRetried.has(failedPolicy.packagePolicy.id ?? '') &&
+                failedPolicy.packagePolicy.id
+              ) {
+                wasPolicyUpdateRetried.add(failedPolicy.packagePolicy.id);
+
+                this.logger.debug(
+                  () =>
+                    `Conflict error encountered for policy [${failedPolicy.packagePolicy.id}]. Retrying update...`
+                );
+
+                // retrieve latest policy - but don't error case it was deleted
+                inflightRequests.add(
+                  this.packagePolicyService
+                    .get(
+                      savedObjects.createInternalScopedSoClient({ spaceId }),
+                      failedPolicy.packagePolicy.id,
+                      { spaceId }
+                    )
+                    .then((latestPolicy) => {
+                      if (!latestPolicy) {
+                        response.failedPolicies.push(failedPolicy);
+                        return;
+                      }
+
+                      set(
+                        latestPolicy,
+                        'inputs[0].config.artifact_manifest.value',
+                        failedPolicy.packagePolicy.inputs[0]?.config?.artifact_manifest?.value
+                      );
+
+                      this.logger.debug(
+                        () =>
+                          `Sending retry update for policy [${latestPolicy.id}]:\n${stringify(
+                            latestPolicy,
+                            20
+                          )}`
+                      );
+
+                      policyUpdateBatchProcessor.addToQueue(latestPolicy);
+                    })
+                    .catch((err) => {
+                      // If unable to get latest version of policy (ex. policy was deleted), then just report update as a failure
+                      this.logger.debug(
+                        () =>
+                          `Failed to retrieve policy [${failedPolicy.packagePolicy.id}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
+                      );
+
+                      response.failedPolicies.push(failedPolicy);
+                    })
+                );
               } else {
-                return new Error(failedPolicy.error.message);
+                updateErrors.push(failedPolicy);
               }
-            })
-          );
-        }
+            }
 
-        if (response.updatedPolicies) {
-          updatedPolicies.push(
-            ...response.updatedPolicies.map((policy) => {
-              return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
-            })
-          );
+            response.failedPolicies.push(...(updateErrors ?? []));
+          }
+
+          if (!isEmpty(response.failedPolicies)) {
+            errors.push(
+              ...response.failedPolicies.map((failedPolicy) => {
+                if (failedPolicy.error instanceof Error) {
+                  return failedPolicy.error;
+                } else {
+                  this.logger.debug(`Update failure:\n${stringify(failedPolicy.error)}`);
+
+                  return new EndpointError(failedPolicy.error.message, failedPolicy.error);
+                }
+              })
+            );
+          }
+
+          if (response.updatedPolicies) {
+            updatedPolicies.push(
+              ...response.updatedPolicies.map((policy) => {
+                return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
+              })
+            );
+          }
+        } catch (err) {
+          errors.push(new EndpointError(`packagePolicy.bulkUpdate error: ${err.message}`, err));
         }
       },
     });
 
-    for await (const policies of await this.fetchAllPolicies()) {
+    const isNewManifestVersionGreaterThanPolicyManifestVersion = (
+      policyManifestVersion: string
+    ): boolean => {
+      try {
+        return semver.gt(manifestVersion, policyManifestVersion);
+      } catch (e) {
+        this.logger.debug(
+          () =>
+            `Failed to validate if new manifest version [${manifestVersion}] is great than policy Manifest Version [${policyManifestVersion}]:\n${stringify(
+              e
+            )}`
+        );
+
+        // If unable to perform version check - assume new manifest version
+        // is greater than the version from the policy
+        return true;
+      }
+    };
+
+    for await (const _policies of await this.fetchAllPolicies()) {
+      const policies = _policies as PolicyData[];
+
       for (const packagePolicy of policies) {
-        const { id, name } = packagePolicy;
+        const { id: policyId, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
 
-        if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
-          const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
-            value: {},
-          };
+        this.logger.debug(
+          () =>
+            `Checking if policy [${policyId}][${name}] in space(s) [${spaceIds.join(
+              ', '
+            )}] needs to be updated with new artifact manifest`
+        );
 
-          const newManifestVersion = manifest.getSemanticVersion();
+        try {
+          if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
+            const oldManifest: ManifestSchema | undefined =
+              packagePolicy.inputs[0].config?.artifact_manifest?.value;
 
-          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-            const serializedManifest = manifest.toPackagePolicyManifest(id);
+            this.logger.debug(
+              () =>
+                `Policy [${policyId}][${name}] currently has manifest version [${oldManifest?.manifest_version}]`
+            );
 
-            if (!manifestDispatchSchema.is(serializedManifest)) {
-              errors.push(
-                new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest)
-              );
-            } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
-              packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
-              policyUpdateBatchProcessor.addToQueue(packagePolicy);
+            if (
+              isNewManifestVersionGreaterThanPolicyManifestVersion(oldManifest?.manifest_version)
+            ) {
+              const serializedManifest = manifest.toPackagePolicyManifest(policyId);
+
+              if (!manifestDispatchSchema.is(serializedManifest)) {
+                errors.push(
+                  new EndpointError(
+                    `Invalid manifest for policy ${policyId}. The new generated manifest did not pass schema validation`,
+                    serializedManifest
+                  )
+                );
+              } else if (!oldManifest || !manifestsEqual(serializedManifest, oldManifest)) {
+                packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+                policyUpdateBatchProcessor.addToQueue(packagePolicy);
+              } else {
+                unChangedPolicies.push(`[${policyId}][${name}] No change in manifest content`);
+              }
             } else {
-              unChangedPolicies.push(`[${id}][${name}] No change in manifest content`);
+              unChangedPolicies.push(`[${policyId}][${name}] No change in manifest version`);
             }
           } else {
-            unChangedPolicies.push(`[${id}][${name}] No change in manifest version`);
+            errors.push(
+              new EndpointError(
+                `Package Policy ${policyId} has no 'inputs[0].config'`,
+                packagePolicy
+              )
+            );
           }
-        } else {
+        } catch (e) {
           errors.push(
-            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+            new EndpointError(
+              `Error thrown while processing policy [${policyId}][${name}]:\n${stringify(e)}`,
+              e
+            )
           );
         }
       }
     }
 
     await policyUpdateBatchProcessor.complete();
+
+    // Since processing of batches could have triggered a retry update, ensure we wait for those to process
+    await Promise.allSettled(inflightRequests).then(() => policyUpdateBatchProcessor.complete());
 
     this.logger.debug(
       `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies: updated: [${
@@ -754,28 +993,13 @@ export class ManifestManager {
   public async commit(manifest: Manifest) {
     const manifestSo = manifest.toSavedObject();
 
-    if (this.experimentalFeatures.unifiedManifestEnabled) {
-      await this.commitUnified(manifestSo);
-    } else {
-      const manifestClient = this.getManifestClient();
-
-      const version = manifest.getSavedObjectVersion();
-
-      if (version == null) {
-        await manifestClient.createManifest(manifestSo);
-      } else {
-        await manifestClient.updateManifest(manifestSo, {
-          version,
-        });
-      }
-
-      this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
-    }
+    await this.commitUnified(manifestSo);
   }
 
   private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {
     return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
+      spaceIds: ['*'],
     });
   }
 
@@ -783,13 +1007,19 @@ export class ManifestManager {
     const allPolicyIds: string[] = [];
     const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
+      spaceIds: ['*'],
     });
 
     for await (const itemIds of idFetcher) {
       allPolicyIds.push(...itemIds);
     }
 
-    this.logger.debug(`Retrieved [${allPolicyIds.length}] endpoint integration policy IDs`);
+    this.logger.debug(
+      () =>
+        `Retrieved [${allPolicyIds.length}] endpoint integration policy IDs:\n${stringify(
+          allPolicyIds
+        )}`
+    );
 
     return allPolicyIds;
   }

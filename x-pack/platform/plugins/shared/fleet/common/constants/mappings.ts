@@ -42,6 +42,7 @@ export const AGENT_POLICY_MAPPINGS = {
     unenroll_timeout: { type: 'integer' },
     updated_at: { type: 'date' },
     updated_by: { type: 'keyword' },
+    supports_agentless: { type: 'boolean' },
   },
 } as const;
 
@@ -98,6 +99,9 @@ export const AGENT_MAPPINGS = {
           type: 'keyword',
         },
         version: {
+          type: 'keyword',
+        },
+        type: {
           type: 'keyword',
         },
       },
@@ -369,6 +373,94 @@ export const AGENT_MAPPINGS = {
     // added to allow validation on status field
     status: {
       type: 'keyword',
+    },
+    sequence_num: {
+      type: 'integer',
+    },
+    capabilities: {
+      type: 'keyword',
+    },
+    identifying_attributes: {
+      properties: {
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'keyword',
+            },
+            instance: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    service: {
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        instance: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    non_identifying_attributes: {
+      properties: {
+        host: {
+          properties: {
+            arch: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        os: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            description: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    host: {
+      properties: {
+        arch: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+    os: {
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+        description: {
+          type: 'keyword',
+        },
+      },
     },
   },
 } as const;

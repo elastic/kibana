@@ -41,7 +41,7 @@ interface OwnProps {
   closePopover: () => void;
   deleteProvider: () => void;
   field: string;
-  kqlQuery: string; // eslint-disable-line react/no-unused-prop-types
+  kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
   isOpen: boolean;
@@ -230,7 +230,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         panelPaddingSize="none"
         ownFocus={true}
       >
-        <div style={{ userSelect: 'none' }}>
+        <div css={{ userSelect: 'none' }}>
           <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
         </div>
       </MyEuiPopover>

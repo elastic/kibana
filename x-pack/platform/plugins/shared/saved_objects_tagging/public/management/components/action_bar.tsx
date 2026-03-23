@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
+import type { EuiContextMenuPanelItemDescriptor, UseEuiTheme } from '@elastic/eui';
 import {
   EuiPopover,
   EuiFlexItem,
   EuiFlexGroup,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiText,
   EuiLink,
   EuiIcon,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TagBulkAction } from '../types';
+import type { TagBulkAction } from '../types';
 
 export interface ActionBarProps {
   actions: TagBulkAction[];
@@ -103,7 +103,11 @@ export const ActionBar: FC<ActionBarProps> = ({
                           count: selectedCount,
                         }}
                       />
-                      <EuiIcon className="tagMgt__actionBarIcon" type="arrowDown" size="s" />
+                      <EuiIcon
+                        className="tagMgt__actionBarIcon"
+                        type="chevronSingleDown"
+                        size="s"
+                      />
                     </EuiLink>
                   </EuiText>
                 }

@@ -15,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiButton,
   EuiSkeletonText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export const NoticeModal: React.FunctionComponent<Props> = ({ noticePath, onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const { notifications } = useStartServices();
   const [notice, setNotice] = useState<string | undefined>(undefined);
 
@@ -46,9 +48,9 @@ export const NoticeModal: React.FunctionComponent<Props> = ({ noticePath, onClos
     fetchData();
   }, [noticePath, notifications]);
   return (
-    <EuiModal maxWidth={true} onClose={onClose}>
+    <EuiModal maxWidth={true} onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>NOTICE.txt</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>NOTICE.txt</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiCodeBlock overflowHeight={360}>

@@ -6,13 +6,14 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
+import { tracksOverlays } from '@kbn/presentation-util';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { PatternAnalysisEmbeddableInitializer } from './pattern_analysis_initializer';
-import type { PatternAnalysisComponentApi, PatternAnalysisEmbeddableState } from './types';
+import type { PatternAnalysisComponentApi } from './types';
+import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
 export async function resolveEmbeddablePatternAnalysisUserInput(
   coreStart: CoreStart,

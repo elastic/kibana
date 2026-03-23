@@ -8,10 +8,11 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { UseFieldValueAutocompleteReturn, useFieldValueAutocomplete } from '.';
+import type { UseFieldValueAutocompleteReturn } from '.';
+import { useFieldValueAutocomplete } from '.';
 import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';
-import { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
 // Copied from "src/platform/plugins/shared/data/common/index_patterns/index_pattern.stub.ts"
 // TODO: Remove this in favor of the above if/when it is ported, https://github.com/elastic/kibana/issues/100715

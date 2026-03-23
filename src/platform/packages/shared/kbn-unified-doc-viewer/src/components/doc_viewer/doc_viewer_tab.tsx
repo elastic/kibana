@@ -7,74 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { isEqual } from 'lodash';
-import { DocViewRenderTab } from './doc_viewer_render_tab';
-import { DocViewerError } from './doc_viewer_error';
-import type { DocViewRenderFn, DocViewRenderProps } from '../../types';
+import React, { useCallback } from 'react';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import type { DocView, DocViewRenderProps } from '../../types';
+import type { DocViewerProps } from './doc_viewer';
 
 interface Props {
-  id: string;
+  docView: DocView;
   renderProps: DocViewRenderProps;
-  title: string;
-  render?: DocViewRenderFn;
-  component?: React.ComponentType<DocViewRenderProps>;
+  initialDocViewerState?: DocViewerProps['initialDocViewerState'];
+  onInitialDocViewerStateChange?: DocViewerProps['onInitialDocViewerStateChange'];
 }
 
-interface State {
-  error: Error | string;
-  hasError: boolean;
-}
+type ExtractState<T> = T extends DocView<infer TState> ? TState | undefined : never;
+
 /**
  * Renders the tab content of a doc view.
  * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
-export class DocViewerTab extends React.Component<Props, State> {
-  state = {
-    hasError: false,
-    error: '',
-  };
+export const DocViewerTab = ({
+  docView,
+  renderProps,
+  initialDocViewerState,
+  onInitialDocViewerStateChange,
+}: Props) => {
+  const initialState = initialDocViewerState?.docViewerTabsState?.[docView.id] as ExtractState<
+    typeof docView
+  >;
 
-  static getDerivedStateFromError(error: unknown) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true, error };
-  }
+  const onInitialStateChange = useCallback(
+    (state: object) => {
+      onInitialDocViewerStateChange?.({
+        ...initialDocViewerState,
+        docViewerTabsState: {
+          ...initialDocViewerState?.docViewerTabsState,
+          [docView.id]: state,
+        },
+      });
+    },
+    [docView.id, initialDocViewerState, onInitialDocViewerStateChange]
+  );
 
-  shouldComponentUpdate(nextProps: Props, nextState: State) {
-    return (
-      nextProps.renderProps.hit.id !== this.props.renderProps.hit.id ||
-      !isEqual(nextProps.renderProps.hit.raw.highlight, this.props.renderProps.hit.raw.highlight) ||
-      nextProps.id !== this.props.id ||
-      !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
-      nextProps.renderProps.decreaseAvailableHeightBy !==
-        this.props.renderProps.decreaseAvailableHeightBy ||
-      nextState.hasError
-    );
-  }
-
-  render() {
-    const { component: Component, render, renderProps, title } = this.props;
-    const { hasError, error } = this.state;
-
-    if (hasError && error) {
-      return <DocViewerError error={error} />;
-    }
-
-    if (render) {
-      // doc view is provided by a render function
-      return <DocViewRenderTab render={render} renderProps={renderProps} />;
-    }
-
-    // doc view is provided by a react component
-    if (Component) {
-      return <Component {...renderProps} />;
-    }
-
-    return (
-      <DocViewerError
-        error={`Invalid plugin ${title}, there is neither a (react) component nor a render function provided`}
-      />
-    );
-  }
-}
+  return (
+    <KibanaSectionErrorBoundary sectionName={docView.title}>
+      {docView.render({
+        ...renderProps,
+        initialState,
+        onInitialStateChange,
+      })}
+    </KibanaSectionErrorBoundary>
+  );
+};

@@ -161,15 +161,6 @@ describe('extractMigrationInfo', () => {
   });
 
   describe('modelVersions', () => {
-    it('returns the correct switchToModelVersionAt', () => {
-      const type = createType({
-        switchToModelVersionAt: '8.8.0',
-      });
-      const output = extractMigrationInfo(type);
-
-      expect(output.switchToModelVersionAt).toEqual('8.8.0');
-    });
-
     it('returns a proper summary of the model versions', () => {
       const type = createType({
         modelVersions: {
@@ -202,8 +193,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
+          modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -211,8 +204,10 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
+          modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
           newMappings: ['foo.type'],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -251,8 +246,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
+          modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -260,8 +257,10 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
+          modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
           newMappings: ['foo.type'],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -300,8 +299,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill', 'data_removal', 'unsafe_transform'],
           hasTransformation: true,
+          modelVersionHash: '9cd0fcc20655480bc520446b62b677f8af0c07eff6853553892be53fafc4a696',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -318,13 +319,14 @@ describe('extractMigrationInfo', () => {
     });
 
     it('returns the correct values for schemas', () => {
+      const typeSchemaV1 = schema.object({ title: schema.string() });
       const type = createType({
-        switchToModelVersionAt: '8.8.0',
         modelVersions: {
           1: {
             changes: [],
             schemas: {
               forwardCompatibility: jest.fn(),
+              create: typeSchemaV1,
             },
           },
           2: {
@@ -334,12 +336,13 @@ describe('extractMigrationInfo', () => {
         },
       });
       const output = extractMigrationInfo(type);
-
       expect(output.modelVersions[0].schemas).toEqual({
-        forwardCompatibility: true,
+        forwardCompatibility: 'c7c71ae951f0ac343cea0403bc34144ede93afec1bfe0ae6bd3279dd28ddf696',
+        create: '7457866b52ceea9e20767b3337518de452b7790243891d81737d48eb8b3afd18',
       });
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
+        create: false,
       });
     });
   });
@@ -374,7 +377,6 @@ describe('extractMigrationInfo', () => {
             ],
           },
         },
-        switchToModelVersionAt: '8.8.0',
       });
 
       const output = extractMigrationInfo(type);
@@ -382,14 +384,15 @@ describe('extractMigrationInfo', () => {
       expect(output).toEqual(
         expect.objectContaining({
           migrationVersions: ['7.17.7', '8.0.2', '8.3.3'],
-          switchToModelVersionAt: '8.8.0',
           modelVersions: [
             {
               version: '1',
               changeTypes: ['data_backfill'],
               hasTransformation: true,
+              modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
               newMappings: [],
               schemas: {
+                create: false,
                 forwardCompatibility: false,
               },
             },
@@ -397,8 +400,10 @@ describe('extractMigrationInfo', () => {
               version: '2',
               changeTypes: ['mappings_addition'],
               hasTransformation: false,
+              modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
               newMappings: ['foo.type'],
               schemas: {
+                create: false,
                 forwardCompatibility: false,
               },
             },

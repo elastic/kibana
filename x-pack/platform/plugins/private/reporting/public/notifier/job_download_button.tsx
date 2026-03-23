@@ -7,9 +7,9 @@
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JobId } from '@kbn/reporting-common/types';
+import type { JobId } from '@kbn/reporting-common/types';
 import React from 'react';
-import { JobSummary } from '../types';
+import type { JobSummary } from '../types';
 
 interface Props {
   getUrl: (jobId: JobId) => string;
@@ -21,6 +21,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
+      data-test-jobId={job.id}
       href={getUrl(job.id)}
       target="_blank"
     >

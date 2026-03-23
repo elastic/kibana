@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type {
   SavedObjectsRawDocSource,
   SavedObjectsType,
@@ -15,23 +15,61 @@ import type {
 } from '@kbn/core-saved-objects-server';
 
 import '../jest_matchers';
+import type { KibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import {
   clearLog,
   defaultKibanaIndex,
   startElasticsearch,
-  KibanaMigratorTestKit,
   getKibanaMigratorTestKit,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 describe('deferred migrations', () => {
   let client: KibanaMigratorTestKit['client'];
   let runMigrations: KibanaMigratorTestKit['runMigrations'];
   let savedObjectsRepository: KibanaMigratorTestKit['savedObjectsRepository'];
   let server: TestElasticsearchUtils['es'];
-  let type: SavedObjectsType;
+
+  const noop = (doc: SavedObjectUnsanitizedDoc) => doc;
+  const type: SavedObjectsType = {
+    name: 'some-type',
+    hidden: false,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+      },
+    },
+    migrations: {
+      '1.0.0': jest.fn(noop),
+      '2.0.0': jest.fn(noop),
+      '3.0.0': {
+        // @ts-expect-error
+        deferred: true,
+        transform: jest.fn(noop),
+      },
+      '4.0.0': jest.fn(noop),
+      '5.0.0': {
+        // @ts-expect-error
+        deferred: true,
+        transform: jest.fn(noop),
+      },
+      '6.0.0': {
+        // @ts-expect-error
+        deferred: true,
+        transform: jest.fn(noop),
+      },
+    },
+  };
 
   beforeAll(async () => {
     server = await startElasticsearch();
+
+    const { runMigrations: createKibanaIndex } = await getKibanaMigratorTestKit({
+      kibanaIndex: defaultKibanaIndex,
+      types: [type],
+    });
+
+    await createKibanaIndex(); // we runMigrations a first time to create the SO index
   });
 
   afterAll(async () => {
@@ -39,39 +77,6 @@ describe('deferred migrations', () => {
   });
 
   beforeEach(async () => {
-    const noop = (doc: SavedObjectUnsanitizedDoc) => doc;
-
-    type = {
-      name: 'some-type',
-      hidden: false,
-      namespaceType: 'agnostic',
-      mappings: {
-        properties: {
-          name: { type: 'keyword' },
-        },
-      },
-      migrations: {
-        '1.0.0': jest.fn(noop),
-        '2.0.0': jest.fn(noop),
-        '3.0.0': {
-          // @ts-expect-error
-          deferred: true,
-          transform: jest.fn(noop),
-        },
-        '4.0.0': jest.fn(noop),
-        '5.0.0': {
-          // @ts-expect-error
-          deferred: true,
-          transform: jest.fn(noop),
-        },
-        '6.0.0': {
-          // @ts-expect-error
-          deferred: true,
-          transform: jest.fn(noop),
-        },
-      },
-    };
-
     ({ client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       kibanaIndex: defaultKibanaIndex,
       types: [type],

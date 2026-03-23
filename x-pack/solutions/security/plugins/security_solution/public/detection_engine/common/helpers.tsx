@@ -16,10 +16,10 @@ import type {
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
@@ -233,7 +233,9 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
 
   return {
     author,
-    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
+    isAssociatedToEndpointList:
+      exceptionsList?.some(({ id }) => id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) ??
+      false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',

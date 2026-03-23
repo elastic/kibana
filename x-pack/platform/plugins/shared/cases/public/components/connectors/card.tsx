@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isString } from 'lodash/fp';
 import React, { memo } from 'react';
 import {
   EuiFlexGroup,
@@ -12,19 +13,62 @@ import {
   EuiIcon,
   EuiSkeletonText,
   EuiText,
-  EuiCodeBlock,
+  type EuiBasicTableColumn,
+  EuiBasicTable,
+  type EuiBasicTableProps,
 } from '@elastic/eui';
 
 import type { ConnectorTypes } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
+import {
+  CARD_TABLE_CAPTION,
+  CARD_TABLE_FIELD_COLUMN_NAME,
+  CARD_TABLE_VALUE_COLUMN_NAME,
+} from './translations';
+
+interface Item {
+  title: string;
+  description: React.ReactNode;
+}
 
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;
   title: string;
-  listItems: Array<{ title: string; description: React.ReactNode; displayAsCodeBlock?: boolean }>;
+  listItems: Array<Item>;
   isLoading: boolean;
 }
+
+const columns: Array<EuiBasicTableColumn<Item>> = [
+  {
+    field: 'title',
+    name: CARD_TABLE_FIELD_COLUMN_NAME,
+    truncateText: true,
+    textOnly: true,
+
+    render: (title: Item['title']) => {
+      return (
+        <EuiText size="xs" data-test-subj="card-list-item">
+          {title}
+        </EuiText>
+      );
+    },
+  },
+  {
+    name: CARD_TABLE_VALUE_COLUMN_NAME,
+    render: ({ description, title }: Item) => (
+      <EuiText size="xs" data-test-subj="card-list-item" key={title}>
+        {Array.isArray(description) || isString(description) || React.isValidElement(description)
+          ? description
+          : JSON.stringify(description)}
+      </EuiText>
+    ),
+  },
+];
+
+const rowProps: EuiBasicTableProps<Item>['rowProps'] = {
+  'data-test-subj': 'card-list-item-row',
+};
 
 const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   connectorType,
@@ -37,11 +81,11 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   return (
     <EuiSkeletonText
       lines={3}
-      size={'m'}
+      size="m"
       isLoading={isLoading}
       data-test-subj="connector-card-loading"
     >
-      <EuiFlexGroup direction="column" alignItems="stretch" data-test-subj="connector-card">
+      <EuiFlexGroup direction="column" data-test-subj="connector-card" gutterSize="s">
         <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiText size="s" data-test-subj="connector-card-title">
@@ -53,29 +97,15 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem data-test-subj="connector-card-details">
-          {listItems.length > 0 &&
-            listItems.map((item, i) =>
-              item.displayAsCodeBlock ? (
-                <>
-                  <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
-                    <strong>{`${item.title}:`}</strong>
-                  </EuiText>
-                  <EuiCodeBlock
-                    data-test-subj="card-list-code-block"
-                    language="json"
-                    fontSize="s"
-                    paddingSize="s"
-                  >
-                    {`${item.description}`}
-                  </EuiCodeBlock>
-                </>
-              ) : (
-                <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
-                  <strong>{`${item.title}: `}</strong>
-                  {`${item.description}`}
-                </EuiText>
-              )
-            )}
+          {listItems.length > 0 && (
+            <EuiBasicTable
+              rowProps={rowProps}
+              tableCaption={CARD_TABLE_CAPTION}
+              responsiveBreakpoint={false}
+              items={listItems}
+              columns={columns}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiSkeletonText>

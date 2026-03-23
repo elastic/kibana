@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FtrService } from '../ftr_provider_context';
 
@@ -69,11 +69,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
-   *  Try to speed resets a bit if the Visualize Library breadcrumb is available
+   *  Try to speed resets a bit if the Visualize library breadcrumb is available
    */
   private async clickOnVisualizeLibraryBreadcrumb() {
     // Try to navigate to the Visualize Listing page from breadcrumb if available
-    const selector = '[data-test-subj="breadcrumb first"][title="Visualize Library"]';
+    const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
     const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
     if (visualizeLibraryBreadcrumb) {
       await this.find.clickByCssSelector(selector);

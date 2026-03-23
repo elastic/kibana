@@ -7,31 +7,17 @@
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export interface TableSectionContext {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 /**
- * A context provider for the AI for SOC alert summary table grouping component.
- * This allows group stats and renderers to not have to fetch rules and packages.
+ * A context provider for EASE alert summary table grouping component.
+ * This allows group stats and renderers to not have to fetch packages.
  */
 export const TableSectionContext = createContext<TableSectionContext | undefined>(undefined);
 
@@ -43,13 +29,12 @@ export type TableSectionContextProviderProps = {
 } & TableSectionContext;
 
 export const TableSectionContextProvider = memo(
-  ({ children, packages, ruleResponse }: TableSectionContextProviderProps) => {
+  ({ children, packages }: TableSectionContextProviderProps) => {
     const contextValue = useMemo(
       () => ({
         packages,
-        ruleResponse,
       }),
-      [packages, ruleResponse]
+      [packages]
     );
 
     return (

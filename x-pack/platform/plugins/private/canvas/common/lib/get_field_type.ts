@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatatableColumn } from '../../types';
+import type { DatatableColumn } from '../../types';
 import { unquoteString } from './unquote_string';
 
 /**

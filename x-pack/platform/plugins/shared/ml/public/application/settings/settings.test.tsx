@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 import { Settings } from './settings';
 
@@ -38,27 +39,23 @@ describe('Settings', () => {
     isCalendarsMngDisabled: boolean,
     isCalendarCreateDisabled: boolean
   ) {
-    const wrapper = mountWithIntl(<Settings />);
+    renderWithI18n(<Settings />);
 
-    const filterMngButton = wrapper
-      .find('[data-test-subj="mlFilterListsMngButton"]')
-      .find('EuiButtonEmpty');
-    expect(filterMngButton.prop('isDisabled')).toBe(isFilterListsMngDisabled);
+    // Check filter lists manage button
+    const filterMngButton = screen.getByTestId('mlFilterListsMngButton');
+    expect(filterMngButton.hasAttribute('disabled')).toBe(isFilterListsMngDisabled);
 
-    const filterCreateButton = wrapper
-      .find('[data-test-subj="mlFilterListsCreateButton"]')
-      .find('EuiButtonEmpty');
-    expect(filterCreateButton.prop('isDisabled')).toBe(isFilterListCreateDisabled);
+    // Check filter lists create button
+    const filterCreateButton = screen.getByTestId('mlFilterListsCreateButton');
+    expect(filterCreateButton.hasAttribute('disabled')).toBe(isFilterListCreateDisabled);
 
-    const calendarMngButton = wrapper
-      .find('[data-test-subj="mlCalendarsMngButton"]')
-      .find('EuiButtonEmpty');
-    expect(calendarMngButton.prop('isDisabled')).toBe(isCalendarsMngDisabled);
+    // Check calendars manage button
+    const calendarMngButton = screen.getByTestId('mlCalendarsMngButton');
+    expect(calendarMngButton.hasAttribute('disabled')).toBe(isCalendarsMngDisabled);
 
-    const calendarCreateButton = wrapper
-      .find('[data-test-subj="mlCalendarsCreateButton"]')
-      .find('EuiButtonEmpty');
-    expect(calendarCreateButton.prop('isDisabled')).toBe(isCalendarCreateDisabled);
+    // Check calendars create button
+    const calendarCreateButton = screen.getByTestId('mlCalendarsCreateButton');
+    expect(calendarCreateButton.hasAttribute('disabled')).toBe(isCalendarCreateDisabled);
   }
 
   test('should render settings page with all buttons enabled when full user capabilities', () => {

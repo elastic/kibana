@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import {
-  ChromeNavControl,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
@@ -44,35 +36,24 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
   }
 
   public start(core: CoreStart, startDeps: GlobalSearchBarPluginStartDeps) {
-    core.chrome.navControls.registerCenter(this.getNavControl({ core, ...startDeps }));
-    return {};
-  }
-
-  private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
-    const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
+    const { globalSearch, savedObjectsTagging, usageCollection } = startDeps;
     const { application, http } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
-    const navControl: ChromeNavControl = {
+    core.chrome.navControls.registerCenter({
       order: 1000,
-      mount: (container) => {
-        ReactDOM.render(
-          <KibanaRenderContextProvider {...core}>
-            <SearchBar
-              globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
-              navigateToUrl={application.navigateToUrl}
-              taggingApi={savedObjectsTagging}
-              basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
-              chromeStyle$={core.chrome.getChromeStyle$()}
-              reportEvent={reportEvent}
-            />
-          </KibanaRenderContextProvider>,
-          container
-        );
+      content: (
+        <SearchBar
+          globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
+          navigateToUrl={application.navigateToUrl}
+          taggingApi={savedObjectsTagging}
+          basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
+          chromeStyle$={core.chrome.getChromeStyle$()}
+          reportEvent={reportEvent}
+        />
+      ),
+    });
 
-        return () => ReactDOM.unmountComponentAtNode(container);
-      },
-    };
-    return navControl;
+    return {};
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScreenshotRefImageData } from '../../../../common/runtime_types';
+import type { ScreenshotRefImageData } from '../../../../common/runtime_types';
 import * as composeScreenshotImages from '../../hooks/use_composite_image';
 
 jest

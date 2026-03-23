@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Notebook } from './types';
+import type { Notebook } from './types';
 
 export const INTRODUCTION_NOTEBOOK: Notebook = {
   id: 'introduction',

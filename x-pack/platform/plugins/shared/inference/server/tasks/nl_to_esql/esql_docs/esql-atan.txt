@@ -1,6 +1,6 @@
 # ATAN
 
-The ATAN function returns the arctangent of a given numeric expression, expressed in radians.
+The ATAN function returns the arctangent of a numeric expression as an angle in radians.
 
 ## Syntax
 
@@ -10,16 +10,13 @@ The ATAN function returns the arctangent of a given numeric expression, expresse
 
 #### number
 
-This is a numeric expression. If the parameter is `null`, the function will also return `null`.
+Numeric expression for which to calculate the arctangent. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-```esql
-ROW a=12.9
-| EVAL atan = ATAN(a)
-```
+Calculates the arctangent of the value in column `a` and stores the result in a new column called `atan`:
 
 ```esql
-ROW x=5.0, y=3.0
-| EVAL atan_yx = ATAN(y / x)
+ROW a=12.9
+| EVAL atan=ATAN(a)
 ```

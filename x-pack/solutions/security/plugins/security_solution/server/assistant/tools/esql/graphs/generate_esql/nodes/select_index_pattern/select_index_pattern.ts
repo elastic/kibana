@@ -14,7 +14,7 @@ import { NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE } from '../../constants';
 export const getSelectIndexPattern = ({
   identifyIndexGraph,
 }: {
-  identifyIndexGraph: ReturnType<typeof getSelectIndexPatternGraph>;
+  identifyIndexGraph: Awaited<ReturnType<typeof getSelectIndexPatternGraph>>;
 }) => {
   return async (state: typeof GenerateEsqlAnnotation.State) => {
     const childGraphOutput = await identifyIndexGraph.invoke({

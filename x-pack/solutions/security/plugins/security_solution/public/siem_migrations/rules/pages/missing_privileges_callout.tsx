@@ -8,14 +8,14 @@
 import React, { useMemo } from 'react';
 import hash from 'object-hash';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_LISTS_INDEX, DEFAULT_ITEMS_INDEX } from '../../../../common/constants';
-import { missingPrivilegesCallOutBody } from '../../../detections/components/callouts/missing_privileges_callout/translations';
+import { DEFAULT_ITEMS_INDEX, DEFAULT_LISTS_INDEX } from '../../../../common/constants';
+import { missingPrivilegesCallOutBody } from '../../../common/components/missing_privileges';
 import {
-  useMissingPrivileges,
-  type MissingPrivileges,
   type MissingIndexPrivileges,
-} from '../../../detections/components/callouts/missing_privileges_callout/use_missing_privileges';
-import { CallOutSwitcher, type CallOutMessage } from '../../../common/components/callouts';
+  type MissingPrivileges,
+  useMissingPrivileges,
+} from '../../../common/hooks/use_missing_privileges';
+import { type CallOutMessage, CallOutSwitcher } from '../../../common/components/callouts';
 import { useGetMigrationMissingPrivileges } from '../logic/use_get_migration_privileges';
 
 export const MissingPrivilegesCallOut = React.memo(() => {

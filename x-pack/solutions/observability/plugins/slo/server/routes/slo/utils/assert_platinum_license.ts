@@ -6,7 +6,7 @@
  */
 
 import { forbidden } from '@hapi/boom';
-import { SLORoutesDependencies } from '../../types';
+import type { SLORoutesDependencies } from '../../types';
 
 export const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
   const licensing = await plugins.licensing.start();

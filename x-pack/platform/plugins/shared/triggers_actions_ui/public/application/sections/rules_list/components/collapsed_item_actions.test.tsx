@@ -6,11 +6,14 @@
  */
 import * as React from 'react';
 import moment from 'moment';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { RuleTableItem, RuleTypeModel } from '../../../../types';
+import type { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -86,6 +89,7 @@ describe('CollapsedItemActions', () => {
       actionsCount: 1,
       index: 0,
       ruleType: 'Test Rule Type',
+      isInternallyManaged: false,
       isEditable: true,
       enabledInLicense: true,
       revision: 0,
@@ -107,6 +111,99 @@ describe('CollapsedItemActions', () => {
       onCloneRule,
     };
   };
+
+  describe('when the rule is internally managed', () => {
+    beforeAll(async () => {
+      await setup(true);
+    });
+
+    test('render update key action as only item', async () => {
+      render(
+        <CollapsedItemActions
+          {...getPropsWithRule({
+            isInternallyManaged: true,
+            name: 'internally managed rule',
+          })}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+
+      expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
+      expect(screen.queryByTestId('disableButtonInternallyManaged')).toBeInTheDocument();
+      expect(screen.queryByTestId('snoozeButton')).toBeNull();
+      expect(screen.queryByTestId('disableButton')).toBeNull();
+      expect(screen.queryByTestId('editRule')).toBeNull();
+      expect(screen.queryByTestId('deleteRule')).toBeNull();
+      expect(screen.queryByTestId('runRule')).toBeNull();
+      expect(screen.queryByTestId('cloneRule')).toBeNull();
+    });
+  });
+
+  describe('Lifecycle alerts', () => {
+    beforeAll(async () => {
+      await setup();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: true })} />);
+
+      expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('disableButton'));
+      await waitFor(async () => {
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
+      });
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: undefined })} />);
+
+      expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('disableButton'));
+      await waitFor(async () => {
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
+      });
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: false })} />);
+
+      expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('disableButton'));
+      await waitFor(async () => {
+        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+        expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
+      });
+    });
+  });
 
   describe('with app context', () => {
     beforeAll(async () => {

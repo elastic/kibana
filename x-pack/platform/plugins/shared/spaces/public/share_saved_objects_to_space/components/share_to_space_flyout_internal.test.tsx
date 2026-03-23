@@ -159,9 +159,10 @@ function changeSpaceSelection(wrapper: ReactWrapper, selectedSpaces: string[]) {
 }
 
 async function clickButton(wrapper: ReactWrapper, button: 'continue' | 'save' | 'copy') {
+  wrapper.update();
   const buttonNode = findTestSubject(wrapper, `sts-${button}-button`);
   await act(async () => {
-    buttonNode.simulate('click');
+    buttonNode.first().simulate('click');
     await nextTick();
     wrapper.update();
   });
@@ -621,7 +622,7 @@ describe('ShareToSpaceFlyout', () => {
             <EuiIconTip
               content="You need additional privileges to deselect this space."
               position="left"
-              type="iInCircle"
+              type="info"
             />
             <EuiIconTip
               color="warning"
@@ -637,7 +638,7 @@ describe('ShareToSpaceFlyout', () => {
             <EuiIconTip
               content="You need additional privileges to deselect this space."
               position="left"
-              type="iInCircle"
+              type="info"
             />
           </React.Fragment>
         `);
@@ -647,7 +648,7 @@ describe('ShareToSpaceFlyout', () => {
             <EuiIconTip
               content="You need additional privileges to select this space."
               position="left"
-              type="iInCircle"
+              type="info"
             />
           </React.Fragment>
         `);

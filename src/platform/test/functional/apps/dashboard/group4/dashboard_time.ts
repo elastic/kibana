@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const dashboardName = 'Dashboard Test Time';
 
@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dashboard with stored timed', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/241757
+    describe.skip('dashboard with stored timed', function () {
       it('is saved with time', async function () {
         await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
@@ -95,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectEmptyPieChart();
       });
 
-      it('should use saved time, if time is missing in global state, but _g is present in the url', async function () {
+      it('should use unsaved saved time from session storage, if time is missing in global state, but _g is present in the url', async function () {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await dashboard.getDashboardIdFromCurrentUrl();
@@ -104,9 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
+
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.equal(timePicker.defaultStartTime);
-        expect(time.end).to.equal(timePicker.defaultEndTime);
+        expect(time.start).to.equal('~ an hour ago');
+        expect(time.end).to.equal('now');
       });
 
       it('should use saved time after time change is undone', async function () {

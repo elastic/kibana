@@ -9,12 +9,12 @@
 
 import moment from 'moment';
 
-import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/chart-expressions-common';
 
 import { initXAxis } from './_init_x_axis';
 import { makeFakeXAspect } from './_fake_x_aspect';
-import { Aspects, Chart, DateHistogramOrdered, HistogramOrdered } from './point_series';
-import { Table, Column } from '../../types';
+import type { Aspects, Chart, DateHistogramOrdered, HistogramOrdered } from './point_series';
+import type { Table, Column } from '../../types';
 
 describe('initXAxis', function () {
   let chart: Chart;

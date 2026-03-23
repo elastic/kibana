@@ -6,8 +6,8 @@
  */
 
 import { useCallback } from 'react';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { NavigationSource } from '../services/telemetry';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { NavigationSource } from '../services/telemetry';
 import { useDatasetTelemetry } from './use_dataset_telemetry';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 

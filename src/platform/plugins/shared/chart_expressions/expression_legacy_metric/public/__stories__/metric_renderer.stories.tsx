@@ -9,15 +9,18 @@
 
 import React from 'react';
 import { from } from 'rxjs';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable, DatatableColumn, TextAlignment } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { TextAlignment } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { ColorMode } from '@kbn/charts-plugin/common';
 import { getFormatService } from '../__mocks__/format_service';
 import { getPaletteService } from '../__mocks__/palette_service';
-import { ExpressionMetricVisRendererDependencies } from '../expression_renderers/metric_vis_renderer';
+import type { ExpressionMetricVisRendererDependencies } from '../expression_renderers/metric_vis_renderer';
 import { getMetricVisRenderer } from '../expression_renderers';
-import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
+import type { MetricStyle, MetricVisRenderConfig } from '../../common/types';
+import { visType } from '../../common/types';
 import { LabelPosition } from '../../common/constants';
 import { setFormatService } from '../services/format_service';
 import { setPaletteService } from '../services/palette_service';

@@ -25,6 +25,7 @@ import type {
   InMemoryPackagePolicy,
   PackageInfo,
   PackagePolicy,
+  PackagePolicyPackage,
 } from '../../../../../types';
 import {
   useLink,
@@ -49,7 +50,8 @@ export const PackagePoliciesPage = ({
   packageInfo: PackageInfo;
   embedded?: boolean;
 }) => {
-  const { name, version } = packageInfo;
+  const { name, version, type } = packageInfo;
+
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const addAgentToPolicyIdFromParams = useMemo(
@@ -64,11 +66,16 @@ export const PackagePoliciesPage = ({
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
 
-  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
-  const { isAgentlessIntegration } = useAgentless();
+  const {
+    isPackagePolicyUpgradable,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+    getUpgradeVersion,
+  } = useIsPackagePolicyUpgradable();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const canHaveAgentlessPolicies = useMemo(
-    () => isAgentlessIntegration(packageInfo),
-    [isAgentlessIntegration, packageInfo]
+    () => getAgentlessStatusForPackage(packageInfo).isAgentless,
+    [getAgentlessStatusForPackage, packageInfo]
   );
 
   // Helper function to map raw policies data for consumption by the table
@@ -79,18 +86,30 @@ export const PackagePoliciesPage = ({
         packagePolicy,
       }: { agentPolicies: AgentPolicy[]; packagePolicy: PackagePolicy },
       index: number
-    ) => {
-      const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
+    ): { agentPolicies: AgentPolicy[]; packagePolicy: InMemoryPackagePolicy; rowIndex: number } => {
       return {
         agentPolicies,
         packagePolicy: {
           ...packagePolicy,
-          hasUpgrade,
+          package: {
+            ...(packagePolicy?.package as PackagePolicyPackage),
+            type,
+          },
+          hasUpgrade: isPackagePolicyUpgradable(packagePolicy),
+          upgradeVersion: getUpgradeVersion(packagePolicy),
+          pendingUpgradeReview: getPackagePolicyUpgradeReview(packagePolicy),
+          keepPoliciesUpToDate: getKeepPoliciesUpToDate(packagePolicy),
         },
         rowIndex: index,
       };
     },
-    [isPackagePolicyUpgradable]
+    [
+      isPackagePolicyUpgradable,
+      getUpgradeVersion,
+      getPackagePolicyUpgradeReview,
+      getKeepPoliciesUpToDate,
+      type,
+    ]
   );
 
   // States and data for agent-based policies table
@@ -122,9 +141,10 @@ export const PackagePoliciesPage = ({
     }`,
   });
   useEffect(() => {
-    setAgentBasedPackageAndAgentPolicies(
-      !agentBasedData?.items ? [] : agentBasedData.items.map(mapPoliciesData)
-    );
+    const mappedPoliciesData = !agentBasedData?.items
+      ? []
+      : agentBasedData.items.map(mapPoliciesData);
+    setAgentBasedPackageAndAgentPolicies(mappedPoliciesData);
   }, [agentBasedData, mapPoliciesData]);
 
   // States and data for agentless policies table
@@ -195,6 +215,7 @@ export const PackagePoliciesPage = ({
               }}
               addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
               showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
+              from={embedded ? 'installed-integrations' : undefined}
             />
           ) : (
             <>
@@ -238,6 +259,7 @@ export const PackagePoliciesPage = ({
                       pageSizeOptions: agentlessPageSizeOptions,
                       setPagination: agentlessSetPagination,
                     }}
+                    from={embedded ? 'installed-integrations' : undefined}
                   />
                 </EuiPanel>
               </EuiAccordion>
@@ -284,6 +306,7 @@ export const PackagePoliciesPage = ({
                     }}
                     addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
                     showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
+                    from={embedded ? 'installed-integrations' : undefined}
                   />
                 </EuiPanel>
               </EuiAccordion>

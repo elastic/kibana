@@ -17,6 +17,6 @@ export const ESQL_QUERY = i18n.translate(
 export const ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.ruleManagement.fields.esqlQuery.ariaLabel',
   {
-    defaultMessage: `Open help popover`,
+    defaultMessage: `ES|QL query help`,
   }
 );

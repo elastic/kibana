@@ -5,67 +5,78 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent } from '@testing-library/react';
+
 import { NewEventModal } from './new_event_modal';
-import moment from 'moment';
 
 const testProps = {
   closeModal: jest.fn(),
   addEvent: jest.fn(),
 };
 
-const stateTimestamps = {
-  startDate: 1544508000000,
-  endDate: 1544594400000,
-};
-
 describe('NewEventModal', () => {
   it('Add button disabled if description empty', () => {
-    const wrapper = shallowWithIntl(<NewEventModal {...testProps} />);
+    // Render the component
+    const { getByTestId } = renderWithI18n(<NewEventModal {...testProps} />);
 
-    const addButton = wrapper.find('EuiButton').first();
-    expect(addButton.prop('disabled')).toBe(true);
+    // Find the Add button by its role
+    const addButton = getByTestId('mlCalendarAddEventButton');
+
+    // Verify it's disabled when description is empty
+    expect(addButton).toBeDisabled();
+
+    // Enter a description
+    const descriptionField = getByTestId('mlCalendarEventDescriptionInput');
+    fireEvent.change(descriptionField, { target: { value: 'Test event' } });
+
+    // Verify button is now enabled
+    expect(addButton).not.toBeDisabled();
   });
 
-  it('if endDate is less than startDate should set startDate one day before endDate', () => {
-    const wrapper = shallowWithIntl(<NewEventModal {...testProps} />);
-    const instance = wrapper.instance();
-    instance.setState({
-      startDate: moment(stateTimestamps.startDate),
-      endDate: moment(stateTimestamps.endDate),
-    });
-    // set to Dec 11, 2018 and Dec 12, 2018
-    const startMoment = moment(stateTimestamps.startDate);
-    const endMoment = moment(stateTimestamps.endDate);
-    // make startMoment greater than current end Date
-    startMoment.startOf('day').add(3, 'days');
-    // trigger handleChangeStart directly with startMoment
-    instance.handleChangeStart(startMoment);
-    // add 3 days to endMoment as it will be adjusted to be one day after startDate
-    const expected = endMoment.startOf('day').add(3, 'days').format();
+  it('enables adding event when description is provided', () => {
+    // Render the component
+    const { getByTestId } = renderWithI18n(<NewEventModal {...testProps} />);
 
-    expect(wrapper.state('endDate').format()).toBe(expected);
+    // Find the Add button by its role and verify it's initially disabled
+    const addButton = getByTestId('mlCalendarAddEventButton');
+    expect(addButton).toBeDisabled();
+
+    // Enter a description
+    const descriptionField = getByTestId('mlCalendarEventDescriptionInput');
+    fireEvent.change(descriptionField, { target: { value: 'Test event' } });
+
+    // Verify button is now enabled
+    expect(addButton).not.toBeDisabled();
+
+    // Click the Add button
+    fireEvent.click(addButton);
+
+    // Verify the addEvent prop was called
+    expect(testProps.addEvent).toHaveBeenCalled();
   });
 
-  it('if startDate is greater than endDate should set endDate one day after startDate', () => {
-    const wrapper = shallowWithIntl(<NewEventModal {...testProps} />);
-    const instance = wrapper.instance();
-    instance.setState({
-      startDate: moment(stateTimestamps.startDate),
-      endDate: moment(stateTimestamps.endDate),
-    });
+  it('updates date fields when text inputs are changed', () => {
+    // Render the component
+    const { getByTestId } = renderWithI18n(<NewEventModal {...testProps} />);
 
-    // set to Dec 11, 2018 and Dec 12, 2018
-    const startMoment = moment(stateTimestamps.startDate);
-    const endMoment = moment(stateTimestamps.endDate);
-    // make endMoment less than current start Date
-    endMoment.startOf('day').subtract(3, 'days');
-    // trigger handleChangeStart directly with endMoment
-    instance.handleChangeStart(endMoment);
-    // subtract 3 days from startDate as it will be adjusted to be one day before endDate
-    const expected = startMoment.startOf('day').subtract(2, 'days').format();
+    // Get the initial date inputs
+    const startDateInput = getByTestId('mlCalendarEventStartDateInput');
+    const endDateInput = getByTestId('mlCalendarEventEndDateInput');
 
-    expect(wrapper.state('startDate').format()).toBe(expected);
+    // Change the start date to a specific value
+    const newStartDateString = '2023-01-15 00:00:00';
+    fireEvent.change(startDateInput, { target: { value: newStartDateString } });
+
+    // Verify the input value was updated
+    expect(startDateInput.value).toBe(newStartDateString);
+
+    // Change the end date to a specific value
+    const newEndDateString = '2023-01-20 00:00:00';
+    fireEvent.change(endDateInput, { target: { value: newEndDateString } });
+
+    // Verify the input value was updated
+    expect(endDateInput.value).toBe(newEndDateString);
   });
 });

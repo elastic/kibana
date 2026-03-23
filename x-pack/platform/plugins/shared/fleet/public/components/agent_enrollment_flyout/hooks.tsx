@@ -18,7 +18,12 @@ import {
   useGetPackageInfoByKeyQuery,
   useStartServices,
 } from '../../hooks';
-import { FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common';
+import {
+  FLEET_KUBERNETES_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_ASSET_PACKAGE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
+} from '../../../common';
 
 import {
   getTemplateUrlFromAgentPolicy,
@@ -43,7 +48,7 @@ import type {
 } from './types';
 
 // Packages that requires custom elastic-agent manifest
-const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
+const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_DEFEND_PACKAGE]);
 
 export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   const [agentPolicyWithPackagePolicies, setAgentPolicy] = useState<AgentPolicy | null>(null);
@@ -53,6 +58,7 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   useEffect(() => {
     async function loadPolicy(policyIdToLoad?: string) {
       if (!policyIdToLoad) {
+        setAgentPolicy(null);
         return;
       }
       try {
@@ -103,11 +109,15 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
   }, [agentPolicy]);
 
   const integrationVersion = cloudSecurityPackagePolicy?.package?.version;
+  const packageName =
+    cloudSecurityPackagePolicy?.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+      ? FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+      : FLEET_CLOUD_SECURITY_ASSET_PACKAGE;
 
   // Fetch the package info to get the CloudFormation template URL only
   // if the package policy is a Cloud Security policy
   const { data: packageInfoData, isLoading } = useGetPackageInfoByKeyQuery(
-    FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+    packageName,
     integrationVersion,
     { full: true },
     { enabled: Boolean(cloudSecurityPackagePolicy) }
@@ -198,7 +208,9 @@ const getCloudSecurityPackagePolicyFromAgentPolicy = (
   agentPolicy?: AgentPolicy
 ): PackagePolicy | undefined => {
   return agentPolicy?.package_policies?.find(
-    (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+    (input) =>
+      input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE ||
+      input.package?.name === FLEET_CLOUD_SECURITY_ASSET_PACKAGE
   );
 };
 

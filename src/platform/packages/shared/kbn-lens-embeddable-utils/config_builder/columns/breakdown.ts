@@ -8,8 +8,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
-import {
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
+import type {
   LensBreakdownConfig,
   LensBreakdownDateHistogramConfig,
   LensBreakdownFiltersConfig,

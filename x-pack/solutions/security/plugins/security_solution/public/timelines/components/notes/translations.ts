@@ -44,7 +44,3 @@ export const YOU_ARE_VIEWING_NOTES = (row: number) =>
     defaultMessage:
       'You are viewing notes for the event in row {row}. Press the up arrow key when finished to return to the event.',
   });
-
-export const CREATED_BY = i18n.translate('xpack.securitySolution.notes.createdByLabel', {
-  defaultMessage: 'Created by',
-});

@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { deletePolicies } from '../services/http';
@@ -27,6 +27,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
   const [policyNames, setPolicyNames] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deletePolicyPrompt: DeletePolicy = (names, onSuccess = () => undefined) => {
     if (!names || !names.length) {
@@ -97,6 +98,8 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         title={
           isSingle ? (
             <FormattedMessage

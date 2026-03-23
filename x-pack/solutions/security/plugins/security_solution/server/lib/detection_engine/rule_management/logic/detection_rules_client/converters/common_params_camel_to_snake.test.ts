@@ -15,6 +15,8 @@ describe('commonParamsCamelToSnake', () => {
       ruleSource: {
         type: 'external',
         isCustomized: false,
+        customizedFields: [],
+        hasBaseVersion: true,
       },
     });
     expect(transformedParams).toEqual(
@@ -22,6 +24,8 @@ describe('commonParamsCamelToSnake', () => {
         rule_source: {
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
         },
       })
     );

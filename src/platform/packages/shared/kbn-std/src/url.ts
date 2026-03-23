@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format as formatUrl, parse as parseUrl } from 'url';
 import type { ParsedQuery } from 'query-string';
 
 /**

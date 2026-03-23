@@ -29,7 +29,6 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
@@ -228,6 +227,7 @@ export function compareAddresses(a: string, b: string) {
 }
 
 export const EnrollmentTokenHelpPopover = () => {
+  const { docLinks } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
@@ -266,12 +266,16 @@ export const EnrollmentTokenHelpPopover = () => {
         </EuiCodeBlock>
       </EuiText>
       <EuiPopoverFooter>
-        <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+        <EuiLink
+          href={docLinks.links.security.enableElasticSearchSecurityFeatures}
+          target="_blank"
+          external
+        >
           <FormattedMessage
             id="interactiveSetup.enrollmentTokenHelpPopover.docLinkText"
             defaultMessage="Learn how to set up Elastic."
           />
-        </DocLink>
+        </EuiLink>
       </EuiPopoverFooter>
     </EuiPopover>
   );

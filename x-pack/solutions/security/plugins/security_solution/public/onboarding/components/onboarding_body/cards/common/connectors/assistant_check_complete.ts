@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
-import { loadAiConnectors } from './ai_connectors';
 import { getConnectorsAuthz } from './authz';
 import type { AssistantCardMetadata } from '../../assistant/types';
 
@@ -19,14 +19,14 @@ const completeBadgeText = (count: number) =>
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
-> = async ({ http, application }) => {
+> = async ({ http, application, settings }) => {
   const authz = getConnectorsAuthz(application.capabilities);
 
   if (!authz.canReadConnectors) {
     return { isComplete: false, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors(http);
+  const aiConnectors = await loadAiConnectors({ http, settings });
 
   return {
     isComplete: aiConnectors.length > 0,

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchResponseError,
-  isNotFoundException,
-  isResourceNotFoundException,
-} from '../../utils/identify_exceptions';
+import type { ElasticsearchResponseError } from '../../utils/identify_exceptions';
+import { isNotFoundException, isResourceNotFoundException } from '../../utils/identify_exceptions';
 
 export function isNotFoundExceptionError(error: unknown): boolean {
   return (

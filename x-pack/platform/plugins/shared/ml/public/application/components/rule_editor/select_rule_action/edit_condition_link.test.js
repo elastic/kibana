@@ -8,62 +8,62 @@
 jest.mock('../../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent } from '@testing-library/react';
 import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils';
 
 import { EditConditionLink } from './edit_condition_link';
 
-function prepareTest(updateConditionValueFn, appliesTo) {
-  const anomaly = {
-    actual: [210],
-    typical: [1.23],
-    detectorIndex: 0,
-    source: {
-      function: 'mean',
-      airline: ['AAL'],
-    },
-  };
+// Common test data
+const testAnomaly = {
+  actual: [210],
+  typical: [1.23],
+  detectorIndex: 0,
+  source: {
+    function: 'mean',
+    airline: ['AAL'],
+  },
+};
 
-  const props = {
+describe('EditConditionLink', () => {
+  const updateConditionValue = jest.fn();
+
+  // Helper function to get common props
+  const getProps = (appliesTo) => ({
     conditionIndex: 0,
     conditionValue: 5,
     appliesTo,
-    anomaly,
-    updateConditionValue: updateConditionValueFn,
-  };
-
-  const wrapper = shallowWithIntl(<EditConditionLink {...props} />);
-
-  return wrapper;
-}
-
-describe('EditConditionLink', () => {
-  const updateConditionValue = jest.fn(() => {});
+    anomaly: testAnomaly,
+    updateConditionValue,
+  });
 
   test(`renders for a condition using actual`, () => {
-    const wrapper = prepareTest(updateConditionValue, ML_DETECTOR_RULE_APPLIES_TO.ACTUAL);
-    expect(wrapper).toMatchSnapshot();
+    const props = getProps(ML_DETECTOR_RULE_APPLIES_TO.ACTUAL);
+    const { container } = renderWithI18n(<EditConditionLink {...props} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test(`renders for a condition using typical`, () => {
-    const wrapper = prepareTest(updateConditionValue, ML_DETECTOR_RULE_APPLIES_TO.TYPICAL);
-    expect(wrapper).toMatchSnapshot();
+    const props = getProps(ML_DETECTOR_RULE_APPLIES_TO.TYPICAL);
+    const { container } = renderWithI18n(<EditConditionLink {...props} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test(`renders for a condition using diff from typical`, () => {
-    const wrapper = prepareTest(
-      updateConditionValue,
-      ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL
-    );
-    expect(wrapper).toMatchSnapshot();
+    const props = getProps(ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL);
+    const { container } = renderWithI18n(<EditConditionLink {...props} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('calls updateConditionValue on clicking update link', () => {
-    const wrapper = prepareTest(updateConditionValue, ML_DETECTOR_RULE_APPLIES_TO.ACTUAL);
-    const instance = wrapper.instance();
-    instance.onUpdateClick();
-    wrapper.update();
+    const props = getProps(ML_DETECTOR_RULE_APPLIES_TO.ACTUAL);
+    const { getByRole } = renderWithI18n(<EditConditionLink {...props} />);
+
+    // Find and click the update button
+    const updateButton = getByRole('button', { name: 'Update' });
+    fireEvent.click(updateButton);
+
+    // Verify the function was called with the correct arguments
     expect(updateConditionValue).toHaveBeenCalledWith(0, 210);
   });
 });

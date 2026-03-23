@@ -16,7 +16,7 @@ import type {
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type { PackageList } from '../../../common';
 
@@ -25,6 +25,7 @@ import type {
   BundledPackage,
   CategoryId,
   EsAssetReference,
+  GetInstalledPackagesRequestSchema,
   InstallablePackage,
   Installation,
   RegistryPackage,
@@ -37,7 +38,11 @@ import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/ep
 
 import type { InstallResult } from '../../../common';
 
-import { appContextService } from '..';
+import { appContextService, packagePolicyService } from '..';
+
+import type { GetInstalledPackagesResponse, RollbackPackageResponse } from '../../../common/types';
+
+import type { TemplateAgentPolicyInput } from '../../../common/types/models/agent_policy';
 
 import {
   type CustomPackageDatasetConfiguration,
@@ -57,10 +62,12 @@ import {
   installPackage,
   getTemplateInputs,
   getPackageInfo,
+  getInstalledPackages,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
 import { createArchiveIteratorFromMap } from './archive/archive_iterator';
+import { rollbackInstallation } from './packages/rollback';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -70,7 +77,10 @@ export interface PackageService {
 }
 
 export interface PackageClient {
-  getInstallation(pkgName: string): Promise<Installation | undefined>;
+  getInstallation(
+    pkgName: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ): Promise<Installation | undefined>;
 
   ensureInstalledPackage(options: {
     pkgName: string;
@@ -85,6 +95,8 @@ export interface PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -129,14 +141,22 @@ export interface PackageClient {
   getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ): Promise<string>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
     assetPaths: string[]
   ): Promise<InstalledAssetType[]>;
+
+  getInstalledPackages(
+    params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+  ): Promise<GetInstalledPackagesResponse>;
+
+  rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -179,8 +199,6 @@ export class PackageServiceImpl implements PackageService {
 }
 
 class PackageClientImpl implements PackageClient {
-  private authorizationHeader?: HTTPAuthorizationHeader | null = undefined;
-
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
@@ -191,18 +209,14 @@ class PackageClientImpl implements PackageClient {
     private readonly request?: KibanaRequest
   ) {}
 
-  private getAuthorizationHeader() {
-    if (this.request) {
-      this.authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
-      return this.authorizationHeader;
-    }
-  }
-
-  public async getInstallation(pkgName: string) {
+  public async getInstallation(
+    pkgName: string,
+    savedObjectsClient: SavedObjectsClientContract = this.internalSoClient
+  ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getInstallation({
       pkgName,
-      savedObjectsClient: this.internalSoClient,
+      savedObjectsClient,
     });
   }
 
@@ -227,6 +241,8 @@ class PackageClientImpl implements PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
@@ -236,6 +252,8 @@ class PackageClientImpl implements PackageClient {
       spaceId = DEFAULT_SPACE_ID,
       force = false,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     } = options;
 
     // If pkgVersion isn't specified, find the latest package version
@@ -253,6 +271,8 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
   }
 
@@ -283,7 +303,7 @@ class PackageClientImpl implements PackageClient {
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
-      authorizationHeader: this.getAuthorizationHeader(),
+      request: this.request,
     });
   }
 
@@ -305,8 +325,10 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
 
@@ -321,8 +343,10 @@ class PackageClientImpl implements PackageClient {
       pkgName,
       pkgVersion,
       'yml',
+      isInputIncluded,
       prerelease,
-      ignoreUnverified
+      ignoreUnverified,
+      injectWiredStreamsRouting
     );
   }
 
@@ -368,6 +392,18 @@ class PackageClientImpl implements PackageClient {
     });
   }
 
+  public async getInstalledPackages(
+    params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+  ): Promise<GetInstalledPackagesResponse> {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    return getInstalledPackages({
+      savedObjectsClient: this.internalSoClient,
+      esClient: this.internalEsClient,
+      ...params,
+    });
+  }
+
   public async reinstallEsAssets(
     packageInfo: InstallablePackage,
     assetPaths: string[]
@@ -389,9 +425,30 @@ class PackageClientImpl implements PackageClient {
     return installedAssets;
   }
 
-  async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const authorizationHeader = this.getAuthorizationHeader();
+  public async rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse> {
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
+    const { pkgName } = options;
+    const esClient = this.internalEsClient;
+    const soClient = this.internalSoClient;
 
+    const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(soClient, {
+      searchFields: ['package.name'],
+      search: pkgName,
+      spaceIds: ['*'],
+      fields: ['id', 'name'],
+    });
+    // rollback all package policies that are accessible to the internal user, we don't have a request when called from an async task
+    const packagePolicyIdsForInternalUser = packagePolicySORes.saved_objects.map((so) => so.id);
+
+    return await rollbackInstallation({
+      esClient,
+      currentUserPolicyIds: packagePolicyIdsForInternalUser,
+      pkgName,
+      spaceId: '*',
+    });
+  }
+
+  async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
     const installation = await this.getInstallation(packageInfo.name);
 
     if (!installation) {
@@ -423,7 +480,7 @@ class PackageClientImpl implements PackageClient {
       logger: this.logger,
       force: true,
       esReferences: undefined,
-      authorizationHeader,
+      request: this.request,
     });
     return installedTransforms;
   }

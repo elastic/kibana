@@ -17,14 +17,13 @@ context.
 
 That API receive the inbound request as parameter.
 
-Example:
+Example, by default it will check with the default ELSER model:
 ```ts
-if (await llmTasksStart.retrieveDocumentationAvailable({ request })) {
+if (await llmTasksStart.retrieveDocumentationAvailable({ inferenceId })) {
   // task is available
 } else {
   // task is not available
 }
-```
 
 ### Executing the task
 
@@ -37,6 +36,7 @@ const result = await llmTasksStart.retrieveDocumentation({
   searchTerm: "How to create a space in Kibana?",
   request,
   connectorId: 'my-connector-id',
+  inferenceId: 'my-inference-id',
 });
 
 const { success, documents } = result;

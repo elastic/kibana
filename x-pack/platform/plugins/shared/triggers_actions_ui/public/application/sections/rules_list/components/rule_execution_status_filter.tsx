@@ -14,7 +14,8 @@ import {
   EuiHealth,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
+import type { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
 import { getExecutionStatusHealthColor } from '../../../../common/lib';
 
@@ -59,6 +60,7 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
       button={
         <EuiFilterButton
           iconType="arrowDown"
+          isSelected={isPopoverOpen}
           hasActiveFilters={selectedValues.length > 0}
           numActiveFilters={selectedValues.length}
           numFilters={selectedValues.length}

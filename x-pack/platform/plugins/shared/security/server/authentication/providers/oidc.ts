@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type from 'type-detect';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -18,11 +19,11 @@ import {
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
@@ -87,7 +88,7 @@ function canStartNewSession(request: KibanaRequest) {
 /**
  * Provider that supports authentication using an OpenID Connect realm in Elasticsearch.
  */
-export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
+export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -118,14 +119,16 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * Performs OpenID Connect request authentication.
    * @param request Request instance.
    * @param attempt Login attempt description.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
   public async login(
     request: KibanaRequest,
     attempt: ProviderLoginAttempt,
-    state?: ProviderState | null
+    session?: SessionValue<ProviderState> | null
   ) {
     this.logger.debug('Trying to perform a login.');
+
+    const state = session?.state;
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
     // we should clear such session an log user out.
@@ -170,9 +173,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs OpenID Connect request authentication.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -184,20 +187,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
     // we should clear such session an log user out.
-    if (state?.realm && state.realm !== this.realm) {
-      const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
+    if (session?.state?.realm && session?.state.realm !== this.realm) {
+      const message = `State based on realm "${session.state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (state) {
-      authenticationResult = await this.authenticateViaState(request, state);
+    if (session) {
+      authenticationResult = await this.authenticateViaState(request, session);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
       ) {
-        authenticationResult = await this.authenticateViaRefreshToken(request, state);
+        authenticationResult = await this.authenticateViaRefreshToken(request, session.state);
       }
     }
 
@@ -304,12 +307,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      const { state, nonce, redirect } =
+      const { state, nonce, realm, redirect } =
         (await this.options.client.asInternalUser.transport.request({
           method: 'POST',
           path: '/_security/oidc/prepare',
           body: params,
         })) as any;
+
+      if (realm !== this.realm) {
+        this.logger.debug(
+          `Provider is configured with the "${this.realm}" realm and isn't compatible with the "${realm}" ` +
+            `realm used by Elasticsearch to prepare the authentication request. Skipping provider…`
+        );
+        return AuthenticationResult.notHandled();
+      }
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       return AuthenticationResult.redirectTo(
@@ -329,21 +340,21 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract an elasticsearch access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session value previously stored by the provider.
    */
-  private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
 
-    if (!accessToken) {
+    if (!session.state?.accessToken) {
       this.logger.debug('Elasticsearch access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders = {
+      authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
+    };
     try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
@@ -374,27 +385,24 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
+      // When user has neither valid access nor refresh token, the only way to resolve this issue is to redirect
+      // user to OpenID Connect provider, re-initiate the authentication flow and get a new access/refresh token
+      // pair as result. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error
+      // message. There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it
+      // seems logical to do the same on Kibana side and `401` would force user to logout and do full SLO if it's
+      // supported.
+      if (err instanceof InvalidGrantError) {
+        if (canStartNewSession(request)) {
+          this.logger.warn(
+            'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
+          );
+          return this.initiateAuthenticationHandshake(request);
+        }
+
+        return AuthenticationResult.failed(Boom.badRequest(err.message));
+      }
       this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
-    }
-
-    // When user has neither valid access nor refresh token, the only way to resolve this issue is to redirect
-    // user to OpenID Connect provider, re-initiate the authentication flow and get a new access/refresh token
-    // pair as result. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error
-    // message. There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it
-    // seems logical to do the same on Kibana side and `401` would force user to logout and do full SLO if it's
-    // supported.
-    if (refreshTokenResult === null) {
-      if (canStartNewSession(request)) {
-        this.logger.warn(
-          'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
-        );
-        return this.initiateAuthenticationHandshake(request);
-      }
-
-      return AuthenticationResult.failed(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');
@@ -414,19 +422,19 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * Invalidates an elasticsearch access token and refresh token that were originally created as a successful response
    * to an OpenID Connect based authentication. This does not handle OP initiated Single Logout
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       this.logger.debug('There is no elasticsearch access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    if (state?.accessToken) {
+    if (session?.state?.accessToken) {
       try {
         // This operation should be performed on behalf of the user with a privilege that normal
         // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
@@ -435,7 +443,10 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         const { redirect } = (await this.options.client.asInternalUser.transport.request({
           method: 'POST',
           path: '/_security/oidc/logout',
-          body: { token: state.accessToken, refresh_token: state.refreshToken },
+          body: {
+            token: session.state.accessToken,
+            refresh_token: session.state.refreshToken,
+          },
         })) as any;
 
         this.logger.debug('User session has been successfully invalidated.');

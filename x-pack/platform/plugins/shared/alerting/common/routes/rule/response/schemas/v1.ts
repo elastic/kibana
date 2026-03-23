@@ -17,7 +17,7 @@ import {
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
-import { flappingSchemaV1 } from '../../common';
+import { flappingSchemaV2 } from '../../common';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: {
@@ -653,7 +653,7 @@ export const ruleResponseSchema = schema.object({
     )
   ),
   alert_delay: schema.maybe(alertDelaySchema),
-  flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
   artifacts: schema.maybe(artifactsSchema),
 });
 

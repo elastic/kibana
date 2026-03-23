@@ -6,10 +6,13 @@
  */
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
@@ -17,13 +20,16 @@ import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { ColdStartBadge } from './badge/cold_start_badge';
-import { SpanLinksBadge } from './badge/span_links_badge';
 import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
-import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import type {
+  IWaterfallSpan,
+  IWaterfallSpanOrTransaction,
+} from './waterfall_helpers/waterfall_helpers';
+import { SpanLinksBadge } from '../../../../../shared/trace_waterfall/badges/span_links_badge';
+import { ColdStartBadge } from '../../../../../shared/trace_waterfall/badges/cold_start_badge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -76,6 +82,7 @@ const ItemText = styled.span`
   align-items: center;
   height: ${({ theme }) => theme.euiTheme.size.l};
   max-width: 100%;
+  overflow-x: auto;
 
   /* add margin to all direct descendants */
   & > * {
@@ -125,6 +132,7 @@ interface IWaterfallItemProps {
     color: string;
   }>;
   onClick?: (flyoutDetailTab: string) => unknown;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable?: boolean;
 }
 
@@ -136,7 +144,7 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
       // icon for database spans
       const isDbType = spanType.startsWith('db');
       if (isDbType) {
-        return <EuiIcon type="database" />;
+        return <EuiIcon type="database" aria-hidden={true} />;
       }
 
       // omit icon for other spans
@@ -145,11 +153,11 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
     case 'transaction': {
       // icon for RUM agent transactions
       if (isRumAgentName(item.doc.agent.name)) {
-        return <EuiIcon type="globe" />;
+        return <EuiIcon type="globe" aria-hidden={true} />;
       }
 
       // icon for other transactions
-      return <EuiIcon type="merge" />;
+      return <EuiIcon type="merge" aria-hidden={true} />;
     }
     default:
       return null;
@@ -174,9 +182,9 @@ function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
 
 function Duration({ item }: { item: IWaterfallSpanOrTransaction }) {
   return (
-    <EuiText color="subdued" size="xs">
+    <EuiBadge color="hollow" iconType="clock">
       {asDuration(item.duration)}
-    </EuiText>
+    </EuiBadge>
   );
 }
 
@@ -192,6 +200,28 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   }
 
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
+}
+
+function ServiceNameBadge({ item, color }: { item: IWaterfallSpanOrTransaction; color: string }) {
+  const serviceName = item.doc.service.name;
+
+  if (!serviceName) return null;
+
+  return (
+    <EuiBadge
+      color="hollow"
+      iconType="dot"
+      css={css`
+        max-width: 30%;
+        flex-shrink: 0;
+        & .euiBadge__icon {
+          color: ${color};
+        }
+      `}
+    >
+      {serviceName}
+    </EuiBadge>
+  );
 }
 
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -225,6 +255,7 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
+  getRelatedErrorsHref,
   marginLeftLevel,
   onClick,
   segments,
@@ -253,6 +284,11 @@ export function WaterfallItem({
 
   const waterfallItemFlyoutTab = 'metadata';
 
+  const itemName =
+    item.docType === 'transaction'
+      ? item.doc.transaction.name
+      : (item as IWaterfallSpan).doc.span.name;
+
   return (
     <Container
       ref={waterfallItemRef}
@@ -260,6 +296,29 @@ export function WaterfallItem({
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       hasToggle={hasToggle}
+      data-test-subj="waterfallItem"
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          // Ignore event if it comes from a link
+          if (e.target instanceof HTMLAnchorElement) {
+            return;
+          }
+          e.preventDefault(); // Prevent scroll if Space is pressed
+          onClick(item.id);
+        }
+      }}
+      tabIndex={onClick ? 0 : -1}
+      role={onClick ? 'button' : undefined}
+      aria-label={
+        onClick
+          ? i18n.translate('xpack.apm.waterfall.openDetailsButton', {
+              defaultMessage: 'View details for {name}',
+              values: {
+                name: itemName,
+              },
+            })
+          : undefined
+      }
       onClick={(e: React.MouseEvent) => {
         if (onClick) {
           e.stopPropagation();
@@ -296,10 +355,14 @@ export function WaterfallItem({
         {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-
+        <ServiceNameBadge item={item} color={color} />
         <Duration item={item} />
         {isEmbeddable ? (
-          <EmbeddableErrorIcon errorCount={errorCount} />
+          <EmbeddableRelatedErrors
+            item={item}
+            errorCount={errorCount}
+            getRelatedErrorsHref={getRelatedErrorsHref}
+          />
         ) : (
           <RelatedErrors item={item} errorCount={errorCount} />
         )}
@@ -308,8 +371,8 @@ export function WaterfallItem({
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
         <SpanLinksBadge
-          linkedParents={item.spanLinksCount.linkedParents}
-          linkedChildren={item.spanLinksCount.linkedChildren}
+          outgoingCount={item.spanLinksCount.linkedParents}
+          incomingCount={item.spanLinksCount.linkedChildren}
           id={item.id}
           onClick={onClick}
         />
@@ -319,12 +382,47 @@ export function WaterfallItem({
   );
 }
 
-function EmbeddableErrorIcon({ errorCount }: { errorCount: number }) {
-  const theme = useEuiTheme();
-  if (errorCount <= 0) {
-    return null;
+function EmbeddableRelatedErrors({
+  item,
+  errorCount,
+  getRelatedErrorsHref,
+}: {
+  item: IWaterfallSpanOrTransaction;
+  errorCount: number;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  const viewRelatedErrorsLabel = i18n.translate(
+    'xpack.apm.waterfall.embeddableRelatedErrors.errorCount',
+    {
+      defaultMessage:
+        '{errorCount, plural, one {View related error} other {View # related errors}}',
+      values: { errorCount },
+    }
+  );
+
+  if (errorCount > 0 && getRelatedErrorsHref) {
+    return (
+      // eslint-disable-next-line @elastic/eui/href-or-on-click
+      <EuiBadge
+        color={euiTheme.colors.danger}
+        iconType="arrowRight"
+        href={getRelatedErrorsHref(item.id) as any}
+        onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
+          e.stopPropagation();
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label={viewRelatedErrorsLabel}
+        onClickAriaLabel={viewRelatedErrorsLabel}
+      >
+        {viewRelatedErrorsLabel}
+      </EuiBadge>
+    );
   }
-  return <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />;
+
+  return <FailureBadge outcome={item.doc.event?.outcome} />;
 }
 
 function RelatedErrors({
@@ -342,6 +440,11 @@ function RelatedErrors({
     '/traces/explorer',
     '/dependencies/operation'
   );
+  const {
+    core: {
+      application: { navigateToUrl },
+    },
+  } = useApmPluginContext();
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
   const transactionId = item.doc.transaction?.id;
@@ -371,22 +474,29 @@ function RelatedErrors({
     },
   });
 
+  const viewRelatedErrorsLabel = i18n.translate('xpack.apm.waterfall.errorCount', {
+    defaultMessage: '{errorCount, plural, one {View related error} other {View # related errors}}',
+    values: { errorCount },
+  });
+
+  const onClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    navigateToUrl(isMobileAgentName(item.doc.agent.name) ? mobileHref : href);
+  };
+
   if (errorCount > 0) {
     return (
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <EuiBadge
-          href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
-          color={euiTheme.colors.danger}
-          iconType="arrowRight"
-        >
-          {i18n.translate('xpack.apm.waterfall.errorCount', {
-            defaultMessage:
-              '{errorCount, plural, one {View related error} other {View # related errors}}',
-            values: { errorCount },
-          })}
-        </EuiBadge>
-      </div>
+      <EuiBadge
+        color={euiTheme.colors.danger}
+        iconType="arrowRight"
+        onClick={onClick}
+        tabIndex={0}
+        role="button"
+        aria-label={viewRelatedErrorsLabel}
+        onClickAriaLabel={viewRelatedErrorsLabel}
+      >
+        {viewRelatedErrorsLabel}
+      </EuiBadge>
     );
   }
 

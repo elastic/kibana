@@ -134,6 +134,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
       defaultMessage: 'Specifies split row of the xy chart',
     }),
+  getPointVisibilityHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.pointVisibility.help', {
+      defaultMessage: 'Specifies the line/area chart point visibility',
+    }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {
       defaultMessage: 'Layers of visual series',
@@ -175,8 +179,8 @@ export const strings = {
       defaultMessage: 'Layout of the chart is horizontal',
     }),
   getSplitAccessorHelp: () =>
-    i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
-      defaultMessage: 'The column to split by',
+    i18n.translate('expressionXY.dataLayer.splitAccessors.help', {
+      defaultMessage: 'The columns to split by',
     }),
   getAccessorsHelp: () =>
     i18n.translate('expressionXY.dataLayer.accessors.help', {

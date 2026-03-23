@@ -3,6 +3,7 @@
 exports[`ScriptingDisabledCallOut should render normally 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="danger"
     iconType="warning"
     title={

@@ -7,11 +7,14 @@
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import type { JobType } from '../../../../common/types/saved_objects';
 import type { MlApi } from '../ml_api_service';
 import { mlJobCapsServiceAnalyticsFactory } from './new_job_capabilities_service_analytics';
 import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
+import { toastNotificationServiceProvider } from '../toast_notification_service/toast_notification_service';
 
 export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
@@ -24,7 +27,8 @@ export function loadNewJobCapabilities(
   mlApi: MlApi,
   dataViewsService: DataViewsContract,
   savedSearchService: SavedSearchPublicPluginStart,
-  jobType: JobType
+  jobType: JobType,
+  notifications: NotificationsStart
 ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -58,6 +62,12 @@ export function loadNewJobCapabilities(
         reject();
       }
     } catch (error) {
+      toastNotificationServiceProvider(notifications.toasts).displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.newJob.capabilities.loadErrorTitle', {
+          defaultMessage: 'Failed to load job capabilities',
+        })
+      );
       reject(error);
     }
   });

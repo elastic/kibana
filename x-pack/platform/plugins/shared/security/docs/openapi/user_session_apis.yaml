@@ -17,7 +17,6 @@ paths:
       summary: Invalidate user sessions
       tags:
         - user session
-      x-state: Technical Preview
       description: >
         Invalidate user sessions that match a query.
         To use this API, you must be a superuser.
@@ -82,7 +81,7 @@ paths:
               invalidateRequestExample2:
                 summary: Invalidate all SAML sessions
                 description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any SAML authentication provider.
-                value: |-              
+                value: |-
                   {
                     "match" : "query",
                     "query": {

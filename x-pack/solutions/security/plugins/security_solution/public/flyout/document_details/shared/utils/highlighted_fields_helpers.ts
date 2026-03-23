@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
+import type { UseHighlightedFieldsResult } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
 
 /**
@@ -19,8 +18,8 @@ import type { HighlightedFieldsTableRow } from '../../right/components/highlight
 export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
   scopeId: string,
-  isPreview: boolean,
-  showCellActions: boolean
+  showCellActions: boolean,
+  ancestorsIndexName?: string
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
@@ -38,27 +37,9 @@ export const convertHighlightedFieldsToTableRow = (
         ...(overrideFieldName ? { originalField: fieldName } : {}),
         values,
         scopeId,
-        isPreview,
         showCellActions,
+        ancestorsIndexName,
       },
     };
   });
-};
-
-/**
- * Converts the highlighted fields to a format that can be consumed by the prevalence query
- * @param highlightedFields
- */
-export const convertHighlightedFieldsToPrevalenceFilters = (
-  highlightedFields: UseHighlightedFieldsResult
-): Record<string, QueryDslQueryContainer> => {
-  const fieldNames = Object.keys(highlightedFields);
-  return fieldNames.reduce((acc, curr) => {
-    const values = highlightedFields[curr].values;
-
-    return {
-      ...acc,
-      [curr]: { terms: { [curr]: values } },
-    };
-  }, []) as unknown as Record<string, QueryDslQueryContainer>;
 };

@@ -8,12 +8,12 @@
  */
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
-import type { SavedDashboardPanel } from '../schema';
 
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-} from './utils';
+} from './dashboard_panel_converters';
+import type { SavedDashboardPanel } from '../schema/v2';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced
@@ -37,7 +37,7 @@ export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (
       // Convert each panel into the dashboard panel state
       const originalPanelState = convertSavedDashboardPanelToPanelState(panel);
       newPanels.push(
-        convertPanelStateToSavedDashboardPanel(panel.panelIndex, {
+        convertPanelStateToSavedDashboardPanel({
           ...originalPanelState,
           explicitInput: {
             ...originalPanelState.explicitInput,

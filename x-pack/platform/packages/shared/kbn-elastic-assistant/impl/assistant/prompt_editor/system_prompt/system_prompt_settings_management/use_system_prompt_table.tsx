@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
 
@@ -12,7 +13,7 @@ import { BadgesColumn } from '../../../common/components/assistant_settings_mana
 import { useInlineActions } from '../../../common/components/assistant_settings_management/inline_actions';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../system_prompt_modal/translations';
 import * as i18n from './translations';
-import { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
 
 export const useSystemPromptTable = () => {
   const getActions = useInlineActions<SystemPromptSettings>();
@@ -55,6 +56,7 @@ export const useSystemPromptTable = () => {
         render: ({ conversations, id }: SystemPromptSettings) => (
           <BadgesColumn items={conversations.map(({ title }) => title)} prefix={id} />
         ),
+        width: '50%',
       },
       {
         align: 'left',

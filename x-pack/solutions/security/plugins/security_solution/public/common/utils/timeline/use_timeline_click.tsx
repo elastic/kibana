@@ -13,9 +13,8 @@ export const useTimelineClick = () => {
   const queryTimelineById = useQueryTimelineById();
 
   const handleTimelineClick = useCallback(
-    (timelineId: string, onError: TimelineErrorCallback, graphEventId?: string) => {
+    (timelineId: string, onError: TimelineErrorCallback) => {
       queryTimelineById({
-        graphEventId,
         timelineId,
         onError,
       });

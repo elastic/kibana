@@ -347,6 +347,7 @@ function ExplorerChartContainer({
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
+                  euiTheme={euiTheme}
                 />
               )}
             </MlTooltipComponent>
@@ -368,6 +369,7 @@ function ExplorerChartContainer({
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
+                  euiTheme={euiTheme}
                 />
               )}
             </MlTooltipComponent>

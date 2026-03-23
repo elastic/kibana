@@ -31,6 +31,7 @@ import { FlameGraphView } from '../views/flamegraphs/flamegraph';
 import { FunctionsView } from '../views/functions';
 import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
 import { TopNFunctionsView } from '../views/functions/topn';
+import { ProfilingNotEnabledView } from '../views/profiling_not_enabled';
 import { Settings } from '../views/settings';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
@@ -94,6 +95,9 @@ const routes = {
       '/delete_data_instructions': {
         element: <DeleteDataView />,
       },
+      '/profiling-not-enabled': {
+        element: <ProfilingNotEnabledView />,
+      },
       '/': {
         children: {
           '/stacktraces/{topNType}': {
@@ -103,6 +107,7 @@ const routes = {
                 topNType: t.union([
                   t.literal(TopNType.Containers),
                   t.literal(TopNType.Deployments),
+                  t.literal(TopNType.Executables),
                   t.literal(TopNType.Hosts),
                   t.literal(TopNType.Threads),
                   t.literal(TopNType.Traces),
@@ -124,7 +129,7 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/threads" />,
+            element: <RedirectTo pathname="/stacktraces/executables" />,
           },
           '/flamegraphs': {
             element: (

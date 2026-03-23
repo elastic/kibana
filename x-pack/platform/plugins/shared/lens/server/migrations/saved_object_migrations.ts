@@ -6,8 +6,9 @@
  */
 
 import { cloneDeep, flow } from 'lodash';
-import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
-import {
+import type { Ast, AstFunction } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
+import type {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
@@ -15,10 +16,10 @@ import {
 } from '@kbn/core/server';
 import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '../../common/types';
-import {
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { PersistableFilter } from '@kbn/lens-common';
+import type {
   LensDocShapePost712,
   LensDocShapePre712,
   LensDocShape713,

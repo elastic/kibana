@@ -37,14 +37,12 @@ import {
   deleteIndexedFleetAgents,
   indexFleetAgentForHost,
 } from './index_fleet_agent';
-import type {
-  DeleteIndexedEndpointFleetActionsResponse,
-  IndexedEndpointAndFleetActionsForHostResponse,
-} from './index_endpoint_fleet_actions';
 import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
   type IndexEndpointAndFleetActionsForHostOptions,
+  type DeleteIndexedEndpointFleetActionsResponse,
+  type IndexedEndpointAndFleetActionsForHostResponse,
 } from './index_endpoint_fleet_actions';
 
 import type {
@@ -338,7 +336,7 @@ export interface DeleteIndexedEndpointHostsResponse
 export const deleteIndexedEndpointHosts = async (
   esClient: Client,
   kbnClient: KbnClient,
-  indexedData: IndexedHostsResponse
+  indexedData: IndexedHostsResponse | undefined
 ): Promise<DeleteIndexedEndpointHostsResponse> => {
   const response: DeleteIndexedEndpointHostsResponse = {
     hosts: undefined,
@@ -351,6 +349,10 @@ export const deleteIndexedEndpointHosts = async (
     integrationPolicies: undefined,
     agentPolicies: undefined,
   };
+
+  if (!indexedData) {
+    return response;
+  }
 
   if (indexedData.hosts.length) {
     const query = {

@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import { EuiModal, EuiModalBody } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiModal, EuiModalBody, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 /**
  * By default the image formatter sets the max-width to "none" on the <img /> tag
@@ -30,15 +32,28 @@ interface Props {
 }
 
 export const ImagePreviewModal = ({ imgHTML, closeModal }: Props) => {
+  const styles = useMemoCss(componentStyles);
+
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalBody>
         <div
-          className="indexPatternFieldEditor__previewImageModal__wrapper"
+          css={styles.previewImageModal}
           // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
           dangerouslySetInnerHTML={{ __html: setMaxWidthImage(imgHTML) }} // eslint-disable-line react/no-danger
         />
       </EuiModalBody>
     </EuiModal>
   );
+};
+
+const componentStyles = {
+  previewImageModal: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.base,
+
+      '& img': {
+        maxWidth: '100%',
+      },
+    }),
 };

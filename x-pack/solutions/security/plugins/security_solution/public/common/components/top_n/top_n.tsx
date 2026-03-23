@@ -10,14 +10,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import type { TopNOption } from './helpers';
-import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
+import { getPageScope, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
@@ -52,6 +52,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
+  dataView: DataView;
   dataViewSpec?: DataViewSpec;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
@@ -59,7 +60,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
+  onFilterAdded?: () => void;
   applyGlobalQueriesAndFilters?: boolean;
 }
 
@@ -70,6 +71,7 @@ const TopNComponent: React.FC<Props> = ({
   filters,
   field,
   from,
+  dataView,
   dataViewSpec,
   options,
   paddingSize,
@@ -86,7 +88,7 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
+  const sourcererScopeId = getPageScope({ scopeId, view });
 
   useEffect(() => {
     setView(defaultView);
@@ -123,6 +125,7 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
+            dataView={dataView}
             dataViewSpec={dataViewSpec}
             onlyField={field}
             paddingSize={paddingSize}

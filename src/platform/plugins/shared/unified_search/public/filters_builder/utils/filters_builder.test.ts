@@ -8,7 +8,7 @@
  */
 
 import { buildEmptyFilter, type Filter, isCombinedFilter, BooleanRelation } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   getFilterByPath,
   getPathInArray,

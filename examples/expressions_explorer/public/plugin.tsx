@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { Setup as InspectorSetup, Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '@kbn/inspector-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { getExpressionsInspectorViewDescription } from './inspector';
-import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
-import { ACTION_NAVIGATE, createNavigateAction } from './actions/navigate_action';
 import { getButtonRenderer } from './renderers/button';
 import { buttonFn } from './functions/button';
 
@@ -35,11 +36,6 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     // register custom inspector adapter & view
     deps.inspector.registerView(getExpressionsInspectorViewDescription());
-
-    // register custom actions
-    deps.uiActions.registerTrigger(navigateTrigger);
-    deps.uiActions.registerAction(createNavigateAction());
-    deps.uiActions.attachAction(NAVIGATE_TRIGGER_ID, ACTION_NAVIGATE);
 
     // register custom functions and renderers
     deps.expressions.registerRenderer(getButtonRenderer(core));

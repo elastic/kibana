@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { CalendarsListHeader } from './header';
 
@@ -21,7 +21,11 @@ jest.mock('../../../capabilities/check_capabilities', () => ({
 jest.mock('../../../contexts/kibana/kibana_context', () => ({
   useMlKibana: () => ({
     services: {
-      docLinks: { links: { ml: { calendars: jest.fn() } } },
+      docLinks: {
+        links: {
+          ml: { calendars: 'calendars link' },
+        },
+      },
     },
   }),
 }));
@@ -50,8 +54,8 @@ describe('CalendarListsHeader', () => {
       ...requiredProps,
     };
 
-    const component = shallowWithIntl(<CalendarsListHeader {...props} />);
+    const { container } = renderWithI18n(<CalendarsListHeader {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

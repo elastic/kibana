@@ -1,0 +1,31 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/test-jest-helpers",
+  ]
+}

@@ -9,15 +9,15 @@ import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../comm
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointsList, PAGING_PARAMS } from './use_get_endpoints_list';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants';
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
 import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

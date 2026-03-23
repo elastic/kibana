@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { FormattedValue } from './common';
+import type { FormattedValue } from './common';
 import {
   formatMonitorConfigFields,
   formatHeartbeatRequest,
@@ -13,14 +13,16 @@ import {
 } from './format_configs';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
+import type {
   CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
-  ScheduleUnit,
   SyntheticsMonitor,
+} from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  ScheduleUnit,
   VerificationMode,
 } from '../../../../common/runtime_types';
 
@@ -104,7 +106,8 @@ describe('formatMonitorConfig', () => {
         Object.keys(testHTTPConfig) as ConfigKey[],
         testHTTPConfig,
         logger,
-        { proxyUrl: 'https://www.google.com' }
+        { proxyUrl: 'https://www.google.com' },
+        []
       );
 
       expect(yamlConfig).toEqual({
@@ -145,7 +148,8 @@ describe('formatMonitorConfig', () => {
             [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
           },
           logger,
-          { proxyUrl: 'https://www.google.com' }
+          { proxyUrl: 'https://www.google.com' },
+          []
         );
 
         expect(yamlConfig).toEqual({
@@ -201,7 +205,6 @@ describe('browser fields', () => {
         latency: 20,
         upload: 3,
       },
-      timeout: '16s',
       type: 'browser',
       synthetics_args: ['--hasTouch true'],
       params: {
@@ -218,10 +221,23 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     expect(yamlConfig).toEqual(formattedBrowserConfig);
+  });
+
+  it('omits timeout for browser monitors in public config', () => {
+    const yamlConfig = formatMonitorConfigFields(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(yamlConfig.timeout).toBeUndefined();
   });
 
   it('does not set empty strings or empty objects for params and playwright options', () => {
@@ -233,7 +249,8 @@ describe('browser fields', () => {
         params: '',
       },
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
@@ -251,7 +268,8 @@ describe('browser fields', () => {
         },
       },
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = {
@@ -269,7 +287,8 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = {
@@ -287,7 +306,8 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = { ...formattedConfig, enabled: false };

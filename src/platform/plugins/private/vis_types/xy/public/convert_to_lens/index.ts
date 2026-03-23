@@ -8,16 +8,17 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
+import type { CollapseFunction } from '@kbn/lens-common';
 import {
   getConvertToLensModule,
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import type { Column } from '@kbn/visualizations-plugin/common';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
-import { ConvertXYToLensVisualization } from './types';
+import type { ConvertXYToLensVisualization } from './types';
 import { getConfiguration } from './configurations';
 
 export interface Layer {
@@ -118,7 +119,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     dataLayers.length > 1 &&
     dataLayers.some((l) =>
       l.columns.some(
-        (c) => c.isSplit && 'orderBy' in c.params && c.params.orderBy.type === 'column'
+        (c) => c.isSplit && c.params && 'orderBy' in c.params && c.params.orderBy.type === 'column'
       )
     )
   ) {

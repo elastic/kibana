@@ -19,6 +19,7 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   'data-test-subj'?: string;
   children?: React.ReactNode;
   isReadOnly?: boolean;
+  noSpacerInContent?: boolean;
 }
 
 export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
@@ -27,6 +28,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   children,
   'data-test-subj': dataTestSubj,
   isReadOnly,
+  noSpacerInContent,
   ...rest
 }) => {
   const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
@@ -45,7 +47,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
       >
         <EuiPageBody>
           <ContentWrapper>
-            <EuiSpacer size="m" />
+            {noSpacerInContent ? null : <EuiSpacer size="m" />}
             {children}
           </ContentWrapper>
         </EuiPageBody>

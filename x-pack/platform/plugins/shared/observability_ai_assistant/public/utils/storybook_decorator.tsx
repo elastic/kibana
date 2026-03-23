@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { ObservabilityAIAssistantChatServiceContext } from '../context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
 import { createStorybookService, createStorybookChatService } from '../storybook_mock';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Annotation } from '../../../../../common/annotations';
+import type { Annotation } from '../../../../../common/annotations';
 
 export function DeleteAnnotationsModal({
   isDeleteModalVisible,
@@ -23,21 +23,25 @@ export function DeleteAnnotationsModal({
   onDelete: () => void;
   setIsDeleteModalVisible: (isVisible: boolean) => void;
 }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   if (!isDeleteModalVisible) {
     return <> </>;
   }
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate(
         'xpack.observability.deleteAnnotations.euiConfirmModal.deleteAnnotationLabel',
         { defaultMessage: 'Delete annotation' }
       )}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => {
         setIsDeleteModalVisible(false);
         setSelection([]);
       }}
-      onConfirm={onDelete}
+      onConfirm={() => onDelete()}
       cancelButtonText={i18n.translate(
         'xpack.observability.deleteAnnotations.euiConfirmModal.cancelButtonLabel',
         { defaultMessage: 'Cancel' }
