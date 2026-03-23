@@ -39,9 +39,19 @@ describe('rules_api', () => {
       const result = await listRules(http, { page: 1, perPage: 10 });
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
-        query: { page: 1, perPage: 10 },
+        query: { page: 1, perPage: 10, search: undefined },
       });
       expect(result).toEqual(mockResponse);
+    });
+
+    it('should pass search param when provided', async () => {
+      http.get.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10 });
+
+      await listRules(http, { page: 1, perPage: 10, search: 'test query' });
+
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+        query: { page: 1, perPage: 10, search: 'test query' },
+      });
     });
 
     it('should handle optional pagination params', async () => {
@@ -50,7 +60,7 @@ describe('rules_api', () => {
       await listRules(http, {});
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
-        query: { page: undefined, perPage: undefined },
+        query: { page: undefined, perPage: undefined, search: undefined },
       });
     });
   });

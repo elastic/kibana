@@ -32,6 +32,7 @@ export interface RulesListTableContainerProps {
   totalItemCount: number;
   page: number;
   perPage: number;
+  search: string;
   isLoading: boolean;
   onTableChange: (criteria: CriteriaWithPagination<RuleApiResponse>) => void;
   share: SharePluginStart;
@@ -42,6 +43,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   totalItemCount,
   page,
   perPage,
+  search,
   isLoading,
   onTableChange,
   share,
@@ -130,6 +132,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         totalItemCount={totalItemCount}
         page={page}
         perPage={perPage}
+        search={search}
         isLoading={isLoading}
         selectedCount={selectedCount}
         isAllSelected={isAllSelected}

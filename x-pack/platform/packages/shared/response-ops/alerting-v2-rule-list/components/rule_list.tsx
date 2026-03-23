@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiButton, EuiCallOut, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiButton, EuiCallOut, EuiPageHeader, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
 import { useFetchRules } from '@kbn/alerting-v2-rule-apis';
 import {
@@ -21,6 +23,7 @@ import { RuleListProvider, useRuleListServices, type RuleListServices } from '..
 import { RulesListTableContainer } from './rules_list_table_container';
 
 const DEFAULT_PER_PAGE = 20;
+export const SEARCH_DEBOUNCE_MS = 300;
 
 export interface RuleListProps {
   services: RuleListServices;
@@ -51,10 +54,16 @@ const RuleListInner = ({
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [searchInput, setSearchInput] = useState('');
+  const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const { data, isLoading, isError, error } = useFetchRules(
     { http, notifications },
-    { page, perPage }
+    { page, perPage, search: debouncedSearch || undefined }
   );
 
   const createLocator = share.url.locators.get<AlertingV2RuleCreateLocatorParams>(
@@ -113,15 +122,30 @@ const RuleListInner = ({
         </>
       ) : null}
       {!isError ? (
-        <RulesListTableContainer
-          items={data?.items ?? []}
-          totalItemCount={data?.total ?? 0}
-          page={page}
-          perPage={perPage}
-          isLoading={isLoading}
-          onTableChange={onTableChange}
-          share={share}
-        />
+        <>
+          <EuiSearchBar
+            query={searchInput}
+            box={{
+              incremental: true,
+              placeholder: i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
+                defaultMessage: 'Search rules',
+              }),
+              'data-test-subj': 'rulesListSearchBar',
+            }}
+            onChange={({ queryText }) => setSearchInput(queryText ?? '')}
+          />
+          <EuiSpacer size="m" />
+          <RulesListTableContainer
+            items={data?.items ?? []}
+            totalItemCount={data?.total ?? 0}
+            page={page}
+            perPage={perPage}
+            search={debouncedSearch}
+            isLoading={isLoading}
+            onTableChange={onTableChange}
+            share={share}
+          />
+        </>
       ) : null}
     </div>
   );

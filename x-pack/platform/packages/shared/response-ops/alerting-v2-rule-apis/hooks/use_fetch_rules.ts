@@ -14,11 +14,11 @@ import { queryKeys } from '../query_keys';
 
 export const useFetchRules = (
   { http, notifications }: { http: HttpStart; notifications: NotificationsStart },
-  { page, perPage }: { page: number; perPage: number }
+  { page, perPage, search }: { page: number; perPage: number; search?: string }
 ) => {
   return useQuery({
-    queryKey: queryKeys.list({ page, perPage }),
-    queryFn: () => listRules(http, { page, perPage }),
+    queryKey: queryKeys.list({ page, perPage, search }),
+    queryFn: () => listRules(http, { page, perPage, search }),
     onError: () => {
       notifications.toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useFetchRules.errorMessage', {

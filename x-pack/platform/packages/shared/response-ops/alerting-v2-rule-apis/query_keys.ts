@@ -8,7 +8,8 @@
 export const queryKeys = {
   root: 'rule',
   lists: () => [queryKeys.root, 'list'] as const,
-  list: (filters: { page: number; perPage: number }) => [...queryKeys.lists(), filters] as const,
+  list: (filters: { page: number; perPage: number; search?: string }) =>
+    [...queryKeys.lists(), filters] as const,
   details: () => [queryKeys.root, 'details'] as const,
   detail: (id: string) => [...queryKeys.details(), id] as const,
 };

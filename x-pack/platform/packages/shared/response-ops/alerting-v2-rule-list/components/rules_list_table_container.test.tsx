@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RulesListTableContainer } from './rules_list_table_container';
-import { createMockServices, createMockPaths, createTestWrapper } from '../test_helpers';
+import { createMockServices, createTestWrapper } from '../test_helpers';
 
 const mockDeleteMutate = jest.fn();
 const mockUseDeleteRule = jest.fn();
@@ -25,6 +25,30 @@ jest.mock('@kbn/alerting-v2-rule-apis', () => ({
   useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
+
+jest.mock('@kbn/deeplinks-alerting-v2', () => ({
+  ALERTING_V2_RULE_EDIT_LOCATOR: 'ALERTING_V2_RULE_EDIT',
+  ALERTING_V2_RULE_CREATE_LOCATOR: 'ALERTING_V2_RULE_CREATE',
+}));
+
+const mockEditNavigate = jest.fn();
+const mockCreateNavigate = jest.fn();
+
+const mockShare = {
+  url: {
+    locators: {
+      get: (id: string) => {
+        if (id === 'ALERTING_V2_RULE_EDIT') {
+          return { navigate: mockEditNavigate, useUrl: jest.fn(() => '') };
+        }
+        if (id === 'ALERTING_V2_RULE_CREATE') {
+          return { navigate: mockCreateNavigate, useUrl: jest.fn(() => '') };
+        }
+        return undefined;
+      },
+    },
+  },
+} as any;
 
 const mockRules = [
   {
@@ -46,10 +70,6 @@ const mockRules = [
 ];
 
 const mockServices = createMockServices();
-const mockPaths = createMockPaths({
-  ruleEdit: (id: string) => `/app/management/insightsAndAlerting/alerting_v2/edit/${id}`,
-  ruleCreate: '/app/management/insightsAndAlerting/alerting_v2/create',
-});
 
 const renderContainer = (overrides = {}) => {
   const props = {
@@ -57,11 +77,13 @@ const renderContainer = (overrides = {}) => {
     totalItemCount: 2,
     page: 1,
     perPage: 20,
+    search: '',
     isLoading: false,
     onTableChange: jest.fn(),
+    share: mockShare,
     ...overrides,
   };
-  const Wrapper = createTestWrapper(mockServices, mockPaths);
+  const Wrapper = createTestWrapper(mockServices);
   return render(
     <Wrapper>
       <RulesListTableContainer {...props} />
@@ -102,9 +124,7 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
-      expect(mockServices.application.navigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
-      );
+      expect(mockEditNavigate).toHaveBeenCalledWith({ ruleId: 'rule-1' });
     });
 
     it('navigates to clone page when clone action is clicked', async () => {
@@ -118,9 +138,7 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-      expect(mockServices.application.navigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
-      );
+      expect(mockCreateNavigate).toHaveBeenCalledWith({ cloneFrom: 'rule-1' });
     });
   });
 

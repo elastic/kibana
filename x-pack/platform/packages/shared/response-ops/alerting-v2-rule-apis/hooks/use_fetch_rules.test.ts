@@ -37,9 +37,26 @@ describe('useFetchRules', () => {
     });
 
     expect(services.http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
-      query: { page: 1, perPage: 10 },
+      query: { page: 1, perPage: 10, search: undefined },
     });
     expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('should pass search param when provided', async () => {
+    (services.http.get as jest.Mock).mockResolvedValue(mockResponse);
+
+    const { result } = renderHook(
+      () => useFetchRules(services, { page: 1, perPage: 10, search: 'test query' }),
+      { wrapper: createTestWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(services.http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+      query: { page: 1, perPage: 10, search: 'test query' },
+    });
   });
 
   it('should show a danger toast when fetching fails', async () => {
