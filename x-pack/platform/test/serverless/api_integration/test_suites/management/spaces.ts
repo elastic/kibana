@@ -102,14 +102,18 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should allow us to get a space', async () => {
-          await supertestAdminWithApiKey
+          const { body } = await supertestAdminWithApiKey
             .get('/api/spaces/space/space_to_get_1')
             .send()
-            .expect(200, {
+            .expect(200);
+
+          expect(body).toEqual(
+            expect.objectContaining({
               id: 'space_to_get_1',
               name: 'space_to_get_1',
               disabledFeatures: [],
-            });
+            })
+          );
         });
 
         it('should allow us to get all spaces', async () => {
@@ -156,15 +160,19 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          await supertestAdminWithApiKey
+          const { body } = await supertestAdminWithApiKey
             .get('/api/spaces/space/space_to_update')
             .send()
-            .expect(200, {
+            .expect(200);
+
+          expect(body).toEqual(
+            expect.objectContaining({
               id: 'space_to_update',
               name: 'some new name',
               initials: 'SN',
               disabledFeatures: [],
-            });
+            })
+          );
         });
 
         it('should not allow us to update a space with disabled features', async () => {
@@ -226,14 +234,18 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('returns the foo space', async () => {
-          await supertestAdminWithCookieCredentials
+          const { body } = await supertestAdminWithCookieCredentials
             .get('/s/foo-space/internal/spaces/_active_space')
             .set(samlAuth.getInternalRequestHeader())
-            .expect(200, {
+            .expect(200);
+
+          expect(body).toEqual(
+            expect.objectContaining({
               id: 'foo-space',
               name: 'foo-space',
               disabledFeatures: [],
-            });
+            })
+          );
         });
 
         it('returns 404 when the space is not found', async () => {
