@@ -67,6 +67,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // ignore errors if the download source is not found
   try {
     const downloadSource = await getDownloadSource(
+      soClient,
       scopedAgentPolicy.download_source_id ?? undefined
     );
     settingsResponse.download_source = downloadSource
@@ -175,7 +176,7 @@ export const getDownloadSource = async (
   soClient: SavedObjectsClientContract,
   downloadSourceId?: string
 ): Promise<GetEnrollmentSettingsResponse['download_source'] | undefined> => {
-  const sources = await downloadSourceService.list();
+  const sources = await downloadSourceService.list(soClient);
   const foundSource = downloadSourceId
     ? sources.items.find((s) => s.id === downloadSourceId)
     : undefined;
@@ -213,11 +214,10 @@ function sanitizeEnrollmentOutput(output: Output): Output {
 }
 
 function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
+  const auth = (downloadSource as DownloadSource & { auth?: Record<string, unknown> }).auth;
   return {
     ...omit(downloadSource, ['secrets']),
     ssl: downloadSource.ssl ? omit(downloadSource.ssl, ['key']) : downloadSource.ssl,
-    auth: downloadSource.auth
-      ? omit(downloadSource.auth, ['password', 'api_key'])
-      : downloadSource.auth,
-  };
+    ...(auth !== undefined ? { auth: omit(auth, ['password', 'api_key']) } : {}),
+  } as DownloadSource;
 }
