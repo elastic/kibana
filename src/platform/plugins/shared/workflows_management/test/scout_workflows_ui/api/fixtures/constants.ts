@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'true',
 };
+
+export const WORKFLOWS_API_SUPPORTED_TAGS = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];
 
 export const SIMPLE_WORKFLOW_YAML = `name: ImportTest Workflow
 description: A simple test workflow for import

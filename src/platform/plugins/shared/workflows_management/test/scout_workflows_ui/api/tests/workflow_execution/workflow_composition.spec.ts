@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { isTerminalStatus } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
+import { WORKFLOWS_API_SUPPORTED_TAGS } from '../../fixtures/constants';
 
 // ---------------------------------------------------------------------------
 // Workflow YAML templates — "System Health Monitoring" scenario
@@ -136,7 +136,7 @@ async function waitForExecution(workflowsApi: WorkflowsApiService, executionId: 
 // Tests
 // ---------------------------------------------------------------------------
 
-spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Workflow composition', { tag: WORKFLOWS_API_SUPPORTED_TAGS }, () => {
   let workflowsApi: WorkflowsApiService;
   let childWorkflowId: string;
   let asyncParentId: string;

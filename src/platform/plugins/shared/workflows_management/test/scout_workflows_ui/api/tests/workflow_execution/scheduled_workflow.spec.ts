@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
+import { WORKFLOWS_API_SUPPORTED_TAGS } from '../../fixtures/constants';
 
 // Minimum allowed interval is 60s — see ScheduledTriggerSchema validation.
 // Seconds values < 60 are rejected by the schema regex.
@@ -45,7 +45,7 @@ steps:
       message: "Scheduled execution fired"
 `;
 
-spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Scheduled workflow execution', { tag: WORKFLOWS_API_SUPPORTED_TAGS }, () => {
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 

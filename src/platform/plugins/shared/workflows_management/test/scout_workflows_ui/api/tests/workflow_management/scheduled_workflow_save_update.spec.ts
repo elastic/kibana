@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { spaceTest } from '../../fixtures';
+import { WORKFLOWS_API_SUPPORTED_TAGS } from '../../fixtures/constants';
 
 const getScheduledWorkflowYaml = (interval: string) => `
 name: Scout Scheduled Save/Update Test
@@ -27,35 +27,39 @@ steps:
       message: "Scheduled execution"
 `;
 
-spaceTest.describe('Scheduled workflow save and update', { tag: tags.deploymentAgnostic }, () => {
-  let workflowsApi: WorkflowsApiService;
-  let workflowId: string;
+spaceTest.describe(
+  'Scheduled workflow save and update',
+  { tag: WORKFLOWS_API_SUPPORTED_TAGS },
+  () => {
+    let workflowsApi: WorkflowsApiService;
+    let workflowId: string;
 
-  spaceTest.setTimeout(300_000);
+    spaceTest.setTimeout(300_000);
 
-  spaceTest.beforeAll(async ({ apiServices }) => {
-    workflowsApi = apiServices.workflowsApi;
-    const created = await workflowsApi.create(getScheduledWorkflowYaml('1m'));
-    workflowId = created.id;
-  });
-
-  spaceTest.afterAll(async () => {
-    await workflowsApi.deleteAll();
-  });
-
-  spaceTest('updating a scheduled workflow with a changed interval succeeds', async () => {
-    const getBefore = await workflowsApi.rawGetWorkflow(workflowId);
-    expect(getBefore.status).toBe(200);
-    expect(getBefore.data.yaml).toContain('every: 1m');
-
-    const updateResponse = await workflowsApi.rawUpdate(workflowId, {
-      yaml: getScheduledWorkflowYaml('5m'),
+    spaceTest.beforeAll(async ({ apiServices }) => {
+      workflowsApi = apiServices.workflowsApi;
+      const created = await workflowsApi.create(getScheduledWorkflowYaml('1m'));
+      workflowId = created.id;
     });
-    expect(updateResponse.status).toBe(200);
-    expect(updateResponse.data.id).toBe(workflowId);
 
-    const getAfter = await workflowsApi.rawGetWorkflow(workflowId);
-    expect(getAfter.status).toBe(200);
-    expect(getAfter.data.yaml).toContain('every: 5m');
-  });
-});
+    spaceTest.afterAll(async () => {
+      await workflowsApi.deleteAll();
+    });
+
+    spaceTest('updating a scheduled workflow with a changed interval succeeds', async () => {
+      const getBefore = await workflowsApi.rawGetWorkflow(workflowId);
+      expect(getBefore.status).toBe(200);
+      expect(getBefore.data.yaml).toContain('every: 1m');
+
+      const updateResponse = await workflowsApi.rawUpdate(workflowId, {
+        yaml: getScheduledWorkflowYaml('5m'),
+      });
+      expect(updateResponse.status).toBe(200);
+      expect(updateResponse.data.id).toBe(workflowId);
+
+      const getAfter = await workflowsApi.rawGetWorkflow(workflowId);
+      expect(getAfter.status).toBe(200);
+      expect(getAfter.data.yaml).toContain('every: 5m');
+    });
+  }
+);
