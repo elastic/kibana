@@ -10,6 +10,8 @@ import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from './lib/kibana';
+import { PACK_USERS_ID } from '../packs/constants';
+import { SAVED_QUERY_USERS_ID } from '../saved_queries/constants';
 
 interface UserEntry {
   created_by: string;
@@ -19,9 +21,6 @@ interface UserEntry {
 interface UsersResponse {
   data: UserEntry[];
 }
-
-import { PACK_USERS_ID } from '../packs/constants';
-import { SAVED_QUERY_USERS_ID } from '../saved_queries/constants';
 
 const useSavedObjectUsers = (endpoint: string, queryKey: string) => {
   const { http, userProfile } = useKibana().services;

@@ -113,10 +113,9 @@ const updatedAtCss = {
   textOverflow: 'ellipsis',
 };
 
-const PackNameComponent = ({ id, name }: { id: string; name: string }) => (
+const PackName = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
 );
-const PackName = React.memo(PackNameComponent);
 
 const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: boolean }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
