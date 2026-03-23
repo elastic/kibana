@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Navigation, type NavigationProps } from './src/components/navigation';
-export { useNavigation } from './src/hooks/use_navigation';
-export { COLLAPSED_WIDTH, EXPANDED_WIDTH } from './src/hooks/use_layout_width';
-export type {
-  BadgeType,
-  MenuItem,
-  NavigationStructure,
-  SecondaryMenuItem,
-  SecondaryMenuSection,
-  SideNavLogo,
-} from './types';
+import { useMemo } from 'react';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Returns the effective side nav pixel width.
+ */
+export function useSideNavWidth(): number {
+  const chrome = useChromeService();
+  const sideNavWidth$ = useMemo(() => chrome.sideNav.getWidth$(), [chrome]);
+  return useObservable(sideNavWidth$, chrome.sideNav.getWidth());
+}
