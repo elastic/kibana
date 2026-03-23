@@ -11,6 +11,7 @@ import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { transformTypeIn } from '@kbn/embeddable-plugin/server';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
@@ -19,7 +20,6 @@ import type {
 } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
-import { transformTypeIn } from '@kbn/embeddable-plugin/server';
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],
@@ -68,8 +68,7 @@ function transformPanelIn(
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
-  const transformType =
-    type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level

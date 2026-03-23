@@ -8,10 +8,10 @@
  */
 
 // Prior to 9.4, embeddable type did not matter as long as it was unique
-// 9.4 and forward, embeddable type is part of public REST API 
+// 9.4 and forward, embeddable type is part of public REST API
 // and needs to be snake and lower cases
 // Table containing embeddable types that required a change for public REST API
-const LEGACY_TO_AS_CODE_TYPES: { [key: string]: string} = {
+const LEGACY_TO_AS_CODE_TYPES: { [key: string]: string } = {
   DASHBOARD_MARKDOWN: 'markdown',
   timeSlider: 'time_slider_control',
   rangeSliderControl: 'range_slider_control',
@@ -46,7 +46,9 @@ const AS_CODE_TO_LEGACY_TYPES = Object.fromEntries(
 
 // Use on read to convert stored embeddabel type into public REST API embeddable type
 export function transformTypeOut(storedType: string) {
-  return Object.hasOwn(LEGACY_TO_AS_CODE_TYPES, storedType) ? LEGACY_TO_AS_CODE_TYPES[storedType] : storedType;
+  return Object.hasOwn(LEGACY_TO_AS_CODE_TYPES, storedType)
+    ? LEGACY_TO_AS_CODE_TYPES[storedType]
+    : storedType;
 }
 
 // Use on write to convert public REST API embeddable type into stored embeddable type

@@ -14,10 +14,10 @@ import type { Writable } from 'utility-types';
 import type { Reference } from '@kbn/content-management-utils';
 import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
+import { transformTypeIn } from '@kbn/embeddable-plugin/server';
 import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
-import { transformTypeIn } from '@kbn/embeddable-plugin/server';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
