@@ -13,6 +13,7 @@ import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
+import { gmailDataSource } from './gmail';
 import { firecrawlDataSource } from './firecrawl';
 import { salesforceDataSource } from './salesforce';
 import { zoomDataSource } from './zoom';
@@ -21,6 +22,7 @@ import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
 import { amazonS3DataSource } from './amazon_s3';
 import { tavilyDataSource } from './tavily';
+import { microsoftTeamsDataSource } from './microsoft_teams';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(figmaDataSource);
@@ -31,6 +33,7 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
+  dataCatalog.register(gmailDataSource);
   dataCatalog.register(firecrawlDataSource);
   dataCatalog.register(salesforceDataSource);
   dataCatalog.register(zoomDataSource);
@@ -39,4 +42,5 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(pagerdutyDataSource);
   dataCatalog.register(amazonS3DataSource);
   dataCatalog.register(tavilyDataSource);
+  dataCatalog.register(microsoftTeamsDataSource);
 }

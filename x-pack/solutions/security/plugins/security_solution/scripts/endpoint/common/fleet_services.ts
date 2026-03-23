@@ -590,6 +590,8 @@ interface ElasticArtifactSearchResponse {
 
 interface GetAgentDownloadUrlResponse {
   url: string;
+  /** The URL to the SHA512 hash file for integrity validation */
+  shaUrl: string;
   /** The file name (ex. the `*.tar.gz` file) */
   fileName: string;
   /** The directory name that the download archive will be extracted to (same as `fileName` but no file extensions) */
@@ -639,6 +641,7 @@ export const getAgentDownloadUrl = async (
 
   return {
     url: searchResult.packages[agentFile].url,
+    shaUrl: searchResult.packages[agentFile].sha_url,
     fileName: agentFile,
     dirName: fileNameWithoutExtension,
   };
@@ -853,7 +856,7 @@ export const enrollHostVmWithFleet = async ({
   const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
 
   const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
-    ? await downloadAndStoreAgent(agentUrlInfo.url)
+    ? await downloadAndStoreAgent(agentUrlInfo.url, undefined, agentUrlInfo.shaUrl)
     : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
 
   log.info(`Installing Elastic Agent`);

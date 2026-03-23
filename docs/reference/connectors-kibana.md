@@ -49,6 +49,13 @@ Access to connectors is granted based on your privileges to alerting-enabled fea
 
 :::
 
+:::{dropdown} Data and context sources
+
+:::{include} connectors-kibana/_snippets/data-context-sources-connectors-list.md
+:::
+
+:::
+
 ::::{note}
 Some connector types are paid commercial features, while others are free. For a comparison of the Elastic subscription levels, go to [the subscription page](https://www.elastic.co/subscriptions).
 ::::
