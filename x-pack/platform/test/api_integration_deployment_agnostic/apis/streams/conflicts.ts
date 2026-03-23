@@ -88,6 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.otel.child',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { dsl: {} },
@@ -130,6 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.otel.child',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { dsl: {} },
