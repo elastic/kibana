@@ -31,7 +31,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => searchResponseBodySchema,
-            description: 'Indicates that the markdown panels were retrieved successfully.',
+            description: 'Indicates that the markdown panels is retrieved successfully.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',

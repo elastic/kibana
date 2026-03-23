@@ -37,7 +37,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           201: {
             body: () => createResponseBodySchema,
-            description: 'Indicates that a markdown panel was created successfully.',
+            description: 'Indicates that a markdown panel is created successfully.',
           },
           400: {
             description: 'Indicates an invalid schema or parameters.',

@@ -36,13 +36,13 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         },
         response: {
           204: {
-            description: 'Indicates that the markdown panel was deleted successfully.',
+            description: 'Indicates that the markdown panel is deleted successfully.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates that the markdown panel with the given ID was not found.',
+            description: 'Indicates that the markdown panel with the given ID is not found.',
           },
         },
       },

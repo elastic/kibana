@@ -37,7 +37,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => updateResponseBodySchema,
-            description: 'Indicates that the markdown panel was updated successfully.',
+            description: 'Indicates that the markdown panel is updated successfully.',
           },
           400: {
             description: 'Indicates an invalid schema or parameters.',
@@ -46,7 +46,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates that the markdown panel with the given ID was not found.',
+            description: 'Indicates that the markdown panel with the given ID is not found.',
           },
         },
       },

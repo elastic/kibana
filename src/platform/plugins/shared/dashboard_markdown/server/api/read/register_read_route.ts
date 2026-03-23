@@ -38,13 +38,13 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         response: {
           200: {
             body: () => readResponseBodySchema,
-            description: 'Indicates that the markdown panel was retrieved successfully.',
+            description: 'Indicates that the markdown panel is retrieved successfully.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates that the markdown panel with the given ID was not found.',
+            description: 'Indicates that the markdown panel with the given ID is not found.',
           },
         },
       },
