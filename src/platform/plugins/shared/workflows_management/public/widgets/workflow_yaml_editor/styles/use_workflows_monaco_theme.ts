@@ -49,6 +49,8 @@ export function useWorkflowsMonacoTheme() {
         'editor.background': '#00000000',
         'editorGutter.background': '#00000000',
         'minimap.background': '#00000000',
+        'diffEditor.unchangedRegionBackground': '#00000000',
+        'diffEditor.unchangedRegionForeground': euiTheme.colors.textSubdued,
       },
     });
   }, [themeBase, euiTheme]);
