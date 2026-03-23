@@ -31,7 +31,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
@@ -61,7 +61,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ message: '8.8.8.8 4.4.4.4' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['client.ip']).toStrictEqual(['8.8.8.8', '4.4.4.4']);
     }
@@ -83,7 +83,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ message: 'not_an_ip' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['client.ip']).toBeNull(); // grok didn't extract but did map the field
     }
@@ -110,7 +110,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
             '127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 "http://www.example.com/start.html" "Mozilla/4.08 [en] (Win98; I ;Nav)"',
         },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
@@ -125,7 +125,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           'url.original': '/apache_pb.gif',
           'source.address': '127.0.0.1',
           message: docs[0].message,
-          'message.keyword': docs[0].message,
+          // With dynamic: false, message is unmapped — no .keyword multi-field is generated
         })
       );
     }
@@ -152,22 +152,14 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
         { expect: '127.0.0.1', client: { ip: '192.168.1.1' }, message: 'User IP: 127.0.0.1' }, // Should grok
         { expect: null, client: { ip: '192.168.1.1' }, message: 'User IP: N/A' }, // Should grok
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Group documents by their expectation
-      const nullDocs = esqlResult.documents.filter((doc) => doc.expect === null);
-      const ipDocs = esqlResult.documents.filter((doc) => doc.expect === '127.0.0.1');
-
-      // Test all null docs have null client.ip
-      nullDocs.forEach((doc) => {
-        expect(doc['client.ip']).toBeNull();
-      });
-
-      // Test all IP docs have correct client.ip
-      ipDocs.forEach((doc) => {
-        expect(doc['client.ip']).toBe('127.0.0.1');
-      });
+      // expect is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] no-message, [1] valid IP, [2] bad IP.
+      expect(esqlResult.documentsOrdered[0]['client.ip']).toBeNull();
+      expect(esqlResult.documentsOrdered[1]['client.ip']).toBe('127.0.0.1');
+      expect(esqlResult.documentsOrdered[2]['client.ip']).toBeNull();
     }
   );
 
@@ -188,8 +180,11 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ log: { level: 'info' } }];
-      await testBed.ingest(indexName, docs);
-      await expect(esql.queryOnIndex(indexName, query)).rejects.toThrow('Unknown column [message]');
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
+      // [UNMAPPED_FIELDS] With SET UNMAPPED_FIELDS=LOAD, 'message' is resolved from _source as null
+      // rather than throwing 'Unknown column'. With ignore_missing=false, null source field filters out the document.
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+      expect(esqlResult.documents).toHaveLength(0);
     }
   );
 
@@ -222,24 +217,19 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
         { expect: '8.8.8.8', attributes: { should_exist: 'YES' }, message: '8.8.8.8' },
         { expect: null, attributes: { size: 2048 }, message: '127.0.0.1' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Group documents by their expectation
-      const ipDocsWithShouldExist = esqlResult.documents.filter(
-        (doc) => doc.expect === '55.3.244.1' || doc.expect === '8.8.8.8'
-      );
-      const docsWithSize = esqlResult.documents.filter((doc) => doc['attributes.size'] === 2048);
+      // expect and attributes.size are not referenced in the query so ES|QL does not return them as columns.
+      // Use documentsOrdered by ingestion position: [0] first should_exist, [1] second should_exist, [2] size.
+      const [doc0, doc1, doc2] = esqlResult.documentsOrdered;
 
       // Test documents with should_exist have correct IP
-      ipDocsWithShouldExist.forEach((doc) => {
-        expect(doc['client.ip']).toBe(doc.expect);
-      });
+      expect(doc0['client.ip']).toBe('55.3.244.1');
+      expect(doc1['client.ip']).toBe('8.8.8.8');
 
-      // Test documents with size have null client.ip
-      docsWithSize.forEach((doc) => {
-        expect(doc['client.ip']).toBeNull();
-      });
+      // Test document with size has null client.ip (where condition not matched)
+      expect(doc2['client.ip']).toBeNull();
     }
   );
 
@@ -264,13 +254,8 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [
-        // Mapping doc to ensure fields exist
-        {
-          http: { response: { body: { bytes: 0 } } },
-          status: { keyword: '' },
-          flags: { process: '' },
-          message: '',
-        },
+        // [UNMAPPED_FIELDS] mapping doc removed — no longer needed with SET UNMAPPED_FIELDS=LOAD
+        // { http: { response: { body: { bytes: 0 } } }, status: { keyword: '' }, flags: { process: '' }, message: '' },
         // Will be grokked (bytes numeric in message)
         {
           case: 'grok_numeric',
@@ -287,12 +272,13 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           message: '2048 IGNORED',
         },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Get specific documents by case
-      const grokNumericDoc = esqlResult.documents.find((doc) => doc.case === 'grok_numeric');
-      const skipNumericDoc = esqlResult.documents.find((doc) => doc.case === 'skip_numeric');
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered: grok_numeric was ingested first (index 0), skip_numeric second (index 1).
+      const grokNumericDoc = esqlResult.documentsOrdered[0];
+      const skipNumericDoc = esqlResult.documentsOrdered[1];
 
       // Test grokked document
       expectDefined(grokNumericDoc);
@@ -324,13 +310,8 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [
-        // Mapping doc for pre-cast stability
-        {
-          user: { name: '' },
-          client: { ip: '' },
-          flags: { process: '' },
-          message: '',
-        },
+        // [UNMAPPED_FIELDS] mapping doc removed — no longer needed with SET UNMAPPED_FIELDS=LOAD
+        // { user: { name: '' }, client: { ip: '' }, flags: { process: '' }, message: '' },
         // Both conditions true -> grok
         {
           case: 'both',
@@ -345,14 +326,15 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
         // Neither condition
         { case: 'none', user: { name: 'offline' } },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Find specific documents by case
-      const bothDoc = esqlResult.documents.find((doc) => doc.case === 'both');
-      const noMessageDoc = esqlResult.documents.find((doc) => doc.case === 'no_message');
-      const noWhereDoc = esqlResult.documents.find((doc) => doc.case === 'no_where');
-      const noneDoc = esqlResult.documents.find((doc) => doc.case === 'none');
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: both(0), no_message(1), no_where(2), none(3).
+      const bothDoc = esqlResult.documentsOrdered[0];
+      const noMessageDoc = esqlResult.documentsOrdered[1];
+      const noWhereDoc = esqlResult.documentsOrdered[2];
+      const noneDoc = esqlResult.documentsOrdered[3];
 
       // Test document with both conditions
       expectDefined(bothDoc);
@@ -397,16 +379,9 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [
-        // Mapping / schema stabilization doc
-        {
-          client: { ip: '0.0.0.0' },
-          user: { name: 'baseline' },
-          http: { response: { body: { bytes: 0 } } },
-          event: { duration: 0 }, // mapped type is long
-          'http.response': { status: 'INIT' },
-          flags: { process: '' },
-          message: '',
-        },
+        // [UNMAPPED_FIELDS] mapping doc removed — no longer needed with SET UNMAPPED_FIELDS=LOAD
+        // { client: { ip: '0.0.0.0' }, user: { name: 'baseline' }, http: { response: { body: { bytes: 0 } } },
+        //   event: { duration: 0 }, 'http.response': { status: 'INIT' }, flags: { process: '' }, message: '' },
         // Full GROK override (all fields present & where passes)
         {
           case: 'grok_all',
@@ -449,18 +424,17 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           'http.response': { status: 'NOOP' },
         },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Collect only docs with a case label (exclude mapping doc)
-      const resultDocs = esqlResult.documents.filter((d) => d.case);
-      expect(resultDocs).toHaveLength(4);
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: grok_all(0), skip_where(1), skip_missing(2), skip_both(3).
+      expect(esqlResult.documentsOrdered).toHaveLength(4);
 
-      // Find specific documents by case
-      const grokAllDoc = resultDocs.find((doc) => doc.case === 'grok_all');
-      const skipWhereDoc = resultDocs.find((doc) => doc.case === 'skip_where');
-      const skipMissingDoc = resultDocs.find((doc) => doc.case === 'skip_missing');
-      const skipBothDoc = resultDocs.find((doc) => doc.case === 'skip_both');
+      const grokAllDoc = esqlResult.documentsOrdered[0];
+      const skipWhereDoc = esqlResult.documentsOrdered[1];
+      const skipMissingDoc = esqlResult.documentsOrdered[2];
+      const skipBothDoc = esqlResult.documentsOrdered[3];
 
       // Test grokked document
       expectDefined(grokAllDoc);
@@ -514,18 +488,19 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
         ],
       };
       const { query } = transpile(streamlangDSL);
-      const mappingDoc = { size: 0, message: '' }; // Ingest size as long type
+      // const mappingDoc = { size: 0, message: '' }; // [UNMAPPED_FIELDS] NOTE: removing this changes test semantics —
+      // without pre-mapping 'size' as long, the field type is determined by first doc ingested
       const docs = [
-        mappingDoc,
         { case: 'groked', size: 1.9, message: '3.14159265358979323846' },
         { case: 'skipped', size: 88.99 },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Find specific documents by case
-      const grokedDoc = esqlResult.documents.find((doc) => doc.case === 'groked');
-      const skippedDoc = esqlResult.documents.find((doc) => doc.case === 'skipped');
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: groked(0), skipped(1).
+      const grokedDoc = esqlResult.documentsOrdered[0];
+      const skippedDoc = esqlResult.documentsOrdered[1];
 
       // Test groked document
       expectDefined(grokedDoc);
@@ -581,7 +556,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
             '11-06 13:43:41.377  1702 17633 W ActivityManager: getRunningAppProcesses: caller 10113 does not hold REAL_GET_TASKS; limiting output',
         },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents).toHaveLength(1);
       expect(esqlResult.documents[0]?.timestamp).toBe('11-06 13:43:41.377');

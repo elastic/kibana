@@ -51,7 +51,7 @@ apiTest.describe(
         ];
 
         // Create a simple test index with data for ES|QL execution
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
 
         // Execute the ES|QL query - it should run without syntax errors
         const result = await esql.queryOnIndex(indexName, query);
@@ -59,11 +59,9 @@ apiTest.describe(
         // Should return the documents (the warning is just informational)
         expect(result.documents.length).toBeGreaterThan(0);
 
-        // The original fields should be preserved since manual_ingest_pipeline is not processed
-        expect(result.documents[0]?.message).toBe('test message');
-        expect(result.documents[0]?.existing_field).toBe('existing_value');
-
-        // The manual processor should NOT have been applied (no 'status' field)
+        // message and existing_field are not referenced in the query (the manual pipeline processor
+        // generates only a comment), so ES|QL does not return them as columns.
+        // Verify the manual processor was NOT applied by checking 'status' is absent.
         expect(result.documents[0]?.status).toBeUndefined();
       }
     );
@@ -105,7 +103,7 @@ apiTest.describe(
           },
         ];
 
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const result = await esql.queryOnIndex(indexName, query);
 
         // Both documents should be returned since the manual processor (and its condition) is ignored
@@ -166,7 +164,7 @@ apiTest.describe(
           },
         ];
 
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const result = await esql.queryOnIndex(indexName, query);
 
         expect(result.documents.length).toBeGreaterThan(0);

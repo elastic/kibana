@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`transpile - Streamlang DSL to ES|QL) should handle not conditions 1`] = `
-"  | EVAL \`attributes.not_flag\` = CASE(NOT \`attributes.status\` == \\"active\\", \\"not-active\\", \`attributes.not_flag\`)
+"SET unmapped_fields=\\"LOAD\\"
+  | EVAL \`attributes.not_flag\` = CASE(NOT \`attributes.status\` == \\"active\\", \\"not-active\\", \`attributes.not_flag\`)
   | EVAL \`attributes.not_nested\` = CASE(NOT (\`attributes.a\` == 1 OR \`attributes.b\` == 2), \\"not-a-or-b\\", \`attributes.not_nested\`)"
 `;
 
@@ -13,7 +14,8 @@ Object {
   | EVAL \`attributes.numeric_450_test\` = CASE(\`attributes.status_code\` == 450 AND \`attributes.status_code_str\` == \\"450\\" AND \`attributes.other_code\` != 450 AND \`attributes.other_code_str\` != \\"450\\", \\"matched_450_test\\", \`attributes.numeric_450_test\`)
   | EVAL \`attributes.mixed_coercion_test\` = CASE(\`attributes.response_time\` > 100 AND \`attributes.response_time_str\` > \\"100\\" AND \`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\" AND \`attributes.is_enabled\` == TRUE AND \`attributes.count_str\` == \\"42\\", \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
   ],
-  "query": "  | EVAL \`attributes.boolean_true_test\` = CASE(\`attributes.is_active\` == TRUE AND \`attributes.is_active_str\` == \\"true\\" AND \`attributes.is_inactive\` != TRUE AND \`attributes.is_inactive_str\` != \\"true\\", \\"matched_true_test\\", \`attributes.boolean_true_test\`)
+  "query": "SET unmapped_fields=\\"LOAD\\"
+  | EVAL \`attributes.boolean_true_test\` = CASE(\`attributes.is_active\` == TRUE AND \`attributes.is_active_str\` == \\"true\\" AND \`attributes.is_inactive\` != TRUE AND \`attributes.is_inactive_str\` != \\"true\\", \\"matched_true_test\\", \`attributes.boolean_true_test\`)
   | EVAL \`attributes.boolean_false_test\` = CASE(\`attributes.is_disabled\` == FALSE AND \`attributes.is_disabled_str\` == \\"false\\" AND \`attributes.is_enabled\` != FALSE AND \`attributes.is_enabled_str\` != \\"false\\", \\"matched_false_test\\", \`attributes.boolean_false_test\`)
   | EVAL \`attributes.numeric_450_test\` = CASE(\`attributes.status_code\` == 450 AND \`attributes.status_code_str\` == \\"450\\" AND \`attributes.other_code\` != 450 AND \`attributes.other_code_str\` != \\"450\\", \\"matched_450_test\\", \`attributes.numeric_450_test\`)
   | EVAL \`attributes.mixed_coercion_test\` = CASE(\`attributes.response_time\` > 100 AND \`attributes.response_time_str\` > \\"100\\" AND \`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\" AND \`attributes.is_enabled\` == TRUE AND \`attributes.count_str\` == \\"42\\", \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
@@ -21,7 +23,8 @@ Object {
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"  | WHERE NOT(source_ip IS NULL) AND NOT(destination_ip IS NULL)
+"SET unmapped_fields=\\"LOAD\\"
+  | WHERE NOT(source_ip IS NULL) AND NOT(destination_ip IS NULL)
   | EVAL \`network.direction\` = NETWORK_DIRECTION(TO_IP(source_ip), TO_IP(destination_ip), [\\"private\\"])
   | EVAL my_joined_field = CONCAT(field1, \\", \\", field2, \\", \\", field3)
   | EVAL full_name = CASE(first_name IS NULL OR last_name IS NULL, NULL, CONCAT(first_name, \\" \\", last_name))
@@ -57,4 +60,5 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
   | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""
 `;
 
-exports[`transpile - Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used 1`] = `"  | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""`;
+exports[`transpile - Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used 1`] = `"SET unmapped_fields=\\"LOAD\\"
+  | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""`;

@@ -33,7 +33,7 @@ apiTest.describe(
         const { query } = transpile(streamlangDSL);
 
         const docs = [{ message: 'Connection from 192.168.1.1 established' }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(1);
@@ -59,7 +59,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Contact user at john.doe@example.com for details' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -84,7 +84,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'User john@example.com connected from 10.0.0.1' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -111,7 +111,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Request from 172.16.0.1' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -136,7 +136,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Device MAC: 00:1A:2B:3C:4D:5E' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -166,13 +166,15 @@ apiTest.describe(
         const docWithField = { message: 'Connection from 192.168.1.1', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should pass through
         const docs = [docWithField, docWithoutField];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // Both documents should be present
-        expect(esqlResult.documents).toHaveLength(2);
-        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
-        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+        // status is not referenced in the query so ES|QL does not return it as a column.
+        // Use documentsOrdered by ingestion position: [0] doc with message, [1] doc without.
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        const doc1 = esqlResult.documentsOrdered[0];
+        const doc2 = esqlResult.documentsOrdered[1];
         expect(doc1).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
         expect(doc2).toStrictEqual(expect.objectContaining({ message: null }));
       }
@@ -199,13 +201,14 @@ apiTest.describe(
         const docWithField = { message: 'Connection from 192.168.1.1', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should be filtered out
         const docs = [docWithField, docWithoutField];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // ES|QL filters out documents with missing field when ignore_missing: false
+        // status is not referenced in the query so ES|QL does not return it as a column.
         expect(esqlResult.documents).toHaveLength(1);
         expect(esqlResult.documents[0]).toStrictEqual(
-          expect.objectContaining({ status: 'doc1', message: 'Connection from <ip>' })
+          expect.objectContaining({ message: 'Connection from <ip>' })
         );
       }
     );
@@ -233,19 +236,20 @@ apiTest.describe(
         { message: 'Connection from 192.168.1.1', environment: 'production', status: 'doc1' },
         { message: 'Connection from 192.168.1.2', environment: 'development', status: 'doc2' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] production doc, [1] development doc.
 
       // Production doc should have IP redacted
-      const prodDoc = esqlResult.documents.find(
-        (d: Record<string, unknown>) => d.status === 'doc1'
-      );
+      const prodDoc = esqlResult.documentsOrdered[0];
       expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
       // Development doc should keep original IP
-      const devDoc = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      const devDoc = esqlResult.documentsOrdered[1];
       expect(devDoc).toStrictEqual(
         expect.objectContaining({ message: 'Connection from 192.168.1.2' })
       );
@@ -267,7 +271,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'User 550e8400-e29b-41d4-a716-446655440000 logged in' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -292,7 +296,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Hello world, no IP here' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);

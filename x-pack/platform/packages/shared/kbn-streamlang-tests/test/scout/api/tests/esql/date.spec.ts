@@ -28,7 +28,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
     }
@@ -55,7 +55,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
         { event: { created: '01/01/2025:12:34:56' } },
         { event: { created: '2025-01-02T12:34:56.789Z' } },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documentsOrdered[0]['event.created_date']).toBe('2025-01-01T12:34:56.000Z');
@@ -80,7 +80,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['custom.time']).toBe('2025-01-01T12:34:56.789Z');
     }
@@ -103,7 +103,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['@timestamp']).toBe('2025/01/01');
     }
@@ -129,16 +129,15 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
 
-      const mappingDoc = { '@timestamp': '2025-01-01T12:32:54.123Z' }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped
+      // const mappingDoc = { '@timestamp': '2025-01-01T12:32:54.123Z' }; // commenting out mapping docs whilst testing unmapped fields
       const docs = [
-        mappingDoc,
         { attributes: { should_exist: 'YES' }, log: { time: '2025-01-01T12:34:56.789Z' } },
         { attributes: { size: 2048 }, log: { time: '2025-01-02T12:34:56.789Z' } },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documentsOrdered[1]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
-      expect(esqlResult.documentsOrdered[2]['@timestamp']).toBeNull();
+      expect(esqlResult.documentsOrdered[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
+      expect(esqlResult.documentsOrdered[1]['@timestamp']).toBeNull();
     }
   );
 
@@ -158,7 +157,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ log: { time: '01-01-2025' } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['log.time']).toBe('01-01-2025');
       expect(esqlResult.documents[0]['@timestamp']).toBeNull();

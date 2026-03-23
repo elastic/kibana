@@ -36,13 +36,13 @@ apiTest.describe(
         { environment: 'production', message: 'keep-this' },
         { environment: 'non-production', message: 'drop-this' }, // should drop docs with non-production environments
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
       const source = esqlResult.documents[0];
       expect(source?.environment).toBe('production');
-      expect(source?.message).toBe('keep-this');
+      // message is not referenced in the query so ES|QL does not return it as a column.
     });
   }
 );

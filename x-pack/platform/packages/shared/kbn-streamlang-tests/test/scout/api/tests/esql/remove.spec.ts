@@ -30,14 +30,12 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
+      // message is not referenced in the query so ES|QL does not return it as a column.
       expect(esqlResult.documents).toHaveLength(1);
       expect(esqlResult.documents[0]?.temp_field).toBeUndefined();
-      expect(esqlResult.documents[0]).toStrictEqual(
-        expect.objectContaining({ message: 'keep-this' })
-      );
     });
 
     apiTest(
@@ -59,12 +57,12 @@ apiTest.describe(
         const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
         const docWithoutField = { message: 'doc2' }; // Should be filtered out
         const docs = [docWithField, docWithoutField];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // ES|QL filters out documents with missing field when ignore_missing: false
+        // message is not referenced in the query so ES|QL does not return it as a column.
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ message: 'doc1' }));
         expect(esqlResult.documents[0]?.temp_field).toBeUndefined();
       }
     );
@@ -87,13 +85,15 @@ apiTest.describe(
       const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
       const docWithoutField = { message: 'doc2' }; // Should pass through
       const docs = [docWithField, docWithoutField];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Both documents should be present
-      expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc1');
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc2');
+      // message is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] doc with field, [1] doc without.
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      const doc1 = esqlResult.documentsOrdered[0];
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc1?.temp_field).toBeUndefined();
       expect(doc2?.temp_field).toBeUndefined();
     });
@@ -120,19 +120,21 @@ apiTest.describe(
         { temp_data: 'remove-me', event: { kind: 'test' }, message: 'doc1' },
         { temp_data: 'keep-me', event: { kind: 'production' }, message: 'doc2' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
+      // message is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
 
       // First doc should have temp_data nulled (where condition matched)
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc1');
+      const doc1 = esqlResult.documentsOrdered[0];
       // Note: ESQL CASE sets to null, which is removed from the result
       expect(doc1?.temp_data).toBeNull();
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should keep temp_data (where condition not matched)
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc2');
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc2?.temp_data).toBe('keep-me');
       expect(doc2?.['event.kind']).toBe('production');
     });

@@ -174,7 +174,7 @@ apiTest.describe(
       const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
       const docs = [docWithField, docWithoutField];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Both documents should be present
@@ -208,10 +208,12 @@ apiTest.describe(
         { tags: 'foo,bar,baz', event: { kind: 'test' }, status: 'doc1' },
         { tags: 'one,two,three', event: { kind: 'production' }, status: 'doc2' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
 
       // First doc should have tags split (where condition matched)
       const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');

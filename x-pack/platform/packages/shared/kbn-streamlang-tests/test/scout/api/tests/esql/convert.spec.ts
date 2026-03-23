@@ -31,7 +31,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // `toHaveProperty` doesn't work with flattened ES|QL Rows/Documents
@@ -79,12 +79,13 @@ apiTest.describe(
         const { query } = transpile(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
+        // attributes.size is unmapped (dynamic: false) so ES|QL loads it as keyword — expect string.
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({
-            'attributes.size': 4096,
+            'attributes.size': '4096',
             'attributes.size_str': '4096',
           })
         );

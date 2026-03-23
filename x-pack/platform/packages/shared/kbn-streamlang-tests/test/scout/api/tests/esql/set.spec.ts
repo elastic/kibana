@@ -31,7 +31,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // `toHaveProperty` doesn't work with flattened ES|QL Rows/Documents
@@ -79,30 +79,28 @@ apiTest.describe(
 
       const { query } = transpile(streamlangDSL);
 
-      // ES|QL errors out when unmapped fields (columns) are read
-      // The following docs helps map the fields for which ES|QL has to perform nullability checks
-      const mappingDoc = { attributes: { should_exist: null, status: 'null' } };
+      // commenting out mapping docs whilst testing unmapped fields
+      // const mappingDoc = { attributes: { should_exist: null, status: 'null' } };
       const docs = [
-        mappingDoc,
         { attributes: { size: 4096, should_exist: 'YES' } },
         { attributes: { size: 2048 } },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // The field should be set since `attributes.status` doesn't exist where attributes.should_exist exists
-      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+      // The field should be set since `attributes.status` doesn't exist where attributes.should_exist exists.
+      // attributes.size is not referenced in the query so ES|QL does not load it.
+      expect(esqlResult.documentsOrdered[0]).toStrictEqual(
         expect.objectContaining({
-          'attributes.size': 4096,
           'attributes.should_exist': 'YES',
           'attributes.status': 'active',
         })
       );
 
-      // The field should not be set since `attributes.should_exist` doesn't exist
-      expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+      // The field should not be set since `attributes.should_exist` doesn't exist.
+      // attributes.size is not referenced in the query so ES|QL does not load it.
+      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
-          'attributes.size': 2048,
           'attributes.status': null,
         })
       );
@@ -124,7 +122,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'should-be-copied' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
@@ -152,7 +150,7 @@ apiTest.describe(
         const { query } = transpile(streamlangDSL);
         const docWithStatus = { attributes: { status: 'active' } }; // 'attributes.status' already exists
         const docs = [docWithStatus, { attributes: { size: 1024 } }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
@@ -187,7 +185,7 @@ apiTest.describe(
 
         const { query } = transpile(streamlangDSL);
         const docs = [{ attributes: { status: 'active' } }]; // 'attributes.status' already exists
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
         expect(esqlResult.documents[0]).toStrictEqual(
           expect.objectContaining({

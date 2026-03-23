@@ -32,7 +32,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ price: 10, quantity: 5 }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0]).toStrictEqual(
@@ -58,7 +58,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ a: 15, b: 25 }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0]).toStrictEqual(
@@ -84,7 +84,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ a: 100, b: 30 }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0]).toStrictEqual(
@@ -110,7 +110,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ total: 100, count: 4 }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0]).toStrictEqual(
@@ -137,7 +137,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ attributes: { price: 25, quantity: 4 } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0]).toStrictEqual(
@@ -165,7 +165,7 @@ apiTest.describe(
 
       // log(e) = 1, using e ≈ 2.718281828459045
       const docs = [{ value: 2.718281828459045 }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Allow small floating-point tolerance
@@ -193,7 +193,7 @@ apiTest.describe(
         { order_id: 1, a: 5, b: 3 },
         { order_id: 2, a: 5, b: 5 },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
@@ -227,7 +227,7 @@ apiTest.describe(
         { order_id: 1, a: 10, b: 5 },
         { order_id: 2, a: 3, b: 7 },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
@@ -257,7 +257,7 @@ apiTest.describe(
         { order_id: 1, a: 3, b: 7 },
         { order_id: 2, a: 10, b: 5 },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
@@ -287,7 +287,7 @@ apiTest.describe(
         { order_id: 1, a: 5, b: 5 },
         { order_id: 2, a: 5, b: 3 },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
@@ -323,7 +323,7 @@ apiTest.describe(
         { order_id: 2, price: 10, quantity: 5, active: true, total: null },
         { order_id: 3, price: 20, quantity: 3, active: false, total: null },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Active doc should have total calculated
@@ -365,7 +365,7 @@ apiTest.describe(
           { order_id: 2, price: 10, quantity: 5, total: null },
           { order_id: 3, price: 20, quantity: null, total: null }, // quantity missing
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // First doc should have total calculated
