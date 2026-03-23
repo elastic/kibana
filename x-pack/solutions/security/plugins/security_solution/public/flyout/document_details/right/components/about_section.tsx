@@ -22,7 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
