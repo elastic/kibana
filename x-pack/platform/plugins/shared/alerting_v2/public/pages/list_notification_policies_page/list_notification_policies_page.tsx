@@ -215,14 +215,14 @@ export const ListNotificationPoliciesPage = () => {
       ),
       sortable: true,
       render: (name: string, policy: NotificationPolicyResponse) => (
-        <>
-          {name}
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{name}</EuiFlexItem>
           {policy.description && (
             <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
               {policy.description}
             </EuiText>
           )}
-        </>
+        </EuiFlexGroup>
       ),
     },
     {
