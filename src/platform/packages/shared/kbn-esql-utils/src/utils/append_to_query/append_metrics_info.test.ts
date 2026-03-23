@@ -22,7 +22,8 @@ describe('buildMetricsInfoQuery', () => {
   });
 
   it('returns query as-is when METRICS_INFO is already in the pipeline', () => {
-    expect(buildMetricsInfoQuery('TS INDEX | METRICS_INFO')).toBe('TS INDEX | METRICS_INFO');
+   const simpleQuery = 'TS INDEX | METRICS_INFO';
+    expect(buildMetricsInfoQuery(simpleQuery)).toBe(simpleQuery);
     const withLimit = 'TS INDEX | METRICS_INFO | LIMIT 100';
     expect(buildMetricsInfoQuery(withLimit)).toBe(withLimit);
   });
