@@ -67,7 +67,6 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     /** Update the styles of the panel as it is dragged via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
       gridLayoutStateManager.activePanelEvent$.pipe(
-        // here
         // filter out the first active panel event to allow "onClick" events through
         pairwise(),
         filter(([before]) => before !== undefined),
