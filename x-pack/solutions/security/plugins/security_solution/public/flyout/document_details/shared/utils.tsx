@@ -165,12 +165,11 @@ export const resolveUserNameForEntityInsights = (
     }
     const sortedKeys = Object.keys(identityFields).sort();
     for (const key of sortedKeys) {
-      if (USER_ID_FIELD_KEYS.has(key) || key.endsWith('.id')) {
-        continue;
-      }
-      const v = identityFields[key];
-      if (typeof v === 'string' && v.trim() !== '') {
-        return v;
+      if (!USER_ID_FIELD_KEYS.has(key) && !key.endsWith('.id')) {
+        const v = identityFields[key];
+        if (typeof v === 'string' && v.trim() !== '') {
+          return v;
+        }
       }
     }
     for (const key of ['user.id', 'entity.id'] as const) {
@@ -205,12 +204,11 @@ export const resolveHostNameForEntityInsights = (
     }
     const sortedKeys = Object.keys(identityFields).sort();
     for (const key of sortedKeys) {
-      if (HOST_ID_FIELD_KEYS.has(key) || key.endsWith('.id')) {
-        continue;
-      }
-      const v = identityFields[key];
-      if (typeof v === 'string' && v.trim() !== '') {
-        return v;
+      if (!HOST_ID_FIELD_KEYS.has(key) && !key.endsWith('.id')) {
+        const v = identityFields[key];
+        if (typeof v === 'string' && v.trim() !== '') {
+          return v;
+        }
       }
     }
     for (const key of ['host.id', 'entity.id'] as const) {
