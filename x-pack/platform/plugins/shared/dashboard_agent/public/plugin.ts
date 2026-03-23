@@ -15,8 +15,8 @@ import type {
 } from './types';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { Subscription } from 'rxjs';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { Subscription } from 'rxjs';
 
 export class DashboardAgentPlugin
   implements
