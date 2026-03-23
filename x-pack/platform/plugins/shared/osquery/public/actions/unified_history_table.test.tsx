@@ -449,10 +449,7 @@ describe('UnifiedHistoryTable', () => {
     });
 
     it('actions column is always visible even when columns are restricted via localStorage', () => {
-      localStorage.setItem(
-        'osquery:historyColumns',
-        JSON.stringify(['query', 'created_at'])
-      );
+      localStorage.setItem('osquery:historyColumns', JSON.stringify(['query', 'created_at']));
       mockHistory({ data: [createMockLiveRow()] });
 
       renderWithProviders(<UnifiedHistoryTable />);

@@ -58,7 +58,17 @@ export const useUnifiedHistory = ({
   return useQuery(
     [
       UNIFIED_HISTORY_QUERY_KEY,
-      { pageSize, nextPage, kuery, sourceFilters, userIds, tags, startDate, endDate, sortDirection },
+      {
+        pageSize,
+        nextPage,
+        kuery,
+        sourceFilters,
+        userIds,
+        tags,
+        startDate,
+        endDate,
+        sortDirection,
+      },
     ],
     () =>
       http.get<UnifiedHistoryResponse>('/api/osquery/history', {
