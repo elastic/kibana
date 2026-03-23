@@ -14,6 +14,7 @@ import type { TraceItem } from '../../../../../../common/waterfall/unified_trace
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { TraceWaterfall } from '../../../../shared/trace_waterfall';
 import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
+import { WaterfallSizeWarning } from '../../../../shared/trace_waterfall/waterfall_size_warning';
 import { UnifiedWaterfallFlyout } from './waterfall/unified_waterfall_flyout';
 
 interface Props {
@@ -25,6 +26,9 @@ interface Props {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (value: boolean) => void;
   entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
 const toggleFlyout = ({
@@ -55,7 +59,12 @@ export function UnifiedWaterfallContainer({
   showCriticalPath,
   onShowCriticalPathChange,
   entryTransactionId,
+  traceDocsTotal,
+  maxTraceItems,
+  discoverHref,
 }: Props) {
+  const exceedMax =
+    traceDocsTotal !== undefined && maxTraceItems !== undefined && traceDocsTotal > maxTraceItems;
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
 
@@ -69,6 +78,16 @@ export function UnifiedWaterfallContainer({
 
   return (
     <EuiFlexGroup direction="column">
+      {exceedMax && (
+        <EuiFlexItem>
+          <WaterfallSizeWarning
+            traceDocsTotal={traceDocsTotal!}
+            maxTraceItems={maxTraceItems!}
+            discoverHref={discoverHref}
+            data-test-subj="unifiedWaterfallSizeWarning"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <TraceWaterfall
           traceItems={traceItems}
