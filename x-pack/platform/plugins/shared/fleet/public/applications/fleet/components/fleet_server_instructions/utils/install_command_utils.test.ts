@@ -393,37 +393,67 @@ describe('getInstallCommandForPlatform', () => {
 
   describe('with simple proxy settings', () => {
     it('should return the correct command if proxies are set for linux', () => {
-      const res = getInstallCommandForPlatform({
-        platform: 'linux',
-        esOutputHost: 'http://elasticsearch:9200',
-        esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
-          url: 'http://es-proxy:1111',
-          is_preconfigured: false,
-        },
-        serviceToken: 'service-token-1',
-        policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
-        downloadSource: {
-          id: 'download-src',
-          name: 'download-src',
-          host: 'https://download-src/8.12.0-test/',
-          is_default: false,
-          proxy_id: 'download-proxy',
-        },
-        downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
-          url: 'http://download-src-proxy:2222',
-          is_preconfigured: false,
-        },
-      });
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'linux_aarch64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz --proxy http://download-src-proxy:2222
+        tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz
+        cd elastic-agent-9.0.0-linux-arm64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --install-servers \\\\
+          --proxy-url=http://es-proxy:1111"
+      `);
 
-      expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz --proxy http://download-src-proxy:2222
-        tar xzvf elastic-agent--linux-x86_64.tar.gz
-        cd elastic-agent--linux-x86_64
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'linux_x86_64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-linux-x86_64.tar.gz --proxy http://download-src-proxy:2222
+        tar xzvf elastic-agent-9.0.0-linux-x86_64.tar.gz
+        cd elastic-agent-9.0.0-linux-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
@@ -434,37 +464,67 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for mac', () => {
-      const res = getInstallCommandForPlatform({
-        platform: 'mac',
-        esOutputHost: 'http://elasticsearch:9200',
-        esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
-          url: 'http://es-proxy:1111',
-          is_preconfigured: false,
-        },
-        serviceToken: 'service-token-1',
-        policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
-        downloadSource: {
-          id: 'download-src',
-          name: 'download-src',
-          host: 'https://download-src/8.12.0-test/',
-          is_default: false,
-          proxy_id: 'download-proxy',
-        },
-        downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
-          url: 'http://download-src-proxy:2222',
-          is_preconfigured: false,
-        },
-      });
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'mac_aarch64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-darwin-aarch64.tar.gz --proxy http://download-src-proxy:2222
+        tar xzvf elastic-agent-9.0.0-darwin-aarch64.tar.gz
+        cd elastic-agent-9.0.0-darwin-aarch64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --install-servers \\\\
+          --proxy-url=http://es-proxy:1111"
+      `);
 
-      expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz --proxy http://download-src-proxy:2222
-        tar xzvf elastic-agent--darwin-aarch64.tar.gz
-        cd elastic-agent--darwin-aarch64
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'mac_x86_64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-darwin-x86_64.tar.gz --proxy http://download-src-proxy:2222
+        tar xzvf elastic-agent-9.0.0-darwin-x86_64.tar.gz
+        cd elastic-agent-9.0.0-darwin-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
@@ -479,10 +539,7 @@ describe('getInstallCommandForPlatform', () => {
         platform: 'windows',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -495,10 +552,7 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
-          is_preconfigured: false,
         },
       });
 
@@ -521,10 +575,7 @@ describe('getInstallCommandForPlatform', () => {
         platform: 'rpm',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -537,16 +588,84 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
-          is_preconfigured: false,
         },
       });
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--x86_64.rpm --proxy http://download-src-proxy:2222
-        sudo rpm -vi elastic-agent--x86_64.rpm
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.msi -OutFile elastic-agent-9.0.0-windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\"
+        .\\\\elastic-agent-9.0.0-windows-x86_64.msi --% INSTALLARGS=\\"\`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --install-servers \`
+          --proxy-url=http://es-proxy:1111\\""
+      `);
+    });
+
+    it('should return the correct command if proxies are set for rpm', () => {
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'rpm_aarch64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-aarch64.rpm --proxy http://download-src-proxy:2222
+        sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-9.0.0-aarch64.rpm
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent
+        sudo elastic-agent enroll \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111"
+      `);
+
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'rpm_x86_64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-x86_64.rpm --proxy http://download-src-proxy:2222
+        sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-9.0.0-x86_64.rpm
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent
         sudo elastic-agent enroll \\\\
@@ -559,36 +678,66 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for deb', () => {
-      const res = getInstallCommandForPlatform({
-        platform: 'deb',
-        esOutputHost: 'http://elasticsearch:9200',
-        esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
-          url: 'http://es-proxy:1111',
-          is_preconfigured: false,
-        },
-        serviceToken: 'service-token-1',
-        policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
-        downloadSource: {
-          id: 'download-src',
-          name: 'download-src',
-          host: 'https://download-src/8.12.0-test/',
-          is_default: false,
-          proxy_id: 'download-proxy',
-        },
-        downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
-          url: 'http://download-src-proxy:2222',
-          is_preconfigured: false,
-        },
-      });
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'deb_aarch64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-arm64.deb --proxy http://download-src-proxy:2222
+        sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-9.0.0-arm64.deb
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent
+        sudo elastic-agent enroll \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111"
+      `);
 
-      expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--amd64.deb --proxy http://download-src-proxy:2222
-        sudo dpkg -i elastic-agent--amd64.deb
+      expect(
+        getInstallCommandForPlatform({
+          platform: 'deb_x86_64',
+          kibanaVersion: '9.0.0',
+          esOutputHost: 'http://elasticsearch:9200',
+          esOutputProxy: {
+            url: 'http://es-proxy:1111',
+          },
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost,
+          downloadSource: {
+            id: 'download-src',
+            name: 'download-src',
+            host: 'https://download-src/8.12.0-test/',
+            is_default: false,
+            proxy_id: 'download-proxy',
+          },
+          downloadSourceProxy: {
+            url: 'http://download-src-proxy:2222',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-amd64.deb --proxy http://download-src-proxy:2222
+        sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-9.0.0-amd64.deb
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent
         sudo elastic-agent enroll \\\\
@@ -607,14 +756,11 @@ describe('getInstallCommandForPlatform', () => {
         platform: 'linux',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
           proxy_headers: {
             'X-Forwarded-For': 'forwarded-value',
             'test-header': 'test-value',
           },
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -627,14 +773,11 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           proxy_headers: {
             'Accept-Language': 'en-US,en;q=0.5',
             'second-header': 'second-value',
           },
-          is_preconfigured: false,
         },
       });
 
@@ -658,14 +801,11 @@ describe('getInstallCommandForPlatform', () => {
         platform: 'mac',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
           proxy_headers: {
             'X-Forwarded-For': 'forwarded-value',
             'test-header': 'test-value',
           },
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -678,14 +818,11 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           proxy_headers: {
             'Accept-Language': 'en-US,en;q=0.5',
             'second-header': 'second-value',
           },
-          is_preconfigured: false,
         },
       });
 
@@ -709,14 +846,11 @@ describe('getInstallCommandForPlatform', () => {
         platform: 'windows',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
           proxy_headers: {
             'X-Forwarded-For': 'forwarded-value',
             'test-header': 'test-value',
           },
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -729,14 +863,11 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           proxy_headers: {
             'Accept-Language': 'en-US,en;q=0.5',
             'second-header': 'second-value',
           },
-          is_preconfigured: false,
         },
       });
 
@@ -755,20 +886,62 @@ describe('getInstallCommandForPlatform', () => {
           --proxy-header=\\"test-header=test-value\\""
       `);
     });
+    it('should return the correct command if proxies are set for windows MSI', () => {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows_msi',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+        },
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost,
+        downloadSource: {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        downloadSourceProxy: {
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+        },
+        kibanaVersion: '9.0.0',
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.msi -OutFile elastic-agent-9.0.0-windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\" -Headers @{\\"Accept-Language\\"=\\"en-US,en;q=0.5\\"; \\"second-header\\"=\\"second-value\\"}
+        .\\\\elastic-agent-9.0.0-windows-x86_64.msi --% INSTALLARGS=\\"\`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --install-servers \`
+          --proxy-url=http://es-proxy:1111 \`
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \`
+          --proxy-header=\\"test-header=test-value\\"\\""
+      `);
+    });
 
     it('should return the correct command if proxies are set for rpm', () => {
       const res = getInstallCommandForPlatform({
         platform: 'rpm',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
           proxy_headers: {
             'X-Forwarded-For': 'forwarded-value',
             'test-header': 'test-value',
           },
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -781,14 +954,11 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           proxy_headers: {
             'Accept-Language': 'en-US,en;q=0.5',
             'second-header': 'second-value',
           },
-          is_preconfigured: false,
         },
       });
 
@@ -813,14 +983,11 @@ describe('getInstallCommandForPlatform', () => {
         platform: 'deb',
         esOutputHost: 'http://elasticsearch:9200',
         esOutputProxy: {
-          id: 'es-proxy',
-          name: 'es-proxy',
           url: 'http://es-proxy:1111',
           proxy_headers: {
             'X-Forwarded-For': 'forwarded-value',
             'test-header': 'test-value',
           },
-          is_preconfigured: false,
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
@@ -833,14 +1000,11 @@ describe('getInstallCommandForPlatform', () => {
           proxy_id: 'download-proxy',
         },
         downloadSourceProxy: {
-          id: 'download-src-proxy',
-          name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           proxy_headers: {
             'Accept-Language': 'en-US,en;q=0.5',
             'second-header': 'second-value',
           },
-          is_preconfigured: false,
         },
       });
 
