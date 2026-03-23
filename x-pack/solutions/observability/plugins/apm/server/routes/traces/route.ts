@@ -155,6 +155,8 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     errors: Error[];
     agentMarks: Record<string, number>;
     entryTransaction?: Transaction;
+    traceDocsTotal: number;
+    maxTraceItems: number;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -164,28 +166,29 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end, serviceName, entryTransactionId } = params.query;
+    const maxTraceItems = params.query.maxTraceItems ?? config.ui.maxTraceItems;
 
-    const [{ traceItems, agentMarks, unifiedTraceErrors }, entryTransaction] = await Promise.all([
-      getUnifiedTraceItems({
-        apmEventClient,
-        logsClient,
-        traceId,
-        start,
-        end,
-        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        config,
-        serviceName,
-      }),
-      entryTransactionId
-        ? getTransaction({
-            transactionId: entryTransactionId,
-            traceId,
-            apmEventClient,
-            start,
-            end,
-          })
-        : Promise.resolve(undefined),
-    ]);
+    const [{ traceItems, agentMarks, unifiedTraceErrors, traceDocsTotal }, entryTransaction] =
+      await Promise.all([
+        getUnifiedTraceItems({
+          apmEventClient,
+          logsClient,
+          traceId,
+          start,
+          end,
+          maxTraceItems,
+          serviceName,
+        }),
+        entryTransactionId
+          ? getTransaction({
+              transactionId: entryTransactionId,
+              traceId,
+              apmEventClient,
+              start,
+              end,
+            })
+          : Promise.resolve(undefined),
+      ]);
 
     return {
       traceItems,
@@ -193,6 +196,8 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       errors: unifiedTraceErrors.apmErrors,
       agentMarks,
       entryTransaction,
+      traceDocsTotal,
+      maxTraceItems,
     };
   },
 });
