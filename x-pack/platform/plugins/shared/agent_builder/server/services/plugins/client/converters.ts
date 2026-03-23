@@ -80,14 +80,17 @@ export const parsedArchiveToCreateRequest = ({
   sourceUrl,
   skillIds,
   nameOverride,
+  id,
 }: {
   parsedArchive: ParsedPluginArchive;
   sourceUrl?: string;
   skillIds: string[];
   nameOverride?: string;
+  id?: string;
 }): PluginCreateRequest => {
   const { manifest, unmanagedAssets } = parsedArchive;
   return {
+    id,
     name: nameOverride ?? manifest.name,
     version: manifest.version ?? '0.0.0',
     description: manifest.description ?? '',

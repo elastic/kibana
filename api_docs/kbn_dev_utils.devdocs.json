@@ -84,75 +84,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-common.createIndexSnapshotCommit",
-        "type": "Function",
-        "tags": [],
-        "label": "createIndexSnapshotCommit",
-        "description": [
-          "\nCreates an ephemeral commit from the current Git index without updating any refs.\nUsed by staged-scope affected checks where tooling needs a real `head` SHA for\nindex contents (for example Moon comparisons with `base=HEAD` and `head=<index snapshot>`)."
-        ],
-        "signature": [
-          "({ parentRef, message, }?: { parentRef?: string | undefined; message?: string | undefined; }) => Promise<string>"
-        ],
-        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-common.createIndexSnapshotCommit.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  parentRef = 'HEAD',\n  message = 'Temporary commit for staged-scope tooling\\n',\n}",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-            "lineNumber": 22,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/dev-utils",
-                "id": "def-common.createIndexSnapshotCommit.$1.parentRef",
-                "type": "string",
-                "tags": [],
-                "label": "parentRef",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-                "lineNumber": 23,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/dev-utils",
-                "id": "def-common.createIndexSnapshotCommit.$1.message",
-                "type": "string",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-                "lineNumber": 24,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.diffStrings",
         "type": "Function",
         "tags": [],
@@ -372,6 +303,27 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.isShallowRepository",
+        "type": "Function",
+        "tags": [],
+        "label": "isShallowRepository",
+        "description": [
+          "Returns true when the current repository is a shallow Git checkout."
+        ],
+        "signature": [
+          "() => Promise<boolean>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/is_shallow_repository.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

@@ -318,6 +318,25 @@ describe('plugin converters', () => {
       });
       expect(result.name).toBe('my-plugin');
     });
+
+    it('includes id when provided', () => {
+      const result = parsedArchiveToCreateRequest({
+        parsedArchive: baseArchive,
+        sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
+        id: 'pre-generated-uuid',
+      });
+      expect(result.id).toBe('pre-generated-uuid');
+    });
+
+    it('leaves id undefined when not provided', () => {
+      const result = parsedArchiveToCreateRequest({
+        parsedArchive: baseArchive,
+        sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
+      });
+      expect(result.id).toBeUndefined();
+    });
   });
 
   describe('updateRequestToEs', () => {

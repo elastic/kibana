@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { ParsedPluginArchive, ParsedSkillFile } from '@kbn/agent-builder-common';
@@ -160,8 +161,10 @@ class PluginsServiceImpl implements PluginsService {
       );
     }
 
+    const pluginId = randomUUID();
+
     const createRequests = parsedArchive.skills.map((skill) =>
-      toSkillCreateRequest({ skill, pluginName })
+      toSkillCreateRequest({ skill, pluginName, pluginId })
     );
     await skillClient.bulkCreate(createRequests);
 
@@ -172,6 +175,7 @@ class PluginsServiceImpl implements PluginsService {
       sourceUrl,
       skillIds,
       nameOverride: pluginNameOverride,
+      id: pluginId,
     });
 
     return pluginClient.create(createRequest);
@@ -192,8 +196,8 @@ class PluginsServiceImpl implements PluginsService {
     }
 
     const { pluginClient, skillClient } = this.getScopedClients({ request });
-    const persistedPlugin = await pluginClient.get(pluginId);
-    await skillClient.deleteByPluginId(persistedPlugin.name);
+    const plugin = await pluginClient.get(pluginId);
+    await skillClient.deleteByPluginId(plugin.id);
     await pluginClient.delete(pluginId);
   }
 }
@@ -201,13 +205,16 @@ class PluginsServiceImpl implements PluginsService {
 const toSkillCreateRequest = ({
   skill,
   pluginName,
+  pluginId,
 }: {
   skill: ParsedSkillFile;
   pluginName: string;
+  pluginId: string;
 }): PersistedSkillCreateRequest => {
   return {
     id: `${pluginName}-${skill.dirName}`,
     name: skill.meta.name ?? skill.dirName,
+    base_path: `/skills/${pluginName}`,
     description: skill.meta.description ?? '',
     content: skill.content,
     referenced_content: skill.referencedFiles.map((file) => ({
@@ -216,6 +223,6 @@ const toSkillCreateRequest = ({
       content: file.content,
     })),
     tool_ids: [],
-    plugin_id: pluginName,
+    plugin_id: pluginId,
   };
 };
