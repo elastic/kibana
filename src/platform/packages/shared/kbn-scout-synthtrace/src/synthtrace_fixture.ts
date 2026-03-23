@@ -16,8 +16,8 @@ import type {
   LogDocument,
 } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
-import { getSynthtraceClient } from '../../../../common/services/synthtrace';
-import { coreWorkerFixtures } from './core_fixtures';
+import { coreWorkerFixtures } from '@kbn/scout';
+import { getSynthtraceClient } from './get_synthtrace_client';
 
 export interface SynthtraceFixture {
   apmSynthtraceEsClient: Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'>;
