@@ -145,18 +145,13 @@ describe('useTelemetry', () => {
     const { result } = renderHook(() => useTelemetry(), { wrapper });
 
     act(() => {
-      result.current.reportCodeEditorCopyClicked({
-        integrationName: 'My Integration',
-        dataStreamName: 'my-data-stream',
-      });
+      result.current.reportCodeEditorCopyClicked();
     });
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.CodeEditorCopyClicked,
       expect.objectContaining({
         sessionId: expect.any(String),
-        integrationName: 'My Integration',
-        dataStreamName: 'my-data-stream',
       })
     );
   });

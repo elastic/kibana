@@ -64,8 +64,6 @@ export interface EditPipelineTabOpenedPayload {
 
 export interface CodeEditorCopyClickedPayload {
   sessionId: string;
-  integrationName: string;
-  dataStreamName: string;
 }
 
 export interface DataStreamCreationCompletePayload {

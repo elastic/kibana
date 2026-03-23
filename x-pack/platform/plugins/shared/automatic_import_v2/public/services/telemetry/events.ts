@@ -85,14 +85,6 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
         optional: false,
       },
     },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: false },
-    },
-    dataStreamName: {
-      type: 'keyword',
-      _meta: { description: 'Data stream name', optional: false },
-    },
   },
 
   [AIV2TelemetryEventType.ManageIntegrationsTableViewed]: {},

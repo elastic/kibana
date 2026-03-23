@@ -385,10 +385,7 @@ describe('EditPipelineFlyout', () => {
       const copyButton = screen.getByTestId('code-editor-copy');
       await userEvent.click(copyButton);
 
-      expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith({
-        integrationName: 'Test Integration',
-        dataStreamName: 'Test Data Stream',
-      });
+      expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith();
     });
   });
 

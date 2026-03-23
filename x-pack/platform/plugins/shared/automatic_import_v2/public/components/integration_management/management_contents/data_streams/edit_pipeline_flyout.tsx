@@ -38,7 +38,6 @@ import { getIconFromType, flattenPipelineObject, diffPipelineLines } from './uti
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
-  integrationName: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
 }
@@ -51,7 +50,6 @@ interface TableRow {
 
 export const EditPipelineFlyout = ({
   integrationId,
-  integrationName,
   dataStream,
   onClose,
 }: EditPipelineFlyoutProps) => {
@@ -209,13 +207,10 @@ export const EditPipelineFlyout = ({
         target.closest('.euiCodeBlock__copyButton') ||
         target.getAttribute('aria-label')?.toLowerCase().includes('copy')
       ) {
-        reportCodeEditorCopyClicked({
-          integrationName,
-          dataStreamName: dataStream.title,
-        });
+        reportCodeEditorCopyClicked();
       }
     },
-    [reportCodeEditorCopyClicked, integrationName, dataStream.title]
+    [reportCodeEditorCopyClicked]
   );
 
   return (

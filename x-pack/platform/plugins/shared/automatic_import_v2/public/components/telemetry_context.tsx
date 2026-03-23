@@ -18,10 +18,7 @@ type ReportAnalyzeLogsTriggered = (params: { logsSource: LogsSource }) => void;
 
 type ReportEditPipelineTabOpened = () => void;
 
-type ReportCodeEditorCopyClicked = (params: {
-  integrationName: string;
-  dataStreamName: string;
-}) => void;
+type ReportCodeEditorCopyClicked = () => void;
 
 type ReportCancelButtonClicked = () => void;
 
@@ -119,16 +116,11 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     });
   }, [telemetry]);
 
-  const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(
-    ({ integrationName, dataStreamName }) => {
-      telemetry?.reportEvent(AIV2TelemetryEventType.CodeEditorCopyClicked, {
-        sessionId: sessionData.current.sessionId,
-        integrationName,
-        dataStreamName,
-      });
-    },
-    [telemetry]
-  );
+  const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.CodeEditorCopyClicked, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
 
   const reportCancelButtonClicked = useCallback<ReportCancelButtonClicked>(() => {
     telemetry?.reportEvent(AIV2TelemetryEventType.CancelButtonClicked, {

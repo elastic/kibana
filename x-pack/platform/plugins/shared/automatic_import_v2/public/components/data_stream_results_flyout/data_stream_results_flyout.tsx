@@ -18,12 +18,7 @@ export const DataStreamResultsFlyout = ({
 }: DataStreamResultsFlyoutProps) => {
   return (
     <UIStateProvider>
-      <EditPipelineFlyout
-        integrationId={integrationId}
-        integrationName={integrationName}
-        dataStream={dataStream}
-        onClose={onClose}
-      />
+      <EditPipelineFlyout integrationId={integrationId} dataStream={dataStream} onClose={onClose} />
     </UIStateProvider>
   );
 };
