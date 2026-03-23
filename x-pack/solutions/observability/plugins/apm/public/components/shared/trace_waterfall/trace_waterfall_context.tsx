@@ -232,6 +232,11 @@ export function TraceWaterfallContextProvider({
     return filterMapByCriticalPath(fullTraceWaterfallMap, criticalPathSegmentsById);
   }, [criticalPathSegmentsById, fullTraceWaterfallMap, showCriticalPath]);
 
+  const marks = useMemo(
+    () => [...getAgentMarks(agentMarks), ...errorMarks],
+    [agentMarks, errorMarks]
+  );
+
   return (
     <TraceWaterfallContext.Provider
       value={{
@@ -261,7 +266,7 @@ export function TraceWaterfallContextProvider({
         showLegend,
         serviceName,
         message,
-        marks: [...getAgentMarks(agentMarks), ...errorMarks],
+        marks,
         errorMarks,
         agentMarks: getAgentMarks(agentMarks),
         scrollElement,
