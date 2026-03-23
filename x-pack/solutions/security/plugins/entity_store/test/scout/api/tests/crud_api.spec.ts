@@ -164,6 +164,90 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     });
   });
 
+  apiTest(
+    'Should update an entity by ID only (no identity fields)',
+    async ({ apiClient, esClient }) => {
+      // Create a host entity
+      const createObj: Entity = {
+        entity: { id: 'host:update-id-only' },
+        host: { name: 'update-id-only' },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: createObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      // Update using only entity.id (no host.name identity field)
+      const update = await apiClient.put(
+        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            entity: {
+              id: 'host:update-id-only',
+              name: 'updated-name',
+            },
+          },
+        }
+      );
+      expect(update.statusCode).toBe(200);
+
+      const entities = await esClient.search({
+        index: LATEST_INDEX,
+        query: { term: { 'host.entity.id': 'host:update-id-only' } },
+      });
+      expect(entities.hits.hits).toHaveLength(1);
+      const received = entities.hits.hits[0]._source as HostEntity;
+      expect(received.host?.entity?.name).toBe('updated-name');
+    }
+  );
+
+  apiTest(
+    'Should update an entity by identity fields only (no entity.id)',
+    async ({ apiClient, esClient }) => {
+      // Create a host entity
+      const createObj: Entity = {
+        entity: { id: 'host:update-identity-only' },
+        host: { name: 'update-identity-only' },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: createObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      // Update using only identity fields (host.name), no entity.id
+      const update = await apiClient.put(
+        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            entity: {
+              name: 'updated-via-identity',
+            },
+            host: {
+              name: 'update-identity-only',
+            },
+          },
+        }
+      );
+      expect(update.statusCode).toBe(200);
+
+      const entities = await esClient.search({
+        index: LATEST_INDEX,
+        query: { term: { 'host.entity.id': 'host:update-identity-only' } },
+      });
+      expect(entities.hits.hits).toHaveLength(1);
+      const received = entities.hits.hits[0]._source as HostEntity;
+      expect(received.host?.entity?.name).toBe('updated-via-identity');
+    }
+  );
+
   apiTest('Should perform a bulk update', async ({ apiClient, esClient }) => {
     // Create entities first so bulk update has something to update
     for (const id of ['required-id-1-bulk', 'required-id-2-bulk']) {
