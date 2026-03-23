@@ -44,92 +44,20 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         },
       },
       async (context, request, response) => {
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
+
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+        let savedQuery;
         try {
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-
-          const space = await osqueryContext.service.getActiveSpace(request);
-          const spaceId = space?.id ?? DEFAULT_SPACE_ID;
-
-          const savedQuery = await spaceScopedClient.get<SavedQuerySavedObject>(
+          savedQuery = await spaceScopedClient.get<SavedQuerySavedObject>(
             savedQuerySavedObjectType,
             request.params.id
           );
-
-          if (savedQuery.attributes.ecs_mapping) {
-            // @ts-expect-error update types
-            savedQuery.attributes.ecs_mapping = convertECSMappingToObject(
-              savedQuery.attributes.ecs_mapping
-            );
-          }
-
-          const prebuiltById = await isSavedQueryPrebuilt(
-            osqueryContext.service.getPackageService()?.asInternalUser,
-            savedQuery.id,
-            spaceScopedClient,
-            spaceId
-          );
-
-          const prebuiltByOriginId =
-            !prebuiltById && savedQuery.originId
-              ? await isSavedQueryPrebuilt(
-                  osqueryContext.service.getPackageService()?.asInternalUser,
-                  savedQuery.originId,
-                  spaceScopedClient,
-                  spaceId
-                )
-              : false;
-
-          savedQuery.attributes.prebuilt = prebuiltById || prebuiltByOriginId;
-
-          const {
-            created_at: createdAt,
-            created_by: createdBy,
-            created_by_profile_uid: createdByProfileUid,
-            description,
-            id,
-            interval,
-            timeout,
-            platform,
-            query,
-            removed,
-            snapshot,
-            version,
-            ecs_mapping: ecsMapping,
-            updated_at: updatedAt,
-            updated_by: updatedBy,
-            updated_by_profile_uid: updatedByProfileUid,
-            prebuilt,
-          } = savedQuery.attributes;
-
-          const data: SavedQueryResponse = {
-            created_at: createdAt,
-            created_by: createdBy,
-            created_by_profile_uid: createdByProfileUid,
-            description,
-            id,
-            removed,
-            snapshot,
-            version,
-            ecs_mapping: ecsMapping,
-            interval,
-            timeout,
-            platform,
-            query,
-            updated_at: updatedAt,
-            updated_by: updatedBy,
-            updated_by_profile_uid: updatedByProfileUid,
-            prebuilt,
-            saved_object_id: savedQuery.id,
-          };
-
-          return response.ok({
-            body: {
-              data,
-            },
-          });
         } catch (err) {
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
             return response.notFound({
@@ -139,6 +67,79 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
           throw err;
         }
+
+        if (savedQuery.attributes.ecs_mapping) {
+          // @ts-expect-error update types
+          savedQuery.attributes.ecs_mapping = convertECSMappingToObject(
+            savedQuery.attributes.ecs_mapping
+          );
+        }
+
+        const prebuiltById = await isSavedQueryPrebuilt(
+          osqueryContext.service.getPackageService()?.asInternalUser,
+          savedQuery.id,
+          spaceScopedClient,
+          spaceId
+        );
+
+        const prebuiltByOriginId =
+          !prebuiltById && savedQuery.originId
+            ? await isSavedQueryPrebuilt(
+                osqueryContext.service.getPackageService()?.asInternalUser,
+                savedQuery.originId,
+                spaceScopedClient,
+                spaceId
+              )
+            : false;
+
+        savedQuery.attributes.prebuilt = prebuiltById || prebuiltByOriginId;
+
+        const {
+          created_at: createdAt,
+          created_by: createdBy,
+          created_by_profile_uid: createdByProfileUid,
+          description,
+          id,
+          interval,
+          timeout,
+          platform,
+          query,
+          removed,
+          snapshot,
+          version,
+          ecs_mapping: ecsMapping,
+          updated_at: updatedAt,
+          updated_by: updatedBy,
+          updated_by_profile_uid: updatedByProfileUid,
+          prebuilt,
+        } = savedQuery.attributes;
+
+        const data: SavedQueryResponse = {
+          created_at: createdAt,
+          created_by: createdBy,
+          created_by_profile_uid: createdByProfileUid,
+          description,
+          id,
+          removed,
+          snapshot,
+          version,
+          ecs_mapping: ecsMapping,
+          interval,
+          timeout,
+          platform,
+          query,
+          updated_at: updatedAt,
+          updated_by: updatedBy,
+          updated_by_profile_uid: updatedByProfileUid,
+          prebuilt,
+          saved_object_id: savedQuery.id,
+        };
+
+        return response.ok({
+          body: {
+            data,
+          },
+        });
       }
     );
 };

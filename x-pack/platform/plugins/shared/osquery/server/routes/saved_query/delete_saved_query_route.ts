@@ -41,31 +41,27 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         },
       },
       async (context, request, response) => {
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
+
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+        const isPrebuilt = await isSavedQueryPrebuilt(
+          osqueryContext.service.getPackageService()?.asInternalUser,
+          request.params.id,
+          spaceScopedClient,
+          spaceId
+        );
+        if (isPrebuilt) {
+          return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
+        }
+
         try {
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-
-          const space = await osqueryContext.service.getActiveSpace(request);
-          const spaceId = space?.id ?? DEFAULT_SPACE_ID;
-
-          const isPrebuilt = await isSavedQueryPrebuilt(
-            osqueryContext.service.getPackageService()?.asInternalUser,
-            request.params.id,
-            spaceScopedClient,
-            spaceId
-          );
-          if (isPrebuilt) {
-            return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
-          }
-
           await spaceScopedClient.delete(savedQuerySavedObjectType, request.params.id, {
             refresh: 'wait_for',
-          });
-
-          return response.ok({
-            body: {},
           });
         } catch (err) {
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
@@ -76,6 +72,10 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
           throw err;
         }
+
+        return response.ok({
+          body: {},
+        });
       }
     );
 };
