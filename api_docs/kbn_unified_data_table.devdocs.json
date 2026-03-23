@@ -2394,7 +2394,7 @@
         "label": "DataGridPaginationMode",
         "description": [],
         "signature": [
-          "\"infinite\" | \"multiPage\" | \"singlePage\""
+          "\"multiPage\" | \"singlePage\" | \"infinite\""
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/types.ts",
         "lineNumber": 66,

@@ -117,6 +117,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/fs'
+  - '@kbn/react-hooks'
 tags:
   - plugin
   - prod
