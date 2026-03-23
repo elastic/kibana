@@ -30,6 +30,13 @@ liquidEngine.registerFilter('json_parse', (value: unknown): unknown => {
   }
 });
 
+liquidEngine.registerFilter('entries', (value: unknown): unknown => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return value;
+  }
+  return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+});
+
 export interface EvaluateExpressionOptions {
   /** The full expression including filters (e.g., "steps.search.output.hits | json") */
   expression: string;
