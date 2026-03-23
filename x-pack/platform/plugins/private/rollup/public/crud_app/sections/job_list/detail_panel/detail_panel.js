@@ -161,7 +161,7 @@ export class DetailPanel extends Component {
                 jobs={[job]}
                 anchorPosition="upRight"
                 detailPanel={true}
-                iconType="arrowUp"
+                iconType="chevronSingleUp"
                 label={i18n.translate('xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel', {
                   defaultMessage: 'Manage',
                 })}

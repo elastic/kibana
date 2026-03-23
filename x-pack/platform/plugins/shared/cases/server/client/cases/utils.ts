@@ -13,7 +13,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
 import type {
   ActionConnector,
-  Attachment,
+  AttachmentV2,
   Case,
   CaseAssignees,
   CaseAttributes,
@@ -40,6 +40,7 @@ import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
+import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
@@ -86,23 +87,25 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: Attachment): string => {
-  if (comment.type === AttachmentType.user) {
-    return comment.comment;
-  } else if (comment.type === AttachmentType.alert) {
-    const ids = getAlertIds(comment);
-    return `Alert with ids ${ids.join(', ')} added to case`;
-  } else if (
-    comment.type === AttachmentType.actions &&
-    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
-  ) {
-    const firstHostname =
-      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
-    const totalHosts = comment.actions.targets.length;
-    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
-    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+const getCommentContent = (comment: AttachmentV2): string => {
+  if (isLegacyAttachmentRequest(comment)) {
+    if (comment.type === AttachmentType.user) {
+      return comment.comment;
+    } else if (comment.type === AttachmentType.alert) {
+      const ids = getAlertIds(comment);
+      return `Alert with ids ${ids.join(', ')} added to case`;
+    } else if (
+      comment.type === AttachmentType.actions &&
+      (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+    ) {
+      const firstHostname =
+        comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
+      const totalHosts = comment.actions.targets.length;
+      const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
+      const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
 
-    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+      return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+    }
   }
 
   return '';
@@ -121,7 +124,7 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === AttachmentType.alert) {
+      if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.alert) {
         return {
           totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,

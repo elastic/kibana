@@ -13,7 +13,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import type { DiscoverServices } from '../../../../build_services';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AppMountParameters } from '@kbn/core/public';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
 import { internalStateActions, selectHasUnsavedChanges } from '../redux';
 import { getPersistedTabMock, getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
@@ -53,43 +53,30 @@ describe('useUnsavedChanges', () => {
     services?: DiscoverServices;
     onAppLeave?: AppMountParameters['onAppLeave'];
   } = {}) => {
-    const {
-      internalState,
-      runtimeStateManager,
-      initializeTabs,
-      initializeSingleTab,
-      getCurrentTab,
-      addNewTab,
-      saveDiscoverSession,
-    } = getDiscoverInternalStateMock({
+    const toolkit = getDiscoverInternalStateMock({
       services,
       persistedDataViews: [dataViewMock, dataViewWithTimefieldMock],
     });
 
-    await initializeTabs({ persistedDiscoverSession: getPersistedDiscoverSession({ services }) });
-
-    const { stateContainer } = await initializeSingleTab({ tabId: getCurrentTab().id });
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: getPersistedDiscoverSession({ services }),
+    });
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
     const result = renderHook(useUnsavedChanges, {
-      initialProps: { internalState, runtimeStateManager, onAppLeave },
+      initialProps: {
+        internalState: toolkit.internalState,
+        runtimeStateManager: toolkit.runtimeStateManager,
+        onAppLeave,
+      },
       wrapper: ({ children }) => (
-        <DiscoverTestProvider services={services} stateContainer={stateContainer}>
-          {children}
-        </DiscoverTestProvider>
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
       ),
     });
 
     return {
       result,
-      internalState,
-      runtimeStateManager,
-      stateContainer,
-      services,
-      initializeTabs,
-      initializeSingleTab,
-      addNewTab,
-      getCurrentTab,
-      saveDiscoverSession,
+      ...toolkit,
     };
   };
 

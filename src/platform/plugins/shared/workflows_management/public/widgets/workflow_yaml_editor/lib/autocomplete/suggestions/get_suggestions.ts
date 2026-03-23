@@ -8,6 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
@@ -22,9 +23,38 @@ import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
+import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
 import { getPropertyHandler } from '../../../../../../common/schema';
-import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
+import type {
+  AutocompleteContext,
+  ExtendedAutocompleteContext,
+} from '../context/autocomplete.types';
+
+const loopStepTypes = new Set<string>(LoopStepTypes);
+
+/**
+ * Checks whether the current cursor position in the YAML document is inside
+ * the body (`steps` array) of a foreach or while loop step.
+ */
+export function isInsideLoopBody(ctx: Pick<AutocompleteContext, 'yamlDocument' | 'path'>): boolean {
+  const { yamlDocument, path } = ctx;
+  if (!yamlDocument || !path) return false;
+
+  for (let i = 0; i < path.length - 2; i++) {
+    if (path[i] === 'steps' && typeof path[i + 1] === 'number') {
+      const stepTypePath = [...path.slice(0, i + 2), 'type'];
+      const stepType = yamlDocument.getIn(stepTypePath);
+      if (typeof stepType === 'string' && loopStepTypes.has(stepType)) {
+        const remainingPath = path.slice(i + 2);
+        if (remainingPath[0] === 'steps') {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
 
 /**
  * Creates an adjusted range for type suggestions that extends to the end of the line
@@ -102,7 +132,8 @@ async function handleMatchTypeSuggestions(
         return getConnectorTypeSuggestions(
           lineParseResult.fullKey,
           adjustedRange,
-          autocompleteContext.dynamicConnectorTypes
+          autocompleteContext.dynamicConnectorTypes,
+          isInsideLoopBody(autocompleteContext)
         );
       }
       return null;
@@ -132,7 +163,6 @@ export async function getSuggestions(
     return getRRuleSchedulingSuggestions(autocompleteContext.range);
   }
 
-  // Handle suggestions based on match type
   const matchTypeSuggestions = await handleMatchTypeSuggestions(autocompleteContext);
   if (matchTypeSuggestions !== null) {
     return matchTypeSuggestions;
@@ -148,16 +178,12 @@ export async function getSuggestions(
     }
   }
 
+  const workflowOutputSuggestions = await getWorkflowOutputsSuggestions(autocompleteContext);
+  if (workflowOutputSuggestions.length > 0) {
+    return workflowOutputSuggestions;
+  }
+
   // JSON Schema autocompletion for inputs.properties
-  // e.g.
-  // inputs:
-  //   properties:
-  //     myProperty:
-  //       type: |<- (suggest: string, number, boolean, object, array, null)
-  //       format: |<- (suggest: email, uri, date-time, etc.)
-  //       enum: |<- (suggest enum values from schema)
-  // This should be checked BEFORE other type completions to avoid conflicts
-  // but AFTER variable/connector completions which are more specific
   const jsonSchemaSuggestions = getJsonSchemaSuggestions(autocompleteContext);
   if (jsonSchemaSuggestions.length > 0) {
     return jsonSchemaSuggestions;
@@ -169,19 +195,4 @@ export async function getSuggestions(
     (stepType: string, scope: 'config' | 'input', key: string) =>
       getPropertyHandler(stepType, scope, key)
   );
-
-  // TODO: Implement connector with block completion
-  // Connector with block completion
-  // e.g.
-  // steps:
-  // - name: search-alerts
-  //   type: elasticsearch.search
-  //   with:
-  //     index: "alerts-*"
-  //     query:
-  //       range:
-  //         "@timestamp":
-  //           gte: "now-1h"
-  //     |<-
-  // return [];
 }

@@ -60,7 +60,7 @@ export default {
       const coreMock = {
         http: {
           get: async (): Promise<TransactionDetailsApiReturnType> => {
-            return dedot(data.transactionEvent, {}) as Transaction;
+            return dedot(data.transactionEvent, {}) as unknown as Transaction;
           },
         },
       };

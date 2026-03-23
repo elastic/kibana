@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 import { generateCopyName } from './generate_copy_name';
@@ -31,6 +32,8 @@ export interface CopySavedObjectContext<T> {
   newName: string;
   /** Current username or undefined */
   username: string | undefined;
+  /** Current user's profile UID, if available */
+  profileUid: string | undefined;
   /** ISO timestamp for created_at / updated_at */
   now: string;
 }
@@ -57,12 +60,14 @@ export async function prepareSavedObjectCopy<T>(
     return null;
   }
 
+  const [, startPlugins] = await osqueryContext.getStartServices();
   const currentUser = await getUserInfo({
     request,
-    security: osqueryContext.security,
+    security: (startPlugins as StartPlugins).security,
     logger: osqueryContext.logFactory.get(options.loggerName),
   });
   const username = currentUser?.username ?? undefined;
+  const profileUid = currentUser?.profile_uid ?? undefined;
 
   // Find existing names for collision resolution.
   // Fetch all entries and filter in memory because KQL does not support
@@ -85,6 +90,7 @@ export async function prepareSavedObjectCopy<T>(
     sourceReferences: sourceSO.references,
     newName,
     username,
+    profileUid,
     now,
   };
 }

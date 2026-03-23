@@ -20,20 +20,26 @@ import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { useDiscoverCustomization } from '../../../../customizations';
+import {
+  useDiscoverCustomization,
+  useDiscoverCustomizationContext,
+} from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
+  selectTab,
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useDataViewsForPicker,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useInternalStateSelector,
+  useRuntimeStateManager,
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
@@ -44,7 +50,6 @@ import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
-  stateContainer: DiscoverStateContainer;
   esqlModeErrors?: Error;
   esqlModeWarning?: string;
   onFieldEdited: (options: {
@@ -57,7 +62,6 @@ export interface DiscoverTopNavProps {
 
 export const DiscoverTopNav = ({
   savedQuery,
-  stateContainer,
   esqlModeErrors,
   esqlModeWarning,
   onFieldEdited,
@@ -65,8 +69,12 @@ export const DiscoverTopNav = ({
   onCancelClick,
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
+  const getState = useInternalStateGetState();
+  const runtimeStateManager = useRuntimeStateManager();
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
+  const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
@@ -181,17 +189,19 @@ export const DiscoverTopNav = ({
         dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
       } else {
         // remove savedQueryId from state
-        const newState = { ...stateContainer.getCurrentTab().appState };
+        const { appState } = selectTab(getState(), currentTabId);
+        const newState = { ...appState };
         delete newState.savedQuery;
         dispatch(setAppState({ appState: newState }));
       }
     },
-    [dispatch, setAppState, stateContainer, updateAppState]
+    [dispatch, setAppState, getState, currentTabId, updateAppState]
   );
 
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const esqlQueryStats = useESQLQueryStats(
     isEsqlMode,
-    stateContainer.dataState.inspectorAdapters.requests
+    dataStateContainer.inspectorAdapters.requests
   );
 
   const transitionFromESQLToDataView = useCurrentTabAction(
@@ -210,7 +220,9 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         onSaveDiscoverSession({
           services,
-          state: stateContainer,
+          dispatch,
+          getState,
+          runtimeStateManager,
           onClose: () =>
             dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
           onSaveCb: () => {
@@ -221,11 +233,10 @@ export const DiscoverTopNav = ({
         dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
       }
     },
-    [dataView.id, dispatch, services, stateContainer, transitionFromESQLToDataView]
+    [dataView.id, dispatch, services, getState, runtimeStateManager, transitionFromESQLToDataView]
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({
-    stateContainer,
     persistedDiscoverSession,
   });
 
@@ -333,7 +344,7 @@ export const DiscoverTopNav = ({
       <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
-          stateContainer.customizationContext.displayMode !== 'embedded' &&
+          customizationContext.displayMode !== 'embedded' &&
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
         }

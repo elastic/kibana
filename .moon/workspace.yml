@@ -3,7 +3,6 @@ $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
   globs:
-    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
     - src/**/moon.yml
     - x-pack/**/moon.yml
     - examples/**/moon.yml

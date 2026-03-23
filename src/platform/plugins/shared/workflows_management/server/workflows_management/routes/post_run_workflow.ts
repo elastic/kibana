@@ -28,6 +28,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
         }),
         body: schema.object({
           inputs: schema.recordOf(schema.string(), schema.any()),
+          metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         }),
       },
     },
@@ -61,7 +62,10 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
             },
           });
         }
-        const { inputs } = request.body as { inputs: Record<string, unknown> };
+        const { inputs, metadata } = request.body as {
+          inputs: Record<string, unknown>;
+          metadata?: Record<string, unknown>;
+        };
 
         let processedInputs = inputs;
         const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
@@ -82,7 +86,9 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
           workflowForExecution,
           spaceId,
           processedInputs,
-          request
+          request,
+          undefined,
+          metadata
         );
         return response.ok({
           body: {

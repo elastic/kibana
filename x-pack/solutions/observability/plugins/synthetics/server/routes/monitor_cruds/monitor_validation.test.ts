@@ -279,9 +279,48 @@ describe('validateMonitor', () => {
         details: 'Invalid value "invalid-location" supplied to "locations"',
       });
     });
+
+    it('when browser timeout is less than 30 seconds with private locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '29',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Browser monitor timeout for private locations is invalid',
+        details:
+          'Timeout of 29 seconds is too low. Browser monitors on private locations require a minimum timeout of 30 seconds.',
+        payload: testMonitor,
+      });
+    });
   });
 
   describe('should validate', () => {
+    it('when browser timeout is less than 30 seconds with only public locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '10',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+        payload: testMonitor,
+      });
+    });
+
     it('when payload is a correct ICMP monitor', () => {
       const testMonitor = testICMPFields as MonitorFields;
       const result = validateMonitor(testMonitor, 'default');

@@ -314,6 +314,7 @@ export const buildXYExpression = (
         ? Math.min(5, state.legend.floatingColumns)
         : [],
     maxLines: state.legend.maxLines,
+    listLayoutMaxWidth: state.legend.listLayoutMaxWidth,
     legendStats: state.legend.legendStats,
     title: state.legend.title,
     isTitleVisible: state.legend.isTitleVisible,

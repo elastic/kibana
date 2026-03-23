@@ -51,6 +51,7 @@ import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ScriptsLibraryMock } from '../services/scripts_library/mocks';
 import { referenceDataMocks } from '../lib/reference_data/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
@@ -146,24 +147,39 @@ export const createMockEndpointAppContextService = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
-    getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
+    getFleetActionsClient: jest.fn(async () => fleetActionsClientMock),
     getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
-    getInternalResponseActionsClient: jest.fn(() => {
+    getInternalResponseActionsClient: jest.fn((_) => {
       return responseActionsClientMock.create();
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    getActiveSpace: jest.fn(async () => ({
+    getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
       name: 'default',
       disabledFeatures: [],
     })),
-    getSpaceId: jest.fn().mockReturnValue('default'),
+    getActiveSpaceId: jest.fn().mockReturnValue(DEFAULT_SPACE_ID),
+    getAccessibleSpaces: jest.fn(async (_) => [
+      {
+        id: DEFAULT_SPACE_ID,
+        name: 'default',
+        disabledFeatures: [],
+      },
+    ]),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
-  } as unknown as jest.Mocked<EndpointAppContextService>;
+    getAgentBuilder: jest.fn(),
+  } as Omit<
+    jest.Mocked<EndpointAppContextService>,
+    | 'config'
+    | 'security'
+    | 'fleetStartServices'
+    | 'savedObjectsServiceStart'
+    | 'exceptionListsClient'
+  > as jest.Mocked<EndpointAppContextService>;
 };
 
 /**
@@ -272,6 +288,7 @@ export const createMockEndpointAppContextServiceStartContract =
       } as unknown as jest.Mocked<ActionPluginStartContract>,
       telemetryConfigProvider: createTelemetryConfigProviderMock(),
       spacesService,
+      agentBuilder: agentBuilderMocks.createStart(),
     };
 
     return startContract;

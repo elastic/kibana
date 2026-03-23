@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/slo-schema'
   - '@kbn/apm-types-shared'
   - '@kbn/observability-utils-server'
+  - '@kbn/calculate-auto'
 tags:
   - plugin
   - prod
@@ -72,6 +73,7 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
+    - scripts/**/*
     - '!target/**/*'
 tasks:
   jest:

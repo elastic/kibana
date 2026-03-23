@@ -15,6 +15,7 @@ import type {
   AttachmentRequestV2,
   FindAttachmentsQueryParams,
 } from '../../../common/types/api';
+import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -28,11 +29,13 @@ export interface AddArgs {
    * The attachment values.
    */
   comment: AttachmentRequestV2;
+  mode?: AttachmentMode;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
   attachments: BulkCreateAttachmentsRequestV2;
+  mode?: AttachmentMode;
 }
 
 /**
@@ -85,6 +88,7 @@ export interface FindCommentsArgs {
    * Optional parameters for filtering the returned attachments
    */
   findQueryParams?: FindAttachmentsQueryParams;
+  mode?: AttachmentMode;
 }
 
 /**
@@ -95,6 +99,7 @@ export interface GetAllArgs {
    * The case ID to retrieve all attachments for
    */
   caseID: string;
+  mode?: AttachmentMode;
 }
 
 export interface GetArgs {
@@ -106,6 +111,10 @@ export interface GetArgs {
    * The ID of the attachment to retrieve
    */
   attachmentID: string;
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }
 
 export interface BulkGetArgs {
@@ -114,6 +123,10 @@ export interface BulkGetArgs {
    * The ids of the attachments
    */
   attachmentIDs: string[];
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }
 
 export interface GetAllDocumentsAttachedToCase {
@@ -137,6 +150,10 @@ export interface UpdateArgs {
    * The full attachment request with the fields updated with appropriate values
    */
   updateRequest: AttachmentPatchRequestV2;
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }
 
 export interface HapiReadableStream extends Readable {
@@ -170,4 +187,8 @@ export interface AddFileArgs {
    * An observable that can be used to abort the upload at any time.
    */
   $abort?: ReplaySubject<unknown>;
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }

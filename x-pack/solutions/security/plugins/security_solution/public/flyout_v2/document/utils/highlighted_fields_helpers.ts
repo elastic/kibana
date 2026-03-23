@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
+
+/**
+ * Converts the highlighted fields to a format that can be consumed by the prevalence query
+ * @param highlightedFields
+ */
+export const convertHighlightedFieldsToPrevalenceFilters = (
+  highlightedFields: UseHighlightedFieldsResult
+): Record<string, QueryDslQueryContainer> => {
+  const fieldNames = Object.keys(highlightedFields);
+  return fieldNames.reduce((acc, curr) => {
+    const values = highlightedFields[curr].values;
+
+    return {
+      ...acc,
+      [curr]: { terms: { [curr]: values } },
+    };
+  }, []) as unknown as Record<string, QueryDslQueryContainer>;
+};

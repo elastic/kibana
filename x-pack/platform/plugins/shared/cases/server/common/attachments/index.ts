@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../../common/types/domain';
-import {
-  COMMENT_ATTACHMENT_TYPE,
-  VALID_ATTACHMENT_TYPES,
-  LEGACY_TO_UNIFIED_MAP,
-} from '../../../common/constants/attachments';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -25,20 +21,6 @@ export {
 } from './saved_object_type';
 
 /**
- * Converts a legacy attachment type to its unified type.
- */
-export function toUnifiedAttachmentType(type: string): string {
-  if (!VALID_ATTACHMENT_TYPES.has(type)) {
-    throw new Error(`Invalid attachment type: ${type}`);
-  }
-  const unified = LEGACY_TO_UNIFIED_MAP[type];
-  if (unified) {
-    return unified;
-  }
-  return type;
-}
-
-/**
  * Returns the attachment type string from attributes (unified or legacy shape).
  * Used to select the correct transformer.
  * @throws Error if attributes is null or not an object
@@ -47,14 +29,11 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (attributes === null || typeof attributes !== 'object') {
     throw new Error('Invalid attributes: expected non-null object');
   }
-  const attrs = attributes as Record<string, unknown>;
-  if (typeof attrs.type === 'string') {
-    return attrs.type;
+  const { type } = attributes as Record<string, unknown>;
+  if (typeof type !== 'string') {
+    throw new Error('Invalid attributes: missing attachment type');
   }
-  if ('comment' in attrs) {
-    return AttachmentType.user;
-  }
-  return COMMENT_ATTACHMENT_TYPE;
+  return type;
 }
 
 /**
@@ -68,7 +47,7 @@ export function getAttachmentTypeTransformers(
 ): AttachmentTypeTransformer<AttachmentPersistedAttributes, UnifiedAttachmentAttributes> {
   const normalizedType = toUnifiedAttachmentType(type);
 
-  if (normalizedType === 'comment') {
+  if (normalizedType === COMMENT_ATTACHMENT_TYPE) {
     return commentAttachmentTransformer;
   }
   return passThroughTransformer;

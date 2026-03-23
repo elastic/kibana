@@ -193,6 +193,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
               environment,
               transactionName,
               transactionType,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

@@ -97,13 +97,6 @@ export const JourneyStepType = t.intersection([
 
 export type JourneyStep = t.TypeOf<typeof JourneyStepType>;
 
-export const FailedStepsApiResponseType = t.type({
-  checkGroups: t.array(t.string),
-  steps: t.array(JourneyStepType),
-});
-
-export type FailedStepsApiResponse = t.TypeOf<typeof FailedStepsApiResponseType>;
-
 /**
  * The individual screenshot blocks Synthetics uses to reduce disk footprint.
  */

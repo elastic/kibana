@@ -10,11 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
-import {
-  ChromeLayout,
-  ChromeLayoutConfigProvider,
-  SimpleDebugOverlay,
-} from '@kbn/core-chrome-layout-components';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
@@ -26,6 +22,7 @@ import {
   Sidebar,
   useHasAppMenu,
 } from '@kbn/core-chrome-browser-components';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
   useChromeStyle,
   useIsChromeVisible,
@@ -33,11 +30,7 @@ import {
 } from '@kbn/core-chrome-browser-hooks';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
-import type {
-  LayoutService,
-  LayoutServiceParams,
-  LayoutServiceStartDeps,
-} from '../../layout_service';
+import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
@@ -70,38 +63,25 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
  * Service for providing layout component wired to other core services.
  */
 export class GridLayout implements LayoutService {
-  constructor(
-    private readonly deps: LayoutServiceStartDeps,
-    private readonly params: LayoutServiceParams
-  ) {}
+  constructor(private readonly deps: LayoutServiceStartDeps) {}
 
   /**
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, chrome, overlays, http, docLinks, customBranding } = this.deps;
+    const { application, overlays, http, docLinks, customBranding } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const debug = this.params.debug ?? false;
 
-    // Stable reference — computed once per getComponent() call (app startup).
-    // chrome.componentDeps and service contracts are singletons that never change.
-    const componentDeps = {
-      ...chrome.componentDeps,
-      application: {
-        navigateToApp: application.navigateToApp,
-        navigateToUrl: application.navigateToUrl,
-        currentAppId$: application.currentAppId$,
-        currentActionMenu$: application.currentActionMenu$,
-      },
-      basePath: http.basePath,
+    const componentDeps: ChromeComponentsDeps = {
+      application,
+      http,
       docLinks,
-      loadingCount$: http.getLoadingCount$(),
-      customBranding$: customBranding.customBranding$,
+      customBranding,
     };
 
-    const GridLayoutContent = React.memo(({ debug: showDebug }: { debug: boolean }) => {
+    const GridLayoutContent = React.memo(() => {
       const chromeVisible = useIsChromeVisible();
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
@@ -137,17 +117,6 @@ export class GridLayout implements LayoutService {
         banner = <HeaderTopBanner position="static" />;
       }
 
-      if (showDebug) {
-        if (chromeVisible) {
-          if (!navigation) {
-            navigation = <SimpleDebugOverlay label="Debug Navigation" />;
-          }
-        }
-        if (!banner) {
-          banner = <SimpleDebugOverlay label="Debug Banner" />;
-        }
-      }
-
       return (
         <>
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
@@ -177,7 +146,7 @@ export class GridLayout implements LayoutService {
 
     return () => (
       <ChromeComponentsProvider value={componentDeps}>
-        <GridLayoutContent debug={debug} />
+        <GridLayoutContent />
       </ChromeComponentsProvider>
     );
   }

@@ -75,6 +75,10 @@ const mockSavedObjectsErrorHelpers = SavedObjectsErrorHelpers as jest.Mocked<
   typeof SavedObjectsErrorHelpers
 >;
 
+const mockAnalytics = {
+  reportEvent: jest.fn(),
+};
+
 function createClient(overrides?: {
   taskManager?: Partial<TaskManagerStartContract>;
   namespace?: string;
@@ -89,6 +93,7 @@ function createClient(overrides?: {
     logger: loggerMock.create(),
     taskManager,
     namespace: overrides?.namespace ?? 'default',
+    analytics: mockAnalytics,
   });
 }
 

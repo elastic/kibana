@@ -134,10 +134,24 @@ spaceTest.describe(
 
     spaceTest(
       'should update grid when selecting a breakdown dimension',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
+
+        await spaceTest.step('breakdown selector dropdown has no a11y violations', async () => {
+          await metricsExperience.breakdownSelector.toggleButton.click();
+          await metricsExperience.breakdownSelector.selectable.waitFor({ state: 'visible' });
+          // EUI known issue: https://github.com/elastic/eui/issues/9517
+          // Remove this exclude once fixed upstream.
+          const { violations } = await page.checkA11y({
+            include: ['[data-test-subj="metricsExperienceBreakdownSelectorSelectable"]'],
+            exclude: ['.euiSelectableList__list'],
+          });
+          expect(violations).toHaveLength(0);
+          await metricsExperience.breakdownSelector.toggleButton.click();
+          await metricsExperience.breakdownSelector.selectable.waitFor({ state: 'hidden' });
+        });
 
         await spaceTest.step('select first dimension as breakdown', async () => {
           await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);

@@ -150,18 +150,6 @@
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -755,18 +743,6 @@
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -1358,18 +1334,6 @@
           {
             "plugin": "agentBuilder",
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
           },
           {
             "plugin": "ml",

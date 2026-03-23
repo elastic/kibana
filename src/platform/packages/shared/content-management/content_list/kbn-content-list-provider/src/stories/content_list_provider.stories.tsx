@@ -215,7 +215,7 @@ const ItemsList = () => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   onClick={() => pagination.setPageIndex(pagination.pageIndex - 1)}
                 >
                   Prev
@@ -227,7 +227,7 @@ const ItemsList = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                     iconSide="right"
                     onClick={() => pagination.setPageIndex(pagination.pageIndex + 1)}
                   >

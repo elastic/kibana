@@ -1,6 +1,134 @@
 {
-  "sha1": "fb374e0c1241deba340defa265887a6f52e88672",
+  "sha1": "10d1b51f55dd306b3acd341b3d796af2aace9782",
   "tests": [
+    {
+      "id": "2b226b45edecc17-e395ce97cca539e",
+      "title": "Automated email resolution integration tests Basic email matching — two entities with same email",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-2925171d96b5532",
+      "title": "Automated email resolution integration tests Namespace priority — AD entity selected as target over Okta and Entra",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 108,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-a99ccef61b945a2",
+      "title": "Automated email resolution integration tests Alphabetical fallback — unknown namespaces use entity ID tiebreaker",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 142,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-c07a229a984ea45",
+      "title": "Automated email resolution integration tests Extend existing group — new entity with matching email joins pre-existing resolution group",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 166,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-5571f3104035a1d",
+      "title": "Automated email resolution integration tests Incremental pickup — watermark advances; second run processes only new entities",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 205,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-a84792155c15c5b",
+      "title": "Automated email resolution integration tests Multi-value email excluded — entity with array user.email is not matched",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 257,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-d8f28015196c6d3",
+      "title": "Automated email resolution integration tests Ambiguous buckets skipped — multiple existing targets for same email",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 302,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b226b45edecc17-bfb4b3b43243881",
+      "title": "Automated email resolution integration tests Manual override preserved — manually linked entity not re-resolved; new entity extends group",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/automated_resolution.spec.ts",
+        "line": 341,
+        "column": 12
+      }
+    },
     {
       "id": "b766b9bba0d643a-9872ed8d1853c32",
       "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for host and write to updates then latest index",
@@ -63,6 +191,70 @@
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
         "line": 482,
         "column": 12
+      }
+    },
+    {
+      "id": "d9737789d696c32-0d07bebba1374b5",
+      "title": "Entity Store check privileges API Should return full privileges for admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-791197e69b48c0e",
+      "title": "Entity Store check privileges API Should deny access for user without securitySolution privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-830cd1dd91a4340",
+      "title": "Entity Store check privileges API Should return no index permissions for user with securitySolution privilege but no index access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-550cdaf8582b4e8",
+      "title": "Entity Store check privileges API Should return limited privileges for user with read-only access to entities index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 83,
+        "column": 10
       }
     },
     {
@@ -658,8 +850,8 @@
       }
     },
     {
-      "id": "b9f6da09bb1a1e2-6c5b60f8439f3d5",
-      "title": "Entity Store API tests Should install the entity store happy path with feature flag enabled",
+      "id": "69891ea93f2e975-c18f4e661235e05",
+      "title": "Entity Store install / update API tests Should install the entity store happy path with feature flag enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -668,14 +860,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install.spec.ts",
-        "line": 25,
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
+        "line": 24,
         "column": 10
       }
     },
     {
-      "id": "b9f6da09bb1a1e2-b00ff4ea2f75181",
-      "title": "Entity Store API tests Should fail with feature flag disabled",
+      "id": "69891ea93f2e975-79b9321af5a6eda",
+      "title": "Entity Store install / update API tests Should fail with feature flag disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -684,15 +876,79 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install.spec.ts",
-        "line": 48,
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "69891ea93f2e975-a600fdc9000f15c",
+      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
+        "line": 60,
+        "column": 10
+      }
+    },
+    {
+      "id": "69891ea93f2e975-1e886910e4426bc",
+      "title": "Entity Store install / update API tests logExtraction is mandatory on update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
+        "line": 79,
+        "column": 10
+      }
+    },
+    {
+      "id": "69891ea93f2e975-c42368a614ad4b9",
+      "title": "Entity Store install / update API tests Update should change installed logExtraction params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "69891ea93f2e975-0d7bd05437a88c9",
+      "title": "Entity Store install / update API tests Update should not change logExtraction properties that were not included in the update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
+        "line": 141,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-edf468ca499c251",
       "title": "Entity Store Main logs extraction Should extract properly extract host",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -701,14 +957,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-70644c9ff872ec2",
       "title": "Entity Store Main logs extraction Should extract properly extract user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -717,14 +973,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-66e9c7a3970c192",
       "title": "Entity Store Main logs extraction Should extract properly extract service",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -733,14 +989,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 130,
+        "line": 131,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-b83bb04860e3ad4",
       "title": "Entity Store Main logs extraction Should extract properly extract generic",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -749,14 +1005,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 166,
+        "line": 167,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-e22bf5980fd8c5d",
       "title": "Entity Store Main logs extraction Should properly handle field retention strategies",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -765,14 +1021,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 202,
+        "line": 203,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-1152aa9f3d6639f",
       "title": "Entity Store Main logs extraction Should store user entities from both IDP and non-IDP sources with and without existing latest",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -781,14 +1037,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 395,
+        "line": 396,
         "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-3226f9613eaf130",
       "title": "Entity Store Main logs extraction Should store _source as nested objects after ingest pipeline",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -797,7 +1053,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 510,
+        "line": 511,
         "column": 10
       }
     },

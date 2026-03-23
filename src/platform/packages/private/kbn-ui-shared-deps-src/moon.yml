@@ -70,6 +70,7 @@ tasks:
       - /src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}
       - /src/core/packages/chrome/sidebar/sidebar-context/**/*.{js,ts,tsx}
       - /src/core/packages/chrome/browser-context/**/*.{js,ts,tsx}
+      - /src/core/packages/di/browser/**/*.{js,ts,tsx}
       - '!/src/**/*.test.{js,ts,tsx}'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

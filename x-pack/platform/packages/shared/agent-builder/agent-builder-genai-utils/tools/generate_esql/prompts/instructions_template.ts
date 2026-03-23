@@ -14,6 +14,11 @@ export interface InstructionsTemplateParams {
    * The maximum LIMIT to use when the user asks for "all" results.
    */
   maxAllLimit?: number;
+  /**
+   * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
+   * for time range filtering.
+   */
+  disableNamedParams?: boolean;
 }
 
 const DEFAULT_LIMIT = 100;
@@ -25,7 +30,11 @@ const MAX_ALL_LIMIT = 250;
  * custom row limits for Agent Builder's index search tool.
  */
 export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): string => {
-  const { defaultLimit = DEFAULT_LIMIT, maxAllLimit = MAX_ALL_LIMIT } = params;
+  const {
+    defaultLimit = DEFAULT_LIMIT,
+    maxAllLimit = MAX_ALL_LIMIT,
+    disableNamedParams = false,
+  } = params;
 
   return `<instructions>
 
@@ -69,12 +78,26 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     Example:
     \`\`\`
     FROM logs-*
-    | WHERE @timestamp <= NOW() - 24 hours
     | STATS count = COUNT(*) BY log.level
     | SORT count DESC
     \`\`\`
 
-    ## Do not invent things to please the user
+    ${
+      disableNamedParams
+        ? ''
+        : `## using named parameters for start and end time periods
+
+    You should ALWAYS use named parameters for start and end time in WHERE conditions or BUCKET ranges (?_tstart and ?_tend),
+    examples:
+     "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
+     "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"
+
+    NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
+
+    Its also prefered to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
+
+    `
+    }## Do not invent things to please the user
 
     If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
     the user. DO NOT invent capabilities not described in the documentation just to provide

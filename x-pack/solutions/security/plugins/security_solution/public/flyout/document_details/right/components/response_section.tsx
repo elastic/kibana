@@ -15,7 +15,7 @@ import { ResponseButton } from './response_button';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
 
 const KEY = 'response';

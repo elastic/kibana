@@ -73,6 +73,9 @@ export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
+  attachments?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -122,12 +125,12 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
 export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
-  latestAttachments: AttachmentUI[];
+  latestAttachments: AttachmentUIV2[];
 }
 
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
-  comments: AttachmentUI[];
+  comments: AttachmentUIV2[];
 };
 export type ObservableUI = CaseUI['observables'][0];
 

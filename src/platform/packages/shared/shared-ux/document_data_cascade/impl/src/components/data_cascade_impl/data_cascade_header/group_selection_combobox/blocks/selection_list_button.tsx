@@ -52,7 +52,7 @@ export function SelectionListButton({
               )}
               size="xs"
               flush="left"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               disabled={
                 !selectionOptions?.length || selectedOptions.length - 1 >= MAX_SELECTABLE_COLUMNS

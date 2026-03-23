@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { groupBy, isObject } from 'lodash';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { getDataFromFieldsHits } from '@kbn/timelines-plugin/common';
+import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ThreatDetailsRow } from '../../left/components/threat_details_view_enrichment_accordion';
-import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
-import { isValidEventField } from '../../../../../common/search_strategy';
-import {
-  DEFAULT_INDICATOR_SOURCE_PATH,
-  ENRICHMENT_DESTINATION_PATH,
-} from '../../../../../common/constants';
+import type { CtiEnrichment } from '../../../../../common/search_strategy';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
   FEED_NAME,
@@ -48,47 +42,6 @@ const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = 
  */
 export const isInvestigationTimeEnrichment = (type: string | undefined): boolean =>
   type === ENRICHMENT_TYPES.InvestigationTime;
-
-/**
- * Parses existing enrichments from the timeline data
- */
-export const parseExistingEnrichments = (
-  data: TimelineEventsDetailsItem[]
-): TimelineEventsDetailsItem[][] => {
-  const threatIndicatorField = data.find(
-    ({ field, originalValue }) => field === ENRICHMENT_DESTINATION_PATH && originalValue
-  );
-  if (!threatIndicatorField) {
-    return [];
-  }
-
-  const { originalValue } = threatIndicatorField;
-  const enrichmentStrings: string[] = Array.isArray(originalValue)
-    ? originalValue
-    : [originalValue];
-
-  return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
-    (enrichments, enrichmentString) => {
-      try {
-        const enrichment = getDataFromFieldsHits(JSON.parse(enrichmentString));
-        enrichments.push(enrichment);
-      } catch (e) {
-        // omit failed parse
-      }
-      return enrichments;
-    },
-    []
-  );
-};
-
-/**
- * Converts timeline data to a CtiEnrichment object
- */
-export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): CtiEnrichment =>
-  data.reduce<CtiEnrichment>((acc, item) => {
-    acc[item.field] = item.originalValue;
-    return acc;
-  }, {});
 
 /**
  * Extracts the first value from an enrichment field
@@ -127,49 +80,6 @@ export const getEnrichmentIdentifiers = (
 });
 
 /**
- * Returns a string composed of the id and the field for the enrichment
- */
-const buildEnrichmentId = (enrichment: CtiEnrichment): string => {
-  const { id, field } = getEnrichmentIdentifiers(enrichment);
-  return `${id}${field}`;
-};
-
-/**
- * This function receives an array of enrichments and removes
- * investigation-time enrichments if that exact indicator already exists
- * elsewhere in the list.
- *
- * @param enrichments {@type CtiEnrichment[]}
- */
-export const filterDuplicateEnrichments = (enrichments: CtiEnrichment[]): CtiEnrichment[] => {
-  if (enrichments.length < 2) {
-    return enrichments;
-  }
-  const enrichmentsById = groupBy(enrichments, buildEnrichmentId);
-
-  return Object.values(enrichmentsById).map(
-    (enrichmentGroup) =>
-      enrichmentGroup.find(
-        (enrichment) => !isInvestigationTimeEnrichment(getEnrichmentValue(enrichment, MATCHED_TYPE))
-      ) ?? enrichmentGroup[0]
-  );
-};
-
-/**
- * Returns the fields from the enrichments
- */
-export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFields =>
-  items.reduce<EventFields>((fields, item) => {
-    if (isValidEventField(item.field)) {
-      const value = getFirstElement(item.originalValue);
-      if (value) {
-        return { ...fields, [item.field]: value };
-      }
-    }
-    return fields;
-  }, {});
-
-/**
  * Returns the first seen date from the enrichment
  */
 export const getFirstSeen = (enrichment: CtiEnrichment): number => {
@@ -199,6 +109,8 @@ export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetail
         // that those values are not rendered here
         if (typeof enrichmentValue === 'string') {
           values.push(enrichmentValue);
+        } else if (typeof enrichmentValue === 'number') {
+          values.push(String(enrichmentValue));
         } else if (isObject(enrichmentValue)) {
           // We don't need to add the message more than once
           if (!values.includes(NESTED_OBJECT_VALUES_NOT_RENDERED)) {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MigrationRulesTable } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -27,6 +27,10 @@ import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_pr
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import type { TableColumn } from '../rules_table_columns/constants';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -44,6 +48,104 @@ jest.mock('../../hooks/use_migration_rules_table_columns');
 const mockRule = migrationRules[0];
 const mockMigrationStats = getRuleMigrationStatsMock();
 const mockTranslationStats = getRuleMigrationTranslationStatsMock();
+
+const rules: RuleMigrationRule[] = [
+  {
+    id: 'qradar-1',
+    migration_id: 'qradar-migration-001',
+    original_rule: {
+      id: 'qradar-rule-100001',
+      vendor: 'qradar',
+      title: 'Authentication Success',
+      description: 'Detects successful authentication',
+      query: 'event category authentication',
+      query_language: 'aql',
+    },
+    '@timestamp': '2025-05-06T07:53:48.805Z',
+    status: SiemMigrationStatus.COMPLETED,
+    created_by: 'test-user',
+    updated_by: 'test-user',
+    updated_at: '2025-05-06T07:57:24.929Z',
+    translation_result: 'full',
+    elastic_rule: {
+      severity: 'low',
+      risk_score: 21,
+      query: 'FROM logs-*',
+      description: 'Detects successful authentication',
+      query_language: 'esql',
+      title: 'Authentication Success',
+    },
+  },
+  {
+    id: 'qradar-2',
+    migration_id: 'qradar-migration-001',
+    original_rule: {
+      id: 'qradar-rule-100002',
+      vendor: 'qradar',
+      title: 'Network Traffic Anomaly',
+      description: 'Detects network anomalies',
+      query: 'event category network',
+      query_language: 'aql',
+    },
+    '@timestamp': '2025-05-06T07:53:48.805Z',
+    status: SiemMigrationStatus.COMPLETED,
+    created_by: 'test-user',
+    updated_by: 'test-user',
+    updated_at: '2025-05-06T07:57:27.998Z',
+    translation_result: 'partial',
+    elastic_rule: {
+      severity: 'medium',
+      risk_score: 47,
+      query: 'FROM logs-*',
+      description: 'Detects network anomalies',
+      query_language: 'esql',
+      title: 'Network Traffic Anomaly',
+    },
+  },
+  {
+    id: 'qradar-3',
+    migration_id: 'qradar-migration-001',
+    original_rule: {
+      id: 'qradar-rule-100003',
+      vendor: 'qradar',
+      title: 'Malware Detection',
+      description: 'Detects malware activity',
+      query: 'event category malware',
+      query_language: 'aql',
+    },
+    '@timestamp': '2025-05-06T07:53:48.805Z',
+    status: SiemMigrationStatus.COMPLETED,
+    created_by: 'test-user',
+    updated_by: 'test-user',
+    updated_at: '2025-05-06T07:57:32.348Z',
+    translation_result: 'partial',
+    elastic_rule: {
+      severity: 'high',
+      risk_score: 73,
+      query: 'FROM logs-*',
+      description: 'Detects malware activity',
+      query_language: 'esql',
+      title: 'Malware Detection',
+    },
+  },
+  {
+    id: 'qradar-4',
+    migration_id: 'qradar-migration-001',
+    original_rule: {
+      id: 'qradar-rule-100004',
+      vendor: 'qradar',
+      title: 'Failed Translation Rule',
+      description: 'Rule that failed to translate',
+      query: 'complex unsupported query',
+      query_language: 'aql',
+    },
+    '@timestamp': '2025-05-06T07:53:48.805Z',
+    status: SiemMigrationStatus.FAILED,
+    created_by: 'test-user',
+    updated_by: 'test-user',
+    updated_at: '2025-05-06T07:57:33.042Z',
+  },
+];
 
 describe('MigrationRulesTable', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -128,5 +230,76 @@ describe('MigrationRulesTable', () => {
     });
 
     expect(getByTestId('siemMigrationsRulesTable')).toBeInTheDocument();
+  });
+
+  describe('Table results', () => {
+    const statusColumns: TableColumn[] = [
+      {
+        field: 'elastic_rule.title',
+        name: 'Rule',
+        render: (_: unknown, rule: RuleMigrationRule) => (
+          <span>{rule.elastic_rule?.title ?? rule.original_rule.title}</span>
+        ),
+      },
+      {
+        field: 'translation_result',
+        name: 'Status',
+        render: (_: unknown, rule: RuleMigrationRule) => (
+          <span data-test-subj={`translationStatus-${rule.translation_result ?? rule.status}`}>
+            {rule.translation_result ?? rule.status}
+          </span>
+        ),
+      },
+    ];
+
+    beforeEach(() => {
+      (useGetMigrationRules as jest.Mock).mockReturnValue({
+        data: { migrationRules: rules, total: rules.length },
+        isLoading: false,
+      });
+      (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+        data: getRuleMigrationTranslationStatsMock({
+          rules: {
+            total: 4,
+            success: {
+              total: 3,
+              result: { full: 1, partial: 2, untranslatable: 0 },
+              installable: 1,
+              prebuilt: 0,
+              missing_index: 0,
+            },
+            failed: 1,
+          },
+        }),
+        isLoading: false,
+      });
+      (useMigrationRulesTableColumns as jest.Mock).mockReturnValue(statusColumns);
+    });
+
+    test('should render correct number of QRadar migration rule rows', () => {
+      render(
+        <MigrationRulesTable
+          migrationStats={getRuleMigrationStatsMock({ vendor: MigrationSource.QRADAR })}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.getByTestId('rules-translation-table')).toBeInTheDocument();
+      const rows = screen.getByTestId('rules-translation-table').querySelectorAll('.euiTableRow');
+      expect(rows).toHaveLength(4);
+    });
+
+    test('should render correct translation status for each QRadar rule', () => {
+      render(
+        <MigrationRulesTable
+          migrationStats={getRuleMigrationStatsMock({ vendor: MigrationSource.QRADAR })}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.getAllByTestId('translationStatus-partial')).toHaveLength(2);
+      expect(screen.getAllByTestId('translationStatus-full')).toHaveLength(1);
+      expect(screen.getAllByTestId('translationStatus-failed')).toHaveLength(1);
+    });
   });
 });

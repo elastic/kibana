@@ -95,18 +95,18 @@ test.describe(
       pageObjects: { transactionDetailsPage },
     }) => {
       await test.step('Waterfall loads with data', async () => {
-        await expect(page.getByTestId('apmWaterfallButton')).toBeVisible();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible();
       });
 
       await test.step('Applies filter that results in no data', async () => {
         await transactionDetailsPage.fillApmUnifiedSearchBar(`_id: "123"`);
-        await expect(page.getByTestId('apmWaterfallButton')).toBeHidden();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeHidden();
         await expect(page.getByTestId('apmNoTraceFound')).toBeVisible();
       });
 
       await test.step('Reloads the page and verifies waterfall is not stuck in loading state', async () => {
         await transactionDetailsPage.reload();
-        await expect(page.getByTestId('apmWaterfallButton')).toBeHidden();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeHidden();
         await expect(page.getByTestId('apmNoTraceFound')).toBeVisible();
       });
     });

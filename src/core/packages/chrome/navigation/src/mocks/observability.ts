@@ -41,7 +41,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'slos',
     label: 'SLOs',
-    iconType: 'visGauge',
+    iconType: 'chartGauge',
     href: '/slos',
   },
   {
@@ -121,7 +121,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'streams',
     label: 'Streams',
-    iconType: 'logstashQueue',
+    iconType: 'queue',
     href: '/streams',
   },
   {
@@ -203,7 +203,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',
-    iconType: 'launch',
+    iconType: 'rocket',
     href: '/getting-started',
     badgeType: 'beta',
   },

@@ -41,6 +41,10 @@ export interface InternalSkillDefinition {
    */
   readonly: boolean;
   /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+  /**
    * Referenced content for the skill.
    */
   referencedContent?: ReferencedContent[];

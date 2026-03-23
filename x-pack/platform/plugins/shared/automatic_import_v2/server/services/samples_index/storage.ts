@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
-export const automaticImportSamplesIndexName = 'automatic-import-samples';
+export const automaticImportSamplesIndexName = '.kibana-automatic-import-samples';
 
 const automaticImportSamplesIndexAdapterSettings = {
   name: automaticImportSamplesIndexName,

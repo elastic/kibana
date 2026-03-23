@@ -8,7 +8,7 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -40,7 +40,14 @@ export const StepIcon = React.memo(
       return <EuiLoadingSpinner size="m" />;
     }
     if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-      return <EuiBeacon size={14} color="warning" />;
+      return (
+        <EuiIcon
+          type="hourglass"
+          size="m"
+          color={getExecutionStatusColors(euiTheme, executionStatus).color}
+          aria-hidden={true}
+        />
+      );
     }
 
     let iconType: IconType;
@@ -68,7 +75,29 @@ export const StepIcon = React.memo(
       iconType = getStepIconType(stepType);
     }
 
-    if (iconType.startsWith('token')) {
+    if (typeof iconType === 'string' && iconType.startsWith('data:')) {
+      const statusColor = shouldApplyColorToIcon
+        ? getExecutionStatusColors(euiTheme, executionStatus).color
+        : undefined;
+      return (
+        <span
+          css={css`
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            mask-image: url('${iconType}');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+          `}
+          onClick={onClick}
+          aria-hidden={true}
+        />
+      );
+    }
+
+    if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return (
         <EuiToken
           iconType={iconType}

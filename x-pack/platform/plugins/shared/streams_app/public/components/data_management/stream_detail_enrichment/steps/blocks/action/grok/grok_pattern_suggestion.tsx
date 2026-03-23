@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
-import type { GrokProcessorResult } from '@kbn/grok-heuristics';
+import type { GrokProcessor } from '@kbn/streamlang';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useAbortController } from '@kbn/react-hooks';
 import { isNoSuggestionsError } from '../utils/no_suggestions_error';
@@ -221,7 +221,7 @@ export const GrokPatternAISuggestions = ({
 };
 
 export interface GrokPatternSuggestionProps {
-  grokProcessor: GrokProcessorResult;
+  grokProcessor: GrokProcessor;
   simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;

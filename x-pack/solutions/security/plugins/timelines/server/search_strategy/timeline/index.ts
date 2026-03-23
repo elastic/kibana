@@ -15,7 +15,7 @@ import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { Logger } from '@kbn/logging';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import type {

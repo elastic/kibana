@@ -123,7 +123,7 @@ export function EditPolicyModal({
                 defaultMessage: 'This is a managed policy',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="editPolicyModal-managedWarning"
             >
               <p>

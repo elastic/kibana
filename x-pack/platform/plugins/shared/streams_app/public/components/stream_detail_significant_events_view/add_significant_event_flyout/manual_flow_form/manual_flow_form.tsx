@@ -12,6 +12,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiPanel,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
@@ -54,10 +55,11 @@ export function ManualFlowForm({
     control,
     watch,
     formState: { isDirty, isValid },
-  } = useForm<Pick<StreamQuery, 'esql' | 'title' | 'severity_score'>>({
+  } = useForm<Pick<StreamQuery, 'esql' | 'title' | 'description' | 'severity_score'>>({
     defaultValues: {
       esql: { query: defaultEsql },
       title: query.title,
+      description: query.description ?? '',
       severity_score: query.severity_score,
     },
     mode: 'onChange',
@@ -123,6 +125,36 @@ export function ManualFlowForm({
           />
 
           <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={
+                  <EuiFormLabel>
+                    {i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldDescriptionLabel',
+                      { defaultMessage: 'Description' }
+                    )}
+                  </EuiFormLabel>
+                }
+              >
+                <EuiTextArea
+                  value={field.value}
+                  disabled={isSubmitting}
+                  onBlur={field.onBlur}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  rows={2}
+                  resize="vertical"
+                  placeholder={i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.manualFlow.descriptionPlaceholder',
+                    { defaultMessage: 'Describe what this query detects and why it matters' }
+                  )}
+                />
+              </EuiFormRow>
+            )}
+          />
+
+          <Controller
             name="severity_score"
             control={control}
             render={({ field }) => (
@@ -161,29 +193,16 @@ export function ManualFlowForm({
                 return true;
               },
             }}
-            render={({ field, fieldState }) => (
-              <EuiFormRow
-                isInvalid={fieldState.isTouched && !!fieldState.error}
-                error={fieldState.error?.message}
-                label={
-                  <EuiFormLabel>
-                    {i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
-                      { defaultMessage: 'Query' }
-                    )}
-                  </EuiFormLabel>
-                }
-              >
-                <StreamsESQLEditor
-                  query={{ esql: field.value }}
-                  isDisabled={isSubmitting}
-                  onTextLangQuerySubmit={async (newQuery) => {
-                    if (newQuery) field.onChange(newQuery.esql);
-                  }}
-                  onTextLangQueryChange={(newQuery) => field.onChange(newQuery.esql)}
-                  prefix={validPrefixes}
-                />
-              </EuiFormRow>
+            render={({ field }) => (
+              <StreamsESQLEditor
+                query={{ esql: field.value }}
+                isDisabled={isSubmitting}
+                onTextLangQuerySubmit={async (newQuery) => {
+                  if (newQuery) field.onChange(newQuery.esql);
+                }}
+                onTextLangQueryChange={(newQuery) => field.onChange(newQuery.esql)}
+                prefix={validPrefixes}
+              />
             )}
           />
         </EuiForm>

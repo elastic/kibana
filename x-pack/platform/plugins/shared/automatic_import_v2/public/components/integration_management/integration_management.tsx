@@ -58,6 +58,7 @@ const IntegrationManagementContents: React.FC = () => {
 };
 
 export const IntegrationManagement = React.memo(() => {
+  const { application } = useKibana().services;
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
 
@@ -95,7 +96,15 @@ export const IntegrationManagement = React.memo(() => {
         title={<h2>{i18n.INTEGRATION_NOT_FOUND_TITLE}</h2>}
         body={<p>{i18n.INTEGRATION_NOT_FOUND_DESCRIPTION}</p>}
         actions={
-          <EuiButton color="primary" fill onClick={() => window.history.back()}>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={() =>
+              application.navigateToApp(INTEGRATIONS_APP_ID, {
+                path: INTEGRATIONS_MANAGE_PATH,
+              })
+            }
+          >
             {i18n.GO_BACK_BUTTON}
           </EuiButton>
         }

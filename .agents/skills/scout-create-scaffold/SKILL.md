@@ -61,8 +61,6 @@ Notes:
 
 ## After Generating
 
-- Update `.meta` manifests when adding/moving configs or tests:
-  - `node scripts/scout.js update-test-config-manifests`
 - Custom server config sets:
   - If you create/use `test/scout_<configSet>`, you typically also need a matching server config under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<configSet>`.
   - `start-server` requires `--serverConfigSet <configSet>` when using a custom server config set.

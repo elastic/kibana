@@ -51,10 +51,11 @@ export interface VersionedAttachment<
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
   /**
-   * Origin/reference info for attachments created from external sources (e.g., saved objects).
+   * Origin/reference info for attachments created from external sources.
+   * For saved-object-backed types this is the saved object ID.
    * Undefined for by-value attachments.
    */
-  origin?: unknown;
+  origin?: string;
 }
 
 /**
@@ -120,7 +121,7 @@ export interface VersionedAttachmentInput<
   /** The attachment data. Optional when `origin` is provided (content will be resolved). */
   data?: DataType;
   /** Origin/reference info for by-reference attachments (e.g., saved object ID). */
-  origin?: unknown;
+  origin?: string;
   /** Human-readable description */
   description?: string;
   /** Whether the attachment should be hidden */
@@ -170,14 +171,14 @@ export const versionedAttachmentSchema = z.object({
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
-  origin: z.unknown().optional(),
+  origin: z.string().optional(),
 });
 
 export const versionedAttachmentInputSchema = z.object({
   id: z.string().optional(),
   type: z.string(),
   data: z.unknown().optional(),
-  origin: z.unknown().optional(),
+  origin: z.string().optional(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),

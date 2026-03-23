@@ -27,6 +27,7 @@ import {
 } from './cli';
 import type { PluginOrPackage, MissingApiItemMap } from './types';
 import type { AllPluginStats } from './cli/types';
+import { writeFlatStatsFiles } from './cli/tasks/flat_stats';
 
 type ValidationCheck = 'any' | 'comments' | 'exports' | 'unnamed';
 
@@ -143,6 +144,10 @@ export const runCheckPackageDocs = async (log: ToolingLog, flags: CliFlags) => {
       optionsWithChecks
     );
 
+    if (optionsWithChecks.writeStats) {
+      writeFlatStatsFiles(setupResult.plugins, apiMapResult, allPluginStats);
+    }
+
     reportMetrics(setupResult, apiMapResult, allPluginStats, log, transaction, {
       ...optionsWithChecks,
       stats: checks,
@@ -189,11 +194,13 @@ export const runCheckPackageDocsCli = () => {
       },
       flags: {
         string: ['plugin', 'package', 'check'],
+        boolean: ['write'],
         help: `
           --plugin           Optionally, run for only a specific plugin by its plugin ID (plugin.id in kibana.jsonc).
           --package          Optionally, run for only a specific package by its package ID (id in kibana.jsonc, e.g., @kbn/core).
           --check            Optional. Specify validation checks: any, comments, exports, or all (default).
                              Can be provided multiple times to combine checks.
+          --write            Write stats to a flat JSON file in each plugin's target/api_docs/ directory.
         `,
       },
     }

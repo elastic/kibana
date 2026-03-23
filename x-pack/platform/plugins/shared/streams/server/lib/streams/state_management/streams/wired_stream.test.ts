@@ -54,6 +54,7 @@ describe('WiredStream', () => {
   const createBaseWiredStreamDefinition = (
     overrides: Partial<Streams.WiredStream.Definition> = {}
   ): Streams.WiredStream.Definition => ({
+    type: 'wired',
     name: 'logs.test',
     description: 'Test stream',
     updated_at: new Date().toISOString(),

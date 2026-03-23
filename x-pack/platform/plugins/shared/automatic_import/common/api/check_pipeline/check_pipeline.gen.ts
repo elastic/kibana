@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { RawSamples, Pipeline } from '../model/common_attributes.gen';
 import { CheckPipelineAPIResponse } from '../model/response_schemas.gen';

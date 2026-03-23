@@ -132,7 +132,7 @@ const createManifest = (
     version,
     description,
     type: 'integration',
-    categories: ['security'],
+    categories: integration.metadata?.categories ?? ['security'],
     conditions: {
       kibana: {
         version: KIBANA_MIN_VERSION,

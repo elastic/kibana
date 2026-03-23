@@ -7,8 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { MappingField } from '../utils/mappings';
 import { isCcsTarget } from '../utils/ccs';
+import { MAX_ES_RESPONSE_SIZE_BYTES } from '../constants';
 
 export interface MatchResult {
   id: string;
@@ -121,8 +123,16 @@ export const performMatchSearch = async ({
 
   let response;
   try {
-    response = await esClient.search<any>(searchRequest);
+    response = await esClient.search<any>(searchRequest, {
+      maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
+    });
   } catch (error) {
+    if (isMaximumResponseSizeExceededError(error)) {
+      throw new Error(
+        `Search response exceeded the maximum allowed size of 20MB. ` +
+          `Try reducing the result size or narrowing the query.`
+      );
+    }
     logger.debug(
       `Elasticsearch search failed for index="${index}", term="${term}": ${
         error instanceof Error ? error.message : String(error)

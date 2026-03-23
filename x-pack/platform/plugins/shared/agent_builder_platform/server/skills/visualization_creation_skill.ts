@@ -71,6 +71,11 @@ Do **not** use this skill when:
    - If the tool returns \`data.attachment_id\`, include that ID in your response so the visualization attachment can be rendered in the conversation.
    - If \`attachment_id\` is missing, report that persistence failed and treat the result as non-reusable.
 
+## Inline Rendering Guidelines
+
+- **When creating standalone visualizations** (i.e. the user directly asked for a chart or visualization), render each visualization attachment inline so the user can see and interact with it immediately.
+- **When creating visualizations as intermediate steps in a larger workflow** (e.g. producing panels that will be composed into another artifact), do NOT render individual visualization attachments inline. Only the final composed artifact should be rendered. Rendering intermediate visualizations clutters the conversation.
+
 ## Writing Effective Visualization Prompts
 
 Good prompt patterns:

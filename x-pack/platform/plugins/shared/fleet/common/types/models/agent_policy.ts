@@ -93,6 +93,12 @@ export interface GlobalDataTag {
   value: string | number;
 }
 
+export interface AgentPolicyAgentVersionCondition {
+  name: string;
+  title: string;
+  version_condition: string;
+}
+
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
@@ -108,6 +114,8 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
+  min_agent_version?: string | null;
+  package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface FullAgentPolicyInputStream {

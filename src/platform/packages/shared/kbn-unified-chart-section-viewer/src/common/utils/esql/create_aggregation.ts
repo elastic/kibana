@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { Parser, BasicPrettyPrinter, isCommand, isFunctionExpression } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import { replaceParameters } from '@kbn/esql-composer';
-import type { MetricField } from '../../../types';
 import { isLegacyHistogram } from '../legacy_histogram';
 
 type Params = Record<string, string | number | boolean | null>;
 interface AggegationTemplateParams {
-  type: MetricField['type'];
-  instrument: MetricField['instrument'];
+  type: ES_FIELD_TYPES;
+  instrument: MappingTimeSeriesMetricType;
   placeholderName: string;
   customFunction?: string;
 }
@@ -88,7 +89,7 @@ export function getAggregationTemplate({
     return `${customFunction}(??${placeholderName})`;
   }
 
-  if (isLegacyHistogram({ type, instrument })) {
+  if (isLegacyHistogram(type, instrument)) {
     return `PERCENTILE(TO_TDIGEST(??${placeholderName}), 95)`;
   }
 
@@ -127,8 +128,8 @@ export function createMetricAggregation({
   placeholderName = 'metricName',
   customFunction,
 }: {
-  type: MetricField['type'];
-  instrument?: MetricField['instrument'];
+  type: ES_FIELD_TYPES;
+  instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;

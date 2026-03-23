@@ -237,7 +237,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
-      get: jest.fn().mockResolvedValue(''),
+      get: jest.fn((path: string) => {
+        // Mock ES|QL timefield endpoint so an ES|QL data view can be created
+        if (path.startsWith('/internal/esql/get_timefield')) {
+          return Promise.resolve({ timeField: '@timestamp' });
+        }
+        return Promise.resolve('');
+      }),
     },
     dataViewEditor: {
       openEditor: jest.fn(),
@@ -266,7 +272,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
-    notifications: notificationServiceMock.createStartContract(),
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
+    },
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {

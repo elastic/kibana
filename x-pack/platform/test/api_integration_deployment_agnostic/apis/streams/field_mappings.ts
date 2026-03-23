@@ -37,6 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.otel.resourcetest',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -80,6 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.otel.hierarchical',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -122,6 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.otel.multinamespace',
           {
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },

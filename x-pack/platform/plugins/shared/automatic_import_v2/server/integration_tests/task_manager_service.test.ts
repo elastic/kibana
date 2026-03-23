@@ -88,7 +88,11 @@ describe('TaskManagerService Integration Tests', () => {
 
       const savedObjectsClient =
         coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClient;
-      await automaticImportService.initialize(savedObjectsClient, taskManagerStart);
+      await automaticImportService.initialize(
+        savedObjectsClient,
+        taskManagerStart,
+        coreStart.elasticsearch.client.asInternalUser
+      );
       savedObjectService = (automaticImportService as any).savedObjectService;
 
       // Get the TaskManagerService instance that was already created by AutomaticImportService

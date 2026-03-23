@@ -10,11 +10,13 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -27,7 +29,11 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { isTriggerType } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
+import { ExportReferencesModal } from './export_references_modal';
+import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
+import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -51,10 +57,29 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
+  const {
+    eventDrivenExecutionEnabled,
+    isLoading: isLoadingEventDrivenStatus,
+    error: eventDrivenStatusError,
+  } = useEventDrivenExecutionStatus();
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+
+  const allWorkflowsMap = useMemo(
+    () => new Map((workflows?.results ?? []).map((w) => [w.id, w])),
+    [workflows?.results]
+  );
+
+  const {
+    exportModalState: singleExportModal,
+    startExport: startSingleExport,
+    handleIgnore: handleSingleExportIgnore,
+    handleAddDirect: handleSingleExportAddDirect,
+    handleAddAll: handleSingleExportAddAll,
+    handleCancel: handleSingleExportCancel,
+  } = useExportWithReferences({ allWorkflowsMap });
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
@@ -73,6 +98,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   // Use a ref here to avoid re-rendering when the selected items change
   const selectedItemsRef = useRef(selectedItems);
   selectedItemsRef.current = selectedItems;
+
+  const hasEventDrivenWorkflowsInList = useMemo(
+    () =>
+      workflows?.results?.some((w) =>
+        w.definition?.triggers?.some((t) => !isTriggerType(t.type))
+      ) ?? false,
+    [workflows?.results]
+  );
 
   const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
@@ -150,6 +183,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       );
     },
     [cloneWorkflow, notifications?.toasts]
+  );
+
+  const handleExportWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      if (!item.definition) return;
+      startSingleExport([item]);
+    },
+    [startSingleExport]
   );
 
   const handleToggleWorkflow = useCallback(
@@ -367,7 +408,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             },
           },
           {
-            enabled: () => false,
+            enabled: (item) => item.definition !== null,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.export', {
@@ -378,6 +419,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
             }),
+            onClick: (item: WorkflowListItemDto) => {
+              handleExportWorkflow(item);
+            },
           },
           {
             enabled: () => !!canDeleteWorkflow,
@@ -403,6 +447,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       application,
       canCreateWorkflow,
       handleCloneWorkflow,
+      handleExportWorkflow,
       canDeleteWorkflow,
       handleDeleteWorkflow,
       setExecuteWorkflow,
@@ -460,9 +505,34 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   return (
     <>
+      {!isLoadingEventDrivenStatus &&
+        !eventDrivenStatusError &&
+        !eventDrivenExecutionEnabled &&
+        hasEventDrivenWorkflowsInList && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate('workflows.workflowList.eventDrivenDisabled.title', {
+                defaultMessage: 'Event-driven triggers are disabled',
+              })}
+              color="warning"
+              iconType="alert"
+              data-test-subj="workflows-event-driven-disabled-banner"
+            >
+              <p>
+                {i18n.translate('workflows.workflowList.eventDrivenDisabled.description', {
+                  defaultMessage:
+                    'Event-driven triggers are disabled. Workflows that use event-driven triggers will not run automatically until the feature is enabled again. Manual and Scheduled runs are not affected.',
+                })}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
       <WorkflowsUtilityBar
         totalWorkflows={workflows?.total || 0}
         selectedWorkflows={selectedItems}
+        allWorkflows={workflows?.results ?? []}
         deselectWorkflows={deselectWorkflows}
         onRefresh={onRefresh}
         showStart={showStart}
@@ -507,6 +577,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
+        />
+      )}
+      {singleExportModal && (
+        <ExportReferencesModal
+          missingWorkflows={singleExportModal.missingWorkflows}
+          onIgnore={handleSingleExportIgnore}
+          onAddDirect={handleSingleExportAddDirect}
+          onAddAll={handleSingleExportAddAll}
+          onCancel={handleSingleExportCancel}
         />
       )}
       {workflowToDelete && (

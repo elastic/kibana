@@ -210,16 +210,12 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
         return (
           agentPolicy && (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} css={{ minWidth: 0 }}>
-              <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
-                <AgentPolicySummaryLine
-                  policy={agentPolicy}
-                  agent={agent}
-                  showPolicyId
-                  isVersionSpecific={isVersionSpecific}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <AgentPolicySummaryLine
+              policy={agentPolicy}
+              agent={agent}
+              showPolicyId
+              isVersionSpecific={isVersionSpecific}
+            />
           )
         );
       },

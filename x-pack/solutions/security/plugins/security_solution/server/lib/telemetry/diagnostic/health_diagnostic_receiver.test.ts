@@ -473,11 +473,11 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-            index: ['test-index'],
+            index: 'test-index',
             allow_no_indices: false,
           });
           expect(mockEsClient.security.hasPrivileges).toHaveBeenCalledWith({
-            index: [{ names: ['test-index'], privileges: ['read'] }],
+            index: [{ names: 'test-index', privileges: ['read'] }],
           });
           expect(mockEsClient.openPointInTime).toHaveBeenCalled();
           done();

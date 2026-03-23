@@ -9,6 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { generateSampleFromJsonSchema } from './generate_sample_from_json_schema';
+import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
 
 describe('generateSampleFromJsonSchema', () => {
   describe('default values', () => {
@@ -32,7 +33,7 @@ describe('generateSampleFromJsonSchema', () => {
 
   describe('string type', () => {
     it('returns "string" for a plain string', () => {
-      expect(generateSampleFromJsonSchema({ type: 'string' })).toBe('string');
+      expect(generateSampleFromJsonSchema({ type: 'string' })).toBe(INPUT_STRING_PLACEHOLDER);
     });
 
     it('returns "user@example.com" for format: email', () => {
@@ -61,7 +62,7 @@ describe('generateSampleFromJsonSchema', () => {
   describe('array type', () => {
     it('returns an array with one sample item when items schema is provided', () => {
       const schema: JSONSchema7 = { type: 'array', items: { type: 'string' } };
-      expect(generateSampleFromJsonSchema(schema)).toEqual(['string']);
+      expect(generateSampleFromJsonSchema(schema)).toEqual([INPUT_STRING_PLACEHOLDER]);
     });
 
     it('returns an empty array when no items schema', () => {
@@ -88,7 +89,10 @@ describe('generateSampleFromJsonSchema', () => {
         },
         required: ['name', 'age'],
       };
-      expect(generateSampleFromJsonSchema(schema)).toEqual({ name: 'string', age: 0 });
+      expect(generateSampleFromJsonSchema(schema)).toEqual({
+        name: INPUT_STRING_PLACEHOLDER,
+        age: 0,
+      });
     });
 
     it('includes properties with defaults even if not required', () => {
@@ -121,7 +125,7 @@ describe('generateSampleFromJsonSchema', () => {
         required: ['address'],
       };
       expect(generateSampleFromJsonSchema(schema)).toEqual({
-        address: { city: 'string' },
+        address: { city: INPUT_STRING_PLACEHOLDER },
       });
     });
   });

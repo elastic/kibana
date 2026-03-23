@@ -102,6 +102,7 @@ function createWiredDefinition({
     effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'ancestor' },
     effective_settings: {},
     stream: {
+      type: 'wired',
       name: 'wired-stream',
       description: 'A wired stream',
       updated_at: new Date().toISOString(),

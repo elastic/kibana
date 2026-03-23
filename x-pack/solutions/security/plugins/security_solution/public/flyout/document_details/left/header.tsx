@@ -13,7 +13,7 @@ import type { LeftPanelPaths } from '.';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import type { LeftPanelTabType } from './tabs';
 import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 
 export interface PanelHeaderProps {

@@ -54,7 +54,7 @@ export function getPosition(
   }
 
   if (isColumn(expressionRoot)) {
-    const escapedColumn = expressionRoot.parts.join('\\.').replace(REGEX_SPECIAL_CHARS, '\\$&');
+    const escapedColumn = expressionRoot.parts.join('.').replace(REGEX_SPECIAL_CHARS, '\\$&');
     const endsWithColumnName = new RegExp(`${escapedColumn}$`).test(innerText);
 
     // If cursor is after column but text continues, suggest operators

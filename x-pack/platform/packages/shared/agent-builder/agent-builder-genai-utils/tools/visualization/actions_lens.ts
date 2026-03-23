@@ -30,7 +30,18 @@ export interface ValidateConfigAction {
   error?: string;
 }
 
-export type Action = GenerateEsqlAction | GenerateConfigAction | ValidateConfigAction;
+export interface GenerateTimeRangeAction {
+  type: 'generate_time_range';
+  success: boolean;
+  timeRange?: { from: string; to: string };
+  error?: string;
+}
+
+export type Action =
+  | GenerateEsqlAction
+  | GenerateConfigAction
+  | ValidateConfigAction
+  | GenerateTimeRangeAction;
 
 export function isGenerateConfigAction(action: Action): action is GenerateConfigAction {
   return action.type === 'generate_config';
@@ -40,10 +51,15 @@ export function isValidateConfigAction(action: Action): action is ValidateConfig
   return action.type === 'validate_config';
 }
 
+export function isGenerateTimeRangeAction(action: Action): action is GenerateTimeRangeAction {
+  return action.type === 'generate_time_range';
+}
+
 // Node name constants
 export const GENERATE_ESQL_NODE = 'generate_esql_query';
 export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';
+export const GENERATE_TIME_RANGE_NODE = 'generate_time_range';
 
 // Configuration constants
 export const MAX_RETRY_ATTEMPTS = 5;

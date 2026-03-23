@@ -166,6 +166,7 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
       version: SLO_RESOURCES_VERSION,
       managed: true,
       managed_by: 'observability',
+      deletion_protected: true,
     },
   };
 }

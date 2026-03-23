@@ -10,7 +10,6 @@
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ISuggestionItem } from '../types';
 
@@ -120,7 +119,8 @@ export const getSuggestionsAfterCompleteExpression = (
 
   // does the query end with whitespace?
   if (/\s$/.test(innerText)) {
-    // if so, comma needs to be sent back a column to replace the trailing space
+    // Replace the trailing space so `field ` + `, ` becomes `field, `.
+    // This is one small local explicit-range case.
     commaSuggestion.rangeToReplace = {
       start: innerText.length - 1,
       end: innerText.length,
@@ -128,64 +128,17 @@ export const getSuggestionsAfterCompleteExpression = (
   }
   // special case: cursor right after a column name
   else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
-    const { fragment, rangeToReplace } = getFragmentData(innerText);
-
     sortCommandKeywordSuggestions = sortCommandKeywordSuggestions.map((s) => ({
       ...s,
-      text: `${fragment} ${s.text}`, // add a space after the column name
-      filterText: fragment, // turn off Monaco's filtering by the suggestion text
-      rangeToReplace,
+      text: ` ${s.text}`,
+      preserveTypedPrefix: true,
     }));
 
-    pipeSuggestion.filterText = fragment;
-    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
-    pipeSuggestion.rangeToReplace = rangeToReplace;
+    pipeSuggestion.text = ` ${pipeSuggestion.text}`;
+    pipeSuggestion.preserveTypedPrefix = true;
 
-    commaSuggestion.filterText = fragment;
-    commaSuggestion.text = fragment + commaSuggestion.text;
-    commaSuggestion.rangeToReplace = rangeToReplace;
+    commaSuggestion.preserveTypedPrefix = true;
   }
 
   return [...sortCommandKeywordSuggestions, pipeSuggestion, commaSuggestion];
-};
-
-const IS_REGEX = /(?:I+S*\s+(?:N+O*T*\s+)?(N(U(L(L)?)?)?)?)\s*$/i;
-const NULLS_REGEX = /(?<nulls>NULLS\s+(FI?R?S?T?|LA?S?T?)?)$/i;
-
-/**
- * The nulls clauses are tricky because they contain whitespace.
- *
- * This function returns the overlap range between the end of the string
- * and the start of any existing NULLS clause.
- *
- * This range needs to be applied to _all_ the suggestions that are returned
- * in any context where the nulls clause is valid because Monaco needs to filter
- * suggestions based on a full prefix.
- *
- * For example, if the user types "SORT column NULLS F", the suggestions
- * will need to be filtered against the full "NULLS F" prefix instead of just "F".
- *
- * Otherwise, invalid suggestions like `FLOOR` could show up leading the user to
- * "SORT column NULLS FLOOR" which is not valid.
- *
- * @param innerText
- * @returns
- */
-export const getNullsPrefixRange = (
-  innerText: string
-): { start: number; end: number } | undefined => {
-  if (IS_REGEX.test(innerText)) {
-    // we're in an IS NULL or IS NOT NULL context, so we don't need to return a range
-    return undefined;
-  }
-
-  const matchResult = innerText.match(NULLS_REGEX);
-  const nulls = matchResult?.groups?.nulls;
-
-  return nulls
-    ? {
-        start: innerText.length - nulls.length,
-        end: innerText.length,
-      }
-    : undefined;
 };

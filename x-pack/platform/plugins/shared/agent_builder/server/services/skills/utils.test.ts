@@ -19,6 +19,7 @@ describe('internalToPublicDefinition', () => {
     readonly: true,
     basePath: 'skills/platform',
     getRegistryTools: () => [],
+    experimental: false,
     ...overrides,
     referencedContentCount: overrides.referencedContentCount ?? 0,
   });

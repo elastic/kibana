@@ -9,24 +9,20 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
-import type { Observable } from 'rxjs';
+import { FLYOUT_SELECTOR, MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { useCustomBranding } from './chrome_hooks';
 
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/src/core/packages/rendering/server-internal/src/views/template.tsx#L35
 const SEPARATOR = ' - ';
 
 export const HeaderPageAnnouncer: FC<{
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  customBranding$: Observable<CustomBranding>;
-}> = ({ breadcrumbs$, customBranding$ }) => {
+  breadcrumbs: ChromeBreadcrumb[];
+}> = ({ breadcrumbs }) => {
   const [routeTitle, setRouteTitle] = useState('');
-  const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
-  const breadcrumbs = useObservable(breadcrumbs$, []);
+  const branding = useCustomBranding()?.pageTitle || DEFAULT_BRAND;
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
   const [shouldHandleTab, setShouldHandleTab] = useState<boolean>(false);
 
@@ -69,9 +65,11 @@ export const HeaderPageAnnouncer: FC<{
         // Only intercept Tab if the user is not already focused within the main content area
         const activeElement = document.activeElement;
         const mainContent = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
+        const openFlyout = document.querySelector(FLYOUT_SELECTOR);
         const isWithinMainContent = mainContent && mainContent.contains(activeElement);
+        const isWithinFlyout = openFlyout && openFlyout.contains(activeElement);
 
-        if (!isWithinMainContent) {
+        if (!isWithinMainContent && !isWithinFlyout) {
           skipLinkRef.current?.focus();
           e.preventDefault?.();
         }
@@ -105,7 +103,7 @@ export const HeaderPageAnnouncer: FC<{
         buttonRef={skipLinkRef}
         position="fixed"
         destinationId=""
-        fallbackDestination={MAIN_CONTENT_SELECTORS}
+        fallbackDestination={[FLYOUT_SELECTOR, ...MAIN_CONTENT_SELECTORS]}
         overrideLinkBehavior
         data-test-subj="skipToMainButton"
         role="button"

@@ -27,12 +27,16 @@ export type Link = DashboardLink | ExternalLink;
 export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
 
 export type LinksState = TypeOf<typeof linksSchema>;
+
+export type StoredLink = StoredDashboardLink | StoredExternalLink;
 export type StoredLinksState = Omit<LinksState, 'links'> & {
-  links?: Array<StoredDashboardLink | ExternalLink>;
+  links?: StoredLink[];
 };
-export type StoredDashboardLink = Omit<DashboardLink, 'destination'> & {
-  destinationRefName: string;
-};
+export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &
+  DeprecatedLinkProperties & {
+    destinationRefName: string;
+  };
+type StoredExternalLink = ExternalLink & DeprecatedLinkProperties;
 
 export type LinksCreateOptions = TypeOf<typeof linksCreateOptionsSchema>;
 export type LinksUpdateOptions = TypeOf<typeof linksUpdateOptionsSchema>;
@@ -41,3 +45,9 @@ export type LinksSearchOptions = TypeOf<typeof linksSearchOptionsSchema>;
 export type LinksGetOut = TypeOf<typeof linksGetResultSchema>;
 export type LinksCreateOut = TypeOf<typeof linksCreateResultSchema>;
 export type LinksUpdateOut = TypeOf<typeof linksCreateResultSchema>;
+
+// For BWC, optionally include deprecated props in StoredLink states so they can be transformed away
+interface DeprecatedLinkProperties {
+  order?: number;
+  id?: string;
+}

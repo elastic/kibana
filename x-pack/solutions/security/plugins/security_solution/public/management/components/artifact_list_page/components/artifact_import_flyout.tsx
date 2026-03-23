@@ -55,14 +55,27 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
         { file },
         {
           onError: (error) => {
-            toasts.addError(error, { title: labels.pageImportErrorToastTitle });
+            toasts.addError(error, {
+              title: labels.pageImportErrorToastTitle,
+              toastMessage: error.body?.message || error.message,
+            });
           },
           onSuccess: (response) => {
             toasts.addSuccess({
               title: labels.pageImportSuccessToastTitle,
-              text: labels.getPageImportSuccessToastText?.(
+              text: `${labels.getPageImportSuccessToastText?.(
                 response.success_count_exception_list_items
-              ),
+              )}${
+                response.errors.length
+                  ? ` ${response.errors.length} errors happened: ${response.errors
+                      .map(
+                        (item, index) =>
+                          `(${index + 1}) item (${item.item_id}): ${item.error.message}.`
+                      )
+                      .join(' -- ')}`
+                  : ''
+              }`,
+              toastLifeTimeMs: 60_000,
             });
             onSuccess();
           },

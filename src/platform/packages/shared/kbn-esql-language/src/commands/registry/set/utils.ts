@@ -94,7 +94,7 @@ const getApproximateCompletionItems = (
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
-    availableParameters.num_rows.suggestions = numOfRowsValueItems;
+    availableParameters.rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, ZodFirstPartyTypeKind } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -13,11 +13,18 @@ import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eu
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
 
-export const convertValue = (
-  value: string | boolean,
-  type: keyof typeof ZodFirstPartyTypeKind
-): any => {
-  if (type === ZodFirstPartyTypeKind.ZodNumber) {
+export const ZodSchemaType = {
+  object: 'object',
+  number: 'number',
+  string: 'string',
+  enum: 'enum',
+  boolean: 'boolean',
+} as const;
+
+export type ZodSchemaTypeName = (typeof ZodSchemaType)[keyof typeof ZodSchemaType];
+
+export const convertValue = (value: string | boolean, type: ZodSchemaTypeName): any => {
+  if (type === ZodSchemaType.number) {
     if (value === '') {
       return 0;
     }
@@ -40,7 +47,7 @@ const renderer = {
 
 export const SettingsFieldWrapper: React.FC<{
   settingsConfig: SettingsConfig;
-  typeName: keyof typeof ZodFirstPartyTypeKind;
+  typeName: ZodSchemaTypeName;
   renderItem: Function;
   disabled?: boolean;
 }> = ({ settingsConfig, typeName, renderItem, disabled }) => {
@@ -48,14 +55,14 @@ export const SettingsFieldWrapper: React.FC<{
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
   const fieldKey = `configuredSetting-${settingsConfig.name}`;
-  const defaultValue: number =
+  const defaultValue =
     settingsConfig.schema instanceof z.ZodDefault
-      ? settingsConfig.schema._def.defaultValue()
+      ? settingsConfig.schema.parse(undefined)
       : undefined;
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = typeName === ZodFirstPartyTypeKind.ZodBoolean ? e.target.checked : e.target.value;
+    const value = typeName === ZodSchemaType.boolean ? e.target.checked : e.target.value;
     const newValue = convertValue(value, typeName);
     const validationError = validateSchema(coercedSchema, newValue);
 
@@ -104,14 +111,52 @@ export const SettingsFieldWrapper: React.FC<{
   );
 };
 
-export const getInnerType = (schema: z.ZodType<any, any>) => {
-  if (schema._def.innerType) {
-    return schema._def.innerType._def.typeName === 'ZodEffects'
-      ? schema._def.innerType._def.schema._def.typeName
-      : schema._def.innerType._def.typeName;
-  }
-  if (schema._def.typeName === 'ZodEffects') {
-    return schema._def.schema._def.typeName;
-  }
-  return schema._def.typeName;
+const getV4TypeName = (schema: any): string | undefined => schema?._zod?.def?.type;
+const getV3TypeName = (schema: any): string | undefined => schema?._def?.typeName;
+
+const normalizeTypeName = (typeName?: string): string | undefined => {
+  const typeMap: Record<string, string> = {
+    ZodObject: ZodSchemaType.object,
+    ZodNumber: ZodSchemaType.number,
+    ZodString: ZodSchemaType.string,
+    ZodEnum: ZodSchemaType.enum,
+    ZodBoolean: ZodSchemaType.boolean,
+  };
+
+  return typeName ? typeMap[typeName] ?? typeName : undefined;
 };
+
+const unwrapAndGetTypeName = (schema: any): string | undefined => {
+  const v4TypeName = getV4TypeName(schema);
+
+  if (v4TypeName) {
+    if (v4TypeName === 'default' || v4TypeName === 'optional') {
+      return unwrapAndGetTypeName(schema?._zod?.def?.innerType);
+    }
+
+    if (v4TypeName === 'pipe') {
+      return unwrapAndGetTypeName(schema?._zod?.def?.out ?? schema?._zod?.def?.in);
+    }
+
+    return normalizeTypeName(v4TypeName);
+  }
+
+  const v3TypeName = getV3TypeName(schema);
+
+  if (v3TypeName) {
+    if (v3TypeName === 'ZodDefault' || v3TypeName === 'ZodOptional') {
+      return unwrapAndGetTypeName(schema?._def?.innerType);
+    }
+
+    if (v3TypeName === 'ZodEffects') {
+      return unwrapAndGetTypeName(schema?._def?.schema);
+    }
+
+    return normalizeTypeName(v3TypeName);
+  }
+
+  return undefined;
+};
+
+export const getInnerType = (schema: z.ZodType<any, any>): ZodSchemaTypeName | '' =>
+  (unwrapAndGetTypeName(schema) as ZodSchemaTypeName | undefined) ?? '';

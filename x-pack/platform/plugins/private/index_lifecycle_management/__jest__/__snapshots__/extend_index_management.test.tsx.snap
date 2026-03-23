@@ -749,7 +749,7 @@ exports[`extend index management ilm summary extension should render the tab whe
 exports[`extend index management remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `
 Object {
   "buttonLabel": "Remove lifecycle policy",
-  "icon": "stopFilled",
+  "icon": "stopFill",
   "indexNames": Array [
     Array [
       "testy3",

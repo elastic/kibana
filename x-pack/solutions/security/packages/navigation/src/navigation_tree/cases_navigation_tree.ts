@@ -10,7 +10,11 @@ import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
 export const createCasesNavigationTree = (templatesEnabled: boolean = false): NodeDefinition => {
-  const children = [
+  const children: NodeDefinition[] = [
+    {
+      id: `${SecurityPageName.case}-all`,
+      link: securityLink(SecurityPageName.case),
+    },
     {
       id: SecurityPageName.caseCreate,
       link: securityLink(SecurityPageName.caseCreate),

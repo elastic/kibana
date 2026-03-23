@@ -10,3 +10,12 @@
 export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from './src/components/observability/metrics/lazy_unified_metrics_experience_grid';
 export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/observability/traces/lazy_trace_metrics_grid';
 export type { UnifiedMetricsGridRestorableState } from './src/restorable_state';
+export type {
+  ParsedMetricItem,
+  MetricsInfoResponse,
+  ParsedMetricsResult,
+  MetricsESQLResponse,
+  Dimension,
+  MetricUnit,
+  UnifiedMetricsGridProps,
+} from './src/types';

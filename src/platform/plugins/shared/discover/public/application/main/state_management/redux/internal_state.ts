@@ -495,7 +495,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId, services);
+          selectTabRuntimeInternalState({
+            runtimeStateManager,
+            tabState: selectTab(listenerApi.getState(), tabId),
+            services,
+          });
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -514,7 +518,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id, services),
+            internalState: selectTabRuntimeInternalState({
+              runtimeStateManager,
+              tabState: tab,
+              services,
+            }),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
@@ -560,10 +568,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { runtimeStateManager } = listenerApi.extra;
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
-      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
 
-      if (tabStateContainer?.dataState.cleanupEsql) {
-        tabStateContainer.dataState.cleanupEsql();
+      if (dataStateContainer?.cleanupEsql) {
+        dataStateContainer.cleanupEsql();
       }
     },
   });

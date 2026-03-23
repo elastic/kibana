@@ -72,7 +72,7 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   if (fs.existsSync(configPathToUse)) {
     const loaded = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
       string,
-      any
+      unknown
     >;
     const config = unflattenObject(loaded);
     esConfigValues = config.elasticsearch || {};
@@ -173,12 +173,11 @@ export async function resolveKibanaUrl(kibanaHostname: string, log?: ToolingLog)
     // No base path detected or request succeeded without redirect
     log?.debug(`No dev mode base path detected, using: ${kibanaHostname}`);
     return kibanaHostname;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If we can't connect, just return the original URL
     // The actual API call will handle the connection error
-    log?.debug(
-      `Could not detect base path (${error.code || error.message}), using: ${kibanaHostname}`
-    );
+    const err = error as { code?: string; message?: string };
+    log?.debug(`Could not detect base path (${err.code || err.message}), using: ${kibanaHostname}`);
     return kibanaHostname;
   }
 }

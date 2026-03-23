@@ -662,13 +662,115 @@ describe('AttachmentService', () => {
   });
 
   describe('find', () => {
+    it('uses a single paginated find call when feature flag is enabled', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await serviceWithFlagOn.find({
+        mode: 'legacy',
+        options: {
+          page: 1,
+          perPage: 10,
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 1,
+          perPage: 10,
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
+      );
+    });
+
+    it('queries only legacy SO type when feature flag is disabled', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await service.find({ mode: 'legacy' });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: CASE_COMMENT_SAVED_OBJECT,
+        })
+      );
+    });
+
+    it('queries both legacy and unified comment SO types when feature flag is enabled', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await serviceWithFlagOn.find({ mode: 'legacy' });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
+      );
+    });
+
+    it('transforms unified comment find results to legacy output', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([
+          {
+            id: 'unified-1',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            score: 0,
+            attributes: {
+              type: 'comment',
+              data: { content: 'from unified' },
+              owner: SECURITY_SOLUTION_OWNER,
+              metadata: { owner: SECURITY_SOLUTION_OWNER },
+              created_at: '2024-01-01T00:00:00.000Z',
+              created_by: { username: 'u', full_name: null, email: null },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: null,
+              updated_by: null,
+            },
+            references: [],
+          },
+        ])
+      );
+
+      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+
+      expect(res.saved_objects[0].attributes).toMatchObject({
+        type: 'user',
+        comment: 'from unified',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+    });
+
     describe('Decoding', () => {
       it('does not throw when the response has the required fields', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(
           createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
         );
 
-        await expect(service.find({})).resolves.not.toThrow();
+        await expect(service.find({ mode: 'legacy' })).resolves.not.toThrow();
       });
 
       it('strips excess fields', async () => {
@@ -676,7 +778,7 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...createUserAttachment({ foo: 'bar' }), score: 0 }])
         );
 
-        const res = await service.find({});
+        const res = await service.find({ mode: 'legacy' });
 
         expect(res).toStrictEqual(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
       });
@@ -689,7 +791,7 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...invalidAttachment, score: 0 }])
         );
 
-        await expect(service.find({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        await expect(service.find({ mode: 'legacy' })).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );
       });

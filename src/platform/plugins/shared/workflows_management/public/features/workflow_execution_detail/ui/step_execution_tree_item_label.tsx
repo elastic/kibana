@@ -8,13 +8,19 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, euiFontSize, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, euiFontSize, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
+
+const actionRequiredLabel = i18n.translate(
+  'workflowsManagement.stepExecutionTreeItemLabel.actionRequired',
+  { defaultMessage: 'Action is required' }
+);
 
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
@@ -34,6 +40,7 @@ export function StepExecutionTreeItemLabel({
   const styles = useMemoCss(componentStyles);
   // Trigger pseudo-steps are not real steps, they are used to display the trigger context
   const isTriggerPseudoStep = stepId === 'trigger';
+  const isOverviewPseudoStep = stepId === 'Overview';
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
 
@@ -62,7 +69,14 @@ export function StepExecutionTreeItemLabel({
           </>
         )}
       </EuiFlexItem>
-      {executionTimeMs && !isTriggerPseudoStep && (
+      {status === ExecutionStatus.WAITING_FOR_INPUT && !isOverviewPseudoStep && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+            {actionRequiredLabel}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {executionTimeMs && status !== ExecutionStatus.WAITING_FOR_INPUT && !isTriggerPseudoStep && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
           <EuiText size="xs" color="subdued">
             {formatDuration(executionTimeMs)}

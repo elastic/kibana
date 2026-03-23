@@ -12,6 +12,7 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { isMac } from '@kbn/shared-ux-utility';
+import { i18n } from '@kbn/i18n';
 import type { ShowAssistantOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
@@ -29,7 +30,7 @@ export const AssistantOverlay = React.memo(() => {
     undefined
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay, setIsOverlayOpen } = useAssistantContext();
   const { getLastConversation } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
@@ -107,11 +108,24 @@ export const AssistantOverlay = React.memo(() => {
 
   const flyoutRef = useRef<HTMLElement>(null);
 
-  // Modal control functions
+  const triggerElementRef = useRef<Element | null>(null);
+
+  useEffect(() => {
+    setIsOverlayOpen(isModalVisible);
+    if (isModalVisible) {
+      triggerElementRef.current = document.activeElement;
+    }
+  }, [isModalVisible, setIsOverlayOpen]);
+
   const cleanupAndCloseModal = useCallback(() => {
+    const shouldRestoreFocus = document.activeElement?.matches(':focus-visible');
     setIsModalVisible(false);
     setPromptContextId(undefined);
     setSelectedConversation(lastConversation);
+    if (shouldRestoreFocus && triggerElementRef.current instanceof HTMLElement) {
+      triggerElementRef.current.focus();
+    }
+    triggerElementRef.current = null;
   }, [lastConversation]);
 
   const handleCloseModal = useCallback(() => {
@@ -138,6 +152,12 @@ export const AssistantOverlay = React.memo(() => {
   return (
     <>
       <EuiFlyoutResizable
+        aria-label={i18n.translate(
+          'xpack.elasticAssistant.assistantOverlay.euiFlyoutResizable.ariaLabel',
+          {
+            defaultMessage: 'AI Assistant chat flyout',
+          }
+        )}
         ref={flyoutRef}
         css={css`
           max-inline-size: calc(100% - 20px);
@@ -147,6 +167,7 @@ export const AssistantOverlay = React.memo(() => {
           }
         `}
         onClose={handleCloseModal}
+        focusTrapProps={{ returnFocus: false }}
         data-test-subj="ai-assistant-flyout"
         paddingSize="none"
         hideCloseButton

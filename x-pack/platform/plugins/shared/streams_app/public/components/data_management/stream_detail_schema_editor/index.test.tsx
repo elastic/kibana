@@ -214,6 +214,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('displays read-only callout for root streams', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs', // root stream
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
@@ -255,6 +256,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('does not display callout for non-root streams', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs.otel.child', // child stream
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
@@ -562,6 +564,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('shows add field button for non-root streams with manage privilege', () => {
       const definition = createMockClassicStreamDefinition({
         stream: {
+          type: 'classic',
           name: 'logs.otel.child',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
@@ -609,6 +612,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('hides add field button for root streams even with manage privilege', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs', // root stream
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',

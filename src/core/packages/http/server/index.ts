@@ -117,6 +117,8 @@ export type {
   RouteAuthc,
   AuthcDisabled,
   AuthcEnabled,
+  AuthcMinimal,
+  AuthcOptional,
   Privilege,
   PrivilegeSet,
   AllRequiredCondition,

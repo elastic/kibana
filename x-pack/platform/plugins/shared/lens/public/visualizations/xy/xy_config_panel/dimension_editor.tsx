@@ -26,7 +26,11 @@ import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { getSortedAccessors } from '../to_expression';
-import { getColorAssignments, getAssignedColorConfig } from '../color_assignment';
+import {
+  getColorAssignments,
+  getAssignedColorConfig,
+  getLayerPaletteName,
+} from '../color_assignment';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 
 export const idPrefix = htmlIdGenerator()();
@@ -186,6 +190,8 @@ export function DataDimensionEditor(
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
+  const swatchPalette =
+    props.palettes.get(getLayerPaletteName(layer)) ?? props.palettes.get(KbnPalette.Default);
   const disabledMessage = Boolean(!layer.collapseFn && (layer.splitAccessors ?? []).length > 0)
     ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
         defaultMessage:
@@ -200,7 +206,7 @@ export function DataDimensionEditor(
         overwriteColor={overwriteColor}
         defaultColor={assignedColor}
         disabledMessage={disabledMessage}
-        swatches={props.palettes.get(KbnPalette.Default).colors(10)}
+        swatches={swatchPalette.colors(10)}
         setConfig={setConfig}
       />
 

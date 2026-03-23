@@ -24,6 +24,7 @@ import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipeline
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/significant_events/insights/client/insight_client';
+import type { ModelSettingsConfigClient } from '../lib/saved_objects/significant_events/model_settings_config_service';
 
 export type GetScopedClients = ({
   request,
@@ -45,6 +46,7 @@ export interface RouteHandlerScopedClients {
   uiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
+  modelSettingsClient: ModelSettingsConfigClient;
 }
 
 export interface RouteDependencies {

@@ -13,7 +13,7 @@ export function TechnicalPreviewBadge() {
   return (
     <EuiBetaBadge
       label="E"
-      iconType="beaker"
+      iconType="flask"
       color="hollow"
       title={i18n.translate('xpack.observabilityAiAssistant.experimentalTitle', {
         defaultMessage: 'Technical preview',

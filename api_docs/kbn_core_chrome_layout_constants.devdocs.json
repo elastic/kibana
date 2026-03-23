@@ -223,6 +223,25 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.FLYOUT_SELECTOR",
+        "type": "string",
+        "tags": [],
+        "label": "FLYOUT_SELECTOR",
+        "description": [
+          "\nSelector for an open EuiFlyout. All flyouts (core overlay service, system flyouts,\nand inline plugin flyouts) render through EuiFlyout which applies this class and role."
+        ],
+        "signature": [
+          "\".euiFlyout[role=\\\"dialog\\\"]\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
         "id": "def-common.LayoutComponent",
         "type": "Type",
         "tags": [],
@@ -285,7 +304,7 @@
           "string[]"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
-        "lineNumber": 38,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -304,7 +323,7 @@
           "8"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
-        "lineNumber": 47,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -322,7 +341,7 @@
           "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
-        "lineNumber": 53,
+        "lineNumber": 59,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -335,7 +354,7 @@
             "label": "prop",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
-            "lineNumber": 54,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -348,7 +367,7 @@
                 "label": "'data-eui-includes-in-flyout-focus-trap'",
                 "description": [],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
-                "lineNumber": 55,
+                "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -363,7 +382,7 @@
             "label": "selector",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
-            "lineNumber": 57,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

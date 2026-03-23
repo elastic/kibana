@@ -9,7 +9,8 @@
 
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { buildStepExecutionsTree } from '../build_step_executions_tree';
+import type { ChildWorkflowExecutionsMap } from '../../model/use_child_workflow_executions';
+import { buildStepExecutionsTree, injectChildWorkflowSteps } from '../build_step_executions_tree';
 
 // Helper function to create a valid WorkflowStepExecutionDto with all required properties
 const createStepExecution = (
@@ -1072,5 +1073,191 @@ describe('buildStepExecutionsTree', () => {
       expect(result[1].stepId).toBe('foreach-1');
       expect(result[1].children).toHaveLength(1);
     });
+  });
+
+  describe('triggeredBy fallback when context lacks inputs/event keys', () => {
+    it('should fall back to triggeredBy for manual execution when context has no inputs key', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { spaceId: 'default' },
+        ExecutionStatus.FAILED,
+        'manual'
+      );
+
+      const inputsStep = result.find((s) => s.stepType === '__inputs');
+      expect(inputsStep).toBeDefined();
+      expect(inputsStep?.stepId).toBe('Inputs');
+      expect(inputsStep?.isTriggerPseudoStep).toBe(true);
+    });
+
+    it('should fall back to triggeredBy for alert execution when context has no event key', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { spaceId: 'default' },
+        ExecutionStatus.FAILED,
+        'alert'
+      );
+
+      const triggerStep = result.find((s) => s.stepType === '__trigger');
+      expect(triggerStep).toBeDefined();
+      expect(triggerStep?.stepId).toBe('Event');
+      expect(triggerStep?.isTriggerPseudoStep).toBe(true);
+    });
+
+    it('should not use triggeredBy fallback when context already has inputs', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { inputs: { name: 'test' } },
+        ExecutionStatus.FAILED,
+        'manual'
+      );
+
+      const inputsSteps = result.filter(
+        (s) => s.stepType === '__inputs' || s.stepType === '__trigger'
+      );
+      expect(inputsSteps).toHaveLength(1);
+    });
+
+    it('should not create trigger pseudo-step when triggeredBy is undefined', () => {
+      const result = buildStepExecutionsTree([], { spaceId: 'default' }, ExecutionStatus.FAILED);
+
+      const triggerSteps = result.filter(
+        (s) => s.stepType === '__inputs' || s.stepType === '__trigger'
+      );
+      expect(triggerSteps).toHaveLength(0);
+    });
+  });
+});
+
+describe('injectChildWorkflowSteps', () => {
+  const makeTreeNode = (
+    overrides: Partial<{
+      stepId: string;
+      stepType: string;
+      stepExecutionId: string | null;
+      status: ExecutionStatus | null;
+      children: any[];
+    }> = {}
+  ) => ({
+    stepId: 'step-1',
+    stepType: 'action',
+    executionIndex: 0,
+    stepExecutionId: 'exec-1' as string | null,
+    status: ExecutionStatus.COMPLETED as ExecutionStatus | null,
+    children: [] as any[],
+    ...overrides,
+  });
+
+  it('should return tree unchanged when no workflow.execute steps exist', () => {
+    const tree = [makeTreeNode({ stepType: 'action' })];
+    const { tree: result, childStepExecutions } = injectChildWorkflowSteps(tree, new Map(), false);
+
+    expect(result).toEqual(tree);
+    expect(childStepExecutions).toEqual([]);
+  });
+
+  it('should inject child steps into workflow.execute nodes', () => {
+    const tree = [
+      makeTreeNode({
+        stepId: 'run-child',
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+      }),
+    ];
+
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'wf-exec-step-1',
+        {
+          parentStepExecutionId: 'wf-exec-step-1',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({
+              id: 'child-step-1',
+              stepId: 'do_thing',
+              stepType: 'action',
+              status: ExecutionStatus.COMPLETED,
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const { tree: result, childStepExecutions } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result[0].children).toHaveLength(1);
+    expect(result[0].children[0].stepId).toBe('do_thing');
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+    expect(childStepExecutions).toHaveLength(1);
+    expect(childStepExecutions[0].id).toBe('child-step-1');
+  });
+
+  it('should add loading placeholder when data is loading for terminal workflow.execute steps', () => {
+    const tree = [
+      makeTreeNode({
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+        status: ExecutionStatus.COMPLETED,
+      }),
+    ];
+
+    const { tree: result } = injectChildWorkflowSteps(tree, new Map(), true);
+
+    expect(result[0].children).toHaveLength(1);
+    expect(result[0].children[0].stepType).toBe('__loading');
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+  });
+
+  it('should not add loading placeholder for non-terminal workflow.execute steps', () => {
+    const tree = [
+      makeTreeNode({
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+        status: ExecutionStatus.RUNNING,
+      }),
+    ];
+
+    const { tree: result } = injectChildWorkflowSteps(tree, new Map(), true);
+
+    expect(result[0].children).toHaveLength(0);
+  });
+
+  it('should filter out workflow_level_timeout steps from children', () => {
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'wf-exec-step-1',
+        {
+          parentStepExecutionId: 'wf-exec-step-1',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({ id: 'cs-1', stepId: 'real_step', stepType: 'action' }),
+            createStepExecution({
+              id: 'cs-2',
+              stepId: 'timeout',
+              stepType: 'workflow_level_timeout',
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const tree = [
+      makeTreeNode({
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+      }),
+    ];
+
+    const { tree: result, childStepExecutions } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result[0].children).toHaveLength(1);
+    expect(result[0].children[0].stepId).toBe('real_step');
+    expect(childStepExecutions).toHaveLength(1);
   });
 });

@@ -15,7 +15,6 @@ import {
   isUnknownNode,
   within,
 } from '@elastic/esql';
-import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
 import { getSettingsCompletionItems } from '../../definitions/utils/settings';
 import { SuggestionCategory } from '../../../..';
 import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
@@ -78,28 +77,19 @@ export async function autocomplete(
   // SET <setting> = "/  --- Within the value quotes.
   if (isStringLiteral(settingRightSide)) {
     if (cursorPosition && within(cursorPosition, settingRightSide)) {
-      const isFragmentComplete = () => {
-        return settingRightSide.valueUnquoted.length > 0 && innerText.endsWith('"');
-      };
-      const getSuggestionsForIncomplete = (): ISuggestionItem[] => {
-        return settingsValueCompletions.map((item) => {
-          return {
-            ...item,
-            rangeToReplace: {
-              start: settingRightSide.location.min + 1,
-              end: innerText.length,
-            },
-          };
-        });
-      };
-      const getSuggestionsForComplete = () => [];
+      const isComplete = settingRightSide.valueUnquoted.length > 0 && innerText.endsWith('"');
 
-      return handleFragment(
-        innerText,
-        isFragmentComplete,
-        getSuggestionsForIncomplete,
-        getSuggestionsForComplete
-      );
+      if (isComplete) {
+        return [];
+      }
+
+      return settingsValueCompletions.map((item) => ({
+        ...item,
+        rangeToReplace: {
+          start: settingRightSide.location.min + 1,
+          end: innerText.length,
+        },
+      }));
     }
   }
 

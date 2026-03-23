@@ -44,7 +44,10 @@ export const useSiemReadinessApi = () => {
 
   const getIntegrations = useQuery({
     queryKey: GET_INTEGRATIONS_QUERY_KEY,
-    queryFn: () => http.get<{ items: SiemReadinessPackageInfo[] }>('/api/fleet/epm/packages'),
+    queryFn: () =>
+      http.get<{ items: SiemReadinessPackageInfo[] }>('/api/fleet/epm/packages', {
+        query: { withPackagePoliciesCount: true },
+      }),
   });
 
   const getDetectionRules = useQuery({

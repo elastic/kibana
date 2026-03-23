@@ -3098,7 +3098,7 @@
         "label": "dedot",
         "description": [],
         "signature": [
-          "(source: Record<string, any>, target: Record<string, any>) => Record<string, any>"
+          "(source: Record<string, unknown>, target: Record<string, unknown>) => Record<string, unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
         "lineNumber": 12,
@@ -3114,7 +3114,7 @@
             "label": "source",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
             "lineNumber": 12,
@@ -3131,11 +3131,11 @@
             "label": "target",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
             "lineNumber": 12,
-            "columnNumber": 52,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

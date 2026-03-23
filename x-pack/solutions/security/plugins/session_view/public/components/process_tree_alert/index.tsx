@@ -57,11 +57,16 @@ export const ProcessTreeAlert = ({
     }
   }, [isInvestigated, uuid, selectAlert]);
 
-  const handleExpandClick = useCallback(() => {
-    if (uuid && index) {
-      onShowAlertDetails(uuid, index);
-    }
-  }, [index, onShowAlertDetails, uuid]);
+  const handleExpandClick = useCallback(
+    (evt: React.MouseEvent<HTMLButtonElement>) => {
+      evt.stopPropagation();
+      evt.preventDefault();
+      if (uuid && index) {
+        onShowAlertDetails(uuid, index);
+      }
+    },
+    [index, onShowAlertDetails, uuid]
+  );
 
   const handleClick = useCallback(() => {
     if (alert.kibana?.alert) {

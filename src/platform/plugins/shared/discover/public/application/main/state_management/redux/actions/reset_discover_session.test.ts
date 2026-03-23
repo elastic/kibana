@@ -104,7 +104,7 @@ describe('resetDiscoverSession', () => {
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
     const tab3RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab3.id);
 
-    expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
+    expect(tab3RuntimeState.dataStateContainer$.getValue()).toBeUndefined();
 
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
@@ -123,7 +123,7 @@ describe('resetDiscoverSession', () => {
     expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab2.id });
     expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab3.id });
 
-    expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
+    expect(tab3RuntimeState.dataStateContainer$.getValue()).toBeUndefined();
 
     const tab1 = selectTab(internalState.getState(), persistedTab1.id);
     const tab2 = selectTab(internalState.getState(), persistedTab2.id);

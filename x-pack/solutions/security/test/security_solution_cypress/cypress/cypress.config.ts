@@ -25,7 +25,6 @@ export default defineCypressConfig({
   videosFolder: '../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
-  numTestsKeptInMemory: 10,
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
@@ -33,20 +32,8 @@ export default defineCypressConfig({
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       esClient(on, config);
-      on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.name === 'chrome' && browser.isHeadless) {
-          launchOptions.args.push('--window-size=1920,1200');
-          return launchOptions;
-        }
-        if (browser.family === 'chromium') {
-          launchOptions.args.push(
-            '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
-          );
-        }
-        return launchOptions;
-      });
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@cypress/grep/src/plugin')(config);
+      require('@cypress/grep/plugin').plugin(config);
       return config;
     },
   },

@@ -354,51 +354,6 @@ describe('WHERE Autocomplete', () => {
         })
       );
     });
-
-    describe('attaches ranges', () => {
-      test('omits ranges if there is no prefix', async () => {
-        (await suggest('FROM index | WHERE ')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toBeUndefined();
-        });
-      });
-
-      test('uses indices of single prefix by default', async () => {
-        (await suggest('FROM index | WHERE some.prefix')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toEqual({
-            start: 19,
-            end: 30,
-          });
-        });
-      });
-
-      test('"IS (NOT) NULL" with a matching prefix', async () => {
-        const suggestions = await suggest('FROM index | WHERE doubleField IS N');
-
-        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 35,
-        });
-
-        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 35,
-        });
-      });
-
-      test('"IS (NOT) NULL" with a matching prefix with trailing space', async () => {
-        const suggestions = await suggest('FROM index | WHERE doubleField IS ');
-
-        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 34,
-        });
-
-        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 34,
-        });
-      });
-    });
   });
 
   describe('function parameter constraints', () => {

@@ -31,6 +31,15 @@ export interface RegistryVarGroup {
   options: RegistryVarGroupOption[];
 }
 
+export interface PackageDependency {
+  package: string;
+  version: string;
+}
+
+export interface PackageRequires {
+  content?: PackageDependency[];
+}
+
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
   format_version?: string;
@@ -42,6 +51,7 @@ export interface PackageSpecManifest {
   source?: {
     license: string;
   };
+  requires?: PackageRequires;
   type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;

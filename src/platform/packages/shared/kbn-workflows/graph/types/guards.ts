@@ -14,6 +14,7 @@ import type {
   KibanaGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
+  WorkflowOutputGraphNode,
 } from './nodes/base';
 import type {
   EnterConditionBranchNode,
@@ -21,6 +22,7 @@ import type {
   ExitConditionBranchNode,
   ExitIfNode,
 } from './nodes/branching_nodes';
+import type { LoopBreakNode, LoopContinueNode } from './nodes/flow_control_nodes';
 import type {
   EnterForeachNode,
   EnterWhileNode,
@@ -39,7 +41,17 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
 } from './nodes/on_failure_nodes';
+import type {
+  EnterCaseBranchNode,
+  EnterDefaultBranchNode,
+  EnterSwitchNode,
+  ExitCaseBranchNode,
+  ExitDefaultBranchNode,
+  ExitSwitchNode,
+} from './nodes/switch_nodes';
 import type { GraphNodeUnion } from './nodes/union';
+import type { LoopStepType } from '../../spec/schema';
+import { LoopStepTypes } from '../../spec/schema';
 
 export const isAtomic = (node: GraphNodeUnion): node is AtomicGraphNode => node.type === 'atomic';
 
@@ -56,6 +68,9 @@ export const isWaitForInput = (node: GraphNodeUnion): node is WaitForInputGraphN
 
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
   node.type === 'data.set';
+
+export const isWorkflowOutput = (node: GraphNodeUnion): node is WorkflowOutputGraphNode =>
+  node.type === 'workflow.output';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 
@@ -75,6 +90,11 @@ export const isExitForeach = (node: GraphNodeUnion): node is ExitForeachNode =>
 
 export const isEnterWhile = (node: GraphNodeUnion): node is EnterWhileNode =>
   node.type === 'enter-while';
+
+export type LoopEnterNode = Extract<GraphNodeUnion, { type: `enter-${LoopStepType}` }>;
+const loopEnterNodeTypes = new Set(LoopStepTypes.map((t) => `enter-${t}`));
+export const isLoopEnterNode = (node: GraphNodeUnion): node is LoopEnterNode =>
+  loopEnterNodeTypes.has(node.type);
 
 export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
   node.type === 'exit-while';
@@ -114,6 +134,29 @@ export const isEnterStepTimeoutZone = (node: GraphNodeUnion): node is EnterTimeo
 
 export const isExitStepTimeoutZone = (node: GraphNodeUnion): node is ExitTimeoutZoneNode =>
   node.type === 'exit-timeout-zone' && node.stepType !== 'workflow_level_timeout';
+
+export const isEnterSwitch = (node: GraphNodeUnion): node is EnterSwitchNode =>
+  node.type === 'enter-switch';
+
+export const isExitSwitch = (node: GraphNodeUnion): node is ExitSwitchNode =>
+  node.type === 'exit-switch';
+
+export const isEnterCaseBranch = (node: GraphNodeUnion): node is EnterCaseBranchNode =>
+  node.type === 'enter-case-branch';
+
+export const isExitCaseBranch = (node: GraphNodeUnion): node is ExitCaseBranchNode =>
+  node.type === 'exit-case-branch';
+
+export const isEnterDefaultBranch = (node: GraphNodeUnion): node is EnterDefaultBranchNode =>
+  node.type === 'enter-default-branch';
+
+export const isExitDefaultBranch = (node: GraphNodeUnion): node is ExitDefaultBranchNode =>
+  node.type === 'exit-default-branch';
+export const isLoopBreak = (node: GraphNodeUnion): node is LoopBreakNode =>
+  node.type === 'loop-break';
+
+export const isLoopContinue = (node: GraphNodeUnion): node is LoopContinueNode =>
+  node.type === 'loop-continue';
 
 /**
  * Returns true for step types whose inner steps have guaranteed execution

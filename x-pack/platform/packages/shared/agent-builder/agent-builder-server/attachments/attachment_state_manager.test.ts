@@ -576,7 +576,7 @@ describe('AttachmentStateManager', () => {
         {
           id: 'by-ref-1',
           type: 'by_ref',
-          origin: { ref: 'a' },
+          origin: 'a',
         },
         undefined,
         mockContext
@@ -585,7 +585,7 @@ describe('AttachmentStateManager', () => {
       // Content should be the resolved payload
       expect(attachment.versions[0].data).toEqual({ value: 'resolved-1' });
       // Origin should be stored on the attachment
-      expect(attachment.origin).toEqual({ ref: 'a' });
+      expect(attachment.origin).toEqual('a');
       expect(attachment.current_version).toBe(1);
     });
 
@@ -594,7 +594,7 @@ describe('AttachmentStateManager', () => {
         {
           id: 'by-ref-2',
           type: 'by_ref',
-          origin: { ref: 'a' },
+          origin: 'a',
         },
         undefined,
         mockContext
@@ -615,7 +615,7 @@ describe('AttachmentStateManager', () => {
         manager.add({
           id: 'by-ref-3',
           type: 'by_ref',
-          origin: { ref: 'a' },
+          origin: 'a',
         })
       ).rejects.toThrow('Resolve context is required');
     });
@@ -634,11 +634,11 @@ describe('AttachmentStateManager', () => {
         id: 'both-1',
         type: 'by_ref',
         data: { ref: 'custom-data' },
-        origin: { ref: 'original-source' },
+        origin: 'original-source',
       });
 
       expect(attachment.versions[0].data).toEqual({ ref: 'custom-data' });
-      expect(attachment.origin).toEqual({ ref: 'original-source' });
+      expect(attachment.origin).toEqual('original-source');
     });
   });
 

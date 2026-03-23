@@ -8,7 +8,9 @@
 import { useEffect, useRef } from 'react';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
+import { getYamlDefaultAsString } from '../templates_v2/utils';
 
 interface UseTemplateFormSyncReturn {
   template: ParsedTemplate | undefined;
@@ -20,6 +22,7 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { data: template, isLoading } = useGetTemplate(templateId || undefined);
   const appliedRef = useRef<string | undefined>(undefined);
+  const appliedFieldsRef = useRef<string[]>([]);
 
   useEffect(() => {
     if (!templateId) {
@@ -29,6 +32,12 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
         setFieldValue('tags', []);
         setFieldValue('severity', 'low');
         setFieldValue('category', null);
+
+        // Clear previously applied extended fields
+        for (const fieldPath of appliedFieldsRef.current) {
+          setFieldValue(fieldPath, '');
+        }
+        appliedFieldsRef.current = [];
       }
       return;
     }
@@ -43,21 +52,32 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
     }
     appliedRef.current = key;
 
-    if (template.definition.name) {
-      setFieldValue('title', template.definition.name);
+    const { definition } = template;
+    const fieldMappings: Array<[string, unknown]> = [
+      ['title', definition.name],
+      ['description', definition.description],
+      ['tags', definition.tags?.length ? definition.tags : undefined],
+      ['severity', definition.severity],
+      ['category', definition.category],
+    ];
+
+    for (const [fieldName, value] of fieldMappings) {
+      if (value !== undefined) {
+        setFieldValue(fieldName, value);
+      }
     }
-    if (template.definition.description) {
-      setFieldValue('description', template.definition.description);
+
+    // Apply default values for extended fields
+    const newAppliedFields: string[] = [];
+    if (template.definition.fields) {
+      for (const field of template.definition.fields) {
+        const fieldPath = `${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`;
+        const defaultValue = getYamlDefaultAsString(field.metadata?.default);
+        setFieldValue(fieldPath, defaultValue);
+        newAppliedFields.push(fieldPath);
+      }
     }
-    if (template.definition.tags?.length) {
-      setFieldValue('tags', template.definition.tags);
-    }
-    if (template.definition.severity) {
-      setFieldValue('severity', template.definition.severity);
-    }
-    if (template.definition.category) {
-      setFieldValue('category', template.definition.category);
-    }
+    appliedFieldsRef.current = newAppliedFields;
   }, [templateId, template, setFieldValue]);
 
   return { template, isLoading };

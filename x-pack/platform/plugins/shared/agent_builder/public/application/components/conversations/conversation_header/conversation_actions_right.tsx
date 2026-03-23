@@ -41,7 +41,10 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       responsive={false}
     >
       <EuiTourStep {...getStepProps(TourStep.ConversationActions)}>
-        <MoreActionsButton onRenameConversation={onRenameConversation} />
+        <MoreActionsButton
+          onRenameConversation={onRenameConversation}
+          onCloseSidebar={isEmbeddedContext ? onClose : undefined}
+        />
       </EuiTourStep>
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>

@@ -7,6 +7,7 @@
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
+import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
 import { AgentBuilderAgentsEdit } from './pages/agent_edit';
 import { AgentBuilderAgentsPage } from './pages/agents';
@@ -21,9 +22,18 @@ import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { useExperimentalFeatures } from './hooks/use_experimental_features';
+import { useKibana } from './hooks/use_kibana';
+import { AgentBuilderConnectorsPage } from './pages/connectors';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const isConnectorsEnabled = uiSettings.get<boolean>(
+    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+    false
+  );
 
   return (
     <Routes>
@@ -58,6 +68,12 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
       <Route path="/tools">
         <AgentBuilderToolsPage />
       </Route>
+
+      {isConnectorsEnabled ? (
+        <Route path="/connectors">
+          <AgentBuilderConnectorsPage />
+        </Route>
+      ) : null}
 
       {isExperimentalFeaturesEnabled
         ? [

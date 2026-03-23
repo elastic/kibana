@@ -12,7 +12,8 @@ value:
       "tag 1"
     ],
     "settings": {
-      "syncAlerts": true
+      "syncAlerts": true,
+      "extractObservables": false
     },
     "owner": "cases",
     "duration": null,

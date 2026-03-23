@@ -1137,13 +1137,26 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncoredibrowser",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/core-di-browser'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbncorechromesidebarcontext",
             "type": "string",
             "tags": [],
             "label": "'@kbn/core-chrome-sidebar-context'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 154,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1156,7 +1169,7 @@
             "label": "'@kbn/core-chrome-browser-context'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 155,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

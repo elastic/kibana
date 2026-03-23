@@ -14,7 +14,7 @@ value:
         "title": "Case title",
         "tags": [ "tag-1" ],
         "description": "Case description",
-        "settings": { "syncAlerts": true },
+        "settings": { "syncAlerts": true, "extractObservables": false },
         "owner": "cases",
         "customFields": [
           {

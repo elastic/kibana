@@ -568,17 +568,37 @@ export class SyntheticsPrivateLocation {
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-    const policyIdsToDelete = new Set<string>();
 
+    const policyIdsToFetch = new Set<string>();
     for (const config of configs) {
-      const { locations } = config;
-      const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
-
+      const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
       for (const privateLocation of monitorPrivateLocations) {
-        policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
         this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
-          (id) => policyIdsToDelete.add(id)
+          (id) => policyIdsToFetch.add(id)
         );
+      }
+    }
+
+    const existingPolicies =
+      (await this.server.fleet.packagePolicyService.getByIDs(soClient, [...policyIdsToFetch], {
+        ignoreMissing: true,
+      })) ?? [];
+
+    const policyIdsToDelete = new Set<string>();
+    for (const config of configs) {
+      const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
+      for (const privateLocation of monitorPrivateLocations) {
+        const { hasNewFormatPolicyId, legacyPolicyIds } = this.getPolicyIdFormatInfo(
+          config,
+          privateLocation.id,
+          existingPolicies,
+          allSpaces
+        );
+        if (hasNewFormatPolicyId) {
+          policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+        }
+        legacyPolicyIds.forEach((id) => policyIdsToDelete.add(id));
       }
     }
 

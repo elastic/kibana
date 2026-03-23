@@ -32,6 +32,7 @@ import { SavedReport } from '../store';
 import type { ScheduledReportType } from '../../types';
 import { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import { eventTrackerMock } from '../../usage/event_tracker.mock';
+import { MAX_DELAY_SECONDS } from '../retry_on_error';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -40,6 +41,8 @@ interface StreamMock {
   fail: () => void;
   end: () => void;
   transform: Transform;
+  once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
+  removeListener: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
 }
 
 const coreSetupMock = coreMock.createSetup();
@@ -47,8 +50,7 @@ const mockEventTracker = eventTrackerMock.create();
 
 function createStreamMock(): StreamMock {
   const transform: Transform = new Transform({});
-
-  return {
+  const mock = {
     getSeqNo: () => 10,
     getPrimaryTerm: () => 20,
     write: (data: string) => {
@@ -62,7 +64,16 @@ function createStreamMock(): StreamMock {
     end: () => {
       transform.end();
     },
+    once: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.once(event, listener);
+      return mock;
+    },
+    removeListener: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.removeListener(event, listener);
+      return mock;
+    },
   };
+  return mock as StreamMock;
 }
 
 const mockStream = createStreamMock();
@@ -571,6 +582,98 @@ describe('Run Scheduled Report Task', () => {
     );
   });
 
+  it('catches stream error during performJob and rejects the operation', async () => {
+    const streamFailRunTaskFn = jest.fn().mockImplementation((opts: { stream: StreamMock }) => {
+      const { stream } = opts;
+      setImmediate(() => stream.fail());
+      return new Promise(() => {}); // never resolve so the stream error throws
+    });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'noop',
+      name: 'Noop',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: streamFailRunTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: pdf scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentExtension: 'pdf',
+      jobType: 'noop',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test',
+        jobtype: 'noop',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+
+    store.setReportFailed = jest.fn();
+    logger.error = jest.fn();
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'prepareJob')
+      .mockResolvedValueOnce({
+        isLastAttempt: false,
+        jobId: '290357209345723095',
+        report: { _id: '290357209345723095', jobtype: 'noop' },
+        task: {
+          id: '290357209345723095',
+          index: '.reporting-fantastic',
+          jobtype: 'noop',
+          payload,
+        },
+      } as never);
+
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+      .spyOn(task, 'getEventTracker')
+      // @ts-ignore
+      .mockReturnValue(new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId'));
+
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        params: {
+          id: 'report-so-id',
+          jobtype: 'noop',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await taskRunner.run().catch(() => {});
+
+    expect(reportStore.setReportFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: '290357209345723095',
+      }),
+      expect.objectContaining({
+        error: expect.objectContaining({
+          message: 'Stream failed',
+        }),
+      })
+    );
+  });
+
   it('updates report with error message and failed status if error occurs during task run', async () => {
     const runAt = new Date('2023-10-01T00:00:00Z');
 
@@ -651,6 +754,7 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('should retry up to maxRetries', async () => {
+    jest.useFakeTimers();
     const runAt = new Date('2023-10-01T00:00:00Z');
     configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
     mockReporting = await createMockReportingCore(configType);
@@ -706,7 +810,13 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    const runPromise = taskRunner.run();
+    const expectPromise = expect(runPromise).rejects.toThrowError('failure generating report');
+    // Advance past all retry delays
+    for (let i = 0; i < 10; i++) {
+      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+    }
+    await expectPromise;
 
     expect(runThisTaskFn).toHaveBeenCalledTimes(2); // should retry 2 times
     expect(logger.error).toHaveBeenCalledWith(
@@ -726,6 +836,7 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
+    jest.useRealTimers();
   });
 
   describe('notify', () => {

@@ -8,8 +8,25 @@
  */
 
 import { DurationFormat } from './duration';
+import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Duration Format', () => {
+  test('handles missing values in html context', () => {
+    const duration = new DurationFormat(
+      {
+        inputFormat: 'seconds',
+        outputFormat: 'humanize',
+      },
+      jest.fn()
+    );
+    expect(duration.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(duration.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+  });
+
   testCase({
     inputFormat: 'seconds',
     outputFormat: 'humanize',

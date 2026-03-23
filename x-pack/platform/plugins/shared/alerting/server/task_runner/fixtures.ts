@@ -287,6 +287,9 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
   nextRun: undefined,
   createdAt: new Date(mockedRawRuleSO.attributes.createdAt),
   updatedAt: new Date(mockedRawRuleSO.attributes.updatedAt),
+  lastEnabledAt: mockedRawRuleSO.attributes.lastEnabledAt
+    ? new Date(mockedRawRuleSO.attributes.lastEnabledAt)
+    : undefined,
   executionStatus: {
     ...mockedRawRuleSO.attributes.executionStatus,
     lastExecutionDate: new Date(mockedRawRuleSO.attributes.executionStatus.lastExecutionDate),

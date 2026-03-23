@@ -279,8 +279,15 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         },
       });
     } else if (logsSourceOption === 'index' && selectedIndex) {
-      // For index source, we don't need to upload
-      // TODO: Add logic to fetch samples from the index.
+      await uploadSamplesMutation.mutateAsync({
+        integrationId,
+        dataStreamId,
+        sourceIndex: selectedIndex,
+        originalSource: {
+          sourceType: 'index',
+          sourceValue: selectedIndex,
+        },
+      });
     }
 
     await createUpdateIntegrationMutation.mutateAsync({

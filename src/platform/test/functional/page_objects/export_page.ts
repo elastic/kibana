@@ -74,14 +74,17 @@ export class ExportPageObject extends FtrService {
 
   async closeExportFlyout() {
     const closeButtonSubj = 'exportFlyoutCloseButton';
-    const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
+    await this.retry.waitFor('flyout to close', async () => {
+      const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
 
-    if (!isExportFlyoutOpen) {
-      return; // It was already closed
-    }
+      if (!isExportFlyoutOpen) {
+        return true; // It was already closed
+      }
 
-    await this.testSubjects.click(closeButtonSubj);
-    await this.testSubjects.waitForDeleted(closeButtonSubj);
+      await this.testSubjects.click(closeButtonSubj);
+      await this.testSubjects.waitForDeleted(closeButtonSubj);
+      return true;
+    });
   }
 
   async getExportAssetTextButton() {

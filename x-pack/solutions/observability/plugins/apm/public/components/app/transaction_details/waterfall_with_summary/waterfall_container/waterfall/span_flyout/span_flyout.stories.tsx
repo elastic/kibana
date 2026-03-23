@@ -67,8 +67,8 @@ export default {
         http: {
           get: async (): Promise<SpanDetailsApiReturnType> => {
             return {
-              span: dedot(data.spanEvent, {}) as Span,
-              parentTransaction: dedot(data.parentTransaction, {}) as Transaction,
+              span: dedot(data.spanEvent, {}) as unknown as Span,
+              parentTransaction: dedot(data.parentTransaction, {}) as unknown as Transaction,
             };
           },
         },

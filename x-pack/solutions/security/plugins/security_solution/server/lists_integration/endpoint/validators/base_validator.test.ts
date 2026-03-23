@@ -35,7 +35,12 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ImportExceptionListItemSchemaDecoded,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { cloneDeep } from 'lodash';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
@@ -500,6 +505,356 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
         ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+      });
+    });
+
+    describe('#validatePreImportItems', () => {
+      const item1Mock = (): PromiseFromStreams['items'][number] => ({
+        item_id: 'itemId1',
+        name: 'name 1',
+        description: 'description 1',
+        entries: [],
+        os_types: ['macos'],
+        tags: ['tag1', 'tag2'],
+        namespace_type: 'agnostic',
+        list_id: 'list id 1',
+        type: 'simple',
+        comments: [],
+        expire_time: 'sometime',
+      });
+
+      const item2Mock = (): PromiseFromStreams['items'][number] => ({
+        item_id: 'itemId2',
+        name: 'name 2',
+        description: 'description 2',
+        entries: [],
+        os_types: ['linux'],
+        tags: ['tag3'],
+        namespace_type: 'agnostic',
+        list_id: 'list id 2',
+        type: 'simple',
+        comments: [],
+        expire_time: 'another time',
+      });
+
+      it('should call validator callback on all items with the item type converted to exception item', async () => {
+        const validateFn = jest.fn().mockResolvedValue(undefined);
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+        const expectedItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(2);
+        expect(validateFn).toHaveBeenNthCalledWith(1, {
+          name: 'name 1',
+          description: 'description 1',
+          entries: [],
+          osTypes: ['macos'],
+          tags: ['tag1', 'tag2'],
+          namespaceType: 'agnostic',
+          listId: 'list id 1',
+          comments: [],
+        });
+        expect(validateFn).toHaveBeenNthCalledWith(2, {
+          name: 'name 2',
+          description: 'description 2',
+          entries: [],
+          osTypes: ['linux'],
+          tags: ['tag3'],
+          namespaceType: 'agnostic',
+          listId: 'list id 2',
+          comments: [],
+        });
+
+        expect(importItems).toEqual(expectedItems);
+      });
+
+      it('should modify data in place', async () => {
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          item.name = `modified ${item.name}`;
+          item.tags = [...item.tags, 'cheese'];
+        });
+
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+        const expectedItems: PromiseFromStreams = {
+          items: [
+            {
+              ...item1Mock(),
+              name: 'modified name 1',
+              tags: [...(item1Mock() as ImportExceptionListItemSchemaDecoded).tags, 'cheese'],
+            },
+            {
+              ...item2Mock(),
+              name: 'modified name 2',
+              tags: [...(item2Mock() as ImportExceptionListItemSchemaDecoded).tags, 'cheese'],
+            },
+          ],
+          lists: [],
+        };
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(2);
+        expect(importItems).toEqual(expectedItems);
+      });
+
+      it('should put errors in items array when validator throws', async () => {
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          if (item.name === 'name 2') {
+            throw new Error('houston, we have a problem');
+          }
+        });
+
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+        const expectedItems: PromiseFromStreams = {
+          items: [item1Mock(), new Error('houston, we have a problem')],
+          lists: [],
+        };
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(2);
+        expect(importItems).toEqual(expectedItems);
+      });
+
+      it('should pass through decode errors', async () => {
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), new Error('decode error')],
+          lists: [],
+        };
+
+        const expectedItems = cloneDeep(importItems);
+
+        const validateFn = jest.fn();
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(1);
+        expect(importItems).toEqual(expectedItems);
+      });
+    });
+
+    describe('#validateImportOwnerSpaceIds()', () => {
+      it('should do nothing when item has no tags', async () => {
+        exceptionLikeItem.tags = [];
+
+        await expect(
+          validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+
+      describe('when the user has global artifact management privilege', () => {
+        it('should allow import when spaces are accessible and artifact is visible in current space', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+        });
+
+        it('should error when owner space is not accessible', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, 'inaccessible-space');
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /invalid owner space IDs/
+          );
+        });
+
+        it('should error when artifact is not visible in current space', async () => {
+          // Artifact owned by another space with no policies assigned (not visible)
+          exceptionLikeItem.tags = [buildSpaceOwnerIdTag('other-space')];
+          (endpointAppContextServices.getAccessibleSpaces as jest.Mock).mockResolvedValue([
+            { id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] },
+            { id: 'other-space', name: 'other', disabledFeatures: [] },
+          ]);
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /Importing artifacts that are not visible in the current space/
+          );
+        });
+      });
+
+      describe('when the user does NOT have global artifact management privilege', () => {
+        it('should allow import when ownerSpaceId matches active space', async () => {
+          authzMock.canManageGlobalArtifacts = false;
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+        });
+
+        it('should error when ownerSpaceId does not match active space', async () => {
+          authzMock.canManageGlobalArtifacts = false;
+          setArtifactOwnerSpaceId(exceptionLikeItem, 'other-space');
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /Importing artifacts to a different space requires global artifact management privilege/
+          );
+        });
+
+        it("should error when there's an additional owner space ID", async () => {
+          authzMock.canManageGlobalArtifacts = false;
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+          setArtifactOwnerSpaceId(exceptionLikeItem, 'other-space');
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /Importing artifacts to a different space requires global artifact management privilege/
+          );
+        });
+      });
+    });
+
+    describe('#isArtifactVisibleInCurrentSpace()', () => {
+      it('should return true when ownerSpaceIds includes the active space', async () => {
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            [DEFAULT_SPACE_ID, 'other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(true);
+      });
+
+      it('should return true when item is a global artifact', async () => {
+        exceptionLikeItem.tags = [GLOBAL_ARTIFACT_TAG];
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(true);
+      });
+
+      it('should return true when at least one assigned policy is visible in the current space', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('policy-1'),
+          buildSpaceOwnerIdTag('other-space'),
+        ];
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(true);
+      });
+
+      it('should return false when item has no assigned policies and owner is a different space', async () => {
+        exceptionLikeItem.tags = [buildSpaceOwnerIdTag('other-space')];
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('should return false when no assigned policies are visible in the current space', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('invisible-policy'),
+          buildSpaceOwnerIdTag('other-space'),
+        ];
+        packagePolicyService.getByIDs.mockResolvedValue([]);
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(false);
+      });
+    });
+
+    describe('#removeInvalidPolicyIds()', () => {
+      it('should do nothing when item is not by-policy', async () => {
+        exceptionLikeItem.tags = [GLOBAL_ARTIFACT_TAG];
+        const originalTags = [...exceptionLikeItem.tags];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual(originalTags);
+      });
+
+      it('should do nothing when item has no policy IDs', async () => {
+        exceptionLikeItem.tags = [buildPerPolicyTag('some-id')];
+        // Clear the per-policy tags but keep it "by policy" by having the prefix
+        exceptionLikeItem.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}`];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+      });
+
+      it('should not modify tags when all policy IDs are valid', async () => {
+        exceptionLikeItem.tags = [buildPerPolicyTag('policy-1'), buildPerPolicyTag('policy-2')];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual([
+          buildPerPolicyTag('policy-1'),
+          buildPerPolicyTag('policy-2'),
+        ]);
+      });
+
+      it('should remove invalid policy ID tags and add a comment', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('policy-1'),
+          buildPerPolicyTag('invalid-policy'),
+        ];
+        exceptionLikeItem.comments = [];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual([buildPerPolicyTag('policy-1')]);
+        expect(exceptionLikeItem.comments).toHaveLength(1);
+        expect(exceptionLikeItem.comments[0]).toEqual({
+          comment: expect.stringContaining('invalid-policy'),
+        });
+      });
+
+      it('should remove all invalid policy ID tags when multiple are invalid', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('policy-1'),
+          buildPerPolicyTag('bad-1'),
+          buildPerPolicyTag('bad-2'),
+        ];
+        exceptionLikeItem.comments = [];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual([buildPerPolicyTag('policy-1')]);
+        expect(exceptionLikeItem.comments).toHaveLength(1);
+        expect(exceptionLikeItem.comments[0]).toEqual({
+          comment: expect.stringContaining('bad-1'),
+        });
+        expect(exceptionLikeItem.comments[0]).toEqual({
+          comment: expect.stringContaining('bad-2'),
+        });
       });
     });
   });

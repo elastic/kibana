@@ -14,7 +14,10 @@ import type { Duplex } from 'stream';
 import { PassThrough } from 'stream';
 
 export function createMetricAggregatorFactory<TFields extends Fields>() {
-  return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>(
+  return function <
+    TMetric extends Record<string, unknown>,
+    TOutput extends Record<string, unknown>
+  >(
     {
       filter,
       getAggregateKey,

@@ -12,11 +12,7 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
-import {
-  columnExists,
-  getLastNonWhitespaceChar,
-  handleFragment,
-} from '../../definitions/utils/autocomplete/helpers';
+import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
 
 export async function autocomplete(
   query: string,
@@ -38,33 +34,33 @@ export async function autocomplete(
     .filter(isColumn)
     .map((arg) => arg.parts.join('.'));
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // KEEP fie<suggest>
-      return fieldSuggestions.map((suggestion) => {
-        return withAutoSuggest({
-          ...suggestion,
-          text: suggestion.text,
-
-          rangeToReplace,
-        });
-      });
+  const completionSuggestions: ISuggestionItem[] = [
+    {
+      ...pipeCompleteItem,
+      text: ' | ',
+      preserveTypedPrefix: true,
+      requiresExistingColumnMatch: true,
     },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // KEEP field<suggest>
-      const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+  ];
 
-      return finalSuggestions.map<ISuggestionItem>((s) =>
-        withAutoSuggest({
-          ...s,
-          filterText: fragment,
-          text: fragment + s.text,
-          rangeToReplace,
-        })
-      );
-    }
-  );
+  if (fieldSuggestions.length > 0) {
+    completionSuggestions.push(
+      withAutoSuggest({
+        ...commaCompleteItem,
+        text: ', ',
+        preserveTypedPrefix: true,
+        requiresExistingColumnMatch: true,
+      })
+    );
+  }
+
+  return [
+    ...completionSuggestions,
+    ...fieldSuggestions.map((suggestion) =>
+      withAutoSuggest({
+        ...suggestion,
+        text: suggestion.text,
+      })
+    ),
+  ];
 }

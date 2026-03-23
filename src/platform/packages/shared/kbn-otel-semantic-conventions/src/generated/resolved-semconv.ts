@@ -15,11 +15,11 @@
  * Registry groups: 143
  * Metric groups: 502
  * Hardcoded fields: 34
- * Total fields: 1216
+ * Total fields: 1217
  *
  * @internal
  *
- * WARNING: This object contains 1216+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1217+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -532,7 +532,7 @@ export const semconvFlat = {
   'aws.lambda.resource_mapping.id': {
     name: 'aws.lambda.resource_mapping.id',
     description:
-      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
+      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
     type: 'keyword',
     example: '587ad24b-03b9-4413-8202-bbd56b36e5b7',
   },
@@ -2118,6 +2118,12 @@ export const semconvFlat = {
     description: 'The number of tokens used in the GenAI response (completion).',
     type: 'long',
     example: '180',
+  },
+  'gen_ai.workflow.name': {
+    name: 'gen_ai.workflow.name',
+    description: 'Human-readable name of the GenAI workflow provided by the application.',
+    type: 'keyword',
+    example: 'multi_agent_rag',
   },
   'geo.continent.code': {
     name: 'geo.continent.code',
@@ -5325,7 +5331,7 @@ export const semconvFlat = {
   },
   'metrics.process.cpu.time': {
     name: 'metrics.process.cpu.time',
-    description: 'Total CPU seconds broken down by different states.',
+    description: 'Total CPU seconds broken down by different CPU modes.',
     type: 'double',
   },
   'metrics.process.cpu.utilization': {

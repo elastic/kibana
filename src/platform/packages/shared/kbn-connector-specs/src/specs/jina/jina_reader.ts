@@ -56,11 +56,11 @@ export const JinaReaderConnector: ConnectorSpec = {
     id: JINA_READER_CONNECTOR_ID,
     displayName: JINA_READER_TITLE,
     description: i18n.translate('connectorSpecs.jinaReader.metadata.description', {
-      defaultMessage: 'Any URL to markdown, web search for better LLM grounding',
+      defaultMessage: 'Convert web pages and files to markdown, and search the web via Jina Reader',
     }),
     minimumLicense: 'gold',
     docsUrl: 'https://jina.ai/reader',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

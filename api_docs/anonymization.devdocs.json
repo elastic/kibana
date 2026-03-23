@@ -114,7 +114,7 @@
               "\nRetrieves a single profile by ID."
             ],
             "signature": [
-              "(namespace: string, profileId: string) => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; } | null>"
+              "(namespace: string, profileId: string) => Promise<any>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 62,
@@ -169,7 +169,7 @@
               "\nRetrieves the global profile for a namespace."
             ],
             "signature": [
-              "(namespace: string) => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; } | null>"
+              "(namespace: string) => Promise<any>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 67,
@@ -548,7 +548,7 @@
             "label": "findProfileByTarget",
             "description": [],
             "signature": [
-              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; } | null>"
+              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<any>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 33,
@@ -609,7 +609,7 @@
                 "section": "def-server.CreateAnonymizationProfileParams",
                 "text": "CreateAnonymizationProfileParams"
               },
-              ") => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; }>"
+              ") => Promise<z.infer<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 37,
@@ -821,12 +821,12 @@
           {
             "parentPluginId": "anonymization",
             "id": "def-server.CreateAnonymizationProfileParams.rules",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "rules",
             "description": [],
             "signature": [
-              "{ fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }"
+              "z.infer<any>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 24,

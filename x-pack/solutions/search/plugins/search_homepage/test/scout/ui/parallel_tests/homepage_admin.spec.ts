@@ -136,6 +136,12 @@ test.describe(
       }
     });
 
+    // === Kibana Version Badge Tests ===
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
+    });
+
     // === Getting Started Banner Tests ===
     test('should display Getting Started banner with title and button', async ({ pageObjects }) => {
       const gettingStartedButton = await pageObjects.homepage.getGettingStartedButton();

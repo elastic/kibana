@@ -6,9 +6,11 @@
  */
 
 import { AttachmentTypeRegistry } from '../../../common/registry';
-import type { UnifiedAttachmentType } from './types';
+import type { UnifiedReferenceAttachmentType, UnifiedValueAttachmentType } from './types';
 
-export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<UnifiedAttachmentType> {
+export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<
+  UnifiedValueAttachmentType | UnifiedReferenceAttachmentType
+> {
   constructor() {
     super('UnifiedAttachmentTypeRegistry');
   }

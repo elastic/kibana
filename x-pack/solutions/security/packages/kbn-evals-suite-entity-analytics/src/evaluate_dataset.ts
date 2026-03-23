@@ -21,6 +21,8 @@ import type { EvaluationChatClient, ErrorResponse, Step, Messages } from './chat
 
 interface ToolCallAssertion {
   id: string;
+  /** If the primary tool was not called, accept any of these tool IDs as satisfying the "tool was used" check (no criteria evaluated for alternatives). */
+  acceptableAlternativeToolIds?: string[];
   criteria?: string[];
 }
 
@@ -79,14 +81,29 @@ const evaluateToolCallAssertion = async (
   output: ChatTaskOutput,
   metadata: DatasetExample['metadata']
 ): Promise<EvaluationResult> => {
-  const toolCallSteps = findToolCallSteps(toolCallAssertion.id, steps);
-  const toolWasCalled = toolCallSteps.length > 0;
+  const primaryToolCallSteps = findToolCallSteps(toolCallAssertion.id, steps);
+  const primaryToolWasCalled = primaryToolCallSteps.length > 0;
+
+  const alternativeIds = toolCallAssertion.acceptableAlternativeToolIds ?? [];
+  const alternativeToolCalled =
+    alternativeIds.length > 0 &&
+    alternativeIds.some((altId) => findToolCallSteps(altId, steps).length > 0);
+
+  const toolWasCalled = primaryToolWasCalled || alternativeToolCalled;
 
   if (!toolWasCalled) {
     return {
       score: 0,
       label: 'FAIL',
       explanation: `Tool "${toolCallAssertion.id}" was not called during the conversation.`,
+    };
+  }
+
+  if (alternativeToolCalled && !primaryToolWasCalled) {
+    return {
+      score: 1,
+      label: 'PASS',
+      explanation: `Primary tool "${toolCallAssertion.id}" was not called, but an acceptable alternative entity-analytics tool was called.`,
     };
   }
 
@@ -192,30 +209,30 @@ export function createEvaluateDataset({
           let correctnessResult: { metadata?: unknown } | undefined;
           let groundednessResult: { metadata?: unknown } | undefined;
 
-          const result = await Promise.all([
-            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-              evaluators.correctnessAnalysis().evaluate({
-                input,
-                expected: output,
-                output: response,
-                metadata,
-              })
-            ),
-            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-              evaluators.groundednessAnalysis().evaluate({
-                input,
-                expected: output,
-                output: response,
-                metadata,
-              })
-            ),
-          ]).catch(() => {
-            // Catch cases where these optional evaluators fail so that entire evaluation doesn't fail
-          });
-
-          if (result) {
-            correctnessResult = result[0];
-            groundednessResult = result[1];
+          try {
+            const [correctness, groundedness] = await Promise.all([
+              withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+                evaluators.correctnessAnalysis().evaluate({
+                  input,
+                  expected: output,
+                  output: response,
+                  metadata,
+                })
+              ),
+              withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+                evaluators.groundednessAnalysis().evaluate({
+                  input,
+                  expected: output,
+                  output: response,
+                  metadata,
+                })
+              ),
+            ]);
+            correctnessResult = correctness;
+            groundednessResult = groundedness;
+          } catch (err) {
+            // Judge model may return invalid tool call args (toolValidationError); continue without
+            // analysis so quantitative evaluators report "unavailable" instead of failing the test.
           }
 
           return {
@@ -234,7 +251,11 @@ export function createEvaluateDataset({
         createToolCallsEvaluator({ evaluators }),
         ...selectEvaluators([
           createQuantitativeGroundednessEvaluator(),
-          ...createQuantitativeCorrectnessEvaluators(),
+          ...createQuantitativeCorrectnessEvaluators().filter(
+            (e) => e.name !== 'Factuality' && e.name !== 'Relevance'
+            // Exclude Factuality/Relevance: expected output is criteria/toolCalls, not literal
+            // ground truth text, so quantitative correctness comparison produces noise (low scores).
+          ),
         ]),
       ]
     );

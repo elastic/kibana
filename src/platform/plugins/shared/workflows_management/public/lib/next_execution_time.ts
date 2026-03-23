@@ -11,7 +11,7 @@
 
 import { Frequency, RRule, Weekday } from '@kbn/rrule';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
-import { parseIntervalString, type WorkflowTrigger } from '../../server/lib/schedule_utils';
+import { parseIntervalString, type WorkflowTrigger } from '../../common/lib/trigger_types';
 
 /**
  * Calculates the next execution time for a scheduled trigger

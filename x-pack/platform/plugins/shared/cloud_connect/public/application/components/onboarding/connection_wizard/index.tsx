@@ -107,7 +107,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               fill
               href={`${cloudUrl}/registration?onboarding_service_type=ccm${signupParams}`}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               onClick={handleSignUpClick}
               data-test-subj="connectionWizardSignUpButton"
@@ -119,7 +119,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             <EuiButton
               href={`${cloudUrl}/login?redirectTo=${encodedRedirectUrl}`}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               onClick={handleLoginClick}
               data-test-subj="connectionWizardLoginButton"

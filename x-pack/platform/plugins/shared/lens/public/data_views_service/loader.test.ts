@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import type { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { TextBasedPersistedState } from '@kbn/lens-common';
+import type { HttpStart } from '@kbn/core/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   ensureIndexPattern,
+  ensureESQLTimeFieldOnAdHocDataViews,
   loadIndexPatternRefs,
   loadIndexPatterns,
   buildIndexPatternField,
 } from './loader';
 import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
+
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLAdHocDataview: jest.fn(),
+}));
+
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
+  typeof getESQLAdHocDataview
+>;
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {
@@ -344,6 +356,208 @@ describe('loader', () => {
         new Set(['meta'])
       );
       expect(field.meta).toEqual(true);
+    });
+  });
+
+  describe('ensureESQLTimeFieldOnAdHocDataViews', () => {
+    const mockHttp = {} as HttpStart;
+    const mockDataViews = mockDataViewsService() as unknown as DataViewsContract;
+
+    beforeEach(() => {
+      mockGetESQLAdHocDataview.mockReset();
+    });
+
+    it('should return adHocDataViews unchanged when textBasedState is undefined', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState: undefined,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toBe(adHocDataViews);
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('should return adHocDataViews unchanged when layers is empty', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState: { layers: {} } as TextBasedPersistedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual(adHocDataViews);
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('should skip layers without an ES|QL query', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {};
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1' },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual({});
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('should skip enrichment when the existing spec already has a timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual(adHocDataViews);
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('should call getESQLAdHocDataview when spec is missing timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        id: 'dv1',
+        toSpec: () => ({ id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' }),
+      } as never);
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'FROM logs-*',
+          options: {
+            skipFetchFields: true,
+            id: 'dv1',
+            createNewInstanceEvenIfCachedOneAvailable: true,
+          },
+          http: mockHttp,
+        })
+      );
+      expect(result.dv1).toEqual({ id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' });
+    });
+
+    it('should use freshDataView.id as the key when layer.index is falsy', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {};
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        id: 'generated-id',
+        toSpec: () => ({ id: 'generated-id', title: 'logs-*', timeFieldName: '@timestamp' }),
+      } as never);
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result['generated-id']).toEqual({
+        id: 'generated-id',
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+      });
+    });
+
+    it('should handle mixed layers: only enrich specs missing timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' },
+        dv2: { id: 'dv2', title: 'metrics-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+          layer2: { columns: [], index: 'dv2', query: { esql: 'FROM metrics-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        id: 'dv2',
+        toSpec: () => ({ id: 'dv2', title: 'metrics-*', timeFieldName: '@timestamp' }),
+      } as never);
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledTimes(1);
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM metrics-*' })
+      );
+      expect(result.dv1).toEqual(adHocDataViews.dv1);
+      expect(result.dv2.timeFieldName).toBe('@timestamp');
+    });
+
+    it('should not mutate the original adHocDataViews object', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        id: 'dv1',
+        toSpec: () => ({ id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' }),
+      } as never);
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).not.toBe(adHocDataViews);
+      expect(adHocDataViews.dv1.timeFieldName).toBeUndefined();
     });
   });
 });

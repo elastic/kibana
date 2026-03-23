@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ELASTIC_GROUP_ID = 'elastic';
+export const ELASTIC_GROUP_ID = 'Elastic';
 
 export interface KnownModelGroup {
   groupId: string;
@@ -23,30 +23,21 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
     }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
-      return (
-        normalizedModelId.includes('elser_model') ||
-        normalizedModelId.includes('jina') ||
-        normalizedModelId.includes('.rerank-v1')
-      );
+      return normalizedModelId.includes('elser_model') || normalizedModelId.includes('.rerank-v1');
     },
   },
   {
-    groupId: 'anthropic',
+    groupId: 'Anthropic',
     groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.anthropic.label', {
       defaultMessage: 'Anthropic',
     }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
-      return (
-        normalizedModelId.includes('claude') ||
-        normalizedModelId.includes('anthropic') ||
-        normalizedModelId.includes('rainbow-sprinkles') ||
-        normalizedModelId.includes('gp-llm-v2')
-      );
+      return normalizedModelId.includes('claude') || normalizedModelId.includes('anthropic');
     },
   },
   {
-    groupId: 'google',
+    groupId: 'Google',
     groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.google.label', {
       defaultMessage: 'Google',
     }),
@@ -60,7 +51,7 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
     },
   },
   {
-    groupId: 'openai',
+    groupId: 'OpenAI',
     groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.openAI.label', {
       defaultMessage: 'OpenAI',
     }),

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
@@ -30,6 +36,12 @@ const appInfo: SearchHomepageAppInfo = {
 export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
+  private readonly kibanaVersion: string;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+  }
+
   public setup(
     core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
   ) {
@@ -37,6 +49,8 @@ export class SearchHomepagePlugin
     const result: SearchHomepagePluginSetup = {
       app: appInfo,
     };
+
+    const kibanaVersion = this.kibanaVersion;
 
     core.application.register({
       id: PLUGIN_ID,
@@ -53,7 +67,7 @@ export class SearchHomepagePlugin
           history,
         };
 
-        return renderApp(coreStart, startDeps, element, queryClient);
+        return renderApp(coreStart, startDeps, element, queryClient, kibanaVersion);
       },
       order: 0,
       visibleIn: ['globalSearch', 'sideNav'],

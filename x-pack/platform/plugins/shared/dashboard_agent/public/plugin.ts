@@ -38,18 +38,15 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
+    // TODO this causes async imports when plugin starts
+    // Please avoid this practice as it hides plugin size but impacts kibana load performance
+    // Please remove async import.
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
-      const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        attachments: plugins.agentBuilder.attachments,
-        dashboardLocator,
+        agentBuilder: plugins.agentBuilder,
+        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
-        doesSavedDashboardExist: async (dashboardId: string) => {
-          const findDashboardsService = await findDashboardsServicePromise;
-          const result = await findDashboardsService.findById(dashboardId);
-          return result.status === 'success';
-        },
+        dashboardPlugin: plugins.dashboard,
       });
     });
 

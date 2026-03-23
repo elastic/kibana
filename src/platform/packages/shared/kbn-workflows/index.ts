@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './spec/lib/build_fields_zod_validator';
 export * from './spec/lib/build_step_schema_for_agent';
 export * from './spec/lib/generate_yaml_schema_from_connectors';
 export * from './spec/lib/get_workflow_json_schema';
@@ -38,6 +39,7 @@ export * from './types/utils';
 export * from './common/constants';
 export * from './common/privileges';
 export * from './common/utils';
+export * from './common/step_types';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';

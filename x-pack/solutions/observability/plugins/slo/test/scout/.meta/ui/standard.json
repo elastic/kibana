@@ -1,5 +1,5 @@
 {
-  "sha1": "d0bd24d5de564361dc06d1d0fd1efd125c785ed4",
+  "sha1": "8e24139831059b818f4d058a4823d4d775cde88c",
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
@@ -71,6 +71,22 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
         "line": 73,
         "column": 7
+      }
+    },
+    {
+      "id": "3789b2ba4b5abe6-f1d0e5a2143a659",
+      "title": "Health Scan pagination paginates through health scan results and shows correct content per page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
+        "line": 71,
+        "column": 9
       }
     },
     {

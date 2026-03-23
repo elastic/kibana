@@ -13,6 +13,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
@@ -106,6 +107,11 @@ export class QueryService {
           // Pre-existing queries were all rule-backed; back-fill the flag so it is persisted.
           if (!(RULE_BACKED in migrated)) {
             migrated = { ...migrated, [RULE_BACKED]: true };
+          }
+
+          // Back-fill description for queries created before the field was introduced.
+          if (!(QUERY_DESCRIPTION in migrated)) {
+            migrated = { ...migrated, [QUERY_DESCRIPTION]: '' };
           }
 
           return migrated as StoredQueryLink;

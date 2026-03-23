@@ -24,8 +24,10 @@ export class SkillsService {
     this.http = http;
   }
 
-  async list() {
-    const { results } = await this.http.get<ListSkillsResponse>(`${publicApiPath}/skills`, {});
+  async list(options?: { includePlugins?: boolean }) {
+    const { results } = await this.http.get<ListSkillsResponse>(`${publicApiPath}/skills`, {
+      query: { include_plugins: options?.includePlugins ?? false },
+    });
     return results;
   }
 

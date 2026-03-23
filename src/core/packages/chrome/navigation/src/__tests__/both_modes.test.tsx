@@ -1172,7 +1172,7 @@ describe('Both modes', () => {
 
         const sidePanel = screen.getByTestId(sidePanelId);
         const tracesLink = within(sidePanel).getByTestId(sidePanelItemId('traces'));
-        const externalIcon = tracesLink.querySelector('[data-euiicon-type="popout"]');
+        const externalIcon = tracesLink.querySelector('[data-euiicon-type="external"]');
 
         expect(externalIcon).toBeInTheDocument();
       });

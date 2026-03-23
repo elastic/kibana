@@ -9,9 +9,7 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardAttachmentDataSchema,
-  dashboardAttachmentOriginSchema,
   type DashboardAttachmentData,
-  type DashboardAttachmentOrigin,
 } from '@kbn/dashboard-agent-common';
 
 /**
@@ -19,8 +17,7 @@ import {
  */
 export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
-  DashboardAttachmentData,
-  DashboardAttachmentOrigin
+  DashboardAttachmentData
 > => {
   return {
     id: DASHBOARD_ATTACHMENT_TYPE,
@@ -31,13 +28,6 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
       } else {
         return { valid: false, error: parseResult.error.message };
       }
-    },
-    validateOrigin: (input) => {
-      const parseResult = dashboardAttachmentOriginSchema.safeParse(input);
-      if (parseResult.success) {
-        return { valid: true, data: parseResult.data };
-      }
-      return { valid: false, error: parseResult.error.message };
     },
     format: (attachment) => {
       return {
@@ -50,7 +40,7 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
       };
     },
     getAgentDescription: () =>
-      `A dashboard attachment is rendered as an interactive card in the UI that the user can click to open. Do NOT use <visualization> tags or any custom rendering elements for dashboard results. Instead, summarize the dashboard content (title, description, panel list) in plain text.`,
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment.`,
     getTools: () => [],
   };
 };

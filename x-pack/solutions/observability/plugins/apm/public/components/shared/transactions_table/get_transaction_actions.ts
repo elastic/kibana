@@ -54,6 +54,7 @@ export function useTransactionActions({
                   environment,
                   transactionName: item.name,
                   transactionType: item.transactionType,
+                  sortDirection: 'DESC',
                 },
                 indexSettings,
               });

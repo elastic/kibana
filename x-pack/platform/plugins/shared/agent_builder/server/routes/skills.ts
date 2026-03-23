@@ -75,12 +75,24 @@ export function registerSkillsRoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            query: schema.object({
+              include_plugins: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'Set to true to include skills from plugins.' },
+              }),
+            }),
+          },
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        const skills = await registry.list({ summaryOnly: true });
+        const skills = await registry.list({
+          summaryOnly: true,
+          includePlugins: request.query.include_plugins,
+        });
         const results = await Promise.all(skills.map(internalToPublicSummary));
         return response.ok<ListSkillsResponse>({
           body: { results },

@@ -139,13 +139,11 @@ describe('SET Autocomplete', () => {
       });
 
       it('suggests map parameter name after completing a parameter entry', async () => {
-        await setExpectSuggestions('SET approximation = { "num_rows": 100, ', [
-          '"confidence_level": ',
-        ]);
+        await setExpectSuggestions('SET approximation = { "rows": 100, ', ['"confidence_level": ']);
       });
 
-      it('suggests map parameter values after parameter name and colon: num_rows', async () => {
-        await setExpectSuggestions('SET approximation = { "num_rows": ', [
+      it('suggests map parameter values after parameter name and colon: rows', async () => {
+        await setExpectSuggestions('SET approximation = { "rows": ', [
           '100000',
           '1000000',
           '500000',

@@ -93,9 +93,9 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: true,
 
   /**
-   * Enables the experimental Threat Hunting home experience.
+   * Enables the new Entity Analytics home page experience.
    */
-  entityThreatHuntingEnabled: false,
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
@@ -245,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

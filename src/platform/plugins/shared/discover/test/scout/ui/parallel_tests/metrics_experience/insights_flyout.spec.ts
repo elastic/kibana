@@ -44,34 +44,51 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should open insights flyout and verify tab content', async ({ pageObjects }) => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-      const { metricsExperience } = pageObjects;
-      await expect(metricsExperience.grid).toBeVisible();
+    spaceTest(
+      'should open insights flyout and verify tab content',
+      async ({ pageObjects, page }) => {
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        const { metricsExperience } = pageObjects;
+        await expect(metricsExperience.grid).toBeVisible();
 
-      await spaceTest.step('open flyout via View details', async () => {
-        await metricsExperience.openInsightsFlyout(0);
-        await expect(metricsExperience.flyout.container).toBeVisible();
-      });
+        await spaceTest.step('open flyout via View details', async () => {
+          await metricsExperience.openInsightsFlyout(0);
+          await expect(metricsExperience.flyout.container).toBeVisible();
+        });
 
-      await spaceTest.step('Overview tab shows description list', async () => {
-        const { descriptionList } = metricsExperience.flyout.overview;
-        await expect(descriptionList).toBeVisible();
-        await expect(descriptionList).toContainText(testData.DATA_VIEW_NAME);
-      });
+        await spaceTest.step('Overview tab shows description list', async () => {
+          const { descriptionList } = metricsExperience.flyout.overview;
+          await expect(descriptionList).toBeVisible();
+          await expect(descriptionList).toContainText(testData.DATA_VIEW_NAME);
+        });
 
-      await spaceTest.step('switch to ES|QL Query tab and verify content', async () => {
-        const { codeBlock, tabButton } = metricsExperience.flyout.esqlQuery;
-        await tabButton.click();
-        await expect(codeBlock).toBeVisible();
-        await expect(codeBlock).toContainText(testData.METRICS_TEST_INDEX_NAME);
-      });
+        await spaceTest.step('Overview tab has no a11y violations', async () => {
+          const { violations } = await page.checkA11y({
+            include: ['[data-test-subj="metricsExperienceFlyoutOverviewTabContent"]'],
+          });
+          expect(violations).toHaveLength(0);
+        });
 
-      await spaceTest.step('switch back to Overview tab', async () => {
-        await metricsExperience.flyout.overview.tabButton.click();
-        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
-      });
-    });
+        await spaceTest.step('switch to ES|QL Query tab and verify content', async () => {
+          const { codeBlock, tabButton } = metricsExperience.flyout.esqlQuery;
+          await tabButton.click();
+          await expect(codeBlock).toBeVisible();
+          await expect(codeBlock).toContainText(testData.METRICS_TEST_INDEX_NAME);
+        });
+
+        await spaceTest.step('ES|QL Query tab has no a11y violations', async () => {
+          const { violations } = await page.checkA11y({
+            include: ['[data-test-subj="metricsExperienceFlyoutEsqlQueryTabContent"]'],
+          });
+          expect(violations).toHaveLength(0);
+        });
+
+        await spaceTest.step('switch back to Overview tab', async () => {
+          await metricsExperience.flyout.overview.tabButton.click();
+          await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+        });
+      }
+    );
 
     spaceTest('should paginate through dimensions in flyout', async ({ pageObjects }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);

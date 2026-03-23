@@ -13,10 +13,11 @@ export const convertPersistedSkill = (
 ): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
-  basePath: '/skills',
+  basePath: skill.base_path ?? '/skills',
   description: skill.description,
   content: skill.content,
   readonly: !!skill.plugin_id,
+  experimental: false,
   referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,

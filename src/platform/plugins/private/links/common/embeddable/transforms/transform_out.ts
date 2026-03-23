@@ -22,7 +22,13 @@ export function transformOut(
   const latestState = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
-  const state = transformTitlesOut(latestState);
+  const state = {
+    ...transformTitlesOut(latestState),
+    // Strip legacy properties
+    ...(latestState.links
+      ? { links: latestState.links.map(({ order, id, ...link }) => link) }
+      : {}),
+  };
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(

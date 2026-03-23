@@ -64,7 +64,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
         <EuiButton
           fill
           data-test-subj="manageComponentTemplateButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen((prevBoolean) => !prevBoolean)}
         >

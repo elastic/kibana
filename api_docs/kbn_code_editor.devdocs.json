@@ -417,6 +417,25 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.documentHighlightProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "documentHighlightProvider",
+            "description": [
+              "\nDocument highlight provider for highlighting all occurrences of a symbol\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.DocumentHighlightProvider.html"
+            ],
+            "signature": [
+              "languages",
+              ".DocumentHighlightProvider | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.editorWillMount",
             "type": "Function",
             "tags": [],
@@ -428,7 +447,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 110,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -448,7 +467,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 114,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -470,7 +489,7 @@
               ".IStandaloneCodeEditor) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 120,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -487,7 +506,7 @@
                   ".IStandaloneCodeEditor"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-                "lineNumber": 123,
+                "lineNumber": 130,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -507,7 +526,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 125,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -527,7 +546,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 127,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -545,7 +564,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 132,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -561,7 +580,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 137,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -579,7 +598,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 138,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -597,7 +616,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 143,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -613,7 +632,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 148,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -629,7 +648,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 149,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -647,7 +666,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 150,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -665,7 +684,7 @@
               "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 155,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -683,7 +702,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 164,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -701,7 +720,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 169,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -717,7 +736,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 174,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -744,7 +763,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 176,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -762,7 +781,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 181,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -781,7 +800,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 186,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -799,7 +818,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 192,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -817,7 +836,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 197,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -835,7 +854,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 203,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -853,7 +872,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
-            "lineNumber": 207,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1084,7 +1103,7 @@
           "node_modules/monaco-editor/esm/vs/editor/editor.api"
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/monaco_imports.ts",
-        "lineNumber": 74,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

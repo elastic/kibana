@@ -140,6 +140,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
     const username = await context.getUserName();
     const now = new Date();
+    const nowIso = now.toISOString();
 
     const schedule = attributes.schedule as IntervalSchedule;
 
@@ -170,11 +171,12 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
-      updatedAt: now.toISOString(),
+      updatedAt: nowIso,
+      lastEnabledAt: nowIso,
       executionStatus: {
         status: 'pending',
         lastDuration: 0,
-        lastExecutionDate: now.toISOString(),
+        lastExecutionDate: nowIso,
         error: null,
         warning: null,
       },

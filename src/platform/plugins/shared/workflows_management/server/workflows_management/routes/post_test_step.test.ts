@@ -59,6 +59,7 @@ describe('POST /api/workflows/testStep', () => {
           workflowYaml:
             'name: Test Workflow\nenabled: true\nsteps:\n  - id: step1\n    name: First Step\n    type: action\n    action: test-action',
           stepId: 'step1',
+          workflowId: 'workflow-123',
           contextOverride: {
             param1: 'value1',
             param2: 'value2',
@@ -74,6 +75,7 @@ describe('POST /api/workflows/testStep', () => {
       expect(workflowsApi.testStep).toHaveBeenCalledWith(
         mockRequest.body.workflowYaml,
         mockRequest.body.stepId,
+        mockRequest.body.workflowId,
         mockRequest.body.contextOverride,
         'default',
         mockRequest
@@ -122,6 +124,7 @@ describe('POST /api/workflows/testStep', () => {
         body: {
           workflowYaml: 'name: Space-specific Test Workflow',
           stepId: 'step1',
+          workflowId: 'workflow-123',
           contextOverride: {
             spaceParam: 'custom-value',
           },
@@ -136,6 +139,7 @@ describe('POST /api/workflows/testStep', () => {
       expect(workflowsApi.testStep).toHaveBeenCalledWith(
         mockRequest.body.workflowYaml,
         mockRequest.body.stepId,
+        mockRequest.body.workflowId,
         mockRequest.body.contextOverride,
         'custom-space',
         mockRequest

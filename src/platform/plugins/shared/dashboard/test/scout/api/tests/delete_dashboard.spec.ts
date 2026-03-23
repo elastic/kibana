@@ -47,7 +47,7 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
     });
   });
 
-  apiTest('should return 200 if the dashboard is deleted', async ({ apiClient }) => {
+  apiTest('should return 204 if the dashboard is deleted', async ({ apiClient }) => {
     const response = await apiClient.delete(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -56,6 +56,6 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(204);
   });
 });

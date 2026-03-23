@@ -161,7 +161,7 @@ export function InputList({
                   <EuiButtonIcon
                     aria-label={i18nTexts.removeItemButtonAriaLabel}
                     css={styles.removeButton}
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     color="danger"
                     onClick={() => onRemove(item.id)}
                     size="s"
@@ -172,7 +172,7 @@ export function InputList({
               </EuiFlexItem>
             </EuiFlexGroup>
           ))}
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
+          <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

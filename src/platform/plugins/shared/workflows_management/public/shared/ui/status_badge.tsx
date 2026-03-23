@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBeacon,
   EuiFlexGroup,
   type EuiFlexGroupProps,
   EuiFlexItem,
@@ -107,7 +106,7 @@ const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
-  [ExecutionStatus.WAITING_FOR_INPUT]: 'dot',
+  [ExecutionStatus.WAITING_FOR_INPUT]: 'hourglass',
   [ExecutionStatus.CANCELLED]: 'crossInCircle',
   [ExecutionStatus.SKIPPED]: 'minusInCircleFilled',
 };
@@ -118,13 +117,20 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
   }
 
   if (status === ExecutionStatus.WAITING_FOR_INPUT) {
-    return <EuiBeacon size={14} color="warning" />;
+    return (
+      <EuiIcon
+        type="hourglass"
+        color={getExecutionStatusColors(euiTheme, status).color}
+        aria-hidden={true}
+      />
+    );
   }
 
   return (
     <EuiIcon
       type={ExecutionStatusIconTypeMap[status]}
       color={getExecutionStatusColors(euiTheme, status).color}
+      aria-hidden={true}
     />
   );
 };

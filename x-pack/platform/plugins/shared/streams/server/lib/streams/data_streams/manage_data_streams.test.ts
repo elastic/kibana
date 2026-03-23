@@ -24,6 +24,7 @@ const createMockLogger = (): jest.Mocked<MockLogger> => ({
 });
 
 const createMockWiredStream = (name: string): Streams.WiredStream.Definition => ({
+  type: 'wired',
   name,
   description: 'Test wired stream',
   updated_at: new Date().toISOString(),
@@ -37,6 +38,7 @@ const createMockWiredStream = (name: string): Streams.WiredStream.Definition => 
 });
 
 const createMockClassicStream = (name: string): Streams.ClassicStream.Definition => ({
+  type: 'classic',
   name,
   description: 'Test classic stream',
   updated_at: new Date().toISOString(),

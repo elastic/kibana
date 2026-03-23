@@ -111,6 +111,7 @@ describe('AgentForm', () => {
           submit: mockSubmit,
           tools: [],
           skills: [],
+          plugins: [],
           error: undefined,
         };
       }
@@ -128,6 +129,7 @@ describe('AgentForm', () => {
       submit: mockSubmit,
       tools: [],
       skills: [],
+      plugins: [],
       error: undefined,
     });
 
@@ -145,6 +147,7 @@ describe('AgentForm', () => {
       submit: mockSubmit,
       tools: [],
       skills: [],
+      plugins: [],
       error: undefined,
     });
 
@@ -164,6 +167,7 @@ describe('AgentForm', () => {
       submit: mockSubmit,
       tools: [],
       skills: [],
+      plugins: [],
       error: undefined,
     });
 

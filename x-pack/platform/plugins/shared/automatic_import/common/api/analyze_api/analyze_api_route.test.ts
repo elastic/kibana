@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { AnalyzeApiRequestBody } from './analyze_api_route.gen';
 import { getAnalyzeApiRequestBody } from '../model/api_test.mock';
 

@@ -58,7 +58,7 @@ export const screenContextTimeRangeSchema = z.object({
   to: z.string(),
 });
 
-export interface ScreenContextTimeRange {
+export interface TimeRange {
   from: string;
   to: string;
 }
@@ -94,7 +94,7 @@ export interface ScreenContextAttachmentData {
   /** app description */
   description?: string;
   /** the currently active time range */
-  time_range?: ScreenContextTimeRange;
+  time_range?: TimeRange;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
 }
@@ -127,22 +127,6 @@ export interface VisualizationAttachmentData {
   esql: string;
   /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
   time_range?: { from: string; to: string };
-}
-
-export const visualizationOriginDataSchema = z.object({
-  saved_object_id: z.string(),
-  title: z.string().optional(),
-  description: z.string().optional(),
-});
-
-/**
- * Origin data for a visualization attachment created by-reference.
- * Stored on the attachment for UI purposes (e.g., "Open in Lens" link).
- */
-export interface VisualizationOriginData {
-  saved_object_id: string;
-  title?: string;
-  description?: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

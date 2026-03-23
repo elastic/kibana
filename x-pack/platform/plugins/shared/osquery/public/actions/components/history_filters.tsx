@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { SourceFilter } from '../../../common/api/unified_history/types';
 import { RunByFilterPopover } from './run_by_filter_popover';
 import { SourceFilterPopover } from './source_filter_popover';
+import { TagsFilterPopover } from './tags_filter_popover';
 
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
@@ -43,6 +44,8 @@ interface HistoryFiltersProps {
   onSelectedUsersChanged: (userIds: string[]) => void;
   selectedSources: SourceFilter[];
   onSelectedSourcesChanged: (sources: SourceFilter[]) => void;
+  selectedTags: string[];
+  onSelectedTagsChanged: (tags: string[]) => void;
   startDate: string;
   endDate: string;
   onTimeChange: (start: string, end: string) => void;
@@ -56,6 +59,8 @@ const HistoryFiltersComponent: React.FC<HistoryFiltersProps> = ({
   onSelectedUsersChanged,
   selectedSources,
   onSelectedSourcesChanged,
+  selectedTags,
+  onSelectedTagsChanged,
   startDate,
   endDate,
   onTimeChange,
@@ -123,6 +128,10 @@ const HistoryFiltersComponent: React.FC<HistoryFiltersProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
+          <TagsFilterPopover
+            selectedTags={selectedTags}
+            onSelectedTagsChanged={onSelectedTagsChanged}
+          />
           <SourceFilterPopover
             selectedSources={selectedSources}
             onSelectedSourcesChanged={onSelectedSourcesChanged}

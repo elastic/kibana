@@ -169,7 +169,7 @@ export async function openSaveModal({
             showCopyOnSave={false}
             onSave={onSaveAttempt}
             accessControl={accessControl}
-            customModalTitle={getCustomModalTitle(viewMode)}
+            customModalTitle={getCustomModalTitle(viewMode, lastSavedId)}
             showAccessContainer={shouldAddAccessControl}
           />
         );
@@ -183,8 +183,8 @@ export async function openSaveModal({
   }
 }
 
-function getCustomModalTitle(viewMode: ViewMode) {
-  if (viewMode === 'edit')
+function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined) {
+  if (!lastSavedId || viewMode === 'edit')
     return i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
       defaultMessage: 'Save as new dashboard',
     });

@@ -12,13 +12,7 @@ import { z as z4 } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { PassThroughAny as PassThroughAnyV4 } from '@kbn/zod-helpers/v4';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
-import {
-  convert,
-  convertPathParameters,
-  convertQuery,
-  registerZodV4Component,
-  resetDefsCounter,
-} from './lib';
+import { convert, convertPathParameters, convertQuery, resetDefsCounter } from './lib';
 
 import { createLargeSchema, createLargeSchemaV4 } from './lib.test.util';
 
@@ -588,18 +582,19 @@ describe('zod v4', () => {
     });
   });
 
-  describe('registerZodV4Component', () => {
+  describe('stable OAS component names via .meta({ id })', () => {
     beforeEach(() => resetDefsCounter());
 
     test('recursive schema: stable name used in $defs and $ref', () => {
-      const condition: z4.ZodType = z4.lazy(() =>
-        z4.union([
-          z4.object({ field: z4.string(), eq: z4.string() }),
-          z4.object({ and: z4.array(condition) }),
-          z4.object({ or: z4.array(condition) }),
-        ])
-      );
-      registerZodV4Component(condition, 'Condition');
+      const condition: z4.ZodType = z4
+        .lazy(() =>
+          z4.union([
+            z4.object({ field: z4.string(), eq: z4.string() }),
+            z4.object({ and: z4.array(condition) }),
+            z4.object({ or: z4.array(condition) }),
+          ])
+        )
+        .meta({ id: 'Condition' });
 
       const body = z4.object({ condition, name: z4.string() });
       const result = convert(body as any);
@@ -623,8 +618,7 @@ describe('zod v4', () => {
     });
 
     test('non-recursive schema: stable name used when schema is inlined (single use)', () => {
-      const address = z4.object({ street: z4.string(), city: z4.string() });
-      registerZodV4Component(address, 'Address');
+      const address = z4.object({ street: z4.string(), city: z4.string() }).meta({ id: 'Address' });
 
       const body = z4.object({ address, name: z4.string() });
       const result = convert(body as any);
@@ -653,14 +647,152 @@ describe('zod v4', () => {
       expect(outputStr).not.toContain('x-kbn-oas-component-id');
     });
 
-    test('registered schema passed directly to convert() produces $ref', () => {
-      const tag = z4.object({ id: z4.string(), label: z4.string() });
-      registerZodV4Component(tag, 'Tag');
+    test('schema with .meta({ id }) passed directly to convert() produces $ref', () => {
+      const tag = z4.object({ id: z4.string(), label: z4.string() }).meta({ id: 'Tag' });
 
       const result = convert(tag as any);
 
       expect(result.shared).toHaveProperty('Tag');
       expect(result.schema).toEqual({ $ref: '#/components/schemas/Tag' });
+    });
+
+    test('.meta({ openapi }) extensions are merged into the component schema', () => {
+      const wired = z4.object({ type: z4.literal('wired') }).meta({ id: 'WiredDef' });
+      const classic = z4.object({ type: z4.literal('classic') }).meta({ id: 'ClassicDef' });
+      const streamDef = z4.union([wired, classic]).meta({
+        id: 'StreamDefinition',
+        openapi: {
+          discriminator: {
+            propertyName: 'type',
+            mapping: {
+              wired: '#/components/schemas/WiredDef',
+              classic: '#/components/schemas/ClassicDef',
+            },
+          },
+        },
+      });
+
+      const body = z4.object({ stream: streamDef });
+      const result = convert(body as any);
+
+      expect(result.shared).toHaveProperty('StreamDefinition');
+      expect(result.shared.StreamDefinition).toMatchObject({
+        discriminator: {
+          propertyName: 'type',
+          mapping: {
+            wired: '#/components/schemas/WiredDef',
+            classic: '#/components/schemas/ClassicDef',
+          },
+        },
+      });
+
+      // no markers should leak into the output
+      const outputStr = JSON.stringify(result);
+      expect(outputStr).not.toContain('x-kbn-oas-component-id');
+      expect(outputStr).not.toContain('x-kbn-oas-extensions');
+    });
+
+    describe('z4.discriminatedUnion auto-discriminator', () => {
+      test('auto-emits discriminator with mapping when all variants have meta({ id })', () => {
+        const wired = z4.object({ type: z4.literal('wired'), name: z4.string() }).meta({
+          id: 'AutoDisc_WiredDef',
+        });
+        const classic = z4.object({ type: z4.literal('classic'), id: z4.number() }).meta({
+          id: 'AutoDisc_ClassicDef',
+        });
+        const streamDef = z4.discriminatedUnion('type', [wired, classic]).meta({
+          id: 'AutoDisc_StreamDefinition',
+        });
+
+        const body = z4.object({ stream: streamDef });
+        const result = convert(body as any);
+
+        expect(result.shared).toHaveProperty('AutoDisc_StreamDefinition');
+        expect(result.shared.AutoDisc_StreamDefinition).toMatchObject({
+          discriminator: {
+            propertyName: 'type',
+            mapping: {
+              wired: '#/components/schemas/AutoDisc_WiredDef',
+              classic: '#/components/schemas/AutoDisc_ClassicDef',
+            },
+          },
+        });
+
+        // no markers should leak into the output
+        const outputStr = JSON.stringify(result);
+        expect(outputStr).not.toContain('x-kbn-oas-component-id');
+        expect(outputStr).not.toContain('x-kbn-oas-extensions');
+      });
+
+      test('auto-emits discriminator without mapping when a variant lacks meta({ id })', () => {
+        const wired = z4.object({ type: z4.literal('wired'), name: z4.string() }).meta({
+          id: 'AutoDiscNoMap_WiredDef',
+        });
+        // No .meta({ id }) on this variant — mapping cannot be completed
+        const classic = z4.object({ type: z4.literal('classic'), id: z4.number() });
+        const streamDef = z4.discriminatedUnion('type', [wired, classic]).meta({
+          id: 'AutoDiscNoMap_StreamDefinition',
+        });
+
+        const body = z4.object({ stream: streamDef });
+        const result = convert(body as any);
+
+        expect(result.shared).toHaveProperty('AutoDiscNoMap_StreamDefinition');
+        expect(result.shared.AutoDiscNoMap_StreamDefinition).toMatchObject({
+          discriminator: { propertyName: 'type' },
+        });
+        expect(
+          (result.shared.AutoDiscNoMap_StreamDefinition as any).discriminator?.mapping
+        ).toBeUndefined();
+      });
+
+      test('explicit .meta({ openapi }) takes precedence over auto-detection', () => {
+        const wired = z4
+          .object({ type: z4.literal('wired') })
+          .meta({ id: 'AutoDiscExplicit_Wired' });
+        const classic = z4.object({ type: z4.literal('classic') }).meta({
+          id: 'AutoDiscExplicit_Classic',
+        });
+        const streamDef = z4.discriminatedUnion('type', [wired, classic]).meta({
+          id: 'AutoDiscExplicit_StreamDefinition',
+          openapi: {
+            discriminator: {
+              propertyName: 'type',
+              mapping: {
+                wired: '#/components/schemas/CustomWired',
+                classic: '#/components/schemas/CustomClassic',
+              },
+            },
+          },
+        });
+
+        const body = z4.object({ stream: streamDef });
+        const result = convert(body as any);
+
+        expect(result.shared.AutoDiscExplicit_StreamDefinition).toMatchObject({
+          discriminator: {
+            propertyName: 'type',
+            mapping: {
+              wired: '#/components/schemas/CustomWired',
+              classic: '#/components/schemas/CustomClassic',
+            },
+          },
+        });
+      });
+
+      test('plain z4.union is not affected', () => {
+        const wired = z4.object({ type: z4.literal('wired') }).meta({ id: 'AutoDiscPlain_Wired' });
+        const classic = z4.object({ type: z4.literal('classic') }).meta({
+          id: 'AutoDiscPlain_Classic',
+        });
+        const streamDef = z4.union([wired, classic]).meta({ id: 'AutoDiscPlain_Stream' });
+
+        const body = z4.object({ stream: streamDef });
+        const result = convert(body as any);
+
+        expect(result.shared).toHaveProperty('AutoDiscPlain_Stream');
+        expect(result.shared.AutoDiscPlain_Stream).not.toHaveProperty('discriminator');
+      });
     });
   });
 });

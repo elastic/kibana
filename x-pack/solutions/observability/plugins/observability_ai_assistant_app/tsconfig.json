@@ -90,6 +90,7 @@
     "@kbn/connector-schemas",
     "@kbn/agent-builder-plugin",
     "@kbn/object-utils",
+    "@kbn/shared-ux-ai-components",
   ],
   "exclude": ["target/**/*"]
 }

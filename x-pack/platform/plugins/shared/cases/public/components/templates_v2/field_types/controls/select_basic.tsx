@@ -13,12 +13,9 @@ import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { SelectBasicFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-export const SelectBasic = ({
-  label,
-  metadata,
-  name,
-  type,
-}: z.infer<typeof SelectBasicFieldSchema>) => {
+type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema>;
+
+export const SelectBasic: React.FC<SelectBasicProps> = ({ label, metadata, name, type }) => {
   return (
     <UseField
       key={name}

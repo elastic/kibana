@@ -12,6 +12,7 @@ export function defaultQuery(): StreamQuery {
   return {
     id: v4(),
     title: '',
+    description: '',
     esql: {
       query: '',
     },

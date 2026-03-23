@@ -20,6 +20,7 @@ import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
 // @ts-ignore
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
+import { ensureShardLegendNodes } from '../../../components/elasticsearch/shard_allocation/lib/ensure_shard_legend_nodes';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import type { AlertsByName } from '../../../alerts/types';
@@ -83,8 +84,9 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
         }),
       });
       setData(response);
+      const nodes = ensureShardLegendNodes(response);
       const transformer = indicesByNodes();
-      setNodesByIndicesData(transformer(response.shards, response.nodes));
+      setNodesByIndicesData(transformer(response.shards ?? [], nodes));
 
       const shards = response.shards;
       if (shards.some((shard: any) => shard.state === 'UNASSIGNED')) {

@@ -10,27 +10,8 @@
 import type { Transaction } from 'elastic-apm-node';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import type { ApiDeclaration } from '../../types';
 import type { AllPluginStats, BuildApiMapResult, CliOptions, SetupProjectResult } from '../types';
-
-/**
- * Generates a link to the GitHub source for an API declaration.
- *
- * TODO: clintandrewhall - allow `base` to be overridden in the instance of a CI build
- * associated with a PR.
- *
- * @param declaration - API declaration to generate link for.
- * @returns GitHub link to the source code.
- */
-function getLink(declaration: ApiDeclaration): string {
-  const base = `https://github.com/elastic/kibana/blob/main/${declaration.path}`;
-  if (declaration.lineNumber) {
-    return `${base}#L${declaration.lineNumber}`;
-  }
-  return `https://github.com/elastic/kibana/tree/main/${
-    declaration.path
-  }#:~:text=${encodeURIComponent(declaration.label)}`;
-}
+import { getLink } from './get_link';
 
 /**
  * Reports metrics to CI stats and logs validation results.

@@ -158,74 +158,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-public.DateFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/public/lib/converters/date.ts",
-            "lineNumber": 66,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-public.DateFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/public/lib/converters/date.ts",
-                "lineNumber": 66,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-public.DateFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/public/lib/converters/date.ts",
-                "lineNumber": 66,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -427,74 +359,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-public.DateNanosFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/date_nanos_shared.ts",
-            "lineNumber": 126,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-public.DateNanosFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/date_nanos_shared.ts",
-                "lineNumber": 126,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-public.DateNanosFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/date_nanos_shared.ts",
-                "lineNumber": 126,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1238,74 +1102,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.BoolFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(value: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/boolean.ts",
-            "lineNumber": 46,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.BoolFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/boolean.ts",
-                "lineNumber": 46,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.BoolFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/boolean.ts",
-                "lineNumber": 46,
-                "columnNumber": 49,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1922,74 +1718,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.DurationFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/duration.ts",
-            "lineNumber": 116,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.DurationFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/duration.ts",
-                "lineNumber": 116,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.DurationFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/duration.ts",
-                "lineNumber": 116,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2002,7 +1730,7 @@
         "label": "FieldFormat",
         "description": [],
         "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2018,7 +1746,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2036,7 +1764,7 @@
               "\nHidden field formats can only be accessed directly by id,\nThey won't appear in field format editor UI,\nBut they can be accessed and used from code internally.\n"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2052,7 +1780,7 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2078,7 +1806,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2104,7 +1832,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2120,7 +1848,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2150,7 +1878,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2181,7 +1909,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2197,7 +1925,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2227,7 +1955,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 96,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2259,7 +1987,7 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 97,
+                "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2307,7 +2035,7 @@
               " | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 106,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2323,7 +2051,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 117,
+                "lineNumber": 118,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2346,7 +2074,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 118,
+                "lineNumber": 119,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2378,7 +2106,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 119,
+                "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2419,7 +2147,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 124,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2441,7 +2169,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 131,
+                "lineNumber": 132,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2474,7 +2202,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 140,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2498,7 +2226,7 @@
               "(name: string) => any"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 149,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2516,7 +2244,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 156,
+                "lineNumber": 157,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2557,7 +2285,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2595,7 +2323,7 @@
               ") | undefined; }"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2628,7 +2356,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 205,
+            "lineNumber": 206,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2650,7 +2378,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 205,
+                "lineNumber": 206,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2677,7 +2405,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 209,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2702,7 +2430,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 216,
+            "lineNumber": 217,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2718,7 +2446,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 216,
+                "lineNumber": 217,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2738,7 +2466,7 @@
               "(val: unknown) => string | void"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 220,
+            "lineNumber": 221,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2754,7 +2482,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 220,
+                "lineNumber": 221,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2774,7 +2502,7 @@
               "(val: unknown) => string | void"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "lineNumber": 229,
+            "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2790,7 +2518,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-                "lineNumber": 229,
+                "lineNumber": 230,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4362,74 +4090,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.GeoPointFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/geo_point.ts",
-            "lineNumber": 151,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.GeoPointFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/geo_point.ts",
-                "lineNumber": 151,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.GeoPointFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/geo_point.ts",
-                "lineNumber": 151,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4777,74 +4437,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.IpFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/ip.ts",
-            "lineNumber": 36,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.IpFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/ip.ts",
-                "lineNumber": 36,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.IpFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/ip.ts",
-                "lineNumber": 36,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -5256,74 +4848,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.RelativeDateFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/relative_date.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.RelativeDateFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/relative_date.ts",
-                "lineNumber": 39,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.RelativeDateFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/relative_date.ts",
-                "lineNumber": 39,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5353,7 +4877,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-        "lineNumber": 41,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5375,7 +4899,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 43,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5388,7 +4912,7 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 44,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5411,7 +4935,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 47,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5427,7 +4951,7 @@
               "() => { lookupEntries: {}[]; unknownKeyValue: null; }"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 54,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5442,10 +4966,10 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: string) => any"
+              "(val: string) => string"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 61,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5461,11 +4985,79 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-                "lineNumber": 61,
+                "lineNumber": 97,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.StaticLookupFormat.htmlConvert",
+            "type": "Function",
+            "tags": [],
+            "label": "htmlConvert",
+            "description": [],
+            "signature": [
+              "(value: any, options?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.HtmlContextTypeOptions",
+                "text": "HtmlContextTypeOptions"
+              },
+              " | undefined) => string"
+            ],
+            "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fieldFormats",
+                "id": "def-common.StaticLookupFormat.htmlConvert.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
+                "lineNumber": 110,
+                "columnNumber": 42,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fieldFormats",
+                "id": "def-common.StaticLookupFormat.htmlConvert.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fieldFormats",
+                    "scope": "common",
+                    "docId": "kibFieldFormatsPluginApi",
+                    "section": "def-common.HtmlContextTypeOptions",
+                    "text": "HtmlContextTypeOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
+                "lineNumber": 110,
+                "columnNumber": 49,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -5853,74 +5445,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.TruncateFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(val: any, options: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/converters/truncate.ts",
-            "lineNumber": 44,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.TruncateFormat.htmlConvert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/truncate.ts",
-                "lineNumber": 44,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.TruncateFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/field_formats/common/converters/truncate.ts",
-                "lineNumber": 44,
-                "columnNumber": 47,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []

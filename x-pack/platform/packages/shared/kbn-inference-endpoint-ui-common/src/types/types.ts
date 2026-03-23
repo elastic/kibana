@@ -42,7 +42,7 @@ export interface Config {
   taskTypeConfig?: Record<string, unknown>;
   inferenceId: string;
   provider: string;
-  providerConfig?: ProviderConfig; // Record<string, unknown>;
+  providerConfig?: ProviderConfig;
   contextWindowLength?: number;
   temperature?: number;
   headers?: Map;

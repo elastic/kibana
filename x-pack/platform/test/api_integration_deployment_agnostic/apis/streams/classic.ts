@@ -64,6 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(classicStream).not.to.be(undefined);
         expect(classicStream).to.eql({
+          type: 'classic',
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: classicStream!.updated_at,
@@ -90,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 query_streams: [],
                 ingest: {
@@ -140,6 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(queries).to.eql([]);
 
         expect(stream).to.eql({
+          type: 'classic',
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: stream.updated_at,
@@ -222,6 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 query_streams: [],
                 ingest: {
@@ -254,6 +258,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, testStreamName, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             query_streams: [],
             ingest: {
@@ -296,6 +301,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 query_streams: [],
                 ingest: {
@@ -340,6 +346,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: 'Should cause a failure due to invalid ingest pipeline',
             query_streams: [],
             ingest: {
@@ -387,6 +394,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             query_streams: [],
             ingest: {
@@ -431,6 +439,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -460,6 +469,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -545,9 +555,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Classic stream name validation', () => {
-      const validClassicStreamBody = {
+      const validClassicStreamBody: Streams.ClassicStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -684,6 +695,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, FIRST_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -748,6 +760,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -784,6 +797,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, FIRST_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -807,6 +821,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -842,6 +857,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -920,6 +936,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -972,6 +989,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -1145,6 +1163,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, testStreamName, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },

@@ -294,8 +294,9 @@ export const Settings = z.object({
    */
   syncAlerts: z.boolean(),
   /**
-   * Auto extracts observables
-   */
+      * When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
+
+      */
   extractObservables: z.boolean().optional(),
 });
 
@@ -912,6 +913,78 @@ export const UpdateCaseConfigurationRequest = z.object({
   version: z.string(),
 });
 
+/**
+  * Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.
+
+  */
+export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
+export const CaseResponseGetCase = z.object({
+  assignees: Assignees.optional(),
+  /**
+   * The case category.
+   */
+  category: z.string().nullable().optional(),
+  closed_at: z.string().datetime().nullable(),
+  closed_by: CaseResponseClosedByProperties,
+  connector: z.discriminatedUnion('type', [
+    ConnectorPropertiesNone,
+    ConnectorPropertiesCasesWebhook,
+    ConnectorPropertiesJira,
+    ConnectorPropertiesResilient,
+    ConnectorPropertiesServicenow,
+    ConnectorPropertiesServicenowSir,
+    ConnectorPropertiesSwimlane,
+  ]),
+  created_at: z.string().datetime(),
+  created_by: CaseResponseCreatedByProperties,
+  /**
+   * Custom field values for the case.
+   */
+  customFields: z
+    .array(
+      z.object({
+        /**
+      * The unique identifier for the custom field. The key value must exist in the case configuration settings.
+
+      */
+        key: z.string().optional(),
+        /**
+      * The custom field type. It must match the type specified in the case configuration settings.
+
+      */
+        type: z.enum(['text', 'toggle']).optional(),
+        /**
+      * The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
+
+      */
+        value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]).optional(),
+      })
+    )
+    .optional(),
+  description: z.string(),
+  /**
+      * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
+
+      */
+  duration: z.number().int().nullable(),
+  external_service: ExternalService,
+  id: z.string(),
+  owner: Owner,
+  settings: Settings,
+  severity: CaseSeverity,
+  status: CaseStatus,
+  tags: z.array(z.string()),
+  title: z.string(),
+  totalAlerts: z.number().int(),
+  /**
+   * The number of user comments on the case. Use the find case comments API to retrieve comment content.
+   */
+  totalComment: z.number().int(),
+  updated_at: z.string().datetime().nullable(),
+  updated_by: CaseResponseUpdatedByProperties,
+  version: z.string(),
+});
+
 export type AlertResponseProperties = z.infer<typeof AlertResponseProperties>;
 export const AlertResponseProperties = z.object({
   attached_at: z.string().datetime().optional(),
@@ -1056,6 +1129,26 @@ export const UpdateCaseCommentRequest = z.discriminatedUnion('type', [
   UpdateAlertCommentRequestProperties,
   UpdateUserCommentRequestProperties,
 ]);
+
+export type FindCommentsResponse = z.infer<typeof FindCommentsResponse>;
+export const FindCommentsResponse = z.object({
+  /**
+   * Paginated list of user comments for the case.
+   */
+  comments: z.array(UserCommentResponseProperties),
+  /**
+   * The current page index.
+   */
+  page: z.number().int(),
+  /**
+   * The number of items per page.
+   */
+  per_page: z.number().int(),
+  /**
+   * The total number of comments.
+   */
+  total: z.number().int(),
+});
 
 export type Actions = z.infer<typeof Actions>;
 export const Actions = z.enum(['add', 'create', 'delete', 'push_to_service', 'update']);

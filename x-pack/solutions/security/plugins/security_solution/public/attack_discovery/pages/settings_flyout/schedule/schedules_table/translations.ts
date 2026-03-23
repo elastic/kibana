@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ATTACK_DISCOVER_SCHEDULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.table.caption',
+  {
+    defaultMessage: 'Scheduled Attack Discoveries',
+  }
+);
+
 export const ATTACK_DISCOVER_SCHEDULES_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.table.description',
   {

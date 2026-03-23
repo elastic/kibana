@@ -23,7 +23,6 @@ import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { handleTaskAction } from '../../../utils/task_helpers';
 
 /* Insights Discovery Task */
@@ -44,25 +43,13 @@ const insightsTaskRoute = createServerRoute({
   },
   params: z.object({
     body: taskActionSchema({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
       streamNames: z
         .array(z.string())
         .describe('List of stream names to generate insights for.')
         .optional(),
     }),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<InsightsTaskResult> => {
+  handler: async ({ params, request, getScopedClients, server }): Promise<InsightsTaskResult> => {
     const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
@@ -78,18 +65,9 @@ const insightsTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
               taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
-              params: await (async (): Promise<InsightsDiscoveryTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connectorId,
-                  uiSettingsClient,
-                  logger,
-                });
-
-                return {
-                  connectorId,
-                  streamNames: body.streamNames,
-                };
-              })(),
+              params: {
+                streamNames: body.streamNames,
+              },
               request,
             },
           } as const)

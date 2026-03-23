@@ -37,7 +37,7 @@ export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigr
   const basePath = http.basePath.get() ?? '';
   const { euiTheme } = useEuiTheme();
   const listItemProps = {
-    iconType: 'checkInCircleFilled',
+    iconType: 'checkCircleFill',
     iconProps: { color: 'success' },
     wrapText: true,
   };

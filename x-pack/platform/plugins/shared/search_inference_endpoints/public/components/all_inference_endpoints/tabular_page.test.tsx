@@ -90,6 +90,11 @@ const inferenceEndpoints = [
     service_settings: {
       model_id: 'rainbow-sprinkles',
     },
+    metadata: {
+      display: {
+        model_creator: 'Anthropic',
+      },
+    },
   },
   {
     inference_id: '.elser-2-elastic',
@@ -344,12 +349,12 @@ describe('When the tabular page is loaded', () => {
     it('should show expected group labels and endpoint counts', () => {
       const expectedGroups = [
         {
-          groupId: 'elastic',
+          groupId: 'Elastic',
           label: 'Elastic',
           countLabel: '5 endpoints',
         },
         {
-          groupId: 'anthropic',
+          groupId: 'Anthropic',
           label: 'Anthropic',
           countLabel: '1 endpoint',
         },
@@ -391,7 +396,7 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should disable delete action for preconfigured endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elastic-table');
+      const elserTable = screen.getByTestId('Elastic-table');
 
       const preconfiguredRow = within(elserTable).getByText('.elser-2-elastic').closest('tr');
 
@@ -409,7 +414,7 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should enable delete action for user-defined endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elastic-table');
+      const elserTable = screen.getByTestId('Elastic-table');
 
       const userDefinedRow = within(elserTable).getByText('custom-inference-id').closest('tr');
 

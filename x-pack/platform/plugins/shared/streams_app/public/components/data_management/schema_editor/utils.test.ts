@@ -308,6 +308,7 @@ const buildWiredDefinition = (
   overrides?: Partial<Streams.WiredStream.GetResponse>
 ): Streams.WiredStream.GetResponse => ({
   stream: {
+    type: 'wired',
     name: 'logs',
     description: 'Wired stream',
     updated_at: new Date().toISOString(),
@@ -336,6 +337,7 @@ const buildWiredDefinition = (
 
 const buildClassicDefinition = (): Streams.ClassicStream.GetResponse => ({
   stream: {
+    type: 'classic',
     name: 'logs-classic',
     description: 'Classic stream',
     updated_at: new Date().toISOString(),

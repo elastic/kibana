@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -112,14 +113,14 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // First doc should have temp_data removed (where condition matched)
-      const doc1 = ingestedDocs.find((d: any) => d.message === 'doc1');
-      expect(doc1?.temp_data).toBeUndefined();
-      expect(doc1?.event?.kind).toBe('test');
+      const doc1 = ingestedDocs.find((d: Record<string, unknown>) => d.message === 'doc1');
+      expect(asDoc(doc1)?.temp_data).toBeUndefined();
+      expect(asDoc(asDoc(doc1)?.event)?.kind).toBe('test');
 
       // Second doc should keep temp_data (where condition not matched)
-      const doc2 = ingestedDocs.find((d: any) => d.message === 'doc2');
-      expect(doc2?.temp_data?.value).toBe('keep-me');
-      expect(doc2?.event?.kind).toBe('production');
+      const doc2 = ingestedDocs.find((d: Record<string, unknown>) => d.message === 'doc2');
+      expect(asDoc(asDoc(doc2)?.temp_data)?.value).toBe('keep-me');
+      expect(asDoc(asDoc(doc2)?.event)?.kind).toBe('production');
     });
 
     apiTest('default value of ignore_missing (false)', async ({ testBed }) => {

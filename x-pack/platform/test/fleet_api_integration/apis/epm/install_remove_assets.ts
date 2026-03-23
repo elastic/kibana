@@ -1330,10 +1330,13 @@ const expectAssetsInstalled = ({
             )
           ).to.not.be(undefined);
         });
+      const installedAsDependency = sortedRes.installed_as_dependency;
+      delete sortedRes.installed_as_dependency;
       expect({ ...sortedRes, installed_es: [] }).eql({
         ...expectedSavedObject,
         installed_es: [],
       });
+      expect(Boolean(installedAsDependency)).eql(false);
     }
 
     await verifySO();

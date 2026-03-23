@@ -255,7 +255,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const onEditRuleClick = () => {
     if (useUnifiedRulesPage) {
       const { pathname, search, hash } = history.location;
-      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
+      const returnPath = `${pathname}${search}${hash}` || `/rule/${rule.id}`;
       history.push({
         pathname: getEditRuleRoute(rule.id),
         state: {
@@ -366,7 +366,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </span>
         }
         description={
-          <EuiFlexGroup gutterSize="m">
+          <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
                 {rule.executionStatus.status.charAt(0).toUpperCase() +

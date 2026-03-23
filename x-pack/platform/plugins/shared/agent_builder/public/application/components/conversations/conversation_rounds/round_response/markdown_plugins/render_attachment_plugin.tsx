@@ -24,31 +24,37 @@ interface ResolveAttachmentVersionParams {
   explicitVersion: string | number | undefined;
   attachmentId: string;
   attachmentRefs: AttachmentVersionRef[] | undefined;
-  currentVersion: number;
+  attachment: VersionedAttachment;
 }
 
 /**
  * Resolves the version to use for an attachment.
- * Priority: explicit version > highest version from refs > current_version
+ * Priority:
+ * 1. Explicit version from tag attributes
+ * 2. Version from cumulative attachment refs (highest version seen up to this round)
+ * 3. Latest available version as fallback
  */
 export const resolveAttachmentVersion = ({
   explicitVersion,
   attachmentId,
   attachmentRefs,
-  currentVersion,
-}: ResolveAttachmentVersionParams): number => {
+  attachment,
+}: ResolveAttachmentVersionParams): number | undefined => {
   if (explicitVersion !== undefined) {
-    return typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
+    const parsed =
+      typeof explicitVersion === 'string' ? Number.parseInt(explicitVersion, 10) : explicitVersion;
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
   }
 
-  const highestRefVersion = attachmentRefs
-    ?.filter((r) => r.attachment_id === attachmentId)
-    .reduce<number | undefined>(
-      (max, r) => (max === undefined || r.version > max ? r.version : max),
-      undefined
-    );
+  const ref = attachmentRefs?.find((r) => r.attachment_id === attachmentId);
+  if (ref) {
+    return ref.version;
+  }
 
-  return highestRefVersion ?? currentVersion;
+  // Final fallback: use the latest version
+  return attachment.versions.at(-1)?.version;
 };
 
 /**
@@ -124,8 +130,12 @@ export const createRenderAttachmentRenderer = ({
       explicitVersion,
       attachmentId,
       attachmentRefs,
-      currentVersion: attachment.current_version,
+      attachment,
     });
+
+    if (versionToUse === undefined) {
+      return null;
+    }
 
     const versionData = attachment.versions.find((v) => v.version === versionToUse);
 
@@ -146,6 +156,7 @@ export const createRenderAttachmentRenderer = ({
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
         screenContext={screenContext}
+        version={versionToUse}
       />
     );
   };

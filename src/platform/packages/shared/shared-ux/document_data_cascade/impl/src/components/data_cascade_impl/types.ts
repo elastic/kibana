@@ -238,10 +238,6 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
   extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
-   * The data to be displayed in the cascade. It should be an array of group nodes.
-   */
-  data: G[];
-  /**
    * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
    */
   onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];

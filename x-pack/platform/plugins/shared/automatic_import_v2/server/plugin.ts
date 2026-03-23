@@ -109,8 +109,10 @@ export class AutomaticImportV2Plugin
       DATA_STREAM_SAVED_OBJECT_TYPE,
     ]);
 
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
     this.automaticImportService
-      .initialize(new SavedObjectsClient(savedObjectsClient), plugins.taskManager)
+      .initialize(new SavedObjectsClient(savedObjectsClient), plugins.taskManager, internalEsClient)
       .then(() => {
         this.logger.debug('AutomaticImportService initialized successfully');
       })

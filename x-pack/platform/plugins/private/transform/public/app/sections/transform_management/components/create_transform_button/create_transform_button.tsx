@@ -37,7 +37,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
       disabled={disabled}
       fill
       onClick={onClick}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="transformButtonCreate"
     >
       <FormattedMessage

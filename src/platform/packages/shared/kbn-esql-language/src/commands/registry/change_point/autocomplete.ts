@@ -12,10 +12,7 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { ESQL_NUMBER_TYPES } from '../../definitions/types';
 import { pipeCompleteItem } from '../complete_items';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../types';
-import {
-  buildUserDefinedColumnsDefinitions,
-  findFinalWord,
-} from '../../definitions/utils/autocomplete/helpers';
+import { buildUserDefinedColumnsDefinitions } from '../../definitions/utils/autocomplete/helpers';
 
 export enum Position {
   VALUE = 'value',
@@ -102,15 +99,6 @@ export async function autocomplete(
           advanceCursor: true,
           openSuggestions: true,
         })) ?? [];
-      const lastWord = findFinalWord(innerText);
-      if (lastWord !== '') {
-        numericFields.forEach((fieldSuggestion) => {
-          fieldSuggestion.rangeToReplace = {
-            start: innerText.length - lastWord.length + 1,
-            end: innerText.length + 1,
-          };
-        });
-      }
       return numericFields;
     case Position.AFTER_VALUE: {
       return [onSuggestion, asSuggestion, pipeCompleteItem];

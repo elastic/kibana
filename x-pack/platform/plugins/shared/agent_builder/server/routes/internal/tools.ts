@@ -9,8 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import {
+  type ActionTypeExecutorResult,
+  AgentBuilderConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -194,7 +197,7 @@ export function registerInternalToolsRoutes({
       const { tools: toolService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
 
-      const allTools = await registry.list({});
+      const allTools = await registry.list({ types: [ToolType.mcp] });
 
       const toolsInNamespace = allTools.filter((tool) => {
         const lastDotIndex = tool.id.lastIndexOf('.');
@@ -453,11 +456,16 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-      const allConnectors = await actionsClient.getAll();
+      const [allConnectors, compatibleTypes] = await Promise.all([
+        actionsClient.getAll(),
+        actionsClient.listTypes({ featureId: AgentBuilderConnectorFeatureId }),
+      ]);
 
+      const compatibleTypeIds = new Set(compatibleTypes.map((t) => t.id));
       const { type } = request.query;
 
       const connectors: ConnectorItem[] = allConnectors
+        .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
         .filter((connector) => (type ? connector.actionTypeId === type : true))
         .map(toConnectorItem);
 
@@ -566,8 +574,9 @@ export function registerInternalToolsRoutes({
       const registry = await toolService.getRegistry({ request });
       const healthClient = toolService.getHealthClient({ request });
 
-      const allTools = await registry.list({});
-      const mcpTools: McpToolDefinition[] = allTools.filter((tool) => isMcpTool(tool));
+      const mcpTools: McpToolDefinition[] = (await registry.list({ types: [ToolType.mcp] })).filter(
+        (tool) => isMcpTool(tool)
+      );
 
       if (mcpTools.length === 0) {
         return response.ok<ListMcpToolsHealthResponse>({

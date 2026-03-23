@@ -72,7 +72,7 @@ const HOSTS: HostConfig[] = [
   },
 ];
 
-const scenario: Scenario<any> = async ({ logger }) => {
+const scenario: Scenario<import('@kbn/synthtrace-client').Fields> = async ({ logger }) => {
   return {
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
       // Generate OTel host metrics (semconv format)

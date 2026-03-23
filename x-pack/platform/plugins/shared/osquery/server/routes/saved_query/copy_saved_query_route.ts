@@ -60,7 +60,7 @@ export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             });
           }
 
-          const { client, sourceAttributes, newName, username, now } = copyContext;
+          const { client, sourceAttributes, newName, username, profileUid, now } = copyContext;
 
           const {
             id: _sourceId,
@@ -76,8 +76,10 @@ export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             ...restAttributes,
             id: newName,
             created_by: username,
+            created_by_profile_uid: profileUid,
             created_at: now,
             updated_by: username,
+            updated_by_profile_uid: profileUid,
             updated_at: now,
           });
 
@@ -86,6 +88,7 @@ export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           const data: CopySavedQueryResponseData = {
             created_at: attributes.created_at,
             created_by: attributes.created_by,
+            created_by_profile_uid: attributes.created_by_profile_uid,
             description: attributes.description,
             id: attributes.id,
             removed: attributes.removed,
@@ -97,6 +100,7 @@ export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             ecs_mapping: attributes.ecs_mapping,
             updated_at: attributes.updated_at,
             updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: newSavedQuerySO.id,
           };
 

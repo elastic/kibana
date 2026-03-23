@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -361,7 +361,7 @@ function validateSortBy({
 
 export const datatableStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
@@ -414,7 +414,7 @@ export const datatableStateSchemaNoESQL = schema.object(
 
 export const datatableStateSchemaESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
@@ -424,7 +424,7 @@ export const datatableStateSchemaESQL = schema.object(
      */
     metrics: schema.maybe(
       schema.arrayOf(
-        esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
           meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
@@ -438,7 +438,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -448,7 +448,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Split metrics by configuration, optional operations.
      */
     split_metrics_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema, {
+      schema.arrayOf(esqlColumnWithFormatSchema, {
         minSize: 1,
         maxSize: 20,
         meta: { description: 'Array of operations to split the metric columns by' },

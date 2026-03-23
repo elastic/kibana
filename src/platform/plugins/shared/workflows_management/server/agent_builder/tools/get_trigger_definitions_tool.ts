@@ -11,23 +11,55 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { builtInTriggerDefinitions } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
-export const GET_TRIGGER_DEFINITIONS_TOOL_ID = 'platform.workflows.get_trigger_definitions';
+const LARGE_ENUM_THRESHOLD = 20;
 
 function zodToJsonSchemaSafe(schema: z.ZodType): unknown {
   try {
-    return z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
+    const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
+    return compactLargeEnums(jsonSchema as Record<string, unknown>);
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Recursively walk a JSON Schema and replace enum arrays larger than
+ * {@link LARGE_ENUM_THRESHOLD} with a compact description + a few examples.
+ * This avoids sending 600+ timezone names (or similar) to the LLM.
+ */
+function compactLargeEnums(node: unknown): unknown {
+  if (node === null || typeof node !== 'object') return node;
+  if (Array.isArray(node)) return node.map(compactLargeEnums);
+
+  const obj = node as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === 'enum' && Array.isArray(value) && value.length > LARGE_ENUM_THRESHOLD) {
+      const examples = value.slice(0, 5) as string[];
+      result.type = 'string';
+      result.description = [
+        obj.description ?? '',
+        `One of ${value.length} allowed values, e.g.: ${examples.join(', ')}`,
+      ]
+        .filter(Boolean)
+        .join('. ');
+    } else {
+      result[key] = compactLargeEnums(value);
+    }
+  }
+
+  return result;
 }
 
 export function registerGetTriggerDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetupContract
 ): void {
   agentBuilder.tools.register({
-    id: GET_TRIGGER_DEFINITIONS_TOOL_ID,
+    id: workflowTools.getTriggerDefinitions,
     type: ToolType.builtin,
     description: `Get available workflow trigger types with schemas and YAML examples.
 

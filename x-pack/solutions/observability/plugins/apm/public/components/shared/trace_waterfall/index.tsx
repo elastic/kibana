@@ -267,7 +267,7 @@ function TraceTree() {
         scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
       }
     >
-      {({ height, isScrolling, onChildScroll, scrollTop, registerChild }) => (
+      {({ height, onChildScroll, scrollTop, registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
             <div data-test-subj="waterfall" ref={registerChild}>
@@ -275,7 +275,6 @@ function TraceTree() {
                 ref={listRef}
                 autoHeight
                 height={height}
-                isScrolling={isScrolling}
                 onScroll={onChildScroll}
                 scrollTop={scrollTop}
                 width={width}
@@ -283,6 +282,7 @@ function TraceTree() {
                 deferredMeasurementCache={rowHeightCache.current}
                 rowHeight={rowHeightCache.current.rowHeight}
                 rowRenderer={rowRenderer}
+                containerRole="rowgroup"
               />
             </div>
           )}
@@ -312,14 +312,16 @@ function VirtualRow({
 }: VirtualRowProps) {
   return (
     <CellMeasurer cache={rowHeightCache} parent={parent} rowIndex={index}>
-      <div style={style}>
-        <TraceItemRow
-          key={item.id}
-          item={item}
-          childrenCount={childrenCount}
-          state={accordionState}
-          onToggle={onToggle}
-        />
+      <div style={style} role="row">
+        <div role="gridcell">
+          <TraceItemRow
+            key={item.id}
+            item={item}
+            childrenCount={childrenCount}
+            state={accordionState}
+            onToggle={onToggle}
+          />
+        </div>
       </div>
     </CellMeasurer>
   );

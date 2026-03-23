@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { z } from '@kbn/zod/v4';
-import type { SecretConfigurationSchema } from '../../common/auth';
-import type { ConfigSchema, HTTP_METHODS, ParamsSchema } from '../schemas/v1';
+import type { ConfigSchema, SecretsSchema, HTTP_METHODS, ParamsSchema } from '../schemas/v1';
 
 // http method definition
 export type HttpMethod = (typeof HTTP_METHODS)[number];
@@ -17,7 +16,7 @@ export type HttpMethod = (typeof HTTP_METHODS)[number];
 export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition
-export type ConnectorTypeSecretsType = z.infer<typeof SecretConfigurationSchema>;
+export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
 // params definition
 export type ActionParamsType = z.infer<typeof ParamsSchema>;

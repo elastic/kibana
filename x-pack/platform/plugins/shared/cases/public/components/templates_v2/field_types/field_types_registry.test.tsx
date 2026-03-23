@@ -52,30 +52,19 @@ fields:
     type: keyword
 `;
 
-const TestTemplatedFormRenderer = ({
-  templateDefinition,
-  values,
-}: {
-  templateDefinition: string;
-  values: Record<string, unknown>;
-}) => {
+const TestTemplatedFormRenderer = ({ templateDefinition }: { templateDefinition: string }) => {
   const parseResult = ParsedTemplateDefinitionSchema.safeParse(parseYaml(templateDefinition));
 
   if (!parseResult.success) {
     return <>{`Invalid template definition:\n ${parseResult.error}`}</>;
   }
 
-  return <TemplateFieldRenderer parsedTemplate={parseResult.data} values={values} />;
+  return <TemplateFieldRenderer parsedTemplate={parseResult.data} />;
 };
 
 describe('controlRegistry', () => {
   it('should render all the controls specified in the template', () => {
-    render(
-      <TestTemplatedFormRenderer
-        templateDefinition={mockTemplateDefinition}
-        values={{ severity: 'low' }}
-      />
-    );
+    render(<TestTemplatedFormRenderer templateDefinition={mockTemplateDefinition} />);
     expect(screen.getByTestId('select')).toBeInTheDocument();
     expect(screen.getAllByTestId('input')).toHaveLength(3);
     expect(screen.getByText('Select label')).toBeInTheDocument();
@@ -86,20 +75,13 @@ describe('controlRegistry', () => {
   });
 
   it('renders an error for unknown controls', () => {
-    render(
-      <TestTemplatedFormRenderer templateDefinition={invalidTemplateDefinition} values={{}} />
-    );
+    render(<TestTemplatedFormRenderer templateDefinition={invalidTemplateDefinition} />);
 
     expect(screen.getByText(/Invalid template definition/)).toBeInTheDocument();
   });
 
   it('renders controls in template order', () => {
-    render(
-      <TestTemplatedFormRenderer
-        templateDefinition={mockTemplateDefinition}
-        values={{ severity: 'low' }}
-      />
-    );
+    render(<TestTemplatedFormRenderer templateDefinition={mockTemplateDefinition} />);
 
     const labels = screen.getAllByText(/label$/i).map((node) => node.textContent);
     expect(labels).toEqual([

@@ -8,6 +8,15 @@ import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
 
+export const createCommentActionCss = (euiTheme?: EuiThemeComputed<{}>) => {
+  if (!euiTheme) return css``;
+  return css`
+    [class*='euiTimelineItemEvent'] {
+      max-width: calc(100% - (${euiTheme.size.xl} + ${euiTheme.size.base}));
+    }
+  `;
+};
+
 export const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
   if (!euiTheme) {
     return css``;

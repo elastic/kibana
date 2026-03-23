@@ -217,6 +217,7 @@ describe('useSchemaFields', () => {
       // on initial load due to comparison issues with optional properties
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs.wired-test',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
@@ -457,6 +458,7 @@ describe('useSchemaFields', () => {
       // should take precedence, and the field should only appear once in the result.
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs.child',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
@@ -509,6 +511,7 @@ describe('useSchemaFields', () => {
       // it should not be marked as uncommitted on initial load (the save bar should not show).
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs.child',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
@@ -548,6 +551,7 @@ describe('useSchemaFields', () => {
       // returns them with status: 'unmapped' since they don't have a real ES mapping.
       const definition = createMockWiredStreamDefinition({
         stream: {
+          type: 'wired',
           name: 'logs.wired-test',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',

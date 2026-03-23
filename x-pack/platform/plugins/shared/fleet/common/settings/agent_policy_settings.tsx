@@ -8,7 +8,7 @@ import React from 'react';
 import { load } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 

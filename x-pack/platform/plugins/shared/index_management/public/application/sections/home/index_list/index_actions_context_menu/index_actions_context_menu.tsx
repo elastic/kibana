@@ -82,7 +82,7 @@ export const IndexActionsContextMenu = ({
   resetSelection,
   anchorPosition = 'rightUp',
   iconSide = 'right',
-  iconType = 'arrowDown',
+  iconType = 'chevronSingleDown',
   label,
   closeIndices,
   openIndices,
@@ -113,10 +113,13 @@ export const IndexActionsContextMenu = ({
     setIsPopoverOpen((prevState) => !prevState);
   };
 
-  const closePopoverAndExecute = (func: () => void) => {
+  const closePopoverAndExecute = async (func: () => void | Promise<void>) => {
     setIsPopoverOpen(false);
-    func();
-    resetSelection?.();
+    try {
+      await func();
+    } finally {
+      resetSelection?.();
+    }
   };
 
   const closePopover = () => {
@@ -437,6 +440,9 @@ export const IndexActionsContextMenu = ({
       />
       <EuiPopover
         id="contextMenuIndices"
+        aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.popoverAriaLabel', {
+          defaultMessage: 'Index actions menu',
+        })}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}

@@ -8,7 +8,11 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import { basicCase, caseUserActions } from '../../containers/mock';
+import {
+  basicCaseWithUnifiedComments,
+  basicCommentUnified,
+  caseUserActions,
+} from '../../containers/mock';
 import { UserActionsList } from './user_actions_list';
 
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
@@ -20,8 +24,9 @@ const builderArgs = getMockBuilderArgs();
 const defaultProps = {
   caseUserActions,
   ...builderArgs,
+  attachments: [basicCommentUnified],
   caseConnectors: getCaseConnectorsMockResponse(),
-  data: basicCase,
+  data: basicCaseWithUnifiedComments,
   manualAlertsData: { 'some-id': { _id: 'some-id' } },
   commentRefs: { current: {} },
   handleManageQuote: jest.fn(),
@@ -34,28 +39,39 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../common/lib/kibana');
 
+const renderUserActionsList = (
+  props: React.ComponentProps<typeof UserActionsList> = defaultProps
+) =>
+  renderWithTestingProviders(<UserActionsList {...props} />, {
+    wrapperProps: {
+      unifiedAttachmentTypeRegistry: builderArgs.unifiedAttachmentTypeRegistry,
+    },
+  });
+
 describe(`UserActionsList`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders list correctly with isExpandable option', async () => {
-    renderWithTestingProviders(<UserActionsList {...defaultProps} isExpandable />);
+    renderUserActionsList({ ...defaultProps, isExpandable: true });
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders list correctly with isExpandable=false option', async () => {
-    renderWithTestingProviders(<UserActionsList {...defaultProps} />);
+    renderUserActionsList();
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders user actions correctly', async () => {
-    renderWithTestingProviders(<UserActionsList {...defaultProps} />);
+    renderUserActionsList();
 
     expect(await screen.findByTestId(`description-create-action-${caseUserActions[0].id}`));
-    expect(await screen.findByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
+    expect(
+      await screen.findByTestId(`comment-${basicCommentUnified.type}-${basicCommentUnified.type}`)
+    );
     expect(await screen.findByTestId(`description-update-action-${caseUserActions[2].id}`));
   });
 
@@ -73,7 +89,7 @@ describe(`UserActionsList`, () => {
       },
     ];
 
-    renderWithTestingProviders(<UserActionsList {...defaultProps} bottomActions={bottomActions} />);
+    renderUserActionsList({ ...defaultProps, bottomActions });
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
     expect(await screen.findByTestId('add-comment')).toBeInTheDocument();

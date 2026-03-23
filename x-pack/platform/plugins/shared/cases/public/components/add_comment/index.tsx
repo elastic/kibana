@@ -23,7 +23,9 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { AttachmentType } from '../../../common/types/domain';
+import { KibanaServices } from '../../common/lib/kibana';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
 import type { MarkdownEditorRef } from '../markdown_editor';
@@ -37,6 +39,7 @@ import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
 
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',
@@ -113,11 +116,16 @@ export const AddComment = React.memo(
             onCommentSaving();
           }
 
+          const attachmentsEnabled = KibanaServices.getConfig()?.attachments?.enabled ?? false;
+          const attachments: CaseAttachmentsWithoutOwner = attachmentsEnabled
+            ? [{ type: COMMENT_ATTACHMENT_TYPE, data: { content: data.comment } }]
+            : [{ type: AttachmentType.user, comment: data.comment }];
+
           createAttachments(
             {
               caseId,
               caseOwner: owner[0],
-              attachments: [{ ...data, type: AttachmentType.user }],
+              attachments,
             },
             {
               onSuccess: (theCase) => {

@@ -7,7 +7,9 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import { isLensESQLConfig } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
+
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
@@ -73,6 +75,15 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      if (isLensESQLConfig(req.body)) {
+        return res.badRequest({
+          body: {
+            message:
+              'ES|QL charts are not yet supported in Lens. Use POST /api/dashboards instead.',
+          },
+        });
+      }
+
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);

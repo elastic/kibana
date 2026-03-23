@@ -19,6 +19,7 @@ import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { AttachmentType } from '../../../common/types/domain';
+import { isLegacyAttachmentRequest } from '../../../common/utils/attachments/v1_type_guards';
 
 const FilesBadge = ({
   activeTab,
@@ -218,11 +219,19 @@ export const useCaseAttachmentTabs = ({
     }
     return caseData.comments.reduce(
       (acc, comment) => {
-        if (comment.type === AttachmentType.alert && features.alerts.enabled) {
+        if (
+          isLegacyAttachmentRequest(comment) &&
+          comment.type === AttachmentType.alert &&
+          features.alerts.enabled
+        ) {
           acc.totalAlerts = Array.isArray(comment.alertId)
             ? acc.totalAlerts + comment.alertId.length
             : acc.totalAlerts + 1;
-        } else if (comment.type === AttachmentType.event && features.events.enabled) {
+        } else if (
+          isLegacyAttachmentRequest(comment) &&
+          comment.type === AttachmentType.event &&
+          features.events.enabled
+        ) {
           acc.totalEvents = Array.isArray(comment.eventId)
             ? acc.totalEvents + comment.eventId.length
             : acc.totalEvents + 1;
@@ -236,7 +245,7 @@ export const useCaseAttachmentTabs = ({
   const totalAttachments =
     stats.totalAlerts +
     stats.totalEvents +
-    Number(fileStatsData?.total) +
+    Number(fileStatsData?.total ?? 0) +
     (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
 
   const tabsConfig = useMemo(

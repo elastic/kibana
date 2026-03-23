@@ -12,6 +12,7 @@ describe('QueryStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'query' as const,
         name: 'query-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -46,7 +47,11 @@ describe('QueryStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(() => QueryStream.Definition.asserts(val as any)).toThrow();
+      expect(() =>
+        QueryStream.Definition.asserts(
+          val as unknown as Parameters<typeof QueryStream.Definition.asserts>[0]
+        )
+      ).toThrow();
     });
   });
 
@@ -54,6 +59,7 @@ describe('QueryStream', () => {
     it.each([
       {
         stream: {
+          type: 'query' as const,
           name: 'query-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -98,10 +104,15 @@ describe('QueryStream', () => {
           description: '',
           query: {},
         },
+        rules: [],
         queries: [],
       },
     ])('is not valid', (val) => {
-      expect(QueryStream.GetResponse.is(val as any)).toBe(false);
+      expect(
+        QueryStream.GetResponse.is(
+          val as unknown as Parameters<typeof QueryStream.GetResponse.is>[0]
+        )
+      ).toBe(false);
     });
   });
 
@@ -109,6 +120,7 @@ describe('QueryStream', () => {
     it.each([
       {
         stream: {
+          type: 'query' as const,
           description: '',
           query: {
             view: 'stream.query-stream',
@@ -125,6 +137,7 @@ describe('QueryStream', () => {
     it.each([
       {
         dashboards: [],
+        rules: [],
         queries: [],
         stream: {
           query: {
@@ -134,6 +147,7 @@ describe('QueryStream', () => {
       },
       {
         dashboards: [],
+        rules: [],
         queries: [],
         stream: {
           description: '',
@@ -141,6 +155,7 @@ describe('QueryStream', () => {
       },
       {
         dashboards: [],
+        rules: [],
         queries: [],
         stream: {
           name: 'my-name',
@@ -151,7 +166,11 @@ describe('QueryStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(QueryStream.UpsertRequest.is(val as any)).toBe(false);
+      expect(
+        QueryStream.UpsertRequest.is(
+          val as unknown as Parameters<typeof QueryStream.UpsertRequest.is>[0]
+        )
+      ).toBe(false);
     });
   });
 });

@@ -14,7 +14,7 @@ import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
   getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
-  scheduleFeaturesIdentificationTask: (connectorId: string) => Promise<void>;
+  scheduleFeaturesIdentificationTask: () => Promise<void>;
   cancelFeaturesIdentificationTask: () => Promise<void>;
   deleteFeature: (uuid: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
@@ -41,7 +41,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
         });
       },
-      scheduleFeaturesIdentificationTask: async (connectorId: string) => {
+      scheduleFeaturesIdentificationTask: async () => {
         const { from, to } = getLast24HoursTimeRange();
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
           signal,
@@ -51,7 +51,6 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
               action: 'schedule',
               to,
               from,
-              connector_id: connectorId,
             },
           },
         });

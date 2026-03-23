@@ -8,7 +8,6 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useDiscoverFieldForBreakdown } from './use_discover_field_for_breakdown';
 import type { Dimension } from '../../../../types';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../../common/constants';
@@ -18,7 +17,6 @@ describe('useDiscoverFieldForBreakdown', () => {
 
   const createDimension = (name: string): Dimension => ({
     name,
-    type: ES_FIELD_TYPES.KEYWORD,
   });
 
   const hostDimension = createDimension('host.name');

@@ -168,7 +168,7 @@ function FieldListItemComponent(
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addPropertyButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={addField}
                 data-test-subj="addPropertyButton"
                 aria-label={addPropertyButtonLabel}
@@ -244,7 +244,7 @@ function FieldListItemComponent(
                 <EuiButtonIcon
                   color="text"
                   onClick={toggleExpand}
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                   data-test-subj="toggleExpandButton"
                   aria-label={
                     isExpanded

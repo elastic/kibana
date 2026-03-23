@@ -31,7 +31,7 @@ import {
   getConfigFromPalette,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializedValue } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -155,7 +155,7 @@ export function ColorMappingByTerms({
                   const newColorMapping = isLegacy
                     ? undefined
                     : palette
-                    ? getConfigFromPalette(palettes, palette.name)
+                    ? getConfigFromPalette(palettes, palette.name as KbnPaletteId)
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
                   trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);

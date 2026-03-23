@@ -36,6 +36,8 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -80,6 +82,7 @@ describe('AuthenticationService', () => {
     kibanaFeatures: [];
     isElasticCloudDeployment: jest.Mock;
     customLogoutURL?: string;
+    userActivity: UserActivityServiceStart;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -124,6 +127,7 @@ describe('AuthenticationService', () => {
       kibanaFeatures: [],
       isElasticCloudDeployment: jest.fn().mockReturnValue(false),
       customLogoutURL: 'https://some-logout-origin/logout',
+      userActivity: userActivityServiceMock.createStartContract(),
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath

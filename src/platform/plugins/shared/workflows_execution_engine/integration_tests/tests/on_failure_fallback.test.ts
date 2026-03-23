@@ -111,15 +111,26 @@ steps:
         });
       });
 
-      // Note: Fallback steps are currently not executed when a step fails without retry
-      // This is a known limitation and will be addressed in the future
-      // The following tests document the current behavior
-      it('should execute fallback step', async () => {
+      it('should set workflow error to the failing step error (regression guard)', async () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        const failingStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter(
+          (se) =>
+            se.stepId === 'constantlyFailingStep' &&
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+        );
+        expect(failingStepExecutions.length).toBe(1);
+        expect(workflowExecutionDoc?.error).toEqual(failingStepExecutions[0].error);
+      });
+
+      it('should execute fallback step once after step failure', async () => {
         const fallbackStepExecutions = Array.from(
           workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
         ).filter((se) => se.stepType === 'fallback');
-
-        // Currently, fallback is not executed without retry
         expect(fallbackStepExecutions.length).toBe(1);
       });
 

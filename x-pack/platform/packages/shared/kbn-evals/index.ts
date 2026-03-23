@@ -76,5 +76,15 @@ export type {
 } from './src/evaluators/rag/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
+export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
+export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
+export { createMultiJudgeEvaluator } from './src/evaluators/multi_judge';
+export {
+  createToolPoisoningEvaluator,
+  createPromptLeakDetectionEvaluator,
+  createScopeViolationEvaluator,
+} from './src/evaluators/security';
+export { createSimilarityEvaluator } from './src/evaluators/similarity';
+
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

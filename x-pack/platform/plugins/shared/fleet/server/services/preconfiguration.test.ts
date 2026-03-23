@@ -355,6 +355,7 @@ describe('policy preconfiguration', () => {
 
     mockedPackagePolicyService.create.mockReset();
     mockedPackagePolicyService.findAllForAgentPolicy.mockReset();
+    mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
     mockInstalledPackages.clear();
     mockInstallPackageErrors.clear();
     mockConfiguredPolicies.clear();

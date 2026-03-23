@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
@@ -116,6 +118,7 @@ interface LoaderSharedArgs {
   storage: LensStoreDeps['lensServices']['storage'];
   eventAnnotationService: LensStoreDeps['lensServices']['eventAnnotationService'];
   defaultIndexPatternId: string;
+  http: LensStoreDeps['lensServices']['http'];
 }
 
 type PreloadedState = Omit<
@@ -371,11 +374,12 @@ export async function loadInitial(
     storage: lensServices.storage,
     eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+    http: lensServices.http,
   };
 
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
-    activeDatasourceId = 'textBased';
+    activeDatasourceId = LENS_DATASOURCE_ID.TEXT_BASED;
   }
   if (initialStateFromLocator) {
     const newFilters = initialStateFromLocator.filters

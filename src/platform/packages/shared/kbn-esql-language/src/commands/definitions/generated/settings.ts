@@ -19,11 +19,11 @@ const approximation = {
   name: EsqlSettingNames.APPROXIMATION,
   type: ['boolean', 'map_param'],
   mapParams:
-    "{name='num_rows', values=[], description='Number of rows.', type=[integer]}, {name='confidence_level', values=[], description='Confidence level.', type=[double]}",
+    "{name='rows', values=[], description='Number of sampled rows used for approximating the query. Must be at least 10,000. Null uses the system default.', type=[integer]}, {name='confidence_level', values=[], description='Confidence level of the computed confidence intervals. Default is 0.90. Null disables computing confidence intervals.', type=[double]}",
   serverlessOnly: false,
   preview: false,
   snapshotOnly: true,
-  description: 'TODO - add description here',
+  description: 'Enables query approximation if possible for the query.',
   ignoreAsSuggestion: true,
 };
 

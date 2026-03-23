@@ -69,7 +69,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               step="any"
               prepend={
                 <EuiButtonIcon
-                  iconType={includeFrom ? 'arrowEnd' : 'arrowRight'}
+                  iconType={includeFrom ? 'chevronLimitRight' : 'chevronSingleRight'}
                   onClick={(e: any) => {
                     updateConfig({ includeFrom: e.target.checked });
                   }}
@@ -99,7 +99,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               step="any"
               append={
                 <EuiButtonIcon
-                  iconType={includeTo ? 'arrowStart' : 'arrowLeft'}
+                  iconType={includeTo ? 'chevronLimitLeft' : 'chevronSingleLeft'}
                   onClick={() => {
                     updateConfig({ includeTo: !includeTo });
                   }}

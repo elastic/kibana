@@ -8,6 +8,7 @@
  */
 
 import { isPromise } from '@kbn/std';
+import type { DependencyList } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface State<T> {
@@ -20,7 +21,7 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
   ? State<TReturn>
   : State<T>) & { refresh: () => void };
 
-export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
+export type AbortableAsyncStateOf<T extends AbortableAsyncState<unknown>> =
   T extends AbortableAsyncState<infer TResponse> ? Awaited<TResponse> : never;
 
 export interface UseAbortableAsyncOptions<T> {
@@ -31,17 +32,17 @@ export interface UseAbortableAsyncOptions<T> {
 }
 
 export type UseAbortableAsync<
-  TAdditionalParameters extends Record<string, any> = {},
-  TAdditionalOptions extends Record<string, any> = {}
+  TAdditionalParameters extends Record<string, unknown> = Record<string, never>,
+  TAdditionalOptions extends Record<string, unknown> = Record<string, never>
 > = <T>(
   fn: ({}: { signal: AbortSignal } & TAdditionalParameters) => T | Promise<T>,
-  deps: any[],
+  deps: DependencyList,
   options?: UseAbortableAsyncOptions<T> & TAdditionalOptions
 ) => AbortableAsyncState<T>;
 
 export function useAbortableAsync<T>(
   fn: ({}: { signal: AbortSignal }) => T | Promise<T>,
-  deps: any[],
+  deps: DependencyList,
   options?: UseAbortableAsyncOptions<T>
 ): AbortableAsyncState<T> {
   const clearValueOnNext = options?.clearValueOnNext;

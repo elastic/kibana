@@ -14,6 +14,7 @@ export type {
   DateRangePickerPanelConfig,
   TimeWindowButtonsConfig,
 } from './date_range_picker';
+export type { DateRangePickerSettings } from './types';
 export { useDateRangePickerContext } from './date_range_picker_context';
 export type { DateRangePickerContextValue } from './date_range_picker_context';
 export { useDateRangePickerPanelNavigation } from './date_range_picker_panel_navigation';

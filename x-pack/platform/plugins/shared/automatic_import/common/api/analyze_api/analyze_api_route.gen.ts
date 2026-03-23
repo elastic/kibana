@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { DataStreamTitle, Connector, LangSmithOptions } from '../model/common_attributes.gen';
 import { PathOptions } from '../model/cel_input_attributes.gen';

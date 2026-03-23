@@ -1169,7 +1169,7 @@
         "signature": [
           "Omit<",
           "OverlayFlyoutOpenOptions",
-          ", \"session\"> & { session?: \"start\" | \"never\" | \"inherit\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
+          ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
           "EuiFlyoutMenuProps",
           " | undefined; }"
         ],

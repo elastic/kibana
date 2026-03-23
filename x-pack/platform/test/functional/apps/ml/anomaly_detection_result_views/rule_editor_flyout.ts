@@ -134,8 +134,20 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('open scope filter selector popover');
       await ml.ruleEditorFlyout.openScopeFilterSelector();
 
+      await ml.ruleEditorFlyout.selectFilter('day_of_week');
       await ml.testExecution.logTestStep('save rule');
       await ml.ruleEditorFlyout.save();
+      await ml.ruleEditorFlyout.closeIfOpen();
+
+      // verify if rule flyout updated its state
+      await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
+      await ml.anomaliesTable.assertAnomalyActionConfigureRulesButtonExists(0);
+      await ml.anomaliesTable.clickConfigureRulesButton(0);
+
+      await ml.ruleEditorFlyout.assertEditRulesTitleIsVisible();
+
+      await ml.ruleEditorFlyout.deleteRule();
+      await ml.ruleEditorFlyout.confirmModalConfirmButton();
       await ml.ruleEditorFlyout.closeIfOpen();
 
       await ml.api.deleteFilter(filterId);

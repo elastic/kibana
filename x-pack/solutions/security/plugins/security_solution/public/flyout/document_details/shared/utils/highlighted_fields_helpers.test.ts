@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  convertHighlightedFieldsToPrevalenceFilters,
-  convertHighlightedFieldsToTableRow,
-} from './highlighted_fields_helpers';
+import { convertHighlightedFieldsToTableRow } from './highlighted_fields_helpers';
 
 const scopeId = 'scopeId';
 const showCellActions = false;
@@ -79,22 +76,5 @@ describe('convertHighlightedFieldsToTableRow', () => {
         },
       ]
     );
-  });
-});
-
-describe('convertHighlightedFieldsToPrevalenceFilters', () => {
-  it('should convert highlighted fields to prevalence filters', () => {
-    const highlightedFields = {
-      'host.name': {
-        values: ['host-1'],
-      },
-      'user.name': {
-        values: ['user-1', 'user-2'],
-      },
-    };
-    expect(convertHighlightedFieldsToPrevalenceFilters(highlightedFields)).toEqual({
-      'host.name': { terms: { 'host.name': ['host-1'] } },
-      'user.name': { terms: { 'user.name': ['user-1', 'user-2'] } },
-    });
   });
 });

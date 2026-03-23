@@ -19,18 +19,16 @@ import {
   useAppStateSelector,
   useCurrentTabSelector,
 } from '../../state_management/redux';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FetchStatus } from '../../../types';
 import type { FieldStatisticsTableProps } from './types';
 import {
   internalStateActions,
   useCurrentTabAction,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 
-type FieldStatisticsTabProps = Omit<FieldStatisticsTableProps, 'query' | 'filters'> & {
-  stateContainer: DiscoverStateContainer;
-};
+type FieldStatisticsTabProps = Omit<FieldStatisticsTableProps, 'query' | 'filters'>;
 
 export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo((props) => {
   const services = useDiscoverServices();
@@ -38,18 +36,19 @@ export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo(
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const isEsql = useIsEsqlMode();
   const hideAggregatedPreview = useAppStateSelector((state) => state.hideAggregatedPreview);
+  const dataStateContainer = useCurrentTabDataStateContainer();
 
   const lastReloadRequestTime$ = useMemo(() => {
-    return props.stateContainer.dataState.refetch$.pipe(map(() => Date.now()));
-  }, [props.stateContainer]);
+    return dataStateContainer.refetch$.pipe(map(() => Date.now()));
+  }, [dataStateContainer]);
   const lastReloadRequestTime = useObservable(lastReloadRequestTime$);
 
   const totalHitsComplete$ = useMemo(() => {
-    return props.stateContainer.dataState.data$.totalHits$.pipe(
+    return dataStateContainer.data$.totalHits$.pipe(
       filter((d) => d.fetchStatus === FetchStatus.COMPLETE),
       map((d) => d.result)
     );
-  }, [props.stateContainer]);
+  }, [dataStateContainer]);
   const totalHits = useObservable(totalHitsComplete$);
 
   const dispatch = useInternalStateDispatch();

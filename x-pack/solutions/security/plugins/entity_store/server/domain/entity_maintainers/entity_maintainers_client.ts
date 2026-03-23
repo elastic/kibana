@@ -18,6 +18,7 @@ import {
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import type { EntityMaintainerState } from '../../tasks/entity_maintainers/types';
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
+import type { TelemetryReporter } from '../../telemetry/events';
 
 interface TaskSnapshot {
   runs: number;
@@ -38,17 +39,20 @@ interface EntityMaintainersClientDeps {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   namespace: string;
+  analytics: TelemetryReporter;
 }
 
 export class EntityMaintainersClient {
   private readonly logger: Logger;
   private readonly taskManager: TaskManagerStartContract;
   private readonly namespace: string;
+  private readonly analytics: TelemetryReporter;
 
   constructor(deps: EntityMaintainersClientDeps) {
     this.logger = deps.logger;
     this.taskManager = deps.taskManager;
     this.namespace = deps.namespace;
+    this.analytics = deps.analytics;
   }
 
   public async start(id: string, request: KibanaRequest): Promise<void> {
@@ -63,6 +67,7 @@ export class EntityMaintainersClient {
         namespace: this.namespace,
         logger: this.logger,
         request,
+        analytics: this.analytics,
       });
     } catch (error) {
       this.logger.error(`Failed to start entity maintainer task: ${id}`, { error });
@@ -109,6 +114,7 @@ export class EntityMaintainersClient {
         request,
         namespace: this.namespace,
         logger: this.logger,
+        analytics: this.analytics,
       });
     } catch (error) {
       this.logger.error(`Failed to stop entity maintainer task: ${id}`, { error });
@@ -141,6 +147,7 @@ export class EntityMaintainersClient {
             id,
             namespace: this.namespace,
             logger: this.logger,
+            analytics: this.analytics,
           });
         })
       );

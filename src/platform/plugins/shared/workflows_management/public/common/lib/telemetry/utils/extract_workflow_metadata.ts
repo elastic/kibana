@@ -24,6 +24,22 @@ function isConnectorStep(step: unknown): boolean {
   );
 }
 
+const ON_FAILURE_KEYS = ['on-failure', 'iteration-on-failure'] as const;
+
+function getFallbackSteps(step: Record<string, unknown>): Array<WorkflowYaml['steps']> {
+  const result: Array<WorkflowYaml['steps']> = [];
+  for (const key of ON_FAILURE_KEYS) {
+    const container = step[key];
+    if (container && typeof container === 'object' && 'fallback' in container) {
+      const { fallback } = container as { fallback: unknown };
+      if (Array.isArray(fallback)) {
+        result.push(fallback as WorkflowYaml['steps']);
+      }
+    }
+  }
+  return result;
+}
+
 /**
  * Metadata extracted from a workflow definition for telemetry purposes
  */
@@ -157,8 +173,8 @@ export function extractWorkflowMetadata(
         if ('else' in step && Array.isArray(step.else)) {
           countStepTypesRecursive(step.else);
         }
-        if ('fallback' in step && Array.isArray(step.fallback)) {
-          countStepTypesRecursive(step.fallback);
+        for (const fb of getFallbackSteps(step as Record<string, unknown>)) {
+          countStepTypesRecursive(fb);
         }
       }
     }
@@ -269,8 +285,8 @@ function findStepRecursive(
       const found = findStepRecursive(step.else, stepId);
       if (found) return found;
     }
-    if ('fallback' in step && Array.isArray(step.fallback)) {
-      const found = findStepRecursive(step.fallback, stepId);
+    for (const fb of getFallbackSteps(step as Record<string, unknown>)) {
+      const found = findStepRecursive(fb, stepId);
       if (found) return found;
     }
   }

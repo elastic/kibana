@@ -209,7 +209,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       buttonRef={filterButtonRef}
       data-test-subj="filtersDropdown"

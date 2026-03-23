@@ -109,7 +109,11 @@ export type AwsCredentialsType =
   | 'cloud_formation';
 
 // GCP types
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json' | 'credentials-none';
+export type GcpCredentialsType =
+  | 'credentials-file'
+  | 'credentials-json'
+  | 'credentials-none'
+  | 'cloud_connectors';
 
 export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];

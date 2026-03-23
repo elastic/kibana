@@ -85,6 +85,7 @@ export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'integer',
   'long',
   'aggregate_metric_double',
+  'exponential_histogram',
   'tdigest',
 ];
 const ACOS_TYPES = [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'] as const;

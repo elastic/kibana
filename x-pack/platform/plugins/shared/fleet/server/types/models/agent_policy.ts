@@ -289,6 +289,22 @@ export const AgentPolicySchemaV3 = schema
     has_agent_version_conditions: schema.maybe(schema.boolean()),
   });
 
+export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends({
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+});
+
 export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
@@ -346,6 +362,19 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   version: schema.maybe(schema.string()),
   is_preconfigured: schema.maybe(schema.boolean()),
   schema_version: schema.maybe(schema.string()),
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string(), { maxSize: 10000 }),

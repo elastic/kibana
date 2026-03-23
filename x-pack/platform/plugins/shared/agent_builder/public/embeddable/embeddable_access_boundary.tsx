@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useEffect, useState } from 'react';
+import React, { type ReactNode, useEffect, useRef, useState } from 'react';
 import {
   EuiLoadingSpinner,
   EuiFlyoutHeader,
@@ -36,6 +36,17 @@ interface AccessDeniedWrapperProps {
 
 const AccessDeniedWrapper: React.FC<AccessDeniedWrapperProps> = ({ children, onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!closeButtonRef.current) return;
+
+    const timeoutId = setTimeout(() => {
+      closeButtonRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
@@ -64,6 +75,7 @@ const AccessDeniedWrapper: React.FC<AccessDeniedWrapperProps> = ({ children, onC
       <EuiFlyoutHeader css={headerStyles}>
         {onClose && (
           <EuiButtonIcon
+            buttonRef={closeButtonRef}
             iconType="cross"
             aria-label={closeButtonLabel}
             onClick={onClose}

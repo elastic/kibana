@@ -56,7 +56,7 @@ export const yourSourceDataSource: DataSource = {
   id: 'your-source',                    // Lowercase, use hyphens
   name: 'Your Source',                  // Display name
   description: i18n.translate('xpack.dataSources.yourSource.description', {
-    defaultMessage: 'Connect to Your Source to search and retrieve data.',
+    defaultMessage: 'Search items, list collections, and retrieve details from Your Source',
   }),
 
   iconType: '.your-source',             // Must match ConnectorIconsMap key
@@ -188,7 +188,7 @@ export const mcpBasedDataSource: DataSource = {
   id: 'mcp-source',
   name: 'MCP Source',
   description: i18n.translate('xpack.dataSources.mcpSource.description', {
-    defaultMessage: 'Connect via MCP server.',
+    defaultMessage: 'Search items, list collections, and retrieve details from MCP Source',
   }),
 
   iconType: '.mcp-source',

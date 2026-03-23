@@ -26,7 +26,6 @@ import {
 } from '@elastic/esql';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
@@ -202,15 +201,10 @@ export const getCommaAndPipe = (
   }
   // special case: cursor right after a column name
   else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
-    const { fragment, rangeToReplace } = getFragmentData(innerText);
+    pipeSuggestion.text = ` ${pipeSuggestion.text}`;
+    pipeSuggestion.preserveTypedPrefix = true;
 
-    pipeSuggestion.filterText = fragment;
-    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
-    pipeSuggestion.rangeToReplace = rangeToReplace;
-
-    commaSuggestion.filterText = fragment;
-    commaSuggestion.text = fragment + commaSuggestion.text;
-    commaSuggestion.rangeToReplace = rangeToReplace;
+    commaSuggestion.preserveTypedPrefix = true;
   }
 
   return [pipeSuggestion, commaSuggestion];

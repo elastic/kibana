@@ -179,6 +179,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             apiUrl: swimlaneSimulatorURL,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 

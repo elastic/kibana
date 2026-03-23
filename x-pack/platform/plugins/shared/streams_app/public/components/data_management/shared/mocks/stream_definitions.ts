@@ -13,6 +13,7 @@ export const createMockClassicStreamDefinition = (
   overrides: Partial<Streams.ClassicStream.GetResponse> = {}
 ): Streams.ClassicStream.GetResponse => ({
   stream: {
+    type: 'classic',
     name: 'logs.classic-test',
     description: '',
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -55,6 +56,7 @@ export const createMockWiredStreamDefinition = (
   overrides: Partial<Streams.WiredStream.GetResponse> = {}
 ): Streams.WiredStream.GetResponse => ({
   stream: {
+    type: 'wired',
     name: 'logs.wired-test',
     description: '',
     updated_at: '2024-01-01T00:00:00.000Z',

@@ -174,7 +174,8 @@ async function suggestAdditionalSources(
   const lastIndex = indexes[indexes.length - 1];
   const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
 
-  // Check for METADATA overlap (only when not typing index name)
+  // Only use overlap here to decide when to show `METADATA`.
+  // The replacement range is still handled centrally.
   if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
     return [metadataSuggestion];
   }

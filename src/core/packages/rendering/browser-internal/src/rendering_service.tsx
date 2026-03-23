@@ -28,7 +28,6 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
-import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
@@ -93,12 +92,9 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { featureFlags } = renderCoreDeps;
-    const debugLayout = getLayoutDebugFlag(featureFlags);
-
     const startServices = this.contextDeps.getValue()!;
 
-    const layout: LayoutService = new GridLayout(renderCoreDeps, { debug: debugLayout });
+    const layout: LayoutService = new GridLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();
 

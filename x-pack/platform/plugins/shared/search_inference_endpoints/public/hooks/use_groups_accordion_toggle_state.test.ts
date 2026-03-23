@@ -18,9 +18,9 @@ describe('useGroupsAccordionToggleState', () => {
       useGroupsAccordionToggleState(InferenceEndpoints, GroupByOptions.Model)
     );
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(true);
-    expect(isGroupOpen(result.current.groupToggleState, 'anthropic')).toBe(true);
-    expect(isGroupOpen(result.current.groupToggleState, 'openai')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Anthropic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'OpenAI')).toBe(true);
   });
 
   it('should collapse all groups when collapseAll is called', () => {
@@ -32,9 +32,9 @@ describe('useGroupsAccordionToggleState', () => {
       result.current.collapseAll();
     });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(false);
-    expect(isGroupOpen(result.current.groupToggleState, 'anthropic')).toBe(false);
-    expect(isGroupOpen(result.current.groupToggleState, 'openai')).toBe(false);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(false);
+    expect(isGroupOpen(result.current.groupToggleState, 'Anthropic')).toBe(false);
+    expect(isGroupOpen(result.current.groupToggleState, 'OpenAI')).toBe(false);
   });
 
   it('should expand all groups when expandAll is called after collapseAll', () => {
@@ -49,8 +49,8 @@ describe('useGroupsAccordionToggleState', () => {
       result.current.expandAll();
     });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(true);
-    expect(isGroupOpen(result.current.groupToggleState, 'anthropic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Anthropic')).toBe(true);
   });
 
   it('should toggle a single group with toggleGroup', () => {
@@ -59,17 +59,17 @@ describe('useGroupsAccordionToggleState', () => {
     );
 
     act(() => {
-      result.current.toggleGroup('elastic', false);
+      result.current.toggleGroup('Elastic', false);
     });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(false);
-    expect(isGroupOpen(result.current.groupToggleState, 'anthropic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(false);
+    expect(isGroupOpen(result.current.groupToggleState, 'Anthropic')).toBe(true);
 
     act(() => {
-      result.current.toggleGroup('elastic', true);
+      result.current.toggleGroup('Elastic', true);
     });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(true);
   });
 
   it('should reset all groups to open when groupBy changes from Model to Service', () => {
@@ -87,14 +87,14 @@ describe('useGroupsAccordionToggleState', () => {
       result.current.collapseAll();
     });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(false);
-    expect(isGroupOpen(result.current.groupToggleState, 'anthropic')).toBe(false);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(false);
+    expect(isGroupOpen(result.current.groupToggleState, 'Anthropic')).toBe(false);
 
     rerender({ groupBy: GroupByOptions.Service });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(true);
-    expect(isGroupOpen(result.current.groupToggleState, 'elasticsearch')).toBe(true);
-    expect(result.current.groupToggleState).not.toHaveProperty('anthropic');
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elasticsearch')).toBe(true);
+    expect(result.current.groupToggleState).not.toHaveProperty('Anthropic');
   });
 
   it('should reset all groups to open when groupBy changes from Service to Model', () => {
@@ -117,8 +117,8 @@ describe('useGroupsAccordionToggleState', () => {
 
     rerender({ groupBy: GroupByOptions.Model });
 
-    expect(isGroupOpen(result.current.groupToggleState, 'elastic')).toBe(true);
-    expect(isGroupOpen(result.current.groupToggleState, 'anthropic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Elastic')).toBe(true);
+    expect(isGroupOpen(result.current.groupToggleState, 'Anthropic')).toBe(true);
     expect(result.current.groupToggleState).not.toHaveProperty('elasticsearch');
   });
 });

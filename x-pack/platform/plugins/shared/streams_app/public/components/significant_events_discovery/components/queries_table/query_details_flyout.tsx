@@ -28,6 +28,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -84,6 +85,7 @@ export function QueryDetailsFlyout({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [title, setTitle] = useState(item.query.title);
+  const [description, setDescription] = useState(item.query.description ?? '');
   const [query, setQuery] = useState(getQueryInputValue(item));
   const [severityScore, setSeverityScore] = useState(item.query.severity_score);
 
@@ -92,6 +94,7 @@ export function QueryDetailsFlyout({
     setIsDeleteModalVisible(false);
     setIsEditMode(false);
     setTitle(item.query.title);
+    setDescription(item.query.description ?? '');
     setQuery(getQueryInputValue(item));
     setSeverityScore(item.query.severity_score);
   }, [item]);
@@ -109,6 +112,7 @@ export function QueryDetailsFlyout({
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setTitle(item.query.title);
+    setDescription(item.query.description ?? '');
     setQuery(getQueryInputValue(item));
     setSeverityScore(item.query.severity_score);
   };
@@ -117,6 +121,7 @@ export function QueryDetailsFlyout({
       {
         ...item.query,
         title: title.trim(),
+        description: description.trim(),
         esql: { query: query.trim() },
         severity_score: severityScore,
       },
@@ -132,6 +137,12 @@ export function QueryDetailsFlyout({
         <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
           {getDisplayQueryValue(item)}
         </EuiCodeBlock>
+      ),
+    },
+    {
+      title: DESCRIPTION_LABEL,
+      description: (
+        <EuiText size="s">{item.query.description || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
       ),
     },
     {
@@ -303,6 +314,17 @@ export function QueryDetailsFlyout({
                     disabled={isSaving}
                   />
                 </EuiFormRow>
+                <EuiFormRow label={DESCRIPTION_LABEL}>
+                  <EuiTextArea
+                    data-test-subj="queriesTableQueryDetailsFlyoutDescriptionInput"
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    disabled={isSaving}
+                    rows={2}
+                    resize="vertical"
+                    placeholder={DESCRIPTION_PLACEHOLDER}
+                  />
+                </EuiFormRow>
                 <StreamsESQLEditor
                   query={{ esql: query }}
                   onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
@@ -398,6 +420,16 @@ const QUERY_NAME_LABEL = i18n.translate(
 const QUERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
+);
+
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionLabel',
+  { defaultMessage: 'Description' }
+);
+
+const DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionPlaceholder',
+  { defaultMessage: 'Describe what this query detects and why it matters' }
 );
 
 const SEVERITY_LABEL = i18n.translate(

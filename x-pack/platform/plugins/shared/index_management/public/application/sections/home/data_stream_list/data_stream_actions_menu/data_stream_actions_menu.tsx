@@ -23,7 +23,7 @@ export const DataStreamActionsMenu = ({ dataStreamActions, selectedDataStreamsCo
     <EuiButton
       data-test-subj="dataStreamActionsPopoverButton"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       fill={true}
     >

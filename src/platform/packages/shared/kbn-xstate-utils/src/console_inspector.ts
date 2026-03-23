@@ -120,7 +120,7 @@ const isActorRef = (actorRefLike: ActorRefLike): actorRefLike is AnyActorRef =>
   'id' in actorRefLike;
 
 const keywordStyle = 'font-weight: bold';
-const styleAsKeyword = (value: any) => [keywordStyle, value, ''] as const;
+const styleAsKeyword = (value: unknown) => [keywordStyle, value, ''] as const;
 
 const actorStyle = 'font-weight: bold; text-decoration: underline';
-const styleAsActor = (value: any) => [actorStyle, value, ''] as const;
+const styleAsActor = (value: unknown) => [actorStyle, value, ''] as const;

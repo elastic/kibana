@@ -24,7 +24,10 @@ export const limitCommand = {
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),
-    declaration: 'LIMIT max_number_of_rows',
-    examples: ['… | LIMIT 100', '… | LIMIT 1'],
+    preview: true,
+    // TODO: Remove this temporary autocomplete gate once LIMIT BY is available outside tests.
+    limitByHidden: process.env.NODE_ENV === 'test' ? false : true,
+    declaration: 'LIMIT max_number_of_rows [BY grouping_expression1[, ..., grouping_expressionN]]',
+    examples: ['… | LIMIT 100', '… | LIMIT 1', '… | LIMIT 10 BY category'],
   },
 };

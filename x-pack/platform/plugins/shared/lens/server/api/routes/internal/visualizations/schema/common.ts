@@ -41,5 +41,5 @@ export const lensResponseItemSchema = schema.object(
     data: schema.oneOf([lensApiStateSchema, lensItemDataSchemaV2]),
     meta: lensItemMetaSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'visualizationResponse' } }
 );

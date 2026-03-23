@@ -24,7 +24,6 @@ import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
-import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -107,14 +106,8 @@ export function AlertActions(
           {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
-          isAlertDetailsEnabled={true}
           resolveRulePagePath={(ruleId, currentPageId) =>
             currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
-          }
-          resolveAlertPagePath={(alertId, currentPageId) =>
-            currentPageId !== ALERT_DETAILS_PAGE_ID
-              ? paths.observability.alertDetails(alertId)
-              : null
           }
         />
       ),

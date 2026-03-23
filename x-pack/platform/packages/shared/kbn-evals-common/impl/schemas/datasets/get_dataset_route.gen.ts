@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type DatasetExample = z.infer<typeof DatasetExample>;
 export const DatasetExample = z.object({

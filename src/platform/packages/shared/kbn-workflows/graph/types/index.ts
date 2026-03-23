@@ -24,6 +24,8 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -49,6 +51,12 @@ export type {
   EnterWhileNodeConfigurationSchema,
 } from './nodes/loop_nodes';
 export type {
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
+} from './nodes/flow_control_nodes';
+export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
   ExitRetryNode,
@@ -73,6 +81,23 @@ export type {
   ExitTimeoutZoneNode,
 } from './nodes/on_failure_nodes';
 
+export type {
+  EnterSwitchNode,
+  EnterSwitchNodeSchema,
+  EnterSwitchNodeConfiguration,
+  EnterSwitchNodeConfigurationSchema,
+  EnterCaseBranchNode,
+  EnterCaseBranchNodeSchema,
+  ExitCaseBranchNode,
+  ExitCaseBranchNodeSchema,
+  EnterDefaultBranchNode,
+  EnterDefaultBranchNodeSchema,
+  ExitDefaultBranchNode,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNode,
+  ExitSwitchNodeSchema,
+} from './nodes/switch_nodes';
+
 export type { GraphNodeUnion } from './nodes/union';
 export type { WorkflowGraphType } from './graph';
 
@@ -83,6 +108,7 @@ export {
   isKibana,
   isWait,
   isWaitForInput,
+  isWorkflowOutput,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,
@@ -101,5 +127,15 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isEnterSwitch,
+  isExitSwitch,
+  isEnterCaseBranch,
+  isExitCaseBranch,
+  isEnterDefaultBranch,
+  isExitDefaultBranch,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
   shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';

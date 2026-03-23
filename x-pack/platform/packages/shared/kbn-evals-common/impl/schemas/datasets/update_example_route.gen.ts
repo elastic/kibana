@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type UpdateExamplePayload = z.infer<typeof UpdateExamplePayload>;
 export const UpdateExamplePayload = z.object({

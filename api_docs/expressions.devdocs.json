@@ -13381,7 +13381,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -24373,7 +24373,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -33890,7 +33890,7 @@
               "\nThe Kibana normalized type of the column"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "lineNumber": 69,
@@ -40816,7 +40816,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,

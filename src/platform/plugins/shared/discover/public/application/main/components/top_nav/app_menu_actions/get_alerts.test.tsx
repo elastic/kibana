@@ -34,9 +34,11 @@ const getAlertsMenuItem = async ({
 
   await toolkit.initializeTabs();
 
-  const { stateContainer } = await toolkit.initializeSingleTab({
+  await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
+
+  const currentTab = toolkit.getCurrentTab();
 
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
@@ -51,7 +53,8 @@ const getAlertsMenuItem = async ({
   return getAlertsAppMenuItem({
     discoverParams: discoverParamsMock,
     services,
-    stateContainer,
+    tabId: currentTab.id,
+    getState: toolkit.internalState.getState,
   });
 };
 

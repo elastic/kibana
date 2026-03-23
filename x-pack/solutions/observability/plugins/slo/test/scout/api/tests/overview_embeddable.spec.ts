@@ -65,7 +65,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         expect(response.body.id).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.title).toBe(dashboardTitle);
@@ -110,7 +110,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slo_instance_id).toBe('*');
       }
@@ -146,7 +146,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         expect(response.body.id).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.title).toBe(dashboardTitle);
@@ -190,7 +190,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.type).toBe(SLO_OVERVIEW_EMBEDDABLE_ID);
         expect(createdPanel.config.overview_mode).toBe('groups');

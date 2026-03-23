@@ -23,7 +23,6 @@ export const DiscoverHistogramLayout = ({
 }: DiscoverMainContentProps) => {
   const chartPortalNode = useCurrentChartPortalNode();
   const { localStorageKeyPrefix, layoutPropsMap } = useCurrentTabRuntimeState(
-    mainContentProps.stateContainer.runtimeStateManager,
     (tab) => tab.unifiedHistogramConfig$
   );
   const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];

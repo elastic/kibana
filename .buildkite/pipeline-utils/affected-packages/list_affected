@@ -1,0 +1,108 @@
+#!/usr/bin/env node
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+const path = require('path');
+const parseArgs = require('minimist');
+
+require('ts-node').register({
+  transpileOnly: true,
+  compilerOptions: {
+    module: 'commonjs',
+  },
+  project: path.join(__dirname, '../../tsconfig.json'),
+});
+
+const { getAffectedPackages } = require(path.join(__dirname, './index'));
+
+const HELP_TEXT = `
+Usage: list_affected [options]
+
+Precedence: CLI flags > environment variables > defaults
+
+Options:
+  --deep                  Include downstream dependencies
+  --json                  Output as JSON array (default: one per line)
+  --merge-base <revision> Git revision to compare against
+  --strategy <git|moon>   Strategy to use
+  --ignore <glob>         (git) Exclude changed files matching glob (repeatable)
+  --ignore-uncategorized  (git) Ignore changes that are not categorized into a module (default: false)
+  --help, -h              Show this help message
+
+Environment variables:
+  AFFECTED_STRATEGY      Strategy (default: git)
+  AFFECTED_DOWNSTREAM    Include downstream: true | false (default: false)
+  AFFECTED_IGNORE        Comma-separated glob patterns to exclude
+  AFFECTED_IGNORE_UNCATEGORIZED_CHANGES Ignore changes that are not categorized into a module (default: false)
+  GITHUB_PR_MERGE_BASE   Merge base commit (default: origin/main)
+
+Examples:
+  list_affected
+  list_affected --deep --json
+  list_affected --merge-base HEAD~5
+  list_affected --ignore '**/*.md' --ignore '**/*.txt'
+  AFFECTED_IGNORE='**/*.md,docs/**' list_affected
+`.trim();
+
+async function main() {
+  const argv = parseArgs(process.argv.slice(2), {
+    boolean: ['deep', 'json', 'help', 'ignore-uncategorized'],
+    string: ['merge-base', 'strategy', 'ignore'],
+    alias: { h: 'help' },
+  });
+
+  if (argv.help) {
+    console.log(HELP_TEXT);
+    process.exit(0);
+  }
+
+  const strategy = argv.strategy || process.env.AFFECTED_STRATEGY || 'git';
+  if (strategy !== 'git' && strategy !== 'moon') {
+    console.error(`Invalid strategy: ${strategy}. Must be 'git' or 'moon'.`);
+    process.exit(1);
+  }
+
+  const includeDownstream = argv.deep || process.env.AFFECTED_DOWNSTREAM === 'true';
+  const mergeBase = argv['merge-base'] || process.env.GITHUB_PR_MERGE_BASE || 'origin/main';
+
+  const flagIgnore = [].concat(argv.ignore || []).filter(Boolean);
+  const envIgnore = (process.env.AFFECTED_IGNORE || '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const ignorePatterns = flagIgnore.length > 0 ? flagIgnore : envIgnore;
+  const ignoreUncategorizedChanges =
+    argv['ignore-uncategorized'] || process.env.AFFECTED_IGNORE_UNCATEGORIZED_CHANGES !== 'false';
+
+  try {
+    const affectedPackages = await getAffectedPackages(mergeBase, {
+      strategy,
+      includeDownstream,
+      logging: false,
+      ignorePatterns,
+      ignoreUncategorizedChanges,
+    });
+
+    const packageList = Array.from(affectedPackages || []).sort();
+
+    if (argv.json) {
+      console.log(JSON.stringify(packageList, null, 2));
+    } else {
+      packageList.forEach((pkg) => console.log(pkg));
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Error getting affected packages:', error.message);
+    process.exit(1);
+  }
+}
+
+main();

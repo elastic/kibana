@@ -103,6 +103,10 @@ describe('getConnectorTypeSuggestions', () => {
             label: 'wait',
             kind: monaco.languages.CompletionItemKind.Constant,
           }),
+          expect.objectContaining({
+            label: 'waitForInput',
+            kind: monaco.languages.CompletionItemKind.Event,
+          }),
         ])
       );
     });
@@ -189,7 +193,7 @@ describe('getConnectorTypeSuggestions', () => {
       const result = getConnectorTypeSuggestions('if', mockRange);
       const ifSuggestion = result.find((s) => s.label === 'if');
       expect(ifSuggestion?.insertText).toBe('if:\n  # snippet');
-      expect(generateBuiltInStepSnippet).toHaveBeenCalledWith('if', {});
+      expect(generateBuiltInStepSnippet).toHaveBeenCalledWith('if', {}, undefined);
     });
 
     it('should generate snippets for connectors', () => {

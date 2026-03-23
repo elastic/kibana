@@ -72,7 +72,7 @@ describe('Cloud Plugin', () => {
         parseDeploymentIdFromDeploymentUrlMock.mockReturnValue('some-deployment-id');
         const { setup } = setupPlugin();
         expect(setup.deploymentId).toBe('some-deployment-id');
-        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledTimes(2); // called when registering the analytic context too
+        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledTimes(1);
         expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledWith(
           baseConfig.deployment_url
         );

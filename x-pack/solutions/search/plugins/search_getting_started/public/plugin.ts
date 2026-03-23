@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
@@ -27,6 +33,12 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
+  private readonly kibanaVersion: string;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+  }
+
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,
@@ -35,6 +47,7 @@ export class SearchGettingStartedPlugin
     deps: {}
   ): SearchGettingStartedPluginSetup {
     const queryClient = new QueryClient({});
+    const kibanaVersion = this.kibanaVersion;
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
@@ -51,7 +64,7 @@ export class SearchGettingStartedPlugin
           usageCollection: depsStart.usageCollection,
         };
 
-        return renderApp(coreStart, services, element, queryClient);
+        return renderApp(coreStart, services, element, queryClient, kibanaVersion);
       },
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],

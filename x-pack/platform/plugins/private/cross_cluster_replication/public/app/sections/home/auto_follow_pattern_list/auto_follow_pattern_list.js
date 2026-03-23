@@ -117,7 +117,7 @@ export class AutoFollowPatternList extends PureComponent {
           <EuiButton
             {...reactRouterNavigate(this.props.history, `/auto_follow_patterns/add`)}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="createAutoFollowPatternButton"
           >
             <FormattedMessage

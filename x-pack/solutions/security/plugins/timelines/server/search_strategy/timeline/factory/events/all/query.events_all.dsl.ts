@@ -7,6 +7,7 @@
 
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type {
   SortItem,
   TimelineEventsAllOptions,
@@ -80,7 +81,7 @@ export const buildTimelineEventsAllQuery = ({
         filter,
       },
     },
-    runtime_mappings: runtimeMappings,
+    runtime_mappings: runtimeMappings as MappingRuntimeFields | undefined,
     from: activePage * querySize,
     size: querySize,
     track_total_hits: true,

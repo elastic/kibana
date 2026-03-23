@@ -100,7 +100,10 @@ describe('useGetIntegrationById', () => {
     // Suppress unrelated React Query errors
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    mockGetIntegrationById.mockRejectedValue(new Error('Not found'));
+    // Use 404-shaped error so the hook does not retry (hook disables retry for 404)
+    const notFoundError = new Error('Not found') as Error & { response?: { status?: number } };
+    notFoundError.response = { status: 404 };
+    mockGetIntegrationById.mockRejectedValue(notFoundError);
 
     const { result } = renderHook(() => useGetIntegrationById('missing-id'), {
       wrapper: createWrapper(),

@@ -10,6 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import { FATAL_REASON_REQUEST_ENTITY_TOO_LARGE } from '../../../common/constants';
 import { throwBadResponse } from '../../../model/helpers';
+import { delayRetryState } from '../../../model/retry_state';
 import { isTypeof } from '../../actions';
 import type { ModelStage } from '../types';
 
@@ -24,6 +25,8 @@ export const outdatedDocumentsSearchBulkIndex: ModelStage<
         controlState: 'FATAL',
         reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
       };
+    } else if (isTypeof(res.left, 'unavailable_shards_exception')) {
+      return delayRetryState(state, res.left.message, Number.MAX_SAFE_INTEGER);
     } else if (
       isTypeof(res.left, 'target_index_had_write_block') ||
       isTypeof(res.left, 'index_not_found_exception')

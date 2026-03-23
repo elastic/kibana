@@ -15,6 +15,7 @@ import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { merge, range as lodashRange } from 'lodash';
 import type { Scenario } from '../cli/scenario';
+import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
@@ -24,11 +25,9 @@ const ENVIRONMENTS = ['production', 'development'].map((env) =>
 );
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
-  const {
-    services: numServices = 25,
-    instances: numInstances = 10,
-    txGroups: numTxGroups = 25,
-  } = scenarioOpts ?? {};
+  const numServices = getNumberOpt(scenarioOpts, 'services', 25);
+  const numInstances = getNumberOpt(scenarioOpts, 'instances', 10);
+  const numTxGroups = getNumberOpt(scenarioOpts, 'txGroups', 25);
 
   return {
     bootstrap: async ({ apmEsClient }) => {

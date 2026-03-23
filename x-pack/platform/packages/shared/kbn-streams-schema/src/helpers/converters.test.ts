@@ -18,6 +18,7 @@ describe('Converter Helpers', () => {
       const request: Streams.ClassicStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -38,6 +39,7 @@ describe('Converter Helpers', () => {
       const request: Streams.WiredStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -58,6 +60,7 @@ describe('Converter Helpers', () => {
       const request: Streams.QueryStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
+          type: 'query',
           description: '',
           query: {
             view: '$.my-query-stream',
@@ -79,6 +82,7 @@ describe('Converter Helpers', () => {
     it('converts classic streams', () => {
       const getResponse: Streams.ClassicStream.GetResponse = {
         stream: {
+          type: 'classic',
           name: 'classic-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -120,6 +124,7 @@ describe('Converter Helpers', () => {
     it('converts wired streams', () => {
       const getResponse: Streams.WiredStream.GetResponse = {
         stream: {
+          type: 'wired',
           name: 'wired-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -167,6 +172,7 @@ describe('Converter Helpers', () => {
     it('converts query streams', () => {
       const getResponse: Streams.QueryStream.GetResponse = {
         stream: {
+          type: 'query',
           name: 'my-query-stream',
           description: '',
           updated_at: new Date().toISOString(),

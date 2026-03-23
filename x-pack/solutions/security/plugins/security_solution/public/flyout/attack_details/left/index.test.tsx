@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { AttackDetailsLeftPanel } from '.';
 import { AttackDetailsProvider } from '../context';
+import { NOTES_TAB_TEST_ID } from '../constants/test_ids';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../shared/components/flyout_header', () => ({
   FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
@@ -21,6 +23,10 @@ jest.mock('../../shared/components/flyout_body', () => ({
   FlyoutBody: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="flyout-body">{children}</div>
   ),
+}));
+
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
 }));
 
 jest.mock('../hooks/use_attack_details', () => {
@@ -51,8 +57,23 @@ jest.mock('../hooks/use_attack_details', () => {
   };
 });
 
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openLeftPanel: jest.fn(),
+  }),
+  useExpandableFlyoutState: () => ({
+    left: { path: { tab: 'insights', subTab: 'entity' } },
+  }),
+}));
+
+jest.mock('../../shared/components/notes_details_content', () => ({
+  NotesDetailsContent: () => (
+    <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
+  ),
+}));
+
 jest.mock('../hooks/use_header_data', () => ({
-  useHeaderData: jest.fn().mockReturnValue({ timestamp: '2024-01-01T00:00:00Z' }),
+  useHeaderData: jest.fn().mockReturnValue({ timestamp: '' }),
 }));
 
 jest.mock('../hooks/use_attack_entities_lists', () => ({
@@ -64,28 +85,48 @@ jest.mock('../hooks/use_attack_entities_lists', () => ({
   }),
 }));
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn().mockReturnValue({
-    openLeftPanel: jest.fn(),
-  }),
-}));
+jest.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+const renderLeftPanel = (path?: { tab: string; subTab?: string }) =>
+  render(
+    <TestProviders>
+      <AttackDetailsProvider attackId="test-id" indexName=".alerts-security.alerts-default">
+        <AttackDetailsLeftPanel path={path} />
+      </AttackDetailsProvider>
+    </TestProviders>
+  );
 
 describe('AttackDetailsLeftPanel', () => {
+  beforeEach(() => {
+    useUserPrivilegesMock.mockReturnValue({
+      notesPrivileges: { read: true, crud: true },
+    });
+  });
+
   it('renders when provided with context via AttackDetailsProvider', () => {
-    render(
-      <TestProviders>
-        <AttackDetailsProvider attackId="test-id" indexName=".alerts-security.alerts-default">
-          <AttackDetailsLeftPanel />
-        </AttackDetailsProvider>
-      </TestProviders>
-    );
+    renderLeftPanel();
 
     expect(screen.getByTestId('flyout-header')).toBeInTheDocument();
     expect(screen.getByTestId('flyout-body')).toBeInTheDocument();
     expect(screen.getByText('Insights')).toBeInTheDocument();
+  });
+
+  it('renders Notes tab when user has notes read privilege', () => {
+    renderLeftPanel();
+
+    expect(screen.getByText('Notes')).toBeInTheDocument();
+    expect(screen.getByTestId(NOTES_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('hides Notes tab when user lacks notes read privilege', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      notesPrivileges: { read: false, crud: false },
+    });
+
+    renderLeftPanel();
+
+    expect(screen.queryByText('Notes')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(NOTES_TAB_TEST_ID)).not.toBeInTheDocument();
   });
 });

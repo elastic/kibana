@@ -19,13 +19,48 @@ import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
+export type CreateWorkflowInsightRequestBody = z.infer<typeof CreateWorkflowInsightRequestBody>;
+export const CreateWorkflowInsightRequestBody = z.object({
+  insightType: z.enum(['incompatible_antivirus', 'policy_response_failure']),
+});
+export type CreateWorkflowInsightRequestBodyInput = z.input<
+  typeof CreateWorkflowInsightRequestBody
+>;
+
+export type CreateWorkflowInsightResponse = z.infer<typeof CreateWorkflowInsightResponse>;
+export const CreateWorkflowInsightResponse = z.object({
+  executionId: z.string(),
+  conversationId: z.string().optional(),
+});
+export type GetPendingWorkflowInsightsRequestQuery = z.infer<
+  typeof GetPendingWorkflowInsightsRequestQuery
+>;
+export const GetPendingWorkflowInsightsRequestQuery = z.object({
+  insightType: z.enum(['incompatible_antivirus', 'policy_response_failure']).optional(),
+});
+export type GetPendingWorkflowInsightsRequestQueryInput = z.input<
+  typeof GetPendingWorkflowInsightsRequestQuery
+>;
+
+export type GetPendingWorkflowInsightsResponse = z.infer<typeof GetPendingWorkflowInsightsResponse>;
+export const GetPendingWorkflowInsightsResponse = z.object({
+  pending: z.array(
+    z.object({
+      executionId: z.string(),
+      status: z.string(),
+      conversationId: z.string().optional(),
+      insightType: z.string(),
+      '@timestamp': z.string(),
+    })
+  ),
+});
 export type GetWorkflowInsightsRequestQuery = z.infer<typeof GetWorkflowInsightsRequestQuery>;
 export const GetWorkflowInsightsRequestQuery = z.object({
   size: z.coerce.number().int().optional(),
   from: z.coerce.number().int().optional(),
   ids: ArrayFromString(z.string()).optional(),
   categories: ArrayFromString(z.literal('endpoint')).optional(),
-  types: ArrayFromString(z.enum(['incompatible_antivirus', 'noisy_process_tree'])).optional(),
+  types: ArrayFromString(z.enum(['incompatible_antivirus', 'policy_response_failure'])).optional(),
   sourceTypes: ArrayFromString(z.literal('llm-connector')).optional(),
   sourceIds: ArrayFromString(z.string()).optional(),
   targetTypes: ArrayFromString(z.literal('endpoint')).optional(),
@@ -50,7 +85,7 @@ export const UpdateWorkflowInsightRequestBody = z.object({
   '@timestamp': z.string().optional(),
   message: z.string().optional(),
   category: z.literal('endpoint').optional(),
-  type: z.enum(['incompatible_antivirus', 'noisy_process_tree']).optional(),
+  type: z.enum(['incompatible_antivirus', 'policy_response_failure']).optional(),
   source: z
     .object({
       type: z.literal('llm-connector').optional(),

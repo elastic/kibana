@@ -24,7 +24,7 @@ exports[`TopNavMenu Should render emphasized item which should be clickable 1`] 
   color="primary"
   fill={true}
   iconSide="right"
-  iconType="beaker"
+  iconType="flask"
   isDisabled={false}
   onClick={[Function]}
   size="s"

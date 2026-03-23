@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,8 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
+import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
@@ -34,9 +36,29 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
+  const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
+  const { updatePersistedConversationId } = usePersistedConversationId({});
+
+  const openSidebarConversation = useCallback(() => {
+    if (conversationId) {
+      updatePersistedConversationId(conversationId);
+    }
+    openSidebarConversationInternal();
+  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
+
+  // Track previous conversation ID to detect changes
+  const prevConversationIdRef = useRef(conversationId);
+
+  // Close canvas when conversation ID changes
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      closeCanvas();
+      prevConversationIdRef.current = conversationId;
+    }
+  }, [conversationId, closeCanvas]);
 
   const updateOrigin = useCallback(
-    async (origin: unknown) => {
+    async (origin: string) => {
       if (!conversationId || !canvasState) {
         return;
       }
@@ -67,7 +89,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id]);
+  }, [canvasState?.attachment.id, canvasState?.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -82,10 +104,11 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         attachment: canvasState.attachment,
         isSidebar: canvasState.isSidebar,
         updateOrigin,
+        openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, updateOrigin, dynamicButtons]);
+  }, [canvasState, uiDefinition, updateOrigin, openSidebarConversation, dynamicButtons]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
@@ -127,13 +150,23 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         title={title}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
-        showPreviewBadge
+        previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        {uiDefinition.renderCanvasContent(
-          { attachment, isSidebar },
-          { registerActionButtons, updateOrigin }
-        )}
+        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+          {uiDefinition.renderCanvasContent(
+            {
+              attachment,
+              isSidebar,
+              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+            },
+            {
+              registerActionButtons,
+              updateOrigin,
+              closeCanvas,
+            }
+          )}
+        </React.Fragment>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

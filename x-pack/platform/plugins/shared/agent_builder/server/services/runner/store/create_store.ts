@@ -5,43 +5,17 @@
  * 2.0.
  */
 
-import type { Conversation, SkillSelection } from '@kbn/agent-builder-common';
-import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
-import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
 
-export const filterSkillsBySelection = <T extends { id: string; readonly: boolean }>(
-  skills: T[],
-  selection: SkillSelection[] | undefined
-): T[] => {
-  if (selection === undefined) {
-    return skills;
-  }
-  if (selection.length === 0) {
-    return [];
-  }
-  if (hasSkillSelectionWildcard(selection)) {
-    const explicitIds = new Set(getExplicitSkillIds(selection));
-    return skills.filter((skill) => skill.readonly || explicitIds.has(skill.id));
-  }
-  const explicitIds = new Set(getExplicitSkillIds(selection));
-  return skills.filter((skill) => explicitIds.has(skill.id));
-};
-
-export const createStore = ({
-  conversation,
-  skills,
-}: {
-  conversation?: Conversation;
-  skills: InternalSkillDefinition[];
-}) => {
+export const createStore = ({ conversation }: { conversation?: Conversation }) => {
   const filesystem = new VirtualFileSystem();
 
   const resultStore = createResultStore({ conversation });
-  const skillsStore = createSkillsStore({ skills });
+  const skillsStore = createSkillsStore({ skills: [] });
   filesystem.mount(resultStore.getVolume());
   filesystem.mount(skillsStore.getVolume());
 

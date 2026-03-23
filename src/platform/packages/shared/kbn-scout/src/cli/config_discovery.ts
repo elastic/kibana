@@ -12,6 +12,7 @@ import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
+import { markModulesAffectedStatus } from '../tests_discovery/affected_modules';
 import {
   filterModulesByScoutCiConfig,
   getScoutCiExcludedConfigs,
@@ -249,11 +250,18 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
+  const affectedModulesPath = flagsReader.string('affected-modules');
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
+
+  // Mark affected status when selective testing is enabled (all modules kept, isAffected set)
+  const modulesAfterAffectedMark = affectedModulesPath
+    ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
+    : modulesWithTests;
+
   // Filter modules by target tags and compute server run flags
-  const filteredModulesByTags = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModulesByTags = filterModulesByTargetTags(modulesAfterAffectedMark, targetTags);
   const filteredModules = filterModulesByCustomServerPaths(
     filteredModulesByTags,
     includeCustomServers
@@ -303,6 +311,9 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               - 'local-stateful-only': @local-stateful-* tags only
                               - 'mki': @cloud-serverless-* tags
                               - 'ech': @cloud-stateful-* tags
+    --affected-modules <file>  Path to a JSON file containing affected @kbn/ module IDs
+                              (produced by list_affected). All modules run; affected ones
+                              get "affected" prefix in Buildkite step (selective testing).
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -336,9 +347,12 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
+
+    # Selective testing: only configs for affected modules
+    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --save
   `,
   flags: {
-    string: ['target'],
+    string: ['target', 'affected-modules'],
     boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
     default: {
       target: 'all',

@@ -694,10 +694,11 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
+                  maximum: 2
+                  minimum: 0
                   type: number
               required:
                 - name
-                - description
                 - riskModifier
         required: true
       responses:
@@ -788,10 +789,11 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
+                  maximum: 2
+                  minimum: 0
                   type: number
               required:
                 - name
-                - description
                 - riskModifier
         required: true
       responses:
@@ -2781,6 +2783,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string

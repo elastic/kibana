@@ -19,6 +19,7 @@ export interface UseUnifiedHistoryConfig {
   kuery?: string;
   sourceFilters?: SourceFilter[];
   userIds?: string[];
+  tags?: string[];
   startDate?: string;
   endDate?: string;
   enabled?: boolean;
@@ -36,6 +37,7 @@ export const useUnifiedHistory = ({
   kuery,
   sourceFilters,
   userIds,
+  tags,
   startDate,
   endDate,
   enabled = true,
@@ -54,7 +56,7 @@ export const useUnifiedHistory = ({
   return useQuery(
     [
       UNIFIED_HISTORY_QUERY_KEY,
-      { pageSize, nextPage, kuery, sourceFilters, userIds, startDate, endDate },
+      { pageSize, nextPage, kuery, sourceFilters, userIds, tags, startDate, endDate },
     ],
     () =>
       http.get<UnifiedHistoryResponse>('/api/osquery/history', {
@@ -67,6 +69,8 @@ export const useUnifiedHistory = ({
             ? { sourceFilters: sourceFilters.join(',') }
             : {}),
           ...(userIds && userIds.length > 0 ? { userIds: userIds.join(',') } : {}),
+          // JSON.stringify instead of join(',') because tag values themselves may contain commas
+          ...(tags && tags.length > 0 ? { tags: JSON.stringify(tags) } : {}),
           ...(startDate ? { startDate } : {}),
           ...(endDate ? { endDate } : {}),
         },

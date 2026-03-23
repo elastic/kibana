@@ -17,7 +17,8 @@ import type {
   LensSerializedAPIConfig,
 } from '@kbn/lens-common-2';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
-import { isTextBasedLanguage, stripInheritedContext, transformToApiConfig } from '../helper';
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<

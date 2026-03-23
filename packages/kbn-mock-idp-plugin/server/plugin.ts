@@ -262,7 +262,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             }),
           },
           security: {
-            authc: { enabled: 'optional' },
+            authc: { enabled: 'optional', reason: 'Mock IDP plugin for testing' },
             authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
           },
         },
@@ -312,8 +312,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               credential: schema.string(),
             }),
           },
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason: 'Mock IDP plugin for testing UIAM operations',
+            },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
         },
         async (context, request, response) => {
           try {
@@ -366,8 +371,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               keys: schema.arrayOf(schema.string(), { minSize: 1 }),
             }),
           },
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason: 'Mock IDP plugin for testing UIAM operations',
+            },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
         },
         async (context, request, response) => {
           try {

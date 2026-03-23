@@ -24,10 +24,12 @@ import type {
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
+  WritableSkillsStore,
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
   SkillsService,
+  PluginsService,
   ToolManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
@@ -110,6 +112,10 @@ export interface AgentHandlerContext {
    */
   skills: SkillsService;
   /**
+   * Plugins service to resolve plugin-contributed skill IDs during execution.
+   */
+  plugins: PluginsService;
+  /**
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
@@ -117,6 +123,11 @@ export interface AgentHandlerContext {
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
+  /**
+   * Skills store to populate with filtered skills during execution.
+   * Backs the skills volume in the virtual filesystem.
+   */
+  skillsStore: WritableSkillsStore;
   /**
    * Attachment state manager to manage conversation attachments during execution.
    */

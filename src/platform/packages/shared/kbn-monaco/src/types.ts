@@ -40,6 +40,7 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
   getInlineCompletionsProvider?: (callbacks?: Deps) => monaco.languages.InlineCompletionsProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
+  getDocumentHighlightProvider?: (callbacks?: Deps) => monaco.languages.DocumentHighlightProvider;
 }
 
 export interface CustomLangModuleType<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData>

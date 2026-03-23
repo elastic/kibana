@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiFormRow, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
@@ -15,8 +15,8 @@ import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types'
 
 import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '../../../../../common/api/detection_engine';
-import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
-import type { RuleStepProps, AboutStepRule } from '../../../common/types';
+import { isEsqlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import type { AboutStepRule, RuleStepProps } from '../../../common/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
@@ -86,7 +86,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   esqlQuery,
   ruleSource,
 }) => {
-  const { data } = useKibana().services;
+  const { data, notifications } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
   const isEsqlRuleValue = useMemo(() => isEsqlRule(ruleType), [ruleType]);
@@ -116,13 +116,21 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   useEffect(() => {
     const fetchSingleDataView = async () => {
       if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
-        setIndexPattern(dv);
+        // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+        try {
+          const dv = await data.dataViews.get(dataViewId);
+          setIndexPattern(dv);
+        } catch (error) {
+          notifications.toasts.addDanger({
+            title: 'Error retrieving data view',
+            text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+          });
+        }
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, indexIndexPattern, setIndexPattern]);
+  }, [data.dataViews, dataViewId, indexIndexPattern, setIndexPattern, notifications]);
 
   const { getFields } = form;
 

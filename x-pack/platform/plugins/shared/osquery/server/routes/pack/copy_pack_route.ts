@@ -62,7 +62,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             });
           }
 
-          const { client, sourceAttributes, newName, username, now } = copyContext;
+          const { client, sourceAttributes, newName, username, profileUid, now } = copyContext;
 
           const {
             name: _name,
@@ -94,8 +94,10 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               enabled: false, // Always disable copy to prevent unexpected deployments
               shards: [],
               created_by: username,
+              created_by_profile_uid: profileUid,
               created_at: now,
               updated_by: username,
+              updated_by_profile_uid: profileUid,
               updated_at: now,
             },
             {
@@ -116,8 +118,10 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             enabled: attributes.enabled,
             created_at: attributes.created_at,
             created_by: attributes.created_by,
+            created_by_profile_uid: attributes.created_by_profile_uid,
             updated_at: attributes.updated_at,
             updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
             policy_ids: [], // No policy assignments — references are empty
             shards: attributes.shards,
             saved_object_id: newPackSO.id,

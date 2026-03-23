@@ -32,7 +32,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   type DiscoverAppState,
   selectTabCombinedFilters,
@@ -49,6 +48,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
@@ -66,15 +66,15 @@ export interface UseUnifiedHistogramOptions {
 }
 
 export const useDiscoverHistogram = (
-  stateContainer: DiscoverStateContainer,
   options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const {
     data$: { main$, documents$, totalHits$ },
     inspectorAdapters,
     getAbortController,
-  } = stateContainer.dataState;
+  } = dataStateContainer;
   const isEsqlMode = useIsEsqlMode();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -279,7 +279,7 @@ export const useDiscoverHistogram = (
       return;
     }
 
-    const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
+    const subscription = dataStateContainer.fetchChart$.subscribe((latestFetchDetails) => {
       if (latestFetchDetails) {
         triggerUnifiedHistogramFetch.current(latestFetchDetails);
       }
@@ -288,7 +288,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription.unsubscribe();
     };
-  }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+  }, [dataStateContainer.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
     const previousFetchParams = previousFetchParamsRef.current;

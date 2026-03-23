@@ -10,8 +10,8 @@ import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
 import type { EndpointScript } from '../types';
 import { SUPPORTED_HOST_OS_TYPE } from '../constants';
-import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
-import { SORTED_SCRIPT_TAGS_KEYS } from '../service/scripts_library/constants';
+import type { SCRIPT_TAGS } from '../service/script_library/constants';
+import { SORTED_SCRIPT_TAGS_KEYS } from '../service/script_library/constants';
 
 export class EndpointScriptsGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<EndpointScript> = {}): EndpointScript {

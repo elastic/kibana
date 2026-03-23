@@ -46,6 +46,9 @@ export const PAGE_ROUTING_PATHS = {
   pack_add: '/packs/add',
   pack_details: '/packs/:packId',
   pack_edit: '/packs/:packId/edit',
+  saved_queries: '/saved_queries',
+  saved_query_new: '/saved_queries/new',
+  saved_query_edit: '/saved_queries/:savedQueryId',
 };
 
 export const pagePathGetters: {

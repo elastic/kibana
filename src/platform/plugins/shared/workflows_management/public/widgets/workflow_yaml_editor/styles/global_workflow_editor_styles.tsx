@@ -12,6 +12,7 @@ import { Global } from '@emotion/react';
 import React from 'react';
 import { getBaseTypeIconsStyles } from './get_base_type_icons_styles';
 import { getMonacoWorkflowOverridesStyles } from './get_monaco_workflow_overrides_styles';
+import { getProposedChangesStyles } from './get_proposed_changes_styles';
 
 export const GlobalWorkflowEditorStyles = () => {
   const euiThemeContext = useEuiTheme();
@@ -20,6 +21,7 @@ export const GlobalWorkflowEditorStyles = () => {
       styles={[
         getBaseTypeIconsStyles(euiThemeContext),
         getMonacoWorkflowOverridesStyles(euiThemeContext),
+        getProposedChangesStyles(euiThemeContext),
       ]}
     />
   );

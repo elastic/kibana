@@ -224,6 +224,7 @@ export function ErrorSampleDetails({
               kuery,
               serviceName: error?.service?.name,
               errorGroupId: groupId,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

@@ -123,5 +123,4 @@ steps:
     type: kibana.getCase
     with:
       caseId: \${{variables.case_id}}
-      includeComments: false
 `;

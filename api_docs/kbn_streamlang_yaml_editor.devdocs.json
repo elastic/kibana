@@ -112,7 +112,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -134,7 +134,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-            "lineNumber": 108,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -157,7 +157,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

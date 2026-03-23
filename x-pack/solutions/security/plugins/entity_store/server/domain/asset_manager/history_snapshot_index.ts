@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getEntityIndexPattern, ENTITY_HISTORY, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
+import {
+  getEntityIndexPattern,
+  ENTITY_HISTORY,
+  ENTITY_SCHEMA_VERSION_V2,
+} from '../../../common/domain/entity_index';
 
 /**
  * Base index pattern for history snapshot indices in a namespace.

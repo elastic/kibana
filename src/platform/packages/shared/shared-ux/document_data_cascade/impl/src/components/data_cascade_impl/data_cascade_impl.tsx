@@ -53,7 +53,6 @@ export const DataCascadeRow = <G extends GroupNode, L extends LeafNode>(
 };
 
 export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
-  data,
   onCascadeGroupingChange,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
@@ -128,7 +127,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   );
 
   const { headerColumns, rows } = useCascadeTable<G, L>({
-    initialData: data,
     enableRowSelection,
     allowMultipleRowToggle,
     header: cascadeHeaderElement,
