@@ -66,8 +66,7 @@ const GroupWithURLPagination = ({
 
   useEffect(() => {
     state.onChangePage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroup]);
+  }, [selectedGroup, state.onChangePage]);
 
   return (
     <GroupWrapper
