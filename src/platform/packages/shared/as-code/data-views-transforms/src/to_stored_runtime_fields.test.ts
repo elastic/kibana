@@ -15,11 +15,11 @@ import {
 
 describe('toStoredRuntimeFields', () => {
   describe('default / empty input', () => {
-    it('returns {} when called with no arguments', () => {
+    it('returns an empty object when called with no arguments', () => {
       expect(toStoredRuntimeFields()).toEqual({});
     });
 
-    it('returns {} when passed an empty array', () => {
+    it('returns an empty object when passed an empty array', () => {
       expect(toStoredRuntimeFields([])).toEqual({});
     });
   });
@@ -128,12 +128,12 @@ describe('toStoredRuntimeFields', () => {
 
 describe('toStoredFieldFormats', () => {
   describe('default / empty input', () => {
-    it('returns undefined when called with no arguments', () => {
-      expect(toStoredFieldFormats()).toBeUndefined();
+    it('returns an empty object when called with no arguments', () => {
+      expect(toStoredFieldFormats()).toEqual({});
     });
 
-    it('returns undefined when passed an empty array', () => {
-      expect(toStoredFieldFormats([])).toBeUndefined();
+    it('returns an empty object when passed an empty array', () => {
+      expect(toStoredFieldFormats([])).toEqual({});
     });
   });
 
@@ -243,12 +243,12 @@ describe('toStoredFieldFormats', () => {
 
 describe('toStoredFieldAttributes', () => {
   describe('default / empty input', () => {
-    it('returns undefined when called with no arguments', () => {
-      expect(toStoredFieldAttributes()).toBeUndefined();
+    it('returns an empty when called with no arguments', () => {
+      expect(toStoredFieldAttributes()).toEqual({});
     });
 
-    it('returns undefined when passed an empty array', () => {
-      expect(toStoredFieldAttributes([])).toBeUndefined();
+    it('returns an empty when passed an empty array', () => {
+      expect(toStoredFieldAttributes([])).toEqual({});
     });
   });
 
