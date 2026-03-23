@@ -10,12 +10,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ParsedMetricItem } from '../../types';
+import type { ParsedMetricItem } from '../../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { METRIC_TYPE_DESCRIPTIONS } from './metric_type_badge';
+import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 
-jest.mock('../../common/utils', () => ({
+jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
     const unitLabels: Record<string, string | undefined> = {
       ms: 'Milliseconds',
@@ -73,13 +73,12 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText('Milliseconds')).toBeInTheDocument();
     });
 
-    it('does not render unit section when unit is undefined', () => {
+    it('renders NoValueBadge when units are empty', () => {
       const metricItem = createMockMetric({ units: [] });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
 
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')
-      ).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
+      expect(getByText('No value')).toBeInTheDocument();
     });
   });
 
@@ -92,13 +91,12 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText('counter')).toBeInTheDocument();
     });
 
-    it('does not render instrument section when not present', () => {
+    it('renders NoValueBadge when metricTypes is undefined', () => {
       const metricItem = createMockMetric({ metricTypes: undefined });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
 
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')
-      ).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
+      expect(getByText('No value')).toBeInTheDocument();
     });
 
     it('handles different instrument types', () => {
@@ -235,6 +233,54 @@ describe('Metric Flyout Overview Tab', () => {
       expect(listItems[0]).toHaveTextContent('alpha.field');
       expect(listItems[1]).toHaveTextContent('beta.field');
       expect(listItems[2]).toHaveTextContent('zebra.field');
+    });
+  });
+
+  describe('multiple values display', () => {
+    it('renders multiple field types as badges', () => {
+      const metricItem = createMockMetric({
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+      });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('double')).toBeInTheDocument();
+      expect(getByText('long')).toBeInTheDocument();
+    });
+
+    it('renders multiple units as badges', () => {
+      const metricItem = createMockMetric({ units: ['ms', 'bytes'] });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('Milliseconds')).toBeInTheDocument();
+      expect(getByText('Bytes')).toBeInTheDocument();
+    });
+
+    it('renders null field type as NoValueBadge', () => {
+      const metricItem = createMockMetric({
+        fieldTypes: [ES_FIELD_TYPES.NULL],
+      });
+      const { getByText, queryByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('No value')).toBeInTheDocument();
+      expect(queryByText('null')).not.toBeInTheDocument();
+    });
+
+    it('renders mixed null and non-null field types correctly', () => {
+      const metricItem = createMockMetric({
+        fieldTypes: [ES_FIELD_TYPES.NULL, ES_FIELD_TYPES.DOUBLE],
+      });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('No value')).toBeInTheDocument();
+      expect(getByText('double')).toBeInTheDocument();
+    });
+
+    it('renders multiple metric types as badges', () => {
+      const metricItem = createMockMetric({ metricTypes: ['counter', 'gauge'] });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('counter')).toBeInTheDocument();
+      expect(getByText('gauge')).toBeInTheDocument();
     });
   });
 
