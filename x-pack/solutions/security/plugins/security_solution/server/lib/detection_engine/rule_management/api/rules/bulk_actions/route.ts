@@ -10,6 +10,7 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import { SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -318,6 +319,10 @@ export const performBulkActionRoute = (
 
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
+                    options: {
+                      originalId: rule.id,
+                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                    },
                   });
 
                   // we try to create exceptions after rule created, and then update rule

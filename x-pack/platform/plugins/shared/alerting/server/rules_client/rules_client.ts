@@ -37,6 +37,7 @@ import type {
   GetGlobalExecutionLogParams,
 } from './methods/get_execution_log';
 import { getExecutionLogForRule, getGlobalExecutionLogWithAuth } from './methods/get_execution_log';
+import { type GetHistoryByParams, getHistoryForRule } from './methods/get_history_for_rule';
 import type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 import { getActionErrorLog, getActionErrorLogWithAuth } from './methods/get_action_error_log';
 import type {
@@ -185,6 +186,8 @@ export class RulesClient {
   public getAlertSummary = (params: GetAlertSummaryParams) => getAlertSummary(this.context, params);
   public getExecutionLogForRule = (params: GetExecutionLogByIdParams) =>
     getExecutionLogForRule(this.context, params);
+  public getHistoryForRule = (params: GetHistoryByParams) =>
+    getHistoryForRule(this.context, params);
   public getGlobalExecutionLogWithAuth = (params: GetGlobalExecutionLogParams) =>
     getGlobalExecutionLogWithAuth(this.context, params);
   public getRuleExecutionKPI = (params: GetRuleExecutionKPIParams) =>

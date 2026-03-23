@@ -28,6 +28,13 @@ export const RULE_ADD_FAILURE = i18n.translate(
   }
 );
 
+export const RULE_RESTORE_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.addRuleFailDescription',
+  {
+    defaultMessage: 'Failed to restore Rule',
+  }
+);
+
 export const BOOTSTRAP_PREBUILT_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesFailure',
   {

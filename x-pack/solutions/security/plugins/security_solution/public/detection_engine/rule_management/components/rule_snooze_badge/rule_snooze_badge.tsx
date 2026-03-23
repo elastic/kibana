@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
@@ -17,17 +17,24 @@ interface RuleSnoozeBadgeProps {
    * Rule's SO id (not ruleId)
    */
   ruleId: RuleObjectId;
+  onSnoozeChange?: () => void;
   showTooltipInline?: boolean;
 }
 
 export function RuleSnoozeBadge({
   ruleId,
+  onSnoozeChange,
   showTooltipInline = false,
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
   const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
+
+  const onRuleChanged = useCallback(() => {
+    invalidateFetchRuleSnoozeSettings();
+    onSnoozeChange?.();
+  }, [invalidateFetchRuleSnoozeSettings, onSnoozeChange]);
 
   return (
     <RulesListNotifyBadge
@@ -36,7 +43,7 @@ export function RuleSnoozeBadge({
       loading={!snoozeSettings && !error}
       disabled={!canEditRules || error}
       showTooltipInline={showTooltipInline}
-      onRuleChanged={invalidateFetchRuleSnoozeSettings}
+      onRuleChanged={onRuleChanged}
     />
   );
 }

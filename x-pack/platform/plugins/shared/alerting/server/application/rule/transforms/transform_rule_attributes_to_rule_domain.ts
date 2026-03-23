@@ -126,6 +126,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
   transformParams: TransformEsToRuleParams,
   isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
+  // here
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
   const {

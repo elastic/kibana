@@ -122,6 +122,16 @@ export const allowedExperimentalValues = Object.freeze({
   storeGapsInEventLogEnabled: true,
 
   /**
+   * Enables scheduling gap fills for rules
+   */
+  bulkFillRuleGapsEnabled: true,
+
+  /**
+   * Enables change tracking for detection rules
+   */
+  ruleChangeHistoryEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: true,

@@ -9,9 +9,12 @@ import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { pick } from 'lodash';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -33,6 +36,7 @@ import type {
   ShouldIncrementRevision,
   UpdateOperationOpts,
 } from './types';
+import type { RuleChange } from '../../lib/change_tracking';
 
 export interface BulkEditOccOptions<Params extends RuleParams> {
   filter: KueryNode | null;
@@ -61,6 +65,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       }
     );
 
+  const originalRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const skipped: BulkEditActionSkipResult[] = [];
   const errors: BulkOperationError[] = [];
@@ -69,6 +74,8 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
+    context.logger.info(`response.saved_objects ${JSON.stringify(response.saved_objects)}`);
+    originalRules.push(...response.saved_objects);
     if (options.shouldValidateSchedule) {
       const intervals = response.saved_objects
         .filter((rule) => rule.attributes.enabled)
@@ -156,6 +163,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const { result, apiKeysToInvalidate } = await saveBulkUpdatedRules({
     context,
     rules,
+    originalRules,
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
   });
@@ -172,16 +180,18 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
 async function saveBulkUpdatedRules({
   context,
   rules,
+  originalRules,
   apiKeysMap,
   shouldInvalidateApiKeys,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  originalRules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
 }) {
   const apiKeysToInvalidate: string[] = [];
-  let result;
+  let result: SavedObjectsBulkResponse<RawRule>;
   try {
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
@@ -191,6 +201,36 @@ async function saveBulkUpdatedRules({
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
       savedObjectsBulkCreateOptions: { overwrite: true },
     });
+
+    // Track changes
+    const changes = rules.reduce((acc, rule) => {
+      const updated = result.saved_objects.find((r: { id: string }) => r.id === rule.id);
+      if (updated && !updated.error) {
+        const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+        if (type?.trackChanges) {
+          const original = originalRules.find((r) => rule.id === r.id);
+          acc.push({
+            objectId: rule.id,
+            objectType: rule.type,
+            module: type.solution,
+            before: original ? pick(original, ['attributes', 'references']) : undefined,
+            after: pick(rule, ['attributes', 'references']),
+          });
+        }
+      }
+      return acc;
+    }, [] as RuleChange[]);
+    if (context.changeTrackingService && changes.length) {
+      const user = context.getUser();
+      const username = user?.username ?? 'unknown';
+      context.changeTrackingService.logBulk(changes, {
+        username,
+        userProfileId: user?.profile_uid,
+        action: RuleChangeTrackingAction.ruleUpdate,
+        spaceId: context.spaceId,
+        data: { metadata: { bulkCount: rules.length } },
+      });
+    }
   } catch (e) {
     // avoid unused newly generated API keys
 
