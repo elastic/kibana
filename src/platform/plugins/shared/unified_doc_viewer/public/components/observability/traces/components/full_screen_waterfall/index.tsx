@@ -15,6 +15,7 @@ import {
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
@@ -39,8 +40,8 @@ export interface FullScreenWaterfallProps {
   skipOpenAnimation?: boolean;
   onNodeClick: (nodeSpanId: string) => void;
   onErrorClick: FullTraceWaterfallOnErrorClick;
-  onCloseFlyout: () => void;
-  onExitFullScreen: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
+  onExitFullScreen: EuiFlyoutProps['onClose'];
 }
 
 export const FullScreenWaterfall = ({

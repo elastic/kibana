@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDelayRender } from '@elastic/eui';
+import { EuiDelayRender, type EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -164,10 +164,34 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]
   );
 
-  const onExitFullScreen = useCallback(() => {
-    setShowFullScreenWaterfall(false);
-    clearActiveFlyout();
-  }, [setShowFullScreenWaterfall, clearActiveFlyout]);
+  const onExitFullScreen = useCallback<EuiFlyoutProps['onClose']>(
+    (event) => {
+      if (event.type === 'navigation') {
+        // Do not reset the restorable state if the event comes from unmounting EuiFlyout
+        // due to switching to a new tab.
+        // Note: This might not be the best solution long term
+        return;
+      }
+
+      setShowFullScreenWaterfall(false);
+      clearActiveFlyout();
+    },
+    [setShowFullScreenWaterfall, clearActiveFlyout]
+  );
+
+  const onCloseFlyout = useCallback<EuiFlyoutProps['onClose']>(
+    (event) => {
+      if (event.type === 'navigation') {
+        // Do not reset the restorable state if the event comes from unmounting EuiFlyout
+        // due to switching to a new tab.
+        // Note: This might not be the best solution long term
+        return;
+      }
+
+      clearActiveFlyout();
+    },
+    [clearActiveFlyout]
+  );
 
   const actions = useMemo(
     () => [
@@ -202,7 +226,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           skipOpenAnimation={isRestoringRef.current}
           onNodeClick={onNodeClick}
           onErrorClick={onErrorClick}
-          onCloseFlyout={clearActiveFlyout}
+          onCloseFlyout={onCloseFlyout}
           onExitFullScreen={onExitFullScreen}
         />
       ) : null}
