@@ -1,8 +1,8 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 96771
-  agentBuilderPlatform: 64202
+  agentBuilder: 335913
+  agentBuilderPlatform: 120663
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
@@ -12,7 +12,7 @@ pageLoadAssetSize:
   automaticImportVTwo: 10143
   banners: 4087
   canvas: 14881
-  cases: 306139
+  cases: 467628
   charts: 40269
   cloud: 10648
   cloudConnect: 9149
@@ -48,13 +48,13 @@ pageLoadAssetSize:
   discover: 28241
   discoverEnhanced: 5509
   discoverShared: 2322
-  elasticAssistant: 338870
+  elasticAssistant: 413329
   elasticAssistantSharedState: 4881
   elasticConsole: 4451
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37566
-  entityStore: 71717
+  entityStore: 117269
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 187862
+  securitySolution: 425243
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7451
@@ -181,7 +181,7 @@ pageLoadAssetSize:
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
-  timelines: 192134
+  timelines: 242887
   transform: 16515
   triggersActionsUi: 114000
   uiActions: 35278
@@ -209,6 +209,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52210
   watcher: 10485
-  workflowsExtensions: 89850
+  workflowsExtensions: 329386
   workflowsManagement: 23749
-  workplaceAIApp: 65547
+  workplaceAIApp: 304661
