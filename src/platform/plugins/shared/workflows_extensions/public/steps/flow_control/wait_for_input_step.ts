@@ -12,8 +12,7 @@ import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { WaitForInputStepCommonDefinition } from '../../../common/steps/flow_control';
 import { createPublicStepDefinition } from '../../step_registry/types';
 
-const recordOutputSchema = (): z.ZodType<Record<string, unknown>> =>
-  z.record(z.string(), z.unknown());
+const recordOutputSchema: z.ZodType<Record<string, unknown>> = z.record(z.string(), z.unknown());
 
 export const WaitForInputStepDefinition = createPublicStepDefinition({
   ...WaitForInputStepCommonDefinition,
@@ -21,19 +20,19 @@ export const WaitForInputStepDefinition = createPublicStepDefinition({
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
         if (!input?.schema) {
-          return recordOutputSchema();
+          return recordOutputSchema;
         }
 
         try {
           const zodSchema = fromJSONSchema(input.schema as Record<string, unknown>);
 
           if (!zodSchema) {
-            return recordOutputSchema();
+            return recordOutputSchema;
           }
 
           return zodSchema as z.ZodType<Record<string, unknown>>;
         } catch {
-          return recordOutputSchema();
+          return recordOutputSchema;
         }
       },
     },
