@@ -8,7 +8,7 @@
  */
 
 import type { ServerlessProjectType } from '@kbn/es';
-import type { Role } from '@kbn/test/src/auth/types';
+import type { Role } from '../../types/role';
 import { PROJECT_DEFAULT_ROLES } from '../constants';
 
 /**

@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Role } from '../types/role';
-
-export const PROJECT_DEFAULT_ROLES = new Map<string, Role>([
-  ['es', 'developer'],
-  ['security', 'editor'],
-  ['oblt', 'editor'],
-]);
+/**
+ * Kibana predefined role name used in Scout session / API helpers.
+ * Duplicated from @kbn/test auth types (`Role` is a string alias there).
+ */
+export type Role = string;

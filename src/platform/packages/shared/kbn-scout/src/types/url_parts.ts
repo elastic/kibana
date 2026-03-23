@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Role } from '../types/role';
-
-export const PROJECT_DEFAULT_ROLES = new Map<string, Role>([
-  ['es', 'developer'],
-  ['security', 'editor'],
-  ['oblt', 'editor'],
-]);
+/**
+ * Parsed URL pieces for test server endpoints.
+ * Duplicated from @kbn/test `UrlParts` so Scout typings do not import @kbn/test.
+ */
+export interface UrlParts {
+  protocol?: string;
+  hostname?: string;
+  port?: number;
+  auth?: string;
+  username?: string;
+  password?: string;
+}
