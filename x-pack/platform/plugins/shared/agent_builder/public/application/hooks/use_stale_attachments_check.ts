@@ -12,8 +12,7 @@ import {
   hashContent,
   isFreshAttachmentStalenessCheckError,
 } from '@kbn/agent-builder-common/attachments';
-import type { StaleAttachment } from '@kbn/agent-builder-common/attachments';
-import type { ConverseAttachmentInput } from '../../../common/http_api/chat';
+import type { AttachmentInput, StaleAttachment } from '@kbn/agent-builder-common/attachments';
 import { labels } from '../utils/i18n';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useToasts } from './use_toasts';
@@ -22,7 +21,7 @@ const STALE_CHECK_DEBOUNCE_MS = 300;
 const STALE_CHECK_DEBOUNCE_OPTIONS = { wait: STALE_CHECK_DEBOUNCE_MS } as const;
 
 export interface UseStaleAttachmentsCheckResult {
-  staleAttachments: ConverseAttachmentInput[];
+  staleAttachments: AttachmentInput[];
   scheduleStaleCheck: () => void;
 }
 
@@ -37,7 +36,7 @@ export const useStaleAttachments = (
 ): UseStaleAttachmentsCheckResult => {
   const { attachmentsService } = useAgentBuilderServices();
   const { addErrorToast } = useToasts();
-  const [staleAttachments, setStaleAttachments] = useState<ConverseAttachmentInput[]>([]);
+  const [staleAttachments, setStaleAttachments] = useState<AttachmentInput[]>([]);
 
   // Always hold the latest stale attachments to avoid stale-closure issues in the debounced fn.
   const staleAttachmentsRef = useRef(staleAttachments);

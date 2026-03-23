@@ -29,12 +29,10 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
-import type { ConverseAttachmentInput } from '../common/http_api/chat';
-
 export interface ConversationSidebarRef {
   close(): void;
 }
@@ -126,7 +124,7 @@ export interface AgentBuilderPluginStart {
    *
    * @param attachment - The attachment to add
    */
-  addAttachment: (attachment: ConverseAttachmentInput) => void;
+  addAttachment: (attachment: AttachmentInput) => void;
   /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.

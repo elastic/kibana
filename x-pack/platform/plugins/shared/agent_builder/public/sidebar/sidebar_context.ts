@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { ConverseAttachmentInput } from '../../common/http_api/chat';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
 import type { OpenConversationSidebarOptions } from './types';
 import type { EmbeddableConversationProps } from '../embeddable/types';
@@ -38,7 +38,7 @@ export interface SidebarRuntimeContext {
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
-    addAttachment: (attachment: ConverseAttachmentInput) => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   }) => void;
 }
 
