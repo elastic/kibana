@@ -27,7 +27,7 @@ export const createRequestParamsSchema = schema.maybe(
             }
           },
           minLength: 1,
-          maxLength: 100,
+          maxLength: 250,
         })
       ),
     },
