@@ -10,7 +10,13 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_ARRAY_PARAM_SIZE,
+  MAX_PAGE_SIZE,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
@@ -44,14 +50,19 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
               enabled: schema.maybe(
                 schema.arrayOf(schema.boolean(), {
                   meta: { description: 'Filter by enabled state.' },
+                  maxSize: 2,
                 })
               ),
               createdBy: schema.maybe(
-                schema.arrayOf(schema.string(), { meta: { description: 'Filter by creator.' } })
+                schema.arrayOf(schema.string(), {
+                  meta: { description: 'Filter by creator.' },
+                  maxSize: MAX_ARRAY_PARAM_SIZE,
+                })
               ),
               tags: schema.maybe(
                 schema.arrayOf(schema.string(), {
                   meta: { description: 'Filter by tags.' },
+                  maxSize: MAX_ARRAY_PARAM_SIZE,
                 })
               ),
               query: schema.maybe(

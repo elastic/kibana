@@ -19,6 +19,13 @@ import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
 
+const executionStatusSchema = schema.oneOf(
+  ExecutionStatusValues.map((type) => schema.literal(type)) as [Type<ExecutionStatus>]
+);
+const executionTypeSchema = schema.oneOf(
+  ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
+);
+
 export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
@@ -46,18 +53,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               statuses: schema.maybe(
                 schema.oneOf(
                   [
-                    schema.oneOf(
-                      ExecutionStatusValues.map((type) => schema.literal(type)) as [
-                        Type<ExecutionStatus>
-                      ]
-                    ),
-                    schema.arrayOf(
-                      schema.oneOf(
-                        ExecutionStatusValues.map((type) => schema.literal(type)) as [
-                          Type<ExecutionStatus>
-                        ]
-                      )
-                    ),
+                    executionStatusSchema,
+                    schema.arrayOf(executionStatusSchema, {
+                      maxSize: ExecutionStatusValues.length,
+                    }),
                   ],
                   {
                     defaultValue: [],
@@ -68,18 +67,8 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               executionTypes: schema.maybe(
                 schema.oneOf(
                   [
-                    schema.oneOf(
-                      ExecutionTypeValues.map((type) => schema.literal(type)) as [
-                        Type<ExecutionType>
-                      ]
-                    ),
-                    schema.arrayOf(
-                      schema.oneOf(
-                        ExecutionTypeValues.map((type) => schema.literal(type)) as [
-                          Type<ExecutionType>
-                        ]
-                      )
-                    ),
+                    executionTypeSchema,
+                    schema.arrayOf(executionTypeSchema, { maxSize: ExecutionTypeValues.length }),
                   ],
                   {
                     defaultValue: [],

@@ -22,3 +22,6 @@ export const API_VERSION = '2023-10-31';
 export const INTERNAL_API_VERSION = '1';
 export const OAS_TAG = 'oas-tag:workflows';
 export const AVAILABILITY = { since: '9.4.0' } as const;
+
+// Maximum size for array parameters in API routes
+export const MAX_ARRAY_PARAM_SIZE = 1000;
