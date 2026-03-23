@@ -121,6 +121,20 @@ type MatchPhraseQuery = Record<string, MatchPhraseValue>;
 const getMatchPhraseStringValue = (value: MatchPhraseValue): string =>
   typeof value === 'string' ? value : value.query;
 
+/**
+ * Builds a bool/should query that matches both the target entity (by entity.id)
+ * and its aliases (by resolved_to) for a given target entity ID.
+ */
+const buildResolutionBoolQuery = (targetEntityId: string) => ({
+  bool: {
+    should: [
+      { term: { [ENTITY_FIELDS.ENTITY_ID]: targetEntityId } },
+      { term: { [ENTITY_FIELDS.RESOLVED_TO]: targetEntityId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 export const groupFilterMap = (filter: Filter | null): Filter | null => {
   const query = filter?.query;
   return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
@@ -143,15 +157,7 @@ export const transformResolutionFilter = (filter: Filter): Filter => {
 
   return {
     ...filter,
-    query: {
-      bool: {
-        should: [
-          { term: { [ENTITY_FIELDS.ENTITY_ID]: targetEntityId } },
-          { term: { [ENTITY_FIELDS.RESOLVED_TO]: targetEntityId } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
+    query: buildResolutionBoolQuery(targetEntityId),
   };
 };
 
@@ -280,17 +286,7 @@ export const buildResolutionGroupFilter = (
   const targetEntityId = filters.map(extractMatchPhraseValue).find(Boolean);
   if (!targetEntityId) return undefined;
 
-  return [
-    {
-      bool: {
-        should: [
-          { term: { [ENTITY_FIELDS.ENTITY_ID]: targetEntityId } },
-          { term: { [ENTITY_FIELDS.RESOLVED_TO]: targetEntityId } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-  ];
+  return [buildResolutionBoolQuery(targetEntityId)];
 };
 
 const DataTableWithLocalPagination = ({
