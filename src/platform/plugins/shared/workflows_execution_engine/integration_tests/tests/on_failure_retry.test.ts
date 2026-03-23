@@ -17,8 +17,7 @@ const CONSTANTLY_FAILING_ERROR = {
   message: 'Error: Constantly failing connector',
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/252871
-describe.skip('workflow with retry', () => {
+describe('workflow with retry', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   beforeAll(async () => {
