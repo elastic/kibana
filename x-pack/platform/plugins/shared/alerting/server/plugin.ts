@@ -804,7 +804,6 @@ export class AlertingPlugin {
   }
 
   private getShouldGrantUiam(core: CoreStart): boolean {
-    return false;
     return !!core.security.authc.apiKeys.uiam;
   }
 
