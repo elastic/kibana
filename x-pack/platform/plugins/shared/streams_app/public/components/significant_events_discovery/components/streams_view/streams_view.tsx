@@ -29,6 +29,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useIndexPatternsConfig } from '../../../../hooks/use_index_patterns_config';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useFeaturesQueriesSubtaskApi } from '../../../../hooks/use_features_queries_subtask_api';
@@ -82,14 +83,16 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const isInitialStatusUpdateDone = useRef(false);
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
+  const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
+
   const streamsListFetch = useFetchStreams({
     select: (result) => {
       return {
         ...result,
         /**
-         * Significant events discovery for now only works with logs streams.
+         * Significant events discovery works with streams that match the configured index patterns.
          */
-        streams: result.streams.filter((stream) => stream.stream.name.startsWith('logs')),
+        streams: filterStreamsByIndexPatterns(result.streams),
       };
     },
   });

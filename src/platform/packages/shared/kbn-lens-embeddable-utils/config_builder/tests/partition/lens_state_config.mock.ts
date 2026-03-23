@@ -1208,7 +1208,7 @@ export const pieLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1250,8 +1250,8 @@ export const pieLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],
@@ -1304,7 +1304,7 @@ export const treemapLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1346,8 +1346,8 @@ export const treemapLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],
@@ -1400,7 +1400,7 @@ export const mosaicLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1442,8 +1442,8 @@ export const mosaicLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],
@@ -1496,7 +1496,7 @@ export const waffleLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1537,8 +1537,8 @@ export const waffleLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],

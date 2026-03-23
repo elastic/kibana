@@ -13,6 +13,8 @@ import {
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  SwitchStepConfigSchema,
+  WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
@@ -120,6 +122,41 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
+    id: 'switch',
+    label: 'Switch',
+    description:
+      'Multi-way branching. Evaluates an expression and runs the steps of the first case whose match equals the expression',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: SwitchStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: route_by_status
+  type: switch
+  expression: "{{ steps.check.output.status }}"
+  cases:
+    - match: success
+      steps:
+        - name: on_success
+          type: console
+          with:
+            message: "Operation succeeded"
+    - match: error
+      steps:
+        - name: on_error
+          type: console
+          with:
+            message: "Operation failed"
+  default:
+    - name: on_unknown
+      type: console
+      with:
+        message: "Unknown status"`,
+      ],
+    },
+  },
+  {
     id: 'loop.break',
     label: 'Break',
     description: 'Exit the enclosing loop immediately. Valid only inside a foreach or while body',
@@ -199,6 +236,22 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'waitForInput',
+    label: 'Wait For Input',
+    description: 'Pause execution until external input is provided (human-in-the-loop)',
+    category: StepCategory.FlowControl,
+    inputSchema: WaitForInputStepInputSchema,
+    outputSchema: z.unknown(),
+    documentation: {
+      examples: [
+        `- name: wait_for_approval
+  type: waitForInput
+  with:
+    message: "Please approve before continuing"`,
       ],
     },
   },

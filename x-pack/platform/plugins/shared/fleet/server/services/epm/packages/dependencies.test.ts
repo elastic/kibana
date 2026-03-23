@@ -9,7 +9,7 @@ import type { InstallablePackage } from '../../../../common/types';
 
 import { appContextService } from '../../app_context';
 
-import { getPackageDependencies } from './dependencies';
+import { getPackageDependencies, mergeIsDependencyOf } from './dependencies';
 
 jest.mock('../../app_context');
 
@@ -150,6 +150,35 @@ describe('getPackageDependencies', () => {
 
     expect(getPackageDependencies(packageInfo)).toEqual([
       { name: 'content-dep', version: '1.0.0' },
+    ]);
+  });
+});
+
+describe('mergeIsDependencyOf', () => {
+  it('appends installedAsDependencyOf when not already in existing list', () => {
+    const existing = [{ name: 'parent-a', version: '1.0.0' }];
+    const installed = { name: 'parent-b', version: '2.0.0' };
+    expect(mergeIsDependencyOf(installed, existing)).toEqual([
+      { name: 'parent-a', version: '1.0.0' },
+      { name: 'parent-b', version: '2.0.0' },
+    ]);
+  });
+
+  it('does not duplicate when installedAsDependencyOf is already in existing list', () => {
+    const existing = [
+      { name: 'parent-a', version: '1.0.0' },
+      { name: 'parent-b', version: '2.0.0' },
+    ];
+    const installed = { name: 'parent-b', version: '2.0.0' };
+    expect(mergeIsDependencyOf(installed, existing)).toEqual(existing);
+  });
+
+  it('appends when same name but different version (different parent)', () => {
+    const existing = [{ name: 'parent-a', version: '1.0.0' }];
+    const installed = { name: 'parent-a', version: '2.0.0' };
+    expect(mergeIsDependencyOf(installed, existing)).toEqual([
+      { name: 'parent-a', version: '1.0.0' },
+      { name: 'parent-a', version: '2.0.0' },
     ]);
   });
 });
