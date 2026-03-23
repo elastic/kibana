@@ -10,6 +10,7 @@
 import { registerCancelExecutionRoute } from './cancel_execution';
 import { registerGetChildrenExecutionsRoute } from './get_children_executions';
 import { registerGetExecutionRoute } from './get_execution';
+import { registerGetExecutionLogsRoute } from './get_execution_logs';
 import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowStepExecutionsRoute } from './get_workflow_step_executions';
@@ -26,6 +27,7 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowStepExecutionsRoute(deps);
   registerGetExecutionRoute(deps);
+  registerGetExecutionLogsRoute(deps);
   registerCancelExecutionRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerResumeExecutionRoute(deps);

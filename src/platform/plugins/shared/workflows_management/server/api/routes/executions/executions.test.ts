@@ -59,6 +59,7 @@ describe('Execution Routes', () => {
       getWorkflowExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       getWorkflowExecution: jest.fn(),
+      getWorkflowExecutionLogs: jest.fn(),
       cancelWorkflowExecution: jest.fn(),
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
@@ -495,6 +496,71 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/logs (get_execution_logs)', () => {
+    const path = '/api/workflows/executions/{executionId}/logs';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should call api.getWorkflowExecutionLogs with execution id, space, and query params', async () => {
+      const logsResponse = {
+        logs: [{ id: 'log-1', timestamp: '2025-01-01T00:00:00Z', message: 'test' }],
+        total: 1,
+        size: 100,
+        page: 1,
+      };
+      mockApi.getWorkflowExecutionLogs.mockResolvedValue(logsResponse);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: {
+          stepExecutionId: 'step-ex-1',
+          size: 50,
+          page: 2,
+          sortField: 'timestamp',
+          sortOrder: 'desc',
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'ex-1',
+        spaceId: 'default',
+        size: 50,
+        page: 2,
+        sortField: 'timestamp',
+        sortOrder: 'desc',
+        stepExecutionId: 'step-ex-1',
+      });
+      expect(result).toEqual({ type: 'ok', body: logsResponse });
+    });
+
+    it('should call api.getWorkflowExecutionLogs with defaults when optional params are omitted', async () => {
+      const logsResponse = { logs: [], total: 0, size: 100, page: 1 };
+      mockApi.getWorkflowExecutionLogs.mockResolvedValue(logsResponse);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { size: 100, page: 1 },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'ex-1',
+        spaceId: 'default',
+        size: 100,
+        page: 1,
+        sortField: undefined,
+        sortOrder: undefined,
+        stepExecutionId: undefined,
+      });
+      expect(result).toEqual({ type: 'ok', body: logsResponse });
     });
   });
 

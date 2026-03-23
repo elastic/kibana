@@ -85,6 +85,33 @@ export interface GetExecutionParams {
   includeOutput?: boolean;
 }
 
+export interface GetExecutionLogsParams {
+  stepExecutionId?: string;
+  size?: number;
+  page?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface WorkflowExecutionLogEntry {
+  id: string;
+  timestamp: string;
+  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
+  message: string;
+  stepId?: string;
+  stepName?: string;
+  connectorType?: string;
+  duration?: number;
+  additionalData?: Record<string, unknown>;
+}
+
+export interface WorkflowExecutionLogsResponse {
+  logs: WorkflowExecutionLogEntry[];
+  total: number;
+  size: number;
+  page: number;
+}
+
 export interface ResumeExecutionParams {
   input: Record<string, unknown>;
 }

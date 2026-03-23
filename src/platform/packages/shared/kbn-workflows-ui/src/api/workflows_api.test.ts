@@ -349,6 +349,27 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getExecutionLogs', () => {
+    it('should call GET /api/workflows/executions/{executionId}/logs with query', async () => {
+      const params = { stepExecutionId: 'step-1', size: 50, page: 2 };
+      await api.getExecutionLogs('exec-1', params);
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/logs', {
+        query: params,
+        headers: VERSION_HEADER,
+      });
+    });
+
+    it('should call GET without query when no params provided', async () => {
+      await api.getExecutionLogs('exec-1');
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/logs', {
+        query: undefined,
+        headers: VERSION_HEADER,
+      });
+    });
+  });
+
   describe('getChildrenExecutions', () => {
     it('should call GET /api/workflows/executions/{executionId}/children', async () => {
       await api.getChildrenExecutions('exec-1');

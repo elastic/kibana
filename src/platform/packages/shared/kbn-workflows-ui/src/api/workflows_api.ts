@@ -35,6 +35,7 @@ import type {
   BulkCreateWorkflowsResponse,
   ExportWorkflowsParams,
   GetAggsParams,
+  GetExecutionLogsParams,
   GetExecutionParams,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
@@ -45,6 +46,7 @@ import type {
   TestWorkflowParams,
   UpdateWorkflowParams,
   ValidateWorkflowParams,
+  WorkflowExecutionLogsResponse,
   WorkflowsConfig,
 } from './types';
 
@@ -138,7 +140,7 @@ export class WorkflowApi {
   async validateWorkflow({ yaml }: ValidateWorkflowParams): Promise<ValidateWorkflowResponseDto> {
     return this.http.post(`${BASE}/validate`, {
       body: JSON.stringify({ yaml }),
-      version: INTERNAL_API_VERSION,
+      version: INTERNAL_API_VERSION, // temporary until we have a reliable validate endpoint
     });
   }
 
@@ -254,6 +256,16 @@ export class WorkflowApi {
   async resumeExecution(executionId: string, { input }: ResumeExecutionParams): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/resume`, {
       body: JSON.stringify({ input }),
+      version: API_VERSION,
+    });
+  }
+
+  async getExecutionLogs(
+    executionId: string,
+    params?: GetExecutionLogsParams
+  ): Promise<WorkflowExecutionLogsResponse> {
+    return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/logs`, {
+      query: params as HttpFetchQuery,
       version: API_VERSION,
     });
   }

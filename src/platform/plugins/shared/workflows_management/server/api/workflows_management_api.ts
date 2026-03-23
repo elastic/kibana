@@ -508,6 +508,6 @@ export class WorkflowsManagementApi {
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {
-    return 'stepExecutionId' in params;
+    return 'stepExecutionId' in params && params.stepExecutionId != null;
   }
 }
