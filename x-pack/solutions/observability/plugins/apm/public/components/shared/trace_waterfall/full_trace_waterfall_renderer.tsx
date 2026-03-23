@@ -78,6 +78,8 @@ export function FullTraceWaterfallRenderer({
       onErrorClick={onErrorClick}
       agentMarks={data.agentMarks}
       showCriticalPathControl
+      traceDocsTotal={data.traceDocsTotal}
+      maxTraceItems={data.maxTraceItems}
     />
   );
 }
