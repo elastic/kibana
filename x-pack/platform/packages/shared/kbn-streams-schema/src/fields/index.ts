@@ -26,8 +26,9 @@ import type {
   MappingVersionProperty,
   MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
+
 import { recursiveRecord } from '../shared/record_types';
 
 export const FIELD_DEFINITION_TYPES = [
@@ -53,34 +54,57 @@ export const FIELD_DEFINITION_TYPES = [
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
+// All field types including non-mapping types (for UI purposes)
+export const ALL_FIELD_DEFINITION_TYPES = [...FIELD_DEFINITION_TYPES, 'system'] as const;
+export type AllFieldDefinitionType = (typeof ALL_FIELD_DEFINITION_TYPES)[number];
+
 // We redefine "first class" parameters
 export type FieldDefinitionConfig =
   | (MappingProperty & {
       type: FieldDefinitionType;
       format?: string;
+      description?: string;
     })
+  /**
+   * Documentation-only override for an inherited field: a stream may override only the description
+   * without freezing the inherited ES mapping. In that case `type` MUST be omitted entirely.
+   */
+  | {
+      description: string;
+      type?: never;
+      format?: never;
+    }
   | {
       type: 'system';
+      description?: string;
     };
 
 // Parameters that we provide a generic (JSON blob) experience for
 export type FieldDefinitionConfigAdvancedParameters = Omit<
   FieldDefinitionConfig,
-  'type' | 'format'
+  'type' | 'format' | 'description'
 >;
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
+export const fieldDefinitionConfigSchema = z.intersection(
   recursiveRecord,
   z.union([
     z.object({
       type: z.enum(FIELD_DEFINITION_TYPES),
       format: z.optional(NonEmptyString),
+      description: z.optional(z.string()),
+    }),
+    z.object({
+      // Documentation-only override: require description and forbid type entirely
+      description: z.string(),
+      type: z.never().optional(),
+      format: z.never().optional(),
     }),
     z.object({
       type: z.literal('system'),
+      description: z.optional(z.string()),
     }),
   ])
-);
+) as z.ZodType<FieldDefinitionConfig>;
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;
@@ -109,12 +133,52 @@ export type AllowedMappingProperty =
 export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
 
 export function isMappingProperties(value: FieldDefinition): value is StreamsMappingProperties {
-  return Object.values(value).every((prop) => prop.type !== 'system');
+  return Object.values(value).every((prop) => Boolean(prop.type) && prop.type !== 'system');
 }
 
 export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
   z.string(),
   fieldDefinitionConfigSchema
+);
+
+/**
+ * Schema for classic stream field overrides.
+ * Classic streams require a `type` for all field overrides - description-only fields are not supported.
+ * This schema excludes the documentation-only override variant that allows type to be omitted.
+ */
+export type ClassicFieldDefinitionConfig =
+  | (MappingProperty & {
+      type: FieldDefinitionType;
+      format?: string;
+      description?: string;
+    })
+  | {
+      type: 'system';
+      description?: string;
+    };
+
+export const classicFieldDefinitionConfigSchema = z.intersection(
+  recursiveRecord,
+  z.union([
+    z.object({
+      type: z.enum(FIELD_DEFINITION_TYPES),
+      format: z.optional(NonEmptyString),
+      description: z.optional(z.string()),
+    }),
+    z.object({
+      type: z.literal('system'),
+      description: z.optional(z.string()),
+    }),
+  ])
+) as z.ZodType<ClassicFieldDefinitionConfig>;
+
+export interface ClassicFieldDefinition {
+  [x: string]: ClassicFieldDefinitionConfig;
+}
+
+export const classicFieldDefinitionSchema: z.Schema<ClassicFieldDefinition> = z.record(
+  z.string(),
+  classicFieldDefinitionConfigSchema
 );
 
 export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
@@ -130,7 +194,10 @@ export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> 
   z.string(),
   z.intersection(
     fieldDefinitionConfigSchema,
-    z.object({ from: NonEmptyString, alias_for: z.optional(NonEmptyString) })
+    z.object({
+      from: NonEmptyString,
+      alias_for: z.optional(NonEmptyString),
+    })
   )
 );
 

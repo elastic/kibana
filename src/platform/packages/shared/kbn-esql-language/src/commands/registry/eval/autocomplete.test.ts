@@ -292,11 +292,12 @@ describe('EVAL Autocomplete', () => {
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedNumeric.map((name) => ({ label: name, text: name }))
     );
+    const numericAndDenseVector = [...ESQL_COMMON_NUMERIC_TYPES, 'dense_vector'] as const;
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField) + ',
       [
         ...expectedNumeric,
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, [...numericAndDenseVector], {
           scalar: true,
         }),
       ],
@@ -306,7 +307,7 @@ describe('EVAL Autocomplete', () => {
       'from a | eval a=round(doubleField)+ ',
       [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, [...numericAndDenseVector], {
           scalar: true,
         }),
       ],
@@ -316,7 +317,7 @@ describe('EVAL Autocomplete', () => {
       'from a | eval a=doubleField+ ',
       [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, [...numericAndDenseVector], {
           scalar: true,
         }),
       ],

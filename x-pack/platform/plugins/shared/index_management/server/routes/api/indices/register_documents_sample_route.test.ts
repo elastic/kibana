@@ -42,7 +42,13 @@ describe('Documents sample API', () => {
       expect(searchMock).toHaveBeenCalledWith({
         index: 'my-index',
         size: DEFAULT_DOCUMENT_PAGE_SIZE,
-        sort: ['_doc'],
+        sort: [
+          {
+            _doc: {
+              order: 'desc',
+            },
+          },
+        ],
         track_total_hits: false,
       });
 

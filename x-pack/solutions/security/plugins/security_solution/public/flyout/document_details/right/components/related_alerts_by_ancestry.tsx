@@ -7,9 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { InsightsSummaryRow } from './insights_summary_row';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { InsightsSummaryRow } from '../../../../flyout_v2/document/components/insights_summary_row';
 import { CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
 
 export interface RelatedAlertsByAncestryProps {
@@ -21,10 +23,6 @@ export interface RelatedAlertsByAncestryProps {
    * Values of the kibana.alert.rule.parameters.index field
    */
   indices: string[];
-  /**
-   * Maintain backwards compatibility // TODO remove when possible
-   */
-  scopeId: string;
 }
 
 /**
@@ -33,12 +31,15 @@ export interface RelatedAlertsByAncestryProps {
 export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
   documentId,
   indices,
-  scopeId,
 }) => {
   const { loading, error, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
     indices,
-    scopeId,
+  });
+
+  const goToCorrelationsTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: CORRELATIONS_TAB_ID,
   });
 
   const text = useMemo(
@@ -58,7 +59,7 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
       error={error}
       text={text}
       value={dataCount}
-      expandedSubTab={CORRELATIONS_TAB_ID}
+      onShowDetails={goToCorrelationsTab}
       data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID}
       key={`correlation-row-${text}`}
     />

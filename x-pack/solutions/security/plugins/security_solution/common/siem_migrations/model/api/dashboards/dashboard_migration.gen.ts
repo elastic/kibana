@@ -14,8 +14,8 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {

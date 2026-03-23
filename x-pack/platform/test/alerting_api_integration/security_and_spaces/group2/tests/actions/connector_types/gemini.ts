@@ -115,7 +115,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiUrl\": Required;\n [2]: Field \"gcpRegion\": Required;\n [3]: Field \"gcpProjectID\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl\n✖ Invalid input: expected string, received undefined\n  → at gcpRegion\n✖ Invalid input: expected string, received undefined\n  → at gcpProjectID`,
             });
           });
       });
@@ -136,7 +136,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"gcpProjectID\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at gcpProjectID`,
             });
           });
       });
@@ -157,7 +157,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"gcpRegion\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at gcpRegion`,
             });
           });
       });
@@ -200,7 +200,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"credentialsJson\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at credentialsJson`,
             });
           });
       });
@@ -295,7 +295,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: geminiActionId,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -429,7 +429,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: geminiActionId,
-              message: `error validating action params: Field \"subAction\": Required`,
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

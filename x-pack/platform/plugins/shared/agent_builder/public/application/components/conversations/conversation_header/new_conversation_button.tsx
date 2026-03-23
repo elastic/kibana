@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -42,23 +42,20 @@ export const NewConversationButton: React.FC<NewConversationButtonProps> = ({ on
         href: createAgentBuilderUrl(appPaths.chat.new),
       };
 
-  const labels = {
-    ariaLabel: i18n.translate('xpack.agentBuilder.newConversationButton.ariaLabel', {
-      defaultMessage: 'Create new conversation',
-    }),
-    display: i18n.translate('xpack.agentBuilder.newConversationButton.display', {
-      defaultMessage: 'New',
-    }),
-  };
+  const label = i18n.translate('xpack.agentBuilder.newConversationButton.ariaLabel', {
+    defaultMessage: 'Create new conversation',
+  });
 
   return (
-    <EuiButtonIcon
-      color="text"
-      iconType="plus"
-      aria-label={labels.ariaLabel}
-      onClick={handleClick}
-      data-test-subj="agentBuilderNewConversationButton"
-      {...buttonProps}
-    />
+    <EuiToolTip position="top" content={<p>{label}</p>}>
+      <EuiButtonIcon
+        color="text"
+        iconType="plus"
+        aria-label={label}
+        onClick={handleClick}
+        data-test-subj="agentBuilderNewConversationButton"
+        {...buttonProps}
+      />
+    </EuiToolTip>
   );
 };

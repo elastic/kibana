@@ -9,10 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
-import { applyColorToSchema, colorByValueAbsolute } from '../color';
+import {
+  applyColorToSchema,
+  colorByValueAbsoluteSchema,
+  legacyColorByValueAbsoluteSchema,
+} from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
@@ -73,7 +77,7 @@ const legacyMetricStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueAbsolute),
+  color: schema.maybe(schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema])),
 };
 
 export const legacyMetricStateSchemaNoESQL = schema.object(
@@ -100,9 +104,7 @@ const esqlLegacyMetricState = schema.object(
     /**
      * Metric configuration, must define operation.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
-      legacyMetricStateMetricOptionsSchema
-    ),
+    metric: esqlColumnWithFormatSchema.extends(legacyMetricStateMetricOptionsSchema),
   },
   { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );

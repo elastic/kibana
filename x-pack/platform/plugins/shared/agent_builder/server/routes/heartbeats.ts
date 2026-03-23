@@ -103,7 +103,7 @@ export const registerHeartbeatRoutes = ({
     .post({
       path: `${publicApiPath}/agents/{agent_id}/heartbeats`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
       },
       access: 'internal',
       summary: 'Create a heartbeat',
@@ -152,7 +152,7 @@ export const registerHeartbeatRoutes = ({
     .put({
       path: `${publicApiPath}/agents/{agent_id}/heartbeats/{heartbeat_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
       },
       access: 'internal',
       summary: 'Update a heartbeat',
@@ -187,7 +187,7 @@ export const registerHeartbeatRoutes = ({
     .delete({
       path: `${publicApiPath}/agents/{agent_id}/heartbeats/{heartbeat_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
       },
       access: 'internal',
       summary: 'Delete a heartbeat',
@@ -215,7 +215,7 @@ export const registerHeartbeatRoutes = ({
     .post({
       path: `${publicApiPath}/agents/{agent_id}/heartbeats/{heartbeat_id}/pause`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
       },
       access: 'internal',
       summary: 'Pause a heartbeat',
@@ -243,7 +243,7 @@ export const registerHeartbeatRoutes = ({
     .post({
       path: `${publicApiPath}/agents/{agent_id}/heartbeats/{heartbeat_id}/resume`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
       },
       access: 'internal',
       summary: 'Resume a heartbeat',

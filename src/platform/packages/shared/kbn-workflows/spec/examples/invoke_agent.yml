@@ -1,0 +1,21 @@
+version: '1'
+name: Invoke an Agent
+description: Triggers an AI agent to triage a security alert using the ai.agent step type.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: alert
+
+steps:
+  - name: log_for_debug
+    type: console
+    with:
+      message: '{{ event | json }}'
+
+  - name: triage_alert_with_agent
+    type: ai.agent
+    agent-id: alert.triage
+    with:
+      message: 'Triage the following alert based on your system instructions: {{ event | json }}'
+    timeout: 600s

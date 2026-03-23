@@ -264,8 +264,7 @@ const InternalDocViewerTable = ({
           if (!shouldShowOnlySelectedFields && !shouldShowFieldHandler(curFieldName)) {
             return acc;
           }
-          const shouldHideNullValue =
-            isEsqlMode && hideNullValues && flattened[curFieldName] == null;
+          const shouldHideNullValue = hideNullValues && flattened[curFieldName] == null;
           if (shouldHideNullValue) {
             return acc;
           }
@@ -302,7 +301,6 @@ const InternalDocViewerTable = ({
       shouldShowOnlySelectedFields,
       fieldToItem,
       flattened,
-      isEsqlMode,
       tableFiltersCallbacks,
       pinnedFields,
       shouldShowFieldHandler,
@@ -418,20 +416,18 @@ const InternalDocViewerTable = ({
               />
             </EuiFlexItem>
           )}
-          {isEsqlMode && (
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide null fields',
-                  description: 'Switch label to hide fields with null values in the table',
-                })}
-                checked={hideNullValues ?? false}
-                onChange={onHideNullValuesChange}
-                compressed
-                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                defaultMessage: 'Hide null fields',
+                description: 'Switch label to hide fields with null values in the table',
+              })}
+              checked={hideNullValues ?? false}
+              onChange={onHideNullValuesChange}
+              compressed
+              data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 

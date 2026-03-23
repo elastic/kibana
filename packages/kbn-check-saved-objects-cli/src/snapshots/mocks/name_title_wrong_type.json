@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "timestamp": 1756914281687,
+    "date": "2025-09-03T15:44:41.687Z",
+    "kibanaCommitHash": "test-commit-hash",
+    "buildUrl": null,
+    "pullRequestUrl": null
+  },
+  "typeDefinitions": {
+    "type-with-wrong-name-title": {
+      "name": "type-with-wrong-name-title",
+      "migrationVersions": [],
+      "hash": "test-hash",
+      "modelVersions": [
+        {
+          "version": "1",
+          "modelVersionHash": "hash1",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [
+            "name.type",
+            "title.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.name.type": "keyword",
+        "properties.title.type": "keyword"
+      }
+    }
+  }
+}

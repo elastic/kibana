@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
-import { NameCell } from './name_cell';
+import { NameCell, type NameCellProps } from './name_cell';
 
 /** Default i18n-translated column title for the name column. */
 const DEFAULT_NAME_COLUMN_TITLE = i18n.translate(
@@ -45,6 +45,28 @@ export interface NameColumnProps {
    * @default true
    */
   showDescription?: boolean;
+  /**
+   * Whether to show tags below the title/description.
+   * Requires `item.tags` to contain tag IDs and a tags service
+   * to be configured on the `ContentListProvider`.
+   *
+   * @default false
+   */
+  showTags?: boolean;
+  /**
+   * Whether to show a star button inline after the title.
+   * Requires `services.favorites` to be configured on the `ContentListProvider`.
+   *
+   * @default false
+   */
+  showStarred?: boolean;
+  /**
+   * Optional click handler for tag badges.
+   * Called with the tag and a boolean indicating whether a modifier key
+   * (Cmd on Mac, Ctrl on Windows/Linux) was held during the click.
+   * Only effective when `showTags` is `true`.
+   */
+  onTagClick?: NameCellProps['onTagClick'];
   /** Custom render function (overrides default rendering). */
   render?: (item: ContentListItem) => ReactNode;
 }
@@ -65,6 +87,9 @@ export const buildNameColumn = (
     width,
     sortable: sortableProp,
     showDescription = true,
+    showTags = false,
+    showStarred = false,
+    onTagClick,
     render: customRender,
   } = attributes;
 
@@ -84,7 +109,7 @@ export const buildNameColumn = (
         return customRender(item);
       }
 
-      return <NameCell item={item} showDescription={showDescription} />;
+      return <NameCell {...{ item, showDescription, showTags, showStarred, onTagClick }} />;
     },
   };
 };
@@ -111,6 +136,7 @@ export const buildNameColumn = (
  * <ContentListTable>
  *   <Column.Name
  *     showDescription={false}
+ *     showTags
  *     width="50%"
  *   />
  * </ContentListTable>

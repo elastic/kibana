@@ -9,7 +9,6 @@
 
 import React, { Component } from 'react';
 import { memoize } from 'lodash';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -43,13 +42,6 @@ const detectFormulasInTables = memoize((datatables: Datatable[]) =>
 );
 
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
-  static propTypes = {
-    title: PropTypes.string.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    datatables: PropTypes.array,
-    fieldFormats: PropTypes.object.isRequired,
-  };
-
   state = {
     isPopoverOpen: false,
   };

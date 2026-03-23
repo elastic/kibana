@@ -9,11 +9,13 @@ import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
+import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -43,6 +45,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         updateProps: (newProps) => setCurrentProps(newProps),
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
+        addAttachment: (attachment) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
+          })),
       });
     }
   }, [onRegisterCallbacks]);
@@ -157,6 +164,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
   }, []);
 
+  const upsertAttachments = useCallback((attachments: AttachmentInput[]) => {
+    if (attachments.length === 0) {
+      return;
+    }
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      attachments: upsertAttachmentsIntoList(prevProps.attachments, attachments),
+    }));
+  }, []);
+
   const removeAttachment = useCallback((attachmentIndex: number) => {
     setCurrentProps((prevProps) => ({
       ...prevProps,
@@ -177,6 +194,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
       attachments: currentProps.attachments,
+      upsertAttachments,
       resetAttachments,
       removeAttachment,
       conversationActions,
@@ -189,6 +207,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.autoSendInitialMessage,
       currentProps.browserApiTools,
       currentProps.attachments,
+      upsertAttachments,
       resetInitialMessage,
       setConversationId,
       resetAttachments,

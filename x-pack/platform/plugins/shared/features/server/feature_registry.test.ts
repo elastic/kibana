@@ -887,7 +887,6 @@ describe('FeatureRegistry', () => {
                     { ruleTypeId: 'foo', consumers: ['test-feature'] },
                     { ruleTypeId: 'bar', consumers: ['test-feature'] },
                   ],
-                  read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -987,7 +986,7 @@ describe('FeatureRegistry', () => {
             all: {
               alerting: {
                 rule: {
-                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                  manual_run: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -1000,7 +999,7 @@ describe('FeatureRegistry', () => {
             read: {
               alerting: {
                 rule: {
-                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                  read: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {

@@ -8,6 +8,7 @@
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { IFileStore, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import {
   createResultTransformer,
@@ -61,6 +62,16 @@ describe('createResultTransformer', () => {
       list: jest.fn(async () => []),
     } as unknown as ToolRegistry);
 
+  const createMockToolManager = (
+    summarizers: Map<
+      string,
+      (step: ToolCallWithResult) => ToolResult[] | null | undefined
+    > = new Map()
+  ): ToolManager =>
+    ({
+      getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
+    } as unknown as ToolManager);
+
   describe('tool-specific summarization', () => {
     it('applies summarizeToolReturn when tool has it defined', async () => {
       const toolWithSummarizer = {
@@ -78,6 +89,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: false,
       });
@@ -106,6 +118,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: false,
       });
@@ -130,6 +143,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: false,
       });
@@ -150,6 +164,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: false,
       });
@@ -162,6 +177,82 @@ describe('createResultTransformer', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].data).toEqual({ original: 'data' });
+    });
+
+    it('prefers toolManager summarizer over toolRegistry', async () => {
+      const managerSummarizer = jest.fn((step: ToolCallWithResult) => [
+        {
+          tool_result_id: 'manager-summarized',
+          type: ToolResultType.other,
+          data: { summary: 'From manager' },
+        },
+      ]);
+
+      const registrySummarizer = {
+        summarizeToolReturn: jest.fn((step: ToolCallWithResult) => [
+          {
+            tool_result_id: 'registry-summarized',
+            type: ToolResultType.other,
+            data: { summary: 'From registry' },
+          },
+        ]),
+      };
+
+      const toolManager = createMockToolManager(new Map([['search', managerSummarizer]]));
+      const toolRegistry = createMockToolRegistry(new Map([['search', registrySummarizer as any]]));
+      const filestore = createMockFileStore(new Map());
+
+      const transformer = createResultTransformer({
+        toolRegistry,
+        toolManager,
+        filestore,
+        filestoreEnabled: false,
+      });
+
+      const toolCall = makeToolCallWithResult('call-1', 'search', [
+        { tool_result_id: 'result-1', type: ToolResultType.other, data: { original: 'data' } },
+      ]);
+
+      const result = await transformer(toolCall);
+
+      expect(managerSummarizer).toHaveBeenCalledWith(toolCall);
+      expect(registrySummarizer.summarizeToolReturn).not.toHaveBeenCalled();
+      expect(result).toHaveLength(1);
+      expect(result[0].data).toEqual({ summary: 'From manager', _summary: true });
+    });
+
+    it('falls back to toolRegistry when toolManager has no summarizer', async () => {
+      const registrySummarizer = {
+        summarizeToolReturn: jest.fn((step: ToolCallWithResult) => [
+          {
+            tool_result_id: 'registry-summarized',
+            type: ToolResultType.other,
+            data: { summary: 'From registry' },
+          },
+        ]),
+      };
+
+      const toolManager = createMockToolManager(new Map());
+      const toolRegistry = createMockToolRegistry(new Map([['search', registrySummarizer as any]]));
+      const filestore = createMockFileStore(new Map());
+
+      const transformer = createResultTransformer({
+        toolRegistry,
+        toolManager,
+        filestore,
+        filestoreEnabled: false,
+      });
+
+      const toolCall = makeToolCallWithResult('call-1', 'search', [
+        { tool_result_id: 'result-1', type: ToolResultType.other, data: { original: 'data' } },
+      ]);
+
+      const result = await transformer(toolCall);
+
+      expect(toolManager.getSummarizer).toHaveBeenCalledWith('search');
+      expect(registrySummarizer.summarizeToolReturn).toHaveBeenCalledWith(toolCall);
+      expect(result).toHaveLength(1);
+      expect(result[0].data).toEqual({ summary: 'From registry', _summary: true });
     });
   });
 
@@ -182,6 +273,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
       });
@@ -212,6 +304,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
       });
@@ -233,6 +326,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
       });
@@ -263,6 +357,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: false,
       });
@@ -307,6 +402,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
       });
@@ -335,6 +431,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
       });
@@ -371,6 +468,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: false,
       });
@@ -395,6 +493,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
       });
@@ -419,6 +518,7 @@ describe('createResultTransformer', () => {
 
       const transformer = createResultTransformer({
         toolRegistry,
+        toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
         tokenThreshold: 100,

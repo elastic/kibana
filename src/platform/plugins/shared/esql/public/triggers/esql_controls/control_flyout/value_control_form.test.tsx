@@ -289,6 +289,7 @@ describe('ValueControlForm', () => {
           expect(getESQLResults).toHaveBeenCalledWith(
             expect.objectContaining({
               timeRange: mockTimeRange,
+              signal: expect.any(AbortSignal),
             })
           );
         });

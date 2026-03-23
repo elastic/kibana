@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type * as Rx from 'rxjs';
 import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { ProductLine, ProductTier } from '../../common/product';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { registerSolutionNavigation } from './navigation';
@@ -47,10 +49,17 @@ describe('Security Side Nav', () => {
     await registerSolutionNavigation(services, []);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Classic);
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(
+      services,
+      AIChatExperience.Classic,
+      false
+    );
     expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
 
-    const [, navigationTree$] = initNavigationSpy.mock.calls[0];
+    const [, navigationTree$] = initNavigationSpy.mock.calls[0] as [
+      string,
+      Rx.Observable<NavigationTreeDefinition>
+    ];
 
     navigationTree$.subscribe({
       next: (value) => {
@@ -70,10 +79,17 @@ describe('Security Side Nav', () => {
     ]);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(AIChatExperience.Classic, false);
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
+      AIChatExperience.Classic,
+      false,
+      false
+    );
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
 
-    const [, navigationTree$] = initNavigationSpy.mock.calls[0];
+    const [, navigationTree$] = initNavigationSpy.mock.calls[0] as [
+      string,
+      Rx.Observable<NavigationTreeDefinition>
+    ];
 
     navigationTree$.subscribe({
       next: (value) => {
@@ -93,6 +109,10 @@ describe('Security Side Nav', () => {
 
     await registerSolutionNavigation(services, []);
 
-    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Agent);
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(
+      services,
+      AIChatExperience.Agent,
+      false
+    );
   });
 });

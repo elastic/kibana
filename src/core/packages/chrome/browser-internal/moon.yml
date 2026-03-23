@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-chrome-browser-internal'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-chrome-browser-internal'
+  title: '@kbn/core-chrome-browser-internal'
   description: Moon project for @kbn/core-chrome-browser-internal
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/core/packages/chrome/browser-internal
+  sourceRoot: src/core/packages/chrome/browser-internal
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -34,12 +33,9 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/core-ui-settings-browser-mocks'
-  - '@kbn/test-jest-helpers'
-  - '@kbn/core-application-common'
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-custom-branding-browser-mocks'
   - '@kbn/core-custom-branding-browser'
-  - '@kbn/core-custom-branding-common'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-analytics-browser'
   - '@kbn/core-http-browser-internal'
@@ -58,18 +54,17 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core-user-profile-common'
   - '@kbn/core-theme-browser-internal'
-  - '@kbn/core-chrome-navigation'
-  - '@kbn/core-chrome-layout-components'
-  - '@kbn/core-chrome-layout-constants'
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-feature-flags-browser-mocks'
-  - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/shared-ux-label-formatter'
   - '@kbn/core-chrome-sidebar-internal'
   - '@kbn/core-chrome-sidebar-context'
-  - '@kbn/core-chrome-sidebar-components'
   - '@kbn/core-chrome-sidebar'
+  - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-browser-internal-types'
+  - '@kbn/use-observable'
+  - '@kbn/react-kibana-context-env'
 tags:
   - shared-browser
   - package
@@ -84,14 +79,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

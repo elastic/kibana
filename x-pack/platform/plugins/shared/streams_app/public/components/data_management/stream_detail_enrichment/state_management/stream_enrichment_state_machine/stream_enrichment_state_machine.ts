@@ -18,7 +18,7 @@ import {
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
-  streamlangDSLSchema,
+  streamlangDSLSchemaStrict,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
@@ -82,7 +82,8 @@ export const streamEnrichmentMachine = setup({
     /* Validation actions */
     computeValidation: assign(({ context }) => {
       // First, check for schema errors (Zod parsing)
-      const parseResult = streamlangDSLSchema.safeParse(context.nextStreamlangDSL);
+      // Use pre-built strict schema to catch excess keys, matching server-side validation behavior
+      const parseResult = streamlangDSLSchemaStrict.safeParse(context.nextStreamlangDSL);
       if (!parseResult.success) {
         const schemaErrors = parseResult.error.issues.map((issue) => {
           const path = issue.path.length > 0 ? issue.path.join('.') : 'root';

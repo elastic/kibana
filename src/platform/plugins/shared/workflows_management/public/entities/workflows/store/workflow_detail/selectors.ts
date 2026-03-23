@@ -76,7 +76,17 @@ export const selectIsTestModalOpen = createSelector(
 
 export const selectReplayExecutionId = createSelector(
   selectDetail,
-  (detail) => detail.replayExecutionId
+  (detail) => detail.replay?.executionId ?? null
+);
+
+export const selectReplayStepExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.stepExecutionId ?? null
+);
+
+export const selectTestStepModalOpenStepId = createSelector(
+  selectDetail,
+  (detail) => detail.testStepModalOpenStepId ?? undefined
 );
 
 export const selectIsSavingYaml = createSelector(
@@ -85,6 +95,7 @@ export const selectIsSavingYaml = createSelector(
 );
 
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
+export const selectWorkflows = createSelector(selectDetail, (detail) => detail.workflows);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);

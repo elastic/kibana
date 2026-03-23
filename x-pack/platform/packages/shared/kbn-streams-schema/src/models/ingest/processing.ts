@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 
 export interface IngestStreamProcessing extends StreamlangDSL {
@@ -14,6 +14,6 @@ export interface IngestStreamProcessing extends StreamlangDSL {
 
 export const ingestStreamProcessingSchema = streamlangDSLSchema.merge(
   z.object({
-    updated_at: z.string().datetime(),
+    updated_at: z.iso.datetime(),
   })
 );

@@ -86,6 +86,7 @@ describe('useGetTemplates', () => {
         search: '',
         tags: [],
         author: [],
+        owner: [],
         isDeleted: false,
       },
     });
@@ -126,6 +127,7 @@ describe('useGetTemplates', () => {
         sortOrder: 'desc',
         tags: [],
         author: [],
+        owner: [],
         isDeleted: false,
       },
     });
@@ -162,6 +164,7 @@ describe('useGetTemplates', () => {
         search: 'partial search',
         tags: [],
         author: [],
+        owner: [],
         isDeleted: false,
       },
     });

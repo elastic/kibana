@@ -47,7 +47,7 @@ describe('getDefendInsightsPrompt', () => {
     (getIncompatibleAntivirusPrompt as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
-      type: DefendInsightType.Enum.incompatible_antivirus,
+      type: DefendInsightType.enum.incompatible_antivirus,
       ...mockArgs,
     });
 
@@ -69,7 +69,7 @@ describe('getDefendInsightsPrompt', () => {
     (getPolicyResponseFailurePrompt as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
-      type: DefendInsightType.Enum.policy_response_failure,
+      type: DefendInsightType.enum.policy_response_failure,
       ...mockArgs,
     });
 

@@ -50,6 +50,7 @@ const browserConfig = schema.object({
   }),
   loggers: schema.arrayOf(browserLoggerSchema, {
     defaultValue: [],
+    maxSize: 100,
   }),
 });
 
@@ -59,7 +60,7 @@ const browserConfig = schema.object({
  * @public
  */
 export const loggerSchema = schema.object({
-  appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  appenders: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 25 }),
   name: schema.string(),
   level: levelSchema,
 });
@@ -72,11 +73,13 @@ export const config = {
     }),
     loggers: schema.arrayOf(loggerSchema, {
       defaultValue: [],
+      maxSize: 100,
     }),
     root: schema.object({
       appenders: schema.arrayOf(schema.string(), {
         defaultValue: [DEFAULT_APPENDER_NAME],
         minSize: 1,
+        maxSize: 25,
       }),
       level: levelSchema,
     }),
@@ -104,7 +107,7 @@ export const loggerContextConfigSchema = schema.object({
     defaultValue: new Map<string, AppenderConfigType>(),
   }),
 
-  loggers: schema.arrayOf(loggerSchema, { defaultValue: [] }),
+  loggers: schema.arrayOf(loggerSchema, { defaultValue: [], maxSize: 100 }),
 });
 
 /** @public */

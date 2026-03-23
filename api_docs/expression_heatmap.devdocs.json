@@ -167,7 +167,7 @@
         "label": "HeatmapArguments",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-        "lineNumber": 83,
+        "lineNumber": 89,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -183,7 +183,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 84,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -199,7 +199,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 85,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -215,7 +215,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 86,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -231,7 +231,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 87,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -262,7 +262,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 88,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -286,7 +286,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 89,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -310,7 +310,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 90,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -334,7 +334,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 91,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -358,7 +358,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 92,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -382,7 +382,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 93,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -399,7 +399,7 @@
               " & { type: \"heatmap_legend\"; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 94,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -416,7 +416,7 @@
               " & { type: \"heatmap_grid\"; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 95,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -432,7 +432,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 96,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -448,7 +448,7 @@
         "label": "HeatmapExpressionProps",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-        "lineNumber": 101,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -470,7 +470,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 102,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -492,7 +492,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 103,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -505,7 +505,7 @@
             "label": "syncTooltips",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 104,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -518,7 +518,7 @@
             "label": "syncCursor",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 105,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -534,7 +534,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 106,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -579,16 +579,18 @@
               "MakeOverridesSerializable",
               "<",
               "LegendValue",
-              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+              "LegendLayout",
+              " | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "lineNumber": 107,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -756,7 +758,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-        "lineNumber": 116,
+        "lineNumber": 122,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -774,7 +776,7 @@
           " & { type: \"heatmap_grid\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-        "lineNumber": 79,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -824,7 +826,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-        "lineNumber": 131,
+        "lineNumber": 137,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -892,7 +894,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-        "lineNumber": 124,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1449,6 +1451,66 @@
               },
               {
                 "parentPluginId": "expressionHeatmap",
+                "id": "def-common.heatmapGridConfig.args.ySortPredicate",
+                "type": "Object",
+                "tags": [],
+                "label": "ySortPredicate",
+                "description": [],
+                "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.ySortPredicate.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "lineNumber": 70,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.ySortPredicate.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "lineNumber": 71,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.ySortPredicate.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "false"
+                    ],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "lineNumber": 74,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressionHeatmap",
                 "id": "def-common.heatmapGridConfig.args.isXAxisLabelVisible",
                 "type": "Object",
                 "tags": [],
@@ -1457,7 +1519,7 @@
                   "// X-axis"
                 ],
                 "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                "lineNumber": 70,
+                "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1473,7 +1535,7 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 71,
+                    "lineNumber": 78,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1486,7 +1548,7 @@
                     "label": "help",
                     "description": [],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 72,
+                    "lineNumber": 79,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1501,7 +1563,7 @@
                 "label": "xAxisLabelRotation",
                 "description": [],
                 "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                "lineNumber": 76,
+                "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1517,7 +1579,7 @@
                       "\"number\"[]"
                     ],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 77,
+                    "lineNumber": 84,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1530,7 +1592,7 @@
                     "label": "help",
                     "description": [],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 78,
+                    "lineNumber": 85,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1545,7 +1607,7 @@
                 "label": "isXAxisTitleVisible",
                 "description": [],
                 "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                "lineNumber": 82,
+                "lineNumber": 89,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1561,7 +1623,7 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 83,
+                    "lineNumber": 90,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1574,7 +1636,7 @@
                     "label": "help",
                     "description": [],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 84,
+                    "lineNumber": 91,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1589,7 +1651,7 @@
                 "label": "xTitle",
                 "description": [],
                 "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                "lineNumber": 88,
+                "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1605,7 +1667,7 @@
                       "\"string\"[]"
                     ],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 89,
+                    "lineNumber": 96,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1618,7 +1680,7 @@
                     "label": "help",
                     "description": [],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 90,
+                    "lineNumber": 97,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1634,7 +1696,67 @@
                       "false"
                     ],
                     "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "lineNumber": 93,
+                    "lineNumber": 100,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressionHeatmap",
+                "id": "def-common.heatmapGridConfig.args.xSortPredicate",
+                "type": "Object",
+                "tags": [],
+                "label": "xSortPredicate",
+                "description": [],
+                "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                "lineNumber": 102,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.xSortPredicate.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "lineNumber": 103,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.xSortPredicate.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "lineNumber": 104,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.xSortPredicate.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "false"
+                    ],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "lineNumber": 107,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1653,10 +1775,14 @@
             "signature": [
               "(input: null, args: ",
               "HeatmapGridConfig",
-              ") => { strokeWidth?: number | undefined; strokeColor?: string | undefined; isCellLabelVisible: boolean; isYAxisLabelVisible: boolean; isYAxisTitleVisible: boolean; yTitle?: string | undefined; isXAxisLabelVisible: boolean; xAxisLabelRotation?: number | undefined; isXAxisTitleVisible: boolean; xTitle?: string | undefined; type: \"heatmap_grid\"; }"
+              ") => { strokeWidth?: number | undefined; strokeColor?: string | undefined; isCellLabelVisible: boolean; isYAxisLabelVisible: boolean; isYAxisTitleVisible: boolean; yTitle?: string | undefined; ySortPredicate?: ",
+              "HeatmapSortPredicate",
+              " | undefined; isXAxisLabelVisible: boolean; xAxisLabelRotation?: number | undefined; isXAxisTitleVisible: boolean; xTitle?: string | undefined; xSortPredicate?: ",
+              "HeatmapSortPredicate",
+              " | undefined; type: \"heatmap_grid\"; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-            "lineNumber": 96,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1672,7 +1798,7 @@
                   "null"
                 ],
                 "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                "lineNumber": 96,
+                "lineNumber": 110,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1689,7 +1815,7 @@
                   "HeatmapGridConfig"
                 ],
                 "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                "lineNumber": 96,
+                "lineNumber": 110,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,

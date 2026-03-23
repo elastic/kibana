@@ -52,6 +52,7 @@ jest.mock('react-redux', () => {
 const panelContextValue = {
   eventId: 'event id',
   dataFormattedForFieldBrowser: [],
+  searchHit: { _index: 'test', _id: 'test-id' },
 } as unknown as DocumentDetailsContext;
 
 const mockGlobalStateWithSavedTimeline: State = {
@@ -131,15 +132,26 @@ describe('NotesDetails', () => {
       },
     });
 
+    const contextValue = {
+      ...panelContextValue,
+      searchHit: {
+        _index: 'test',
+        _id: 'test-id',
+        fields: {
+          'kibana.alert.rule.uuid': ['rule-uuid'],
+        },
+      },
+    } as unknown as DocumentDetailsContext;
+
     const { getByText } = render(
       <TestProviders store={store}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <NotesDetails />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
-    expect(getByText(NO_NOTES(true))).toBeInTheDocument();
+    expect(getByText(NO_NOTES('alert'))).toBeInTheDocument();
   });
 
   it('should render no data message for events if no notes are present', () => {
@@ -163,7 +175,7 @@ describe('NotesDetails', () => {
       </TestProviders>
     );
 
-    expect(getByText(NO_NOTES(false))).toBeInTheDocument();
+    expect(getByText(NO_NOTES('event'))).toBeInTheDocument();
   });
 
   it('should render error toast if fetching notes fails', () => {

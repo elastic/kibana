@@ -29,7 +29,7 @@ import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import { FieldsTable, usePinnedFields } from './components/fields_table';
 import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 const defaultPinnedFields = [

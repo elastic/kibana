@@ -49,6 +49,7 @@ export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsS
         analytics.reportEvent(FEEDBACK_SUBMITTED_EVENT_TYPE, {
           ...request.body,
           user_id: user?.uid,
+          source: 'kibana',
         });
 
         return response.ok({
