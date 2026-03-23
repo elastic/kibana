@@ -221,16 +221,6 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Returns a legend item locator scoped to a specific card by matching
-   * the visible text of the elastic-charts legend label.
-   */
-  public getLegendItemInCard(index: number, legendLabel: string): Locator {
-    return this.getCardByIndex(index)
-      .locator('.echLegendItem__label')
-      .filter({ hasText: legendLabel });
-  }
-
-  /**
    * Opens the inspector flyout by triggering "Inspect" from the chart
    * actions menu of the given card.
    */
