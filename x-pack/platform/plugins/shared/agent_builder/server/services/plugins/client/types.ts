@@ -33,6 +33,7 @@ export interface PersistedPluginDefinition {
 }
 
 export interface PluginCreateRequest {
+  id?: string;
   name: string;
   version: string;
   description: string;
