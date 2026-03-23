@@ -41,11 +41,7 @@ evaluate.describe('KI feature duplication (harness)', () => {
     inferenceClient: BoundInferenceClient;
     logger: Logger;
     sampleSize: number;
-  }): Promise<{
-    runs: Array<{
-      features: BaseFeature[];
-    }>;
-  }> {
+  }): Promise<{ runs: Array<{ features: BaseFeature[] }> }> {
     const outputs: Array<{ features: BaseFeature[] }> = [];
 
     for (let i = 0; i < runs; i++) {
@@ -142,6 +138,7 @@ evaluate.describe('KI feature duplication (harness)', () => {
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
+              evaluators.traceBasedEvaluators.toolCalls,
               createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
             ]
           );

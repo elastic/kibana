@@ -10,6 +10,7 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { BaseFeature } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -19,6 +20,7 @@ import {
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
 import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction_evaluators';
+import { createCorrectnessEvaluators } from '../../../src/evaluators/correctness_evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -88,7 +90,19 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+        async ({
+          executorClient,
+          evaluators,
+          inferenceClient,
+          evaluationConnector,
+          logger,
+          traceEsClient,
+          log,
+        }) => {
+          const evaluatorInferenceClient = inferenceClient.bindTo({
+            connectorId: evaluationConnector.id,
+          });
+
           await executorClient.runExperiment(
             {
               dataset: {
@@ -128,9 +142,32 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 criteriaFn: evaluators.criteria.bind(evaluators),
                 criteria: scenario.output.criteria,
               }),
+              ...createCorrectnessEvaluators({
+                inferenceClient: evaluatorInferenceClient,
+                log,
+                extractContext: (_input, metadata) => {
+                  const meta = metadata as Record<string, unknown>;
+                  return `Identify key infrastructure features from log data. Failure domain: ${meta.failure_domain}, failure mode: ${meta.failure_mode}`;
+                },
+                extractResponse: (output) => {
+                  const features = ((output as Record<string, unknown>)?.features ??
+                    []) as BaseFeature[];
+                  return features
+                    .map(
+                      (f) =>
+                        `[${f.type}] ${f.id}: ${f.description} (confidence: ${
+                          f.confidence
+                        }, evidence: ${(f.evidence ?? []).join('; ')})`
+                    )
+                    .join('\n');
+                },
+                extractGroundTruth: (expected) =>
+                  (expected as Record<string, unknown>)?.expected as string,
+              }),
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
+              evaluators.traceBasedEvaluators.toolCalls,
               createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
             ]
           );
