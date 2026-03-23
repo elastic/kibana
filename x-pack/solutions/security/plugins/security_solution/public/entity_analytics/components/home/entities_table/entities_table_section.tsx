@@ -58,6 +58,7 @@ const GroupWithURLPagination = ({
   selectedGroupOptions,
   groupSelectorComponent,
 }: GroupWithURLPaginationProps) => {
+  const { onChangePage } = state;
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
@@ -65,8 +66,8 @@ const GroupWithURLPagination = ({
   });
 
   useEffect(() => {
-    state.onChangePage(0);
-  }, [selectedGroup, state.onChangePage]);
+    onChangePage(0);
+  }, [selectedGroup, onChangePage]);
 
   return (
     <GroupWrapper
