@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { INVESTIGATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/investigation_section'; /* Table */
-import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/about_section'; /* Table */
-import {
-  CONTENT_TEST_ID,
-  HEADER_TEST_ID,
-} from '../../../../flyout_v2/shared/components/expandable_section';
 import { PREFIX } from '../../../shared/test_ids';
+
+const HEADER_TEST_ID = 'Header';
+const CONTENT_TEST_ID = 'Content';
 
 /* Table */
 
@@ -64,6 +61,7 @@ export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAd
 
 /* About section */
 
+const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
 
@@ -81,6 +79,7 @@ export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Detail
 
 /* Investigation section */
 
+const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_ID + HEADER_TEST_ID;
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
@@ -164,14 +163,6 @@ export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Misconfigurations` as const;
 export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
-
-/* Threat intelligence */
-
-export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
-export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
-  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;
-export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID =
-  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
 
 /* Correlations */
 

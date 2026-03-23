@@ -125,7 +125,7 @@ const providerMap = new Map<
   new (
     options: AuthenticationProviderOptions,
     providerSpecificOptions?: AuthenticationProviderSpecificOptions
-  ) => BaseAuthenticationProvider
+  ) => BaseAuthenticationProvider<any>
 >([
   [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
   [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
@@ -352,7 +352,7 @@ export class Authenticator {
       const authenticationResult = await provider.login(
         request,
         attempt.value,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSessionValue! : null
       );
 
       securityTelemetry.recordLoginDuration(performance.now() - startTime, {
@@ -442,7 +442,7 @@ export class Authenticator {
 
       let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSession.value!.state : null
+        ownsSession ? existingSession.value! : null
       );
 
       if (!authenticationResult.notHandled()) {
@@ -565,7 +565,7 @@ export class Authenticator {
     // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
     // available then `getSessionValue` should have returned `null`.
     const provider = this.providers.get(existingSessionValue.provider.name)!;
-    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    const authenticationResult = await provider.authenticate(request, existingSessionValue);
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
@@ -598,7 +598,7 @@ export class Authenticator {
       // hence, we can't assume that this provider exists, so we have to check it.
       const provider = this.providers.get(suggestedProviderName);
       if (provider) {
-        return provider.logout(request, sessionValue?.state ?? null);
+        return provider.logout(request, sessionValue ?? null);
       }
     } else {
       // In case logout is called and we cannot figure out what provider is supposed to handle it,
@@ -757,6 +757,7 @@ export class Authenticator {
    * Updates, creates, extends or clears session value based on the received authentication result.
    * @param request Request instance.
    * @param provider Provider that produced provided authentication result.
+   * @param providerInstance Provider instance that produced provided authentication result.
    * @param authenticationResult Result of the authentication or login attempt.
    * @param existingSessionValue Value of the existing session if any.
    */
@@ -788,6 +789,14 @@ export class Authenticator {
           authenticationType: provider.type,
         })
       );
+    }
+
+    // Don't update session if request is "minimally" authenticated.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(
+        'Session should not be changed for requests that require minimal authentication, skipping session update.'
+      );
+      return null;
     }
 
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
