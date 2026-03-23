@@ -37,6 +37,5 @@ describe('common_fields', () => {
         }
       }
     );
-
   });
 });
