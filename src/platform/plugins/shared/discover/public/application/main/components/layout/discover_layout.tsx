@@ -503,6 +503,7 @@ export function DiscoverLayout() {
                       <PanelsToggle
                         sidebarToggleState$={sidebarToggleState$}
                         omitChartButton
+                        omitTableButton
                         dataTestSubjSuffix="InPage"
                       />
                     </div>

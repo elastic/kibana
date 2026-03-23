@@ -24,6 +24,7 @@ import {
 export interface PanelsToggleProps {
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   omitChartButton?: boolean;
+  omitTableButton?: boolean;
   dataTestSubjSuffix?: string;
 }
 
@@ -123,12 +124,14 @@ const getTableButton = ({
 /**
  * @param sidebarToggleState$
  * @param omitChartButton
+ * @param omitTableButton
  * @param dataTestSubjSuffix
  * @constructor
  */
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   sidebarToggleState$,
   omitChartButton = false,
+  omitTableButton = false,
   dataTestSubjSuffix,
 }) => {
   const dispatch = useInternalStateDispatch();
@@ -171,12 +174,14 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     );
   }
 
-  buttons.push(
-    getTableButton({
-      isHidden: isTableHidden,
-      toggleTable: onToggleTable,
-    })
-  );
+  if (!omitTableButton) {
+    buttons.push(
+      getTableButton({
+        isHidden: isTableHidden,
+        toggleTable: onToggleTable,
+      })
+    );
+  }
 
   if (!buttons.length) {
     return null;
