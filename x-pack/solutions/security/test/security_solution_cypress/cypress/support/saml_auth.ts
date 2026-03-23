@@ -10,8 +10,8 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import type { HostOptions } from '@kbn/test';
-import { SamlSessionManager } from '@kbn/test';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import axios from 'axios';
