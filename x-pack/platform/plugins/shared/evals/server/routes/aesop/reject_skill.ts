@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import {
   AESOPError,
   SkillNotFoundError,
@@ -76,7 +78,7 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
-        const { review_notes, rejection_reason, suggested_improvements } = request.body;
+        const { review_notes, rejection_reason, suggested_improvements, connector_id: connectorId } = request.body;
 
         const startTime = Date.now();
 
@@ -101,6 +103,7 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
             throw error;
           }
 
+          // TODO: Replace with a proper ProposedSkill type when moving beyond spike
           const skill = skillDoc._source as any;
 
           // 2. Validate skill is not already deployed
@@ -170,7 +173,6 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
           });
 
           // 5. Cross-evaluate remaining pending skills with rejection context
-          const { connector_id: connectorId } = request.body;
           if (connectorId) {
             const evalsContext = await context.evals;
             const actionsStart = evalsContext.getActionsStart();
@@ -240,11 +242,11 @@ async function crossEvaluatePendingSkills({
   rejectedSkill,
   logger,
 }: {
-  esClient: any;
-  actionsClient: any;
+  esClient: ElasticsearchClient;
+  actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
   connectorId: string;
   rejectedSkill: { id: string; name: string; rejection_reason: string; review_notes: string };
-  logger: any;
+  logger: Logger;
 }) {
   // Find all pending_review skills that haven't been validated yet
   const result = await esClient.search({
@@ -358,7 +360,9 @@ Respond with ONLY a JSON array (no markdown fences):
             },
           },
           refresh: 'wait_for',
-        }).catch(() => {});
+        }).catch((err: Error) => {
+          logger.warn(`[AESOP] Failed to auto-reject skill ${evaluation.id}: ${err.message}`);
+        });
 
         autoRejected++;
         logger.info(`[AESOP] Auto-rejected skill ${evaluation.id}: ${evaluation.reason}`);
@@ -378,7 +382,9 @@ Respond with ONLY a JSON array (no markdown fences):
               },
             },
           },
-        }).catch(() => {});
+        }).catch((err: Error) => {
+          logger.warn(`[AESOP] Failed to flag skill ${evaluation.id}: ${err.message}`);
+        });
 
         autoImproved++;
         logger.info(`[AESOP] Flagged skill ${evaluation.id} (${evaluation.severity}): ${evaluation.reason}`);

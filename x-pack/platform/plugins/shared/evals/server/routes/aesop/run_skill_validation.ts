@@ -7,6 +7,8 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 
 const runSkillValidationParamsSchema = z.object({
@@ -53,6 +55,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
             id: skillId,
           });
 
+          // TODO: Replace with a proper ProposedSkill type when moving beyond spike
           const skill = skillDoc._source as any;
 
           logger.info('[AESOP] Starting LLM-based skill validation', {
@@ -139,12 +142,12 @@ async function runLLMValidation({
   skill,
   logger,
 }: {
-  esClient: any;
-  actionsClient: any;
+  esClient: ElasticsearchClient;
+  actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
   connectorId: string;
   skillId: string;
-  skill: any;
-  logger: any;
+  skill: Record<string, any>;
+  logger: Logger;
 }) {
   const startTime = Date.now();
   const evalTraceId = `aesop-eval-${skillId}-${Date.now()}`;

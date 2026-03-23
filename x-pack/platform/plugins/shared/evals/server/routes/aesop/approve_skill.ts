@@ -92,6 +92,7 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             id: skillId,
           });
 
+          // TODO: Replace with a proper ProposedSkill type when moving beyond spike
           const skill = skillDoc._source as any;
 
           // 2. Validate skill passed evaluations

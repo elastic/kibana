@@ -52,7 +52,8 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
 
         try {
           const { executionId } = request.params;
-          const coreContext = await context.core; const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const coreContext = await context.core;
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
           // Fetch workflow execution state
           const workflowState = await esClient.get({
@@ -120,6 +121,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
             // Patterns index may not exist - non-critical
           }
 
+          // TODO: Replace with a proper WorkflowExecution type when moving beyond spike
           const executionState = workflowState._source as any;
 
           // Build comprehensive execution detail response

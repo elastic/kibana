@@ -52,6 +52,14 @@ interface ProposedSkill {
   };
   review: {
     status: 'pending_review' | 'approved' | 'rejected';
+    reviewed_by?: string;
+  };
+  cross_evaluation?: {
+    triggered_by_rejection: string;
+    action: 'auto_rejected' | 'flagged';
+    severity: string;
+    reason: string;
+    evaluated_at: string;
   };
 }
 
@@ -165,7 +173,7 @@ export const ProposedSkillsList = () => {
         const statusConfig = {
           pending: { color: 'default', label: 'Pending' },
           validating: { color: 'primary', label: 'Running...' },
-          passed: { color: 'success', label: `Passed (${(skill.validation.final_score! * 100).toFixed(0)}%)` },
+          passed: { color: 'success', label: `Passed (${((skill.validation.final_score ?? 0) * 100).toFixed(0)}%)` },
           failed: { color: 'danger', label: 'Failed' },
         };
 
@@ -184,8 +192,8 @@ export const ProposedSkillsList = () => {
           approved: 'success',
           rejected: 'danger',
         };
-        const crossEval = (skill as any).cross_evaluation;
-        const reviewedBy = (skill as any).review?.reviewed_by;
+        const crossEval = skill.cross_evaluation;
+        const reviewedBy = skill.review?.reviewed_by;
         return (
           <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
             <EuiFlexItem grow={false}>
