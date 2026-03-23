@@ -216,10 +216,10 @@ export class GenAiSettingsPage {
   }
 
   /**
-   * Get the AI Agent flyout element
+   * Get the AI Agent sidebar panel element
    */
-  getAIAgentFlyout() {
-    return this.page.testSubj.locator('agent-builder-conversation-flyout-wrapper');
+  getAIAgentSidebar() {
+    return this.page.testSubj.locator('sidebarPanel');
   }
 
   /**
