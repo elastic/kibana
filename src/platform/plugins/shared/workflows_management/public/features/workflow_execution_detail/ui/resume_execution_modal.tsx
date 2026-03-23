@@ -55,7 +55,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   const [inputsJson, setInputsJson] = useState<string>(
     initialcontextOverride ? JSON.stringify(initialcontextOverride.stepContext, null, 2) : '{}'
   );
-  const isJsonValid = useMemo(() => {
+  const isResumePayloadValid = useMemo(() => {
     try {
       const parsed: unknown = JSON.parse(inputsJson);
       const schema = initialcontextOverride?.schema;
@@ -177,7 +177,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
       <EuiModalFooter>
         <EuiButton
           onClick={handleSubmit}
-          disabled={!isJsonValid}
+          disabled={!isResumePayloadValid}
           color="warning"
           iconType="check"
           size="s"
