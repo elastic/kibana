@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 
 const attachment = (
   id: string | undefined,
-  overrides: Partial<ConverseAttachmentInput> = {}
-): ConverseAttachmentInput => ({
+  overrides: Partial<AttachmentInput> = {}
+): AttachmentInput => ({
   id,
   type: 'visualization',
   data: {},

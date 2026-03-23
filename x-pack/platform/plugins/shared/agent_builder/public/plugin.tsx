@@ -13,6 +13,7 @@ import {
   type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -55,7 +56,6 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
-import type { ConverseAttachmentInput } from '../common/http_api/chat';
 
 export class AgentBuilderPlugin
   implements
@@ -76,7 +76,7 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
-    addAttachment: (attachment: ConverseAttachmentInput) => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -227,7 +227,7 @@ export class AgentBuilderPlugin
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
-      addAttachment: (attachment: ConverseAttachmentInput) => {
+      addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
         }

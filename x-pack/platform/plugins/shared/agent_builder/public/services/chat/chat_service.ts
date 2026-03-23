@@ -14,12 +14,10 @@ import {
   getKibanaDefaultAgentCapabilities,
   type PromptResponse,
 } from '@kbn/agent-builder-common/agents';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
-import type {
-  ChatRequestBodyPayload,
-  ConverseAttachmentInput,
-} from '../../../common/http_api/chat';
+import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
 import { propagateEvents } from './propagate_events';
@@ -35,7 +33,7 @@ interface BaseConverseParams {
 
 export type ChatParams = BaseConverseParams & {
   input: string;
-  attachments?: ConverseAttachmentInput[];
+  attachments?: AttachmentInput[];
 };
 
 export type ResumeRoundParams = BaseConverseParams & {

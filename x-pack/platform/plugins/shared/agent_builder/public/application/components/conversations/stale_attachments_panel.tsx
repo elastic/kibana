@@ -15,12 +15,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { borderRadiusXlStyles } from '../../../common.styles';
 import { AttachmentPillsRow } from './conversation_input/attachment_pills_row';
 
 export interface StaleAttachmentsPanelProps {
-  attachmentInputs: ConverseAttachmentInput[];
+  attachmentInputs: AttachmentInput[];
   onAddToInput: () => void;
   onDismiss: () => void;
 }

@@ -19,24 +19,12 @@ import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/ag
 /**
  * body payload for request to the /internal/agent_builder/chat endpoint
  */
-
-/**
- * Attachments accepted by the converse APIs.
- *
- * Note: unlike conversation-level attachments, attachments sent in a chat message do not support `origin`.
- * The server route schema also forbids unknown keys.
- */
-export type ConverseAttachmentInput = Omit<AttachmentInput, 'origin'> & {
-  /** Not supported by the converse APIs (server forbids unknown keys). */
-  origin?: never;
-};
-
 export interface ChatRequestBodyPayload {
   agent_id?: string;
   connector_id?: string;
   conversation_id?: string;
   capabilities?: AgentCapabilities;
-  attachments?: ConverseAttachmentInput[];
+  attachments?: AttachmentInput[];
   input?: string;
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];

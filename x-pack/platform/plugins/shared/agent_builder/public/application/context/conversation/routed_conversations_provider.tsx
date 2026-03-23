@@ -9,7 +9,7 @@ import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useQueryClient } from '@kbn/react-query';
-import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ConversationContext } from './conversation_context';
 import type { LocationState } from '../../hooks/use_navigation';
 import { newConversationId } from '../../utils/new_conversation';
@@ -86,7 +86,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<ConverseAttachmentInput[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<AttachmentInput[] | undefined>(undefined);
 
   const conversationActions = useConversationActions({
     conversationId,
@@ -96,7 +96,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     onDeleteConversation,
   });
 
-  const upsertAttachments = useCallback((nextAttachments: ConverseAttachmentInput[]) => {
+  const upsertAttachments = useCallback((nextAttachments: AttachmentInput[]) => {
     if (nextAttachments.length === 0) {
       return;
     }

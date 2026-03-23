@@ -15,11 +15,11 @@ import type {
   ConversationRoundStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
+  Attachment,
   ScreenContextAttachmentData,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
@@ -73,7 +73,7 @@ const withScreenContextAttachment = async ({
 }: {
   services: StartServices;
   conversationAttachments?: VersionedAttachment[];
-}): Promise<ConverseAttachmentInput[]> => {
+}): Promise<Attachment[]> => {
   const data = await buildScreenContextData({ services });
   if (!data) {
     return [];

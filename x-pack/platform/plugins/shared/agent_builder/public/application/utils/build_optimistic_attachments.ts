@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import type {
+  AttachmentInput,
+  Attachment,
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
   getLatestVersion,
   hashContent,
-  type Attachment,
-  type AttachmentVersionRef,
-  type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import type { ConverseAttachmentInput } from '../../../common/http_api/chat';
 
 export const buildOptimisticAttachments = ({
   attachments,
   conversationAttachments,
 }: {
-  attachments?: ConverseAttachmentInput[];
+  attachments?: AttachmentInput[];
   conversationAttachments?: VersionedAttachment[];
 }): { fallbackAttachments: Attachment[]; attachmentRefs: AttachmentVersionRef[] } => {
   if (!attachments?.length) {

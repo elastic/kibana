@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { ConverseAttachmentInput } from '../../common/http_api/chat';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
@@ -68,7 +68,7 @@ export interface EmbeddableConversationProps {
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: ConverseAttachmentInput[];
+  attachments?: AttachmentInput[];
 
   /**
    * Browser API tools that the agent can use to interact with the page.
@@ -102,7 +102,7 @@ export interface EmbeddableConversationSidebarProps {
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
-    addAttachment: (attachment: ConverseAttachmentInput) => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   }) => void;
 }
 
