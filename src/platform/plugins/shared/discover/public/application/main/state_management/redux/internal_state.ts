@@ -264,9 +264,8 @@ export const internalStateSlice = createSlice({
      */
     resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
       withTab(state, action.payload, (tab) => {
-        const appState = normalizeVisiblePanelsState(action.payload.appState);
-        tab.previousAppState = appState;
-        tab.appState = appState;
+        tab.previousAppState = action.payload.appState;
+        tab.appState = action.payload.appState;
       }),
 
     /**
