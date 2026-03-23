@@ -15,8 +15,8 @@ import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
-import type { Config } from '../../functional_test_runner';
 import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test-es-server';
+import type { Config } from '../../functional_test_runner';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;

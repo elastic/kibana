@@ -57,8 +57,7 @@ class EsTestConfig {
     }
 
     const username = process.env.TEST_ES_USERNAME || SYSTEM_INDICES_SUPERUSER;
-    const password =
-      process.env.TEST_ES_PASSWORD || process.env.TEST_ES_PASS || 'changeme';
+    const password = process.env.TEST_ES_PASSWORD || process.env.TEST_ES_PASS || 'changeme';
 
     const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
 

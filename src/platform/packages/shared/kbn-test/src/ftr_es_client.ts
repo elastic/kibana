@@ -9,11 +9,8 @@
 
 import * as Url from 'url';
 
+import { createEsClientForTesting, type EsClientForTestingOptions } from '@kbn/test-es-server';
 import type { Config } from './functional_test_runner';
-import {
-  createEsClientForTesting,
-  type EsClientForTestingOptions,
-} from '@kbn/test-es-server';
 
 export type { EsClientForTestingOptions };
 
