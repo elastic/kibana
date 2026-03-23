@@ -13,8 +13,13 @@ export type {
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
+  EsqlTransformationalChartToggleState,
 } from './types';
-export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
+export {
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramExternalVisContextStatus,
+  EsqlTransformationalChartToggleMode,
+} from './types';
 
 export {
   UnifiedBreakdownFieldSelector,

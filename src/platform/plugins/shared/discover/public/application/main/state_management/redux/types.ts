@@ -25,6 +25,7 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { EsqlTransformationalChartToggleMode } from '@kbn/unified-histogram';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -113,6 +114,10 @@ export interface DiscoverAppState {
    * Breakdown field of chart
    */
   breakdownField?: string;
+  /**
+   * ES|QL transformational queries: user-selected chart (result vs time histogram).
+   */
+  esqlTransformationalChartMode?: EsqlTransformationalChartToggleMode;
   /**
    * Density of table
    */

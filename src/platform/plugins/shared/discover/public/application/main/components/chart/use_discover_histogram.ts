@@ -27,6 +27,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -59,6 +60,7 @@ const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchPar
   'externalVisContext',
   'breakdownField',
   'timeInterval',
+  'esqlTransformationalChartMode',
 ];
 
 export interface UseUnifiedHistogramOptions {
@@ -206,6 +208,9 @@ export const useDiscoverHistogram = (
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
+  const esqlTransformationalChartMode = useAppStateSelector(
+    (state) => state.esqlTransformationalChartMode
+  );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
@@ -233,9 +238,11 @@ export const useDiscoverHistogram = (
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
+      esqlTransformationalChartMode: isEsqlMode ? esqlTransformationalChartMode : undefined,
     };
   }, [
     breakdownField,
+    esqlTransformationalChartMode,
     timeInterval,
     currentTabControlState,
     dataView,
@@ -391,6 +398,36 @@ export const useDiscoverHistogram = (
     [timeInterval, dispatch, updateAppState]
   );
 
+  const previousQueryEsqlRef = useRef<string | undefined>();
+  useEffect(() => {
+    const nextEsql = query && isOfAggregateQueryType(query) ? query.esql : undefined;
+    if (previousQueryEsqlRef.current !== undefined && previousQueryEsqlRef.current !== nextEsql) {
+      dispatch(
+        updateAppState({
+          appState: {
+            esqlTransformationalChartMode: undefined,
+          },
+        })
+      );
+    }
+    previousQueryEsqlRef.current = nextEsql;
+  }, [dispatch, query, updateAppState]);
+
+  const onEsqlTransformationalChartModeChange = useCallback<
+    NonNullable<UseUnifiedHistogramProps['onEsqlTransformationalChartModeChange']>
+  >(
+    (mode) => {
+      dispatch(
+        updateAppState({
+          appState: {
+            esqlTransformationalChartMode: mode,
+          },
+        })
+      );
+    },
+    [dispatch, updateAppState]
+  );
+
   return useMemo(
     () => ({
       setUnifiedHistogramApi,
@@ -411,6 +448,9 @@ export const useDiscoverHistogram = (
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
       onTimeIntervalChange,
+      onEsqlTransformationalChartModeChange: isEsqlMode
+        ? onEsqlTransformationalChartModeChange
+        : undefined,
     }),
     [
       chartHidden,
@@ -421,6 +461,7 @@ export const useDiscoverHistogram = (
       isEsqlMode,
       isChartLoading,
       onBreakdownFieldChange,
+      onEsqlTransformationalChartModeChange,
       onTimeIntervalChange,
       onVisContextChanged,
       options?.initialLayoutProps?.topPanelHeight,

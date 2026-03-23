@@ -44,10 +44,12 @@ import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common'
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import type {
+  EsqlTransformationalChartToggleState,
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
   LensVisServiceState,
 } from '../types';
+import { EsqlTransformationalChartToggleMode } from '../types';
 import {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramSuggestionType,
@@ -104,6 +106,7 @@ export class LensVisService {
         type: UnifiedHistogramSuggestionType.unsupported,
       },
       visContext: undefined,
+      esqlTransformationalChartToggle: undefined,
     };
     this.state$ = new BehaviorSubject<LensVisServiceState>(initialState);
 
@@ -163,6 +166,7 @@ export class LensVisService {
       status: LensVisServiceStatus.completed,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       visContext: lensAttributesState.visContext,
+      esqlTransformationalChartToggle: suggestionState.esqlTransformationalChartToggle,
     };
 
     this.state$.next(nextState);
@@ -218,9 +222,13 @@ export class LensVisService {
     breakdownField: DataViewField | undefined;
   }): {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
+    esqlTransformationalChartToggle?: EsqlTransformationalChartToggleState;
   } => {
     let type = UnifiedHistogramSuggestionType.unsupported;
     let currentSuggestion: Suggestion | undefined;
+    let transformationalChartToggleAvailability:
+      | { timeDistributionAvailable: boolean; resultChartAvailable: boolean }
+      | undefined;
 
     const availableSuggestionsWithType: Array<{
       suggestion: UnifiedHistogramSuggestionContext['suggestion'];
@@ -249,17 +257,30 @@ export class LensVisService {
             });
           }
         } else if (hasTransformationalCommand(queryParams.query.esql)) {
-          // appends the first lens suggestion if available
           const allSuggestions = this.getAllSuggestions({
             queryParams,
             preferredVisAttributes: externalVisContext?.attributes,
           });
-
-          if (allSuggestions.length) {
-            availableSuggestionsWithType.push({
-              suggestion: allSuggestions[0],
-              type: UnifiedHistogramSuggestionType.lensSuggestion,
-            });
+          const histogramSuggestionForESQL = this.getTransformationalHistogramSuggestion(
+            queryParams,
+            breakdownField,
+            externalVisContext?.attributes
+          );
+          const effectiveMode = this.resolveEffectiveTransformationalChartMode(
+            queryParams.esqlTransformationalChartMode,
+            allSuggestions.length > 0,
+            Boolean(histogramSuggestionForESQL)
+          );
+          const toggleAvailability = this.appendTransformationalChartSuggestionEntries(
+            availableSuggestionsWithType,
+            {
+              allSuggestions,
+              histogramSuggestion: histogramSuggestionForESQL,
+              effectiveMode,
+            }
+          );
+          if (toggleAvailability) {
+            transformationalChartToggleAvailability = toggleAvailability;
           }
         } else if (hasTimeseriesInfoCommand(queryParams.query.esql)) {
           // skip chart suggestions for info commands
@@ -268,6 +289,7 @@ export class LensVisService {
               type: UnifiedHistogramSuggestionType.unsupported,
               suggestion: undefined,
             },
+            esqlTransformationalChartToggle: undefined,
           };
         } else {
           // appends an ES|QL histogram if available
@@ -333,12 +355,137 @@ export class LensVisService {
       type = availableSuggestionsWithType[0].type;
     }
 
+    const resolvedType = currentSuggestion ? type : UnifiedHistogramSuggestionType.unsupported;
+
+    let esqlTransformationalChartToggle: EsqlTransformationalChartToggleState | undefined;
+    if (
+      transformationalChartToggleAvailability?.timeDistributionAvailable &&
+      transformationalChartToggleAvailability?.resultChartAvailable
+    ) {
+      esqlTransformationalChartToggle = {
+        activeMode:
+          resolvedType === UnifiedHistogramSuggestionType.histogramForESQL
+            ? EsqlTransformationalChartToggleMode.timeDistribution
+            : EsqlTransformationalChartToggleMode.result,
+      };
+    }
+
     return {
       currentSuggestionContext: {
-        type: Boolean(currentSuggestion) ? type : UnifiedHistogramSuggestionType.unsupported,
+        type: resolvedType,
         suggestion: currentSuggestion,
       },
+      esqlTransformationalChartToggle,
     };
+  };
+
+  /**
+   * Time-distribution histogram for transformational ES|QL when the data view time field is still
+   * present in the query result (KEEP/STATS output) as a date column.
+   */
+  private getTransformationalHistogramSuggestion = (
+    queryParams: QueryParams,
+    breakdownField: DataViewField | undefined,
+    preferredVisAttributes: UnifiedHistogramVisContext['attributes'] | undefined
+  ): Suggestion | undefined => {
+    const { dataView, query, timeRange, columns } = queryParams;
+    if (!isOfAggregateQueryType(query) || !query.esql || !timeRange) {
+      return undefined;
+    }
+    const timeFieldName = dataView.timeFieldName;
+    if (!timeFieldName || !columns?.some((column) => column.name === timeFieldName)) {
+      return undefined;
+    }
+    return this.getHistogramSuggestionForESQL({
+      queryParams,
+      breakdownField,
+      preferredVisAttributes,
+      allowTransformationalHistogram: true,
+    });
+  };
+
+  /**
+   * Chooses result vs time-distribution: uses stored app preference when set, otherwise defaults.
+   * The corrections below handle stale `storedMode` (e.g. saved search / URL) when availability
+   * no longer matches — the toggle may be hidden, but `esqlTransformationalChartMode` can still be set.
+   */
+  private resolveEffectiveTransformationalChartMode = (
+    storedMode: EsqlTransformationalChartToggleMode | undefined,
+    hasResultChart: boolean,
+    hasTimeDistributionChart: boolean
+  ): EsqlTransformationalChartToggleMode => {
+    let mode =
+      storedMode ??
+      (hasResultChart
+        ? EsqlTransformationalChartToggleMode.result
+        : EsqlTransformationalChartToggleMode.timeDistribution);
+
+    // Align impossible stored preference with what we can build (toggle not shown in single-chart cases).
+    if (
+      mode === EsqlTransformationalChartToggleMode.result &&
+      !hasResultChart &&
+      hasTimeDistributionChart
+    ) {
+      mode = EsqlTransformationalChartToggleMode.timeDistribution;
+    }
+    if (
+      mode === EsqlTransformationalChartToggleMode.timeDistribution &&
+      !hasTimeDistributionChart &&
+      hasResultChart
+    ) {
+      mode = EsqlTransformationalChartToggleMode.result;
+    }
+    return mode;
+  };
+
+  /**
+   * Pushes transformational chart suggestions; returns toggle availability only when both modes exist.
+   */
+  private appendTransformationalChartSuggestionEntries = (
+    availableSuggestionsWithType: Array<{
+      suggestion: UnifiedHistogramSuggestionContext['suggestion'];
+      type: UnifiedHistogramSuggestionType;
+    }>,
+    params: {
+      allSuggestions: Suggestion[];
+      histogramSuggestion: Suggestion | undefined;
+      effectiveMode: EsqlTransformationalChartToggleMode;
+    }
+  ): { timeDistributionAvailable: boolean; resultChartAvailable: boolean } | undefined => {
+    const { allSuggestions, histogramSuggestion, effectiveMode } = params;
+    const resultChartAvailable = allSuggestions.length > 0;
+    const timeDistributionAvailable = Boolean(histogramSuggestion);
+
+    if (timeDistributionAvailable && resultChartAvailable) {
+      if (effectiveMode === EsqlTransformationalChartToggleMode.timeDistribution) {
+        availableSuggestionsWithType.push({
+          suggestion: histogramSuggestion!,
+          type: UnifiedHistogramSuggestionType.histogramForESQL,
+        });
+      } else {
+        availableSuggestionsWithType.push({
+          suggestion: allSuggestions[0],
+          type: UnifiedHistogramSuggestionType.lensSuggestion,
+        });
+      }
+      return {
+        timeDistributionAvailable: true,
+        resultChartAvailable: true,
+      };
+    }
+
+    if (timeDistributionAvailable) {
+      availableSuggestionsWithType.push({
+        suggestion: histogramSuggestion!,
+        type: UnifiedHistogramSuggestionType.histogramForESQL,
+      });
+    } else if (resultChartAvailable) {
+      availableSuggestionsWithType.push({
+        suggestion: allSuggestions[0],
+        type: UnifiedHistogramSuggestionType.lensSuggestion,
+      });
+    }
+    return undefined;
   };
 
   private getDefaultHistogramSuggestion = ({
@@ -493,10 +640,12 @@ export class LensVisService {
     queryParams,
     breakdownField,
     preferredVisAttributes: originalPreferredVisAttributes,
+    allowTransformationalHistogram = false,
   }: {
     queryParams: QueryParams;
     breakdownField?: DataViewField;
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
+    allowTransformationalHistogram?: boolean;
   }): Suggestion | undefined => {
     const { dataView, query, timeRange, columns } = queryParams;
     const breakdownColumn = breakdownField?.name
@@ -527,96 +676,99 @@ export class LensVisService {
       }
     }
 
-    if (
-      dataView.timeFieldName &&
-      timeRange &&
+    const canBuildHistogram =
+      Boolean(dataView.timeFieldName) &&
+      timeRange != null &&
       isOfAggregateQueryType(query) &&
-      !hasTransformationalCommand(query.esql)
-    ) {
-      const interval = computeInterval(timeRange, this.services.data);
-      const esqlQuery = this.getESQLHistogramQuery({
-        dataView,
-        query,
-        timeRange,
-        interval,
-        breakdownColumn,
-      });
-      const dateFieldLabel = `${dataView.timeFieldName} every ${interval}`;
-      const context = {
-        dataViewSpec: dataView?.toSpec(),
-        fieldName: '',
-        textBasedColumns: [
-          {
-            id: TIMESTAMP_COLUMN,
-            name: dateFieldLabel,
-            meta: {
-              type: 'date',
-            },
+      (!hasTransformationalCommand(query.esql) || allowTransformationalHistogram);
+
+    if (!canBuildHistogram) {
+      return undefined;
+    }
+
+    const interval = computeInterval(timeRange, this.services.data);
+    const esqlQuery = this.getESQLHistogramQuery({
+      dataView,
+      query,
+      timeRange,
+      interval,
+      breakdownColumn,
+    });
+    const dateFieldLabel = `${dataView.timeFieldName} every ${interval}`;
+    const context = {
+      dataViewSpec: dataView?.toSpec(),
+      fieldName: '',
+      textBasedColumns: [
+        {
+          id: TIMESTAMP_COLUMN,
+          name: dateFieldLabel,
+          meta: {
+            type: 'date',
           },
-          {
-            id: 'results',
-            name: 'results',
-            meta: {
-              type: 'number',
-            },
-          },
-        ] as DatatableColumn[],
-        query: {
-          esql: esqlQuery,
         },
-      };
+        {
+          id: 'results',
+          name: 'results',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as DatatableColumn[],
+      query: {
+        esql: esqlQuery,
+      },
+    };
 
-      if (breakdownColumn) {
-        context.textBasedColumns.push(breakdownColumn);
+    if (breakdownColumn) {
+      context.textBasedColumns.push(breakdownColumn);
+    }
+
+    // here the attributes contain the main query and not the histogram one
+    const updatedAttributesWithQuery = preferredVisAttributes
+      ? injectESQLQueryIntoLensLayers(
+          preferredVisAttributes,
+          {
+            esql: esqlQuery,
+          },
+          dateFieldLabel
+        )
+      : undefined;
+
+    const suggestions =
+      this.lensSuggestionsApi(
+        context,
+        dataView,
+        ['lnsDatatable'],
+        ChartType.XY,
+        updatedAttributesWithQuery
+      ) ?? [];
+    if (suggestions.length) {
+      const suggestion = suggestions[0];
+      const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+      // the suggestions api will suggest a numeric column as a metric and not as a breakdown,
+      // so we need to adjust it here
+      if (
+        breakdownColumn &&
+        breakdownColumn.meta?.type === 'number' &&
+        suggestion &&
+        'layers' in suggestionVisualizationState &&
+        Array.isArray(suggestionVisualizationState.layers)
+      ) {
+        return {
+          ...suggestion,
+          visualizationState: {
+            ...(suggestionVisualizationState ?? {}),
+            layers: suggestionVisualizationState.layers.map((layer) => {
+              return {
+                ...layer,
+                accessors: ['results'],
+                splitAccessors: [breakdownColumn.name],
+              };
+            }),
+          },
+        };
       }
-
-      // here the attributes contain the main query and not the histogram one
-      const updatedAttributesWithQuery = preferredVisAttributes
-        ? injectESQLQueryIntoLensLayers(
-            preferredVisAttributes,
-            {
-              esql: esqlQuery,
-            },
-            dateFieldLabel
-          )
-        : undefined;
-
-      const suggestions =
-        this.lensSuggestionsApi(
-          context,
-          dataView,
-          ['lnsDatatable'],
-          ChartType.XY,
-          updatedAttributesWithQuery
-        ) ?? [];
-      if (suggestions.length) {
-        const suggestion = suggestions[0];
-        const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
-        // the suggestions api will suggest a numeric column as a metric and not as a breakdown,
-        // so we need to adjust it here
-        if (
-          breakdownColumn &&
-          breakdownColumn.meta?.type === 'number' &&
-          suggestion &&
-          'layers' in suggestionVisualizationState &&
-          Array.isArray(suggestionVisualizationState.layers)
-        ) {
-          return {
-            ...suggestion,
-            visualizationState: {
-              ...(suggestionVisualizationState ?? {}),
-              layers: suggestionVisualizationState.layers.map((layer) => {
-                return {
-                  ...layer,
-                  accessors: ['results'],
-                  splitAccessors: [breakdownColumn.name],
-                };
-              }),
-            },
-          };
-        }
-        return suggestion;
-      }
+      return suggestion;
     }
 
     return undefined;

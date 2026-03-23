@@ -18,7 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { UnifiedHistogramVisContext } from '../types';
+import type { EsqlTransformationalChartToggleMode, UnifiedHistogramVisContext } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 
@@ -32,6 +32,10 @@ export interface QueryParams {
   columns?: DatatableColumn[];
   columnsMap?: Record<string, DatatableColumn>;
   timeRange?: TimeRange;
+  /**
+   * User preference for transformational ES|QL chart: Categorical vs time histogram.
+   */
+  esqlTransformationalChartMode?: EsqlTransformationalChartToggleMode;
 }
 
 export const exportVisContext = (

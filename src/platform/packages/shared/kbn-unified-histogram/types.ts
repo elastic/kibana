@@ -165,10 +165,23 @@ export enum LensVisServiceStatus {
   'completed' = 'completed',
 }
 
+export enum EsqlTransformationalChartToggleMode {
+  result = 'result',
+  timeDistribution = 'timeDistribution',
+}
+
+export interface EsqlTransformationalChartToggleState {
+  activeMode: EsqlTransformationalChartToggleMode;
+}
+
 export interface LensVisServiceState {
   status: LensVisServiceStatus;
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   visContext: UnifiedHistogramVisContext | undefined;
+  /**
+   * When both Lens and time histogram are available for a transformational ES|QL query.
+   */
+  esqlTransformationalChartToggle?: EsqlTransformationalChartToggleState;
 }
 /**
  * Unified Histogram type for recreating a stored Lens vis
@@ -246,6 +259,10 @@ export interface UnifiedHistogramFetchParamsExternal {
   getModifiedVisAttributes?: (
     attributes: TypedLensByValueInput['attributes']
   ) => TypedLensByValueInput['attributes'];
+  /**
+   * For ES|QL transformational queries: switch between result chart and time histogram.
+   */
+  esqlTransformationalChartMode?: EsqlTransformationalChartToggleMode;
 }
 
 export type UnifiedHistogramFetchParams = Omit<
@@ -269,6 +286,10 @@ export type UnifiedHistogramFetchParams = Omit<
       }
     | undefined;
   timeInterval: string;
+  /**
+   * Passed from Discover when the user toggles chart mode for transformational ES|QL.
+   */
+  esqlTransformationalChartMode?: EsqlTransformationalChartToggleMode;
 };
 
 export interface UnifiedHistogramFetch$Arguments {

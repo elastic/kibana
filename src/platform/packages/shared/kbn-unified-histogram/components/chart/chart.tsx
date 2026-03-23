@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -35,7 +35,11 @@ import type {
   UnifiedHistogramSuggestionContext,
   LensVisServiceState,
 } from '../../types';
-import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
+import {
+  EsqlTransformationalChartToggleMode,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramSuggestionType,
+} from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
@@ -69,6 +73,7 @@ export interface UnifiedHistogramChartProps {
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  onEsqlTransformationalChartModeChange?: (mode: EsqlTransformationalChartToggleMode) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -95,6 +100,7 @@ export function UnifiedHistogramChart({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
+  onEsqlTransformationalChartModeChange,
   onTotalHitsChange,
   onChartLoad,
   ...histogramProps
@@ -247,9 +253,38 @@ export function UnifiedHistogramChart({
     [chartVisible, toggleHideChart, renderCustomChartToggleActions]
   );
 
+  const esqlTransformationalChartToggle = lensVisServiceState.esqlTransformationalChartToggle;
+
   const toolbarSelectors = useMemo(
     () => [
-      ,
+      chartVisible && esqlTransformationalChartToggle && onEsqlTransformationalChartModeChange ? (
+        <EuiButtonGroup
+          key="esqlChartMode"
+          buttonSize="compressed"
+          data-test-subj="unifiedHistogramEsqlChartMode"
+          legend={i18n.translate('unifiedHistogram.esqlChartModeLegend', {
+            defaultMessage: 'Chart type',
+          })}
+          options={[
+            {
+              id: EsqlTransformationalChartToggleMode.result,
+              label: i18n.translate('unifiedHistogram.esqlResultChart', {
+                defaultMessage: 'Result chart',
+              }),
+            },
+            {
+              id: EsqlTransformationalChartToggleMode.timeDistribution,
+              label: i18n.translate('unifiedHistogram.esqlTimeDistribution', {
+                defaultMessage: 'Time distribution',
+              }),
+            },
+          ]}
+          idSelected={esqlTransformationalChartToggle.activeMode}
+          onChange={(id) =>
+            onEsqlTransformationalChartModeChange(id as EsqlTransformationalChartToggleMode)
+          }
+        />
+      ) : null,
       chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
@@ -266,7 +301,9 @@ export function UnifiedHistogramChart({
     ],
     [
       chartVisible,
+      esqlTransformationalChartToggle,
       isPlainRecord,
+      onEsqlTransformationalChartModeChange,
       onTimeIntervalChange,
       chart,
       breakdown,
