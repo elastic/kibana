@@ -493,12 +493,11 @@ const ExceptionsViewerComponent = ({
 
   const isEndpointSecurityRule: boolean = useMemo(
     () =>
-      isEndpointExceptionListLinked &&
       rule != null &&
       rule.immutable &&
       rule.rule_source.type === 'external' &&
       rule.related_integrations.some(({ package: pkg }) => pkg === 'endpoint'),
-    [isEndpointExceptionListLinked, rule]
+    [rule]
   );
   const isDetectionRuleWithEndpointExceptions =
     isEndpointExceptionListLinked && !isEndpointSecurityRule;

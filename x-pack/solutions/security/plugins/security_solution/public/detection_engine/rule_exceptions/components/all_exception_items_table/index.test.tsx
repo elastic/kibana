@@ -461,14 +461,7 @@ describe('ExceptionsViewer', () => {
               immutable: true,
               rule_source: { type: 'external' } as Rule['rule_source'],
               related_integrations: [{ package: 'endpoint', version: '9.0.0' }],
-              exceptions_list: [
-                {
-                  id: '12345',
-                  list_id: 'endpoint_list',
-                  type: 'endpoint',
-                  namespace_type: 'agnostic',
-                },
-              ],
+              exceptions_list: [], // even if endpoint exceptions are unassigned from the rule somehow
             }}
             listTypes={[ExceptionListTypeEnum.DETECTION]}
             isViewReadOnly={false}
