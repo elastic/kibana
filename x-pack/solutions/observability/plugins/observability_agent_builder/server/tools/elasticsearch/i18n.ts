@@ -12,7 +12,7 @@ export const progressMessages = {
     return i18n.translate(
       'xpack.observabilityAgentBuilder.tools.elasticsearch.progress.generatingTools',
       {
-        defaultMessage: 'Dynamically generating tools based on the user query',
+        defaultMessage: 'Searching Elasticsearch API documentation',
       }
     );
   },
@@ -20,7 +20,7 @@ export const progressMessages = {
     return i18n.translate(
       'xpack.observabilityAgentBuilder.tools.elasticsearch.progress.callingElasticsearchAgent',
       {
-        defaultMessage: 'Choosing the most appropriate Elasticsearch API',
+        defaultMessage: 'Selecting the Elasticsearch API to call',
       }
     );
   },
@@ -28,7 +28,7 @@ export const progressMessages = {
     return i18n.translate(
       'xpack.observabilityAgentBuilder.tools.elasticsearch.progress.performingElasticsearchTool',
       {
-        defaultMessage: 'Executing the Elasticsearch tool',
+        defaultMessage: 'Querying Elasticsearch',
       }
     );
   },

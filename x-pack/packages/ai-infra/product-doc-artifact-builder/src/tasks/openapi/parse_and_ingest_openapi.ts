@@ -26,8 +26,7 @@ interface Document extends OpenAPIV3.OperationObject {
 
 /**
  * Walks the operation to find all $ref strings and collects the referenced
- * components (transitively) into a minimal self-contained spec fragment.
- * The original operation is left unchanged — $refs are NOT resolved inline.
+ * components into a minimal self-contained spec fragment.
  */
 function collectReferencedComponents(
   operation: OpenAPIV3.OperationObject,
