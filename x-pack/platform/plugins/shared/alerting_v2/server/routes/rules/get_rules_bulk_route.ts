@@ -14,7 +14,7 @@ import { z } from '@kbn/zod/v4';
 import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesBulkQuerySchema = z.object({
   ids: z
@@ -28,16 +28,17 @@ const getRulesBulkQuerySchema = z.object({
 @injectable()
 export class BulkGetRulesRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'Get rules in bulk',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

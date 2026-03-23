@@ -19,7 +19,7 @@ interface UseCreateRuleProps {
 export const useCreateRule = ({ http, notifications }: UseCreateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
-      return http.post<RuleResponse>('/internal/alerting/v2/rule', {
+      return http.post<RuleResponse>('/api/alerting/v2/rule', {
         body: JSON.stringify(mapFormValuesToCreateRequest(formValues)),
       });
     },

@@ -16,7 +16,7 @@ import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesQuerySchema = z.object({
   page: z.coerce.number().min(1).optional().describe('The page number to return.'),
@@ -34,16 +34,17 @@ const getRulesQuerySchema = z.object({
 @injectable()
 export class GetRulesRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'List rules',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

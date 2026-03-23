@@ -19,7 +19,7 @@ jest.mock('react-use/lib/useAsync', () => ({
 }));
 
 const mockHttp = httpServiceMock.createStartContract();
-const GET_RULES_BULK_ENDPOINT = '/internal/alerting/v2/rule/_bulk';
+const GET_RULES_BULK_ENDPOINT = '/api/alerting/v2/rule/_bulk';
 
 describe('useAlertingRulesIndex', () => {
   beforeEach(() => {
