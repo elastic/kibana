@@ -108,7 +108,7 @@ describe('AgentDownloadStorage', () => {
     mockDigest.mockReturnValue(expectedHash);
     // Mock createReadStream used by computeFileHash — supports async iteration
     const mockReadStream = {
-      [Symbol.asyncIterator]: async function* () {
+      async *[Symbol.asyncIterator]() {
         yield Buffer.from('mock-data');
       },
     };
