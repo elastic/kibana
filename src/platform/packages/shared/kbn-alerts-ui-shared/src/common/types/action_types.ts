@@ -31,6 +31,7 @@ export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
+  authMode?: 'shared' | 'per-user';
 }
 
 export interface ActionConnectorProps<Config, Secrets> {

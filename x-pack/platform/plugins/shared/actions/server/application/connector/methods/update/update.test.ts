@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
@@ -48,11 +49,11 @@ const actionTypeRegistry: ActionTypeRegistry = {
   }),
 } as unknown as ActionTypeRegistry;
 
-const authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
+const authTypeRegistry = authTypeRegistryMock.create();
 
 const mockContext: ActionsClientContext = {
   actionTypeRegistry,
-  authTypeRegistry,
+  authTypeRegistry: authTypeRegistry as unknown as AuthTypeRegistry,
   authorization: authorization as unknown as ActionsAuthorization,
   unsecuredSavedObjectsClient,
   scopedClusterClient,
@@ -88,6 +89,12 @@ beforeEach(() => {
   jest.clearAllMocks();
   authorization.ensureAuthorized.mockResolvedValue(undefined);
   connectorTokenClient.deleteConnectorTokens.mockResolvedValue(undefined);
+  authTypeRegistry.get.mockImplementation((authTypeId: string) => ({
+    id: authTypeId,
+    schema: z.object({}),
+    configure: jest.fn(async (_ctx, axiosInstance) => axiosInstance),
+    authMode: authTypeId === 'oauth_authorization_code' ? 'per-user' : 'shared',
+  }));
 });
 
 describe('update()', () => {
@@ -132,6 +139,77 @@ describe('update()', () => {
       });
 
       expect(result.authMode).toBe('shared');
+    });
+  });
+
+  describe('authType change restrictions', () => {
+    test('rejects changing a per-user connector authType', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'per-user',
+        secrets: { authType: 'oauth_authorization_code' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: {
+            name: 'Test Connector',
+            config: {},
+            secrets: { authType: 'bearer' },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Authentication type cannot be changed for per-user connectors. Connector: 1.]`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('rejects changing a shared connector to a per-user authType', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'shared',
+        secrets: { authType: 'bearer' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: {
+            name: 'Test Connector',
+            config: {},
+            secrets: { authType: 'oauth_authorization_code' },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Authentication type cannot be changed to a per-user type for shared connectors. Connector: 1.]`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('allows updating a per-user connector when authType does not change', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'per-user',
+        secrets: { authType: 'oauth_authorization_code' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soResult);
+
+      const result = await update({
+        context: mockContext,
+        id: '1',
+        action: {
+          name: 'Test Connector',
+          config: {},
+          secrets: { authType: 'oauth_authorization_code' },
+        },
+      });
+
+      expect(result.authMode).toBe('per-user');
     });
   });
 

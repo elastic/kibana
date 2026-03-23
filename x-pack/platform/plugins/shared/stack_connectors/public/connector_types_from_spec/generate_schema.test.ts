@@ -52,35 +52,7 @@ describe('generateSchema', () => {
     expect(sharedAuthTypes).not.toContain('oauth_authorization_code');
   });
 
-  describe('authMode field', () => {
-    const spec = {
-      schema: z4.object({ url: z4.string().min(1) }),
-      auth: { types: ['basic'] },
-    } as unknown as ConnectorSpec;
-
-    it('accepts valid auth modes', () => {
-      const schema = generateSchema(spec);
-      expect(schema.shape.authMode.parse('shared')).toBe('shared');
-      expect(schema.shape.authMode.parse('per-user')).toBe('per-user');
-    });
-
-    it('coerces empty string to undefined', () => {
-      const schema = generateSchema(spec);
-      expect(schema.shape.authMode.parse('')).toBeUndefined();
-    });
-
-    it('accepts undefined', () => {
-      const schema = generateSchema(spec);
-      expect(schema.shape.authMode.parse(undefined)).toBeUndefined();
-    });
-
-    it('rejects other invalid values', () => {
-      const schema = generateSchema(spec);
-      expect(schema.shape.authMode.parse('invalid')).toBeUndefined();
-    });
-  });
-
-  it('excludes oauth_authorization_code by default', () => {
+  it('includes all auth types when no authMode is specified', () => {
     const spec = {
       schema: z4.object({
         url: z4.string().min(1),
@@ -98,6 +70,27 @@ describe('generateSchema', () => {
 
     expect(authTypes).toContain('basic');
     expect(authTypes).toContain('bearer');
-    expect(authTypes).not.toContain('oauth_authorization_code');
+    expect(authTypes).toContain('oauth_authorization_code');
+  });
+
+  it('filters to per-user auth types when authMode is per-user', () => {
+    const spec = {
+      schema: z4.object({
+        url: z4.string().min(1),
+      }),
+      auth: {
+        types: ['basic', 'bearer', 'oauth_authorization_code'],
+      },
+    } as unknown as ConnectorSpec;
+
+    const schema = generateSchema(spec, { authMode: 'per-user' });
+    const jsonSchema = z4.toJSONSchema(schema) as any;
+    const authTypes = (jsonSchema.properties?.secrets?.anyOf || [])
+      .map((opt: any) => opt.properties?.authType?.const)
+      .filter(Boolean);
+
+    expect(authTypes).toContain('oauth_authorization_code');
+    expect(authTypes).not.toContain('basic');
+    expect(authTypes).not.toContain('bearer');
   });
 });

@@ -11,11 +11,10 @@ import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 
 export const generateSchema = (
   spec: ConnectorSpec,
-  { isPfxEnabled, authMode = 'shared' }: { isPfxEnabled?: boolean; authMode?: AuthMode } = {}
+  { isPfxEnabled, authMode }: { isPfxEnabled?: boolean; authMode?: AuthMode } = {}
 ) => {
   return z.object({
     config: spec.schema ?? z.object({}),
     secrets: generateSecretsSchemaFromSpec(spec.auth, { isPfxEnabled, authMode }),
-    authMode: z.enum(['shared', 'per-user']).optional().catch(undefined).meta({ hidden: true }),
   });
 };
