@@ -43,6 +43,10 @@ describe('getTriggerHoverContent', () => {
 
     const result = getTriggerHoverContent('cases.updated', getTriggerDefinition('cases.updated'));
     expect(result).not.toBeNull();
+    expect(result!.value).toContain('Tech Preview');
+    expect(result!.value).toContain(
+      'This functionality is experimental and not supported. It may change or be removed at any time.'
+    );
     expect(result!.value).toContain('Case updated');
     expect(result!.value).toContain('**Trigger**:');
     expect(result!.value).toContain('Fired when a case is created or updated');
