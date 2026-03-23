@@ -45,7 +45,7 @@ export function createShareHelper(page: ScoutPage): ShareHelper {
     },
 
     closeShareModal: async () => {
-      await page.locator('[aria-label="Closes this modal window"]').click();
+      await page.keyboard.press('Escape');
       await expect(modal).toBeHidden();
     },
   };
