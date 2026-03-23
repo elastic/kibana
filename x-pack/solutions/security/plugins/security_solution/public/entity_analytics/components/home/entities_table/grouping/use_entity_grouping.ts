@@ -102,8 +102,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   return aggMetrics;
 };
 
-const RESOLUTION_RISK_SCORE_FIELD = 'entity.relationships.resolution.risk.calculated_score_norm';
-
 const buildResolutionGroupingQuery = ({
   filters,
   pageIndex,
@@ -138,7 +136,7 @@ const buildResolutionGroupingQuery = ({
       },
       aggs: {
         resolutionRiskScore: {
-          max: { field: RESOLUTION_RISK_SCORE_FIELD },
+          max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
         },
         resolutionEntityName: {
           filter: {

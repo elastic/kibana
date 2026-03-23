@@ -40,6 +40,7 @@ export const ENTITY_FIELDS = {
   ENTITY_SOURCE: 'entity.source',
   ENTITY_TYPE: 'entity.EngineMetadata.Type',
   ENTITY_RISK: 'entity.risk.calculated_score_norm',
+  RESOLUTION_RISK_SCORE: 'entity.relationships.resolution.risk.calculated_score_norm',
   RESOLVED_TO: 'entity.relationships.resolution.resolved_to',
   TIMESTAMP: '@timestamp',
 } as const;
