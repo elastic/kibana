@@ -16,4 +16,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/__mocks__/alert.mock.ts',
   '^@kbn/actions-plugin/server$':
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/__mocks__/action.mock.ts',
+  // use the same mock that kbn-date-range-picker's own test suite uses.
+  '^react-day-picker$':
+    '<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/calendar/__mocks__/react-day-picker.tsx',
 };
