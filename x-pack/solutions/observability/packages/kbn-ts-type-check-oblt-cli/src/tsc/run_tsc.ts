@@ -14,8 +14,14 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import type { TsProject } from '@kbn/ts-projects';
 
+import { table, getBorderCharacters } from 'table';
 import { getChangedFiles, getAffectedProjectRefs } from './root_refs_config';
 import { TscProgressTracker } from './tsc_progress_tracker';
+import {
+  buildForwardDependencyMap,
+  buildReverseDependencyMap,
+  computeEffectiveRebuildSet,
+} from '../cache/restore_ts_build_artifacts';
 
 interface TscRunOptions {
   type?: 'Full pass' | 'First pass';
@@ -99,13 +105,44 @@ export async function runTscFastPass({
   });
   const multi = affectedRefs.size > 1;
 
-  log.info(
-    `[TypeCheck] [First pass] Checking ${affectedRefs.size} changed ${
-      multi ? 'projects' : 'project'
-    } first (${projectNames.join(', ')}) with ${
-      multi ? 'their' : 'its'
-    } dependencies for fast feedback...`
-  );
+  const forwardDeps = buildForwardDependencyMap(projects);
+  const reverseDeps = buildReverseDependencyMap(projects);
+
+  // For each changed project compute both directions of the dep graph.
+  // Counts exclude the root project itself.
+  const perProject = configPaths.map((configPath) => {
+    const abs = Path.resolve(REPO_ROOT, configPath);
+    const depCount = computeEffectiveRebuildSet(new Set([abs]), forwardDeps).size - 1;
+    const dependentCount = computeEffectiveRebuildSet(new Set([abs]), reverseDeps).size - 1;
+    return { depCount, dependentCount };
+  });
+
+  // Union of each changed project's full forward closure = all projects tsc -b will touch.
+  const firstPassProjectCount = configPaths.reduce((acc, configPath) => {
+    const abs = Path.resolve(REPO_ROOT, configPath);
+    for (const p of computeEffectiveRebuildSet(new Set([abs]), forwardDeps)) {
+      acc.add(p);
+    }
+    return acc;
+  }, new Set<string>()).size;
+
+  const tableRows = perProject.map(({ depCount, dependentCount }, i) => [
+    projectNames[i],
+    String(depCount),
+    dependentCount === 0 ? '—' : String(dependentCount),
+  ]);
+
+  const tableOutput = table([['Project', 'Dependencies', 'Dependents'], ...tableRows], {
+    border: getBorderCharacters('norc'),
+    drawHorizontalLine: (i, rowCount) => i === 0 || i === 1 || i === rowCount,
+  });
+
+  log.info(`[TypeCheck] ${affectedRefs.size} changed ${multi ? 'projects' : 'project'}:`);
+  for (const line of tableOutput.trimEnd().split('\n')) {
+    log.info(`[TypeCheck] ${line}`);
+  }
+
+  log.info(`[TypeCheck] [First pass] Checking ${firstPassProjectCount} projects...`);
 
   const success = await runTsc({
     log,
@@ -174,11 +211,11 @@ async function runTscWithProgress({
     );
   } else if (result.exitCode === 0) {
     log.info(
-      `[${type}] Type checked ${totalProjects} projects successfully in ${elapsed} (${builtProjects} built, ${skippedProjects} up-to-date).`
+      `[TypeCheck] [${type}] Type checked ${totalProjects} projects successfully in ${elapsed} (${builtProjects} built, ${skippedProjects} up-to-date).`
     );
   } else {
     log.error(
-      `[${type}] Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`
+      `[TypeCheck] [${type}] Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`
     );
   }
 

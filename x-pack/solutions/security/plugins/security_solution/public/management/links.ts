@@ -25,7 +25,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SCRIPTS_LIBRARY_PATH,
+  SCRIPT_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
   TRUSTED_APPS_PATH,
@@ -42,7 +42,7 @@ import {
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
-  SCRIPTS_LIBRARY,
+  SCRIPT_LIBRARY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
 } from '../app/translations';
@@ -88,7 +88,7 @@ const categories = [
       SecurityPageName.blocklist,
       SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
-      SecurityPageName.scriptsLibrary,
+      SecurityPageName.scriptLibrary,
     ],
   },
   {
@@ -256,13 +256,14 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.scriptsLibrary,
-      title: SCRIPTS_LIBRARY,
-      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
-        defaultMessage: 'View and manage your scripts library.',
+      id: SecurityPageName.scriptLibrary,
+      title: SCRIPT_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptLibraryDescription', {
+        defaultMessage:
+          'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.',
       }),
       landingIcon: IconScriptLibrary,
-      path: SCRIPTS_LIBRARY_PATH,
+      path: SCRIPT_LIBRARY_PATH,
       skipUrlState: true,
       hideTimeline: true,
       experimentalKey: 'responseActionsScriptLibraryManagement',
@@ -348,7 +349,7 @@ export const getManagementFilteredLinks = async (
   }
 
   if (!canReadScriptsLibrary) {
-    linksToExclude.push(SecurityPageName.scriptsLibrary);
+    linksToExclude.push(SecurityPageName.scriptLibrary);
   }
 
   return excludeLinks(linksToExclude);

@@ -140,7 +140,9 @@ export const doctorCmd: Command<void> = {
       let detail = 'running';
       if (scoutManagedAlive) {
         const state = readState(repoRoot);
-        detail = `running (managed, PID ${state.scout?.pid})`;
+        const configSet = state.scout?.serverConfigSet;
+        const configSetInfo = configSet ? `, serverConfigSet=${configSet}` : '';
+        detail = `running (managed, PID ${state.scout?.pid}${configSetInfo})`;
       } else if (scoutProcessLine) {
         const configMatch = scoutProcessLine.match(/--serverConfigSet(?:=|\s+)(\S+)/);
         const archMatch = /--arch(?:=|\s+)(stateful|serverless)/.exec(scoutProcessLine);
