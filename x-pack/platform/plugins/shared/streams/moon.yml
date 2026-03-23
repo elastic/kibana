@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/datemath'
+  - '@kbn/dataset-quality-plugin'
 tags:
   - plugin
   - prod
