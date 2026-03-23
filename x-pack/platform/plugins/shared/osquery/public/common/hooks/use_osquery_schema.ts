@@ -17,8 +17,11 @@ let fallbackOsquerySchema: OsqueryTable[] | null = null;
 const getFallbackOsquerySchema = (): OsqueryTable[] => {
   if (!fallbackOsquerySchema) {
     // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    fallbackOsquerySchema = sortBy(require('../schemas/osquery/v5.19.0.json') as OsqueryTable[], 'name');
+
+    fallbackOsquerySchema = sortBy(
+      require('../schemas/osquery/v5.19.0.json') as OsqueryTable[],
+      'name'
+    );
   }
 
   return fallbackOsquerySchema;

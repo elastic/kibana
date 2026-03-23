@@ -18,7 +18,7 @@ let bundledOsqueryTables: OsqueryTable[] | null = null;
 const getOsqueryTables = (): OsqueryTable[] => {
   if (!bundledOsqueryTables) {
     // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     bundledOsqueryTables = normalizeTables(
       require('../common/schemas/osquery/v5.19.0.json') as OsqueryTable[]
     );
@@ -40,7 +40,9 @@ export const useOsqueryTables = () => {
     if (tablesStableRef.current !== null && isEqual(tablesStableRef.current, next)) {
       return tablesStableRef.current;
     }
+
     tablesStableRef.current = next;
+
     return next;
   }, [data]);
 
