@@ -180,19 +180,16 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(create.statusCode).toBe(200);
 
       // Update using only entity.id (no host.name identity field)
-      const update = await apiClient.put(
-        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            entity: {
-              id: 'host:update-id-only',
-              name: 'updated-name',
-            },
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entity: {
+            id: 'host:update-id-only',
+            name: 'updated-name',
           },
-        }
-      );
+        },
+      });
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
@@ -221,21 +218,18 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(create.statusCode).toBe(200);
 
       // Update using only identity fields (host.name), no entity.id
-      const update = await apiClient.put(
-        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            entity: {
-              name: 'updated-via-identity',
-            },
-            host: {
-              name: 'update-identity-only',
-            },
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entity: {
+            name: 'updated-via-identity',
           },
-        }
-      );
+          host: {
+            name: 'update-identity-only',
+          },
+        },
+      });
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({

@@ -101,13 +101,7 @@ describe('crud_client utils', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'entity-generic' } };
-      const result = validateAndTransformDocForUpsert(
-        'generic',
-        'default',
-        doc,
-        undefined,
-        true
-      );
+      const result = validateAndTransformDocForUpsert('generic', 'default', doc, undefined, true);
 
       expect(result.id).toBe('entity-generic');
       expect(result.doc).toEqual(
@@ -138,21 +132,13 @@ describe('crud_client utils', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'doc-id' } };
-      const result = validateAndTransformDocForUpsert(
-        'generic',
-        'default',
-        doc,
-        undefined,
-        true
-      );
+      const result = validateAndTransformDocForUpsert('generic', 'default', doc, undefined, true);
 
       expect(result.id).toBe('doc-id');
     });
 
     it('nests entity under typed field for non-generic types', () => {
-      mockGetEntityDefinition.mockReturnValue(
-        createDefinition('host', [createField('host.name')])
-      );
+      mockGetEntityDefinition.mockReturnValue(createDefinition('host', [createField('host.name')]));
 
       const doc: Entity = {
         entity: { id: 'entity-host' },
@@ -201,13 +187,7 @@ describe('crud_client utils', () => {
           },
         },
       } as Entity;
-      const result = validateAndTransformDocForUpsert(
-        'generic',
-        'default',
-        doc,
-        undefined,
-        false
-      );
+      const result = validateAndTransformDocForUpsert('generic', 'default', doc, undefined, false);
 
       expect(result.doc).toHaveProperty('entity.attributes.watchlists', [
         'privileged_watchlist_id',
