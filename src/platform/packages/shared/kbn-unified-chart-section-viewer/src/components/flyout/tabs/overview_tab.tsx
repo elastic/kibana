@@ -23,11 +23,11 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { getUnitLabel } from '../../common/utils';
-import { TabTitleAndDescription } from './tab_title_and_description';
-import { MetricTypeBadge } from './metric_type_badge';
-import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
-import type { Dimension, ParsedMetricItem } from '../../types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { getUnitLabel } from '../../../common/utils';
+import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup } from '../components';
+import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -41,11 +41,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-
-  const unitLabel = useMemo(
-    () => getUnitLabel({ unit: metricItem.units?.[0] ?? undefined }),
-    [metricItem.units]
-  );
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -100,38 +95,44 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
           defaultMessage: 'Field type',
         }),
-        <div>
-          <EuiBadge>{metricItem.fieldTypes?.[0] ?? ''}</EuiBadge>
-        </div>
+        <BadgeGroup
+          items={metricItem.fieldTypes}
+          isNoValue={(fieldType) => fieldType === ES_FIELD_TYPES.NULL}
+          renderItem={(fieldType, index) => (
+            <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
+          )}
+        />
       ),
-      ...(unitLabel
-        ? [
-            createDescriptionListItem(
-              i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                defaultMessage: 'Metric unit',
-              }),
-              <EuiBadge>{unitLabel}</EuiBadge>,
-              'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
-            ),
-          ]
-        : []),
-      ...(metricItem.metricTypes?.[0]
-        ? [
-            createDescriptionListItem(
-              i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                defaultMessage: 'Metric type',
-              }),
-              <MetricTypeBadge instrument={metricItem.metricTypes?.[0]} />,
-              'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
-            ),
-          ]
-        : []),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+          defaultMessage: 'Metric unit',
+        }),
+        <BadgeGroup
+          items={metricItem.units}
+          renderItem={(unit, index) => (
+            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
+          )}
+        />,
+        'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
+      ),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+          defaultMessage: 'Metric type',
+        }),
+        <BadgeGroup
+          items={metricItem.metricTypes}
+          renderItem={(metricType, index) => (
+            <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
+          )}
+        />,
+        'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
+      ),
     ],
     [
       metricItem.dataStream,
       metricItem.fieldTypes,
       metricItem.metricTypes,
-      unitLabel,
+      metricItem.units,
       createDescriptionListItem,
     ]
   );
@@ -148,7 +149,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       paginatedDimensions.map((dimension: Dimension) => {
         return {
           'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
-          label: <FieldNameWithIcon name={dimension.name} />,
+          label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
         };
       }),
     [paginatedDimensions]
