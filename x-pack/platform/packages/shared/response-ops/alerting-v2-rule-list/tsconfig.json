@@ -23,7 +23,6 @@
     "@kbn/es-query",
     "@kbn/esql-utils",
     "@kbn/react-query",
-    "@kbn/alerting-v2-schemas",
     "@kbn/alerting-v2-rule-apis"
   ]
 }
