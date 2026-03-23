@@ -14,15 +14,8 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
 export type PathOptions = z.infer<typeof PathOptions>;
 export const PathOptions = z.object({}).catchall(z.unknown());

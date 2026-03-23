@@ -14,15 +14,8 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
 import { ESProcessorItem } from './processor_attributes.gen';
 import { CelInput } from './cel_input_attributes.gen';

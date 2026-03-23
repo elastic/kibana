@@ -14,6 +14,7 @@
  *   version: not applicable
  */
 
+import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
 
 /**
