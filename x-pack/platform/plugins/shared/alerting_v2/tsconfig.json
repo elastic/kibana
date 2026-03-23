@@ -67,7 +67,8 @@
     "@kbn/react-query",
     "@kbn/es-query",
     "@kbn/react-hooks",
-    "@kbn/core-security-server-mocks"
+    "@kbn/core-security-server-mocks",
+    "@kbn/alerting-v2-rule-apis"
   ],
   "exclude": ["target/**/*"]
 }

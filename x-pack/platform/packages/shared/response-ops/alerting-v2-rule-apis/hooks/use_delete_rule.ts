@@ -7,16 +7,23 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useRuleListServices } from './rule_list_context';
-import { deleteRule } from './rules_api';
-import { ruleKeys } from './query_key_factory';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { deleteRule } from '../apis/rules_api';
+import { mutationKeys } from '../mutation_keys';
+import { queryKeys } from '../query_keys';
 
-export const useDeleteRule = () => {
-  const { http, notifications } = useRuleListServices();
+export const useDeleteRule = ({
+  http,
+  notifications,
+}: {
+  http: HttpStart;
+  notifications: NotificationsStart;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.delete(),
+    mutationKey: mutationKeys.delete(),
     mutationFn: (id: string) => deleteRule(http, id),
     onSuccess: () => {
       notifications.toasts.addSuccess(
@@ -24,8 +31,8 @@ export const useDeleteRule = () => {
           defaultMessage: 'Rule deleted successfully',
         })
       );
-      queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.details());
+      queryClient.invalidateQueries(queryKeys.lists());
+      queryClient.invalidateQueries(queryKeys.details());
     },
     onError: () => {
       notifications.toasts.addDanger(

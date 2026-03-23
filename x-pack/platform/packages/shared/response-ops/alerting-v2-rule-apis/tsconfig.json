@@ -4,9 +4,7 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react",
-      "@testing-library/jest-dom"
+      "node"
     ]
   },
   "include": [
@@ -17,13 +15,13 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/core",
-    "@kbn/es-query",
-    "@kbn/esql-utils",
-    "@kbn/react-query",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks",
     "@kbn/alerting-v2-schemas",
-    "@kbn/alerting-v2-rule-apis"
+    "@kbn/react-query",
+    "@kbn/i18n",
+    "@kbn/es-query"
   ]
 }

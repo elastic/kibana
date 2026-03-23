@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { RuleApiResponse } from './rules_api';
+import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;

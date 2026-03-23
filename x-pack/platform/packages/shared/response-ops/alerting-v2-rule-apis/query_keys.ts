@@ -1,0 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export const queryKeys = {
+  root: 'rule',
+  lists: () => [queryKeys.root, 'list'] as const,
+  list: (filters: { page: number; perPage: number }) => [...queryKeys.lists(), filters] as const,
+  details: () => [queryKeys.root, 'details'] as const,
+  detail: (id: string) => [...queryKeys.details(), id] as const,
+};

@@ -74,6 +74,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/react-hooks'
   - '@kbn/core-security-server-mocks'
+  - '@kbn/alerting-v2-rule-list'
+  - '@kbn/alerting-v2-rule-apis'
 tags:
   - plugin
   - prod

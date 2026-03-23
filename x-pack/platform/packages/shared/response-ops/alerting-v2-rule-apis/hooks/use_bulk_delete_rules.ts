@@ -7,21 +7,28 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useService, CoreStart } from '@kbn/core-di-browser';
-import { RulesApi, type BulkOperationParams } from '../services/rules_api';
-import { ruleKeys } from './query_key_factory';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { bulkDeleteRules } from '../apis/rules_api';
+import type { BulkOperationParams } from '../types';
+import { mutationKeys } from '../mutation_keys';
+import { queryKeys } from '../query_keys';
 
-export const useBulkDeleteRules = () => {
-  const rulesApi = useService(RulesApi);
-  const { toasts } = useService(CoreStart('notifications'));
+export const useBulkDeleteRules = ({
+  http,
+  notifications,
+}: {
+  http: HttpStart;
+  notifications: NotificationsStart;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.bulkDelete(),
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDeleteRules(params),
+    mutationKey: mutationKeys.bulkDelete(),
+    mutationFn: (params: BulkOperationParams) => bulkDeleteRules(http, params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
-        toasts.addWarning(
+        notifications.toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.partialSuccessMessage', {
             defaultMessage:
               'Bulk delete completed with {errorCount, plural, one {# error} other {# errors}}',
@@ -29,16 +36,16 @@ export const useBulkDeleteRules = () => {
           })
         );
       } else {
-        toasts.addSuccess(
+        notifications.toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.successMessage', {
             defaultMessage: 'Rules deleted successfully',
           })
         );
       }
-      queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(queryKeys.lists());
     },
     onError: () => {
-      toasts.addDanger(
+      notifications.toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.errorMessage', {
           defaultMessage: 'Failed to delete rules',
         })

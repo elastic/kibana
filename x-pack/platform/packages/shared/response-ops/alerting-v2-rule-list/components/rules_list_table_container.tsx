@@ -7,13 +7,16 @@
 
 import React, { useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import type { RuleApiResponse } from './rules_api';
-import { useRuleListServices, useRuleListPaths } from './rule_list_context';
-import { useBulkSelect } from './use_bulk_select';
-import { useDeleteRule } from './use_delete_rule';
-import { useBulkDeleteRules } from './use_bulk_delete_rules';
-import { useBulkEnableRules, useBulkDisableRules } from './use_bulk_enable_disable_rules';
-import { useToggleRuleEnabled } from './use_toggle_rule_enabled';
+import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
+import {
+  useDeleteRule,
+  useBulkDeleteRules,
+  useBulkEnableRules,
+  useBulkDisableRules,
+  useToggleRuleEnabled,
+} from '@kbn/alerting-v2-rule-apis';
+import { useRuleListServices, useRuleListPaths } from '../rule_list_context';
+import { useBulkSelect } from '../hooks/use_bulk_select';
 import { DeleteConfirmationModal } from './delete_confirmation_modal';
 import { RulesListTable } from './rules_list_table';
 
@@ -34,17 +37,17 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   isLoading,
   onTableChange,
 }) => {
-  const { application, http } = useRuleListServices();
+  const { http, notifications, application } = useRuleListServices();
   const paths = useRuleListPaths();
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
-  const deleteRuleMutation = useDeleteRule();
-  const bulkDeleteMutation = useBulkDeleteRules();
-  const bulkEnableMutation = useBulkEnableRules();
-  const bulkDisableMutation = useBulkDisableRules();
-  const toggleEnabledMutation = useToggleRuleEnabled();
+  const deleteRuleMutation = useDeleteRule({ http, notifications });
+  const bulkDeleteMutation = useBulkDeleteRules({ http, notifications });
+  const bulkEnableMutation = useBulkEnableRules({ http, notifications });
+  const bulkDisableMutation = useBulkDisableRules({ http, notifications });
+  const toggleEnabledMutation = useToggleRuleEnabled({ http, notifications });
 
   const {
     isAllSelected,

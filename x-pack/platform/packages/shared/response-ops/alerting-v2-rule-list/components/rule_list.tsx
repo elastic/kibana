@@ -10,15 +10,15 @@ import { EuiButton, EuiCallOut, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
-import type { RuleApiResponse } from './rules_api';
-import { useFetchRules } from './use_fetch_rules';
+import type { RuleApiResponse } from '@kbn/alerting-v2-rule-apis';
+import { useFetchRules } from '@kbn/alerting-v2-rule-apis';
 import {
   RuleListProvider,
   useRuleListServices,
   useRuleListPaths,
   type RuleListServices,
   type RuleListPaths,
-} from './rule_list_context';
+} from '../rule_list_context';
 import { RulesListTableContainer } from './rules_list_table_container';
 
 const DEFAULT_PER_PAGE = 20;
@@ -42,13 +42,16 @@ export const RuleList = ({ services, paths, showPageHeader = true }: RuleListPro
 };
 
 const RuleListInner = ({ showPageHeader }: { showPageHeader: boolean }) => {
-  const { http } = useRuleListServices();
+  const { http, notifications } = useRuleListServices();
   const paths = useRuleListPaths();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
-  const { data, isLoading, isError, error } = useFetchRules({ page, perPage });
+  const { data, isLoading, isError, error } = useFetchRules(
+    { http, notifications },
+    { page, perPage }
+  );
 
   const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
     setPage(tablePage.index + 1);

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export { RuleList } from './rule_list';
-export type { RuleListProps } from './rule_list';
+import { RuleList } from './components/rule_list';
+
+export { RuleList } from './components/rule_list';
+export type { RuleListProps } from './components/rule_list';
 
 export { RuleListProvider, useRuleListServices, useRuleListPaths } from './rule_list_context';
 export type { RuleListServices, RuleListPaths } from './rule_list_context';
@@ -17,4 +19,7 @@ export type {
   BulkOperationParams,
   BulkOperationResponse,
   BulkOperationError,
-} from './rules_api';
+} from '@kbn/alerting-v2-rule-apis';
+
+// eslint-disable-next-line import/no-default-export
+export default RuleList;

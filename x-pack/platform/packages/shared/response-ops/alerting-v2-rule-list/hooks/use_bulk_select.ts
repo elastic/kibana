@@ -7,7 +7,7 @@
 
 import { useReducer, useMemo, useCallback } from 'react';
 import { escapeQuotes } from '@kbn/es-query';
-import type { BulkOperationParams } from '../services/rules_api';
+import type { BulkOperationParams } from '@kbn/alerting-v2-rule-apis';
 
 interface BulkSelectState {
   /**
@@ -88,10 +88,8 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
       return 0;
     }
     if (state.isAllSelected) {
-      // All selected minus the exclusion set
       return totalItemCount - state.selectedIds.size;
     }
-    // Only IDs that are actually on the current page count
     return itemIds.filter((id) => state.selectedIds.has(id)).length;
   }, [state, itemIds, totalItemCount]);
 
@@ -101,7 +99,6 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
     }
     return items.every((item) => {
       if (state.isAllSelected) {
-        // In select-all mode, the row is selected unless it is in the exclusion set
         return !state.selectedIds.has(item.id);
       }
       return state.selectedIds.has(item.id);
@@ -128,15 +125,12 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
 
   const onSelectPage = useCallback(() => {
     if (state.isAllSelected) {
-      // In select-all mode: clicking the header checkbox should exclude/include the whole page
       if (isPageSelected) {
-        // Page is fully selected → exclude all page items
         dispatch({
           type: ActionType.SET_PAGE_SELECTION,
           payload: [...state.selectedIds, ...itemIds],
         });
       } else {
-        // Some deselected → remove page items from exclusion set
         const nextIds = new Set(state.selectedIds);
         for (const id of itemIds) {
           nextIds.delete(id);
@@ -144,14 +138,11 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
         dispatch({ type: ActionType.SET_PAGE_SELECTION, payload: [...nextIds] });
       }
     } else {
-      // Normal mode
       if (isPageSelected) {
-        // Deselect the page
         const pageIdSet = new Set(itemIds);
         const nextIds = [...state.selectedIds].filter((id) => !pageIdSet.has(id));
         dispatch({ type: ActionType.SET_PAGE_SELECTION, payload: nextIds });
       } else {
-        // Select the page
         dispatch({
           type: ActionType.SET_PAGE_SELECTION,
           payload: [...state.selectedIds, ...itemIds],
@@ -177,7 +168,6 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
     if (state.isAllSelected) {
       const excludedIds = [...state.selectedIds];
       if (excludedIds.length === 0) {
-        // Select all, no exclusions → match-all filter
         return { filter: '' };
       }
       const exclusionClauses = excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ');

@@ -7,15 +7,17 @@
 
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useRuleListServices } from './rule_list_context';
-import { listRules } from './rules_api';
-import { ruleKeys } from './query_key_factory';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { listRules } from '../apis/rules_api';
+import { queryKeys } from '../query_keys';
 
-export const useFetchRules = ({ page, perPage }: { page: number; perPage: number }) => {
-  const { http, notifications } = useRuleListServices();
-
+export const useFetchRules = (
+  { http, notifications }: { http: HttpStart; notifications: NotificationsStart },
+  { page, perPage }: { page: number; perPage: number }
+) => {
   return useQuery({
-    queryKey: ruleKeys.list({ page, perPage }),
+    queryKey: queryKeys.list({ page, perPage }),
     queryFn: () => listRules(http, { page, perPage }),
     onError: () => {
       notifications.toasts.addDanger(

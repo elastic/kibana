@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
-import { listRules, updateRule, deleteRule } from './rules_api';
+import type { HttpStart } from '@kbn/core-http-browser';
+import {
+  listRules,
+  updateRule,
+  deleteRule,
+  bulkDeleteRules,
+  bulkEnableRules,
+  bulkDisableRules,
+} from './rules_api';
 
 const createMockHttp = (): jest.Mocked<HttpStart> =>
   ({
@@ -69,6 +76,52 @@ describe('rules_api', () => {
       await deleteRule(http, 'rule-1');
 
       expect(http.delete).toHaveBeenCalledWith('/internal/alerting/v2/rule/rule-1');
+    });
+  });
+
+  describe('bulkDeleteRules', () => {
+    it('should call http.post with ids', async () => {
+      http.post.mockResolvedValue({ rules: [], errors: [] });
+
+      await bulkDeleteRules(http, { ids: ['a', 'b'] });
+
+      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule/_bulk_delete', {
+        body: JSON.stringify({ ids: ['a', 'b'] }),
+      });
+    });
+
+    it('should call http.post with filter', async () => {
+      http.post.mockResolvedValue({ rules: [], errors: [] });
+
+      await bulkDeleteRules(http, { filter: 'NOT (id: "x")' });
+
+      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule/_bulk_delete', {
+        body: JSON.stringify({ filter: 'NOT (id: "x")' }),
+      });
+    });
+  });
+
+  describe('bulkEnableRules', () => {
+    it('should call http.post with the correct path', async () => {
+      http.post.mockResolvedValue({ rules: [], errors: [] });
+
+      await bulkEnableRules(http, { ids: ['a'] });
+
+      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule/_bulk_enable', {
+        body: JSON.stringify({ ids: ['a'] }),
+      });
+    });
+  });
+
+  describe('bulkDisableRules', () => {
+    it('should call http.post with the correct path', async () => {
+      http.post.mockResolvedValue({ rules: [], errors: [] });
+
+      await bulkDisableRules(http, { ids: ['a'] });
+
+      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule/_bulk_disable', {
+        body: JSON.stringify({ ids: ['a'] }),
+      });
     });
   });
 });

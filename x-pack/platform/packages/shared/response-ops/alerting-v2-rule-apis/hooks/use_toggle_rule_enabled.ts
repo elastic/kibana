@@ -7,12 +7,18 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useRuleListServices } from './rule_list_context';
-import { updateRule } from './rules_api';
-import { ruleKeys } from './query_key_factory';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { updateRule } from '../apis/rules_api';
+import { queryKeys } from '../query_keys';
 
-export const useToggleRuleEnabled = () => {
-  const { http, notifications } = useRuleListServices();
+export const useToggleRuleEnabled = ({
+  http,
+  notifications,
+}: {
+  http: HttpStart;
+  notifications: NotificationsStart;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -28,8 +34,8 @@ export const useToggleRuleEnabled = () => {
               defaultMessage: 'Rule disabled',
             })
       );
-      queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.detail(variables.id));
+      queryClient.invalidateQueries(queryKeys.lists());
+      queryClient.invalidateQueries(queryKeys.detail(variables.id));
     },
     onError: () => {
       notifications.toasts.addDanger(

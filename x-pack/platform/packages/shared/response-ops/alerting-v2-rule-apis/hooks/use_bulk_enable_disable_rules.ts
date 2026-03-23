@@ -7,21 +7,28 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useService, CoreStart } from '@kbn/core-di-browser';
-import { RulesApi, type BulkOperationParams } from '../services/rules_api';
-import { ruleKeys } from './query_key_factory';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { bulkEnableRules, bulkDisableRules } from '../apis/rules_api';
+import type { BulkOperationParams } from '../types';
+import { mutationKeys } from '../mutation_keys';
+import { queryKeys } from '../query_keys';
 
-export const useBulkEnableRules = () => {
-  const rulesApi = useService(RulesApi);
-  const { toasts } = useService(CoreStart('notifications'));
+export const useBulkEnableRules = ({
+  http,
+  notifications,
+}: {
+  http: HttpStart;
+  notifications: NotificationsStart;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.bulkEnable(),
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkEnableRules(params),
+    mutationKey: mutationKeys.bulkEnable(),
+    mutationFn: (params: BulkOperationParams) => bulkEnableRules(http, params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
-        toasts.addWarning(
+        notifications.toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.partialSuccessMessage', {
             defaultMessage:
               'Bulk enable completed with {errorCount, plural, one {# error} other {# errors}}',
@@ -29,16 +36,16 @@ export const useBulkEnableRules = () => {
           })
         );
       } else {
-        toasts.addSuccess(
+        notifications.toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.successMessage', {
             defaultMessage: 'Rules enabled successfully',
           })
         );
       }
-      queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(queryKeys.lists());
     },
     onError: () => {
-      toasts.addDanger(
+      notifications.toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.errorMessage', {
           defaultMessage: 'Failed to enable rules',
         })
@@ -47,17 +54,21 @@ export const useBulkEnableRules = () => {
   });
 };
 
-export const useBulkDisableRules = () => {
-  const rulesApi = useService(RulesApi);
-  const { toasts } = useService(CoreStart('notifications'));
+export const useBulkDisableRules = ({
+  http,
+  notifications,
+}: {
+  http: HttpStart;
+  notifications: NotificationsStart;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.bulkDisable(),
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDisableRules(params),
+    mutationKey: mutationKeys.bulkDisable(),
+    mutationFn: (params: BulkOperationParams) => bulkDisableRules(http, params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
-        toasts.addWarning(
+        notifications.toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.partialSuccessMessage', {
             defaultMessage:
               'Bulk disable completed with {errorCount, plural, one {# error} other {# errors}}',
@@ -65,16 +76,16 @@ export const useBulkDisableRules = () => {
           })
         );
       } else {
-        toasts.addSuccess(
+        notifications.toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.successMessage', {
             defaultMessage: 'Rules disabled successfully',
           })
         );
       }
-      queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(queryKeys.lists());
     },
     onError: () => {
-      toasts.addDanger(
+      notifications.toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.errorMessage', {
           defaultMessage: 'Failed to disable rules',
         })

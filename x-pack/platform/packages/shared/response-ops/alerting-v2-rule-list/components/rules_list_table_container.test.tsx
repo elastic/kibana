@@ -8,29 +8,21 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RulesListTableContainer } from './rules_list_table_container';
-import { createMockServices, createMockPaths, createTestWrapper } from './test_helpers';
+import { createMockServices, createMockPaths, createTestWrapper } from '../test_helpers';
 
 const mockDeleteMutate = jest.fn();
 const mockUseDeleteRule = jest.fn();
-jest.mock('./use_delete_rule', () => ({
-  useDeleteRule: () => mockUseDeleteRule(),
-}));
-
 const mockBulkDeleteMutate = jest.fn();
-jest.mock('./use_bulk_delete_rules', () => ({
-  useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
-}));
-
 const mockBulkEnableMutate = jest.fn();
 const mockBulkDisableMutate = jest.fn();
-jest.mock('./use_bulk_enable_disable_rules', () => ({
-  useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
-  useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
-}));
-
 const mockToggleEnabledMutate = jest.fn();
 const mockUseToggleRuleEnabled = jest.fn();
-jest.mock('./use_toggle_rule_enabled', () => ({
+
+jest.mock('@kbn/alerting-v2-rule-apis', () => ({
+  useDeleteRule: () => mockUseDeleteRule(),
+  useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
+  useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
+  useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
 

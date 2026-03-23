@@ -6,9 +6,9 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import type { FindRulesResponse } from '../types';
 import { useFetchRules } from './use_fetch_rules';
-import { createMockServices, createTestWrapper } from './test_helpers';
-import type { FindRulesResponse } from './rules_api';
+import { createMockServices, createTestWrapper } from '../test_utils';
 
 const mockResponse: FindRulesResponse = {
   items: [
@@ -21,44 +21,38 @@ const mockResponse: FindRulesResponse = {
 };
 
 describe('useFetchRules', () => {
-  const mockServices = createMockServices();
-  const mockHttp = mockServices.http as jest.Mocked<typeof mockServices.http>;
-  const mockToasts = mockServices.notifications.toasts as jest.Mocked<
-    typeof mockServices.notifications.toasts
-  >;
+  const services = createMockServices();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   it('should fetch rules with pagination params', async () => {
-    (mockHttp.get as jest.Mock).mockResolvedValue(mockResponse);
+    (services.http.get as jest.Mock).mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(() => useFetchRules({ page: 1, perPage: 10 }), {
-      wrapper: createTestWrapper(mockServices),
+    const { result } = renderHook(() => useFetchRules(services, { page: 1, perPage: 10 }), {
+      wrapper: createTestWrapper(),
     });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockHttp.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+    expect(services.http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
       query: { page: 1, perPage: 10 },
     });
     expect(result.current.data).toEqual(mockResponse);
   });
 
   it('should show a danger toast when fetching fails', async () => {
-    (mockHttp.get as jest.Mock).mockRejectedValue(new Error('fetch failed'));
+    (services.http.get as jest.Mock).mockRejectedValue(new Error('fetch failed'));
 
-    const { result } = renderHook(() => useFetchRules({ page: 1, perPage: 10 }), {
-      wrapper: createTestWrapper(mockServices),
+    const { result } = renderHook(() => useFetchRules(services, { page: 1, perPage: 10 }), {
+      wrapper: createTestWrapper(),
     });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
 
-    expect(mockToasts.addDanger).toHaveBeenCalledWith(expect.any(String));
+    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith(expect.any(String));
   });
 });
