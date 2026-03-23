@@ -72,7 +72,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(check.found).toBe(true);
   });
 
-  apiTest('Should require a force flag for restricted fields', async ({ apiClient, esClient }) => {
+  apiTest('Should require a force flag for restricted fields', async ({ apiClient }) => {
     // First create the entity so we can test force flag on update
     const entityId = 'required-id-force';
     const createObj: Entity = { entity: { id: entityId } };
