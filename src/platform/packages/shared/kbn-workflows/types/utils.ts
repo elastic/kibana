@@ -14,6 +14,7 @@ import type {
   HttpMethod,
   InternalConnectorContract,
   StepStabilityLevel,
+  WorkflowStepExecutionDto,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import { getBuiltInStepDefinition } from '../spec/builtin_step_definitions';
@@ -32,8 +33,8 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
-import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
-import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
+import type { TriggerType } from '../spec/schema/triggers';
+import { TriggerTypes } from '../spec/schema/triggers';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -65,6 +66,13 @@ export function isDangerousStatus(status: ExecutionStatus) {
 
 export function isTerminalStatus(status: ExecutionStatus) {
   return TerminalExecutionStatuses.includes(status);
+}
+
+export function isFailedBeforeSteps(
+  status: ExecutionStatus,
+  stepExecutions: WorkflowStepExecutionDto[]
+) {
+  return status === ExecutionStatus.FAILED && stepExecutions.length === 0;
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {
