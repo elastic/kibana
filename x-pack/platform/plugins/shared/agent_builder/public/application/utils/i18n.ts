@@ -17,6 +17,12 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
       defaultMessage: 'Agent Chat',
     }),
+    staleCheckPartialFailureTitle: i18n.translate(
+      'xpack.agentBuilder.conversations.staleCheckPartialFailureTitle',
+      {
+        defaultMessage: 'Could not check whether some attachments are outdated',
+      }
+    ),
   },
   tools: {
     // Landing page
