@@ -678,11 +678,17 @@ The plugin can be configured via `kibana.yml`:
 workflowsExecutionEngine:
   # Enable/disable the plugin
   enabled: true
-  
+
+  # Event-driven execution
+  eventDriven:
+    # When false, event-triggered runs are skipped at execution time (no scheduling).
+    enabled: true
+    # When false, trigger subscriptions are not resolved and events are not written to the trigger-events data stream
+    logEvents: true
+
   # Enable console logging for debugging
   logging:
     console: false
-  
   # Configure allowed hosts for HTTP steps
   http:
     allowedHosts: ['*']  # Use specific hosts in production

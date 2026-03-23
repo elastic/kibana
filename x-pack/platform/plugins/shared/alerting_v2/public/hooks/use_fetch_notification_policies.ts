@@ -15,18 +15,45 @@ import { notificationPolicyKeys } from './query_key_factory';
 interface UseFetchNotificationPoliciesParams {
   page: number;
   perPage: number;
+  search?: string;
+  destinationType?: string;
+  enabled?: boolean;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const useFetchNotificationPolicies = ({
   page,
   perPage,
+  search,
+  destinationType,
+  enabled,
+  sortField,
+  sortOrder,
 }: UseFetchNotificationPoliciesParams) => {
   const notificationPoliciesApi = useService(NotificationPoliciesApi);
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<FindNotificationPoliciesResponse, Error>({
-    queryKey: notificationPolicyKeys.list({ page, perPage }),
-    queryFn: () => notificationPoliciesApi.listNotificationPolicies({ page, perPage }),
+    queryKey: notificationPolicyKeys.list({
+      page,
+      perPage,
+      search,
+      destinationType,
+      enabled,
+      sortField,
+      sortOrder,
+    }),
+    queryFn: () =>
+      notificationPoliciesApi.listNotificationPolicies({
+        page,
+        perPage,
+        search,
+        destinationType,
+        enabled,
+        sortField,
+        sortOrder,
+      }),
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {

@@ -51,9 +51,28 @@ export const NotificationPolicyFormPage = () => {
     navigateToUrl(basePath.prepend(paths.notificationPolicyList));
   }, [navigateToUrl, basePath]);
 
+  const returnButton = (
+    <EuiFlexGroup justifyContent="flexStart">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          onClick={navigateToList}
+          data-test-subj="returnButton"
+          style={{ paddingInline: 0 }}
+        >
+          <FormattedMessage
+            id="xpack.alertingV2.notificationPolicy.formPage.return"
+            defaultMessage="Return"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   if (isEditMode && isFetchingPolicy) {
     return (
       <>
+        {returnButton}
         <EuiPageHeader
           pageTitle={
             <FormattedMessage
@@ -73,6 +92,7 @@ export const NotificationPolicyFormPage = () => {
   if (isEditMode && isFetchError) {
     return (
       <>
+        {returnButton}
         <EuiPageHeader
           pageTitle={
             <FormattedMessage
@@ -139,6 +159,21 @@ const NotificationPolicyFormPageContent = ({
 
   return (
     <>
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="arrowLeft"
+            onClick={onCancel}
+            data-test-subj="returnButton"
+            style={{ paddingInline: 0 }}
+          >
+            <FormattedMessage
+              id="xpack.alertingV2.notificationPolicy.formPage.return"
+              defaultMessage="Return"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiPageHeader
         pageTitle={
           isEditMode ? (

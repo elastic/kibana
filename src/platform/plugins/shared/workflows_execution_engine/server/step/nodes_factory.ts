@@ -28,6 +28,7 @@ import type {
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
+  WorkflowOutputGraphNode,
 } from '@kbn/workflows/graph';
 import {
   isDataSet,
@@ -70,6 +71,7 @@ import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step'
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
+import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
@@ -347,6 +349,18 @@ export class NodesFactory {
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
           workflowLogger: this.workflowLogger,
         });
+      case 'workflow.output':
+        this.workflowLogger.logDebug(`Creating workflow.output step`, {
+          event: { action: 'workflow-output-step-creation', outcome: 'success' },
+          tags: ['step-factory', 'workflow-output', 'core-step'],
+        });
+        return new WorkflowOutputStepImpl(
+          node as WorkflowOutputGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory
+        );
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);
     }

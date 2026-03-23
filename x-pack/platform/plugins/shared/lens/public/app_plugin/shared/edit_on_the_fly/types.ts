@@ -12,7 +12,7 @@ import type {
   UserMessagesGetter,
   LensDocument,
   LensInspector,
-  SupportedDatasourceId,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -46,7 +46,7 @@ export interface EditConfigPanelProps {
     visualizationState: unknown,
     visualizationId?: string,
     /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
-    datasourceId?: SupportedDatasourceId
+    datasourceId?: LensDatasourceId
   ) => void;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */

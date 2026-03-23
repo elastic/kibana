@@ -64,7 +64,10 @@
     "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
     "@kbn/react-query",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }

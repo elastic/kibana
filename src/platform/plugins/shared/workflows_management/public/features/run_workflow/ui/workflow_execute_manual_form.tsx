@@ -13,13 +13,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
-  normalizeInputsToJsonSchema,
-} from '@kbn/workflows/spec/lib/input_conversion';
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { z } from '@kbn/zod/v4';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
-import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 interface WorkflowExecuteManualFormProps {
@@ -32,7 +32,7 @@ interface WorkflowExecuteManualFormProps {
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
 
   if (!normalizedInputs?.properties) {
     return '{}';
@@ -65,7 +65,7 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => buildInputsZodValidator(normalizeInputsToJsonSchema(definition?.inputs)),
+    () => buildFieldsZodValidator(normalizeFieldsToJsonSchema(definition?.inputs)),
     [definition?.inputs]
   );
 
@@ -78,7 +78,9 @@ export const WorkflowExecuteManualForm = ({
           if (!res.success) {
             setErrors(
               res.error.issues
-                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+                .map((e: z.ZodIssue) =>
+                  e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message
+                )
                 .join(', ')
             );
           } else {
@@ -106,7 +108,11 @@ export const WorkflowExecuteManualForm = ({
         const res = inputsValidator.safeParse(JSON.parse(value));
         if (!res.success) {
           setErrors(
-            res.error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ')
+            res.error.issues
+              .map((e: z.ZodIssue) =>
+                e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message
+              )
+              .join(', ')
           );
         } else {
           setErrors(null);

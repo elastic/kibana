@@ -131,12 +131,18 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       OsqueryAction: getLazyOsqueryAction({
-        ...core,
-        ...plugins,
+        services: {
+          ...core,
+          ...plugins,
+        },
+        experimentalFeatures: this.experimentalFeatures,
       }),
       LiveQueryField: getLazyLiveQueryField({
-        ...core,
-        ...plugins,
+        services: {
+          ...core,
+          ...plugins,
+        },
+        experimentalFeatures: this.experimentalFeatures,
       }),
       OsqueryResult: getLazyOsqueryResult({
         ...core,

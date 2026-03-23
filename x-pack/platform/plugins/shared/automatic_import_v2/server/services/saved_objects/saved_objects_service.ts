@@ -40,7 +40,7 @@ export interface FieldMappingEntry {
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
-  ingestPipeline: Pipeline;
+  ingestPipeline?: Pipeline;
   pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
   fieldMapping?: FieldMappingEntry[];
   status: keyof typeof TASK_STATUSES;
@@ -606,13 +606,17 @@ export class AutomaticImportSavedObjectService {
         `Updating data stream ${dataStreamId} with pipeline docs: ${JSON.stringify(pipelineDocs)}`
       );
 
+      const updatedResult = ingestPipeline
+        ? {
+            ingest_pipeline: ingestPipeline,
+            ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
+            ...(fieldMapping ? { field_mapping: fieldMapping } : {}),
+          }
+        : dataStream.attributes.result;
+
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
-        result: {
-          ingest_pipeline: ingestPipeline,
-          ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
-          ...(fieldMapping ? { field_mapping: fieldMapping } : {}),
-        },
+        result: updatedResult,
         job_info: {
           ...dataStream.attributes.job_info,
           status,

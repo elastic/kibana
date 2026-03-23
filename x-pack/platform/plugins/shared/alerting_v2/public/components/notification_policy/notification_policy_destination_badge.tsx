@@ -17,7 +17,7 @@ export const NotificationPolicyDestinationBadge = ({
   switch (destination.type) {
     case 'workflow':
       return (
-        <EuiBadge color="primary" iconType="logoWorkflows">
+        <EuiBadge color="primary" iconType="briefcase">
           {destination.id}
         </EuiBadge>
       );

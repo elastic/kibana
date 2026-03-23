@@ -477,7 +477,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -984,7 +986,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
               "RenderContext",
               "<",
               {
@@ -1011,7 +1015,7 @@
               " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; })"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/components/alert_actions/alert_actions.tsx",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2375,7 +2379,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -2865,7 +2871,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -3271,7 +3279,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -3705,7 +3715,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -4195,7 +4207,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -4227,7 +4241,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderAdditionalToolbarControls?: ",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderAdditionalToolbarControls?: ",
           "ComponentRenderer",
           "<",
           {
@@ -4933,7 +4949,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
               "RenderContext",
               "<",
               {
@@ -5423,7 +5441,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
               "RenderContext",
               "<",
               {
@@ -5829,7 +5849,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
               "RenderContext",
               "<",
               {
@@ -6263,7 +6285,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
               "RenderContext",
               "<",
               {
@@ -6753,7 +6777,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
               "RenderContext",
               "<",
               {
@@ -6785,7 +6811,9 @@
                 "section": "def-public.AlertFormatter",
                 "text": "AlertFormatter"
               },
-              "<Record<string, unknown>> | undefined) | undefined; renderAdditionalToolbarControls?: ",
+              "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+              "AlertDetailsNavigation",
+              " | undefined; renderAdditionalToolbarControls?: ",
               "ComponentRenderer",
               "<",
               {
@@ -12006,7 +12034,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -12496,7 +12526,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -12902,7 +12934,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -13336,7 +13370,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -13826,7 +13862,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -13858,7 +13896,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderAdditionalToolbarControls?: ",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderAdditionalToolbarControls?: ",
           "ComponentRenderer",
           "<",
           {
@@ -14548,7 +14588,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -15038,7 +15080,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -15444,7 +15488,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -15878,7 +15924,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -16368,7 +16416,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -16400,7 +16450,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderAdditionalToolbarControls?: ",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderAdditionalToolbarControls?: ",
           "ComponentRenderer",
           "<",
           {
@@ -17183,7 +17235,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -17673,7 +17727,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -18079,7 +18135,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -18513,7 +18571,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -19003,7 +19063,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderExpandedAlertView?: React.ComponentType<Omit<",
           "RenderContext",
           "<",
           {
@@ -19035,7 +19097,9 @@
             "section": "def-public.AlertFormatter",
             "text": "AlertFormatter"
           },
-          "<Record<string, unknown>> | undefined) | undefined; renderAdditionalToolbarControls?: ",
+          "<Record<string, unknown>> | undefined) | undefined; alertDetailsNavigation?: ",
+          "AlertDetailsNavigation",
+          " | undefined; renderAdditionalToolbarControls?: ",
           "ComponentRenderer",
           "<",
           {
@@ -26361,7 +26425,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "lineNumber": 426,
@@ -28436,6 +28500,20 @@
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.NOT_AVAILABLE_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "NOT_AVAILABLE_LABEL",
+        "description": [],
+        "path": "x-pack/solutions/observability/plugins/observability/common/i18n.ts",
+        "lineNumber": 10,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -21,6 +21,7 @@ import { EnableNotificationPolicyRoute } from '../routes/notification_policies/e
 import { GetNotificationPolicyRoute } from '../routes/notification_policies/get_notification_policy_route';
 import { ListNotificationPoliciesRoute } from '../routes/notification_policies/list_notification_policies_route';
 import { SnoozeNotificationPolicyRoute } from '../routes/notification_policies/snooze_notification_policy_route';
+import { UnsnoozeNotificationPolicyRoute } from '../routes/notification_policies/unsnooze_notification_policy_route';
 import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
 import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
 
@@ -40,5 +41,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(EnableNotificationPolicyRoute);
   bind(Route).toConstantValue(DisableNotificationPolicyRoute);
   bind(Route).toConstantValue(SnoozeNotificationPolicyRoute);
+  bind(Route).toConstantValue(UnsnoozeNotificationPolicyRoute);
   bind(Route).toConstantValue(BulkActionNotificationPoliciesRoute);
 }

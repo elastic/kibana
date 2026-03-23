@@ -255,12 +255,18 @@ spaceTest.describe(
 
     spaceTest(
       'Transaction Detail - Waterfall size warning "view in Discover" link opens traces experience',
-      async ({ page, pageObjects }) => {
+      async ({ page, pageObjects, scoutSpace }) => {
         const transactionDetailParams = {
           ...APM_TIME_RANGE,
           transactionName: RICH_TRACE.TRANSACTION_NAME,
           transactionType: 'request',
         };
+
+        await spaceTest.step('disable unified waterfall to use legacy waterfall', async () => {
+          await scoutSpace.uiSettings.set({
+            'observability:apmUseUnifiedTraceWaterfall': false,
+          });
+        });
 
         await spaceTest.step('intercept trace API to force exceedsMax condition', async () => {
           await page.route('**/internal/apm/traces/**', async (route) => {
@@ -286,6 +292,7 @@ spaceTest.describe(
             await page.testSubj.locator('apmWaterfallSizeWarningDiscoverLink').click();
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
+            await scoutSpace.uiSettings.unset('observability:apmUseUnifiedTraceWaterfall');
           }
         );
       }

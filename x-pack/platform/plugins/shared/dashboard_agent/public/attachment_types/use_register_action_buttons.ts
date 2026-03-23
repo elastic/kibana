@@ -8,7 +8,6 @@
 import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +21,7 @@ export type SavedObjectStatus =
 interface UseRegisterActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  updateOrigin: (origin: string) => Promise<unknown>;
   timeRange: { from: string; to: string };
   dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
   linkedSavedObjectId: string | undefined;
@@ -91,7 +90,7 @@ export const useRegisterActionButtons = ({
         const result = await dashboardApi.runInteractiveSave();
         const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
         if (nextSavedObjectId && nextSavedObjectId !== existingDashboardId) {
-          await updateOrigin({ savedObjectId: nextSavedObjectId });
+          await updateOrigin(nextSavedObjectId);
         }
       },
     });

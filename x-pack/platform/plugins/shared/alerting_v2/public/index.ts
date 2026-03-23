@@ -33,7 +33,6 @@ export const module = new ContainerModule(({ bind }) => {
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
 
-    // Populate services for exported stateful components
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
       setKibanaServices({

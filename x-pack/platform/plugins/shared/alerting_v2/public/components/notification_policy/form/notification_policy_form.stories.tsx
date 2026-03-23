@@ -59,7 +59,6 @@ export const EditMode: Story = {
       description: 'Routes critical production alerts to escalation workflows',
       matcher: 'data.severity : "critical" and data.env : "prod"',
       groupBy: ['host.name', 'service.name'],
-      ruleLabels: ['production', 'critical'],
       frequency: { type: 'throttle', interval: '5m' },
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
     },

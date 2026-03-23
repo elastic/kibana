@@ -130,7 +130,6 @@
     "@kbn/synthtrace-client",
     "@kbn/alerting-v2-plugin",
     "@kbn/cps-utils",
-    "@kbn/es-types"
   ],
   "exclude": ["target/**/*"]
 }

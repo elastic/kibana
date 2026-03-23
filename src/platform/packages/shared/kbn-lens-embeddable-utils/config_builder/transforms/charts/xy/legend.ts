@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYLegendValue } from '@kbn/chart-expressions-common';
-import { LegendSize, LegendLayout } from '@kbn/chart-expressions-common';
+import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYState as XYLensState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
 import { stripUndefined } from '../utils';
@@ -108,9 +107,6 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
     ...(legend?.statistics
       ? { legendStats: (legend?.statistics ?? []).map(mapStatToCamelCase) }
       : {}),
-    ...(legend?.statistics
-      ? { layout: legend?.statistics?.length ? LegendLayout.Table : LegendLayout.List }
-      : {}),
     ...extractAlignment(legend),
     ...(legend?.visibility === 'auto' ? { showSingleSeries: true } : {}),
     ...(legend?.inside
@@ -122,6 +118,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
           legendSize: legend?.size ? getLegendSize(legend.size) : LegendSize.AUTO,
+          ...(legend?.layout === 'list' ? { layout: LegendLayout.List } : {}),
         }),
   };
 

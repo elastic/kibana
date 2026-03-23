@@ -157,6 +157,33 @@ describe('evaluateKql', () => {
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
       });
     });
+
+    describe('array membership', () => {
+      it('should match when array contains the value', () => {
+        const kql = 'tags: "production"';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(true);
+      });
+
+      it('should not match when array does not contain the value', () => {
+        const kql = 'tags: "staging"';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(false);
+      });
+
+      it('should match wildcard against array elements', () => {
+        const kql = 'tags: prod*';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(true);
+      });
+
+      it('should match existence wildcard against array', () => {
+        const kql = 'tags: *';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(true);
+      });
+
+      it('should not match when array is empty', () => {
+        const kql = 'tags: "production"';
+        expect(evaluateKql(kql, { tags: [] })).toBe(false);
+      });
+    });
   });
 
   describe('datemath expressions', () => {

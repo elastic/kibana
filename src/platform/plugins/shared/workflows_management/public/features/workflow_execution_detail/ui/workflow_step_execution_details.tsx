@@ -49,6 +49,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       : undefined;
 
     const hasInput = Boolean(stepExecution?.input);
+    const hasOutput = Boolean(stepExecution?.output);
     const hasError = Boolean(stepExecution?.error);
 
     const tabs = useMemo(() => {
@@ -58,6 +59,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           pseudoTabs.push({
             id: 'input',
             name: 'Input',
+          });
+        }
+        if (hasOutput) {
+          pseudoTabs.push({
+            id: 'output',
+            name: 'Output',
           });
         }
         return pseudoTabs;
@@ -72,7 +79,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Input',
         },
       ];
-    }, [hasInput, hasError, isTriggerPseudoStep]);
+    }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -139,33 +146,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ) : (
                 <>
                   {selectedTabId === 'output' && (
-                    <>
-                      {isTriggerPseudoStep && (
-                        <>
-                          <EuiCallOut
-                            size="s"
-                            title={i18n.translate(
-                              'workflowsManagement.stepExecutionDetails.contextAccessTitle',
-                              {
-                                defaultMessage: 'Access this data in your workflow',
-                              }
-                            )}
-                            iconType="info"
-                            announceOnMount={false}
-                          >
-                            <FormattedMessage
-                              id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
-                              defaultMessage="You can reference these values using {code}"
-                              values={{
-                                code: <strong>{`{{ <field> }}`}</strong>,
-                              }}
-                            />
-                          </EuiCallOut>
-                          <EuiSpacer size="m" />
-                        </>
-                      )}
-                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-                    </>
+                    <StepExecutionDataView stepExecution={stepExecution} mode="output" />
                   )}
                   {selectedTabId === 'input' && (
                     <>

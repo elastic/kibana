@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -55,12 +56,27 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         const spaceId = space?.id ?? DEFAULT_SPACE_ID;
 
         try {
+          const filters: string[] = [];
+          if (request.query.createdBy) {
+            const users = request.query.createdBy.split(',');
+            const userFilters = users.map(
+              (u) =>
+                `${savedQuerySavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
+            );
+            filters.push(`(${userFilters.join(' OR ')})`);
+          }
+
           const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
             type: savedQuerySavedObjectType,
             page: request.query.page || 1,
             perPage: request.query.pageSize,
             sortField: request.query.sort || 'id',
             sortOrder: request.query.sortOrder || 'desc',
+            ...(request.query.search && {
+              search: request.query.search,
+              searchFields: ['id', 'description'],
+            }),
+            ...(filters.length && { filter: filters.join(' AND ') }),
           });
 
           const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
@@ -89,6 +105,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
               const {
                 created_at: createdAt,
                 created_by: createdBy,
+                created_by_profile_uid: createdByProfileUid,
                 description,
                 id,
                 interval,
@@ -101,12 +118,14 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
                 ecs_mapping: ecsMapping,
                 updated_at: updatedAt,
                 updated_by: updatedBy,
+                updated_by_profile_uid: updatedByProfileUid,
                 prebuilt,
               } = savedObject.attributes;
 
               return {
                 created_at: createdAt,
                 created_by: createdBy,
+                created_by_profile_uid: createdByProfileUid,
                 description,
                 id,
                 removed,
@@ -119,6 +138,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
                 query,
                 updated_at: updatedAt,
                 updated_by: updatedBy,
+                updated_by_profile_uid: updatedByProfileUid,
                 prebuilt,
                 saved_object_id: savedObject.id,
               };

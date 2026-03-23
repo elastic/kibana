@@ -210,15 +210,19 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>,
     request: KibanaRequest,
-    triggeredBy?: string
+    triggeredBy?: string,
+    metadata?: Record<string, unknown>
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
-    const context = {
+    const context: Record<string, unknown> = {
       event,
       spaceId,
       inputs: manualInputs,
       triggeredBy,
     };
+    if (metadata) {
+      context.metadata = metadata;
+    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,

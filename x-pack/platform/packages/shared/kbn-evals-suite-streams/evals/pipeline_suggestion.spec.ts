@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
-import { extractGrokPatternDangerouslySlow } from '@kbn/grok-heuristics';
+import { extractGrokPatternDangerouslySlow, type GrokPatternNode } from '@kbn/grok-heuristics';
 import { groupMessagesByPattern as groupMessagesByDissectPattern } from '@kbn/dissect-heuristics';
 import { evaluate } from '../src/evaluate';
 import {
@@ -85,7 +85,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       fieldName: string;
       patternGroups: Array<{
         messages: string[];
-        nodes: any[];
+        nodes: GrokPatternNode[];
       }>;
     } | null;
     dissect: {
