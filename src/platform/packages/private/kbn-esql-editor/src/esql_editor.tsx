@@ -985,6 +985,8 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
+  const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
+
   const codeEditorHoverProvider = useMemo(
     () => ({
       provideHover: (
@@ -1184,6 +1186,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 hoverProvider={codeEditorHoverProvider}
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
+                documentHighlightProvider={documentHighlightProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
