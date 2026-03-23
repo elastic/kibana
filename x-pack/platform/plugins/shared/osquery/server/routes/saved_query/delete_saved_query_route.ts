@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
@@ -50,9 +50,19 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
         }
 
-        await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
-          refresh: 'wait_for',
-        });
+        try {
+          await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
+            refresh: 'wait_for',
+          });
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         return response.ok({
           body: {},

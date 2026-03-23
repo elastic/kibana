@@ -7,7 +7,7 @@
 
 import { filter, map } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -47,8 +47,23 @@ export const readPackRoute = (router: IRouter) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
 
-        const { attributes, references, id, ...rest } =
-          await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
+        let packSO;
+        try {
+          packSO = await savedObjectsClient.get<PackSavedObject>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
+
+        const { attributes, references, id, ...rest } = packSO;
 
         const policyIds = map(
           filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
