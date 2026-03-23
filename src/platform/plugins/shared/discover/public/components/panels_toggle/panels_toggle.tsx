@@ -59,6 +59,13 @@ const temporaryCollapseTableIcon: IconType = (props) => (
   </svg>
 );
 
+const disabledCollapsingTooltip = i18n.translate(
+  'discover.panelsToggle.atLeastOnePanelMustRemain',
+  {
+    defaultMessage: 'At least one panel must remain open',
+  }
+);
+
 const getSidebarButton = ({
   isHidden,
   toggleSidebar,
@@ -83,9 +90,11 @@ const getSidebarButton = ({
 const getChartButton = ({
   isHidden,
   toggleChart,
+  isDisabled,
 }: {
   isHidden: boolean;
   toggleChart: () => void;
+  isDisabled?: boolean;
 }) => ({
   label: isHidden
     ? i18n.translate('discover.panelsToggle.showChartButton', {
@@ -98,15 +107,20 @@ const getChartButton = ({
   'data-test-subj': isHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
   'aria-expanded': !isHidden,
   'aria-controls': 'unifiedHistogramCollapsablePanel',
+  isDisabled,
+  toolTipContent: isDisabled ? disabledCollapsingTooltip : undefined,
+  title: isDisabled ? disabledCollapsingTooltip : undefined,
   onClick: toggleChart,
 });
 
 const getTableButton = ({
   isHidden,
   toggleTable,
+  isDisabled,
 }: {
   isHidden: boolean;
   toggleTable: () => void;
+  isDisabled?: boolean;
 }) => ({
   label: isHidden
     ? i18n.translate('discover.panelsToggle.showTableButton', {
@@ -118,6 +132,9 @@ const getTableButton = ({
   iconType: isHidden ? temporaryCollapseTableIcon : temporaryExpandTableIcon,
   'data-test-subj': isHidden ? 'dscShowTableButton' : 'dscHideTableButton',
   'aria-expanded': !isHidden,
+  isDisabled,
+  toolTipContent: isDisabled ? disabledCollapsingTooltip : undefined,
+  title: isDisabled ? disabledCollapsingTooltip : undefined,
   onClick: toggleTable,
 });
 
@@ -154,6 +171,9 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     sidebarToggleState.toggle?.(!isSidebarHidden);
   }, [isSidebarHidden, sidebarToggleState]);
 
+  const disableHideChart = isTableHidden && !isChartHidden;
+  const disableHideTable = isChartHidden && !isTableHidden;
+
   const buttons = [];
 
   if (!isMobile) {
@@ -170,6 +190,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
       getChartButton({
         isHidden: isChartHidden,
         toggleChart: onToggleChart,
+        isDisabled: disableHideChart,
       })
     );
   }
@@ -179,6 +200,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
       getTableButton({
         isHidden: isTableHidden,
         toggleTable: onToggleTable,
+        isDisabled: disableHideTable,
       })
     );
   }
