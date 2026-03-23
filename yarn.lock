@@ -7436,6 +7436,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kbn-client@link:src/platform/packages/shared/kbn-kbn-client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kbn-genai-cli@link:x-pack/solutions/observability/packages/kbn-genai-cli":
   version "0.0.0"
   uid ""
