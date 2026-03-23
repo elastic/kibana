@@ -25,6 +25,7 @@ import {
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { builderEnums } from '../enums';
 
 /**
  * Sorting configuration for the datatable. Only one column can be sorted at a time.
@@ -41,9 +42,7 @@ const sortingSchema = schema.oneOf(
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -65,9 +64,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       {
         meta: {
