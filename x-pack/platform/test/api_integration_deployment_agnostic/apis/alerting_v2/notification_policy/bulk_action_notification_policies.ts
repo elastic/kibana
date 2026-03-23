@@ -212,6 +212,89 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.errors[0].id).to.be('non-existent-id');
     });
 
+    it('should bulk delete policies', async () => {
+      const p1 = await createPolicy('bulk-delete-1');
+      const p2 = await createPolicy('bulk-delete-2');
+
+      const response = await bulkAction([
+        { id: p1.id, action: 'delete' },
+        { id: p2.id, action: 'delete' },
+      ]);
+
+      expect(response.status).to.be(200);
+      expect(response.body.processed).to.be(2);
+      expect(response.body.total).to.be(2);
+      expect(response.body.errors).to.have.length(0);
+
+      const get1 = await supertestWithoutAuth
+        .get(`${NOTIFICATION_POLICY_API_PATH}/${p1.id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
+      const get2 = await supertestWithoutAuth
+        .get(`${NOTIFICATION_POLICY_API_PATH}/${p2.id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
+
+      expect(get1.status).to.be(404);
+      expect(get2.status).to.be(404);
+    });
+
+    it('should handle mixed delete and update actions in a single request', async () => {
+      const pEnable = await createPolicy('bulk-mixed-del-enable');
+      const pDelete = await createPolicy('bulk-mixed-del-delete');
+      await disablePolicy(pEnable.id);
+
+      const response = await bulkAction([
+        { id: pEnable.id, action: 'enable' },
+        { id: pDelete.id, action: 'delete' },
+      ]);
+
+      expect(response.status).to.be(200);
+      expect(response.body.processed).to.be(2);
+      expect(response.body.total).to.be(2);
+      expect(response.body.errors).to.have.length(0);
+
+      const updatedEnable = await getPolicy(pEnable.id);
+      expect(updatedEnable.enabled).to.be(true);
+
+      const getDeleted = await supertestWithoutAuth
+        .get(`${NOTIFICATION_POLICY_API_PATH}/${pDelete.id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
+      expect(getDeleted.status).to.be(404);
+    });
+
+    it('should report errors for non-existent policies in bulk delete', async () => {
+      const existing = await createPolicy('bulk-delete-partial');
+
+      const response = await bulkAction([
+        { id: existing.id, action: 'delete' },
+        { id: 'non-existent-del-id', action: 'delete' },
+      ]);
+
+      expect(response.status).to.be(200);
+      expect(response.body.processed).to.be(1);
+      expect(response.body.total).to.be(2);
+      expect(response.body.errors).to.have.length(1);
+      expect(response.body.errors[0].id).to.be('non-existent-del-id');
+
+      const getDeleted = await supertestWithoutAuth
+        .get(`${NOTIFICATION_POLICY_API_PATH}/${existing.id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
+      expect(getDeleted.status).to.be(404);
+    });
+
+    it('should return 400 when bulk snooze has an invalid date', async () => {
+      const p = await createPolicy('bulk-snooze-invalid');
+
+      const response = await bulkAction([
+        { id: p.id, action: 'snooze', snoozedUntil: 'not-a-date' },
+      ]);
+
+      expect(response.status).to.be(400);
+    });
+
     it('should return 400 when actions array is empty', async () => {
       const response = await bulkAction([]);
 

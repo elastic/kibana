@@ -172,6 +172,16 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
+/** Artifacts (optional) */
+
+const artifactSchema = z
+  .object({
+    id: z.string().min(1).max(256).describe('Artifact identifier.'),
+    type: z.string().min(1).max(128).describe('Artifact type.'),
+    value: z.string().min(1).max(1024).describe('Artifact value.'),
+  })
+  .strict();
+
 /** Create rule API schema */
 
 /**
@@ -194,6 +204,7 @@ const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
+    artifacts: z.array(artifactSchema).optional(),
   })
   .strip();
 
@@ -253,6 +264,7 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
+    artifacts: z.array(artifactSchema).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();

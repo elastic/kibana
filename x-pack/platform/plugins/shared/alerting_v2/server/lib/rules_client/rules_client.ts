@@ -41,6 +41,7 @@ import {
   buildUpdateRuleAttributes,
 } from './utils';
 import { buildRuleSoFilter } from './build_rule_filter';
+import { buildFindRulesSearch } from './build_rule_search';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
@@ -335,7 +336,7 @@ export class RulesClient {
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;
-    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const soFilter = buildFindRulesSearch({ filter: params.filter, search: params.search });
 
     const res = await this.rulesSavedObjectService.find({
       page,

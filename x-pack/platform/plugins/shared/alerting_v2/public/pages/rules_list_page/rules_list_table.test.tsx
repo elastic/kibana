@@ -34,6 +34,7 @@ const defaultProps: RulesListTableProps = {
   totalItemCount: 2,
   page: 1,
   perPage: 20,
+  search: '',
   isLoading: false,
   selectedCount: 0,
   isAllSelected: false,
@@ -87,6 +88,18 @@ describe('RulesListTable', () => {
 
       const label = screen.getByTestId('rulesListShowingLabel');
       expect(label).toHaveTextContent('Showing 0-0 of 0 Rules');
+    });
+
+    it('renders a generic empty state when there are no rules', () => {
+      renderTable({ items: [], totalItemCount: 0, search: '' });
+
+      expect(screen.getByText('No rules found.')).toBeInTheDocument();
+    });
+
+    it('renders a search-specific empty state when no rules match', () => {
+      renderTable({ items: [], totalItemCount: 0, search: 'prod' });
+
+      expect(screen.getByText('No rules match your search.')).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {

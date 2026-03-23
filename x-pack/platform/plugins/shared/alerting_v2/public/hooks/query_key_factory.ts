@@ -8,7 +8,8 @@
 export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
-  list: (filters: { page: number; perPage: number }) => [...ruleKeys.lists(), filters] as const,
+  list: (filters: { page: number; perPage: number; search?: string }) =>
+    [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   create: () => [...ruleKeys.all, 'create'] as const,
@@ -36,6 +37,7 @@ export const notificationPolicyKeys = {
   disable: () => [...notificationPolicyKeys.all, 'disable'] as const,
   snooze: () => [...notificationPolicyKeys.all, 'snooze'] as const,
   unsnooze: () => [...notificationPolicyKeys.all, 'unsnooze'] as const,
+  bulkAction: () => [...notificationPolicyKeys.all, 'bulkAction'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
   lists: () => [...notificationPolicyKeys.all, 'list'] as const,
   list: (filters: {

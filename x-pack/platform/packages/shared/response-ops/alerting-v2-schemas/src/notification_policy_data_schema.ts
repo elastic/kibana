@@ -46,11 +46,17 @@ const bulkUnsnoozeActionSchema = z.object({
   action: z.literal('unsnooze'),
 });
 
+const bulkDeleteActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('delete'),
+});
+
 export const notificationPolicyBulkActionSchema = z.discriminatedUnion('action', [
   bulkEnableActionSchema,
   bulkDisableActionSchema,
   bulkSnoozeActionSchema,
   bulkUnsnoozeActionSchema,
+  bulkDeleteActionSchema,
 ]);
 
 export type NotificationPolicyBulkAction = z.infer<typeof notificationPolicyBulkActionSchema>;

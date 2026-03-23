@@ -21,6 +21,7 @@ interface NotificationPolicySnoozePopoverProps {
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
   isLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export const NotificationPolicySnoozePopover = ({
@@ -28,6 +29,7 @@ export const NotificationPolicySnoozePopover = ({
   onSnooze,
   onCancelSnooze,
   isLoading,
+  isDisabled = false,
 }: NotificationPolicySnoozePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -50,6 +52,7 @@ export const NotificationPolicySnoozePopover = ({
         size="xs"
         onClick={togglePopover}
         isLoading={isLoading}
+        isDisabled={isDisabled}
       >
         {formatSnoozeDate(policy.snoozedUntil!)}
       </EuiButton>
@@ -62,6 +65,7 @@ export const NotificationPolicySnoozePopover = ({
       })}
       onClick={togglePopover}
       isLoading={isLoading}
+      isDisabled={isDisabled}
     />
   );
 
