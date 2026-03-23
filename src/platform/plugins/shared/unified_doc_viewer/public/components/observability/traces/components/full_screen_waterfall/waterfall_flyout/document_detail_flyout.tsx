@@ -11,7 +11,6 @@ import { EuiCallOut } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
-import { FlyoutContentId } from '../../../../../../analytics/flyout_viewed_event';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { spanFlyoutId, SpanFlyoutContent } from './span_flyout';
 import { LogFlyoutContent } from './logs_flyout';
@@ -20,6 +19,7 @@ import {
   type DocumentType,
   type DocumentFlyoutData,
 } from './use_document_flyout_data';
+import { FlyoutContentId } from '../../../common/constants';
 
 export type { DocumentType } from './use_document_flyout_data';
 

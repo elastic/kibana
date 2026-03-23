@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/restorable-state'
+  - '@kbn/core'
 tags:
   - shared-browser
   - package

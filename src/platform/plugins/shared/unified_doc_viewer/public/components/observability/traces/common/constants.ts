@@ -24,3 +24,9 @@ export const OPEN_IN_DISCOVER_ARIA_LABEL = i18n.translate(
 export const NOT_AVAILABLE_LABEL = i18n.translate('unifiedDocViewer.observability.traces.na', {
   defaultMessage: 'N/A',
 });
+
+export enum FlyoutContentId {
+  TRACE_TIMELINE = 'trace_timeline',
+  SPAN_DETAIL = 'span_detail',
+  LOG_DETAIL = 'log_detail',
+}

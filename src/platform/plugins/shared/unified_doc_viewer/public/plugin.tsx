@@ -10,7 +10,7 @@
 import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DocViewsRegistry, registerDocViewerAnalyticsEvents } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -24,8 +24,6 @@ import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
-
-export const FLYOUT_VIEWED_EVENT_TYPE = 'flyout_viewed';
 
 const fallback = (
   <EuiDelayRender delay={300}>
@@ -58,25 +56,7 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
-    core.analytics.registerEventType({
-      eventType: FLYOUT_VIEWED_EVENT_TYPE,
-      schema: {
-        contentId: {
-          type: 'keyword',
-          _meta: {
-            description: 'Flyout content viewed.',
-            optional: false,
-          },
-        },
-        tabId: {
-          type: 'keyword',
-          _meta: {
-            description: 'Active tab identifier within the flyout.',
-            optional: true,
-          },
-        },
-      },
-    });
+    registerDocViewerAnalyticsEvents(core.analytics);
 
     this.docViewsRegistry.add({
       id: 'doc_view_table',
