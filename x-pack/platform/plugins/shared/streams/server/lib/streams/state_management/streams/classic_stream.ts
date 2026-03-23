@@ -709,6 +709,16 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
+      // Check if the data stream is replicated (no local index template).
+      // The getDataStreamSettings ES API returns HTTP 400 for replicated
+      // data streams, so we skip it and return empty settings.
+      const dataStream = await this.dependencies.streamsClient
+        .getDataStream(this._definition.name)
+        .catch(() => null);
+      if (dataStream?.replicated) {
+        this._effectiveSettings = {};
+        return this._effectiveSettings;
+      }
       this._effectiveSettings = getDataStreamSettings(
         await this.dependencies.esClient.indices
           .getDataStreamSettings({ name: this._definition.name })

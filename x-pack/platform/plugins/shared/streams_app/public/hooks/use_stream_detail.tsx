@@ -63,13 +63,16 @@ export function StreamDetailContextProvider({
         })
         .then((response) => {
           if (Streams.ingest.all.GetResponse.is(response)) {
+            // Replicated streams (via CCR) are read-only — disable manage/lifecycle privileges
+            const isReplicated = 'replicated' in response && response.replicated === true;
             return {
               ...response,
               privileges: {
                 ...response.privileges,
                 // restrict the manage privilege by the Elasticsearch-level data-stream specific privilege and the Kibana-level UI privilege
                 // the UI should only enable manage features if the user has privileges on both levels for the current stream
-                manage: response.privileges.manage && canManage,
+                manage: response.privileges.manage && canManage && !isReplicated,
+                lifecycle: response.privileges.lifecycle && !isReplicated,
               },
             };
           }

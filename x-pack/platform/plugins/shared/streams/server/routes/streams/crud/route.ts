@@ -116,6 +116,14 @@ export const editStreamRoute = createServerRoute({
   }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
+    // Replicated data streams are managed by the source cluster via CCR and cannot be modified locally
+    const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
+    if (dataStream?.replicated) {
+      throw badData(
+        'Cannot modify a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+      );
+    }
+
     if (
       Streams.WiredStream.UpsertRequest.is(params.body) &&
       !(await streamsClient.isStreamsEnabled())
@@ -163,6 +171,14 @@ export const deleteStreamRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({
       request,
     });
+
+    // Replicated data streams are managed by the source cluster via CCR and cannot be deleted locally
+    const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
+    if (dataStream?.replicated) {
+      throw badData(
+        'Cannot delete a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+      );
+    }
 
     return await streamsClient.deleteStream(params.path.name);
   },
