@@ -52,6 +52,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
+  `${internalNamespaces.workflows}.workflow_insert_step`,
+  `${internalNamespaces.workflows}.workflow_modify_step`,
+  `${internalNamespaces.workflows}.workflow_modify_step_property`,
+  `${internalNamespaces.workflows}.workflow_modify_property`,
+  `${internalNamespaces.workflows}.workflow_delete_step`,
+  `${internalNamespaces.workflows}.workflow_replace_yaml`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -87,6 +93,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Dashboard
   'dashboard-management',
+
+  // Platform – Workflows
+  'workflow-authoring',
 
   // Security Solution
   'find-security-ml-jobs',
