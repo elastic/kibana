@@ -168,7 +168,10 @@ describe('useAlertsTableConfiguration', () => {
     });
 
     expect(result.current[0]).toEqual({ pageSize: 100 });
-    expect(mockStorageWrapper.set).toHaveBeenCalledWith('test-id', JSON.stringify({ pageSize: 100 }));
+    expect(mockStorageWrapper.set).toHaveBeenCalledWith(
+      'test-id',
+      JSON.stringify({ pageSize: 100 })
+    );
   });
 
   it('should remove saved configuration when setConfiguration is called with null', () => {
