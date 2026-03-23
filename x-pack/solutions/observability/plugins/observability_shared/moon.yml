@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/deeplinks-observability'
   - '@kbn/home-sample-data-tab'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/controls-constants'
 tags:
   - plugin
   - prod

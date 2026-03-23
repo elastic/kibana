@@ -17,7 +17,6 @@ import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-m
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import type { IntlShape } from '@kbn/i18n-react';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
@@ -29,7 +28,6 @@ import type { TabState } from '../../../state_management/redux/types';
 interface BuildShareOptionsParams {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
   currentTab: TabState;
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
@@ -42,7 +40,6 @@ interface BuildShareOptionsParams {
 const buildShareOptions = async ({
   discoverParams,
   services,
-  stateContainer,
   currentTab,
   persistedDiscoverSession,
   totalHitsState,
@@ -225,7 +222,6 @@ const getExportItems = (
 export const getShareAppMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
   hasIntegrations,
   hasUnsavedChanges,
   currentTab,
@@ -235,7 +231,6 @@ export const getShareAppMenuItem = ({
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
   currentTab: TabState;
@@ -251,7 +246,6 @@ export const getShareAppMenuItem = ({
     const shareOptions = await buildShareOptions({
       discoverParams,
       services,
-      stateContainer,
       currentTab,
       persistedDiscoverSession,
       totalHitsState,
@@ -280,7 +274,6 @@ export const getShareAppMenuItem = ({
       {
         discoverParams,
         services,
-        stateContainer,
         currentTab,
         persistedDiscoverSession,
         totalHitsState,

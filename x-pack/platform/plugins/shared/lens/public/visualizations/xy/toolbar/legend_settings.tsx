@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import { LegendValue, ScaleType } from '@elastic/charts';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
-import { LegendSize } from '@kbn/chart-expressions-common';
+import { LegendLayout, LegendSize } from '@kbn/chart-expressions-common';
 import type { VisualizationToolbarProps, XYState } from '@kbn/lens-common';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings';
@@ -28,6 +28,7 @@ export const XyLegendSettings = ({
   setState,
   frame,
 }: VisualizationToolbarProps<XYState>) => {
+  const hasLayoutChange = useRef(false);
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -123,6 +124,13 @@ export const XyLegendSettings = ({
           legend: { ...state.legend, maxLines: val },
         });
       }}
+      listLayoutMaxWidth={state?.legend.listLayoutMaxWidth}
+      onListLayoutMaxWidthChange={(val) => {
+        setState({
+          ...state,
+          legend: { ...state.legend, listLayoutMaxWidth: val },
+        });
+      }}
       shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
       onTruncateLegendChange={() => {
         const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
@@ -132,9 +140,30 @@ export const XyLegendSettings = ({
         });
       }}
       onPositionChange={(id) => {
+        const nextPosition = id as Position;
         setState({
           ...state,
-          legend: { ...state.legend, position: id as Position },
+          legend: {
+            ...state.legend,
+            position: nextPosition,
+            layout:
+              !hasLayoutChange.current &&
+              (nextPosition === 'top' || nextPosition === 'bottom') &&
+              state.legend.layout == null
+                ? LegendLayout.List
+                : state.legend.layout,
+          },
+        });
+      }}
+      layout={state.legend.layout}
+      onLayoutChange={(layout) => {
+        hasLayoutChange.current = true;
+        setState({
+          ...state,
+          legend: {
+            ...state.legend,
+            layout,
+          },
         });
       }}
       onAlignmentChange={(value) => {
