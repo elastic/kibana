@@ -16,5 +16,4 @@ describe('Cel request schema', () => {
     expectParseSuccess(result);
     expect(result.data).toEqual(payload);
   });
-
 });
