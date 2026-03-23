@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './constants';
+export { registerDocViewerAnalyticsEvents } from './register_analytics_events';
 export {
-  DocViewer,
-  type DocViewerProps,
-  type DocViewerApi,
-  type DocViewerRestorableState,
-  DocViewsRegistry,
-  ElasticRequestState,
-  FieldName,
-  registerDocViewerAnalyticsEvents,
-  type UseDocViewerTabViewedEventParams,
   type UseDocViewerViewedEventParams,
-  useDocViewerTabViewedEvent,
+  type UseDocViewerTabViewedEventParams,
   useDocViewerViewedEvent,
-} from './src';
+  useDocViewerTabViewedEvent,
+} from './doc_viewer_viewed_event';

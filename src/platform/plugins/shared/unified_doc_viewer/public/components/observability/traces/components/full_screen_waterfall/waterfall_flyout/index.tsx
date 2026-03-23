@@ -24,10 +24,11 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState } from 'react';
+import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
-import { type FlyoutContentId } from '../../../../../../analytics/flyout_viewed_event';
-import { useTrackFlyoutViewed } from '../../../../../../analytics/use_track_flyout_viewed';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
@@ -92,11 +93,13 @@ export function WaterfallFlyout({
   dataTestSubj,
   flyoutContentId,
 }: Props) {
+  const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
 
-  useTrackFlyoutViewed({
+  useDocViewerViewedEvent({
+    reportEvent: analytics.reportEvent,
     contentId: flyoutContentId,
     tabId: selectedTabId,
   });

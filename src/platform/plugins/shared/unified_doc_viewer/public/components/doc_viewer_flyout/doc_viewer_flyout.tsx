@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiFlyoutProps } from '@elastic/eui';
@@ -32,20 +32,11 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerProps } from '@kbn/unified-doc-viewer';
-import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
-import { FlyoutContentId, reportFlyoutViewedEvent } from '../../analytics/flyout_viewed_event';
-import { FlyoutCoverProvider, type FlyoutCoverState } from './flyout_cover_context';
 
 export interface UnifiedDocViewerFlyoutProps
-  extends Pick<
-    DocViewerProps,
-    | 'initialTabId'
-    | 'initialDocViewerState'
-    | 'onInitialDocViewerStateChange'
-    | 'onUpdateSelectedTabId'
-  > {
+  extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
@@ -53,7 +44,6 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutActions?: React.ReactNode;
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
-  flyoutContentId?: FlyoutContentId;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -66,6 +56,8 @@ export interface UnifiedDocViewerFlyoutProps
   hits?: DataTableRecord[];
   dataView: DataView;
   hideFilteringOnComputedColumns?: boolean;
+  initialDocViewerState?: DocViewerProps['initialState'];
+  onInitialDocViewerStateChange?: DocViewerProps['onInitialStateChange'];
   renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   onClose: () => void;
@@ -96,7 +88,6 @@ export function UnifiedDocViewerFlyout({
   flyoutActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
-  flyoutContentId = FlyoutContentId.DOC_DETAIL,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -118,7 +109,6 @@ export function UnifiedDocViewerFlyout({
   onUpdateSelectedTabId,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
-  const { analytics } = getUnifiedDocViewerServices();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const chromeStyle = useObservable(services.chrome.getChromeStyle$(), 'classic');
   const isProjectStyle = chromeStyle === 'project';
@@ -263,48 +253,6 @@ export function UnifiedDocViewerFlyout({
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
-  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
-  const [isFlyoutCovered, setIsFlyoutCovered] = useState(false);
-
-  const lastReportedEventRef = useRef<string | undefined>(undefined);
-
-  const flyoutCoverValue = useMemo<FlyoutCoverState>(
-    () => ({
-      isFlyoutCovered,
-      setIsFlyoutCovered,
-    }),
-    [isFlyoutCovered]
-  );
-
-  // setting the selected tab id will trigger reporting the event
-  const onUpdateSelectedTabIdWithTracking = useCallback(
-    (tabId: string | undefined) => {
-      onUpdateSelectedTabId?.(tabId);
-      setSelectedTabId(tabId);
-    },
-    [onUpdateSelectedTabId]
-  );
-
-  useEffect(() => {
-    // if the flyout is covered by another UI element, we don't want to report the event
-    if (isFlyoutCovered) {
-      lastReportedEventRef.current = undefined;
-      return;
-    }
-
-    if (!flyoutContentId || !selectedTabId) return;
-
-    const eventKey = `${flyoutContentId}|${selectedTabId}|${hit.id}`;
-    if (lastReportedEventRef.current === eventKey) return;
-
-    lastReportedEventRef.current = eventKey;
-
-    reportFlyoutViewedEvent(analytics, {
-      contentId: flyoutContentId,
-      tabId: selectedTabId,
-    });
-  }, [analytics, flyoutContentId, hit.id, isFlyoutCovered, selectedTabId]);
-
   return (
     <EuiPortal>
       <EuiFlyout
@@ -373,16 +321,14 @@ export function UnifiedDocViewerFlyout({
               <EuiSpacer size="m" />
             </>
           )}
-          <FlyoutCoverProvider value={flyoutCoverValue}>
-            <UnifiedDocViewer
-              ref={docViewerRef}
-              initialTabId={initialTabId}
-              initialDocViewerState={initialDocViewerState}
-              onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-              onUpdateSelectedTabId={onUpdateSelectedTabIdWithTracking}
-              {...docViewRenderProps}
-            />
-          </FlyoutCoverProvider>
+          <UnifiedDocViewer
+            ref={docViewerRef}
+            initialTabId={initialTabId}
+            initialState={initialDocViewerState}
+            onInitialStateChange={onInitialDocViewerStateChange}
+            onUpdateSelectedTabId={onUpdateSelectedTabId}
+            {...docViewRenderProps}
+          />
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>

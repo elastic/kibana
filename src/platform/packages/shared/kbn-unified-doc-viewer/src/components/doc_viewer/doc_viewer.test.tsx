@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DocViewerProps } from './doc_viewer';
@@ -35,14 +35,30 @@ jest.mock('react-use/lib/useLocalStorage', () => {
   });
 });
 
-const WrappedDocViewer = (props: DocViewerProps) => (
+const WrappedDocViewer = (props: Omit<DocViewerProps, 'reportEvent'>) => (
   <KibanaErrorBoundaryProvider analytics={analytics}>
-    <DocViewer {...props} />
+    <DocViewer reportEvent={analytics.reportEvent} {...props} />
   </KibanaErrorBoundaryProvider>
 );
 
 const ThrowingComponent = ({ message }: { message?: string }) => {
   throw new Error(message ?? 'Invalid');
+};
+
+const InitialStateReportingTab = ({
+  content,
+  onInitialStateChange,
+  state,
+}: {
+  content: string;
+  onInitialStateChange: (state: object) => void;
+  state: object;
+}) => {
+  useEffect(() => {
+    onInitialStateChange(state);
+  }, [onInitialStateChange, state]);
+
+  return <div>{content}</div>;
 };
 
 describe('<DocViewer />', () => {
@@ -276,38 +292,22 @@ describe('<DocViewer />', () => {
       />
     );
 
-    expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test1');
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith(undefined);
     await userEvent.click(screen.getByTestId('docViewerTab-test2'));
     expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test2');
   });
 
-  test('should call onUpdateSelectedTabId with the first available tab when local storage tab is unavailable', () => {
-    const onUpdateSelectedTabId = jest.fn();
-    const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn() });
-
-    mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test3';
-
-    render(
-      <WrappedDocViewer
-        docViews={registry.getAll()}
-        hit={records[0]}
-        dataView={dataViewMock}
-        onUpdateSelectedTabId={onUpdateSelectedTabId}
-      />
-    );
-
-    expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test1');
-
-    mockTestInitialLocalStorageValue = undefined;
-  });
-
   test('should call onInitialDocViewerStateChange when tab state changes', () => {
     const onInitialDocViewerStateChange = jest.fn();
+    const initialState = { someState: 'value1' };
     const renderFn = jest.fn(({ onInitialStateChange }) => {
-      onInitialStateChange({ someState: 'value1' });
-      return <div>Tab 1 Content</div>;
+      return (
+        <InitialStateReportingTab
+          content="Tab 1 Content"
+          onInitialStateChange={onInitialStateChange}
+          state={initialState}
+        />
+      );
     });
 
     const registry = new DocViewsRegistry();
@@ -323,28 +323,40 @@ describe('<DocViewer />', () => {
         docViews={registry.getAll()}
         hit={records[0]}
         dataView={dataViewMock}
-        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        onInitialStateChange={onInitialDocViewerStateChange}
       />
     );
 
     expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
       docViewerTabsState: {
-        test1: { someState: 'value1' },
+        test1: initialState,
       },
     });
   });
 
   test('should handle state for multiple tabs independently', async () => {
     const onInitialDocViewerStateChange = jest.fn();
+    const tab1State = { tab1State: 'value1' };
+    const tab2State = { tab2State: 'value2' };
 
     const renderTab1 = jest.fn(({ onInitialStateChange }) => {
-      onInitialStateChange({ tab1State: 'value1' });
-      return <div>Tab 1 Content</div>;
+      return (
+        <InitialStateReportingTab
+          content="Tab 1 Content"
+          onInitialStateChange={onInitialStateChange}
+          state={tab1State}
+        />
+      );
     });
 
     const renderTab2 = jest.fn(({ onInitialStateChange }) => {
-      onInitialStateChange({ tab2State: 'value2' });
-      return <div>Tab 2 Content</div>;
+      return (
+        <InitialStateReportingTab
+          content="Tab 2 Content"
+          onInitialStateChange={onInitialStateChange}
+          state={tab2State}
+        />
+      );
     });
 
     const registry = new DocViewsRegistry();
@@ -366,22 +378,24 @@ describe('<DocViewer />', () => {
         docViews={registry.getAll()}
         hit={records[0]}
         dataView={dataViewMock}
-        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        onInitialStateChange={onInitialDocViewerStateChange}
       />
     );
 
     expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
       docViewerTabsState: {
-        test1: { tab1State: 'value1' },
+        test1: tab1State,
       },
     });
 
     await userEvent.click(screen.getByTestId('docViewerTab-test2'));
 
-    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+    expect(onInitialDocViewerStateChange).toHaveBeenLastCalledWith({
       docViewerTabsState: {
-        test2: { tab2State: 'value2' },
+        test1: tab1State,
+        test2: tab2State,
       },
+      initialDocViewerViewedEventKey: 'doc_detail|test2|i::1::',
     });
   });
 
@@ -412,7 +426,7 @@ describe('<DocViewer />', () => {
         hit={records[0]}
         dataView={dataViewMock}
         initialTabId="testTab"
-        initialDocViewerState={initialDocViewerState}
+        initialState={initialDocViewerState}
       />
     );
 

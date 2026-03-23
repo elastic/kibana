@@ -11,9 +11,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/unified_doc_viewer'],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/platform/plugins/shared/unified_doc_viewer/public/__tests__/jest.setup.ts',
-  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/unified_doc_viewer',
   coverageReporters: ['text', 'html'],

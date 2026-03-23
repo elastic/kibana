@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setUnifiedDocViewerServices } from '../plugin';
-import type { UnifiedDocViewerServices } from '../types';
-
-// Many unit tests render components in isolation without running the plugin `start()`.
-// Provide a default set of services so calls to `getUnifiedDocViewerServices()` don't throw.
-setUnifiedDocViewerServices({
-  analytics: {
-    reportEvent: jest.fn(),
-  },
-} as unknown as UnifiedDocViewerServices);
+export const DOC_VIEWER_VIEWED_EVENT_TYPE = 'unified_doc_viewer_viewed';
+export const DOC_VIEWER_VIEWED_ROOT_CONTENT_ID = 'doc_detail';
