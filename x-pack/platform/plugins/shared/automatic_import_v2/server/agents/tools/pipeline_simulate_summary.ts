@@ -186,7 +186,7 @@ export async function runLightweightIngestSimulateSummary(
       `Example successful outputs (${successfulOutputs.length} of ${successfulCount}):`
     );
     for (const output of successfulOutputs) {
-      lines.push(JSON.stringify(output));
+      lines.push(JSON.stringify(output, null, 2));
     }
   }
 

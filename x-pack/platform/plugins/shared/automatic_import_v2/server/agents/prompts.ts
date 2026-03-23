@@ -187,6 +187,9 @@ List fields with no confident ECS mapping — the pipeline generator will namesp
 
 ### Threat Intelligence Fields
 - \`threat.technique.*\`, \`threat.tactic.*\`, and \`threat.technique.subtechnique.*\` are reserved exclusively for MITRE ATT&CK framework identifiers. Do NOT map generic threat classifications, severity names, vendor-specific threat labels, or "threat subclass" values to these fields.
+
+### Process Fields
+- ECS defines \`process.parent.*\` fields that mirror \`process.*\` (e.g. \`process.parent.pid\`, \`process.parent.name\`, \`process.parent.executable\`). For event sources that include both parent and child process information in a single event, map child process fields to \`process.*\` and parent process fields to \`process.parent.*\`.
 </workflow>
 
 <output_format>
@@ -339,6 +342,7 @@ The log analysis provided to you includes ECS field mappings with confidence lev
 - If a mapping says \`src_ip -> source.ip (High confidence)\`, create the rename processor without second-guessing.
 - If event classification rules say "when action='accept' -> event.type: [allowed]", implement that conditional logic with \`if\` conditions on append processors.
 - If you discover unmapped fields during validation that seem like they should be ECS fields, note them in your response so the orchestrator can request additional ECS analysis if needed.
+- **process.parent.***: ECS defines \`process.parent.*\` fields that mirror \`process.*\` (e.g. \`process.parent.pid\`, \`process.parent.name\`, \`process.parent.executable\`). For event sources that include both parent and child process information in a single event, map child process fields to \`process.*\` and parent process fields to \`process.parent.*\`.
 </ecs_mapping_direction>
 
 <injected_context_structure>
@@ -441,7 +445,8 @@ The pipeline follows this exact processor order. Items marked [PRE-SEEDED] are a
 6. **ECS rename processors** — Rename extracted fields to ECS equivalents with \`ignore_missing: true\`.
 7. **Non-ECS field renames** — Rename to \`<integration_name>.<datastream_name>.<field_name>\` with \`ignore_missing: true\`.
 8. **Set event.kind** — Usually "event", or "alert" for alert logs, "metric" for metrics.
-9. **ECS append/set processors** — event.action, event.type, event.category (conditional \`if\` clauses), related.* fields with \`allow_duplicates: false\`.
+9. **ECS append/set processors** — event.action, event.type, event.category (conditional \`if\` clauses), and related.* field population.
+   - **related.* fields** (\`related.ip\`, \`related.user\`, \`related.hosts\`, \`related.hash\`): Use one \`append\` processor per source field, each with \`allow_duplicates: false\` and \`ignore_missing: true\`. Do NOT combine multiple source fields into a single append — each source field gets its own append processor targeting the appropriate related field. Example: if \`source.ip\` and \`destination.ip\` both need to go into \`related.ip\`, create two separate append processors.
 10. **Cleanup remove** — Remove temporary/intermediate fields at the end.
 11. [PRE-SEEDED] **Top-level \`on_failure\`** — Already configured. Do NOT modify.
 </pipeline_structure>
@@ -487,8 +492,14 @@ The pipeline follows this exact processor order. Items marked [PRE-SEEDED] are a
 
 <script_processor_rules>
 ### When to use script processors
-- Script processors are a LAST RESORT. Always prefer built-in processors: set, rename, convert, gsub, dissect, grok, foreach, append, lowercase, uppercase, uri_parts, user_agent, community_id, date, split, join, sort, dot_expander, remove, trim, urldecode, bytes, html_strip.
-- Only use a script processor when no combination of built-in processors can achieve the same result.
+- Script processors are a LAST RESORT. Always prefer built-in processors: rename, append, set (with \`copy_from\` when copying fields), convert, gsub, dissect, grok, foreach, lowercase, uppercase, uri_parts, user_agent, community_id, date, split, join, sort, dot_expander, remove, trim, urldecode, bytes, html_strip.
+- Common operations that MUST use built-in processors, not scripts:
+  - **Moving a field**: use \`rename\` with \`ignore_missing: true\`
+  - **Copying a field**: use \`set\` with \`copy_from\` (then remove the original at end if not needed)
+  - **Appending to an array** (e.g. related.*, event.type, event.category): use \`append\` with \`allow_duplicates: false\`
+  - **Conditional field setting**: use \`set\` with an \`if\` condition
+  - **Type conversion**: use \`convert\` with \`ignore_missing: true\`
+- Only use a script processor when no combination of built-in processors can achieve the same result — typically for complex conditional logic, multi-field transformations that depend on each other, or custom parsing that grok/dissect cannot handle.
 - A single script should handle ONE concern (e.g., one conditional transformation). If your script exceeds ~30 lines, break it into smaller scripts or replace parts with built-in processors.
 
 ### Painless anti-patterns (NEVER do these)
@@ -561,12 +572,12 @@ You review completed ingest pipelines for quality, correctness, and ECS complian
 The user message uses XML-style tags. The **full current pipeline** is in \`<current_pipeline>\` at the **end** (JSON inside CDATA). Earlier blocks include \`<validation_results>\`, \`<sample_logs>\`, optional simulation outputs, and failure details.
 
 Do **not** call \`fetch_pipeline\` unless that block is missing or truncated — it should always be present for a normal review task.
-Use \`get_ecs_info\` to verify ECS field validity — batch your queries using root_fields (array) or field_paths (array) to minimize tool calls.
+The pipeline and samples have already been validated against ECS by \`validate_pipeline\` — the validation results in your context include ECS warnings and field naming errors. Your review should focus on whether fields have been mapped to the most appropriate ECS field (not just any valid one), whether better ECS fields exist for unmapped or custom-namespaced fields, and whether value semantics match the target ECS field. Use \`get_ecs_info\` with \`field_paths\` to check specific fields you are uncertain about — avoid bulk \`root_fields\` lookups unless you genuinely need to discover what children exist under a root group.
 </injected_context>
 
 <tools>
 - **fetch_pipeline**: Retrieves the current pipeline from state if it was not injected. Supports optional start_index/end_index to fetch specific processor ranges.
-- **get_ecs_info**: Looks up ECS field definitions. Batch queries using root_fields or field_paths arrays.
+- **get_ecs_info**: Looks up ECS field definitions. Prefer \`field_paths\` for specific fields you need to verify (e.g. \`["source.ip", "event.action"]\`). Only use \`root_fields\` when you genuinely do not know which children exist under a root group — each root field returns all direct children, which can be very token-heavy. Batch all lookups into a single call.
 - **submit_review**: MUST be called as your final action. Pass your full review (all issues, details, and recommendations) as \`full_review\` and a concise summary (PASSED/FAILED, issue count, severity, which agent should fix) as \`summary\`. The full review is stored in shared state; the summary is returned to the orchestrator.
 </tools>
 
