@@ -17,6 +17,7 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
+import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
   UnifiedAttachmentAttributesRt,
   AttachmentAttributesRtV2,
@@ -35,6 +36,7 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectType,
 } from '../../common/attachments';
+import { passThroughTransformer } from '../../common/attachments/base';
 
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
@@ -75,6 +77,7 @@ import type {
   UnifiedAttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
+import { transformAttributesForMode } from './operations/utils';
 
 /**
  * Ensures alert attachments have rule.name, or else existing tests will fail
@@ -507,6 +510,7 @@ export class AttachmentService {
   public async bulkUpdate({
     comments,
     refresh,
+    requestWithoutType = false,
   }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(
@@ -522,9 +526,9 @@ export class AttachmentService {
               const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
                 c.updatedAttributes
               );
-              const transformer = getAttachmentTypeTransformers(
-                getAttachmentTypeFromAttributes(decodedAttributes)
-              );
+              const transformer = requestWithoutType
+                ? passThroughTransformer
+                : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
               const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
               return {
@@ -536,7 +540,7 @@ export class AttachmentService {
             }),
             { refresh }
           );
-        return this.transformAndDecodeBulkUpdateResponse(res, comments);
+        return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
       }
 
       const res =
@@ -546,9 +550,9 @@ export class AttachmentService {
               c.updatedAttributes
             );
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
-            const transformer = getAttachmentTypeTransformers(
-              getAttachmentTypeFromAttributes(decodedAttributes)
-            );
+            const transformer = requestWithoutType
+              ? passThroughTransformer
+              : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
             const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
             const {
               attributes: extractedAttributes,
@@ -578,7 +582,7 @@ export class AttachmentService {
           { refresh }
         );
 
-      return this.transformAndDecodeBulkUpdateResponse(res, comments);
+      return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
     } catch (error) {
       this.context.log.error(
         `Error on UPDATE attachments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
@@ -591,7 +595,8 @@ export class AttachmentService {
     res: SavedObjectsBulkUpdateResponse<
       AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
     >,
-    comments: UpdateArgs[]
+    comments: UpdateArgs[],
+    requestWithoutType: boolean
   ): SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributesV2> {
     const validatedAttachments: Array<
       SavedObjectsUpdateResponse<AttachmentTransformedAttributesV2>
@@ -614,9 +619,9 @@ export class AttachmentService {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        const transformer = getAttachmentTypeTransformers(
-          getAttachmentTypeFromAttributes(decodedAttributes)
-        );
+        const transformer = requestWithoutType
+          ? passThroughTransformer
+          : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,
@@ -642,38 +647,50 @@ export class AttachmentService {
 
   public async find({
     options,
+    mode,
   }: {
     options?: SavedObjectFindOptionsKueryNode;
-  }): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode: AttachmentMode;
+  }): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
-      const res =
-        await this.context.unsecuredSavedObjectsClient.find<AttachmentPersistedAttributes>({
-          sortField: defaultSortField,
-          ...options,
-          type: CASE_COMMENT_SAVED_OBJECT,
-        });
 
-      const validatedAttachments: Array<SavedObjectsFindResult<AttachmentTransformedAttributes>> =
-        [];
+      const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled === true;
+      const res = await this.context.unsecuredSavedObjectsClient.find<AttachmentAttributesV2>({
+        sortField: defaultSortField,
+        ...options,
+        type: isCasesAttachmentsEnabled
+          ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
+          : CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const validatedAttachments: Array<SavedObjectsFindResult<AttachmentAttributesV2>> = [];
 
       for (const so of res.saved_objects) {
-        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-          so,
-          this.context.persistableStateAttachmentTypeRegistry
-          // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
-          // which has the score in it. The score is returned but the type is not correct
-        ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
+        const transformed = transformAttributesForMode({
+          attributes: so.attributes,
+          mode,
+        });
+        if (transformed.isUnified) {
+          validatedAttachments.push(Object.assign(so, { attributes: transformed.attributes }));
+        } else {
+          const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+            { ...so, attributes: transformed.attributes },
+            this.context.persistableStateAttachmentTypeRegistry
+            // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
+            // which has the score in it. The score is returned but the type is not correct
+          ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
 
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          transformedAttachment.attributes
-        );
+          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+            transformedAttachment.attributes
+          );
 
-        validatedAttachments.push(
-          Object.assign(transformedAttachment, {
-            attributes: validatedAttributes,
-          })
-        );
+          validatedAttachments.push(
+            Object.assign(transformedAttachment, {
+              attributes: validatedAttributes,
+            })
+          );
+        }
       }
 
       return Object.assign(res, { saved_objects: validatedAttachments });
