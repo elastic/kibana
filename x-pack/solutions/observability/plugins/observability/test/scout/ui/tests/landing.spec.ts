@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { generateApmData, generateLogsData } from '../fixtures/generators';
+import { test } from '../fixtures';
+import {
+  generateApmData,
+  generateLogsData,
+} from '../fixtures/generators';
 
 test.describe(
   'Observability Landing Page',
