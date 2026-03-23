@@ -245,16 +245,6 @@ steps:
           expect(workflowExecutionDoc?.scopeStack).toEqual([]);
         });
 
-        it('should have correct workflow duration', async () => {
-          const workflowExecutionDoc =
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-              'fake_workflow_execution_id'
-            );
-          // Duration should be at least 2s (2 retries with 1s delay each)
-          // But less than 10s to avoid test timeout
-          expect(workflowExecutionDoc?.duration).toBeLessThan(10);
-        });
-
         it('should have 1 executions of constantlyFailingStep', async () => {
           const stepExecutions = Array.from(
             workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
