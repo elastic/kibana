@@ -31,8 +31,6 @@
     "@kbn/scout-reporting",
     "@kbn/zod",
     "@kbn/core-http-common",
-    "@kbn/streams-schema",
-    "@kbn/streamlang",
     "@kbn/axe-config",
     "@kbn/peggy",
     "@kbn/apm-synthtrace",
