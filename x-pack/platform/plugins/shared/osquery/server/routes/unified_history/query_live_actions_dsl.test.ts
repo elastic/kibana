@@ -184,10 +184,7 @@ describe('buildLiveActionsQuery', () => {
       const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
       const sort = result.body.sort as unknown[];
 
-      expect(sort).toEqual([
-        { '@timestamp': { order: 'desc' } },
-        { _shard_doc: { order: 'asc' } },
-      ]);
+      expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'asc' } }]);
     });
 
     test('sorts ascending when sortDirection is asc', () => {
@@ -198,10 +195,7 @@ describe('buildLiveActionsQuery', () => {
       });
       const sort = result.body.sort as unknown[];
 
-      expect(sort).toEqual([
-        { '@timestamp': { order: 'asc' } },
-        { _shard_doc: { order: 'desc' } },
-      ]);
+      expect(sort).toEqual([{ '@timestamp': { order: 'asc' } }, { _shard_doc: { order: 'desc' } }]);
     });
 
     test('sorts descending when sortDirection is desc', () => {
@@ -212,10 +206,7 @@ describe('buildLiveActionsQuery', () => {
       });
       const sort = result.body.sort as unknown[];
 
-      expect(sort).toEqual([
-        { '@timestamp': { order: 'desc' } },
-        { _shard_doc: { order: 'asc' } },
-      ]);
+      expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'asc' } }]);
     });
   });
 

@@ -205,10 +205,9 @@ const UnifiedHistoryTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
 
-  const [storedColumns, setStoredColumns] = useLocalStorage<string[]>(
-    HISTORY_COLUMNS_STORAGE_KEY,
-    [...ALL_COLUMN_IDS]
-  );
+  const [storedColumns, setStoredColumns] = useLocalStorage<string[]>(HISTORY_COLUMNS_STORAGE_KEY, [
+    ...ALL_COLUMN_IDS,
+  ]);
   const visibleColumns = useMemo(() => storedColumns ?? [...ALL_COLUMN_IDS], [storedColumns]);
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isPaused, setIsPaused] = useState(true);
