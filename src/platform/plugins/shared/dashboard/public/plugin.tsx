@@ -80,6 +80,7 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
+import { initializeDashboardApiServices } from './services/dashboard_api_services';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -260,10 +261,14 @@ export class DashboardPlugin
           import('./dashboard_app/dashboard_router'),
           import('./dashboard_renderer/dashboard_module'),
           untilPluginStartServicesReady(),
+          ,
         ]);
         appMounted();
 
-        const [coreStart] = await core.getStartServices();
+        const [[coreStart], _] = await Promise.all([
+          core.getStartServices(),
+          initializeDashboardApiServices(),
+        ]);
 
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
