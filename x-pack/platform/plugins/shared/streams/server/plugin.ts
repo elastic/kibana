@@ -56,7 +56,6 @@ import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
-import { registerStreamsAgentBuilder } from './agent_builder/register';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -280,10 +279,6 @@ export class StreamsPlugin
     });
 
     registerFeatureFlags(core, this.logger);
-
-    if (plugins.agentBuilder) {
-      registerStreamsAgentBuilder({ agentBuilder: plugins.agentBuilder, getScopedClients });
-    }
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
