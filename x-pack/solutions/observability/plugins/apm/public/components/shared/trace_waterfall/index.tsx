@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import {
@@ -29,6 +29,7 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 import { WaterfallAccordionButton } from './waterfall_accordion_button';
+import { WaterfallSizeWarning } from './waterfall_size_warning';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -50,6 +51,9 @@ export interface Props {
   onShowCriticalPathChange?: (value: boolean) => void;
   children?: React.ReactNode;
   entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
 export function TraceWaterfall({
@@ -72,7 +76,13 @@ export function TraceWaterfall({
   onShowCriticalPathChange,
   children,
   entryTransactionId,
+  traceDocsTotal,
+  maxTraceItems,
+  discoverHref,
 }: Props) {
+  const exceedMax =
+    traceDocsTotal !== undefined && maxTraceItems !== undefined && traceDocsTotal > maxTraceItems;
+
   return (
     <TraceWaterfallContextProvider
       traceItems={traceItems}
@@ -94,6 +104,16 @@ export function TraceWaterfall({
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
     >
+      {exceedMax && (
+        <>
+          <WaterfallSizeWarning
+            traceDocsTotal={traceDocsTotal}
+            maxTraceItems={maxTraceItems}
+            discoverHref={discoverHref}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <TraceWarning>
         <TraceWaterfallComponent />
       </TraceWarning>

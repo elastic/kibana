@@ -235,7 +235,7 @@ describe('UnifiedWaterfallContainer', () => {
         maxTraceItems: 5000,
       });
 
-      await waitFor(() => expect(getByTestId('unifiedWaterfallSizeWarning')).toBeInTheDocument());
+      await waitFor(() => expect(getByTestId('waterfallSizeWarning')).toBeInTheDocument());
     });
 
     it('does not show warning when traceDocsTotal is within limit', async () => {
@@ -244,9 +244,7 @@ describe('UnifiedWaterfallContainer', () => {
         maxTraceItems: 5000,
       });
 
-      await waitFor(() =>
-        expect(queryByTestId('unifiedWaterfallSizeWarning')).not.toBeInTheDocument()
-      );
+      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
     });
 
     it('does not show warning when traceDocsTotal equals maxTraceItems', async () => {
@@ -255,9 +253,7 @@ describe('UnifiedWaterfallContainer', () => {
         maxTraceItems: 5000,
       });
 
-      await waitFor(() =>
-        expect(queryByTestId('unifiedWaterfallSizeWarning')).not.toBeInTheDocument()
-      );
+      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
     });
 
     it('does not show warning when traceDocsTotal or maxTraceItems is undefined', async () => {
@@ -266,9 +262,7 @@ describe('UnifiedWaterfallContainer', () => {
         maxTraceItems: undefined,
       });
 
-      await waitFor(() =>
-        expect(queryByTestId('unifiedWaterfallSizeWarning')).not.toBeInTheDocument()
-      );
+      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
     });
 
     it('passes discoverHref to the warning', async () => {
@@ -279,7 +273,7 @@ describe('UnifiedWaterfallContainer', () => {
       });
 
       await waitFor(() => {
-        const link = getByTestId('unifiedWaterfallSizeWarningDiscoverLink');
+        const link = getByTestId('waterfallSizeWarningDiscoverLink');
         expect(link).toBeInTheDocument();
         expect(link).toHaveAttribute('href', 'https://discover-link');
       });
@@ -292,7 +286,7 @@ describe('UnifiedWaterfallContainer', () => {
       });
 
       await waitFor(() =>
-        expect(queryByTestId('unifiedWaterfallSizeWarningDiscoverLink')).not.toBeInTheDocument()
+        expect(queryByTestId('waterfallSizeWarningDiscoverLink')).not.toBeInTheDocument()
       );
     });
   });
