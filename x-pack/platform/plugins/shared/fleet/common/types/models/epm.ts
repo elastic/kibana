@@ -260,6 +260,7 @@ export enum RegistryPolicyTemplateKeys {
   vars = 'vars',
   input = 'input',
   template_path = 'template_path',
+  template_paths = 'template_paths',
   name = 'name',
   title = 'title',
   description = 'description',
@@ -293,7 +294,8 @@ export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
 export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.type]: string;
   [RegistryPolicyTemplateKeys.input]: string;
-  [RegistryPolicyTemplateKeys.template_path]: string;
+  [RegistryPolicyTemplateKeys.template_path]?: string;
+  [RegistryPolicyTemplateKeys.template_paths]?: string[];
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
   [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
@@ -308,6 +310,7 @@ export enum RegistryInputKeys {
   title = 'title',
   description = 'description',
   template_path = 'template_path',
+  template_paths = 'template_paths',
   condition = 'condition',
   input_group = 'input_group',
   required_vars = 'required_vars',
@@ -325,6 +328,7 @@ export interface RegistryInput {
   [RegistryInputKeys.title]: string;
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
+  [RegistryInputKeys.template_paths]?: string[];
   [RegistryInputKeys.condition]?: string;
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
@@ -343,6 +347,7 @@ export enum RegistryStreamKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   template_path = 'template_path',
+  template_paths = 'template_paths',
   ingestion_method = 'ingestion_method',
   var_groups = 'var_groups',
   deprecated = 'deprecated',
@@ -356,7 +361,8 @@ export interface RegistryStream {
   [RegistryStreamKeys.enabled]?: boolean;
   [RegistryStreamKeys.required_vars]?: RegistryRequiredVars;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
-  [RegistryStreamKeys.template_path]: string;
+  [RegistryStreamKeys.template_path]?: string;
+  [RegistryStreamKeys.template_paths]?: string[];
   [RegistryStreamKeys.ingestion_method]?: string;
   [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
   [RegistryStreamKeys.deprecated]?: DeprecationInfo;
