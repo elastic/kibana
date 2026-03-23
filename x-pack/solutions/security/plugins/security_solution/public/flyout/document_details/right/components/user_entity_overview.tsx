@@ -357,7 +357,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                {stableEntityIdentifiers['user.name']}
+                {userName}
               </EuiText>
             </PreviewLink>
           </EuiFlexItem>

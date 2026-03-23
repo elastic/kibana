@@ -247,12 +247,23 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     'user',
     entityFromStoreResult
   );
+
+  const userIdentityFields = useMemo(
+    () =>
+      entityStoreV2Enabled
+        ? identityFields ?? {}
+        : userName != null && userName !== ''
+        ? { 'user.name': userName }
+        : {},
+    [entityStoreV2Enabled, userName, identityFields]
+  );
+
   const userCspIdentityDoc = observedUser.details;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: identityFields ?? null,
+    identityFields: userIdentityFields ?? null,
     to,
     from,
     queryId: USER_DETAILS_INSIGHTS_ID,
@@ -260,7 +271,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
 
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
-    identityFields: identityFields ?? {},
+    identityFields: userIdentityFields ?? {},
     entityId: entityFromStoreResult?.entityRecord?.entity.id,
     scopeId,
     isRiskScoreExist,
@@ -466,13 +477,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
-          identityFields={identityFields ?? {}}
+          identityFields={userIdentityFields ?? {}}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
-          identityFields={identityFields ?? {}}
+          identityFields={userIdentityFields ?? {}}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}

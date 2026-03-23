@@ -103,11 +103,16 @@ export const UserPanel = ({
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    return (
-      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
-      {}
-    );
-  }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
+    if (entityStoreV2Enabled) {
+      return (
+        euidApi?.euid?.getEntityIdentifiersFromDocument(
+          'user',
+          entityFromStoreResult.entityRecord
+        ) ?? {}
+      );
+    }
+    return userName != null && userName !== '' ? { 'user.name': userName } : {};
+  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -150,6 +155,7 @@ export const UserPanel = ({
     buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi)
   );
 
+  console.log('documentEntityIdentifiers', documentEntityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     to,
@@ -251,7 +257,7 @@ export const UserPanel = ({
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
         userName={userName}
-        entityId={panelDisplayEntityId}
+        entityId={entityStoreV2Enabled ? panelDisplayEntityId : undefined}
       />
       {noEntityInStore && (
         <EuiCallOut

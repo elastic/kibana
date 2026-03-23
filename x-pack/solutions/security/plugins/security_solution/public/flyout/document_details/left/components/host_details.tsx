@@ -278,13 +278,23 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       ? !!getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level
       : !!hostRiskData?.host?.risk;
 
+  const hostInsightsIdentityFields = useMemo(
+    () =>
+      entityStoreV2Enabled
+        ? hostIdentityFieldsForStore ?? {}
+        : hostName != null && hostName !== ''
+        ? { 'host.name': hostName }
+        : {},
+    [entityStoreV2Enabled, hostIdentityFieldsForStore, hostName]
+  );
+
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: hostIdentityFieldsForStore ?? {},
+    identityFields: hostInsightsIdentityFields,
     to,
     from,
     queryId: 'HostEntityOverview',
   });
-  const hostEuidIdentityDoc = observedHost.entityRecord ?? hostIdentityFieldsForStore;
+  const hostEuidIdentityDoc = observedHost.entityRecord ?? hostInsightsIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi)
   );

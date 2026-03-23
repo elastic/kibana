@@ -96,11 +96,16 @@ export const HostPanel = ({
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    return (
-      euidApi?.euid?.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ??
-      {}
-    );
-  }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
+    if (entityStoreV2Enabled) {
+      return (
+        euidApi?.euid?.getEntityIdentifiersFromDocument(
+          'host',
+          entityFromStoreResult.entityRecord
+        ) ?? {}
+      );
+    }
+    return hostName != null && hostName !== '' ? { 'host.name': hostName } : {};
+  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -137,7 +142,7 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi)
   );
-
+  console.log('documentEntityIdentifiers', documentEntityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     to,
@@ -243,7 +248,7 @@ export const HostPanel = ({
       <HostPanelHeader
         hostName={hostName}
         lastSeen={observedHost.lastSeen}
-        entityId={panelDisplayEntityId}
+        entityId={entityStoreV2Enabled ? panelDisplayEntityId : undefined}
       />
       {noEntityInStore && (
         <EuiCallOut
