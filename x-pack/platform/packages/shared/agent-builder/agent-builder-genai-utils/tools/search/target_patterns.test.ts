@@ -8,8 +8,8 @@
 import { isIndexPattern } from './target_patterns';
 
 describe('isIndexPattern', () => {
-  it('returns false for standalone wildcard target', () => {
-    expect(isIndexPattern('*')).toBe(false);
+  it('returns true when the target is a lone asterisk', () => {
+    expect(isIndexPattern('*')).toBe(true);
   });
 
   it('returns true for wildcard index patterns', () => {

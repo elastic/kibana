@@ -218,7 +218,7 @@ describe('resolveResource', () => {
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
       expect(result).toEqual({
         name: 'logs-*',
-        type: EsResourceType.index,
+        type: EsResourceType.indexPattern,
         fields: expect.arrayContaining([
           expect.objectContaining({ path: '@timestamp', type: 'date' }),
         ]),
@@ -247,7 +247,7 @@ describe('resolveResource', () => {
       ).rejects.toThrow("No resource found for 'missing-index'");
     });
 
-    it('uses field caps with alias type when multiple aliases match and no indices', async () => {
+    it('uses field caps with index pattern type when multiple aliases match and no indices', async () => {
       esClient.indices.resolveIndex.mockResolvedValue({
         indices: [],
         aliases: [
@@ -272,14 +272,14 @@ describe('resolveResource', () => {
       });
       expect(result).toEqual({
         name: 'alias-a,alias-b',
-        type: EsResourceType.alias,
+        type: EsResourceType.indexPattern,
         fields: expect.arrayContaining([
           expect.objectContaining({ path: 'host', type: 'keyword' }),
         ]),
       });
     });
 
-    it('uses field caps with data stream type when multiple data streams match', async () => {
+    it('uses field caps with index pattern type when multiple data streams match', async () => {
       esClient.indices.resolveIndex.mockResolvedValue({
         indices: [],
         aliases: [],
@@ -298,7 +298,7 @@ describe('resolveResource', () => {
 
       const result = await resolveResourceForEsql({ resourceName: 'logs-*', esClient });
 
-      expect(result.type).toBe(EsResourceType.dataStream);
+      expect(result.type).toBe(EsResourceType.indexPattern);
       expect(result.name).toBe('logs-*');
       expect(result.fields).toEqual(
         expect.arrayContaining([expect.objectContaining({ path: '@timestamp', type: 'date' })])

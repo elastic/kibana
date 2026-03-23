@@ -68,7 +68,7 @@ export const resolveResource = async ({
 /**
  * Retrieve resource metadata for ES|QL generation.
  * Supports index patterns and comma-separated targets by using field_caps
- * when multiple resources are resolved.
+ * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
  */
 export const resolveResourceForEsql = async ({
   resourceName,
@@ -108,20 +108,9 @@ export const resolveResourceForEsql = async ({
   });
   const { fields } = processFieldCapsResponse(fieldCapRes);
 
-  const hasIndices = resolveRes.indices.length > 0;
-  const hasAliases = resolveRes.aliases.length > 0;
-  const hasDatastreams = resolveRes.data_streams.length > 0;
-
-  let type = EsResourceType.index;
-  if (!hasIndices && hasAliases && !hasDatastreams) {
-    type = EsResourceType.alias;
-  } else if (!hasIndices && !hasAliases && hasDatastreams) {
-    type = EsResourceType.dataStream;
-  }
-
   return {
     name: resourceName,
-    type,
+    type: EsResourceType.indexPattern,
     fields,
   };
 };

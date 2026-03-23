@@ -17,7 +17,7 @@ const searchSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
+      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
     ),
   time_range: z
     .object({

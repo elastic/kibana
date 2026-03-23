@@ -6,5 +6,5 @@
  */
 
 export const isIndexPattern = (target: string): boolean => {
-  return target !== '*' && (target.includes('*') || target.includes(','));
+  return target.includes('*') || target.includes(',');
 };

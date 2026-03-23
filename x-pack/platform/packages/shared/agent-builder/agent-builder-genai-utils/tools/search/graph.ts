@@ -54,13 +54,13 @@ const StateAnnotation = Annotation.Root({
 
 export type StateType = typeof StateAnnotation.State;
 
-const isPatternTargetEnabled = (
-  state: StateType
-): state is StateType & { targetPattern: string } => {
-  return Boolean(
-    state.allowPatternTarget && state.targetPattern && isIndexPattern(state.targetPattern)
+const isPatternTargetEnabled = (state: StateType): state is StateType & { targetPattern: string } =>
+  Boolean(
+    state.allowPatternTarget &&
+      state.targetPattern &&
+      isIndexPattern(state.targetPattern) &&
+      state.targetPattern !== '*' // When no index pattern is specified, we rather use the index explorer
   );
-};
 
 export const createSearchToolGraph = ({
   model,
@@ -111,7 +111,7 @@ export const createSearchToolGraph = ({
       return {
         indexIsValid: true,
         searchTarget: {
-          type: EsResourceType.index,
+          type: EsResourceType.indexPattern,
           name: state.targetPattern,
         },
       };
@@ -144,7 +144,8 @@ export const createSearchToolGraph = ({
     if (!state.indexIsValid) {
       return '__end__';
     }
-    return isPatternTargetEnabled(state) ? 'get_nl_search_tool' : 'agent';
+    // If the target is an index pattern, we need to call the NL search tool
+    return state.searchTarget.type === EsResourceType.indexPattern ? 'get_nl_search_tool' : 'agent';
   };
 
   const callSearchAgent = async (state: StateType) => {
@@ -177,8 +178,8 @@ export const createSearchToolGraph = ({
   };
 
   const getNlSearchTool = async (state: StateType) => {
-    if (!isPatternTargetEnabled(state)) {
-      throw new Error('get_nl_search_tool should only be called for pattern targets');
+    if (state.searchTarget.type !== EsResourceType.indexPattern) {
+      throw new Error('get_nl_search_tool should only be called for index pattern targets');
     }
 
     return {
