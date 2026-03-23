@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import { AiButton, type AiButtonProps } from '@kbn/shared-ux-ai-components';
 
 export function AskAssistantButton({ size, variant, onClick, ...props }: AiButtonProps) {
@@ -36,13 +37,21 @@ export function AskAssistantButton({ size, variant, onClick, ...props }: AiButto
 
   if (props.iconOnly) {
     return (
-      <AiButton
-        {...props}
-        onClick={onClick}
-        iconOnly
-        iconType="sparkles"
-        aria-label={aiAssistantLabel}
-      />
+      <EuiToolTip
+        position="top"
+        title={aiAssistantLabel}
+        content={i18n.translate('xpack.aiAssistant.askAssistantButton.popoverContent', {
+          defaultMessage: 'Get insights into your data with the Elastic Assistant',
+        })}
+      >
+        <AiButton
+          {...props}
+          onClick={onClick}
+          iconOnly
+          iconType="sparkles"
+          aria-label={aiAssistantLabel}
+        />
+      </EuiToolTip>
     );
   }
 }
