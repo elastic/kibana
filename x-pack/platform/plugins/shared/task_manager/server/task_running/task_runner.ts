@@ -81,6 +81,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
+const TO_NANOSECOND = 1000000; // 1ns
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -1059,10 +1060,10 @@ export class TaskManagerRunner implements TaskRunner {
     message: string,
     error?: Error | DecoratedError
   ): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
-    const scheduleDelayMs =
+    const runDurationNs = (taskTiming.stop - taskTiming.start) * TO_NANOSECOND;
+    const scheduleDelayNs =
       task.startedAt && task.scheduledAt
-        ? task.startedAt.getTime() - task.scheduledAt.getTime()
+        ? (task.startedAt.getTime() - task.scheduledAt.getTime()) * TO_NANOSECOND
         : undefined;
     const errorDetails = error
       ? {
@@ -1074,7 +1075,7 @@ export class TaskManagerRunner implements TaskRunner {
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,
         outcome,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
         ...(error && this.isCancelled ? { reason: `Task "${this.id}" was cancelled.` } : {}),
@@ -1084,7 +1085,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
-          ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
         },
       },
       message,
@@ -1093,11 +1094,11 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
+    const runDurationNs = (taskTiming.stop - taskTiming.start) * TO_NANOSECOND;
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskCancel,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
       },
