@@ -499,7 +499,10 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       });
       const ext4 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext4.statusCode).toBe(200);
-      const hit4 = await searchDocById(esClient, 'user:postagg-idp-iam-ad-inlatest@active_directory');
+      const hit4 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
       expect(hit4.hits.hits).toHaveLength(1);
       expect(hit4.hits.hits[0]._source).toMatchObject({
         entity: {
@@ -524,7 +527,10 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       });
       const ext5 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext5.statusCode).toBe(200);
-      const hit5 = await searchDocById(esClient, 'user:postagg-idp-iam-ad-inlatest@active_directory');
+      const hit5 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
       expect(hit5.hits.hits).toHaveLength(1);
       expect(hit5.hits.hits[0]._source).toMatchObject({
         entity: {
