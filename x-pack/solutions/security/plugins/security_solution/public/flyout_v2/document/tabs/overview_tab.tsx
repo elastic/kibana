@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AboutSection } from '../components/about_section';
