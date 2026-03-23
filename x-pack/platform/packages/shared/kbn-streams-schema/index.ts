@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Streams } from './src/models/streams';
+export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
@@ -189,7 +189,10 @@ export {
 
 export {
   type Feature,
+  type FeatureWithFilter,
   type BaseFeature,
+  type IdentifiedFeature,
+  type IgnoredFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
@@ -197,11 +200,14 @@ export {
   ERROR_LOGS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   isFeature,
+  isFeatureWithFilter,
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
 
