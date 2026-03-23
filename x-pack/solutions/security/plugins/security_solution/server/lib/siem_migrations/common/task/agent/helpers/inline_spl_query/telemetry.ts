@@ -141,8 +141,7 @@ export const getSPLQueryKeywords = (
   splKeywords: string[] = SPL_KEYWORDS
 ): string[] => {
   const maskedQuery = maskSplQueryStrings(query).toLowerCase();
-  return splKeywords.filter((keyword) => {
-    const pattern = new RegExp(`\\b${keyword.toLowerCase()}\\b`);
-    return pattern.test(maskedQuery);
-  });
+  const pattern = new RegExp(`\\b(${splKeywords.join('|')})\\b`, 'g');
+  const matches = maskedQuery.match(pattern);
+  return matches ? [...new Set(matches)] : [];
 };
