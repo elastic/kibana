@@ -17,22 +17,14 @@ apiTest.describe(
     let dataViewId: string;
     let dataViewTitle: string;
 
-    apiTest.beforeEach(async ({ kbnClient }) => {
+    apiTest.beforeEach(async ({ apiServices }) => {
       dataViewTitle = `test-data-view-${Date.now()}`;
 
-      // Create a test data view using kbnClient
-      const response = await kbnClient.request({
-        method: 'POST',
-        path: '/api/data_views/data_view',
-        body: {
-          data_view: {
-            title: dataViewTitle,
-            name: `Test Data View ${Date.now()}`,
-          },
-        },
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: dataViewTitle,
+        name: `Test Data View ${Date.now()}`,
       });
 
-      const dataView = (response.data as any).data_view;
       dataViewId = dataView.id;
     });
 
@@ -75,20 +67,13 @@ apiTest.describe(
       expect(status).toBe(404);
     });
 
-    apiTest('should delete a data view with delete()', async ({ apiServices, kbnClient }) => {
-      // Create an additional data view to delete
+    apiTest('should delete a data view with delete()', async ({ apiServices }) => {
       const tempTitle = `temp-data-view-${Date.now()}`;
-      const createResponse = await kbnClient.request({
-        method: 'POST',
-        path: '/api/data_views/data_view',
-        body: {
-          data_view: {
-            title: tempTitle,
-            name: `Temp Data View ${Date.now()}`,
-          },
-        },
+      const { data: tempDataView } = await apiServices.dataViews.create({
+        title: tempTitle,
+        name: `Temp Data View ${Date.now()}`,
       });
-      const tempId = (createResponse.data as any).data_view.id;
+      const tempId = tempDataView.id;
 
       // Delete it
       const { status } = await apiServices.dataViews.delete(tempId);
@@ -111,35 +96,22 @@ apiTest.describe(
 
     apiTest(
       'should find data views with a predicate using find()',
-      async ({ apiServices, kbnClient }) => {
-        // Create multiple data views with different titles
+      async ({ apiServices }) => {
         const title1 = `test-find-alpha-${Date.now()}`;
         const title2 = `test-find-beta-${Date.now()}`;
 
-        const createResponse1 = await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: title1,
-              name: 'Find Test Alpha',
-            },
-          },
+        const { data: dv1 } = await apiServices.dataViews.create({
+          title: title1,
+          name: 'Find Test Alpha',
         });
 
-        const createResponse2 = await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: title2,
-              name: 'Find Test Beta',
-            },
-          },
+        const { data: dv2 } = await apiServices.dataViews.create({
+          title: title2,
+          name: 'Find Test Beta',
         });
 
-        const id1 = (createResponse1.data as any).data_view.id;
-        const id2 = (createResponse2.data as any).data_view.id;
+        const id1 = dv1.id;
+        const id2 = dv2.id;
 
         try {
           // Find data views with titles containing "test-find-alpha"
@@ -179,21 +151,14 @@ apiTest.describe(
 
     apiTest(
       'should delete a data view by title with deleteByTitle()',
-      async ({ apiServices, kbnClient }) => {
+      async ({ apiServices }) => {
         const tempTitle = `test-delete-by-title-${Date.now()}`;
 
-        // Create a data view
-        const createResponse = await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: tempTitle,
-              name: `Delete By Title Test ${Date.now()}`,
-            },
-          },
+        const { data: tempDataView } = await apiServices.dataViews.create({
+          title: tempTitle,
+          name: `Delete By Title Test ${Date.now()}`,
         });
-        const tempId = (createResponse.data as any).data_view.id;
+        const tempId = tempDataView.id;
 
         // Delete by title
         const { status } = await apiServices.dataViews.deleteByTitle(tempTitle);
@@ -220,34 +185,21 @@ apiTest.describe(
 
     apiTest(
       'should delete only the first matching data view when multiple have same title',
-      async ({ apiServices, kbnClient }) => {
+      async ({ apiServices }) => {
         const sharedTitle = `shared-title-${Date.now()}`;
 
-        // Create two data views with the same title (edge case, but possible)
-        const createResponse1 = await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: sharedTitle,
-              name: 'First Data View',
-            },
-          },
+        const { data: dv1 } = await apiServices.dataViews.create({
+          title: sharedTitle,
+          name: 'First Data View',
         });
 
-        const createResponse2 = await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: sharedTitle,
-              name: 'Second Data View',
-            },
-          },
+        const { data: dv2 } = await apiServices.dataViews.create({
+          title: sharedTitle,
+          name: 'Second Data View',
         });
 
-        const id1 = (createResponse1.data as any).data_view.id;
-        const id2 = (createResponse2.data as any).data_view.id;
+        const id1 = dv1.id;
+        const id2 = dv2.id;
 
         try {
           // Delete by title (should delete only the first one found)
@@ -269,11 +221,10 @@ apiTest.describe(
       }
     );
 
-    apiTest('should handle multiple data views operations', async ({ apiServices, kbnClient }) => {
+    apiTest('should handle multiple data views operations', async ({ apiServices }) => {
       const createdIds: string[] = [];
 
       try {
-        // Create multiple data views
         const titles = [
           `multi-test-1-${Date.now()}`,
           `multi-test-2-${Date.now()}`,
@@ -281,17 +232,11 @@ apiTest.describe(
         ];
 
         for (const title of titles) {
-          const response = await kbnClient.request({
-            method: 'POST',
-            path: '/api/data_views/data_view',
-            body: {
-              data_view: {
-                title,
-                name: `Multi Test ${title}`,
-              },
-            },
+          const { data: dataView } = await apiServices.dataViews.create({
+            title,
+            name: `Multi Test ${title}`,
           });
-          createdIds.push((response.data as any).data_view.id);
+          createdIds.push(dataView.id);
         }
 
         // Get all and verify they exist
@@ -329,21 +274,14 @@ apiTest.describe(
 
     apiTest(
       'should not throw error when deleting already deleted data view',
-      async ({ apiServices, kbnClient }) => {
+      async ({ apiServices }) => {
         const tempTitle = `error-test-${Date.now()}`;
 
-        // Create a data view
-        const createResponse = await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: tempTitle,
-              name: 'Error Test',
-            },
-          },
+        const { data: tempDataView } = await apiServices.dataViews.create({
+          title: tempTitle,
+          name: 'Error Test',
         });
-        const tempId = (createResponse.data as any).data_view.id;
+        const tempId = tempDataView.id;
 
         // Delete it once
         const { status: firstDeleteStatus } = await apiServices.dataViews.delete(tempId);
@@ -357,19 +295,12 @@ apiTest.describe(
 
     apiTest(
       'should handle deleteByTitle() when called twice',
-      async ({ apiServices, kbnClient }) => {
+      async ({ apiServices }) => {
         const tempTitle = `duplicate-delete-test-${Date.now()}`;
 
-        // Create a data view
-        await kbnClient.request({
-          method: 'POST',
-          path: '/api/data_views/data_view',
-          body: {
-            data_view: {
-              title: tempTitle,
-              name: 'Duplicate Delete Test',
-            },
-          },
+        await apiServices.dataViews.create({
+          title: tempTitle,
+          name: 'Duplicate Delete Test',
         });
 
         // Delete by title first time

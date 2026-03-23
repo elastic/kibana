@@ -173,7 +173,6 @@ export async function generateMetricsData({
 
   await client.index(generator);
 }
-
 /**
  * Creates a data view in Kibana
  */

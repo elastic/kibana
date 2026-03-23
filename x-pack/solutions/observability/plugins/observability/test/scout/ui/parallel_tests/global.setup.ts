@@ -7,7 +7,6 @@
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import {
-  createDataView,
   generateLogsData,
   generateMetricsData,
   generateRulesData,
@@ -21,7 +20,6 @@ globalSetupHook(
     apiServices,
     log,
     logsSynthtraceEsClient,
-    kbnClient,
     infraSynthtraceEsClient,
     esClient,
   }) => {
@@ -40,7 +38,7 @@ globalSetupHook(
     });
 
     log.info('Creating default data view for .alerts-* pattern...');
-    await createDataView(kbnClient, {
+    await apiServices.dataViews.create({
       name: 'Default Alerts Data View',
       id: 'default-alerts-data-view',
       title: '.alerts-*',
