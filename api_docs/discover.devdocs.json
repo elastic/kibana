@@ -21,7 +21,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-        "lineNumber": 112,
+        "lineNumber": 113,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37,7 +37,7 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2747,7 +2747,7 @@
         "label": "HasTimeRange",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-        "lineNumber": 119,
+        "lineNumber": 129,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2763,7 +2763,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2781,7 +2781,7 @@
         "label": "PublishesSavedSearch",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3147,7 +3147,7 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3180,7 +3180,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3196,7 +3196,7 @@
               "(columns: string[] | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3212,7 +3212,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
-                "lineNumber": 109,
+                "lineNumber": 110,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3651,6 +3651,8 @@
             "section": "def-public.HasInspectorAdapters",
             "text": "HasInspectorAdapters"
           },
+          " & ",
+          "PublishesSelectedTabId",
           " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -5125,7 +5127,7 @@
           "\"_a\""
         ],
         "path": "src/platform/plugins/shared/discover/common/constants.ts",
-        "lineNumber": 46,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
