@@ -348,9 +348,29 @@ export function getTextBasedDatasource({
         };
       });
 
-      const initState = state || { layers: {} };
+      const initState = state ?? { layers: {} };
+      const hydratedLayers: typeof initState.layers = {};
+
+      // Validate the layers without a timeField configured at runtime.
+      // The ad-hoc DataView specs are regenerated at initialization (with time field
+      // detection via HTTP), but the persisted layer state may not have a timeField (if comes from the API)
+      // This ensures each layer picks up the correct timeFieldName so that
+      // time-based filtering works correctly for ES|QL visualizations.
+      for (const [layerId, layer] of Object.entries(initState.layers)) {
+        if (layer.timeField || !indexPatterns) {
+          hydratedLayers[layerId] = layer;
+          continue;
+        }
+
+        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
+        hydratedLayers[layerId] = matchedIndexPattern?.timeFieldName
+          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
+          : layer;
+      }
+
       return {
         ...initState,
+        layers: hydratedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -444,15 +464,10 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    isTimeBased: (state, indexPatterns) => {
+    isTimeBased: (state) => {
       if (!state) return false;
       const { layers } = state;
-      return (
-        Boolean(layers) &&
-        Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
-        })
-      );
+      return Boolean(layers) && Object.values(layers).some((layer) => Boolean(layer.timeField));
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
       if (!layerId || !state.layers[layerId].index) {
