@@ -19,7 +19,7 @@ import type { ResolverCellActionRenderer } from '../../../resolver/types';
 import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/flyout_missing_alerts_privilege';
 import { FlyoutLoading } from '../../../flyout/shared/components/flyout_loading';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
+import { EventKind } from '../constants/event_kinds';
 
 const OVERVIEW_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',

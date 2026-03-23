@@ -19,7 +19,7 @@ import { OverviewTab } from './overview_tab';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../../flyout/shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/flyout_missing_alerts_privilege';
-import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
+import { EventKind } from '../constants/event_kinds';
 
 const DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.document.overviewWrapper.dataViewError',
