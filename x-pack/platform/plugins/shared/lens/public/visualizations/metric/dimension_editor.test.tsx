@@ -1308,7 +1308,7 @@ describe('dimension editor', () => {
             color: undefined,
           },
         });
-        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
+        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorVis2.toUpperCase());
       });
 
       it('fills with default vis text color', async () => {
