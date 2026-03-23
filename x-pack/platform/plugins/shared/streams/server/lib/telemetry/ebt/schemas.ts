@@ -265,6 +265,25 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The total number of tokens used for the identification request',
     },
   },
+  excluded_features_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of excluded features present at the time of identification',
+    },
+  },
+  llm_ignored_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of features the LLM reported as matching excluded features',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
   total_duration_ms: {
     type: 'long',
     _meta: {
