@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
-import type { Streams } from '@kbn/streams-schema';
+import type { BaseFeature, Feature, Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
@@ -394,4 +394,84 @@ export async function importContent(
     })
     .expect(expectStatusCode)
     .then((response) => response.body);
+}
+
+export async function upsertFeature(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  feature: BaseFeature,
+  expectedStatusCode = 200
+): Promise<{ uuid: string }> {
+  await client
+    .fetch('POST /internal/streams/{name}/features', {
+      params: {
+        path: { name: streamName },
+        body: feature,
+      },
+    })
+    .expect(expectedStatusCode);
+
+  const { features } = await listFeatures(client, streamName);
+  const created = features.find((f) => f.id === feature.id);
+
+  if (!created) {
+    throw new Error(`Feature with id "${feature.id}" not found after upsert`);
+  }
+
+  return { uuid: created.uuid };
+}
+
+export async function listFeatures(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  opts?: { includeExcluded?: boolean },
+  expectedStatusCode = 200
+) {
+  return client
+    .fetch('GET /internal/streams/{name}/features', {
+      params: {
+        path: { name: streamName },
+        query: opts?.includeExcluded ? { include_excluded: true } : undefined,
+      },
+    })
+    .expect(expectedStatusCode)
+    .then((response) => response.body as { features: Feature[] });
+}
+
+export async function bulkFeatures(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  operations: Array<
+    | { index: { feature: Feature } }
+    | { delete: { id: string } }
+    | { exclude: { id: string } }
+    | { restore: { id: string } }
+  >,
+  expectedStatusCode = 200
+) {
+  return client
+    .fetch('POST /internal/streams/{name}/features/_bulk', {
+      params: {
+        path: { name: streamName },
+        body: { operations },
+      },
+    })
+    .expect(expectedStatusCode)
+    .then((response) => response.body as { acknowledged: boolean });
+}
+
+export async function deleteFeature(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  uuid: string,
+  expectedStatusCode = 200
+) {
+  return client
+    .fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+      params: {
+        path: { name: streamName, uuid },
+      },
+    })
+    .expect(expectedStatusCode)
+    .then((response) => response.body as { acknowledged: boolean });
 }
