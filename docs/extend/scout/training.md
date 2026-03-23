@@ -4,7 +4,7 @@ navigation_title: Training
 
 # Scout training [scout-training]
 
-Get the most out of Scout with dedicated training sessions recorded by the AppEx QA team.
+Get the most out of [Scout](../scout.md) with dedicated training sessions recorded by the AppEx QA team.
 
 :::::{important}
 These videos are currently available for Elasticians only.
