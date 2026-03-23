@@ -19,7 +19,7 @@ import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
-import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { generateFieldMappings } from '../build_integration/fields';
 import { validateFieldMappings } from '../build_integration/validate_fields';
 import type { LangSmithOptions } from '../../routes/types';
@@ -61,10 +61,11 @@ export class TaskManagerService {
   constructor(
     logger: LoggerFactory,
     taskManagerSetup: TaskManagerSetupContract,
-    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    samplesIndexService: AutomaticImportSamplesIndexService
   ) {
     this.logger = logger.get('taskManagerService');
-    this.agentService = new AgentService(new AutomaticImportSamplesIndexService(logger), logger);
+    this.agentService = new AgentService(samplesIndexService, logger);
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
       [DATA_STREAM_CREATION_TASK_TYPE]: {
@@ -206,8 +207,9 @@ export class TaskManagerService {
       // Get core services and plugins
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      const esClient = scopedClusterClient.asCurrentUser;
+      // Use internal user for agent tools (fetch samples, validate pipeline) and field mapping
+      // validation. These operations run in a background task and do not require user-scoped access.
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
 
       const model = await pluginsStart.inference.getChatModel({
         request,
@@ -232,8 +234,12 @@ export class TaskManagerService {
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      const pipelineObject = (result.current_pipeline || {}) as Pipeline;
-      const pipelineGenerationResultsObjects = result.pipeline_generation_results;
+      if (!result.current_pipeline) {
+        throw new Error('Agent did not produce a valid ingest pipeline');
+      }
+
+      const pipelineObject = result.current_pipeline as Pipeline;
+      const pipelineGenerationResultsObjects = result.pipeline_generation_results ?? [];
 
       this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
       this.logger.debug(
@@ -279,7 +285,7 @@ export class TaskManagerService {
         },
       };
     } catch (error) {
-      this.logger.error(`Task ${taskId} failed: ${JSON.stringify(error)}`);
+      this.logger.error(`Task ${taskId} failed: ${error}`);
 
       try {
         await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
@@ -291,9 +297,7 @@ export class TaskManagerService {
           `Data stream ${dataStreamId} marked as failed for integration ${integrationId}`
         );
       } catch (updateError) {
-        this.logger.error(
-          `Failed to mark data stream ${dataStreamId} as failed: ${JSON.stringify(updateError)}`
-        );
+        this.logger.error(`Failed to mark data stream ${dataStreamId} as failed: ${updateError}`);
       }
 
       if (isUnrecoverableByStatus(error))
