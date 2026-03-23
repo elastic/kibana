@@ -18,11 +18,18 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 
-import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../../types';
+import type {
+  NewPackagePolicyInput,
+  RegistryVarGroup,
+  RegistryVarsEntry,
+} from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
+import { shouldShowVar } from '../../../services/var_group_helpers';
+import type { VarGroupSelection } from '../../../services/var_group_helpers';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+import { VarGroupSelector } from './var_group_selector';
 
 export const PackagePolicyInputConfig: React.FunctionComponent<{
   hasInputStreams: boolean;
@@ -32,6 +39,9 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   inputValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  varGroups?: RegistryVarGroup[];
+  varGroupSelections?: VarGroupSelection;
+  onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
 }> = memo(
   ({
     hasInputStreams,
@@ -41,23 +51,33 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    varGroups,
+    varGroupSelections = {},
+    onVarGroupSelectionChange,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
-    // Split vars into required and advanced
+    // Split vars into required and advanced, filtering by var_group visibility
     const [requiredVars, advancedVars] = useMemo(() => {
       const _advancedVars: RegistryVarsEntry[] = [];
       const _requiredVars: RegistryVarsEntry[] = [];
       (packageInputVars || []).forEach((varDef) => {
-        if (isAdvancedVar(varDef)) {
+        if (
+          varGroups &&
+          varGroups.length > 0 &&
+          !shouldShowVar(varDef.name, varGroups, varGroupSelections)
+        ) {
+          return;
+        }
+        if (isAdvancedVar(varDef, varGroups, varGroupSelections)) {
           _advancedVars.push(varDef);
         } else {
           _requiredVars.push(varDef);
         }
       });
       return [_requiredVars, _advancedVars];
-    }, [packageInputVars]);
+    }, [packageInputVars, varGroups, varGroupSelections]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);
@@ -138,6 +158,15 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
+            {varGroups?.map((varGroup) => (
+              <EuiFlexItem key={varGroup.name}>
+                <VarGroupSelector
+                  varGroup={varGroup}
+                  selectedOptionName={varGroupSelections[varGroup.name]}
+                  onSelectionChange={onVarGroupSelectionChange ?? (() => {})}
+                />
+              </EuiFlexItem>
+            ))}
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
 

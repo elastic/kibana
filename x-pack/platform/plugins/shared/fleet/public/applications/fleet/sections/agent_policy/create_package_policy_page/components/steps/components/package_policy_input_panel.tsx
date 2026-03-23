@@ -36,7 +36,7 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
-import { useDataStreamId } from './hooks';
+import { useDataStreamId, useVarGroupSelections } from './hooks';
 
 const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
   &&& {
@@ -97,6 +97,18 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
+
+    const inputVarGroups = packageInput.var_groups?.length ? packageInput.var_groups : undefined;
+
+    const {
+      selections: inputVarGroupSelections,
+      handleSelectionChange: handleInputVarGroupSelectionChange,
+    } = useVarGroupSelections({
+      varGroups: inputVarGroups,
+      savedSelections: packagePolicyInput.var_group_selections,
+      isAgentlessEnabled,
+      onSelectionsChange: (update) => updatePackagePolicyInput(update),
+    });
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -261,6 +273,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
+              varGroups={inputVarGroups}
+              varGroupSelections={inputVarGroupSelections}
+              onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
           </Fragment>
