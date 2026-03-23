@@ -18,18 +18,16 @@ export const registerWorkflowAttachmentRenderers = (
   attachments: AttachmentServiceStartContract,
   services: { http: HttpSetup; notifications: NotificationsStart; application: ApplicationStart }
 ): void => {
-  attachments.addAttachmentType(
-    WORKFLOW_YAML_ATTACHMENT_TYPE,
-    async () => {
-      const { createWorkflowYamlAttachmentUiDefinition } = await import ('./workflow_yaml_attachment_renderer');
-      return createWorkflowYamlAttachmentUiDefinition(services)
-    }
-  );
-  attachments.addAttachmentType(
-    WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-    async () => {
-      const { workflowYamlDiffAttachmentUiDefinition } = await import('./workflow_yaml_diff_attachment_renderer');
-      return workflowYamlDiffAttachmentUiDefinition;
-    }
-  );
+  attachments.addAttachmentType(WORKFLOW_YAML_ATTACHMENT_TYPE, async () => {
+    const { createWorkflowYamlAttachmentUiDefinition } = await import(
+      './workflow_yaml_attachment_renderer'
+    );
+    return createWorkflowYamlAttachmentUiDefinition(services);
+  });
+  attachments.addAttachmentType(WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE, async () => {
+    const { workflowYamlDiffAttachmentUiDefinition } = await import(
+      './workflow_yaml_diff_attachment_renderer'
+    );
+    return workflowYamlDiffAttachmentUiDefinition;
+  });
 };
