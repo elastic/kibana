@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
-import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
-import { ScoutSpaceParallelFixture } from '../../scout_space';
-=======
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
@@ -24,13 +20,10 @@ import {
   isClassicStreamDefinition,
   isWiredStreamDefinition,
 } from './types';
->>>>>>> 192d722b3edf ([scout] hardcode stream types and remove external deps (#258958))
 
 export interface StreamsApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
-<<<<<<< HEAD
-=======
   forkStream: (
     streamName: string,
     destination: string,
@@ -48,7 +41,6 @@ export interface StreamsApiService {
     streamName: string,
     getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
   ) => Promise<void>;
->>>>>>> 192d722b3edf ([scout] hardcode stream types and remove external deps (#258958))
 }
 
 export const getStreamsApiService = ({
@@ -62,7 +54,7 @@ export const getStreamsApiService = ({
 }): StreamsApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
-  return {
+  const service = {
     enable: async () => {
       await measurePerformanceAsync(log, 'streamsApi.enable', async () => {
         await kbnClient.request({
@@ -79,8 +71,6 @@ export const getStreamsApiService = ({
         });
       });
     },
-<<<<<<< HEAD
-=======
     forkStream: async (
       streamName: string,
       newStreamName: string,
@@ -203,6 +193,7 @@ export const getStreamsApiService = ({
         });
       });
     },
->>>>>>> 192d722b3edf ([scout] hardcode stream types and remove external deps (#258958))
   };
+
+  return service;
 };
