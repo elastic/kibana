@@ -35,7 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('sets up a replicated data stream via CCR auto-follow', async () => {
-      // 1. Create an index template and data stream on the remote (leader) cluster
+      // 1. Create the index template on the remote (leader) cluster
       await remoteEs.indices.putIndexTemplate({
         name: `${LEADER_STREAM}-template`,
         index_patterns: [LEADER_STREAM],
@@ -48,6 +48,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
+      // 2. Create an auto-follow pattern on the local cluster BEFORE the data stream exists.
+      //    Auto-follow only applies to newly created indices, and leader_index_patterns must
+      //    match the backing index names (`.ds-<name>-*`), not the data stream name.
+      await esClient.ccr.putAutoFollowPattern({
+        name: AUTO_FOLLOW_PATTERN_NAME,
+        remote_cluster: REMOTE_CLUSTER_NAME,
+        leader_index_patterns: [`.ds-${LEADER_STREAM}-*`],
+        leader_index_exclusion_patterns: [],
+        follow_index_pattern: '{{leader_index}}',
+      });
+
+      // 3. Now create the data stream by indexing a document on the remote cluster
       await remoteEs.index({
         index: LEADER_STREAM,
         document: {
@@ -57,16 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         refresh: 'wait_for',
       });
 
-      // 2. Create an auto-follow pattern on the local cluster to replicate the data stream
-      await esClient.ccr.putAutoFollowPattern({
-        name: AUTO_FOLLOW_PATTERN_NAME,
-        remote_cluster: REMOTE_CLUSTER_NAME,
-        leader_index_patterns: [LEADER_STREAM],
-        leader_index_exclusion_patterns: [],
-        follow_index_pattern: '{{leader_index}}',
-      });
-
-      // 3. Wait for the follower data stream to appear
+      // 4. Wait for the follower data stream to appear
       await waitForReplicatedDataStream(esClient, LEADER_STREAM);
     });
 
@@ -83,6 +86,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             type: 'classic',
             description: 'should not work',
@@ -95,14 +99,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         },
-        400
+        422
       );
 
       expect(body.message).to.contain('replicated');
     });
 
-    it('DELETE returns 400 for a replicated data stream', async () => {
-      const body = await deleteStream(apiClient, LEADER_STREAM, 400);
+    it('DELETE returns 422 for a replicated data stream', async () => {
+      const body = await deleteStream(apiClient, LEADER_STREAM, 422);
       expect(body.message).to.contain('replicated');
     });
   });
