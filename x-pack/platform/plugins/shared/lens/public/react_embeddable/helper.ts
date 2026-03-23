@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   EVENT_ANNOTATION_GROUP_TYPE,
@@ -27,7 +26,7 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
-import type { SerializedTitles, ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
   apiHasParentApi,
@@ -40,6 +39,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+
+import type { StrippedLensState } from '../../common/transforms/helpers';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
@@ -84,15 +85,15 @@ export async function deserializeState(
   state: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
-  const savedObjectId = 'savedObjectId' in state ? state.savedObjectId : undefined;
+  const refId = 'ref_id' in state ? state.ref_id : undefined;
 
-  if (savedObjectId) {
+  if (refId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(savedObjectId);
+        await attributeService.loadFromLibrary(refId);
       return {
         ...state,
-        savedObjectId,
+        ref_id: refId,
         attributes,
         managed,
         sharingSavedObjectProps,
@@ -103,7 +104,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -212,11 +213,11 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
  * !Important! call stripInheritedContext before transforming to API config
  */
 export function transformToApiConfig(state: StrippedLensState): LensSerializedAPIConfig {
-  const { savedObjectId, attributes } = state;
+  const { ref_id, attributes } = state;
 
-  if (savedObjectId) {
+  if (ref_id) {
     return {
-      savedObjectId,
+      ref_id,
     };
   }
 
@@ -247,59 +248,6 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
   return {
     ...state,
     attributes: apiConfigAttributes,
-  };
-}
-
-/**
- * Keys that should be persisted at the panel level.
- * All other properties from LensSerializedState are inherited from the
- * dashboard/container or are runtime-only and should not be persisted.
- *
- * TODO - LensSerializedState should really be paired down to match this list.
- * it is currently used as a runtime state object but it shouldn't be.
- */
-type IncludedPanelStateKeys =
-  | 'savedObjectId'
-  | 'attributes'
-  | 'references'
-  | 'time_range'
-  | keyof SerializedTitles
-  | keyof SerializedDrilldowns;
-
-export type StrippedLensState = Pick<LensSerializedState, IncludedPanelStateKeys>;
-
-/**
- * The serialized state contains many properties that are inherited from the dashboard or other container
- * or are runtime-only (like executionContext) and should not be persisted at the panel
- * level. This function strips those out to ensure only panel-level state is persisted.
- */
-export function stripInheritedContext(state: LensSerializedState): StrippedLensState {
-  const {
-    savedObjectId,
-    attributes,
-    // LensWithReferences
-    references,
-    // LensUnifiedSearchContext (only time_range is panel-level)
-    time_range,
-    // SerializedTitles
-    title,
-    description,
-    hide_title,
-    hide_border,
-    // SerializedDrilldowns
-    drilldowns,
-  } = state;
-
-  return {
-    savedObjectId,
-    attributes,
-    references,
-    time_range,
-    title,
-    description,
-    hide_title,
-    hide_border,
-    drilldowns,
   };
 }
 

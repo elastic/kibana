@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertSavedDashboardToPanels } from './helper';
+import { convertSavedDashboardToPanels, hasDashboard } from './helper';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 
@@ -53,6 +53,57 @@ describe('APM metrics static dashboard helpers', () => {
         .find(Boolean);
 
       expect(esqlQuery).toContain('from test-apm-indices:metrics*,metrics*');
+    });
+  });
+
+  describe('hasDashboard', () => {
+    it('returns false when agentName is undefined', () => {
+      expect(hasDashboard({})).toBe(false);
+    });
+
+    it('returns true for a known default dashboard', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet/elastic',
+          telemetrySdkName: undefined,
+          telemetrySdkLanguage: undefined,
+        })
+      ).toBe(true);
+    });
+
+    it('resolves EDOT .NET 8 to a versioned dashboard via <=8 rule', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet/elastic',
+          runtimeVersion: '8.0.11',
+        })
+      ).toBe(true);
+    });
+
+    it('falls back to default for EDOT .NET 9 (above <=8 rule)', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet/elastic',
+          runtimeVersion: '9.0.0',
+        })
+      ).toBe(true);
+    });
+
+    it('falls back to default when runtimeVersion is invalid', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet/elastic',
+          runtimeVersion: 'preview',
+        })
+      ).toBe(true);
+    });
+
+    it('returns false for an unknown agent', () => {
+      expect(
+        hasDashboard({
+          agentName: 'my-custom-agent',
+        })
+      ).toBe(false);
     });
   });
 });
