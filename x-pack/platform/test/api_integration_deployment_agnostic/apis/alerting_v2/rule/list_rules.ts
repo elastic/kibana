@@ -200,5 +200,101 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.items.length).to.be(2);
       });
     });
+
+    describe('search', () => {
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.clean({ types: [RULE_SO_TYPE] });
+      });
+
+      it('should search rules by a name prefix', async () => {
+        const prefixMatch = await createRule(roleAuthc, 'Limit120');
+        expect(prefixMatch.status).to.be(200);
+
+        const searchResponse = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'lim' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(searchResponse.status).to.be(200);
+        expect(searchResponse.body.items.length).to.be(1);
+        expect(searchResponse.body.items[0].metadata.name).to.be('Limit120');
+      });
+
+      it('should search rules by name and labels', async () => {
+        const nameMatch = await createRule(roleAuthc, 'cpu threshold');
+        expect(nameMatch.status).to.be(200);
+
+        const labelMatch = await createRule(roleAuthc, 'network threshold', {
+          metadata: { name: 'network threshold', labels: ['prod'] },
+        });
+        expect(labelMatch.status).to.be(200);
+
+        const responseByName = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'cpu' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(responseByName.status).to.be(200);
+        expect(responseByName.body.items.length).to.be(1);
+        expect(responseByName.body.items[0].metadata.name).to.be('cpu threshold');
+
+        const responseByLabel = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'prod' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(responseByLabel.status).to.be(200);
+        expect(responseByLabel.body.items.length).to.be(1);
+        expect(
+          responseByLabel.body.items.map(
+            (item: { metadata: { name: string } }) => item.metadata.name
+          )
+        ).to.contain('network threshold');
+      });
+
+      it('should compose search with pagination', async () => {
+        const response1 = await createRule(roleAuthc, 'prod rule 1', {
+          metadata: { name: 'prod rule 1', labels: ['prod'] },
+        });
+        expect(response1.status).to.be(200);
+
+        const response2 = await createRule(roleAuthc, 'prod rule 2', {
+          metadata: { name: 'prod rule 2', labels: ['prod'] },
+        });
+        expect(response2.status).to.be(200);
+
+        const response3 = await createRule(roleAuthc, 'dev rule 1', {
+          metadata: { name: 'dev rule 1', labels: ['dev'] },
+        });
+        expect(response3.status).to.be(200);
+
+        const firstPage = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'prod', page: 1, perPage: 1 })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(firstPage.status).to.be(200);
+        expect(firstPage.body.items.length).to.be(1);
+        expect(firstPage.body.total).to.be(2);
+        expect(firstPage.body.page).to.be(1);
+        expect(firstPage.body.perPage).to.be(1);
+
+        const secondPage = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'prod', page: 2, perPage: 1 })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(secondPage.status).to.be(200);
+        expect(secondPage.body.items.length).to.be(1);
+        expect(secondPage.body.total).to.be(2);
+        expect(secondPage.body.page).to.be(2);
+        expect(secondPage.body.perPage).to.be(1);
+      });
+    });
   });
 }

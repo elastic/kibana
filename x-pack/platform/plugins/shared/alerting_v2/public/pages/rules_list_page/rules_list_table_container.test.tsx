@@ -74,6 +74,7 @@ const renderContainer = (overrides = {}) => {
     totalItemCount: 2,
     page: 1,
     perPage: 20,
+    search: '',
     isLoading: false,
     onTableChange: jest.fn(),
     ...overrides,

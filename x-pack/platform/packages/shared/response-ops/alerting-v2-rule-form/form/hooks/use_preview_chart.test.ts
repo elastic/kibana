@@ -18,12 +18,34 @@ jest.mock('@kbn/react-hooks', () => ({
   useDebouncedValue: <T>(value: T) => value,
 }));
 
+const mockGetLensAttributesFromSuggestion = jest.fn();
+
+const mockLensAttributes = {
+  visualizationType: 'lnsXY',
+  title: '',
+  state: {
+    datasourceStates: { textBased: { layers: {} } },
+    filters: [],
+    query: { esql: 'FROM logs-*' },
+    visualization: { layers: [] },
+  },
+  references: [],
+};
+
+jest.mock('@kbn/visualization-utils', () => {
+  const actual = jest.requireActual('@kbn/visualization-utils');
+  return {
+    ...actual,
+    getLensAttributesFromSuggestion: (...args: unknown[]) =>
+      mockGetLensAttributesFromSuggestion(...args),
+  };
+});
+
 const mockDataView = {
   id: 'test-id',
   timeFieldName: '@timestamp',
   getIndexPattern: () => 'logs-*',
   toSpec: () => ({ id: 'test-id', title: 'logs-*' }),
-  isPersisted: () => true,
 };
 
 const defaultFormValues = {
@@ -47,27 +69,13 @@ const MOCK_NOW = new Date('2026-03-11T12:00:00.000Z').getTime();
 
 describe('usePreviewChart', () => {
   let mockSuggestions: jest.Mock;
-  const mockLensAttributes = {
-    visualizationType: 'lnsXY',
-    title: '',
-    state: {
-      datasourceStates: { textBased: { layers: {} } },
-      filters: [],
-      query: { esql: 'FROM logs-*' },
-      visualization: { layers: [] },
-    },
-    references: [],
-  };
-
-  jest.mock('@kbn/visualization-utils', () => ({
-    getLensAttributesFromSuggestion: jest.fn().mockReturnValue(mockLensAttributes),
-  }));
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Date, 'now').mockReturnValue(MOCK_NOW);
 
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+    mockGetLensAttributesFromSuggestion.mockReturnValue(mockLensAttributes);
 
     // Get the suggestions mock from the lens plugin mock
     mockSuggestions = jest.fn().mockReturnValue([

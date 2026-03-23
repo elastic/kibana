@@ -55,7 +55,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     originatingApp: PLUGIN_ID,
     localStorageKeyPrefix: 'discover',
     compressed: true,
-    showSidebarToggleButton: true,
+    showSidebarToggleButton: false,
     disableFieldsExistenceAutoFetching: true,
     shouldKeepAdHocDataViewImmutable: true,
     buttonPropsToTriggerFlyout: {
