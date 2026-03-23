@@ -12,6 +12,12 @@ import { createPluginsService, type PluginsServiceStart } from './plugin_service
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import type { SkillClient } from '../skills/persisted/client';
 
+const mockRandomUUID = jest.fn().mockReturnValue('test-plugin-uuid');
+jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
+  randomUUID: () => mockRandomUUID(),
+}));
+
 const mockParsePluginFromUrl = jest.fn();
 const mockParsePluginFromFile = jest.fn();
 jest.mock('./utils', () => ({
@@ -198,26 +204,29 @@ describe('PluginsService', () => {
           {
             id: 'my-plugin-pdf-processor',
             name: 'PDF Processor',
+            base_path: '/skills/my-plugin',
             description: 'Processes PDFs',
             content: 'Skill instructions for PDF.',
             referenced_content: [
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
             tool_ids: [],
-            plugin_id: 'my-plugin',
+            plugin_id: 'test-plugin-uuid',
           },
           {
             id: 'my-plugin-code-reviewer',
             name: 'code-reviewer',
+            base_path: '/skills/my-plugin',
             description: '',
             content: 'Review code.',
             referenced_content: [],
             tool_ids: [],
-            plugin_id: 'my-plugin',
+            plugin_id: 'test-plugin-uuid',
           },
         ]);
 
         expect(mockClient.create).toHaveBeenCalledWith({
+          id: 'test-plugin-uuid',
           name: 'my-plugin',
           version: '1.0.0',
           description: 'A test plugin',
@@ -376,11 +385,11 @@ describe('PluginsService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               id: 'custom-name-pdf-processor',
-              plugin_id: 'custom-name',
+              plugin_id: 'test-plugin-uuid',
             }),
             expect.objectContaining({
               id: 'custom-name-code-reviewer',
-              plugin_id: 'custom-name',
+              plugin_id: 'test-plugin-uuid',
             }),
           ])
         );
@@ -408,7 +417,7 @@ describe('PluginsService', () => {
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
       expect(mockClient.get).toHaveBeenCalledWith('plugin-1');
-      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('my-plugin');
+      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('plugin-1');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
