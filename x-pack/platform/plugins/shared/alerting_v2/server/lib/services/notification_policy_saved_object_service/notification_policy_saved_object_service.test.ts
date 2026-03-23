@@ -465,9 +465,7 @@ describe('NotificationPolicySavedObjectService', () => {
 
       const result = await service.findAllDecrypted();
 
-      expect(result).toEqual([
-        { id: 'p1', attributes: mockAttrs, namespaces: ['default'] },
-      ]);
+      expect(result).toEqual([{ id: 'p1', attributes: mockAttrs, namespaces: ['default'] }]);
       expect(mockClose).toHaveBeenCalled();
     });
 

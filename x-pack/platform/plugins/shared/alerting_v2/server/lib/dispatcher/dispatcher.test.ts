@@ -366,7 +366,13 @@ describe('DispatcherService', () => {
       const rulesMock = createRulesSavedObjectService();
       rulesSoService = rulesMock.rulesSavedObjectService;
       mockFindByIds = rulesMock.mockFindByIds;
-      mockRulesFindByIds(mockFindByIds, ['rule-001', 'rule-002', 'rule-003', 'rule-004', 'rule-005']);
+      mockRulesFindByIds(mockFindByIds, [
+        'rule-001',
+        'rule-002',
+        'rule-003',
+        'rule-004',
+        'rule-005',
+      ]);
 
       const npMock = createNotificationPolicySavedObjectService();
       npSoService = npMock.notificationPolicySavedObjectService;
