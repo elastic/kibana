@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/kubernetes-security-plugin'
   - '@kbn/es-query'
+  - '@kbn/kbn-client'
 tags:
   - test-helper
   - package

@@ -55,6 +55,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/std",
     "@kbn/rule-data-utils",
