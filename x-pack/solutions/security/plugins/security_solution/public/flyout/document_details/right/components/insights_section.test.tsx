@@ -7,20 +7,23 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
   CORRELATIONS_TEST_ID,
   INSIGHTS_CONTENT_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
   INSIGHTS_HEADER_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
 } from './test_ids';
-import { PREVALENCE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import {
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
+  PREVALENCE_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { useFetchThreatIntelligence } from '../../../../flyout_v2/document/hooks/use_fetch_threat_intelligence';
 import { usePrevalence } from '../../../../flyout_v2/document/hooks/use_prevalence';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -69,6 +72,13 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
+const mockSearchHit = {
+  _id: 'some-id',
+  _index: 'alerts-index',
+  _source: {
+    '@timestamp': '2022-04-05T12:00:00.000Z',
+  },
+} as EsHitRecord;
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -100,7 +110,7 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../explore/hosts/containers/hosts/details');
 
-jest.mock('../hooks/use_fetch_threat_intelligence');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../../../flyout_v2/document/hooks/use_prevalence');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
@@ -163,6 +173,7 @@ describe('<InsightsSection />', () => {
       ...mockContextValue,
       eventId: 'some_Id',
       getFieldsData: mockGetFieldsData,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
@@ -181,6 +192,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
@@ -196,6 +208,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
@@ -217,6 +230,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: true,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderInsightsSection(contextValue);
@@ -241,6 +255,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: false,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const { getByTestId, queryByTestId } = renderInsightsSection(contextValue);

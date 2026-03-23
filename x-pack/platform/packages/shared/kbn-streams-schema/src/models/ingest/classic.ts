@@ -82,6 +82,7 @@ type OmitClassicStreamUpsertProps<
 
 export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {
+    type: 'classic';
     ingest: ClassicIngest;
   }
 
@@ -107,9 +108,12 @@ export namespace ClassicStream {
   }
 }
 
-const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema.extend({
-  ingest: classicIngestSchemaObject,
-});
+const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
+  .extend({
+    type: z.literal('classic'),
+    ingest: classicIngestSchemaObject,
+  })
+  .meta({ id: 'ClassicStreamDefinition' });
 
 const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend({
   stream: classicStreamDefinitionSchema,
@@ -122,6 +126,7 @@ const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend(
 
 const classicStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema.extend({
   stream: ingestBaseStreamUpsertDefinitionSchema.extend({
+    type: z.literal('classic'),
     ingest: classicIngestUpsertSchemaObject,
   }),
 });
