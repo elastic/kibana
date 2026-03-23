@@ -35,11 +35,6 @@ jest.mock('../../services', () => ({
           name: 'Source 1',
           host: 'https://source-1/',
           is_default: true,
-          auth: {
-            username: 'elastic',
-            password: 'source-password',
-            api_key: 'source-api-key',
-          },
           ssl: {
             certificate_authorities: ['/path/to/source-ca'],
             certificate: '/path/to/source-cert',
@@ -377,9 +372,6 @@ describe('EnrollmentSettingsHandler utils', () => {
             id: 'source-1',
             is_default: true,
             name: 'Source 1',
-            auth: {
-              username: 'elastic',
-            },
             ssl: {
               certificate_authorities: ['/path/to/source-ca'],
               certificate: '/path/to/source-cert',
@@ -392,8 +384,6 @@ describe('EnrollmentSettingsHandler utils', () => {
         });
 
         const actualBody = (response.ok as jest.Mock).mock.calls[0][0].body;
-        expect(actualBody.download_source?.auth?.password).toBeUndefined();
-        expect(actualBody.download_source?.auth?.api_key).toBeUndefined();
         expect(actualBody.download_source?.ssl?.key).toBeUndefined();
         expect(actualBody.download_source?.secrets).toBeUndefined();
         expect(actualBody.download_source_proxy?.proxy_headers).toBeUndefined();

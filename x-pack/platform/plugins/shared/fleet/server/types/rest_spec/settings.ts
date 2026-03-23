@@ -90,19 +90,6 @@ const EnrollmentSettingsDownloadSourceSchema = schema.maybe(
         certificate: schema.maybe(schema.string()),
       })
     ),
-    auth: schema.maybe(
-      schema.oneOf([
-        schema.literal(null),
-        schema.object({
-          username: schema.maybe(schema.string()),
-          headers: schema.maybe(
-            schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
-              maxSize: 100,
-            })
-          ),
-        }),
-      ])
-    ),
   })
 );
 

@@ -215,8 +215,5 @@ function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): Downl
   return {
     ...omit(downloadSource, ['secrets']),
     ssl: downloadSource.ssl ? omit(downloadSource.ssl, ['key']) : downloadSource.ssl,
-    auth: downloadSource.auth
-      ? omit(downloadSource.auth, ['password', 'api_key'])
-      : downloadSource.auth,
   };
 }
