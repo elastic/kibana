@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-test-saml-auth
 dependsOn:
   - '@kbn/es'
-  - '@kbn/kbn-client'
   - '@kbn/mock-idp-utils'
   - '@kbn/tooling-log'
 tags:
