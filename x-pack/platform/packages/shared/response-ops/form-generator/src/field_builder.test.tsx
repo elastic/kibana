@@ -244,17 +244,7 @@ describe('Field Builder', () => {
       expect(result?.message).toContain('First validation failed');
     });
 
-    it('should skip validation for optional fields with empty string value', () => {
-      const schema = z.enum(['option_a', 'option_b']).optional();
-      const path = 'field';
-
-      const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg('', path));
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should skip validation for optional fields with undefined value', () => {
+    it('should pass validation for optional fields with undefined value', () => {
       const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
@@ -264,12 +254,23 @@ describe('Field Builder', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should skip validation for optional fields with null value', () => {
+    it('should return error for optional enum fields with null value', () => {
       const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
       const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg(null, path));
+      const result = field.validate(createValidationArg(null, path)) as ValidationError;
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('message');
+    });
+
+    it('should pass validation for optional enum fields with empty string when using z.catch', () => {
+      const schema = z.enum(['option_a', 'option_b']).optional().catch(undefined);
+      const path = 'field';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const result = field.validate(createValidationArg('', path));
 
       expect(result).toBeUndefined();
     });

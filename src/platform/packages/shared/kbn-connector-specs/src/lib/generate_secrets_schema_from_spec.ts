@@ -14,7 +14,7 @@ import { getSchemaForAuthType } from '.';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
-  authMode?: AuthMode;
+  authMode?: AuthMode | '';
 }
 
 export const generateSecretsSchemaFromSpec = (

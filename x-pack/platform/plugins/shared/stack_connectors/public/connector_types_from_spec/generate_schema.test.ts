@@ -76,7 +76,7 @@ describe('generateSchema', () => {
 
     it('rejects other invalid values', () => {
       const schema = generateSchema(spec);
-      expect(() => schema.shape.authMode.parse('invalid')).toThrow();
+      expect(schema.shape.authMode.parse('invalid')).toBeUndefined();
     });
   });
 
