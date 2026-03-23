@@ -17,11 +17,15 @@ import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
+const sortFieldSchema = schema.oneOf([schema.literal('kind'), schema.literal('enabled')]);
+
 const getRulesQuerySchema = schema.object({
   page: schema.maybe(schema.number({ min: 1 })),
   perPage: schema.maybe(schema.number({ min: 1, max: 1000 })),
   filter: schema.maybe(schema.string()),
   search: schema.maybe(schema.string()),
+  sortField: schema.maybe(sortFieldSchema),
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
 
 @injectable()
@@ -54,6 +58,8 @@ export class GetRulesRoute {
         perPage: this.request.query.perPage,
         filter: this.request.query.filter,
         search: this.request.query.search,
+        sortField: this.request.query.sortField,
+        sortOrder: this.request.query.sortOrder,
       });
       return this.response.ok({ body: result });
     } catch (e) {

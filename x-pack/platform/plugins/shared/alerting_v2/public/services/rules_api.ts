@@ -14,6 +14,8 @@ import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse };
 
+export type ListRulesSortField = 'kind' | 'enabled';
+
 export interface FindRulesResponse {
   items: RuleResponse[];
   total: number;
@@ -24,7 +26,10 @@ export interface FindRulesResponse {
 export interface ListRulesParams {
   page?: number;
   perPage?: number;
+  filter?: string;
   search?: string;
+  sortField?: ListRulesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface BulkOperationError {
@@ -47,7 +52,14 @@ export class RulesApi {
 
   public async listRules(params: ListRulesParams) {
     return this.http.get<FindRulesResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
-      query: { page: params.page, perPage: params.perPage, search: params.search },
+      query: {
+        page: params.page,
+        perPage: params.perPage,
+        filter: params.filter,
+        search: params.search,
+        sortField: params.sortField,
+        sortOrder: params.sortOrder,
+      },
     });
   }
 

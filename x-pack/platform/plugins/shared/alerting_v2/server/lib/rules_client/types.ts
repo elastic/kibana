@@ -14,11 +14,16 @@ export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
+
+export type FindRulesSortField = 'kind' | 'enabled';
+
 export interface FindRulesParams {
   page?: number;
   perPage?: number;
   filter?: string;
   search?: string;
+  sortField?: FindRulesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface FindRulesResponse {
