@@ -17842,6 +17842,8 @@
             "label": "issue",
             "description": [],
             "signature": [
+              "ZodCustomIssue",
+              " | ",
               "ZodInvalidTypeIssue",
               " | ",
               "ZodInvalidLiteralIssue",
@@ -17870,9 +17872,7 @@
               " | ",
               "ZodNotMultipleOfIssue",
               " | ",
-              "ZodNotFiniteIssue",
-              " | ",
-              "ZodCustomIssue"
+              "ZodNotFiniteIssue"
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 161,
@@ -17984,7 +17984,7 @@
         "label": "getParsedType",
         "description": [],
         "signature": [
-          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"nan\" | \"null\" | \"array\" | \"promise\" | \"void\" | \"never\""
+          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"never\" | \"nan\" | \"array\" | \"promise\" | \"void\""
         ],
         "path": "node_modules/zod/v3/helpers/util.d.cts",
         "lineNumber": 85,
@@ -20088,7 +20088,7 @@
             "label": "parsedType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"nan\" | \"null\" | \"array\" | \"promise\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"never\" | \"nan\" | \"array\" | \"promise\" | \"void\""
             ],
             "path": "node_modules/zod/v3/helpers/parseUtil.d.cts",
             "lineNumber": 27,
@@ -21670,7 +21670,7 @@
             "label": "expected",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"nan\" | \"null\" | \"array\" | \"promise\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"never\" | \"nan\" | \"array\" | \"promise\" | \"void\""
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 37,
@@ -21686,7 +21686,7 @@
             "label": "received",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"nan\" | \"null\" | \"array\" | \"promise\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"never\" | \"nan\" | \"array\" | \"promise\" | \"void\""
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 38,
@@ -24142,6 +24142,10 @@
           "(",
           "util",
           ".OmitKeys<",
+          "ZodCustomIssue",
+          ", \"path\"> | ",
+          "util",
+          ".OmitKeys<",
           "ZodInvalidTypeIssue",
           ", \"path\"> | ",
           "util",
@@ -24199,10 +24203,6 @@
           "util",
           ".OmitKeys<",
           "ZodNotFiniteIssue",
-          ", \"path\"> | ",
-          "util",
-          ".OmitKeys<",
-          "ZodCustomIssue",
           ", \"path\">) & { path?: (string | number)[] | undefined; fatal?: boolean | undefined; }"
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
@@ -25197,6 +25197,8 @@
             "label": "issue",
             "description": [],
             "signature": [
+              "ZodCustomIssue",
+              " | ",
               "ZodInvalidTypeIssue",
               " | ",
               "ZodInvalidLiteralIssue",
@@ -25225,9 +25227,7 @@
               " | ",
               "ZodNotMultipleOfIssue",
               " | ",
-              "ZodNotFiniteIssue",
-              " | ",
-              "ZodCustomIssue"
+              "ZodNotFiniteIssue"
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 161,
@@ -25264,23 +25264,23 @@
         "signature": [
           "ZodString",
           " | ",
-          "ZodBoolean",
-          " | ",
           "ZodNumber",
           " | ",
-          "ZodUnknown",
-          " | ",
-          "ZodUndefined",
-          " | ",
-          "ZodAny",
-          " | ",
           "ZodBigInt",
+          " | ",
+          "ZodBoolean",
           " | ",
           "ZodDate",
           " | ",
           "ZodSymbol",
           " | ",
+          "ZodUndefined",
+          " | ",
           "ZodNull",
+          " | ",
+          "ZodAny",
+          " | ",
+          "ZodUnknown",
           " | ",
           "ZodNever",
           " | ",
@@ -25404,7 +25404,7 @@
         "label": "ZodIssueCode",
         "description": [],
         "signature": [
-          "\"invalid_literal\" | \"invalid_type\" | \"invalid_union\" | \"unrecognized_keys\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"custom\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
+          "\"custom\" | \"unrecognized_keys\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 30,
@@ -25421,6 +25421,8 @@
         "label": "ZodIssueOptionalMessage",
         "description": [],
         "signature": [
+          "ZodCustomIssue",
+          " | ",
           "ZodInvalidTypeIssue",
           " | ",
           "ZodInvalidLiteralIssue",
@@ -25449,9 +25451,7 @@
           " | ",
           "ZodNotMultipleOfIssue",
           " | ",
-          "ZodNotFiniteIssue",
-          " | ",
-          "ZodCustomIssue"
+          "ZodNotFiniteIssue"
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 118,
@@ -25539,7 +25539,7 @@
         "label": "ZodParsedType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"nan\" | \"null\" | \"array\" | \"promise\" | \"void\" | \"never\""
+          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"never\" | \"nan\" | \"array\" | \"promise\" | \"void\""
         ],
         "path": "node_modules/zod/v3/helpers/util.d.cts",
         "lineNumber": 84,
