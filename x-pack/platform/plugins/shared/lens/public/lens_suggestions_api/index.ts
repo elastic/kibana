@@ -12,12 +12,11 @@ import type {
   DatasourceMap,
   VisualizationMap,
   VisualizeEditorContext,
-  Suggestion,
   DataViewsState,
   TypedLensByValueInput,
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { mergeSuggestionWithVisContext } from './helpers';
+import { createSuggestionWithAttributes, selectAndApplyChartSuggestion } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -28,26 +27,6 @@ interface SuggestionsApiProps {
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
-
-// Helper function to find compatible suggestion by chart type
-const findCompatibleSuggestion = (suggestionCandidates: Suggestion[], targetChartType: ChartType) =>
-  suggestionCandidates.find(
-    (s) => s.title.includes(targetChartType) || s.visualizationId.includes(targetChartType)
-  );
-
-// Helper function to merge suggestion with visual attributes if needed
-const createSuggestionWithAttributes = (
-  suggestion: Suggestion,
-  preferredVisAttributes: TypedLensByValueInput['attributes'] | undefined,
-  context: VisualizeFieldContext | VisualizeEditorContext
-) =>
-  preferredVisAttributes
-    ? mergeSuggestionWithVisContext({
-        suggestion,
-        visAttributes: preferredVisAttributes,
-        context,
-      })
-    : suggestion;
 
 export const suggestionsApi = ({
   context,
@@ -187,30 +166,16 @@ export const suggestionsApi = ({
     const shouldSkipSearch =
       !preferredChartType && suggestionsList.length > 1 && targetChartType === ChartType.Table;
     if (!shouldSkipSearch) {
-      const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
-      const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
-
-      // Switch the visualization sub-type if needed (e.g., bar → line within XY, pie → donut)
-      let finalSuggestion = selectedSuggestion;
-      if (chartType) {
-        const vis = visualizationMap[selectedSuggestion.visualizationId];
-        if (vis?.isSubtypeSupported?.(chartType) && vis?.switchVisualizationType) {
-          const currentSubType = vis.getVisualizationTypeId?.(
-            selectedSuggestion.visualizationState
-          );
-          if (currentSubType !== chartType) {
-            finalSuggestion = {
-              ...selectedSuggestion,
-              visualizationState: vis.switchVisualizationType(
-                chartType,
-                selectedSuggestion.visualizationState
-              ),
-            };
-          }
-        }
-      }
-
-      return [createSuggestionWithAttributes(finalSuggestion, preferredVisAttributes, context)];
+      return [
+        selectAndApplyChartSuggestion({
+          suggestionsList,
+          targetChartType,
+          chartType,
+          visualizationMap,
+          preferredVisAttributes,
+          context,
+        }),
+      ];
     }
   }
 
