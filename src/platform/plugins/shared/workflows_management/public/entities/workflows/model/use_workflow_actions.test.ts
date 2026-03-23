@@ -473,7 +473,7 @@ describe('useWorkflowActions – import mutations', () => {
 
       const childYaml = 'name: Child\nsteps: []';
 
-      const workflowsWithRefs = [
+      const workflowsWithRefs: { id: string; yaml: string }[] = [
         { id: 'parent-1', yaml: parentYaml },
         { id: 'child-1', yaml: childYaml },
       ];
@@ -494,10 +494,10 @@ describe('useWorkflowActions – import mutations', () => {
 
       // Both workflows should have new IDs
       const parentPayload = body.workflows.find(
-        (w: { id: string }) => w.id !== 'parent-1' && w.yaml.includes('Parent')
+        (w: { id: string; yaml: string }) => w.id !== 'parent-1' && w.yaml.includes('Parent')
       );
       const childPayload = body.workflows.find(
-        (w: { id: string }) => w.id !== 'child-1' && w.yaml.includes('Child')
+        (w: { id: string; yaml: string }) => w.id !== 'child-1' && w.yaml.includes('Child')
       );
 
       expect(parentPayload).toBeDefined();
