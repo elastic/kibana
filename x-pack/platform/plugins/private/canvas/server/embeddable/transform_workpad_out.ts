@@ -122,7 +122,6 @@ export function transformWorkpadOut(
 
         const embeddableConfig = decode(fn.arguments.config[0] as string);
         const embeddableType = fn.arguments.type[0] as string;
-        fn.arguments.type[0] = embeddableType;
         const transforms = embeddableService.getTransforms(embeddableType);
 
         try {
