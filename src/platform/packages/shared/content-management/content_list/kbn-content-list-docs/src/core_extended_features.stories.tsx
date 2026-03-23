@@ -25,6 +25,12 @@ import {
   mockContentListUserProfilesServices,
   StateDiagnosticPanel,
 } from './stories_helpers';
+import { createPlayContext } from './interactions/play_helpers';
+import { testCreatedByInteractions } from './interactions/created_by_interactions';
+import { testTagsPopoverInteractions } from './interactions/tags_popover_interactions';
+import { testTagBadgeInteractions } from './interactions/tag_badge_interactions';
+import { testStarredSortPaginationInteractions } from './interactions/starred_sort_pagination_interactions';
+import { testCombinedFilterInteractions } from './interactions/combined_filter_interactions';
 
 // =============================================================================
 // Storybook Meta
@@ -224,8 +230,29 @@ const CoreTagsStarredFeaturesWrapper = () => {
  * **Try:** Click the star icon in any row to mark it as a favorite. Toggle the
  * "Starred" filter to narrow the list. Use the "Created by" filter to filter by
  * user, or type `createdBy:email` in the search bar. Hold Cmd/Ctrl to exclude.
+ *
+ * ## Interaction tests
+ *
+ * The play function exercises 31 steps across 5 modules:
+ * - Created By filter (popover, avatars, include/exclude, OR logic, sorted order, bare-clause gate)
+ * - Tags popover (include, exclude, OR logic, clear)
+ * - Tag badges (click to include, Ctrl+click to exclude)
+ * - Starred + Sort + Pagination + Delete
+ * - Combined filters + free-text search + starred flag + tag AND
+ *
+ * Each module resets search to empty before returning so the next module
+ * starts from a clean state, avoiding hidden sequential dependencies.
  */
 export const CoreTagsStarredFeatures: StoryObj = {
   name: 'Core Features + Extended',
   render: () => <CoreTagsStarredFeaturesWrapper />,
+  play: async (args) => {
+    const ctx = createPlayContext(args);
+
+    await testCreatedByInteractions(ctx);
+    await testTagsPopoverInteractions(ctx);
+    await testTagBadgeInteractions(ctx);
+    await testStarredSortPaginationInteractions(ctx);
+    await testCombinedFilterInteractions(ctx);
+  },
 };

@@ -21,6 +21,10 @@ import jest from 'jest-mock';
 /* @ts-expect-error TS doesn't see jest as a property of window, and I don't want to edit our global config. */
 window.jest = jest;
 import type { Preview } from '@storybook/react';
+import { configure } from '@storybook/test';
+
+// Kibana uses `data-test-subj` instead of the default `data-testid`.
+configure({ testIdAttribute: 'data-test-subj' });
 
 const preview: Preview = {
   parameters: {

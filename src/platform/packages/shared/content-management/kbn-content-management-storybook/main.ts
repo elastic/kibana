@@ -15,4 +15,5 @@ module.exports = {
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },
+  addons: [...(defaultConfig.addons || []), '@storybook/addon-interactions'],
 };

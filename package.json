@@ -1854,6 +1854,7 @@
     "@storybook/addon-a11y": "8.6.17",
     "@storybook/addon-actions": "8.6.17",
     "@storybook/addon-essentials": "8.6.17",
+    "@storybook/addon-interactions": "8.6.17",
     "@storybook/addon-jest": "8.6.17",
     "@storybook/addon-styling-webpack": "2.0.0",
     "@storybook/addon-webpack5-compiler-babel": "3.0.6",
