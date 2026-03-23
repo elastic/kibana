@@ -57,13 +57,13 @@ import {
   isUnifiedReferenceAttachmentRequest,
   isUnifiedValueAttachmentRequest,
   isLegacyAttachmentRequest,
+  isLegacyCommentAttachment,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
-  isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
   isCommentRequestTypeEvent,
@@ -84,7 +84,7 @@ export const decodeCommentRequest = (
   comment: AttachmentRequest,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
-  if (isCommentRequestTypeUser(comment)) {
+  if (isLegacyCommentAttachment(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
     decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
