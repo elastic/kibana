@@ -7,9 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { CORRELATIONS_RELATED_CASES_TEST_ID } from './test_ids';
-import { InsightsSummaryRow } from './insights_summary_row';
+import { InsightsSummaryRow } from '../../../../flyout_v2/document/components/insights_summary_row';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 
 export interface RelatedCasesProps {
@@ -24,6 +26,11 @@ export interface RelatedCasesProps {
  */
 export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, dataCount } = useFetchRelatedCases({ eventId });
+
+  const goToCorrelationsTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: CORRELATIONS_TAB_ID,
+  });
 
   const text = useMemo(
     () => (
@@ -42,7 +49,7 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
       error={error}
       text={text}
       value={dataCount}
-      expandedSubTab={CORRELATIONS_TAB_ID}
+      onShowDetails={goToCorrelationsTab}
       data-test-subj={CORRELATIONS_RELATED_CASES_TEST_ID}
       key={`correlation-row-${text}`}
     />
