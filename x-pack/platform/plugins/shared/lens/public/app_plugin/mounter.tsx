@@ -442,6 +442,11 @@ export async function mountApp(
     lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
-    stateTransfer.clearEditorState?.(APP_ID);
+    // Only clear editor state on intentional programmatic navigation,
+    // not on browser back/forward. `POP` must preserve the state so that
+    // navigating forward again restores the originating app breadcrumb context.
+    if (params.history.action !== 'POP') {
+      stateTransfer.clearEditorState?.(APP_ID);
+    }
   };
 }
