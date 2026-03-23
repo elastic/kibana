@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/streams-plugin'
   - '@kbn/content-packs-schema'
   - '@kbn/streams-schema'
+  - '@kbn/streamlang'
 tags:
   - test-helper
   - package
