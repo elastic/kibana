@@ -26,14 +26,14 @@ export interface AttachmentTypeTransformer<TOld = unknown, TNew = unknown> {
   isLegacyPayload(attachment: AttachmentRequestV2): boolean;
   isUnifiedPayload(attachment: AttachmentRequestV2): boolean;
   toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload;
-  toLegacyPayload(attachment: AttachmentRequestV2, owner?: string): AttachmentRequest;
+  toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest;
 
   // --- Persisted attributes (SO layer) ---
   isType(attributes: AttachmentAttributesV2): boolean;
   isUnifiedType(attributes: unknown): boolean;
   isLegacyType(attributes: unknown): boolean;
   toUnifiedSchema(attributes: unknown): TNew;
-  toLegacySchema(attributes: unknown, owner?: string): TOld;
+  toLegacySchema(attributes: unknown): TOld;
 }
 
 export const passThroughTransformer: AttachmentTypeTransformer<
