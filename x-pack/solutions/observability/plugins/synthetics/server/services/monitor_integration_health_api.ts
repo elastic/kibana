@@ -295,9 +295,7 @@ export class MonitorIntegrationHealthApi {
       return {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
-        isUnhealthy: locationStatuses.some(
-          (ls) => ls.status !== LocationHealthStatusValue.Healthy
-        ),
+        isUnhealthy: locationStatuses.some((ls) => ls.status !== LocationHealthStatusValue.Healthy),
         locations: locationStatuses,
       };
     });
