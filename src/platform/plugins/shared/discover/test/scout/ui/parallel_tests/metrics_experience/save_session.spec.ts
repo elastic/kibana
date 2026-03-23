@@ -71,6 +71,8 @@ spaceTest.describe(
       await spaceTest.step('start a new Discover session', async () => {
         const newButton = page.testSubj.locator('discoverNewButton');
         await newButton.click();
+        // Extended timeout: clicking "New" clears the ES|QL query and resets
+        // the Discover session, which can take several seconds on CI.
         await expect(metricsExperience.grid).toBeHidden({ timeout: 30000 });
       });
 
