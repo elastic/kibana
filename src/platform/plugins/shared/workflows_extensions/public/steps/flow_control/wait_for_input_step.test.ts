@@ -9,6 +9,7 @@
 
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
+import * as fromJSONSchemaModule from '@kbn/zod/v4/from_json_schema';
 import { WaitForInputStepDefinition } from './wait_for_input_step';
 
 describe('WaitForInputStepDefinition', () => {
@@ -76,6 +77,22 @@ describe('WaitForInputStepDefinition', () => {
     // Should accept anything (fallback)
     const parsed = result.safeParse({ anything: true });
     expect(parsed.success).toBe(true);
+  });
+
+  it('should fall back to record schema when fromJSONSchema throws', () => {
+    const spy = jest.spyOn(fromJSONSchemaModule, 'fromJSONSchema').mockImplementationOnce(() => {
+      throw new Error('Unsupported schema construct');
+    });
+
+    const schema = { type: 'object' as const } satisfies JsonModelSchemaType;
+    const result = getOutputSchema({ input: { schema }, config: {} });
+
+    // Must not throw and must return the permissive fallback.
+    expect(result).toBeDefined();
+    const parsed = result.safeParse({ anything: true });
+    expect(parsed.success).toBe(true);
+
+    spy.mockRestore();
   });
 
   it('should have the correct step id', () => {

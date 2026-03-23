@@ -24,13 +24,17 @@ export const WaitForInputStepDefinition = createPublicStepDefinition({
           return recordOutputSchema();
         }
 
-        const zodSchema = fromJSONSchema(input.schema as Record<string, unknown>);
+        try {
+          const zodSchema = fromJSONSchema(input.schema as Record<string, unknown>);
 
-        if (!zodSchema) {
+          if (!zodSchema) {
+            return recordOutputSchema();
+          }
+
+          return zodSchema as z.ZodType<Record<string, unknown>>;
+        } catch {
           return recordOutputSchema();
         }
-
-        return zodSchema as z.ZodType<Record<string, unknown>>;
       },
     },
   },
