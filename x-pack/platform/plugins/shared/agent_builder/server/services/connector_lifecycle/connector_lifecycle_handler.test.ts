@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ToolType } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
@@ -174,33 +175,33 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
-    it('calls smlIndexAttachment with create action after tool creation', async () => {
-      const smlIndexAttachment = jest.fn().mockResolvedValue(undefined);
+    it('calls smlIndexAttachmentFn with create action after tool creation', async () => {
+      const smlIndexAttachmentFn = jest.fn().mockResolvedValue(undefined);
       const handler = createConnectorLifecycleHandler({
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
-        smlIndexAttachment,
+        smlIndexAttachmentFn,
       });
 
       const params = createBaseParams({ workflowTemplates: [SIMPLE_WORKFLOW_YAML] });
       await handler.onPostCreate(params as any);
 
-      expect(smlIndexAttachment).toHaveBeenCalledWith({
+      expect(smlIndexAttachmentFn).toHaveBeenCalledWith({
         request: params.request,
         originId: 'connector-abc',
-        attachmentType: 'connector',
+        attachmentType: AttachmentType.connector,
         action: 'create',
       });
     });
 
-    it('logs warning but does not throw when smlIndexAttachment fails', async () => {
-      const smlIndexAttachment = jest.fn().mockRejectedValue(new Error('SML error'));
+    it('logs warning but does not throw when smlIndexAttachmentFn fails', async () => {
+      const smlIndexAttachmentFn = jest.fn().mockRejectedValue(new Error('SML error'));
       const handler = createConnectorLifecycleHandler({
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
-        smlIndexAttachment,
+        smlIndexAttachmentFn,
       });
 
       await expect(
@@ -350,37 +351,37 @@ describe('createConnectorLifecycleHandler', () => {
       expect(workflowsManagement.management.deleteWorkflows).not.toHaveBeenCalled();
     });
 
-    it('calls smlIndexAttachment with delete action after cleanup', async () => {
-      const smlIndexAttachment = jest.fn().mockResolvedValue(undefined);
+    it('calls smlIndexAttachmentFn with delete action after cleanup', async () => {
+      const smlIndexAttachmentFn = jest.fn().mockResolvedValue(undefined);
       const toolRegistry = createMockToolRegistry();
       toolRegistry.list.mockResolvedValue([]);
       const handler = createConnectorLifecycleHandler({
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
-        smlIndexAttachment,
+        smlIndexAttachmentFn,
       });
 
       const params = createBaseParams({ connectorType: '.test' });
       await handler.onPostDelete(params as any);
 
-      expect(smlIndexAttachment).toHaveBeenCalledWith({
+      expect(smlIndexAttachmentFn).toHaveBeenCalledWith({
         request: params.request,
         originId: 'connector-abc',
-        attachmentType: 'connector',
+        attachmentType: AttachmentType.connector,
         action: 'delete',
       });
     });
 
     it('logs warning but does not throw when SML delete fails', async () => {
-      const smlIndexAttachment = jest.fn().mockRejectedValue(new Error('SML delete error'));
+      const smlIndexAttachmentFn = jest.fn().mockRejectedValue(new Error('SML delete error'));
       const toolRegistry = createMockToolRegistry();
       toolRegistry.list.mockResolvedValue([]);
       const handler = createConnectorLifecycleHandler({
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
-        smlIndexAttachment,
+        smlIndexAttachmentFn,
       });
 
       await expect(

@@ -10,7 +10,7 @@ import Mustache from 'mustache';
 import { parse } from 'yaml';
 import { trimStart } from 'lodash';
 import { ToolType } from '@kbn/agent-builder-common';
-import { CONNECTOR_TAG_PREFIX } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, CONNECTOR_TAG_PREFIX } from '@kbn/agent-builder-common/attachments';
 import { toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -29,7 +29,7 @@ const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 type SmlIndexAttachmentFn = (params: {
   request: KibanaRequest;
   originId: string;
-  attachmentType: string;
+  attachmentType: AttachmentType;
   action: SmlIndexAction;
 }) => Promise<void>;
 
@@ -37,7 +37,7 @@ interface ConnectorLifecycleHandlerDeps {
   serviceManager: ServiceManager;
   workflowsManagement?: WorkflowsServerPluginSetup;
   logger: Logger;
-  smlIndexAttachment?: SmlIndexAttachmentFn;
+  smlIndexAttachmentFn?: SmlIndexAttachmentFn;
 }
 
 function renderWorkflowTemplate(
@@ -60,7 +60,7 @@ function slugify(input: string): string {
 }
 
 export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerDeps) {
-  const { serviceManager, workflowsManagement, logger, smlIndexAttachment } = deps;
+  const { serviceManager, workflowsManagement, logger, smlIndexAttachmentFn } = deps;
 
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
@@ -171,12 +171,12 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         );
 
         // Index the connector into SML for immediate discoverability
-        if (smlIndexAttachment) {
+        if (smlIndexAttachmentFn) {
           try {
-            await smlIndexAttachment({
+            await smlIndexAttachmentFn({
               request,
               originId: connectorId,
-              attachmentType: 'connector',
+              attachmentType: AttachmentType.connector,
               action: 'create',
             });
             logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
@@ -240,12 +240,12 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         await Promise.all([deleteToolsPromise, deleteWorkflowsPromise]);
 
         // Remove the connector from SML
-        if (smlIndexAttachment) {
+        if (smlIndexAttachmentFn) {
           try {
-            await smlIndexAttachment({
+            await smlIndexAttachmentFn({
               request,
               originId: connectorId,
-              attachmentType: 'connector',
+              attachmentType: AttachmentType.connector,
               action: 'delete',
             });
             logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);

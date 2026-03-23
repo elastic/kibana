@@ -60,7 +60,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
           if (tools.length > 0) {
             parts.push('Available tools:');
             for (const tool of tools) {
-              parts.push(`  - ${tool.id}: ${tool.description}`);
+              parts.push(`  - ${tool.tool_id}: ${tool.description}`);
             }
           }
 
@@ -69,7 +69,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
 
         getBoundedTools: (): WorkflowAttachmentBoundedTool[] => {
           return tools.map((tool) => ({
-            id: tool.id,
+            id: tool.tool_id,
             type: ToolType.workflow,
             description: tool.description,
             configuration: { workflow_id: tool.configuration.workflow_id },

@@ -229,12 +229,12 @@ describe('connectorSmlType', () => {
           connector_type: '.mcp',
           tools: [
             {
-              id: 'mcp.my-mcp.search',
+              tool_id: 'mcp.my-mcp.search',
               description: 'Search tool',
               configuration: { workflow_id: 'wf-1' },
             },
             {
-              id: 'mcp.my-mcp.fetch',
+              tool_id: 'mcp.my-mcp.fetch',
               description: 'Fetch tool',
               configuration: { workflow_id: 'wf-2' },
             },
@@ -315,7 +315,7 @@ describe('connectorSmlType', () => {
           connector_type: '.mcp',
           tools: [
             {
-              id: 'mcp.tool',
+              tool_id: 'mcp.tool',
               description: 'Tool without workflow_id',
               configuration: { workflow_id: '' },
             },

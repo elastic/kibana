@@ -138,7 +138,7 @@ export interface VisualizationAttachmentData {
 export const CONNECTOR_TAG_PREFIX = 'connector:';
 
 export const connectorAttachmentToolSchema = z.object({
-  id: z.string(),
+  tool_id: z.string(),
   description: z.string(),
   configuration: z.object({
     workflow_id: z.string(),
@@ -165,7 +165,7 @@ export interface ConnectorAttachmentData {
   /** Workflow tools for this connector instance */
   tools: Array<{
     /** Tool ID */
-    id: string;
+    tool_id: string;
     /** Tool description from workflow YAML */
     description: string;
     /** Tool configuration */

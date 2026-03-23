@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
@@ -36,6 +42,48 @@ import { createModelProviderFactory } from './services/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+
+/**
+ * Creates the callback that indexes connector attachments into the SML.
+ * Extracted from the inline closure in plugin setup for readability.
+ */
+const createSmlIndexAttachmentFn = ({
+  getStartServices,
+  serviceManager,
+  logger,
+}: {
+  getStartServices: CoreSetup<
+    AgentBuilderStartDependencies,
+    AgentBuilderPluginStart
+  >['getStartServices'];
+  serviceManager: ServiceManager;
+  logger: Logger;
+}) => {
+  return async (params: {
+    request: KibanaRequest;
+    originId: string;
+    attachmentType: string;
+    action: string;
+  }) => {
+    const [coreStart, startDeps] = await getStartServices();
+    const sml = serviceManager.internalStart?.sml;
+    if (!sml) return;
+    // Use the internal repository with the hidden 'action' type because
+    // connector saved objects are encrypted/hidden and not visible to
+    // scoped clients or default internal repositories.
+    const soClient = coreStart.savedObjects.createInternalRepository(['action']);
+    const spaceId = startDeps.spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
+    await sml.indexAttachment({
+      originId: params.originId,
+      attachmentType: params.attachmentType,
+      action: params.action,
+      spaces: [spaceId],
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      savedObjectsClient: soClient,
+      logger,
+    });
+  };
+};
 
 export class AgentBuilderPlugin
   implements
@@ -117,7 +165,7 @@ export class AgentBuilderPlugin
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
           uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services').get('sml'),
+          logger: this.logger.get('services.sml'),
         };
       },
     });
@@ -193,25 +241,11 @@ export class AgentBuilderPlugin
       serviceManager: this.serviceManager,
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger.get('connector-lifecycle'),
-      smlIndexAttachment: async (params) => {
-        const [coreStart, startDeps] = await coreSetup.getStartServices();
-        const sml = this.serviceManager.internalStart?.sml;
-        if (!sml) return;
-        // Use the internal repository with the hidden 'action' type because
-        // connector saved objects are encrypted/hidden and not visible to
-        // scoped clients or default internal repositories.
-        const soClient = coreStart.savedObjects.createInternalRepository(['action']);
-        const spaceId = startDeps.spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        await sml.indexAttachment({
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          action: params.action,
-          spaces: [spaceId],
-          esClient: coreStart.elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('services').get('sml'),
-        });
-      },
+      smlIndexAttachmentFn: createSmlIndexAttachmentFn({
+        getStartServices: coreSetup.getStartServices,
+        serviceManager: this.serviceManager,
+        logger: this.logger.get('services.sml'),
+      }),
     });
 
     setupDeps.actions.registerConnectorLifecycleListener({
@@ -282,7 +316,7 @@ export class AgentBuilderPlugin
     scheduleSmlCrawlerTasks({
       taskManager,
       smlService: startServices.sml,
-      logger: this.logger.get('services').get('sml'),
+      logger: this.logger.get('services.sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
@@ -322,7 +356,7 @@ export class AgentBuilderPlugin
             spaces: [spaceId],
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
-            logger: this.logger.get('services').get('sml'),
+            logger: this.logger.get('services.sml'),
           });
         },
       },

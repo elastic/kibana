@@ -121,7 +121,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         const connectorTools = await toolRegistry.list({ tags: [connectorTag] });
 
         const tools: ConnectorAttachmentData['tools'] = connectorTools.map((tool) => ({
-          id: tool.id,
+          tool_id: tool.id,
           description: tool.description,
           configuration: {
             workflow_id:

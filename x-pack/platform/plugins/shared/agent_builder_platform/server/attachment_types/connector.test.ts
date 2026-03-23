@@ -36,12 +36,12 @@ const validData: ConnectorAttachmentData = {
   connector_type: '.github',
   tools: [
     {
-      id: 'github.my-github.search_repos',
+      tool_id: 'github.my-github.search_repos',
       description: 'Search GitHub repositories',
       configuration: { workflow_id: 'workflow-1' },
     },
     {
-      id: 'github.my-github.create_issue',
+      tool_id: 'github.my-github.create_issue',
       description: 'Create a GitHub issue',
       configuration: { workflow_id: 'workflow-2' },
     },
@@ -99,7 +99,7 @@ describe('connector attachment type', () => {
     it('rejects tools with missing workflow_id', () => {
       const data = {
         ...validData,
-        tools: [{ id: 'tool-1', description: 'desc', configuration: {} }],
+        tools: [{ tool_id: 'tool-1', description: 'desc', configuration: {} }],
       };
       const result = connectorType.validate(data);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
