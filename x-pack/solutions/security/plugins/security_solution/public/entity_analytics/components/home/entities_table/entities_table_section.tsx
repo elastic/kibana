@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { GroupWrapper } from '@kbn/cloud-security-posture';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
@@ -58,7 +58,9 @@ const GroupWithURLPagination = ({
   selectedGroupOptions,
   groupSelectorComponent,
 }: GroupWithURLPaginationProps) => {
-  const { onChangePage } = state;
+  const onChangePageRef = useRef(state.onChangePage);
+  onChangePageRef.current = state.onChangePage;
+
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
@@ -66,8 +68,8 @@ const GroupWithURLPagination = ({
   });
 
   useEffect(() => {
-    onChangePage(0);
-  }, [selectedGroup, onChangePage]);
+    onChangePageRef.current(0);
+  }, [selectedGroup]);
 
   return (
     <GroupWrapper
