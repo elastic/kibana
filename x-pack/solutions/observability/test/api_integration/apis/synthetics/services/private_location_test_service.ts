@@ -124,12 +124,14 @@ export class PrivateLocationTestService {
       ...(spaces ? { spaces } : {}),
     };
 
-    const response = await this.supertest
-      .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
-      .set('kbn-xsrf', 'true')
-      .send(location);
+    let url: string = SYNTHETICS_API_URLS.PRIVATE_LOCATIONS;
+    if (spaces) {
+      url = `/s/${spaces[0]}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}`;
+    }
 
-    expect(response.status).to.be(200);
+    const response = await this.supertest.post(url).set('kbn-xsrf', 'true').send(location);
+
+    expect(response.status).to.eql(200, JSON.stringify(response.body));
 
     const { isInvalid, ...loc } = response.body;
 
@@ -180,9 +182,19 @@ export class PrivateLocationTestService {
       .expect(200);
   }
 
-  async getPackagePolicy({ monitorId, locId }: { monitorId: string; locId: string }) {
+  async getPackagePolicy({
+    monitorId,
+    locId,
+    spaceId,
+  }: {
+    monitorId: string;
+    locId: string;
+    spaceId?: string;
+  }) {
     const apiResponse = await this.supertest.get(
-      '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      `/s/${
+        spaceId ?? 'default'
+      }/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics`
     );
 
     return apiResponse.body.items.find(

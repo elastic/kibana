@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { SyntheticsServerSetup } from '../../../types';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -48,17 +49,16 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     const { response, request, server, spaceId } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
     const location = request.body as PrivateLocationObject;
-    const agentPolicy = await server.fleet?.agentPolicyService.get(
-      internalSOClient,
+    const { agentPolicy, validationError } = await validateAgentPolicy(
+      server,
       location.agentPolicyId,
-      false,
-      { spaceId }
+      spaceId
     );
 
     if (!agentPolicy) {
       return response.badRequest({
         body: {
-          message: `Agent policy with id ${location.agentPolicyId} not found, this should never happen`,
+          message: validationError!,
         },
       });
     }
@@ -111,6 +111,30 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     }
   },
 });
+
+const validateAgentPolicy = async (
+  server: SyntheticsServerSetup,
+  agentPolicyId: string,
+  spaceId: string
+) => {
+  const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+  try {
+    return {
+      agentPolicy: await server.fleet?.agentPolicyService.get(
+        internalSOClient,
+        agentPolicyId,
+        false,
+        {
+          spaceId,
+        }
+      ),
+    };
+  } catch (error) {
+    return {
+      validationError: `Agent policy with id ${agentPolicyId} not found in space ${spaceId}, please use an agent policy available in current space.`,
+    };
+  }
+};
 
 const getAgentPolicySpaceIds = (agentPolicy: AgentPolicy) => {
   const spaceIds = agentPolicy.space_ids;
