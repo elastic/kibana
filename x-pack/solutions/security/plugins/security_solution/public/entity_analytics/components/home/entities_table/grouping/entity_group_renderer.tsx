@@ -124,9 +124,14 @@ export const groupPanelRenderer = (
 const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefined }) => {
   const { euiTheme } = useEuiTheme();
 
+  const badgeCss = css`
+    margin-left: ${euiTheme.size.s};
+    width: 55px;
+  `;
+
   if (riskScore == null) {
     return (
-      <EuiBadge style={{ marginLeft: 10, width: 55 }} color="hollow">
+      <EuiBadge css={badgeCss} color="hollow">
         {'\u2013'}
       </EuiBadge>
     );
@@ -136,7 +141,7 @@ const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefin
   const colors = getRiskScoreColors(euiTheme, riskLevel);
 
   return (
-    <EuiBadge style={{ marginLeft: 10, width: 55 }} color={colors.background}>
+    <EuiBadge css={badgeCss} color={colors.background}>
       <EuiText
         css={css`
           font-weight: ${euiTheme.font.weight.semiBold};
