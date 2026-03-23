@@ -99,14 +99,17 @@ describe('resolveUserNameForEntityInsights', () => {
 
   it('prefers user.name in identity map over user.id', () => {
     expect(
-      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'user.name': 'bob' }, emptyGetFieldsData)
+      resolveUserNameForEntityInsights(
+        { 'user.id': 'id-1', 'user.name': 'bob' },
+        emptyGetFieldsData
+      )
     ).toBe('bob');
   });
 
   it('falls back to user.id when no name fields exist', () => {
-    expect(
-      resolveUserNameForEntityInsights({ 'user.id': 'uid-9' }, emptyGetFieldsData)
-    ).toBe('uid-9');
+    expect(resolveUserNameForEntityInsights({ 'user.id': 'uid-9' }, emptyGetFieldsData)).toBe(
+      'uid-9'
+    );
   });
 });
 
@@ -120,9 +123,9 @@ describe('resolveHostNameForEntityInsights', () => {
   });
 
   it('falls back to host.id when no name fields exist', () => {
-    expect(
-      resolveHostNameForEntityInsights({ 'host.id': 'uuid-host' }, emptyGetFieldsData)
-    ).toBe('uuid-host');
+    expect(resolveHostNameForEntityInsights({ 'host.id': 'uuid-host' }, emptyGetFieldsData)).toBe(
+      'uuid-host'
+    );
   });
 });
 
