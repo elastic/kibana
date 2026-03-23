@@ -6,7 +6,7 @@
  */
 
 import { ReservedPrivilegesSet, type RequestHandler } from '@kbn/core/server';
-import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../common/endpoint/types/endpoint_exceptions_per_policy_opt_in';
+import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
