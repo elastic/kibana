@@ -51,7 +51,6 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
 
   const handleExecuteClick = useCallback(() => {
     if (!selectedId) return;
-
     setIsLoading(true);
 
     const inputsPayload: AlertTriggerInput = {

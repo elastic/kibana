@@ -135,5 +135,4 @@ describe('UpdateAttacksModal', () => {
     const updateButton = screen.getByTestId(UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_AND_ALERTS_TEST_ID);
     expect(updateButton).toHaveTextContent(/mark alert & discoveries/i);
   });
-
 });
