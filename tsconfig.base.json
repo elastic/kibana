@@ -994,6 +994,8 @@
       "@kbn/dev-tools-plugin/*": ["src/platform/plugins/shared/dev_tools/*"],
       "@kbn/dev-utils": ["src/platform/packages/shared/kbn-dev-utils"],
       "@kbn/dev-utils/*": ["src/platform/packages/shared/kbn-dev-utils/*"],
+      "@kbn/dev-validation-runner": ["src/platform/packages/shared/kbn-dev-validation-runner"],
+      "@kbn/dev-validation-runner/*": ["src/platform/packages/shared/kbn-dev-validation-runner/*"],
       "@kbn/developer-examples-plugin": ["examples/developer_examples"],
       "@kbn/developer-examples-plugin/*": ["examples/developer_examples/*"],
       "@kbn/developer-toolbar": ["src/platform/packages/shared/kbn-developer-toolbar"],

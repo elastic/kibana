@@ -9,14 +9,17 @@
 
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { ParsedMetricItem } from '../../types';
+import type { ParsedMetricItem } from '../../../types';
 
-interface OverviewTabProps {
+interface TabTitleAndDescriptionProps {
   metricItem: ParsedMetricItem;
   description?: string;
 }
 
-export const TabTitleAndDescription = ({ metricItem, description }: OverviewTabProps) => {
+export const TabTitleAndDescription = ({
+  metricItem,
+  description,
+}: TabTitleAndDescriptionProps) => {
   return (
     <>
       <EuiSpacer />

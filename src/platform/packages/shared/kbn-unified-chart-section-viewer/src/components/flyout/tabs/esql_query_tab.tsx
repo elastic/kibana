@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import type { ParsedMetricItem } from '../../types';
-import { TabTitleAndDescription } from './tab_title_and_description';
+import type { ParsedMetricItem } from '../../../types';
+import { TabTitleAndDescription } from '../components';
 
 interface EsqlQueryTabProps {
   esqlQuery?: string;
