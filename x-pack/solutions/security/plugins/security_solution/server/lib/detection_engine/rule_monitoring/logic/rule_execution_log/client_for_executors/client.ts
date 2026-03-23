@@ -102,9 +102,9 @@ export function createRuleExecutionLogClientForExecutors(
 
     logMetric<Metric extends keyof RuleExecutionLogMetrics>(
       metricName: Metric,
-      value: RuleExecutionLogMetrics[Metric]
+      value: NonNullable<RuleExecutionLogMetrics[Metric]>
     ): void {
-      if (this.closed() || !value) {
+      if (this.closed()) {
         return;
       }
 
