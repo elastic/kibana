@@ -88,12 +88,7 @@ export const useAttackRunWorkflowContextMenuItems = ({
               id: RUN_WORKFLOW_BULK_PANEL_ID,
               title: alertsTableI18n.SELECT_WORKFLOW_PANEL_TITLE,
               'data-test-subj': 'attack-workflow-context-menu-panel',
-              content: (
-                <AlertWorkflowsPanel
-                  alertIds={attackAlertIds}
-                  onClose={handleClose}
-                />
-              ),
+              content: <AlertWorkflowsPanel alertIds={attackAlertIds} onClose={handleClose} />,
             },
           ]
         : [],
