@@ -35,6 +35,21 @@ jest.mock('../../services', () => ({
           name: 'Source 1',
           host: 'https://source-1/',
           is_default: true,
+          auth: {
+            username: 'elastic',
+            password: 'source-password',
+            api_key: 'source-api-key',
+          },
+          ssl: {
+            certificate_authorities: ['/path/to/source-ca'],
+            certificate: '/path/to/source-cert',
+            key: '/path/to/source-key',
+          },
+          secrets: {
+            ssl: {
+              key: { id: 'source-ssl-key-secret' },
+            },
+          },
         },
         {
           id: 'source-2',
@@ -61,6 +76,22 @@ jest.mock('../../services/fleet_server_host', () => ({
     name: 'Host 1',
     host_urls: ['http://localhost:8220'],
     proxy_id: 'proxy-1',
+    ssl: {
+      certificate: '/path/to/cert',
+      certificate_authorities: ['/path/to/ca'],
+      key: '/path/to/key',
+      es_certificate: '/path/to/es-cert',
+      es_key: '/path/to/es-key',
+      agent_certificate: '/path/to/agent-cert',
+      agent_key: '/path/to/agent-key',
+    },
+    secrets: {
+      ssl: {
+        key: { id: 'host-key-secret' },
+        es_key: { id: 'host-es-key-secret' },
+        agent_key: { id: 'host-agent-key-secret' },
+      },
+    },
   }),
 }));
 
@@ -70,6 +101,34 @@ jest.mock('../../services/fleet_proxies', () => ({
     name: 'Proxy 1',
     url: 'https://proxy-1/',
     is_preconfigured: true,
+    proxy_headers: {
+      authorization: 'Bearer secret-token',
+    },
+    certificate: 'proxy-cert',
+    certificate_authorities: 'proxy-ca',
+    certificate_key: 'proxy-key',
+  }),
+}));
+
+jest.mock('../../services/agent_policies', () => ({
+  getDataOutputForAgentPolicy: jest.fn().mockResolvedValue({
+    id: 'output-1',
+    name: 'Default output',
+    type: 'elasticsearch',
+    is_default: true,
+    is_default_monitoring: true,
+    hosts: ['https://elasticsearch:9200'],
+    proxy_id: 'proxy-1',
+    ssl: {
+      certificate: '/path/to/output-cert',
+      key: '/path/to/output-key',
+      certificate_authorities: ['/path/to/output-ca'],
+    },
+    secrets: {
+      ssl: {
+        key: { id: 'output-ssl-key-secret' },
+      },
+    },
   }),
 }));
 
@@ -207,7 +266,7 @@ describe('EnrollmentSettingsHandler utils', () => {
   describe('getDownloadSource', () => {
     it('returns the default download source when no id is specified', async () => {
       const source = await getDownloadSource();
-      expect(source).toEqual({
+      expect(source).toMatchObject({
         id: 'source-1',
         name: 'Source 1',
         host: 'https://source-1/',
@@ -217,7 +276,7 @@ describe('EnrollmentSettingsHandler utils', () => {
 
     it('returns the default download source when the specified id is not found', async () => {
       const source = await getDownloadSource('some-id');
-      expect(source).toEqual({
+      expect(source).toMatchObject({
         id: 'source-1',
         name: 'Source 1',
         host: 'https://source-1/',
@@ -264,7 +323,6 @@ describe('EnrollmentSettingsHandler utils', () => {
             host_proxy: {
               id: 'proxy-1',
               name: 'Proxy 1',
-              is_preconfigured: true,
               url: 'https://proxy-1/',
             },
 
@@ -275,6 +333,30 @@ describe('EnrollmentSettingsHandler utils', () => {
               is_preconfigured: true,
               name: 'Host 1',
               proxy_id: 'proxy-1',
+              ssl: {
+                certificate: '/path/to/cert',
+                certificate_authorities: ['/path/to/ca'],
+                es_certificate: '/path/to/es-cert',
+                agent_certificate: '/path/to/agent-cert',
+              },
+            },
+            es_output: {
+              id: 'output-1',
+              name: 'Default output',
+              type: 'elasticsearch',
+              is_default: true,
+              is_default_monitoring: true,
+              hosts: ['https://elasticsearch:9200'],
+              proxy_id: 'proxy-1',
+              ssl: {
+                certificate: '/path/to/output-cert',
+                certificate_authorities: ['/path/to/output-ca'],
+              },
+            },
+            es_output_proxy: {
+              id: 'proxy-1',
+              name: 'Proxy 1',
+              url: 'https://proxy-1/',
             },
             policies: [
               {
@@ -286,6 +368,7 @@ describe('EnrollmentSettingsHandler utils', () => {
                 is_managed: true,
                 name: 'FS Policy 1',
                 space_ids: undefined,
+                data_output_id: undefined,
               },
             ],
           },
@@ -294,12 +377,38 @@ describe('EnrollmentSettingsHandler utils', () => {
             id: 'source-1',
             is_default: true,
             name: 'Source 1',
+            auth: {
+              username: 'elastic',
+            },
+            ssl: {
+              certificate_authorities: ['/path/to/source-ca'],
+              certificate: '/path/to/source-cert',
+            },
           },
         };
         await getEnrollmentSettingsHandler(context, {} as any, response);
         expect(response.ok).toHaveBeenCalledWith({
           body: expectedResponse,
         });
+
+        const actualBody = (response.ok as jest.Mock).mock.calls[0][0].body;
+        expect(actualBody.download_source?.auth?.password).toBeUndefined();
+        expect(actualBody.download_source?.auth?.api_key).toBeUndefined();
+        expect(actualBody.download_source?.ssl?.key).toBeUndefined();
+        expect(actualBody.download_source?.secrets).toBeUndefined();
+        expect(actualBody.download_source_proxy?.proxy_headers).toBeUndefined();
+        expect(actualBody.download_source_proxy?.certificate).toBeUndefined();
+        expect(actualBody.download_source_proxy?.certificate_authorities).toBeUndefined();
+        expect(actualBody.download_source_proxy?.certificate_key).toBeUndefined();
+        expect(actualBody.fleet_server.host?.ssl?.key).toBeUndefined();
+        expect(actualBody.fleet_server.host?.ssl?.es_key).toBeUndefined();
+        expect(actualBody.fleet_server.host?.ssl?.agent_key).toBeUndefined();
+        expect(actualBody.fleet_server.host?.secrets).toBeUndefined();
+        expect(actualBody.fleet_server.es_output?.ssl?.key).toBeUndefined();
+        expect(actualBody.fleet_server.es_output?.secrets).toBeUndefined();
+        expect(actualBody.fleet_server.host_proxy?.proxy_headers).toBeUndefined();
+        expect(actualBody.fleet_server.es_output_proxy?.certificate_key).toBeUndefined();
+
         const validationResp = GetEnrollmentSettingsResponseSchema.validate(expectedResponse);
         expect(validationResp).toEqual(expectedResponse);
       });

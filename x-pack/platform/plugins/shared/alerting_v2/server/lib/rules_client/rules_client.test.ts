@@ -741,6 +741,42 @@ describe('RulesClient', () => {
       expect(res.perPage).toBe(50);
     });
 
+    it('uses default pagination when no page params are provided', async () => {
+      const client = createClient();
+
+      const so1 = {
+        id: 'rule-pagination-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+        score: 0,
+        attributes: createRuleSoAttributes({
+          metadata: { name: 'rule-pagination-1' },
+        }),
+      };
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [so1],
+        total: 100,
+        page: 1,
+        per_page: 20,
+      });
+
+      const res = await client.findRules();
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 20,
+        sortField: 'updatedAt',
+        sortOrder: 'desc',
+      });
+      expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+
+      expect(res.total).toBe(100);
+      expect(res.page).toBe(1);
+      expect(res.perPage).toBe(20);
+    });
+
     it('translates clean API filter to SO filter before passing to saved objects client', async () => {
       const client = createClient();
 
