@@ -14,6 +14,7 @@ import {
   ForEachStepConfigSchema,
   IfStepConfigSchema,
   SwitchStepConfigSchema,
+  WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
@@ -235,6 +236,22 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'waitForInput',
+    label: 'Wait For Input',
+    description: 'Pause execution until external input is provided (human-in-the-loop)',
+    category: StepCategory.FlowControl,
+    inputSchema: WaitForInputStepInputSchema,
+    outputSchema: z.unknown(),
+    documentation: {
+      examples: [
+        `- name: wait_for_approval
+  type: waitForInput
+  with:
+    message: "Please approve before continuing"`,
       ],
     },
   },
