@@ -18,7 +18,7 @@ import { z } from '@kbn/zod/v4';
 
 export type SyncWatchlistRequestParams = z.infer<typeof SyncWatchlistRequestParams>;
 export const SyncWatchlistRequestParams = z.object({
-  watchlist_id: z.string(),
+  watchlist_id: z.string().min(1),
 });
 export type SyncWatchlistRequestParamsInput = z.input<typeof SyncWatchlistRequestParams>;
 

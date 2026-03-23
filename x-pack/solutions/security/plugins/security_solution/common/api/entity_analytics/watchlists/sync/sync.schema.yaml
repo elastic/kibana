@@ -16,6 +16,7 @@ paths:
           required: true
           schema:
             type: string
+            minLength: 1
       responses:
         "200":
           description: Sync completed successfully
