@@ -46,7 +46,7 @@ export function registerCreateRoute(
           body: getCreateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
-          200: {
+          201: {
             body: () => getCreateResponseBodySchema(isDashboardAppRequest),
           },
         },
@@ -61,7 +61,7 @@ export function registerCreateRoute(
           req.params,
           isDashboardAppRequest
         );
-        return res.ok({ body: result });
+        return res.created({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({

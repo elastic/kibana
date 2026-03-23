@@ -174,6 +174,7 @@ export const getXyVisualization = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<XYState, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
+  suggestionPriority: 1,
   getVisualizationTypeId(state, layerId) {
     const type = getVisualizationType(state, layerId);
     return type === 'mixed' ? type : type.id;
