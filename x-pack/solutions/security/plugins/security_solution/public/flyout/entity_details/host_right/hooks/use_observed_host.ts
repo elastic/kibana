@@ -57,7 +57,10 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const useEntityStoreObservedData = entityFromStore != null;
+  // Same as useObservedUser: use entity-store observed fields only when a store record exists.
+  const useEntityStoreObservedData = Boolean(
+    entityFromStore?.entityRecord ?? entityFromStore?.entity
+  );
 
   const [isLoading, { hostDetails, inspect: inspectObservedHost, refetch: refetchHostDetails }] =
     useHostDetails({
@@ -71,10 +74,12 @@ export const useObservedHost = (
 
   useQueryInspector({
     deleteQuery,
-    inspect: entityFromStore?.inspect ?? inspectObservedHost,
-    loading: entityFromStore?.isLoading ?? isLoading,
+    inspect: useEntityStoreObservedData ? entityFromStore?.inspect : inspectObservedHost,
+    loading: useEntityStoreObservedData ? entityFromStore?.isLoading ?? false : isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: entityFromStore?.refetch ?? refetchHostDetails,
+    refetch: useEntityStoreObservedData
+      ? entityFromStore?.refetch ?? (() => {})
+      : refetchHostDetails,
     setQuery,
   });
 
@@ -97,7 +102,7 @@ export const useObservedHost = (
   });
 
   return useMemo((): ObservedHostResult => {
-    if (entityFromStore) {
+    if (useEntityStoreObservedData && entityFromStore) {
       return {
         details: (entityFromStore.entity ?? {}) as HostItem,
         isLoading: entityFromStore.isLoading,
@@ -127,13 +132,14 @@ export const useObservedHost = (
       refetchObservedDetails: refetchHostDetails,
     };
   }, [
+    useEntityStoreObservedData,
+    entityFromStore,
     hostDetails,
     isLoading,
     loadingLastSeen,
     loadingFirstSeen,
     firstSeen,
     lastSeen,
-    entityFromStore,
     inspectObservedHost,
     refetchHostDetails,
   ]);

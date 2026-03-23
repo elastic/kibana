@@ -85,6 +85,7 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../entity_details/shared/entity_store_risk_utils';
+import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -248,20 +249,20 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     entityFromStoreResult
   );
 
-  const userIdentityFields = useMemo(
-    () =>
-      entityStoreV2Enabled
-        ? identityFields ?? {}
-        : userName != null && userName !== ''
-        ? { 'user.name': userName }
-        : {},
-    [entityStoreV2Enabled, userName, identityFields]
-  );
+  const userIdentityFields = useMemo(() => {
+    const legacyFields =
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
+    if (!entityStoreV2Enabled) {
+      return legacyFields;
+    }
+    return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
+  }, [entityStoreV2Enabled, userName, identityFields]);
 
   const userCspIdentityDoc = observedUser.details;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
   );
+
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: userIdentityFields ?? null,
     to,

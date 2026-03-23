@@ -45,7 +45,10 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
-import type { IdentityFields } from '../../document_details/shared/utils';
+import {
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  type IdentityFields,
+} from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 
 export interface UserPanelProps extends Record<string, unknown> {
@@ -103,15 +106,17 @@ export const UserPanel = ({
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const legacyFields =
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     if (entityStoreV2Enabled) {
-      return (
+      const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
           'user',
           entityFromStoreResult.entityRecord
-        ) ?? {}
-      );
+        ) ?? {};
+      return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
-    return userName != null && userName !== '' ? { 'user.name': userName } : {};
+    return legacyFields;
   }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(

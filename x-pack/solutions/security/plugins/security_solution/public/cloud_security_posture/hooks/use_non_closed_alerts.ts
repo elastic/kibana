@@ -19,7 +19,7 @@ export const useNonClosedAlerts = ({
   additionalFilters,
   skip = false,
 }: {
-  identityFields: Record<string, string> | null;
+  identityFields: Record<string, string>;
   to: string;
   from: string;
   queryId: string;

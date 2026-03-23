@@ -44,7 +44,10 @@ import {
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
-import type { IdentityFields } from '../../document_details/shared/utils';
+import {
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  type IdentityFields,
+} from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 
 export interface HostPanelProps extends Record<string, unknown> {
@@ -96,15 +99,17 @@ export const HostPanel = ({
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const legacyFields =
+      hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
     if (entityStoreV2Enabled) {
-      return (
+      const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
           'host',
           entityFromStoreResult.entityRecord
-        ) ?? {}
-      );
+        ) ?? {};
+      return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
-    return hostName != null && hostName !== '' ? { 'host.name': hostName } : {};
+    return legacyFields;
   }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(

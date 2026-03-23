@@ -95,6 +95,7 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../entity_details/shared/entity_store_risk_utils';
+import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -278,15 +279,17 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       ? !!getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level
       : !!hostRiskData?.host?.risk;
 
-  const hostInsightsIdentityFields = useMemo(
-    () =>
-      entityStoreV2Enabled
-        ? hostIdentityFieldsForStore ?? {}
-        : hostName != null && hostName !== ''
-        ? { 'host.name': hostName }
-        : {},
-    [entityStoreV2Enabled, hostIdentityFieldsForStore, hostName]
-  );
+  const hostInsightsIdentityFields = useMemo(() => {
+    const legacyFields =
+      hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
+    if (!entityStoreV2Enabled) {
+      return legacyFields;
+    }
+    return mergeLegacyIdentityWhenStoreEntityMissing(
+      hostIdentityFieldsForStore ?? {},
+      legacyFields
+    );
+  }, [entityStoreV2Enabled, hostIdentityFieldsForStore, hostName]);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: hostInsightsIdentityFields,

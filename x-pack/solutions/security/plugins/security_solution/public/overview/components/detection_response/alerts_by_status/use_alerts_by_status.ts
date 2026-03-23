@@ -136,7 +136,7 @@ export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
-  identityFields?: Record<string, string> | null;
+  identityFields: Record<string, string>;
   /**
    * When `identityFields` includes `entity.id`, resolves the store record (Entity Store v2)
    * and expands to ECS-style identifier terms (e.g. `user.entity.id`, `user.name`) for the alerts query.
@@ -189,7 +189,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
             storeEntityType ?? 'generic',
             entityRecord
           )
-        : identityFields ?? {},
+        : identityFields,
     [entityStoreV2Enabled, euidApi?.euid, storeEntityType, entityRecord, identityFields]
   );
 
@@ -232,7 +232,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     query: getAlertsByStatusQuery({
       from,
       to,
-      identityFields: identityFieldsForQuery,
+      identityFields: identityFieldsForQuery ?? identityFields,
       additionalFilters,
       runtimeMappings,
     }),
@@ -246,12 +246,20 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       getAlertsByStatusQuery({
         from,
         to,
-        identityFields: identityFieldsForQuery,
+        identityFields: identityFieldsForQuery ?? identityFields,
         additionalFilters,
         runtimeMappings,
       })
     );
-  }, [setAlertsQuery, from, to, identityFieldsForQuery, additionalFilters, runtimeMappings]);
+  }, [
+    setAlertsQuery,
+    from,
+    to,
+    identityFieldsForQuery,
+    identityFields,
+    additionalFilters,
+    runtimeMappings,
+  ]);
 
   useEffect(() => {
     if (data == null) {

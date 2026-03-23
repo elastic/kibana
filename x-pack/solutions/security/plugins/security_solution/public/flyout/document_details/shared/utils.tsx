@@ -125,6 +125,21 @@ export const identityFieldsHaveUsableValues = (
   return Object.values(fields).some((v) => typeof v === 'string' && v.trim() !== '');
 };
 
+/**
+ * When Entity Store v2 has no record for the entity, document-derived identity fields from
+ * the store API can be empty. In that case fall back to legacy ECS pairs (for example
+ * `user.name`, `host.name`, `service.name`) from the document or panel context.
+ */
+export const mergeLegacyIdentityWhenStoreEntityMissing = (
+  storeIdentityFields: IdentityFields,
+  legacyIdentityFields: IdentityFields
+): IdentityFields => {
+  if (identityFieldsHaveUsableValues(storeIdentityFields)) {
+    return storeIdentityFields;
+  }
+  return legacyIdentityFields;
+};
+
 const USER_DISPLAY_FIELD_PRIORITY: readonly string[] = [
   'user.name',
   'related.user',

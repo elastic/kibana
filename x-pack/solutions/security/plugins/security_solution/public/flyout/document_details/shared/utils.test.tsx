@@ -10,6 +10,7 @@ import {
   getFieldArray,
   getEventTitle,
   getAlertTitle,
+  mergeLegacyIdentityWhenStoreEntityMissing,
   resolveHostNameForEntityInsights,
   resolveUserNameForEntityInsights,
 } from './utils';
@@ -136,5 +137,25 @@ describe('getAlertTitle', () => {
 
   it('should return ruleName when ruleName is defined', () => {
     expect(getAlertTitle({ ruleName: 'test rule' })).toBe('test rule');
+  });
+});
+
+describe('mergeLegacyIdentityWhenStoreEntityMissing', () => {
+  it('returns store fields when they have usable values', () => {
+    expect(
+      mergeLegacyIdentityWhenStoreEntityMissing({ 'host.name': 'h1' }, { 'host.name': 'legacy' })
+    ).toEqual({ 'host.name': 'h1' });
+  });
+
+  it('falls back to legacy ECS pairs when store map is empty', () => {
+    expect(
+      mergeLegacyIdentityWhenStoreEntityMissing({}, { 'user.name': 'alice', 'host.name': 'srv' })
+    ).toEqual({ 'user.name': 'alice', 'host.name': 'srv' });
+  });
+
+  it('falls back when store map has only whitespace values', () => {
+    expect(
+      mergeLegacyIdentityWhenStoreEntityMissing({ 'host.name': '  ' }, { 'host.name': 'ok' })
+    ).toEqual({ 'host.name': 'ok' });
   });
 });
