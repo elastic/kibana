@@ -14369,7 +14369,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/action_results/action_results_summary.tsx"
+                "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_bulk_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14553,15 +14553,23 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_findings.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14573,27 +14581,31 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_find_attack_discoveries/index.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_ai_connectors.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connector_types_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14613,15 +14625,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14685,6 +14689,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connector_types_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/ai_rule_creation/hooks/use_inference_connectors.ts"
               },
               {
@@ -14701,6 +14713,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/grouping/use_fetch_grouped_data.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/hooks/use_fetch_grid_data.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/dashboards/logic/use_get_migration_dashboards.ts"
               },
               {
@@ -14714,18 +14734,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/logic/use_get_migration_privileges.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_findings.ts"
               },
               {
                 "plugin": "securitySolution",
