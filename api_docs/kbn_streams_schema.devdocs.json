@@ -6279,16 +6279,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ClassicIngest",
-            "text": "ClassicIngest"
+            "section": "def-common.WiredIngest",
+            "text": "WiredIngest"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredIngest",
-            "text": "WiredIngest"
+            "section": "def-common.ClassicIngest",
+            "text": "ClassicIngest"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/index.ts",
@@ -7338,6 +7338,25 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.streamDefinitionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "streamDefinitionSchema",
+        "description": [
+          "\nFlat Zod union of all three stream definition schemas, discriminated by the\n`type` literal field. Registered as a named OAS component (`StreamDefinition`)\nwith a `discriminator` extension so code generators can produce properly typed\nsealed-class / tagged-union structs."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/streams.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.StreamNameValidationError",
         "type": "Type",
         "tags": [],
@@ -7420,7 +7439,7 @@
         "label": "StreamsOasDefinitions",
         "description": [],
         "signature": [
-          "{ readonly WiredStreamDefinition: z.Schema<TRight>; readonly ClassicStreamDefinition: z.Schema<TRight>; readonly WiredIngest: z.Schema<TRight>; readonly ClassicIngest: z.Schema<TRight>; readonly FieldDefinition: z.Schema<",
+          "{ readonly StreamDefinition: any; readonly WiredStreamDefinition: z.Schema<TRight>; readonly ClassicStreamDefinition: z.Schema<TRight>; readonly QueryStreamDefinition: z.Schema<TRight>; readonly WiredIngest: z.Schema<TRight>; readonly ClassicIngest: z.Schema<TRight>; readonly FieldDefinition: z.Schema<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -7447,7 +7466,7 @@
           ">; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/oas_definitions.ts",
-        "lineNumber": 42,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7845,7 +7864,7 @@
         "label": "ClassicStream",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
-        "lineNumber": 129,
+        "lineNumber": 134,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7872,7 +7891,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
-            "lineNumber": 135,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7899,7 +7918,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
-            "lineNumber": 139,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7928,7 +7947,7 @@
               ".GetResponse>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
-            "lineNumber": 143,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7957,7 +7976,7 @@
               ".UpsertRequest>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
-            "lineNumber": 147,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8379,7 +8398,7 @@
         "label": "QueryStream",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
-        "lineNumber": 87,
+        "lineNumber": 94,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8406,7 +8425,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
-            "lineNumber": 93,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8433,7 +8452,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
-            "lineNumber": 97,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8462,7 +8481,7 @@
               ".GetResponse>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
-            "lineNumber": 101,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8491,7 +8510,7 @@
               ".UpsertRequest>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
-            "lineNumber": 105,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8548,7 +8567,7 @@
         "label": "streamsOasDefinitions",
         "description": [],
         "signature": [
-          "{ readonly WiredStreamDefinition: z.Schema<TRight>; readonly ClassicStreamDefinition: z.Schema<TRight>; readonly WiredIngest: z.Schema<TRight>; readonly ClassicIngest: z.Schema<TRight>; readonly FieldDefinition: z.Schema<",
+          "{ readonly StreamDefinition: any; readonly WiredStreamDefinition: z.Schema<TRight>; readonly ClassicStreamDefinition: z.Schema<TRight>; readonly QueryStreamDefinition: z.Schema<TRight>; readonly WiredIngest: z.Schema<TRight>; readonly ClassicIngest: z.Schema<TRight>; readonly FieldDefinition: z.Schema<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -8575,7 +8594,7 @@
           ">; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/oas_definitions.ts",
-        "lineNumber": 25,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8720,7 +8739,7 @@
         "label": "WiredStream",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 135,
+        "lineNumber": 142,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8747,7 +8766,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 141,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8774,7 +8793,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 145,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8803,7 +8822,7 @@
               ".GetResponse>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 149,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8832,7 +8851,7 @@
               ".UpsertRequest>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 153,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
