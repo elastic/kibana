@@ -120,7 +120,8 @@ const buildResolutionGroupingQuery = ({
           if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
               && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
             emit(doc['${ENTITY_FIELDS.RESOLVED_TO}'].value);
-          } else {
+          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_ID}')
+              && !doc['${ENTITY_FIELDS.ENTITY_ID}'].empty) {
             emit(doc['${ENTITY_FIELDS.ENTITY_ID}'].value);
           }
         `),
