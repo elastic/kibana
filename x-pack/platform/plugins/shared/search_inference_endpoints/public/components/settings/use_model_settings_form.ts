@@ -101,13 +101,11 @@ export const useModelSettingsForm = () => {
           [...getEffectiveEndpoints(f, parentEndpointsMap)],
         ])
       );
-      setAssignments((prev) => {
-        const updated = { ...prev, ...resetEntries };
-        saveSettings({ features: toApiFormat(updated) });
-        return updated;
-      });
+      const updated = { ...assignments, ...resetEntries };
+      setAssignments(updated);
+      saveSettings({ features: toApiFormat(updated) });
     },
-    [sections, saveSettings, parentEndpointsMap]
+    [assignments, sections, saveSettings, parentEndpointsMap]
   );
 
   return {
