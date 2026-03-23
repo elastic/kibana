@@ -127,7 +127,7 @@ export const ConversationSidebarView: React.FC = () => {
   `;
 
   return (
-    <div css={containerStyles}>
+    <div css={containerStyles} data-test-subj="agentBuilderSidebar-conversation">
       <CustomizeLink />
       <EuiFlexGroup gutterSize="s" responsive={false} css={newChatBarStyles}>
         <EuiFlexItem grow>

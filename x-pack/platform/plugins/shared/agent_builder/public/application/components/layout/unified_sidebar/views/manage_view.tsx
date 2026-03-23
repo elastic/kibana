@@ -45,7 +45,7 @@ export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }
   const isActive = (path: string) => pathname.startsWith(path);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="agentBuilderSidebar-manage">
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup
         direction="column"

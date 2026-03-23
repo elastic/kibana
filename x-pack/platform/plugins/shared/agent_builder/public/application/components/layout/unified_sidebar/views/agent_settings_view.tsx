@@ -42,7 +42,7 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
   const isActive = (path: string) => pathname === path;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="agentBuilderSidebar-agent">
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup
         direction="column"
