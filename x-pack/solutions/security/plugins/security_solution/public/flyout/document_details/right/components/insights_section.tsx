@@ -13,7 +13,7 @@ import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/lo
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from '../../../../flyout_v2/document/components/prevalence_overview';
-import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
+import { ThreatIntelligenceOverview } from '../../../../flyout_v2/document/components/threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
@@ -22,6 +22,7 @@ import { getField } from '../../shared/utils';
 import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { LeftPanelInsightsTab } from '../../left';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 
 const KEY = 'insights';
@@ -35,6 +36,11 @@ export const InsightsSection = memo(() => {
   const eventKind = getField(getFieldsData('event.kind'));
 
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
+  const goToThreatIntelligenceTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: THREAT_INTELLIGENCE_TAB_ID,
+  });
 
   const goToPrevalenceTab = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -64,7 +70,11 @@ export const InsightsSection = memo(() => {
       {eventKind === EventKind.signal && (
         <>
           <EuiSpacer size="s" />
-          <ThreatIntelligenceOverview />
+          <ThreatIntelligenceOverview
+            hit={hit}
+            showIcon={!isPreviewMode}
+            onShowThreatIntelligence={goToThreatIntelligenceTab}
+          />
         </>
       )}
       <EuiSpacer size="s" />

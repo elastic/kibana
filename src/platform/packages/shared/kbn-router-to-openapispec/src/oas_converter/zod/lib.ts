@@ -652,7 +652,7 @@ type NormalizedOasMetaExtensions = Omit<OasMetaExtensions, 'availability'> & {
  * The name must be unique across all schemas in the document and follow OpenAPI
  * component naming rules: `[a-zA-Z0-9._-]+`.
  */
-function getZodV4ComponentId(schema: z4.ZodType): string | undefined {
+function getZodV4ComponentId(schema: z4.core.$ZodType): string | undefined {
   const meta = z4.globalRegistry.get(schema);
   return typeof meta?.id === 'string' ? meta.id : undefined;
 }
@@ -660,7 +660,7 @@ function getZodV4ComponentId(schema: z4.ZodType): string | undefined {
 /**
  * Reads OAS-native extensions declared via `.meta({ openapi: { ... } })`.
  */
-function getZodV4OasExtensions(schema: z4.ZodType): OasMetaExtensions | undefined {
+function getZodV4OasExtensions(schema: z4.core.$ZodType): OasMetaExtensions | undefined {
   const meta = z4.globalRegistry.get(schema);
   return meta?.openapi as OasMetaExtensions | undefined;
 }
@@ -1005,7 +1005,7 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
         // schemas that declare .meta({ id }) / .meta({ openapi: { ... } }).
         // Picked up by extractDefsToShared (for $defs entries) and
         // hoistMarkedSchemas (for inline, single-use schemas).
-        const componentName = getZodV4ComponentId(zodSchema as unknown as z4.ZodType);
+        const componentName = getZodV4ComponentId(zodSchema);
 
         if (componentName) {
           (js as any)[COMPONENT_ID_MARKER] = componentName;
