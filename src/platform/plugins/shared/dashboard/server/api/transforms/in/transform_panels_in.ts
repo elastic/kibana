@@ -19,6 +19,7 @@ import type {
 } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
+import { transformTypeIn } from '@kbn/embeddable-plugin/server';
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],
@@ -62,13 +63,13 @@ function transformPanelIn(
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
-  const { uid, grid, config, ...restPanel } = panel;
+  const { uid, grid, config, type, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
   const transformType =
-    panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+    type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level
@@ -79,7 +80,7 @@ function transformPanelIn(
       panelSchema.validate(config);
     } catch (error) {
       throw Boom.badRequest(
-        `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
+        `Panel config validation failed. Panel uid: ${uid}, type: ${type}, validation error: ${error.message}`
       );
     }
   }
@@ -95,13 +96,14 @@ function transformPanelIn(
   } catch (transformInError) {
     // do not prevent save if transformIn throws
     logger.warn(
-      `Unable to transform "${panel.type}" embeddable state on save. Error: ${transformInError.message}`
+      `Unable to transform "${type}" embeddable state on save. Error: ${transformInError.message}`
     );
   }
 
   return {
     storedPanel: {
       ...restPanel,
+      type: transformTypeIn(type),
       embeddableConfig: transformedPanelConfig as SavedDashboardPanel['embeddableConfig'],
       panelIndex: idx,
       gridData: {

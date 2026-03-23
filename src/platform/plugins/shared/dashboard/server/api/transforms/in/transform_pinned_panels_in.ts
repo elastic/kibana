@@ -17,6 +17,7 @@ import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
+import { transformTypeIn } from '@kbn/embeddable-plugin/server';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
@@ -72,7 +73,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
         uid,
         {
           order: index,
-          type,
+          type: transformTypeIn(type),
           width,
           grow,
           config: { ...omit(config, ['type']) },
