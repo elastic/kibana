@@ -11,14 +11,13 @@ import { sortBy } from 'lodash';
 import { API_VERSIONS, FALLBACK_OSQUERY_VERSION } from '../../../common/constants';
 import type { OsquerySchemaResponse, OsqueryTable } from '../../../common/types/schema';
 import { useKibana } from '../lib/kibana';
+// Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
+import fallbackSchemaJson from '../schemas/osquery/v5.19.0.json';
 
-// Lazy-loaded fallback — only imported if the API call fails
 let fallbackOsquerySchema: OsqueryTable[] | null = null;
 const getFallbackOsquerySchema = (): OsqueryTable[] => {
   if (!fallbackOsquerySchema) {
-    // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    fallbackOsquerySchema = sortBy(require('../schemas/osquery/v5.19.0.json') as OsqueryTable[], 'name');
+    fallbackOsquerySchema = sortBy(fallbackSchemaJson as OsqueryTable[], 'name');
   }
 
   return fallbackOsquerySchema;

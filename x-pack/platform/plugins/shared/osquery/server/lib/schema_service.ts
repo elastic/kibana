@@ -110,10 +110,7 @@ export class SchemaService {
 
     const now = Date.now();
 
-    if (
-      this.installationVersionCache !== null &&
-      now < this.installationVersionCache.expiresAt
-    ) {
+    if (this.installationVersionCache !== null && now < this.installationVersionCache.expiresAt) {
       return this.installationVersionCache.version;
     }
 
