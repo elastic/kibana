@@ -11,22 +11,10 @@ import type { ListrTask } from 'listr2';
 import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
 import { checkDocuments } from './check_documents';
+import { getRollbackMigrationContext } from './rollback_context';
 
 export const testUpgrade: Task = async (ctx, task) => {
-  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = ctx;
-  if (!migrationTypes || !migrationTypes.length) {
-    throw new Error('Missing migrationTypes. This task must be run from automated rollback tests.');
-  }
-  if (!migrationKibanaIndex) {
-    throw new Error(
-      'Missing migrationKibanaIndex. This task must be run from automated rollback tests.'
-    );
-  }
-  if (!migrationAlgorithm) {
-    throw new Error(
-      'Missing migrationAlgorithm. This task must be run from automated rollback tests.'
-    );
-  }
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = getRollbackMigrationContext(ctx);
 
   const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     types: migrationTypes,

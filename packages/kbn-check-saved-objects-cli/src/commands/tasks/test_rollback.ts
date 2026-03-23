@@ -12,22 +12,11 @@ import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import { encryptionOverrides, type Task, type TaskContext } from '../types';
 import { getPreviousVersionType } from '../../migrations';
 import { checkDocuments } from './check_documents';
+import { getRollbackMigrationContext } from './rollback_context';
 
 export const testRollback: Task = async (ctx, task) => {
-  const { migrationTypes, baselineMappings, migrationKibanaIndex, migrationAlgorithm } = ctx;
-  if (!migrationTypes || !migrationTypes.length) {
-    throw new Error('Missing migrationTypes. This task must be run from automated rollback tests.');
-  }
-  if (!migrationKibanaIndex) {
-    throw new Error(
-      'Missing migrationKibanaIndex. This task must be run from automated rollback tests.'
-    );
-  }
-  if (!migrationAlgorithm) {
-    throw new Error(
-      'Missing migrationAlgorithm. This task must be run from automated rollback tests.'
-    );
-  }
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = getRollbackMigrationContext(ctx);
+  const { baselineMappings } = ctx;
 
   const previousVersionTypes = migrationTypes.map((type) =>
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
