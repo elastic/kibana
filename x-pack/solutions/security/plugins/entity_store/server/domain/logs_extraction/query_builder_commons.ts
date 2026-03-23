@@ -167,6 +167,9 @@ export function extractPaginationParams(
  */
 export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
   const fieldEvaluationsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  if (fieldEvaluationsEsql === undefined || fieldEvaluationsEsql === '') {
+    return '';
+  }
   return `| EVAL ${fieldEvaluationsEsql}`;
 }
 
