@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import { expect } from '@kbn/scout-security/api';
-import { apiTest } from '@kbn/scout-security';
+import { apiTest, type EsClient } from '@kbn/scout-security';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -15,7 +15,10 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { ingestDoc } from '../fixtures/helpers';
-import { USER_TS_EXTRACTION_CASES } from '../fixtures/user_ts_extraction_cases';
+import {
+  USER_TS_EXTRACTION_CASES,
+  type UserTsExtractionCase,
+} from '../fixtures/user_ts_extraction_cases';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidPainlessRuntimeMapping } from '../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
@@ -37,11 +40,7 @@ const userRuntimeSearchBody = {
   fields: ['entity_id'] as const,
 };
 
-async function runUserRuntimeSearch(
-  esClient: { search: (params: object) => Promise<unknown> },
-  query: object,
-  size = 10
-) {
+async function runUserRuntimeSearch(esClient: EsClient, query: object, size = 10) {
   return esClient.search({
     index: UPDATES_INDEX,
     body: {
@@ -49,7 +48,7 @@ async function runUserRuntimeSearch(
       query,
       size,
     },
-  }) as Promise<{
+  } as unknown as Parameters<EsClient['search']>[0]) as Promise<{
     hits: { hits: Array<{ _source?: unknown; fields?: Record<string, unknown> }> };
   }>;
 }
@@ -61,6 +60,23 @@ function assertUserRuntimeMatchesMemory(hit: {
   const expected = getEuidFromObject(USER_ENTITY_TYPE, hit);
   const actual = (hit.fields?.entity_id as string[] | undefined)?.[0];
   expect(actual).toBe(expected);
+}
+
+async function ingestAndRunUserTsPainlessScenario(
+  esClient: EsClient,
+  scenario: UserTsExtractionCase
+): Promise<{ _source?: unknown; fields?: Record<string, unknown> }> {
+  if (scenario.ingestSource) {
+    await ingestDoc(esClient, scenario.ingestSource);
+  }
+
+  const result = await runUserRuntimeSearch(esClient, scenario.query, 10);
+  const hits = result.hits.hits;
+  expect(hits).toHaveLength(1);
+
+  const hit = hits[0];
+  assertUserRuntimeMatchesMemory(hit);
+  return hit;
 }
 
 /**
@@ -171,37 +187,44 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
     );
   }
 
-  apiTest.describe('user.ts runtime field (definitions/user.ts)', () => {
-    for (const scenario of USER_TS_EXTRACTION_CASES) {
-      apiTest(`Painless entity_id: ${scenario.id}`, async ({ esClient }) => {
-        if (scenario.ingestSource) {
-          await ingestDoc(esClient, scenario.ingestSource);
+  for (const scenario of USER_TS_EXTRACTION_CASES.filter(
+    (c): c is UserTsExtractionCase & { expectedEuid: undefined } => c.expectedEuid === undefined
+  )) {
+    apiTest(
+      `should align user.ts Painless entity_id with definitions for ${scenario.id}`,
+      async ({ esClient }) => {
+        const hit = await ingestAndRunUserTsPainlessScenario(esClient, scenario);
+        expect(getEuidFromObject(USER_ENTITY_TYPE, hit)).toBeUndefined();
+        expect((hit.fields?.entity_id as string[] | undefined)?.[0]).toBeUndefined();
+      }
+    );
+  }
+
+  for (const scenario of USER_TS_EXTRACTION_CASES.filter(
+    (c): c is UserTsExtractionCase & { expectedEuid: string } => c.expectedEuid !== undefined
+  )) {
+    apiTest(
+      `should align user.ts Painless entity_id with definitions for ${scenario.id}`,
+      async ({ esClient }) => {
+        const hit = await ingestAndRunUserTsPainlessScenario(esClient, scenario);
+        const expectedEuid = scenario.expectedEuid;
+
+        expect(getEuidFromObject(USER_ENTITY_TYPE, hit)).toBe(expectedEuid);
+        expect((hit.fields?.entity_id as string[] | undefined)?.[0]).toBe(expectedEuid);
+        expect(expectedEuid).toMatch(/^user:.+/);
+        expect(expectedEuid).toContain('@');
+
+        if (scenario.expectedMeta === undefined) {
+          throw new Error(`USER_TS_EXTRACTION_CASES missing expectedMeta for id=${scenario.id}`);
         }
-
-        const result = await runUserRuntimeSearch(esClient, scenario.query, 10);
-        const hits = result.hits.hits;
-        expect(hits).toHaveLength(1);
-
-        const hit = hits[0];
-        assertUserRuntimeMatchesMemory(hit);
-
-        expect(getEuidFromObject(USER_ENTITY_TYPE, hit)).toBe(scenario.expectedEuid);
-        expect((hit.fields?.entity_id as string[] | undefined)?.[0]).toBe(scenario.expectedEuid);
-
-        if (scenario.expectedEuid !== undefined) {
-          expect(scenario.expectedEuid).toMatch(/^user:.+/);
-          expect(scenario.expectedEuid).toContain('@');
-          if (scenario.expectedMeta) {
-            expect(deriveUserEntityPreAggMetadata(hit)).toStrictEqual({
-              namespace: scenario.expectedMeta.namespace,
-              confidence: scenario.expectedMeta.confidence,
-              entityName: scenario.expectedMeta.entityName,
-            });
-          }
-        }
-      });
-    }
-  });
+        expect(deriveUserEntityPreAggMetadata(hit)).toStrictEqual({
+          namespace: scenario.expectedMeta.namespace,
+          confidence: scenario.expectedMeta.confidence,
+          entityName: scenario.expectedMeta.entityName,
+        });
+      }
+    );
+  }
 
   apiTest(
     'should omit user entity_id for excluded user.name; runtime matches in-memory euid (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, user.ts)',
