@@ -1519,6 +1519,10 @@
       "internal": {
         "type": "boolean"
       },
+      "is_dependency_of": {
+        "dynamic": false,
+        "properties": {}
+      },
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
@@ -1530,6 +1534,9 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
+      },
+      "installed_as_dependency": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
