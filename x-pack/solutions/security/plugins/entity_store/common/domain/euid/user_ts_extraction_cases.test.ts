@@ -33,23 +33,20 @@ function deriveUserMeta(doc: Record<string, unknown>) {
 }
 
 describe('USER_TS_EXTRACTION_CASES vs getEuidFromObject (user.ts)', () => {
-  it.each(USER_TS_EXTRACTION_CASES.map((c) => [c.id, c] as const))(
-    '%s',
-    (_id, scenario) => {
-      const doc = scenario.ingestSource ?? scenario.dslFilterSource;
-      const euid = getEuidFromObject(USER, doc);
-      expect(euid).toBe(scenario.expectedEuid);
+  it.each(USER_TS_EXTRACTION_CASES.map((c) => [c.id, c] as const))('%s', (_id, scenario) => {
+    const doc = scenario.ingestSource ?? scenario.dslFilterSource;
+    const euid = getEuidFromObject(USER, doc);
+    expect(euid).toBe(scenario.expectedEuid);
 
-      if (scenario.expectedEuid === undefined) {
-        return;
-      }
-      if (scenario.expectedMeta) {
-        expect(deriveUserMeta(doc)).toStrictEqual({
-          namespace: scenario.expectedMeta.namespace,
-          confidence: scenario.expectedMeta.confidence,
-          entityName: scenario.expectedMeta.entityName,
-        });
-      }
+    if (scenario.expectedEuid === undefined) {
+      return;
     }
-  );
+    if (scenario.expectedMeta) {
+      expect(deriveUserMeta(doc)).toStrictEqual({
+        namespace: scenario.expectedMeta.namespace,
+        confidence: scenario.expectedMeta.confidence,
+        entityName: scenario.expectedMeta.entityName,
+      });
+    }
+  });
 });

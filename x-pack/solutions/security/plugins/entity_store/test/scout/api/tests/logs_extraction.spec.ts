@@ -725,8 +725,12 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       });
 
       // Invalid documents were omitted
-      expect((await searchDocById(esClient, 'user:mixed-invalid-failure@okta')).hits.hits).toHaveLength(0);
-      expect((await searchDocById(esClient, 'user:root@mixed-root-host@local')).hits.hits).toHaveLength(0);
+      expect(
+        (await searchDocById(esClient, 'user:mixed-invalid-failure@okta')).hits.hits
+      ).toHaveLength(0);
+      expect(
+        (await searchDocById(esClient, 'user:root@mixed-root-host@local')).hits.hits
+      ).toHaveLength(0);
     }
   );
 
@@ -745,7 +749,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         await ingestDoc(esClient, {
           '@timestamp': `2026-03-18T20:0${i + 1}:00Z`,
           event: { kind: 'event', category: 'network', outcome: 'success' },
-          user: { name: name },
+          user: { name },
           host: { id: `excluded-host-${name}`, name: 'server' },
         });
       }
@@ -778,7 +782,10 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       }
 
       // Valid non-IDP user must be extracted
-      const allowedHit = await searchDocById(esClient, 'user:allowed.user@excluded-host-allowed@local');
+      const allowedHit = await searchDocById(
+        esClient,
+        'user:allowed.user@excluded-host-allowed@local'
+      );
       expect(allowedHit.hits.hits).toHaveLength(1);
       expect(allowedHit.hits.hits[0]._source).toMatchObject({
         entity: {
@@ -866,7 +873,10 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         },
       });
 
-      const userLocalHit = await searchDocById(esClient, 'user:mixed-all-local@mixed-all-host@local');
+      const userLocalHit = await searchDocById(
+        esClient,
+        'user:mixed-all-local@mixed-all-host@local'
+      );
       expect(userLocalHit.hits.hits).toHaveLength(1);
       expect(userLocalHit.hits.hits[0]._source).toMatchObject({
         entity: {
@@ -876,7 +886,9 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         },
       });
 
-      expect((await searchDocById(esClient, 'user:mixed-all-invalid@okta')).hits.hits).toHaveLength(0);
+      expect((await searchDocById(esClient, 'user:mixed-all-invalid@okta')).hits.hits).toHaveLength(
+        0
+      );
 
       const serviceHit = await searchDocById(esClient, 'service:mixed-service-valid');
       expect(serviceHit.hits.hits).toHaveLength(1);
@@ -932,7 +944,9 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       expect(extractionResponse.body).toMatchObject({ count: 0 });
 
       // Verify none of the omitted documents produced entities
-      expect((await searchDocById(esClient, 'user:omitted-failure@okta')).hits.hits).toHaveLength(0);
+      expect((await searchDocById(esClient, 'user:omitted-failure@okta')).hits.hits).toHaveLength(
+        0
+      );
       expect(
         (await searchDocById(esClient, 'user:root@omitted-root-host@local')).hits.hits
       ).toHaveLength(0);
