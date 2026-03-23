@@ -96,7 +96,6 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 
 1. Add an entry in `docs/reference/toc.yml` under the data and context sources connectors section.
 2. Add a row in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`.
-3. The main connectors landing page (`docs/reference/connectors-kibana.md`) includes this snippet via its "Data and context sources" dropdown — no direct edit to that file is needed as long as the snippet is updated.
 
 Once you are done developing the connector, data source, tests, and documentation, let the user review your work before next steps.
 
