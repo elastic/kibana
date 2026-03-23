@@ -142,4 +142,90 @@ describe('selectSkills', () => {
     expect(result).toHaveLength(3);
     expect(result.map((s) => s.id).sort()).toEqual(['builtin-1', 'builtin-2', 'custom-1']);
   });
+
+  describe('additionalSkillIds (plugin skills)', () => {
+    it('returns empty when only additionalSkillIds are provided but list is empty', async () => {
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockResolvedValue(new Map());
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig(),
+        additionalSkillIds: [],
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('returns skills from additionalSkillIds', async () => {
+      const pluginSkill = createSkill('plugin-skill-1');
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockImplementation(async (ids: string[]) => {
+        const map = new Map<string, ReturnType<typeof createSkill>>();
+        if (ids.includes('plugin-skill-1')) map.set('plugin-skill-1', pluginSkill);
+        return map;
+      });
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig(),
+        additionalSkillIds: ['plugin-skill-1'],
+      });
+
+      expect(result).toEqual([pluginSkill]);
+      expect(skillsStore.add).toHaveBeenCalledWith(pluginSkill);
+    });
+
+    it('merges additionalSkillIds with explicit skill_ids, no duplicates', async () => {
+      const sharedSkill = createSkill('shared-skill');
+      const pluginOnlySkill = createSkill('plugin-only');
+      const explicitOnlySkill = createSkill('explicit-only');
+
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockImplementation(async (ids: string[]) => {
+        const map = new Map<string, ReturnType<typeof createSkill>>();
+        if (ids.includes('shared-skill')) map.set('shared-skill', sharedSkill);
+        if (ids.includes('explicit-only')) map.set('explicit-only', explicitOnlySkill);
+        if (ids.includes('plugin-only')) map.set('plugin-only', pluginOnlySkill);
+        return map;
+      });
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({ skill_ids: ['shared-skill', 'explicit-only'] }),
+        additionalSkillIds: ['shared-skill', 'plugin-only'],
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result.map((s) => s.id).sort()).toEqual([
+        'explicit-only',
+        'plugin-only',
+        'shared-skill',
+      ]);
+    });
+
+    it('does not call bulkGet for additionalSkillIds if list is empty', async () => {
+      const customSkill = createSkill('custom-1');
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockResolvedValue(new Map([['custom-1', customSkill]]));
+      const skillsStore = createSkillsStoreMock();
+
+      await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({ skill_ids: ['custom-1'] }),
+        additionalSkillIds: [],
+      });
+
+      // bulkGet called once for skill_ids, but NOT a second time for empty additionalSkillIds
+      expect(skills.bulkGet).toHaveBeenCalledTimes(1);
+      expect(skills.bulkGet).toHaveBeenCalledWith(['custom-1']);
+    });
+  });
 });
