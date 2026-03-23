@@ -66,7 +66,6 @@ export interface CreateThreatSignalOptions {
 
 export interface CreateEventSignalOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
-  currentResult: SearchAfterAndBulkCreateReturnType;
   currentEventList: EventItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
