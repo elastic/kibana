@@ -46,7 +46,10 @@ export const MatcherInput = ({
 
   const query: Query = useMemo(() => ({ query: value, language: 'kuery' }), [value]);
 
-  const handleChange = useCallback((q: Query) => onChange(q.query as string), [onChange]);
+  const handleChange = useCallback(
+    (q: Query) => onChange(typeof q.query === 'string' ? q.query : ''),
+    [onChange]
+  );
 
   return (
     <QueryStringInput

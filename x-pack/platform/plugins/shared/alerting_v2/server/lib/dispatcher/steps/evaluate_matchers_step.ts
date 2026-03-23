@@ -45,6 +45,8 @@ export function evaluateMatchers(
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 
+    let context: MatcherContext | undefined;
+
     for (const policy of allPolicies) {
       if (!policy.enabled) continue;
       if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
@@ -54,7 +56,7 @@ export function evaluateMatchers(
         continue;
       }
 
-      const context = createMatcherContext(episode, rule);
+      context ??= createMatcherContext(episode, rule);
       const isMatch = evaluateKql(policy.matcher, context);
       if (isMatch) {
         matched.push({ episode, policy });
