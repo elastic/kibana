@@ -109,7 +109,6 @@ const getChartButton = ({
   'aria-controls': 'unifiedHistogramCollapsablePanel',
   isDisabled,
   toolTipContent: isDisabled ? disabledCollapsingTooltip : undefined,
-  title: isDisabled ? disabledCollapsingTooltip : undefined,
   onClick: toggleChart,
 });
 
@@ -134,7 +133,6 @@ const getTableButton = ({
   'aria-expanded': !isHidden,
   isDisabled,
   toolTipContent: isDisabled ? disabledCollapsingTooltip : undefined,
-  title: isDisabled ? disabledCollapsingTooltip : undefined,
   onClick: toggleTable,
 });
 
