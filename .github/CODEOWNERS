@@ -143,7 +143,6 @@ src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
-src/core/packages/chrome/layout/core-chrome-layout-feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
 src/core/packages/chrome/navigation @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
@@ -980,6 +979,7 @@ x-pack/platform/packages/shared/kbn-ai-tools @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team
+x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-rule-management
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-data-forge @elastic/actionable-obs-team
@@ -1108,6 +1108,7 @@ x-pack/platform/plugins/shared/data_catalog @elastic/workchat-eng
 x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/data_sources @elastic/workchat-eng
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/elastic_console @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
@@ -2379,18 +2380,22 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
+src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/response-ops
+src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
@@ -2398,11 +2403,6 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
 
@@ -3209,8 +3209,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
 # Appex QA to own auto-generated scout metadata
-/**/scout/.meta/** @kibanamachine @elastic/appex-qa
-/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
+/**/scout/.meta/**
+/**/scout_*/.meta/**
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
