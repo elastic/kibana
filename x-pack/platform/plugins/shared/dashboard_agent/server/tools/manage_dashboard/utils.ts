@@ -42,7 +42,10 @@ const visualizationAttachmentDataSchema = z.object({
 
 type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
 
-const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromVisualizationAttachment = (
+  data: unknown,
+  attachmentId: string
+): ResolvedPanelWithoutGrid[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
@@ -61,13 +64,18 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelW
       visualization: visualization as LensApiSchemaType,
       title,
       ...(query ? { query } : {}),
+      sourceAttachmentId: attachmentId,
     },
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromAttachment = (
+  type: string,
+  data: unknown,
+  attachmentId: string
+): ResolvedPanelWithoutGrid[] => {
   if (type === AttachmentType.visualization) {
-    return resolvePanelsFromVisualizationAttachment(data);
+    return resolvePanelsFromVisualizationAttachment(data, attachmentId);
   }
 
   throw new Error(
@@ -79,7 +87,7 @@ const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanel
  * Resolves attachment ids into dashboard panel entries.
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolvePanelsFromAttachments = async ({
+export const resolvePanelsFromAttachments = ({
   attachmentInputs,
   attachments,
   logger,
@@ -87,7 +95,7 @@ export const resolvePanelsFromAttachments = async ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
@@ -107,7 +115,11 @@ export const resolvePanelsFromAttachments = async ({
         throw new Error(`Attachment "${attachmentId}" does not have a readable version.`);
       }
 
-      const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
+      const resolvedPanels = resolvePanelsFromAttachment(
+        attachmentRecord.type,
+        latestVersion.data,
+        attachmentId
+      );
       panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
     } catch (error) {
       const errorMessage = getErrorMessage(error);
