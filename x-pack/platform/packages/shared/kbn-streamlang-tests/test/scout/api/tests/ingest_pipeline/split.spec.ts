@@ -328,7 +328,7 @@ apiTest.describe(
           ],
         };
 
-        await expect(() => transpile(streamlangDSL)).rejects.toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

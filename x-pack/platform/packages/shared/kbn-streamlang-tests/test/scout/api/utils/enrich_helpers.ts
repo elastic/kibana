@@ -7,16 +7,17 @@
 
 import type { EsClient } from '@kbn/scout/src/types/services';
 
-export const ENRICH_SOURCE_INDEX = 'streams-e2e-enrich-source-ip-location';
-export const ENRICH_POLICY_NAME = 'streams-e2e-ip-location-policy';
-
 /**
  * Sets up an enrich index with an enrich policy with sample data for tests.
  * @param esClient The Elasticsearch client.
  */
-export const setupEnrichIndexWithPolicy = async (esClient: EsClient) => {
+export const setupEnrichIndexWithPolicy = async (
+  esClient: EsClient,
+  indexName: string,
+  policyName: string
+) => {
   await esClient.indices.create({
-    index: ENRICH_SOURCE_INDEX,
+    index: indexName,
     mappings: {
       properties: {
         ip: { type: 'keyword' },
@@ -29,33 +30,37 @@ export const setupEnrichIndexWithPolicy = async (esClient: EsClient) => {
   await esClient.bulk({
     refresh: true,
     body: [
-      { index: { _index: ENRICH_SOURCE_INDEX } },
+      { index: { _index: indexName } },
       { ip: '10.0.0.1', city: 'New York', country: 'US' },
-      { index: { _index: ENRICH_SOURCE_INDEX } },
+      { index: { _index: indexName } },
       { ip: '10.0.0.2', city: 'London', country: 'GB' },
     ],
   });
 
   await esClient.enrich.putPolicy({
-    name: ENRICH_POLICY_NAME,
+    name: policyName,
     match: {
-      indices: ENRICH_SOURCE_INDEX,
+      indices: indexName,
       match_field: 'ip',
       enrich_fields: ['city', 'country'],
     },
   });
 
-  await esClient.enrich.executePolicy({ name: ENRICH_POLICY_NAME });
+  await esClient.enrich.executePolicy({ name: policyName });
 };
 
 /**
  * Tears down an enrich index with an enrich policy that were created by the setup function.
  * @param esClient The Elasticsearch client.
  */
-export const teardownEnrichIndexWithPolicy = async (esClient: EsClient) => {
-  await esClient.enrich.deletePolicy({ name: ENRICH_POLICY_NAME });
+export const teardownEnrichIndexWithPolicy = async (
+  esClient: EsClient,
+  indexName: string,
+  policyName: string
+) => {
+  await esClient.enrich.deletePolicy({ name: policyName });
   await esClient.indices.delete({
-    index: ENRICH_SOURCE_INDEX,
+    index: indexName,
     ignore_unavailable: true,
   });
 };

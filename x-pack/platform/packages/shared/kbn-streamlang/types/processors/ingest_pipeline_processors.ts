@@ -205,4 +205,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineConcatProcessor
   | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineJsonExtractProcessor
+  | IngestPipelineEnrichProcessor
   | IngestPipelineManualIngestPipelineProcessor;

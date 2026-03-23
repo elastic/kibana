@@ -12,10 +12,12 @@ import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import type { EnrichPolicyResolver } from '@kbn/streamlang/types/resolvers';
 import { streamlangApiTest as apiTest } from '../..';
 import {
-  ENRICH_POLICY_NAME,
   setupEnrichIndexWithPolicy,
   teardownEnrichIndexWithPolicy,
 } from '../../utils/enrich_helpers';
+
+const ENRICH_POLICY_NAME = 'test-enrich-ingest-pipeline-policy';
+const ENRICH_INDEX_NAME = 'test-enrich-ingest-pipeline-index';
 
 const mockEnrichPolicyResolver: EnrichPolicyResolver = () =>
   Promise.resolve({
@@ -28,11 +30,11 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ esClient }) => {
-      await setupEnrichIndexWithPolicy(esClient);
+      await setupEnrichIndexWithPolicy(esClient, ENRICH_INDEX_NAME, ENRICH_POLICY_NAME);
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      await teardownEnrichIndexWithPolicy(esClient);
+      await teardownEnrichIndexWithPolicy(esClient, ENRICH_INDEX_NAME, ENRICH_POLICY_NAME);
     });
 
     apiTest('should enrich a document with location data based on ip', async ({ testBed }) => {

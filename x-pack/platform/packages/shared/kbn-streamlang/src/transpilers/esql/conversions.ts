@@ -38,7 +38,6 @@ import type {
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import {
   getStreamlangResolverForProcessor,
-  type EnrichPolicyResolver,
   type StreamlangResolver,
   type StreamlangResolverOptions,
 } from '../../../types/resolvers';
@@ -139,10 +138,10 @@ async function convertProcessorToESQL(
       return convertJsonExtractProcessorToESQL(processor as JsonExtractProcessor);
 
     case 'enrich':
-      return await convertEnrichProcessorToESQL(
-        processor as EnrichProcessor,
-        resolver as EnrichPolicyResolver
-      );
+      if (!resolver) {
+        throw new Error('Enrich policy resolver is required for enrich processor.');
+      }
+      return await convertEnrichProcessorToESQL(processor as EnrichProcessor, resolver);
 
     case 'manual_ingest_pipeline':
       return [

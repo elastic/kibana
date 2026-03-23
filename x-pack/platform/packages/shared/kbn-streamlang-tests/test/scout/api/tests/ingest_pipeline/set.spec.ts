@@ -160,7 +160,7 @@ apiTest.describe(
         ],
       };
 
-      await expect(() => transpile(streamlangDSL)).rejects.toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Set processor must have either value or copy_from, but not both.'
       );
     });
@@ -177,7 +177,7 @@ apiTest.describe(
         ],
       };
 
-      await expect(() => transpile(streamlangDSL)).rejects.toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Set processor must have either value or copy_from, but not both.'
       );
     });
