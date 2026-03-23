@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { initTour } from './lib';
-
-export { SolutionViewTour } from './solution_view_tour';
+export { telemetryEventsSchemas } from './events';
