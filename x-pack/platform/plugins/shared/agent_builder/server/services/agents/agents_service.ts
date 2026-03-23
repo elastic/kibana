@@ -16,7 +16,12 @@ import type {
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AgentsServiceSetup, AgentsServiceStart, ToolRefsParams } from './types';
+import type {
+  AgentsServiceSetup,
+  AgentsServiceStart,
+  ToolRefsParams,
+  SkillRefsParams,
+} from './types';
 import type { AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
 import {
@@ -120,10 +125,28 @@ export class AgentsService {
       return client.getAgentsUsingTools({ toolIds });
     };
 
+    const removeSkillRefsFromAgents = async ({
+      request,
+      skillIds,
+    }: SkillRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.removeSkillRefsFromAgents({ skillIds });
+    };
+
+    const getAgentsUsingSkills = async ({
+      request,
+      skillIds,
+    }: SkillRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingSkills({ skillIds });
+    };
+
     return {
       getRegistry,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
+      removeSkillRefsFromAgents,
+      getAgentsUsingSkills,
     };
   }
 }
