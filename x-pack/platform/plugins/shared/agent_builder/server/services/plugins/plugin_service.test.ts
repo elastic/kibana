@@ -397,18 +397,10 @@ describe('PluginsService', () => {
 
   describe('deletePlugin', () => {
     it('deletes associated skills by plugin name, then deletes via registry', async () => {
-      mockClient.has.mockResolvedValue(false);
+      mockClient.has.mockResolvedValue(true);
       mockClient.get.mockResolvedValue(
         createMockPersistedPlugin({ id: 'plugin-1', name: 'my-plugin' })
       );
-
-      const mockGetReturningPlugin = jest
-        .fn()
-        .mockImplementation(async () =>
-          mockClient.has('plugin-1').then(async () => mockClient.get('plugin-1'))
-        );
-      mockClient.has.mockResolvedValue(true);
-
       mockSkillClient.deleteByPluginId.mockResolvedValue(undefined);
       mockClient.delete.mockResolvedValue(undefined);
 
