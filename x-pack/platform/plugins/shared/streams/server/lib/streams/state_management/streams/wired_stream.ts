@@ -223,6 +223,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       cascadingChanges.push({
         type: 'upsert',
         definition: {
+          type: 'wired',
           name: parentId,
           description: '',
           updated_at: now,
@@ -256,6 +257,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: routeTarget,
               description: '',
               updated_at: now,
@@ -288,6 +290,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: now,
@@ -339,6 +342,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
