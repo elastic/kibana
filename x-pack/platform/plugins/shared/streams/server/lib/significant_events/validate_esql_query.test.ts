@@ -23,6 +23,7 @@ const createWiredStreamDefinition = (name: string): Streams.WiredStream.Definiti
   name,
   description: '',
   updated_at: new Date().toISOString(),
+  type: 'wired',
   ingest: {
     lifecycle: { inherit: {} },
     processing: { steps: [], updated_at: new Date().toISOString() },
@@ -38,6 +39,7 @@ const createWiredStreamDefinition = (name: string): Streams.WiredStream.Definiti
 const createClassicStreamDefinition = (name: string): Streams.ClassicStream.Definition => ({
   name,
   description: '',
+  type: 'classic',
   updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { inherit: {} },
