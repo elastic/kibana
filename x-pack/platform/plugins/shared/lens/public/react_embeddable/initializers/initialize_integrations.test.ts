@@ -6,20 +6,22 @@
  */
 
 import { faker } from '@faker-js/faker';
+
+import type { LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+
 import { createEmptyLensState } from '../helper';
 import { getLensRuntimeStateMock } from '../mocks';
-import type { LensRuntimeState } from '@kbn/lens-common';
 import { initializeIntegrations } from './initialize_integrations';
 
-function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
+function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>): LensApi {
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
   const { api } = initializeIntegrations(() => runtimeState);
-  return api;
+  return api as LensApi;
 }
 
 function createAttributesWithReferences() {
   const attributes = createEmptyLensState().attributes;
-  // inject some references to test later
   attributes.references = [{ type: 'index-pattern', id: '1', name: 'indexpattern-datasource' }];
   return attributes;
 }
@@ -30,11 +32,10 @@ describe('Dashboard services API', () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({ attributes });
       const serializedState = api.serializeState();
-      // * attributes are sent back
       expect(serializedState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
-      // * savedObjectId is undefined for by-value panels
-      expect(serializedState).toHaveProperty('savedObjectId', undefined);
+      expect(serializedState.savedObjectId).toBeUndefined();
     });
+
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({
@@ -42,7 +43,6 @@ describe('Dashboard services API', () => {
         attributes,
       });
       const serializedState = api.serializeState();
-      // check the same 3 things as above
       expect(serializedState).not.toEqual(
         expect.objectContaining({ attributes: expect.anything() })
       );

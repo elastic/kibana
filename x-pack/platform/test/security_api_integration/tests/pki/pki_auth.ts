@@ -542,5 +542,49 @@ export default function ({ getService }: FtrProviderContext) {
         expect(auditEvents[0].kibana.authentication_provider).to.be('pki');
       });
     });
+
+    it('should support minimal authentication', async () => {
+      const response = await supertest
+        .get('/security/account')
+        .ca(CA_CERT)
+        .pfx(FIRST_CLIENT_CERT)
+        .expect(200);
+
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).to.have.length(1);
+
+      const sessionCookie = parseCookie(cookies[0])!;
+      checkCookieIsSet(sessionCookie);
+
+      // Access the minimal and default auth endpoint with the session cookie.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .ca(CA_CERT)
+        .pfx(FIRST_CLIENT_CERT)
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+      const defaultResponse = await supertest
+        .get('/internal/security/me')
+        .ca(CA_CERT)
+        .pfx(FIRST_CLIENT_CERT)
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql(defaultResponse.body.username);
+      expect(minimalResponse.body.principal.username).to.eql('first_client');
+
+      expect(minimalResponse.body.principal.authentication_provider).to.eql(
+        defaultResponse.body.authentication_provider
+      );
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'pki',
+        name: 'pki',
+      });
+
+      // In minimal authentication mode, unlike when in default authentication mode, we don't call ES Authenticate API,
+      // so we don't have `authentication_realm` information available.
+      expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
+      expect(defaultResponse.body).to.have.property('authentication_realm');
+    });
   });
 }
