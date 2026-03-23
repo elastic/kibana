@@ -92,9 +92,7 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <strong>{entityName}</strong>
-        </EuiText>
+        <EuiText size="s">{entityName}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -114,9 +112,7 @@ export const groupPanelRenderer = (
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>{entityType}</strong>
-          </EuiText>
+          <EuiText size="s">{entityType}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
