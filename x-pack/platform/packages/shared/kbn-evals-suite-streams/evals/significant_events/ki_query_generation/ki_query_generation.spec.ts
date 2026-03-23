@@ -10,7 +10,7 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 import { tags } from '@kbn/scout';
 import kbnDatemath from '@kbn/datemath';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
@@ -224,7 +224,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     MANAGED_STREAM_NAME
                   );
 
-                  const stream = { ...logsStream, name: MANAGED_STREAM_SEARCH_PATTERN };
+                  const stream = {
+                    ...logsStream,
+                    name: MANAGED_STREAM_SEARCH_PATTERN,
+                  } as Streams.all.Definition;
                   const kiTypeCounts = kis.reduce<Record<string, number>>((counts, ki) => {
                     counts[ki.type] = (counts[ki.type] ?? 0) + 1;
                     return counts;
@@ -313,12 +316,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               ],
             },
             task: async () => {
-              const { stream } = await apiServices.streams.getStreamDefinition(
+              const { stream: streamFromApi } = await apiServices.streams.getStreamDefinition(
                 emptyDataStreamTestIndex!
               );
 
               const { queries } = await generateSignificantEvents({
-                stream,
+                stream: streamFromApi as Streams.all.Definition,
                 esClient,
                 start: kbnDatemath.parse('now-24h')!.valueOf(),
                 end: kbnDatemath.parse('now')!.valueOf(),
