@@ -18,7 +18,7 @@ import { usePersistedConversationId } from '../../../../../hooks/use_persisted_c
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
-import { useAttachmentUiDefinition } from '@kbn/agent-builder-plugin/public/application/hooks/use_attachment_ui_definition';
+import { useAttachmentUiDefinition } from '../../../../../hooks/use_attachment_ui_definition';
 
 interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
