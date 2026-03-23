@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export const PACKS_ID = 'packList';
-export const PACK_USERS_ID = 'packUsers';
+export const sanitizeSearch = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+  const sanitized = value.replace(/[*?\\{}()|"<>]/g, '').trim();
+
+  return sanitized || undefined;
+};
