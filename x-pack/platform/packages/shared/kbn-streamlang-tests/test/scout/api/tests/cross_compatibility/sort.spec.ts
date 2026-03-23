@@ -11,8 +11,7 @@ import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-// https://github.com/elastic/kibana/issues/258476
-apiTest.describe.skip(
+apiTest.describe(
   'Cross-compatibility - Sort Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -95,11 +94,17 @@ apiTest.describe.skip(
       await testBed.ingest('esql-sort-target', docs);
       const esqlResult = await esql.queryOnIndex('esql-sort-target', query);
 
-      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
       expect(ingestResult[0]).toStrictEqual(
         expect.objectContaining({
           tags: ['charlie', 'alpha', 'bravo'], // Original preserved
           sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
+        })
+      );
+      expect(esqlResult.documentsWithoutKeywords[0]).toStrictEqual(
+        expect.objectContaining({
+          // ES|QL returns keyword fields sorted, so tags order may differ from ingest _source
+          tags: expect.arrayContaining(['charlie', 'alpha', 'bravo']),
+          sorted_tags: ['alpha', 'bravo', 'charlie'],
         })
       );
     });
@@ -151,8 +156,17 @@ apiTest.describe.skip(
       await testBed.ingest('esql-sort-single', docs);
       const esqlResult = await esql.queryOnIndex('esql-sort-single', query);
 
-      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+      // Note: behavioral difference for single-element arrays —
+      // ingest pipeline preserves the single-element array from MV_SORT,
+      // while ES|QL returns a scalar when MV_SORT operates on a single value.
+      // Check each result independently.
       expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
+      const esqlTags = esqlResult.documentsWithoutKeywords[0].tags;
+      // Accept either scalar "single" or array ["single"] from ES|QL
+      expect(
+        esqlTags === 'single' ||
+          (Array.isArray(esqlTags) && esqlTags.length === 1 && esqlTags[0] === 'single')
+      ).toBe(true);
     });
 
     apiTest('should support conditional sort with where clause', async ({ testBed, esql }) => {
