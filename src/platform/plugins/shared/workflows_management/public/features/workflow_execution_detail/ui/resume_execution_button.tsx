@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StepContext } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
@@ -24,7 +25,7 @@ import type { ContextOverrideData } from '../../../shared/utils/build_step_conte
 interface ResumeExecutionButtonProps {
   executionId: string;
   resumeMessage?: string;
-  resumeSchema?: Record<string, unknown>;
+  resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
 }

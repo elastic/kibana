@@ -13,6 +13,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -26,7 +27,7 @@ interface WorkflowExecutionOverviewProps {
   showResumeUI?: boolean;
   executionId?: string;
   resumeMessage?: string;
-  resumeSchema?: Record<string, unknown>;
+  resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
 }
 
