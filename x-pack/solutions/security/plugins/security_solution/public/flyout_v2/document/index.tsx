@@ -30,7 +30,7 @@ export interface DocumentFlyoutProps {
 export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(({ hit, renderCellActions }) => {
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         <Header hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
