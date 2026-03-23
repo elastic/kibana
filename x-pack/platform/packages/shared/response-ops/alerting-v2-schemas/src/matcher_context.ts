@@ -26,34 +26,18 @@ export interface MatcherContext {
 export interface MatcherContextFieldDescriptor {
   path: string;
   type: 'string' | 'boolean' | 'string[]';
-  description: string;
-  values?: string[];
 }
 
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
-  { path: 'episode_id', type: 'string', description: 'Unique episode identifier' },
-  {
-    path: 'episode_status',
-    type: 'string',
-    description: 'Episode status (inactive, pending, active, recovering)',
-    values: ['inactive', 'pending', 'active', 'recovering'],
-  },
-  { path: 'group_hash', type: 'string', description: 'Alert group hash' },
-  {
-    path: 'last_event_timestamp',
-    type: 'string',
-    description: 'Timestamp of the last event',
-  },
-  { path: 'rule.id', type: 'string', description: 'Rule ID' },
-  { path: 'rule.name', type: 'string', description: 'Rule name' },
-  { path: 'rule.description', type: 'string', description: 'Rule description' },
-  { path: 'rule.labels', type: 'string[]', description: 'Rule labels' },
-  {
-    path: 'rule.enabled',
-    type: 'boolean',
-    description: 'Whether the rule is enabled',
-    values: ['true', 'false'],
-  },
-  { path: 'rule.createdAt', type: 'string', description: 'Rule creation date' },
-  { path: 'rule.updatedAt', type: 'string', description: 'Rule last update date' },
+  { path: 'episode_id', type: 'string' },
+  { path: 'episode_status', type: 'string' },
+  { path: 'group_hash', type: 'string' },
+  { path: 'last_event_timestamp', type: 'string' },
+  { path: 'rule.id', type: 'string' },
+  { path: 'rule.name', type: 'string' },
+  { path: 'rule.description', type: 'string' },
+  { path: 'rule.labels', type: 'string[]' },
+  { path: 'rule.enabled', type: 'boolean' },
+  { path: 'rule.createdAt', type: 'string' },
+  { path: 'rule.updatedAt', type: 'string' },
 ];
