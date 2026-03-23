@@ -159,7 +159,7 @@ export class NotificationPolicySavedObjectService
   public async findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
-        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE }
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, namespaces: ['*'], perPage: 1000 }
       );
 
     const results: NotificationPolicySavedObjectBulkGetItem[] = [];
