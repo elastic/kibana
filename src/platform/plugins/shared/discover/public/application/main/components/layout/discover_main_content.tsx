@@ -118,7 +118,8 @@ export const DiscoverMainContent = ({
   const isEsqlMode = useIsEsqlMode();
   const isDropAllowed = Boolean(onDropFieldToTable);
   const showChart = useAppStateSelector((state) => !state.hideChart);
-  const showPanelsToggle = !isChartAvailable || !showChart;
+  const showTable = useAppStateSelector((state) => !state.hideTable);
+  const showPanelsToggle = !isChartAvailable || !showChart || !showTable;
 
   const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
@@ -170,7 +171,7 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL && showTable ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
