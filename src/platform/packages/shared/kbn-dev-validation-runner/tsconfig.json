@@ -4,22 +4,18 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
     "@kbn/dev-utils",
-    "@kbn/dev-cli-runner",
-    "@kbn/repo-packages",
-    "@kbn/tooling-log"
+    "@kbn/moon"
   ]
 }
