@@ -145,25 +145,6 @@ export class CRUDClient {
     });
   }
 
-  // TODO(kuba): This is a short description of a plan to replace upsertEntity
-  // and upsertEntitiesBulk with createEntity(), updateEntity(), and
-  // bulkUpdateEntity().
-  //
-  // NOTE: all new methods should operate directly on LATEST index; ditch usage of UPDATES
-  //
-  // 1. Implement createEntity - ignores provided entity.id and calculates it
-  // using getEuidFromObject(); throws if deriving EUID from given object is
-  // impossible
-  // 2. Implement updateEntity folowing logic outlined in https://github.com/elastic/kibana/issues/256698
-  //   - If only id and non id relevant data is provided, update
-  //   - If id and id relevant data is provided, make sure that they match, if not throw an error (or maybe overwrite the id)
-  //   - If only id relevant data is provided generate the id to update
-  // 3. Rename upsertEntitiesBulk to bulkUpdateEntity and update its logic to follow the logic in 2.
-  // 4. Update tests and utils.ts
-  // 5. Update API by removing old endpoints and adding new ones
-  // 6. Update Scout tests to test new logic, make sure they pass
-  // 7. Remove updates index and methods that install/test it.
-
   // updateEntity takes a single entity patch and applies it to an existing
   // entity in LATEST index. The patch has to contain either:
   // 1. ID only - a valid ID and non-identifying data - provided ID will be used
