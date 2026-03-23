@@ -11,6 +11,7 @@ describe('isOtelStream', () => {
   const now = new Date().toISOString();
 
   const createWired = (name: string) => ({
+    type: 'wired' as const,
     name,
     description: '',
     updated_at: now,
@@ -24,6 +25,7 @@ describe('isOtelStream', () => {
   });
 
   const createClassic = (name: string) => ({
+    type: 'classic' as const,
     name,
     description: '',
     updated_at: now,
