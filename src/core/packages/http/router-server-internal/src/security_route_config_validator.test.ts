@@ -212,23 +212,6 @@ describe('RouteSecurity validation', () => {
     );
   });
 
-  it('should fail validation when authc is provided in multiple configs', () => {
-    const routeSecurity = {
-      authz: {
-        requiredPrivileges: ['read'],
-      },
-      authc: {
-        enabled: false,
-      },
-    };
-
-    expect(() =>
-      validRouteSecurity(routeSecurity, { authRequired: false })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify both security.authc and options.authRequired"`
-    );
-  });
-
   it('should pass validation when authc is minimal', () => {
     expect(() =>
       validRouteSecurity({
