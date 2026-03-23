@@ -60,7 +60,7 @@ describe('createGetDataQualityTool handler', () => {
       expect(data.lifecycle_degraded_docs).toBe(50);
       expect(data.recent_failed_docs).toBe(10);
       expect(data.recent_failed_time_range).toEqual({ start: 'now-24h', end: 'now' });
-      expect(data.quality_score).toBeDefined();
+      expect(data.quality).toBeDefined();
       expect(data.failure_store_status).toBe('inherited');
     }
   });
@@ -83,7 +83,7 @@ describe('createGetDataQualityTool handler', () => {
 });
 
 describe('computeQualityMetrics', () => {
-  it('returns score 100 when no degraded or failed', () => {
+  it('returns "good" when no degraded or failed', () => {
     const result = computeQualityMetrics({
       totalCount: 1000,
       degradedCount: 0,
@@ -91,17 +91,27 @@ describe('computeQualityMetrics', () => {
     });
     expect(result.degradedPct).toBe(0);
     expect(result.failedPct).toBe(0);
-    expect(result.qualityScore).toBe(100);
+    expect(result.quality).toBe('good');
   });
 
-  it('computes degraded percentage correctly', () => {
+  it('returns "poor" when degraded percentage exceeds 3%', () => {
     const result = computeQualityMetrics({
       totalCount: 200,
       degradedCount: 20,
       failedCount: 0,
     });
     expect(result.degradedPct).toBe(10);
-    expect(result.qualityScore).toBe(90);
+    expect(result.quality).toBe('poor');
+  });
+
+  it('returns "degraded" when degraded percentage is between 0% and 3%', () => {
+    const result = computeQualityMetrics({
+      totalCount: 1000,
+      degradedCount: 10,
+      failedCount: 0,
+    });
+    expect(result.degradedPct).toBe(1);
+    expect(result.quality).toBe('degraded');
   });
 
   it('computes failed percentage with denominator = total + failed', () => {
@@ -112,21 +122,20 @@ describe('computeQualityMetrics', () => {
     });
     const expectedFailedPct = (10 / 110) * 100;
     expect(result.failedPct).toBeCloseTo(expectedFailedPct);
+    expect(result.quality).toBe('poor');
   });
 
-  it('combines degraded and failed', () => {
+  it('returns "poor" when failed percentage exceeds 3%', () => {
     const result = computeQualityMetrics({
       totalCount: 100,
-      degradedCount: 10,
+      degradedCount: 0,
       failedCount: 5,
     });
-    expect(result.degradedPct).toBe(10);
     expect(result.failedPct).toBeCloseTo((5 / 105) * 100);
-    expect(result.qualityScore).toBeLessThan(90);
-    expect(result.qualityScore).toBeGreaterThan(0);
+    expect(result.quality).toBe('poor');
   });
 
-  it('returns all zeros when totalCount is 0 and no failed', () => {
+  it('returns "good" when totalCount is 0 and no failed', () => {
     const result = computeQualityMetrics({
       totalCount: 0,
       degradedCount: 0,
@@ -134,16 +143,16 @@ describe('computeQualityMetrics', () => {
     });
     expect(result.degradedPct).toBe(0);
     expect(result.failedPct).toBe(0);
-    expect(result.qualityScore).toBe(100);
+    expect(result.quality).toBe('good');
   });
 
-  it('clamps quality score at 0 minimum', () => {
+  it('returns "poor" when all docs are degraded and failed', () => {
     const result = computeQualityMetrics({
       totalCount: 100,
       degradedCount: 100,
       failedCount: 100,
     });
-    expect(result.qualityScore).toBe(0);
+    expect(result.quality).toBe('poor');
   });
 });
 

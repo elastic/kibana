@@ -97,7 +97,7 @@ export const streamExplorationSkill = defineSkillType({
     Always include the metric value alongside each key (e.g. "host2 — 1,532 docs", "200 — 45.2%"). For terms aggregations, show the doc_count. For metric aggregations, show the computed value with units where known.
 
     Field lists: "field.name: type" format, grouped by source (own vs inherited).
-    Data quality: concise summary line (e.g. "Quality: 95/100 — 3.2% degraded, 1.8% failed").
+    Data quality: concise summary line (e.g. "Quality: poor — 3.2% degraded, 1.8% failed").
     Retention: single summary line (e.g. "Retention: ILM policy 'hot-warm-30d', 45.2 GB, 12.3M docs").
 
     Failed documents:

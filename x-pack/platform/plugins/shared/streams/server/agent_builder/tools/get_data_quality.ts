@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
+import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
+import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../routes/types';
@@ -52,7 +54,7 @@ export const createGetDataQualityTool = ({
   id: GET_DATA_QUALITY,
   type: ToolType.builtin,
   description: dedent(`
-    Returns data quality metrics for a stream: degraded document percentage, failed document percentage, an overall quality score (0-100), and failure store status.
+    Returns data quality metrics for a stream: degraded document percentage, failed document percentage, an overall quality indicator (good, degraded, or poor), and failure store status.
 
     **When to use:**
     - User asks about data quality, degraded documents, or mapping issues
@@ -95,7 +97,7 @@ export const createGetDataQualityTool = ({
       const degradedCount = degradedResults.find((s) => s.stream === name)?.count ?? 0;
       const failedCount = failedResults.find((s) => s.stream === name)?.count ?? 0;
 
-      const { degradedPct, failedPct, qualityScore } = computeQualityMetrics({
+      const { degradedPct, failedPct, quality } = computeQualityMetrics({
         totalCount,
         degradedCount,
         failedCount,
@@ -114,7 +116,7 @@ export const createGetDataQualityTool = ({
               recent_failed_docs: failedCount,
               recent_failed_pct: Math.round(failedPct * 100) / 100,
               recent_failed_time_range: { start, end },
-              quality_score: qualityScore,
+              quality,
               failure_store_status: failureStoreStatus,
             },
           },
@@ -147,12 +149,12 @@ export const computeQualityMetrics = ({
   totalCount: number;
   degradedCount: number;
   failedCount: number;
-}): { degradedPct: number; failedPct: number; qualityScore: number } => {
+}): { degradedPct: number; failedPct: number; quality: QualityIndicators } => {
   const degradedPct = totalCount > 0 ? (degradedCount / totalCount) * 100 : 0;
   const allAttempted = totalCount + failedCount;
   const failedPct = allAttempted > 0 ? (failedCount / allAttempted) * 100 : 0;
-  const qualityScore = Math.max(0, Math.round(100 - degradedPct - failedPct));
-  return { degradedPct, failedPct, qualityScore };
+  const quality = mapPercentageToQuality([degradedPct, failedPct]);
+  return { degradedPct, failedPct, quality };
 };
 
 export const detectFailureStoreStatus = (definition: Streams.all.Definition): string => {

@@ -9,18 +9,16 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getFlattenedObject } from '@kbn/std';
 import { Streams } from '@kbn/streams-schema';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../routes/types';
+import { getUnmappedFields, UNMAPPED_SAMPLE_SIZE } from '../../lib/streams/helpers/unmapped_fields';
 import {
   STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
   STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
 } from './tool_ids';
 import { classifyError } from './error_utils';
-
-const UNMAPPED_SAMPLE_SIZE = 500;
 
 const getSchemaSchema = z.object({
   name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
@@ -100,16 +98,7 @@ export const createGetSchemaTool = ({
         }
       }
 
-      const sourceFields = new Set<string>();
-      sampleDocs.hits.hits.forEach((hit) => {
-        Object.keys(getFlattenedObject(hit._source as Record<string, unknown>)).forEach((field) => {
-          sourceFields.add(field);
-        });
-      });
-
-      const unmappedFields = Array.from(sourceFields)
-        .filter((field) => !mappedFieldNames.has(field))
-        .sort();
+      const unmappedFields = getUnmappedFields({ definition, ancestors, sampleDocs });
 
       return {
         results: [
