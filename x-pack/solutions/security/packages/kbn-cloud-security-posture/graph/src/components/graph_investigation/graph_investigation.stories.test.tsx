@@ -185,13 +185,14 @@ describe('GraphInvestigation Component', () => {
   });
 
   it('renders with initial state', async () => {
-    const { container, getAllByText } = renderStory();
+    const { container, getByTestId } = renderStory();
 
     await waitFor(() => {
       const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
       expect(nodes).toHaveLength(6);
     });
-    expect(getAllByText('~ an hour ago')).toHaveLength(2);
+    // "30m" is the duration badge in the time picker
+    expect(getByTestId('dateRangePickerControlButton')).toHaveTextContent('30m');
   });
 
   it('shows error on bad kql syntax', async () => {
