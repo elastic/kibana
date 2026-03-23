@@ -21,10 +21,14 @@ export const createBaseline: Task = async (ctx, task) => {
     throw new Error('Missing migrationTypes. This task must be run from automated rollback tests.');
   }
   if (!migrationKibanaIndex) {
-    throw new Error('Missing migrationKibanaIndex. This task must be run from automated rollback tests.');
+    throw new Error(
+      'Missing migrationKibanaIndex. This task must be run from automated rollback tests.'
+    );
   }
   if (!migrationAlgorithm) {
-    throw new Error('Missing migrationAlgorithm. This task must be run from automated rollback tests.');
+    throw new Error(
+      'Missing migrationAlgorithm. This task must be run from automated rollback tests.'
+    );
   }
 
   const kibanaIndex = migrationKibanaIndex;
