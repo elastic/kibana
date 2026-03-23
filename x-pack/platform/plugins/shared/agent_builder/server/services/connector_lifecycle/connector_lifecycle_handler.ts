@@ -175,7 +175,9 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
               action: 'create',
               spaces: [spaceId],
               esClient: coreStart.elasticsearch.client.asInternalUser,
-              savedObjectsClient: coreStart.savedObjects.createInternalRepository(['action']),
+              savedObjectsClient: coreStart.savedObjects.getScopedClient(request, {
+                includedHiddenTypes: ['action'],
+              }),
               logger,
             });
             logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
@@ -250,7 +252,9 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
               action: 'delete',
               spaces: [spaceId],
               esClient: coreStart.elasticsearch.client.asInternalUser,
-              savedObjectsClient: coreStart.savedObjects.createInternalRepository(['action']),
+              savedObjectsClient: coreStart.savedObjects.getScopedClient(request, {
+                includedHiddenTypes: ['action'],
+              }),
               logger,
             });
             logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);

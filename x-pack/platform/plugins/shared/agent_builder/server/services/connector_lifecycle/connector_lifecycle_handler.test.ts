@@ -89,7 +89,7 @@ const createMockGetStartServices = () =>
   jest.fn().mockResolvedValue([
     {
       elasticsearch: { client: { asInternalUser: {} } },
-      savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
+      savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
     },
     { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } } },
     {},
