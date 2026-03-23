@@ -1,5 +1,5 @@
 {
-  "sha1": "d84672e7efccc9b50745c56994500efa27842d8a",
+  "sha1": "b1e481360ed5513068446e14c2f89ff613722a0b",
   "tests": [
     {
       "id": "db4898614990d08-c129e7cf5767d21",
@@ -172,14 +172,14 @@
     {
       "id": "210079aca1b9c83-036cb48539f2f34",
       "title": "DefaultStatusAlert creates default alert, triggers on down status, and recovers",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 7
       }
     },
