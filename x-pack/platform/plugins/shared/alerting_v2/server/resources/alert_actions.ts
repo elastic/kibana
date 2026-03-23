@@ -44,6 +44,7 @@ const mappings: MappingsDefinition = {
     notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
     reason: { type: 'text' },
+    tags: { type: 'keyword' },
   },
 };
 
