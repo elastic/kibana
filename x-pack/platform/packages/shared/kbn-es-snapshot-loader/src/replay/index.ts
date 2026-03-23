@@ -16,6 +16,99 @@ import { reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
+interface AliasEntry {
+  aliasName: string;
+  isWriteIndex: boolean;
+  isHidden: boolean;
+}
+
+async function getTempIndexAliases({
+  esClient,
+  log,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<Map<string, AliasEntry[]>> {
+  const aliasMap = new Map<string, AliasEntry[]>();
+
+  try {
+    const response = await esClient.indices.getAlias({ index: `${TEMP_INDEX_PREFIX}*` });
+
+    for (const [tempIndexName, indexData] of Object.entries(response)) {
+      const aliases = indexData.aliases;
+      if (!aliases || Object.keys(aliases).length === 0) {
+        continue;
+      }
+
+      const finalIndexName = tempIndexName.slice(TEMP_INDEX_PREFIX.length);
+      const entries: AliasEntry[] = [];
+
+      for (const [aliasName, aliasConfig] of Object.entries(aliases)) {
+        entries.push({
+          aliasName,
+          isWriteIndex: aliasConfig.is_write_index ?? false,
+          isHidden: aliasConfig.is_hidden ?? false,
+        });
+      }
+
+      if (entries.length > 0) {
+        aliasMap.set(finalIndexName, entries);
+      }
+    }
+
+    log.debug(`Captured aliases for ${aliasMap.size} indices from temp indices`);
+  } catch (error) {
+    log.debug(`No aliases found on temp indices: ${getErrorMessage(error)}`);
+  }
+
+  return aliasMap;
+}
+
+async function recreateAliases({
+  esClient,
+  log,
+  aliasMap,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  aliasMap: Map<string, AliasEntry[]>;
+}): Promise<void> {
+  if (aliasMap.size === 0) {
+    return;
+  }
+
+  let createdCount = 0;
+  let failedCount = 0;
+
+  for (const [finalIndexName, aliases] of aliasMap) {
+    for (const { aliasName, isWriteIndex, isHidden } of aliases) {
+      try {
+        await esClient.indices.updateAliases({
+          actions: [
+            {
+              add: {
+                index: finalIndexName,
+                alias: aliasName,
+                is_write_index: isWriteIndex,
+                is_hidden: isHidden,
+              },
+            },
+          ],
+        });
+        log.debug(`Created alias "${aliasName}" on "${finalIndexName}"`);
+        createdCount++;
+      } catch (error) {
+        log.warning(
+          `Failed to create alias "${aliasName}" on "${finalIndexName}": ${getErrorMessage(error)}`
+        );
+        failedCount++;
+      }
+    }
+  }
+
+  log.info(`Alias recreation: ${createdCount} created, ${failedCount} failed`);
+}
+
 interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
   values: unknown[][];
@@ -105,6 +198,8 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
     result.restoredIndices = restoredIndices;
 
+    const aliasMap = await getTempIndexAliases({ esClient, log });
+
     result.maxTimestamp = await getMaxTimestampFromData({
       esClient,
       log,
@@ -128,6 +223,8 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       pipelineName,
     });
     result.reindexedIndices = reindexedIndices;
+
+    await recreateAliases({ esClient, log, aliasMap });
 
     const expectedDataStreams = new Set(
       indicesToRestore

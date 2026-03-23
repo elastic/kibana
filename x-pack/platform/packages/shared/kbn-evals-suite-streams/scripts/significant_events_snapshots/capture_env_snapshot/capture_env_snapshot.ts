@@ -10,7 +10,13 @@ import { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { createSnapshot, registerGcsRepository } from '../lib/gcs';
+import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
+import { GCS_BUCKET } from '../lib/constants';
+import {
+  resolvePatterns,
+  parseRepeatableFlag,
+  validateIndexPrivileges,
+} from '../lib/snapshot_utils';
 
 const DEFAULT_SYSTEM_INDICES = ['.kibana_streams_features-*', '.kibana_streams_assets-*'];
 
@@ -26,58 +32,6 @@ async function fetchMapping(
 ): Promise<MappingTypeMapping | undefined> {
   const response = await esClient.indices.getMapping({ index: indexName });
   return response[indexName]?.mappings;
-}
-
-async function resolvePatterns(
-  esClient: Client,
-  log: ToolingLog,
-  patterns: string[]
-): Promise<string[]> {
-  const resolved: string[] = [];
-
-  for (const pattern of patterns) {
-    if (!pattern.includes('*')) {
-      resolved.push(pattern);
-      continue;
-    }
-
-    try {
-      const response = await esClient.indices.resolveIndex({
-        name: pattern,
-        expand_wildcards: 'all',
-      });
-
-      const indices = (response.indices ?? []).map((idx) => idx.name);
-      if (indices.length === 0) {
-        log.warning(`No indices matched pattern "${pattern}" — skipping`);
-      } else {
-        for (const idx of indices) {
-          log.info(`Resolved ${pattern} → ${idx}`);
-        }
-        resolved.push(...indices);
-      }
-    } catch (err) {
-      log.warning(
-        `Failed to resolve pattern "${pattern}" — skipping: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  }
-
-  return resolved;
-}
-
-async function fetchAliases(
-  esClient: Client,
-  indexName: string
-): Promise<Record<string, { is_write_index?: boolean; is_hidden?: boolean }>> {
-  try {
-    const response = await esClient.indices.getAlias({ index: indexName });
-    return response[indexName]?.aliases ?? {};
-  } catch {
-    return {};
-  }
 }
 
 async function captureSystemIndex(
@@ -109,12 +63,6 @@ async function captureSystemIndex(
   log.info(`Captured ${sourceIndex} → ${snapshotIndex} (${created} docs)`);
 
   return snapshotIndex;
-}
-
-function parseRepeatableFlag(value: unknown): string[] {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.map(String);
-  return [String(value)];
 }
 
 export async function captureEnvSnapshot({
@@ -155,26 +103,35 @@ export async function captureEnvSnapshot({
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
+  await validateIndexPrivileges(
+    esClient,
+    log,
+    systemIndexPatterns,
+    (missing) =>
+      `Capture requires a user with manage privilege on system indices. ` +
+      `Pass superuser credentials via --es-username/--es-password (e.g. the elastic user). ` +
+      `Missing index:manage privilege on: ${missing}`
+  );
+
   const resolvedSystemIndices = await resolvePatterns(esClient, log, systemIndexPatterns);
   const resolvedIndices = await resolvePatterns(esClient, log, indexPatterns);
 
-  const allAliases: Array<{ index: string; alias: string; isHidden: boolean }> = [];
-
   const capturedSystemIndices: string[] = [];
   for (const idx of resolvedSystemIndices) {
-    const snapshotIndex = await captureSystemIndex(esClient, log, idx);
+    let snapshotIndex: string;
+    try {
+      snapshotIndex = await captureSystemIndex(esClient, log, idx);
+    } catch (err) {
+      if (err?.meta?.body?.error?.type === 'security_exception') {
+        throw new Error(
+          `Capture requires a user with manage privilege on system indices. ` +
+            `Pass superuser credentials via --es-username/--es-password (e.g. the elastic user). ` +
+            `Missing index:manage privilege on: ${idx}`
+        );
+      }
+      throw err;
+    }
     capturedSystemIndices.push(snapshotIndex);
-    const aliases = await fetchAliases(esClient, idx);
-    for (const [aliasName, aliasConfig] of Object.entries(aliases)) {
-      allAliases.push({ index: idx, alias: aliasName, isHidden: !!aliasConfig.is_hidden });
-    }
-  }
-
-  for (const idx of resolvedIndices) {
-    const aliases = await fetchAliases(esClient, idx);
-    for (const [aliasName, aliasConfig] of Object.entries(aliases)) {
-      allAliases.push({ index: idx, alias: aliasName, isHidden: !!aliasConfig.is_hidden });
-    }
   }
 
   const allSnapshotIndices = [...resolvedIndices, ...capturedSystemIndices].join(',');
@@ -184,30 +141,19 @@ export async function captureEnvSnapshot({
 
   log.info(`Snapshot created: sigevents-${runId}/${snapshotName} (${allSnapshotIndices})`);
 
-  if (capturedSystemIndices.length > 0) {
-    log.info('');
-    log.info(
-      `Restore .kibana indices: --indices "${capturedSystemIndices.join(
-        ','
-      )}" --rename-pattern "snapshot-(.*)" --rename-replacement ".$1"`
-    );
-  }
+  log.info('');
+  log.info('='.repeat(70));
+  log.info('SNAPSHOT CREATED — next steps:');
+  log.info('='.repeat(70));
 
-  if (resolvedIndices.length > 0) {
-    log.info('');
-    log.info(`Replay data indices: --patterns "${resolvedIndices.join(',')}"`);
-  }
+  const gcsBasePath = generateGcsBasePath({ runId });
 
-  if (allAliases.length > 0) {
-    log.info('');
-    log.info(
-      'After restore/replay, recreate aliases (.kibana aliases require a user with the system_indices_superuser role):'
-    );
-    for (const { index, alias, isHidden } of allAliases) {
-      const hiddenFlag = isHidden ? ', "is_hidden": true' : '';
-      log.info(
-        `  POST _aliases { "actions": [{ "add": { "index": "${index}", "alias": "${alias}"${hiddenFlag} } }] }`
-      );
-    }
-  }
+  log.info('');
+  log.info('Restore this snapshot to replay the environment:');
+  log.info(
+    `  node scripts/restore_sigevents_env_snapshot.js \\\n` +
+      `  --gcs-bucket ${GCS_BUCKET} \\\n` +
+      `  --gcs-base-path ${gcsBasePath} \\\n` +
+      `  --snapshot-name ${snapshotName}`
+  );
 }

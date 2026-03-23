@@ -41,14 +41,13 @@ node scripts/capture_sigevents_env_snapshot.js \
 | `--es-url` | Elasticsearch URL | from `config/kibana.dev.yml` |
 | `--es-username` | Elasticsearch username | from `config/kibana.dev.yml` |
 | `--es-password` | Elasticsearch password | from `config/kibana.dev.yml` |
-| `--kibana-url` | Kibana URL | from `config/kibana.dev.yml` |
 
 ## How it works
 
 1. Resolves wildcard patterns to concrete index names via `GET _resolve/index`.
 2. For each `--system-indices` match, fetches its mapping, creates a `snapshot-*` copy, and reindexes the data. `--indices` targets are included directly in the snapshot without reindexing.
-3. Fetches existing aliases from all resolved indices (both system and regular) and prints them as post-restore/replay commands.
-4. Registers a GCS snapshot repository and creates the snapshot containing all captured indices.
+3. Registers a GCS snapshot repository and creates the snapshot containing all captured indices.
+4. During **replay**, non-system aliases (e.g. `.alerts-streams.alerts-default`) are automatically captured from restored temp indices and recreated on the final destination indices — no manual step needed.
 
 ### Naming convention
 
@@ -63,69 +62,16 @@ Only `.kibana` system indices are renamed. Leading `.` is replaced with `snapsho
 
 ## Restoring
 
-### 1. System indices (restore with rename)
+After capturing a snapshot, use the restore script to bring up a fresh environment:
 
 ```bash
-node scripts/es_snapshot_loader restore \
-  --repo-type gcs \
+node scripts/restore_sigevents_env_snapshot.js \
   --gcs-bucket significant-events-datasets \
   --gcs-base-path <run-id>/<base-path> \
-  --snapshot-name <snapshot-name> \
-  --es-url http://elastic:changeme@localhost:9200 \
-  --indices "snapshot-kibana_streams_features-000001,snapshot-kibana_streams_assets-000001" \
-  --rename-pattern "snapshot-(.*)" \
-  --rename-replacement ".\$1"
+  --snapshot-name <snapshot-name>
 ```
 
-### 2. Data indices (replay with timestamp transformation)
-
-```bash
-node scripts/es_snapshot_loader replay \
-  --repo-type gcs \
-  --gcs-bucket significant-events-datasets \
-  --gcs-base-path <run-id>/<base-path> \
-  --snapshot-name <snapshot-name> \
-  --es-url http://elastic:changeme@localhost:9200 \
-  --patterns "logs.otel,.internal.alerts-streams.alerts-default-000001"
-```
-
-### 3. Recreate aliases
-
-Aliases are **not** preserved during restore or replay. They must be recreated manually after the data is in place. The capture script prints the exact commands needed.
-
-#### `.kibana` system aliases
-
-`.kibana` aliases (e.g. `.kibana_streams_features`, `.kibana_streams_assets`) are managed by Elasticsearch's system index protection. Creating them requires either:
-
-- **Option A (recommended):** Start Kibana — the Streams plugin will automatically recreate the aliases via `kbn-storage-adapter` on startup.
-- **Option B:** Use a user with the `system_indices_superuser` role and run the alias commands manually:
-
-```
-POST _aliases
-{
-  "actions": [
-    { "add": { "index": ".kibana_streams_features-000001", "alias": ".kibana_streams_features", "is_hidden": true } },
-    { "add": { "index": ".kibana_streams_assets-000001", "alias": ".kibana_streams_assets", "is_hidden": true } }
-  ]
-}
-```
-
-> **Note:** The default `elastic` user with the `superuser` role is **not** sufficient.
-> You must create a dedicated user with the `system_indices_superuser` role to manage
-> `.kibana`-prefixed aliases. This is an Elasticsearch restriction on system index access.
-
-#### `.internal` and other aliases
-
-Non-system aliases can be created by any user with the `manage` index privilege:
-
-```
-POST _aliases
-{
-  "actions": [
-    { "add": { "index": ".internal.alerts-streams.alerts-default-000001", "alias": ".alerts-streams.alerts-default", "is_hidden": true } }
-  ]
-}
-```
+See [`restore_env_snapshot/README.md`](../restore_env_snapshot/README.md) for the full restore workflow and all available flags.
 
 ## Why aliases can't be baked into the snapshot
 
