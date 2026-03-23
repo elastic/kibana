@@ -544,17 +544,6 @@ export const splitProcessorSchema = processorBaseWithWhereSchema
       .optional(z.boolean())
       .describe('Preserve empty trailing fields in the split result'),
   })
-  .refine(
-    (obj) =>
-      !obj.where ||
-      (obj.where && isAlwaysCondition(obj.where)) ||
-      (obj.where && obj.to && obj.from !== obj.to),
-    {
-      message:
-        'Split processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-      path: ['to', 'where'],
-    }
-  )
   .describe(
     'Split processor - Split a field value into an array using a separator'
   ) satisfies z.Schema<SplitProcessor>;

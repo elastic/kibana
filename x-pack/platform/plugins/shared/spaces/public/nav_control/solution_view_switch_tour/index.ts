@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { initTour } from './lib';
+export const SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX = 'spaces.solutionViewSwitchTourShown';
 
-export { SolutionViewTour } from './solution_view_tour';
+export { SolutionViewSwitchTour } from './solution_view_switch_tour';
+export type { SolutionViewSwitchTourProps } from './solution_view_switch_tour';
