@@ -68,7 +68,7 @@ Add processors after parsing for:
 All fields must match the target schema (ECS or OTel):
 
 **ECS:** `log.level`, `service.name`, `host.name`, `@timestamp`
-**OTel:** `{{{severity_field}}}`, `resource.attributes.service.name`, `body.text`, `attributes.*`
+**OTel:** `severity_text`, `resource.attributes.service.name`, `body.text`, `attributes.*`
 
 Add explicit type conversions for fields extracted as wrong types.
 
