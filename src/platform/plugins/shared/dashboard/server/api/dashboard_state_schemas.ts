@@ -217,6 +217,6 @@ export function getDashboardStateSchema(
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    ...(allowAccessControl ? { access_control: accessControlSchema } : {}),
+    access_control: allowAccessControl ? accessControlSchema : schema.never(),
   });
 }
