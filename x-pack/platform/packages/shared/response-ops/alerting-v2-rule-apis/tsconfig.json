@@ -16,9 +16,7 @@
   ],
   "kbn_references": [
     "@kbn/core-http-browser",
-    "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser",
-    "@kbn/core-notifications-browser-mocks",
     "@kbn/alerting-v2-schemas",
     "@kbn/react-query",
     "@kbn/i18n",
