@@ -8,7 +8,6 @@ import {
   getInlineSplQuery,
   type GetInlineSplQueryParams,
   getSPLQueryKeywords,
-  maskSplQueryStrings,
   SPL_KEYWORDS,
 } from '../../../../../../../common/task/agent/helpers/inline_spl_query';
 import type { GraphNode } from '../../types';
@@ -33,9 +32,8 @@ export const getInlineQueryNode = (params: InlineQueryNodeParams): GraphNode => 
     }
     const finalInlineQuery = inlineQuery ?? state.parsed_panel.query;
     if (finalInlineQuery) {
-      telemetryClient.reportSourceQueryKeywordsTelemetry({
+      telemetryClient.reportSourceQueryKeywords({
         type: 'dashboards',
-        maskedQuery: maskSplQueryStrings(finalInlineQuery),
         keywords: getSPLQueryKeywords(finalInlineQuery, SPL_KEYWORDS),
       });
     }

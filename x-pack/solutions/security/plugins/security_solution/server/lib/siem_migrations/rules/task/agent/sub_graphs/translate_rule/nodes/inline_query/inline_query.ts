@@ -38,7 +38,7 @@ export const getInlineQueryNode = (params: InlineQueryNodeParams): GraphNode => 
     }
     const finalInlineQuery = inlineQuery ?? state.original_rule.query;
     if (finalInlineQuery) {
-      telemetryClient.reportSourceQueryKeywordsTelemetry({
+      telemetryClient.reportSourceQueryKeywords({
         type: 'rules',
         keywords: getSPLQueryKeywords(finalInlineQuery, SPL_KEYWORDS),
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/** SPL keywords that we want to track the frequency of */
 export const SPL_KEYWORDS: string[] = [
   'join',
   'multisearch',
