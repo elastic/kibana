@@ -9,11 +9,11 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useEffect, useMemo, useRef } from 'react';
-import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
+import { FLYOUT_VIEWED_EVENT_TYPE, FLYOUT_ROOT_CONTENT_ID } from './constants';
 import type { DocViewRenderProps } from '../types';
 
 /**
- * Payload for the `unified_doc_viewer_viewed` event.
+ * Payload for the `flyout_viewed` event.
  */
 export interface DocViewerViewedEvent {
   /**
@@ -79,13 +79,13 @@ export const useDocViewerViewedEvent = ({
 
     try {
       onEventKeyChange?.(eventKey);
-      reportEvent(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
         contentId,
         tabId,
       });
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(`Error reporting event ${DOC_VIEWER_VIEWED_EVENT_TYPE}:`, error);
+      console.error(`Error reporting event ${FLYOUT_VIEWED_EVENT_TYPE}:`, error);
     }
   }, [contentId, enabled, keys, onEventKeyChange, reportEvent, tabId]);
 };
@@ -110,7 +110,7 @@ export const useDocViewerTabViewedEvent = ({
 
   useDocViewerViewedEvent({
     ...params,
-    contentId: DOC_VIEWER_VIEWED_ROOT_CONTENT_ID,
+    contentId: FLYOUT_ROOT_CONTENT_ID,
     keys,
     enabled: Boolean(params.tabId),
   });

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DOC_VIEWER_VIEWED_EVENT_TYPE = 'unified_doc_viewer_viewed';
-export const DOC_VIEWER_VIEWED_ROOT_CONTENT_ID = 'doc_detail';
+export const FLYOUT_VIEWED_EVENT_TYPE = 'flyout_viewed';
+export const FLYOUT_ROOT_CONTENT_ID = 'doc_detail';
