@@ -121,19 +121,13 @@ export function transformWorkpadOut(
         }
 
         const embeddableConfig = decode(fn.arguments.config[0] as string);
-<<<<<<< HEAD
         const embeddableType = fn.arguments.type[0] as string;
-        const transforms = embeddableService.getTransforms(embeddableType);
-=======
-        const storedEmbeddableType = fn.arguments.type[0] as string;
-        const embeddableType = transformType(storedEmbeddableType);
         fn.arguments.type[0] = embeddableType;
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
         const transforms = embeddableService.getTransforms(
           embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType
         );
->>>>>>> 56c6e4f0c6e2 ([canvas] fix unable to load embeddable when no references are provided (#257779))
 
         try {
           // BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
@@ -141,7 +135,7 @@ export function transformWorkpadOut(
           if (embeddableConfig.savedObjectId) {
             referencesForElement = ensureLibraryReference(
               referencesForElement,
-              storedEmbeddableType,
+              embeddableType,
               embeddableConfig.savedObjectId
             );
           }
