@@ -45,6 +45,10 @@ jest.mock('../../../shared/components/notes_details_content', () => ({
   )),
 }));
 
+jest.mock('../../../document_details/shared/hooks/use_timeline_config', () => ({
+  useTimelineConfig: jest.fn().mockReturnValue(undefined),
+}));
+
 const renderNotesTab = () =>
   render(
     <TestProviders>
