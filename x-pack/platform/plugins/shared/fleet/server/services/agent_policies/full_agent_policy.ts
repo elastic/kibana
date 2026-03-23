@@ -163,7 +163,15 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput, packageInfoCache);
+    const dataOutputProxy = dataOutput?.proxy_id
+      ? proxies.find((p) => p.id === dataOutput.proxy_id)
+      : undefined;
+    otelcolConfig = generateOtelcolConfig(
+      agentInputs,
+      dataOutput,
+      packageInfoCache,
+      dataOutputProxy
+    );
   }
 
   const inputs = agentInputs

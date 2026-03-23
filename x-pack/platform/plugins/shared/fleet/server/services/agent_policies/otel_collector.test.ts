@@ -255,6 +255,9 @@ describe('generateOtelcolConfig', () => {
   it('should return the otel config when there is one', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      extensions: {
+        'beatsauth/default': {},
+      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -287,9 +290,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
+        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -308,6 +313,9 @@ describe('generateOtelcolConfig', () => {
   it('should use the output id when it is not the default', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
     expect(generateOtelcolConfig(inputs, { ...defaultOutput, is_default: false })).toEqual({
+      extensions: {
+        'beatsauth/fleet-default-output': {},
+      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -340,9 +348,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/fleet-default-output': {
           endpoints: ['http://localhost:9200'],
+          auth: { authenticator: 'beatsauth/fleet-default-output' },
         },
       },
       service: {
+        extensions: ['beatsauth/fleet-default-output'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -361,6 +371,9 @@ describe('generateOtelcolConfig', () => {
   it('should return the otel config if there is any', () => {
     const inputs: FullAgentPolicyInput[] = [logInput, otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      extensions: {
+        'beatsauth/default': {},
+      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -393,9 +406,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
+        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -454,6 +469,9 @@ describe('generateOtelcolConfig', () => {
   it('should merge otel configs', () => {
     const inputs: FullAgentPolicyInput[] = [logInput, otelInput1, otelInput2];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      extensions: {
+        'beatsauth/default': {},
+      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -508,9 +526,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
+        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -534,6 +554,9 @@ describe('generateOtelcolConfig', () => {
   it('should keep components with the same type', () => {
     const inputs: FullAgentPolicyInput[] = [otelInputMultipleComponentsSameType];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      extensions: {
+        'beatsauth/default': {},
+      },
       receivers: {
         'httpcheck/1/test-3-stream-id-1': {
           targets: [
@@ -576,9 +599,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
+        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-3-stream-id-1': {
             receivers: ['httpcheck/1/test-3-stream-id-1', 'httpcheck/2/test-3-stream-id-1'],
@@ -640,12 +665,17 @@ describe('generateOtelcolConfig', () => {
         'elasticapm/apmtest': {},
         forward: {},
       },
+      extensions: {
+        'beatsauth/default': {},
+      },
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
+        extensions: ['beatsauth/default'],
         pipelines: {
           'traces/test-traces-stream-id-1': {
             receivers: ['zipkin/test-traces-stream-id-1'],
@@ -1228,6 +1258,133 @@ describe('generateOtelcolConfig', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('beatsauth extension generation', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+
+    it('should include beatsauth extension with ssl fields when output has ssl config', () => {
+      const outputWithSSL: Output = {
+        ...defaultOutput,
+        ca_trusted_fingerprint: 'abc123fingerprint',
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nMIIC...'],
+          certificate: '-----BEGIN CERTIFICATE-----\nMIID...',
+          key: '-----BEGIN PRIVATE KEY-----\nMIIE...',
+          verification_mode: 'full',
+        },
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithSSL);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: {
+          ca_trusted_fingerprint: 'abc123fingerprint',
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nMIIC...'],
+          certificate: '-----BEGIN CERTIFICATE-----\nMIID...',
+          key: '-----BEGIN PRIVATE KEY-----\nMIIE...',
+          verification_mode: 'full',
+        },
+      });
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: ['http://localhost:9200'],
+        auth: { authenticator: 'beatsauth/default' },
+      });
+      expect(result.service?.extensions).toContain('beatsauth/default');
+    });
+
+    it('should include ca_trusted_fingerprint only when that is the only ssl field set', () => {
+      const outputWithFingerprint: Output = {
+        ...defaultOutput,
+        ca_trusted_fingerprint: 'myfingerprint',
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithFingerprint);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: { ca_trusted_fingerprint: 'myfingerprint' },
+      });
+    });
+
+    it('should include ca_sha256 in beatsauth ssl config', () => {
+      const outputWithCaSha: Output = {
+        ...defaultOutput,
+        ca_sha256: 'sha256value',
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithCaSha);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: { ca_sha256: 'sha256value' },
+      });
+    });
+
+    it('should include proxy fields when proxy is passed', () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'X-Custom-Header': 'value' },
+        is_preconfigured: false,
+      };
+
+      const result = generateOtelcolConfig(inputs, defaultOutput, undefined, proxy);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        proxy_url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'X-Custom-Header': 'value' },
+      });
+      expect(result.service?.extensions).toContain('beatsauth/default');
+    });
+
+    it('should include proxy url but not proxy_headers when headers are not set', () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        is_preconfigured: false,
+      };
+
+      const result = generateOtelcolConfig(inputs, defaultOutput, undefined, proxy);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        proxy_url: 'http://proxy.example.com:3128',
+      });
+    });
+
+    it('should combine ssl and proxy fields in beatsauth when both are configured', () => {
+      const outputWithSSL: Output = {
+        ...defaultOutput,
+        ca_trusted_fingerprint: 'combinedfingerprint',
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nCA...'],
+        },
+      };
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'Proxy-Auth': 'token' },
+        is_preconfigured: false,
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithSSL, undefined, proxy);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: {
+          ca_trusted_fingerprint: 'combinedfingerprint',
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nCA...'],
+        },
+        proxy_url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'Proxy-Auth': 'token' },
+      });
+    });
+
+    it('should produce empty beatsauth config when output has no ssl or proxy fields', () => {
+      const result = generateOtelcolConfig(inputs, defaultOutput);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({});
     });
   });
 });

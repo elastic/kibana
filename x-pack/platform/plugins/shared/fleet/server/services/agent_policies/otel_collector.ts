@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Output, TemplateAgentPolicyInput } from '../../types';
+import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
 import type {
   FullAgentPolicyInput,
   OTelCollectorComponentID,
@@ -29,7 +29,8 @@ import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
   dataOutput?: Output,
-  packageInfoCache?: Map<string, PackageInfo>
+  packageInfoCache?: Map<string, PackageInfo>,
+  proxy?: FleetProxy
 ): OTelCollectorConfig {
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
@@ -130,7 +131,7 @@ export function generateOtelcolConfig(
   }
 
   const config = mergeOtelcolConfigs(otelConfigs);
-  return attachOtelcolExporter(config, dataOutput);
+  return attachOtelcolExporter(config, dataOutput, proxy);
 }
 
 function generateOtelTypeTransforms(
@@ -374,23 +375,57 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
   });
 }
 
+function buildBeatsauthConfig(output: Output, proxy?: FleetProxy): Record<string, unknown> {
+  const config: Record<string, unknown> = {};
+
+  const ssl: Record<string, unknown> = {};
+  if (output.ca_trusted_fingerprint) ssl.ca_trusted_fingerprint = output.ca_trusted_fingerprint;
+  if (output.ca_sha256) ssl.ca_sha256 = output.ca_sha256;
+  if (output.ssl?.certificate_authorities?.length)
+    ssl.certificate_authorities = output.ssl.certificate_authorities;
+  if (output.ssl?.certificate) ssl.certificate = output.ssl.certificate;
+  if (output.ssl?.key) ssl.key = output.ssl.key;
+  if (output.ssl?.verification_mode) ssl.verification_mode = output.ssl.verification_mode;
+  if (Object.keys(ssl).length > 0) config.ssl = ssl;
+
+  if (proxy) {
+    config.proxy_url = proxy.url;
+    if (proxy.proxy_headers) config.proxy_headers = proxy.proxy_headers;
+  }
+
+  return config;
+}
+
 function attachOtelcolExporter(
   config: OTelCollectorConfig,
-  dataOutput?: Output
+  dataOutput?: Output,
+  proxy?: FleetProxy
 ): OTelCollectorConfig {
   if (!dataOutput) {
     return config;
   }
 
-  const exporter = generateOtelcolExporter(dataOutput);
+  const { extensions, exporters } = generateOtelcolExporter(dataOutput, proxy);
   config.connectors = {
     ...config.connectors,
     forward: {},
   };
+  config.extensions = {
+    ...config.extensions,
+    ...extensions,
+  };
   config.exporters = {
     ...config.exporters,
-    ...exporter,
+    ...exporters,
   };
+
+  const extensionIDs = Object.keys(extensions);
+  if (extensionIDs.length > 0) {
+    config.service = {
+      ...config.service,
+      extensions: [...(config.service?.extensions ?? []), ...extensionIDs],
+    };
+  }
 
   if (config.service?.pipelines) {
     const signalTypes = new Set<string>();
@@ -405,7 +440,7 @@ function attachOtelcolExporter(
     signalTypes.forEach((id) => {
       config.service!.pipelines![id] = {
         receivers: ['forward'],
-        exporters: Object.keys(exporter),
+        exporters: Object.keys(exporters),
       };
     });
   }
@@ -413,15 +448,29 @@ function attachOtelcolExporter(
   return config;
 }
 
-function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorComponentID, any> {
+function generateOtelcolExporter(
+  dataOutput: Output,
+  proxy?: FleetProxy
+): {
+  extensions: Record<OTelCollectorComponentID, any>;
+  exporters: Record<OTelCollectorComponentID, any>;
+} {
   switch (dataOutput.type) {
-    case outputType.Elasticsearch:
+    case outputType.Elasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
+      const beatsauthID = `beatsauth/${outputID}`;
       return {
-        [`elasticsearch/${outputID}`]: {
-          endpoints: dataOutput.hosts,
+        extensions: {
+          [beatsauthID]: buildBeatsauthConfig(dataOutput, proxy),
+        },
+        exporters: {
+          [`elasticsearch/${outputID}`]: {
+            endpoints: dataOutput.hosts,
+            auth: { authenticator: beatsauthID },
+          },
         },
       };
+    }
     default:
       throw new FleetError(
         `output type ${dataOutput.type} not supported when policy contains OTel inputs`
