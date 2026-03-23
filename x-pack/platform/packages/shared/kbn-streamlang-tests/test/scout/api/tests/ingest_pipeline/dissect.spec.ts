@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -40,12 +41,12 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.log?.level).toBe('info');
-      expect(source?.client?.ip).toBe('127.0.0.1');
-      expect(source?.http?.version).toBe('1.1');
-      expect(source?.http?.response?.status_code).toBe('200');
-      expect(source?.http?.response?.body?.bytes).toBe('123');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.log)?.level).toBe('info');
+      expect(asDoc(source?.client)?.ip).toBe('127.0.0.1');
+      expect(asDoc(source?.http)?.version).toBe('1.1');
+      expect(asDoc(asDoc(source?.http)?.response)?.status_code).toBe('200');
+      expect(asDoc(asDoc(asDoc(source?.http)?.response)?.body)?.bytes).toBe('123');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -69,8 +70,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.client?.ip).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.client)?.ip).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {

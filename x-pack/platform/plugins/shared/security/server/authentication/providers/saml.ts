@@ -405,12 +405,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
         : 'Login has been initiated by Identity Provider.'
     );
 
-    this.logger.debug(
-      `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
-        !isIdPInitiatedLogin ? [...stateRequestIds] : []
-      )}`
-    );
-
     const providerRealm = this.realm || stateRealm;
 
     let result: {

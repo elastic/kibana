@@ -124,18 +124,30 @@ function buildTextBasedState(
           );
         }
 
-        // Determine format: user-configured first, then data view field format as fallback
-        let format = sourceColumn.format;
-        if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
-          const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
-          if (fieldFormat?.id) {
-            format = fieldFormat as typeof sourceColumn.format;
-          }
-        }
+        // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
+        // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
+        const originalCol = layer.columns[sourceColumn.id] as
+          | { params?: { format?: ValueFormatConfig } }
+          | undefined;
+        const hadUserFormat = Boolean(
+          originalCol?.params &&
+            'format' in originalCol.params &&
+            originalCol.params.format !== undefined
+        );
 
-        // Only include params if format has a valid id
-        if (format?.id !== undefined) {
-          column.params = { format: format as ValueFormatConfig };
+        // Only set format when the user had explicitly configured it on the form-based column.
+        // If it was default (no user override), leave column.params.format unset so it stays default.
+        if (hadUserFormat) {
+          let format = sourceColumn.format;
+          if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
+            const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
+            if (fieldFormat?.id) {
+              format = fieldFormat as typeof sourceColumn.format;
+            }
+          }
+          if (format?.id !== undefined) {
+            column.params = { format: format as ValueFormatConfig };
+          }
         }
 
         return column;
@@ -158,6 +170,7 @@ function buildTextBasedState(
       id: ip.id!,
       title: ip.title,
       name: ip.name,
+      timeField: ip.timeFieldName,
     })),
   };
 }

@@ -9,6 +9,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   BoundInferenceClient,
@@ -22,6 +23,7 @@ import type {
   AnonymizationPluginStart,
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
+import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -151,6 +153,23 @@ export interface InferenceServerStart {
    * @throws Error if the connector with the specified ID does not exist
    */
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Lists available Elasticsearch inference endpoints, optionally filtered by task type.
+   *
+   * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
+   * @returns A promise that resolves to an array of inference endpoints
+   */
+  getInferenceEndpoints: (taskType?: InferenceTaskType) => Promise<InferenceEndpoint[]>;
+
+  /**
+   * Retrieves a specific Elasticsearch inference endpoint by its ID.
+   *
+   * @param inferenceId - The unique identifier of the inference endpoint
+   * @returns A promise that resolves to the inference endpoint metadata
+   * @throws Error if the endpoint does not exist
+   */
+  getInferenceEndpointById: (inferenceId: string) => Promise<InferenceEndpoint>;
 }
 
 /**

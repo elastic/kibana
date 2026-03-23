@@ -39,129 +39,187 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 
   describe('host', () => {
-    it('returns filter with term on host.entity.id when present', () => {
+    it('returns filter with term on host.id when present', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
-        host: { name: 'to-be-ignored', entity: { id: 'host-entity-1' } },
+        host: { name: 'to-be-ignored', id: 'host-id-1' },
       });
-
-      expect(result).toEqual({
-        bool: {
-          filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
-        },
-      });
-    });
-
-    it('returns filter with term on host.entity.id when present (with flattened source)', () => {
-      const result = getEuidDslFilterBasedOnDocument('host', {
-        _source: {
-          'host.name': 'to-be-ignored',
-          'host.entity.id': 'host-entity-1',
-        },
-      });
-
-      expect(result).toEqual({
-        bool: {
-          filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
-        },
-      });
-    });
-
-    it('returns filter with term on host.id when host.entity.id is missing', () => {
-      const result = getEuidDslFilterBasedOnDocument('host', { host: { id: 'host-id-1' } });
 
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'host.id': 'host-id-1' } }],
-          must_not: [{ exists: { field: 'host.entity.id' } }],
         },
       });
     });
 
-    it('returns filter with terms on host.name and host.domain when composed id is used', () => {
+    it('returns filter with term on host.id when present (with flattened source)', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
-        host: { name: 'myserver', domain: 'example.com' },
+        _source: {
+          'host.name': 'to-be-ignored',
+          'host.id': 'host-id-1',
+        },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'host.name': 'myserver' } },
-            { term: { 'host.domain': 'example.com' } },
-          ],
-          must_not: [{ exists: { field: 'host.entity.id' } }, { exists: { field: 'host.id' } }],
+          filter: [{ term: { 'host.id': 'host-id-1' } }],
         },
       });
     });
 
-    it('returns filter with term on host.name when only host.name is present', () => {
+    it('returns filter with term on host.name when host.id is missing', () => {
       const result = getEuidDslFilterBasedOnDocument('host', { host: { name: 'server1' } });
 
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'host.name': 'server1' } }],
-          must_not: [
-            { exists: { field: 'host.entity.id' } },
-            { exists: { field: 'host.id' } },
-            { exists: { field: 'host.domain' } },
-            { exists: { field: 'host.hostname' } },
-          ],
+          must_not: [{ exists: { field: 'host.id' } }],
         },
       });
     });
 
-    it('precedence: uses host.entity.id when both host.entity.id and host.name are present', () => {
+    it('returns filter with term on host.hostname when host.id and host.name are missing', () => {
+      const result = getEuidDslFilterBasedOnDocument('host', { host: { hostname: 'node-1' } });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [{ term: { 'host.hostname': 'node-1' } }],
+          must_not: [{ exists: { field: 'host.id' } }, { exists: { field: 'host.name' } }],
+        },
+      });
+    });
+
+    it('precedence: uses host.id when both host.id and host.name are present', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
-        host: { entity: { id: 'e1' }, name: 'myserver', domain: 'example.com' },
+        host: { id: 'e1', name: 'myserver' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'host.entity.id': 'e1' } }],
+          filter: [{ term: { 'host.id': 'e1' } }],
         },
       });
     });
   });
 
   describe('user', () => {
-    it('returns filter with term on user.entity.id when present', () => {
+    it('returns filter with term on user.email and source clause (event.module whenClause expands to sourceMatchesAny)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
-        user: { entity: { id: 'user-entity-1' } },
+        user: { email: 'alice@example.com' },
+        event: { module: 'okta' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.entity.id': 'user-entity-1' } }],
+          filter: [
+            { term: { 'user.email': 'alice@example.com' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'okta' } },
+                  { prefix: { 'data_stream.dataset': 'okta' } },
+                  { term: { 'event.module': 'entityanalytics_okta' } },
+                  { prefix: { 'data_stream.dataset': 'entityanalytics_okta' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
       });
     });
 
-    it('returns filter with terms on user.name and host.entity.id when composed id is used', () => {
+    it('returns filter with term on user.email and unknown source clause when no event.module or data_stream.dataset', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { email: 'alice@example.com' },
+      });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [
+            { term: { 'user.email': 'alice@example.com' } },
+            {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      should: [
+                        { bool: { must_not: [{ exists: { field: 'event.module' } }] } },
+                        { term: { 'event.module': '' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        { bool: { must_not: [{ exists: { field: 'data_stream.dataset' } }] } },
+                        { term: { 'data_stream.dataset': '' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('returns filter with term on user.name and source clause and must_not on higher-ranked identity fields', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
-        host: { entity: { id: 'host-e1' } },
+        event: { module: 'azure' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.name': 'alice' } }, { term: { 'host.entity.id': 'host-e1' } }],
-          must_not: [{ exists: { field: 'user.entity.id' } }],
+          filter: [
+            { term: { 'user.name': 'alice' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'azure' } },
+                  { prefix: { 'data_stream.dataset': 'azure' } },
+                  { term: { 'event.module': 'entityanalytics_entra_id' } },
+                  { prefix: { 'data_stream.dataset': 'entityanalytics_entra_id' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          must_not: [
+            { exists: { field: 'user.email' } },
+            { exists: { field: 'user.id' } },
+            { exists: { field: 'user.domain' } },
+          ],
         },
       });
     });
 
-    it('returns filter with term on user.id when only user.id is present', () => {
-      const result = getEuidDslFilterBasedOnDocument('user', { user: { id: 'user-id-42' } });
+    it('returns filter with term on user.id and source clause and must_not on user.email', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { id: 'user-id-42' },
+        event: { module: 'o365' },
+      });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.id': 'user-id-42' } }],
-          must_not: [
-            { exists: { field: 'user.entity.id' } },
-            { exists: { field: 'user.name' } },
-            { exists: { field: 'host.entity.id' } },
-            { exists: { field: 'host.id' } },
-            { exists: { field: 'host.name' } },
+          filter: [
+            { term: { 'user.id': 'user-id-42' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'o365' } },
+                  { prefix: { 'data_stream.dataset': 'o365' } },
+                  { term: { 'event.module': 'o365_metrics' } },
+                  { prefix: { 'data_stream.dataset': 'o365_metrics' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
           ],
+          must_not: [{ exists: { field: 'user.email' } }],
         },
       });
     });
@@ -170,34 +228,86 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(getEuidDslFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.entity.id when both user.entity.id and user.name@host.entity.id are present', () => {
+    it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
-        user: { entity: { id: 'ue1' }, name: 'alice' },
-        host: { entity: { id: 'he1' } },
+        user: { email: 'alice@example.com', id: 'user-42' },
+        event: { module: 'entityanalytics_okta' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.entity.id': 'ue1' } }],
+          filter: [
+            { term: { 'user.email': 'alice@example.com' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'okta' } },
+                  { prefix: { 'data_stream.dataset': 'okta' } },
+                  { term: { 'event.module': 'entityanalytics_okta' } },
+                  { prefix: { 'data_stream.dataset': 'entityanalytics_okta' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
       });
+    });
+
+    it('returns filter for user.name and user.domain with source clause and must_not on higher-ranked identity fields', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { name: 'jane', domain: 'corp.com' },
+        event: { module: 'entityanalytics_ad' },
+      });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [
+            { term: { 'user.name': 'jane' } },
+            { term: { 'user.domain': 'corp.com' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'entityanalytics_ad' } },
+                  { prefix: { 'data_stream.dataset': 'entityanalytics_ad' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
+        },
+      });
+    });
+
+    it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must_not so the query can match stored documents', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { email: 'bob@example.com' },
+        event: { module: 'okta' },
+      });
+      const filter = result?.bool?.filter as Array<{ term?: Record<string, string> }> | undefined;
+      const filterFields = Array.isArray(filter)
+        ? filter.map((clause) => Object.keys(clause.term ?? {})[0])
+        : [];
+      const mustNot = (result?.bool?.must_not ?? []) as Array<{ exists?: { field: string } }>;
+      const mustNotFields = Array.isArray(mustNot)
+        ? mustNot.map((clause) => clause.exists?.field).filter(Boolean)
+        : [];
+      expect(filterFields).not.toContain('entity.namespace');
+      expect(mustNotFields).not.toContain('entity.namespace');
     });
   });
 
   describe('service', () => {
-    it('returns filter with term on service.entity.id when present', () => {
+    it('returns undefined when service.name is missing (single-field identity)', () => {
       const result = getEuidDslFilterBasedOnDocument('service', {
         service: { entity: { id: 'svc-entity-1' } },
       });
 
-      expect(result).toEqual({
-        bool: {
-          filter: [{ term: { 'service.entity.id': 'svc-entity-1' } }],
-        },
-      });
+      expect(result).toBeUndefined();
     });
 
-    it('returns filter with term on service.name when service.entity.id is missing', () => {
+    it('returns filter with term on service.name (single-field identity)', () => {
       const result = getEuidDslFilterBasedOnDocument('service', {
         service: { name: 'api-gateway' },
       });
@@ -205,76 +315,135 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'service.name': 'api-gateway' } }],
-          must_not: [{ exists: { field: 'service.entity.id' } }],
         },
       });
     });
 
-    it('precedence: uses service.entity.id when both service.entity.id and service.name are present', () => {
+    it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
       const result = getEuidDslFilterBasedOnDocument('service', {
         service: { entity: { id: 'svc-e1' }, name: 'api-gateway' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'service.entity.id': 'svc-e1' } }],
+          filter: [{ term: { 'service.name': 'api-gateway' } }],
         },
       });
     });
   });
 });
 
+const isNotEmptyClause = (field: string) => ({
+  bool: {
+    must: [{ exists: { field } }, { bool: { must_not: { match: { [field]: '' } } } }],
+  },
+});
+
 describe('getEuidDslDocumentsContainsIdFilter', () => {
-  it('user: returns should with all user identity fields', () => {
+  it('user: returns documentsFilter DSL (exclusions and at least one id field)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
     expect(result).toEqual({
       bool: {
-        should: [
-          { exists: { field: 'user.entity.id' } },
-          { exists: { field: 'user.id' } },
-          { exists: { field: 'user.name' } },
-          { exists: { field: 'user.email' } },
+        must: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'event.outcome',
+                      },
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      match: {
+                        'event.outcome': 'failure',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'event.kind',
+                      },
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      match: {
+                        'event.kind': 'enrichment',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              should: [
+                isNotEmptyClause('user.email'),
+                isNotEmptyClause('user.id'),
+                isNotEmptyClause('user.name'),
+              ],
+            },
+          },
         ],
-        minimum_should_match: 1,
       },
     });
   });
 
-  it('host: returns should with all host identity fields', () => {
+  it('host: returns documentsFilter DSL (or of isNotEmpty for each identity field)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('host');
 
     expect(result).toEqual({
       bool: {
         should: [
-          { exists: { field: 'host.entity.id' } },
-          { exists: { field: 'host.id' } },
-          { exists: { field: 'host.name' } },
-          { exists: { field: 'host.hostname' } },
+          isNotEmptyClause('host.id'),
+          isNotEmptyClause('host.name'),
+          isNotEmptyClause('host.hostname'),
         ],
-        minimum_should_match: 1,
       },
     });
   });
 
-  it('service: returns should with all service identity fields', () => {
+  it('service: returns documentsFilter DSL (service.name not empty)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('service');
 
     expect(result).toEqual({
       bool: {
-        should: [{ exists: { field: 'service.entity.id' } }, { exists: { field: 'service.name' } }],
-        minimum_should_match: 1,
+        must: [
+          { exists: { field: 'service.name' } },
+          { bool: { must_not: { match: { 'service.name': '' } } } },
+        ],
       },
     });
   });
 
-  it('generic: returns should with entity.id', () => {
+  it('generic: returns documentsFilter DSL (entity.id not empty)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('generic');
 
     expect(result).toEqual({
       bool: {
-        should: [{ exists: { field: 'entity.id' } }],
-        minimum_should_match: 1,
+        must: [
+          { exists: { field: 'entity.id' } },
+          { bool: { must_not: { match: { 'entity.id': '' } } } },
+        ],
       },
     });
   });

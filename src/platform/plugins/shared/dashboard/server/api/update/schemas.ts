@@ -20,6 +20,5 @@ export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

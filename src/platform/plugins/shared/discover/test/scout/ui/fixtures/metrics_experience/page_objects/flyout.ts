@@ -26,6 +26,7 @@ export interface FlyoutEsqlQueryTab {
 
 export interface MetricsFlyout {
   readonly container: Locator;
+  readonly closeButton: Locator;
   readonly overview: FlyoutOverviewTab;
   readonly esqlQuery: FlyoutEsqlQueryTab;
 }
@@ -34,6 +35,7 @@ export function createFlyout(page: ScoutPage): MetricsFlyout {
   const container = page.testSubj.locator('metricsExperienceFlyout');
   return {
     container,
+    closeButton: page.testSubj.locator('euiFlyoutCloseButton'),
     overview: {
       tabButton: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
       descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),

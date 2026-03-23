@@ -42,6 +42,8 @@ export interface GetPackagesRequest {
     excludeInstallStatus?: boolean;
     withPackagePoliciesCount?: boolean;
     type?: string;
+    package?: string;
+    all?: boolean;
   };
 }
 
@@ -108,6 +110,10 @@ export interface UpdatePackageRequest {
 
 export interface UpdatePackageResponse {
   item: PackageInfo;
+}
+
+export interface ReviewUpgradeResponse {
+  success: boolean;
 }
 
 export interface GetStatsRequest {

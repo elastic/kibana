@@ -76,6 +76,32 @@ export const shouldShowStreamsByDefault = (
   );
 };
 
+export const MigrationTooltip = ({
+  migrateFrom,
+  isStream = false,
+}: {
+  migrateFrom: string;
+  isStream?: boolean;
+}) => (
+  <EuiFlexItem grow={false}>
+    <EuiIconTip
+      type="info"
+      color="subdued"
+      content={i18n.translate(
+        isStream
+          ? 'xpack.fleet.createPackagePolicy.stepConfigure.streamMigratedTooltip'
+          : 'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+        {
+          defaultMessage: isStream
+            ? 'This data stream was automatically migrated from {migrateFrom}.'
+            : 'This input was automatically migrated from {migrateFrom}.',
+          values: { migrateFrom },
+        }
+      )}
+    />
+  </EuiFlexItem>
+);
+
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
@@ -86,6 +112,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   forceShowErrors?: boolean;
   isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
@@ -98,6 +125,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     forceShowErrors,
     isSingleInputAndStreams = false,
     isEditPage = false,
+    isUpgrade = false,
     varGroupSelections = {},
   }) => {
     const theme = useEuiTheme();
@@ -224,12 +252,12 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
 
     const allStreamsDeprecated = useMemo(
-      () => packageInputStreams.length > 0 && packageInputStreams.every((s) => !!s.deprecated),
-      [packageInputStreams]
+      () => inputStreams.length > 0 && inputStreams.every((s) => !!s.packageInputStream.deprecated),
+      [inputStreams]
     );
     const deprecationInfo =
       packagePolicyInput.deprecated ||
-      (allStreamsDeprecated ? packageInputStreams[0].deprecated : undefined);
+      (allStreamsDeprecated ? inputStreams[0].packageInputStream.deprecated : undefined);
     const isDeprecatedInput = !!deprecationInfo;
     const deprecatedInputTooltip = deprecationInfo
       ? deprecationInfo.replaced_by
@@ -262,6 +290,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     if (!isEditPage && (isDeprecatedInput || allStreamsDeprecated)) {
       return null;
     }
+    const migrationTooltip = isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
+      <MigrationTooltip migrateFrom={packagePolicyInput.migrate_from} />
+    );
 
     return (
       <>
@@ -269,16 +300,21 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {isSingleInputAndStreams ? (
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3
-                  data-test-subj="PackagePolicy.InputStreamConfig.title"
-                  style={
-                    isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
-                  }
-                >
-                  {packageInput.title || packageInput.type}
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3
+                      data-test-subj="PackagePolicy.InputStreamConfig.title"
+                      style={
+                        isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
+                      }
+                    >
+                      {packageInput.title || packageInput.type}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {migrationTooltip}
+              </EuiFlexGroup>
               <EuiSpacer size="s" />
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
@@ -302,6 +338,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
+                    {migrationTooltip}
                     {isDeprecatedInput && (
                       <EuiFlexItem grow={false}>
                         <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedIcon">
@@ -436,6 +473,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   showDescriptionColumn={!isSingleInputAndStreams}
+                  isUpgrade={isUpgrade}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {

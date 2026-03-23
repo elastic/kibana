@@ -18,6 +18,7 @@ export interface WorkflowUrlState {
   executionId?: string;
   stepExecutionId?: string;
   stepId?: string;
+  resume?: boolean;
 }
 
 export function useWorkflowUrlState() {
@@ -31,6 +32,7 @@ export function useWorkflowUrlState() {
       executionId: params.executionId as string | undefined,
       stepExecutionId: params.stepExecutionId as string | undefined,
       stepId: params.stepId as string | undefined,
+      shouldAutoResume: params.resume === 'true',
     };
   }, [location.search]);
 
@@ -107,12 +109,17 @@ export function useWorkflowUrlState() {
     [updateUrlState]
   );
 
+  const clearResumeParam = useCallback(() => {
+    updateUrlState({ resume: undefined });
+  }, [updateUrlState]);
+
   return {
     // Current state
     activeTab: urlState.tab,
     selectedExecutionId: urlState.executionId,
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
+    shouldAutoResume: urlState.shouldAutoResume,
 
     // State setters
     setActiveTab,
@@ -120,5 +127,6 @@ export function useWorkflowUrlState() {
     setSelectedStepExecution,
     setSelectedStep,
     updateUrlState,
+    clearResumeParam,
   };
 }

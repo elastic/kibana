@@ -101,6 +101,7 @@ describe('Agent Routes - experimental visibility gate', () => {
     });
 
     const mockRouter = {
+      get: jest.fn(),
       versioned: {
         get: jest
           .fn()

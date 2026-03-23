@@ -22,7 +22,14 @@ import React, {
 
 import { useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRangeBoundsOption, TimeRange, InitialFocus } from './types';
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  TimeRange,
+  InitialFocus,
+  CalendarOptions,
+  DateRangePickerSettings,
+} from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import {
@@ -102,6 +109,17 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   disabled: boolean;
   /** Whether a loading spinner is shown inside the form control. */
   isLoading: boolean;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
+  /** Current picker settings (e.g. rounding, refresh). */
+  settings: DateRangePickerSettings;
+  /** Called when the user changes a setting in the settings panel. */
+  onSettingsChange: (settings: DateRangePickerSettings) => void;
+  /**
+   * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
+   * Displayed informally in the panel footer.
+   */
+  timeZone?: string;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -139,6 +157,10 @@ export function DateRangePickerProvider({
   onPresetDelete,
   onInputChange,
   width = 'auto',
+  calendarOptions,
+  settings = { roundRelativeTime: true },
+  onSettingsChange,
+  timeZone,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -149,7 +171,11 @@ export function DateRangePickerProvider({
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
   const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
-  const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
+  const timeRange: TimeRange = useMemo(
+    () =>
+      textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
+    [text, presets, dateFormat, settings]
+  );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
     [dateFormat, timeRange]
@@ -254,6 +280,10 @@ export function DateRangePickerProvider({
       width,
       disabled,
       isLoading,
+      calendarOptions,
+      settings,
+      onSettingsChange,
+      timeZone,
     }),
     [
       text,
@@ -277,6 +307,10 @@ export function DateRangePickerProvider({
       width,
       disabled,
       isLoading,
+      calendarOptions,
+      settings,
+      onSettingsChange,
+      timeZone,
     ]
   );
 
