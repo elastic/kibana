@@ -44,7 +44,6 @@ export async function runCli() {
   }, options);
 }
 
-
 async function collectDependenciesAndWriteFile(
   dependencies: string[],
   outputFilePath: string,
@@ -67,7 +66,6 @@ async function collectDependenciesAndWriteFile(
 
   await fs.writeFile(outputFilePath, outputLines.join('\n') + '\n', 'utf-8');
 }
-
 
 export const collectDependencyVersionLines = ({
   dependencies,
