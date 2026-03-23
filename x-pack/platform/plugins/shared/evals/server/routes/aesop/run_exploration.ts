@@ -71,7 +71,7 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
           const esClient = coreContext.elasticsearch.client;
           const { include_sample_data, connector_id: connectorId } = request.body;
 
-          // Get actions client for LLM-powered skill synthesis (optional)
+          // TODO: Replace with proper ActionsClient type when moving beyond spike
           let actionsClient: any;
           if (connectorId) {
             const actionsStart = evalsContext.getActionsStart();

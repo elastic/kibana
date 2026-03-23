@@ -66,7 +66,8 @@ export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteD
       },
       async (context, request, response) => {
         const { rule_ids: requestedRuleIds, overwrite, dry_run } = request.body;
-        const coreContext = await context.core; const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         logger.info('[AESOP Alerting] Deploying alerting rules', {
           requested_rules: requestedRuleIds?.length ?? 'all',

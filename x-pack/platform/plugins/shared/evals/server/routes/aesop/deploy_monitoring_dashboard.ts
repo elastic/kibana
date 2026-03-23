@@ -39,21 +39,21 @@ export function registerDeployMonitoringDashboardRoute({ router, logger }: AESOP
         },
       },
       async (context, request, response) => {
-        const ctx = await context.resolve(['core', 'evals']);
+        const coreContext = await context.core;
 
         try {
-          ctx.logger.info('[AESOP] Deploying performance monitoring dashboard');
+          logger.info('[AESOP] Deploying performance monitoring dashboard');
 
           const dashboardGenerator = new DashboardGeneratorService(
-            ctx.core.savedObjects.client,
-            ctx.logger
+            coreContext.savedObjects.client,
+            logger
           );
 
           const dashboardId = await dashboardGenerator.createPerformanceMonitoringDashboard();
 
           const dashboardUrl = `/app/dashboards#/view/${dashboardId}`;
 
-          ctx.logger.info('[AESOP] ✅ Dashboard deployed successfully', {
+          logger.info('[AESOP] Dashboard deployed successfully', {
             dashboard_id: dashboardId,
             url: dashboardUrl,
           });
@@ -67,7 +67,7 @@ export function registerDeployMonitoringDashboardRoute({ router, logger }: AESOP
             },
           });
         } catch (error) {
-          ctx.logger.error('[AESOP] ❌ Failed to deploy monitoring dashboard', { error });
+          logger.error('[AESOP] Failed to deploy monitoring dashboard', { error });
 
           return response.customError({
             statusCode: 500,

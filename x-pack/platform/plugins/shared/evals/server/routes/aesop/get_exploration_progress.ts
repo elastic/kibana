@@ -55,7 +55,8 @@ export function registerGetExplorationProgressRoute({ router, logger }: AESOPRou
         const { executionId } = request.params;
 
         try {
-          const coreContext = await context.core; const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const coreContext = await context.core;
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const tracker = new WorkflowStateTracker(esClient, logger);
 
           const state = await tracker.getExecutionState(executionId);
