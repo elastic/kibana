@@ -18,6 +18,11 @@ import { getRoot, LOGS_ECS_STREAM_NAME } from '../shared/hierarchy';
  * @param stream - The stream definition to check
  * @returns boolean - true if the stream should conform to OTel naming convention, false otherwise
  */
+export const OTEL_CONTENT_FIELD = 'body.text';
+export const ECS_CONTENT_FIELD = 'message';
+export const OTEL_SEVERITY_FIELD = 'severity_text';
+export const ECS_SEVERITY_FIELD = 'log.level';
+
 export function isOtelStream(stream: Streams.all.Definition) {
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
   const isEcsStream = getRoot(stream.name) === LOGS_ECS_STREAM_NAME;

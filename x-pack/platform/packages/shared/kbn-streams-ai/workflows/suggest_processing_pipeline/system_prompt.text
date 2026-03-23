@@ -6,7 +6,7 @@ You design ingest pipelines that transform raw log events into clean, well-struc
 
 **Important:** Not all data needs processing. Before designing a pipeline, check if the data is already well-structured:
 
-- If documents already have proper `@timestamp`, `severity_text`, `{{{content_field}}}`, or other schema-compliant fields
+- If documents already have proper `@timestamp`, `{{{severity_field}}}`, `{{{content_field}}}`, or other schema-compliant fields
 - If there's no `event.original` field or raw text that needs parsing
 - If fields are already in the correct format and types
 - If `{{{content_field}}}` contains a simple human-readable message (not a structured log line that needs parsing)
@@ -68,7 +68,7 @@ Add processors after parsing for:
 All fields must match the target schema (ECS or OTel):
 
 **ECS:** `log.level`, `service.name`, `host.name`, `@timestamp`
-**OTel:** `severity_text`, `resource.attributes.service.name`, `body.text`, `attributes.*`
+**OTel:** `{{{severity_field}}}`, `resource.attributes.service.name`, `body.text`, `attributes.*`
 
 Add explicit type conversions for fields extracted as wrong types.
 
