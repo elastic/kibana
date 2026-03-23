@@ -6,7 +6,7 @@
  */
 
 import { ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-browser';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -17,14 +17,19 @@ import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
+import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
+import type { AlertingV2PublicStart } from './types';
 
-export { DynamicRuleFormFlyout } from './create_rule_form_flyout';
+export type { AlertingV2PublicStart } from './types';
 export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(NotificationPoliciesApi).toSelf().inSingletonScope();
   bind(WorkflowsApi).toSelf().inSingletonScope();
+  bind(Start).toConstantValue({
+    DynamicRuleFormFlyout,
+  } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
 

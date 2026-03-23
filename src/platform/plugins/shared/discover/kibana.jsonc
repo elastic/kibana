@@ -50,7 +50,8 @@
       "logsDataAccess",
       "apmSourcesAccess",
       "fileUpload",
-      "cps"
+      "cps",
+      "alertingVTwo"
     ],
     "requiredBundles": [
       "kibanaUtils",
@@ -58,8 +59,7 @@
       "unifiedSearch",
       "savedObjects",
       "presentationPanel",
-      "esql",
-      "alertingVTwo"
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

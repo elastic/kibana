@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-plugin/public';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { AppMenuDiscoverParams } from './types';
@@ -35,7 +34,8 @@ export function CreateESQLRuleFlyout({
   const currentTab = selectTab(getState(), tabId);
   const query = (currentTab.appState.query as AggregateQuery)?.esql || '';
 
-  const { history, core } = services;
+  const { history, core, alertingVTwo } = services;
+  const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -61,7 +61,7 @@ export function CreateESQLRuleFlyout({
     };
   }, [history, core.application.currentAppId$]);
 
-  return <DynamicRuleFormFlyout query={query} onClose={onClose} />;
+  return <RuleFormFlyout query={query} onClose={onClose} />;
 }
 
 export const getCreateRuleMenuItem = ({
