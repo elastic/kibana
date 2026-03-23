@@ -189,7 +189,10 @@ export {
 
 export {
   type Feature,
+  type FeatureWithFilter,
   type BaseFeature,
+  type IdentifiedFeature,
+  type IgnoredFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
@@ -197,11 +200,14 @@ export {
   ERROR_LOGS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   isFeature,
+  isFeatureWithFilter,
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
 
