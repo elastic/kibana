@@ -54,13 +54,13 @@ export function registerUpdateRoute(
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard was updated successfully',
+            description: 'Indicates the dashboard is updated successfully',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates that the dashboard was not found.',
+            description: 'Indicates that the dashboard with the given ID is not found.',
           },
         },
       }),
@@ -84,9 +84,9 @@ export function registerUpdateRoute(
           });
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: e });
         }
-        return res.badRequest({ body: e.output.payload });
+        return res.badRequest({ body: e });
       }
     }
   );
