@@ -77,7 +77,7 @@ describe('CreateAlertEventsStep', () => {
     expect(results[1].state.alertEventsBatch).toHaveLength(1);
   });
 
-  it('skips batches that produce no alert events', async () => {
+  it('yields continue with empty alertEventsBatch when no alert events are produced', async () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse();
 
@@ -85,7 +85,9 @@ describe('CreateAlertEventsStep', () => {
 
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(results).toHaveLength(0);
+    expect(results).toHaveLength(1);
+    expect(results[0].type).toBe('continue');
+    expect(results[0].state.alertEventsBatch).toEqual([]);
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {

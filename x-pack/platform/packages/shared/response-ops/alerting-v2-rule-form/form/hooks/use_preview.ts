@@ -45,6 +45,12 @@ export interface PreviewResult {
   uniqueGroupCount: number | null;
   /** Whether the current query is syntactically valid ES|QL (used to distinguish "no query" from "valid query with 0 results") */
   hasValidQuery: boolean;
+  /** The assembled ES|QL query string passed to the preview */
+  query: string;
+  /** The time field name used for the range filter */
+  timeField: string;
+  /** The lookback duration string (e.g. '5m', '1h') */
+  lookback: string;
 }
 
 export interface UsePreviewParams {
@@ -215,5 +221,8 @@ export const usePreview = ({
     groupingFields,
     uniqueGroupCount,
     hasValidQuery,
+    query,
+    timeField,
+    lookback,
   };
 };

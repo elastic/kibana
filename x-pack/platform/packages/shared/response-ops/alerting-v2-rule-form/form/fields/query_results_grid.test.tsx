@@ -11,6 +11,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryResultsGrid, type QueryResultsGridProps } from './query_results_grid';
 import type { PreviewColumn } from '../hooks/use_preview';
 
+jest.mock('./rule_preview_chart', () => ({
+  PreviewChart: () => <div data-test-subj="previewChart">Chart Mock</div>,
+}));
+
 const defaultColumns: PreviewColumn[] = [
   { id: '@timestamp', displayAsText: '@timestamp', esType: 'date' },
   { id: 'message', displayAsText: 'message', esType: 'keyword' },

@@ -34,6 +34,11 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 const metadataSchema = z
   .object({
     name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
+    description: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('Optional human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
     labels: z.array(z.string().max(64)).max(100).optional().describe('Labels for categorization.'),
   })
@@ -123,6 +128,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
+      .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive recoveries before inactive.'),
     recovering_timeframe: durationSchema
@@ -159,6 +165,16 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
+/** Artifacts (optional) */
+
+const artifactSchema = z
+  .object({
+    id: z.string().min(1).max(256).describe('Artifact identifier.'),
+    type: z.string().min(1).max(128).describe('Artifact type.'),
+    value: z.string().min(1).max(1024).describe('Artifact value.'),
+  })
+  .strict();
+
 /** Create rule API schema */
 
 /**
@@ -181,6 +197,7 @@ const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
+    artifacts: z.array(artifactSchema).optional(),
   })
   .strip();
 
@@ -240,6 +257,7 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
+    artifacts: z.array(artifactSchema).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();

@@ -21,6 +21,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
 
   metadata: schema.object({
     name: schema.string(),
+    description: schema.maybe(schema.string()),
     owner: schema.maybe(schema.string()),
     labels: schema.maybe(schema.arrayOf(schema.string())),
   }),
@@ -78,6 +79,15 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     })
   ),
 
+  artifacts: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        type: schema.string(),
+        value: schema.string(),
+      })
+    )
+  ),
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

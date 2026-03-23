@@ -38,6 +38,16 @@ jest.mock('./field_groups/alert_conditions_field_group', () => ({
   ),
 }));
 
+jest.mock('./fields/kind_field', () => ({
+  KindField: () => <div data-test-subj="mockKindField">Kind Field</div>,
+}));
+
+jest.mock('./field_groups/attachment_runbook_field_group', () => ({
+  AttachmentRunbookFieldGroup: () => (
+    <div data-test-subj="mockAttachmentRunbookFieldGroup">Attachment Runbook Field Group</div>
+  ),
+}));
+
 jest.mock('../flyout/error_callout', () => ({
   ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
 }));
@@ -83,6 +93,18 @@ describe('GuiRuleForm', () => {
 
       expect(screen.getByTestId('mockRuleExecutionFieldGroup')).toBeInTheDocument();
     });
+
+    it('renders KindField', () => {
+      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockKindField')).toBeInTheDocument();
+    });
+
+    it('renders AttachmentRunbookFieldGroup', () => {
+      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockAttachmentRunbookFieldGroup')).toBeInTheDocument();
+    });
   });
 
   describe('includeQueryEditor prop', () => {
@@ -113,7 +135,7 @@ describe('GuiRuleForm', () => {
   });
 
   describe('field group ordering', () => {
-    it('renders field groups in correct order: ErrorCallOut, Details, Condition, Execution, AlertConditions', () => {
+    it('renders field groups in correct order', () => {
       const { container } = render(<GuiRuleForm {...defaultProps} includeQueryEditor />, {
         wrapper: createFormWrapper(),
       });
@@ -126,7 +148,9 @@ describe('GuiRuleForm', () => {
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
+        'mockKindField',
         'mockAlertConditionsFieldGroup',
+        'mockAttachmentRunbookFieldGroup',
       ]);
     });
 
@@ -143,7 +167,9 @@ describe('GuiRuleForm', () => {
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
+        'mockKindField',
         'mockAlertConditionsFieldGroup',
+        'mockAttachmentRunbookFieldGroup',
       ]);
     });
   });

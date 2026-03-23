@@ -13,6 +13,7 @@ import {
   mapFormValuesToUpdateRequest,
   mapRuleResponseToFormValues,
 } from './rule_request_mappers';
+import type { RuleRequestCommon } from './rule_request_mappers';
 
 describe('rule_request_mappers', () => {
   const baseFormValues: FormValues = {
@@ -270,7 +271,7 @@ describe('rule_request_mappers', () => {
       });
     });
 
-    it('strips enabled and description from metadata (API does not accept them)', () => {
+    it('strips enabled from metadata (server-managed) but includes description', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         metadata: {
@@ -284,9 +285,116 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.metadata).toEqual({ name: 'My Rule', owner: 'owner', labels: [] });
+      expect(result.metadata).toEqual({
+        name: 'My Rule',
+        description: 'A description',
+        owner: 'owner',
+        labels: [],
+      });
       expect(result.metadata).not.toHaveProperty('enabled');
-      expect(result.metadata).not.toHaveProperty('description');
+    });
+
+    it('passes artifacts through to API request', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+    });
+
+    it('replaces existing runbook artifact value while preserving artifact id', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'existing-runbook-id', type: 'runbook', value: '  Existing runbook  ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'existing-runbook-id', type: 'runbook', value: 'Existing runbook' },
+      ]);
+    });
+
+    it('removes empty runbook artifact and keeps other artifacts', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'runbook-id', type: 'runbook', value: '   ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+    });
+
+    it('omits artifacts when only runbook artifact is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: 'runbook-id', type: 'runbook', value: '   ' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('omits artifacts when artifacts are empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('omits artifacts when artifacts are undefined', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('keeps non-empty runbook artifact value unchanged', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+      ]);
+    });
+
+    it('creates runbook artifact id when runbook artifact id is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: '', type: 'runbook', value: 'Runbook with missing id' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toHaveLength(1);
+      expect(result.artifacts?.[0]).toEqual({
+        id: expect.stringMatching(/^runbook-\d+-[a-z0-9]+$/),
+        type: 'runbook',
+        value: 'Runbook with missing id',
+      });
     });
   });
 
@@ -303,13 +411,30 @@ describe('rule_request_mappers', () => {
       expect(result.time_field).toBe('@timestamp');
     });
 
+    it('includes description in the create request when provided', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: {
+          ...baseFormValues.metadata,
+          description: 'Create rule description',
+        },
+      };
+
+      const result = mapFormValuesToCreateRequest(formValues);
+
+      expect(result.metadata.description).toBe('Create rule description');
+    });
+
     it('produces a superset of mapFormValuesToRuleRequest', () => {
       const common = mapFormValuesToRuleRequest(baseFormValues);
       const create = mapFormValuesToCreateRequest(baseFormValues);
+      const createRequest = create as typeof create & {
+        artifacts?: RuleRequestCommon['artifacts'];
+      };
 
       // Every key in common should be present in create with the same value
       for (const key of Object.keys(common) as Array<keyof typeof common>) {
-        expect(create[key]).toEqual(common[key]);
+        expect(createRequest[key]).toEqual(common[key]);
       }
     });
   });
@@ -317,10 +442,14 @@ describe('rule_request_mappers', () => {
   describe('mapFormValuesToUpdateRequest', () => {
     it('coerces undefined optional fields to null for explicit removal', () => {
       const result = mapFormValuesToUpdateRequest(baseFormValues);
+      const updateRequest = result as typeof result & {
+        artifacts?: RuleRequestCommon['artifacts'] | null;
+      };
 
-      expect(result.grouping).toBeNull();
-      expect(result.recovery_policy).toBeNull();
-      expect(result.state_transition).toBeNull();
+      expect(updateRequest.grouping).toBeNull();
+      expect(updateRequest.recovery_policy).toBeNull();
+      expect(updateRequest.state_transition).toBeNull();
+      expect(updateRequest.artifacts).toBeNull();
     });
 
     it('does not include kind in the update payload', () => {
@@ -369,6 +498,17 @@ describe('rule_request_mappers', () => {
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
       expect(result.evaluation).toEqual({ query: { base: 'FROM logs-* | LIMIT 10' } });
     });
+
+    it('coerces empty artifacts array to null for explicit removal', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [],
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.artifacts).toBeNull();
+    });
   });
 
   describe('mapRuleResponseToFormValues', () => {
@@ -405,6 +545,23 @@ describe('rule_request_mappers', () => {
         owner: 'test-owner',
         labels: ['tag1'],
       });
+    });
+
+    it('maps description from the API response', () => {
+      const rule = {
+        ...baseRuleResponse,
+        metadata: { ...baseRuleResponse.metadata, description: 'A rule description' },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.metadata?.description).toBe('A rule description');
+    });
+
+    it('leaves description undefined when not present in the API response', () => {
+      const result = mapRuleResponseToFormValues(baseRuleResponse);
+
+      expect(result.metadata?.description).toBeUndefined();
     });
 
     it('maps schedule with existing lookback', () => {
@@ -561,9 +718,27 @@ describe('rule_request_mappers', () => {
       expect(result).not.toHaveProperty('stateTransition');
     });
 
+    it('maps artifacts when present', () => {
+      const rule = {
+        ...baseRuleResponse,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+        ],
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+      ]);
+    });
+
     it('roundtrips: create request from mapped response matches original API payload', () => {
       const fullRule = {
         ...baseRuleResponse,
+        metadata: { ...baseRuleResponse.metadata, description: 'Roundtrip description' },
         grouping: { fields: ['host.name'] },
         recovery_policy: {
           type: 'query',
@@ -584,11 +759,13 @@ describe('rule_request_mappers', () => {
         grouping: formValues.grouping,
         recoveryPolicy: formValues.recoveryPolicy,
         stateTransition: formValues.stateTransition,
+        artifacts: formValues.artifacts,
       };
 
       const createPayload = mapFormValuesToCreateRequest(completeFormValues);
 
       expect(createPayload.kind).toBe('alert');
+      expect(createPayload.metadata.description).toBe('Roundtrip description');
       expect(createPayload.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host');
       expect(createPayload.evaluation.query.condition).toBe('WHERE count > 100');
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });

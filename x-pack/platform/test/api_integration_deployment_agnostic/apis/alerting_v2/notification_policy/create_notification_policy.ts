@@ -40,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          group_by: ['service.name', 'environment'],
+          groupBy: ['service.name', 'environment'],
           throttle: { interval: '1m' },
         });
 
@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.description).to.be('my-policy description');
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'my-workflow-id' }]);
       expect(response.body.matcher).to.be("env == 'production' && region == 'us-east-1'");
-      expect(response.body.group_by).to.eql(['service.name', 'environment']);
+      expect(response.body.groupBy).to.eql(['service.name', 'environment']);
       expect(response.body.throttle).to.eql({ interval: '1m' });
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
@@ -73,7 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'another-policy description',
           destinations: [{ type: 'workflow', id: 'another-workflow-id' }],
           matcher: "env == 'staging' && region == 'eu-west-1'",
-          group_by: ['kubernetes.namespace'],
+          groupBy: ['kubernetes.namespace'],
           throttle: { interval: '5m' },
         });
 
@@ -83,7 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.description).to.be('another-policy description');
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'another-workflow-id' }]);
       expect(response.body.matcher).to.be("env == 'staging' && region == 'eu-west-1'");
-      expect(response.body.group_by).to.eql(['kubernetes.namespace']);
+      expect(response.body.groupBy).to.eql(['kubernetes.namespace']);
       expect(response.body.throttle).to.eql({ interval: '5m' });
       expect(response.body.auth).to.be.an('object');
       expect(response.body.auth.owner).to.be.a('string');
@@ -167,6 +167,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
           throttle: { interval: 'invalid-interval' },
+        });
+
+      expect(response.status).to.be(400);
+    });
+
+    it('should create with only required fields and return defaults', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'minimal-policy',
+          description: 'minimal-policy description',
+          destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.name).to.be('minimal-policy');
+      expect(response.body.description).to.be('minimal-policy description');
+      expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'minimal-workflow-id' }]);
+      expect(response.body.enabled).to.be(true);
+      expect(response.body.snoozedUntil).to.be(null);
+      expect(response.body.matcher).to.be(null);
+      expect(response.body.groupBy).to.be(null);
+      expect(response.body.throttle).to.be(null);
+    });
+
+    it('should return 400 when destinations is an empty array', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'empty-dest-policy',
+          description: 'empty-dest-policy description',
+          destinations: [],
         });
 
       expect(response.status).to.be(400);

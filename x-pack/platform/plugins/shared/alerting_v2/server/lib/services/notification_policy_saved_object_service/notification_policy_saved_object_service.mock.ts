@@ -31,8 +31,14 @@ export function createMockEncryptedSavedObjects(
       references: [],
     });
   });
+  const createPointInTimeFinderDecryptedAsInternalUser = jest
+    .fn()
+    .mockResolvedValue({ async *find() {}, close: jest.fn() });
   return {
-    getClient: jest.fn().mockReturnValue({ getDecryptedAsInternalUser }),
+    getClient: jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser,
+      createPointInTimeFinderDecryptedAsInternalUser,
+    }),
   };
 }
 
