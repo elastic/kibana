@@ -45,7 +45,7 @@ function buildPreAggEvaluatedVarOverridesPreamble(
   }
   const parts: string[] = [];
   for (const rule of whenRules) {
-    const cond = streamlangConditionToPainlessDoc(rule.condition);
+    const cond = streamlangConditionToPainlessDoc(rule.condition, { evaluatedVars });
     for (const [field, value] of Object.entries(rule.fields)) {
       if (typeof value !== 'string') {
         continue;
@@ -176,27 +176,12 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     );
   }
 
-  const buildWhenCondition = (when: unknown): string => {
-    if (!when || typeof when !== 'object') return 'false';
-    const c = when as Record<string, unknown>;
-    if ('field' in c && 'eq' in c && typeof c.field === 'string') {
-      const varName = evaluatedVars.get(c.field);
-      const val = escapePainlessString(String(c.eq));
-      if (varName) return `${varName} != null && ${varName} == "${val}"`;
-      return (
-        painlessFieldNonEmpty(c.field) +
-        ` && doc['${escapePainlessField(c.field)}'].value == "${val}"`
-      );
-    }
-    return 'false';
-  };
-
   const branchParts: string[] = [];
   for (let i = 0; i < euidRanking.branches.length; i++) {
     const branch = euidRanking.branches[i];
     const clauses = buildBranchClauses(branch.ranking);
     if (branch.when) {
-      const cond = buildWhenCondition(branch.when);
+      const cond = streamlangConditionToPainlessDoc(branch.when, { evaluatedVars });
       const prefix = i === 0 ? 'if' : 'else if';
       branchParts.push(`${prefix} (${cond}) { ${clauses} return null; }`);
     } else {
@@ -217,30 +202,63 @@ function painlessFieldNonEmpty(field: string): string {
   return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
 }
 
+export interface StreamlangToPainlessDocOptions {
+  /** Maps logical field names (e.g. entity.namespace) to Painless locals from field-eval preamble. */
+  evaluatedVars?: ReadonlyMap<string, string>;
+}
+
 /**
- * Translates a streamlang condition to Painless using doc['field'] access for runtime mappings.
+ * Translates a streamlang condition to Painless using doc['field'].value and/or evaluated locals.
  * Handles and, or, not, and field predicates (eq, neq, exists, includes).
  *
  * @internal Exported for testing.
  */
-export function streamlangConditionToPainlessDoc(condition: unknown): string {
+export function streamlangConditionToPainlessDoc(
+  condition: unknown,
+  options?: StreamlangToPainlessDocOptions
+): string {
+  const opts: StreamlangToPainlessDocOptions = options ?? {};
   if (!condition || typeof condition !== 'object') return 'false';
   const c = condition as Record<string, unknown>;
   if ('and' in c && Array.isArray(c.and)) {
-    const parts = (c.and as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub));
+    const parts = (c.and as unknown[]).map((sub) =>
+      streamlangConditionToPainlessDoc(sub, opts)
+    );
     return parts.length > 0 ? `(${parts.join(' && ')})` : 'true';
   }
   if ('or' in c && Array.isArray(c.or)) {
-    const parts = (c.or as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub));
+    const parts = (c.or as unknown[]).map((sub) =>
+      streamlangConditionToPainlessDoc(sub, opts)
+    );
     return parts.length > 0 ? `(${parts.join(' || ')})` : 'false';
   }
   if ('not' in c) {
-    return `!(${streamlangConditionToPainlessDoc(c.not)})`;
+    return `!(${streamlangConditionToPainlessDoc(c.not, opts)})`;
   }
   if ('always' in c) return 'true';
   if ('never' in c) return 'false';
   if ('field' in c && typeof c.field === 'string') {
     const field = c.field;
+    const varName = opts.evaluatedVars?.get(field);
+    if (varName !== undefined) {
+      if ('eq' in c && c.eq !== undefined) {
+        const val = escapePainlessString(String(c.eq));
+        return `${varName} != null && ${varName} == "${val}"`;
+      }
+      if ('neq' in c && c.neq !== undefined) {
+        const val = escapePainlessString(String(c.neq));
+        return `(${varName} == null || ${varName} == "" || ${varName} != "${val}")`;
+      }
+      if ('exists' in c) {
+        return c.exists
+          ? `${varName} != null && ${varName} != ""`
+          : `(${varName} == null || ${varName} == "")`;
+      }
+      if ('includes' in c) {
+        const val = escapePainlessString(String(c.includes));
+        return `${varName} != null && ${varName} != "" && ${varName}.contains("${val}")`;
+      }
+    }
     const escaped = escapePainlessField(field);
     const nonEmpty = painlessFieldNonEmpty(field);
     if ('eq' in c && c.eq !== undefined) {

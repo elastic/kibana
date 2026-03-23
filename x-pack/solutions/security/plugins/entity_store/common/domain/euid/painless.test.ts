@@ -145,6 +145,78 @@ describe('streamlangConditionToPainlessDoc', () => {
   it('returns "false" for unknown condition shape', () => {
     expect(streamlangConditionToPainlessDoc({ field: 'a' })).toBe('false');
   });
+
+  const userEvaluatedVars = new Map<string, string>([['entity.namespace', 'entity_namespace']]);
+
+  it('should use evaluated var for eq when field is in evaluatedVars', () => {
+    expect(
+      streamlangConditionToPainlessDoc(
+        { field: 'entity.namespace', eq: 'local' },
+        { evaluatedVars: userEvaluatedVars }
+      )
+    ).toBe('entity_namespace != null && entity_namespace == "local"');
+  });
+
+  it('should use doc access for eq when field is not in evaluatedVars', () => {
+    expect(
+      streamlangConditionToPainlessDoc(
+        { field: 'user.name', eq: 'alice' },
+        { evaluatedVars: userEvaluatedVars }
+      )
+    ).toBe(
+      `(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`
+    );
+  });
+
+  it('should mix evaluated var and doc fields in and conditions', () => {
+    const result = streamlangConditionToPainlessDoc(
+      {
+        and: [
+          { field: 'entity.namespace', eq: 'local' },
+          { field: 'user.name', eq: 'x' },
+        ],
+      },
+      { evaluatedVars: userEvaluatedVars }
+    );
+    expect(result).toBe(
+      `(entity_namespace != null && entity_namespace == "local" && (${nonEmpty(
+        'user.name'
+      )} && doc['user.name'].value == "x"))`
+    );
+  });
+
+  it('should use evaluated var for neq', () => {
+    expect(
+      streamlangConditionToPainlessDoc(
+        { field: 'entity.namespace', neq: 'local' },
+        { evaluatedVars: userEvaluatedVars }
+      )
+    ).toBe('(entity_namespace == null || entity_namespace == "" || entity_namespace != "local")');
+  });
+
+  it('should use evaluated var for exists true and false', () => {
+    expect(
+      streamlangConditionToPainlessDoc(
+        { field: 'entity.namespace', exists: true },
+        { evaluatedVars: userEvaluatedVars }
+      )
+    ).toBe('entity_namespace != null && entity_namespace != ""');
+    expect(
+      streamlangConditionToPainlessDoc(
+        { field: 'entity.namespace', exists: false },
+        { evaluatedVars: userEvaluatedVars }
+      )
+    ).toBe('(entity_namespace == null || entity_namespace == "")');
+  });
+
+  it('should use evaluated var for includes', () => {
+    expect(
+      streamlangConditionToPainlessDoc(
+        { field: 'entity.namespace', includes: 'okta' },
+        { evaluatedVars: userEvaluatedVars }
+      )
+    ).toBe('entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")');
+  });
 });
 
 describe('getEuidPainlessEvaluation', () => {
