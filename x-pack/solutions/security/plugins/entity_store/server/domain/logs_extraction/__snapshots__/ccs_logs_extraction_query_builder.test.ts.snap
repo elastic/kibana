@@ -179,7 +179,8 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE host.id IS NOT NULL,
  host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL
     BY entity.id
-| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.name)), entity.name)
+| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.name)), entity.name)
+| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT (NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\")), TO_STRING(user.name), entity.name)
 | EVAL entity.name = CASE((\`entity.namespace\` != \\"local\\"), TO_STRING(user.name), entity.name),
     entity.confidence = CASE((\`entity.namespace\` != \\"local\\"), \\"high\\", entity.confidence)
 | KEEP entity*,

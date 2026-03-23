@@ -499,7 +499,10 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       });
       const ext4 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext4.statusCode).toBe(200);
-      const hit4 = await searchDocById(esClient, 'user:postagg-idp-iam-ad-inlatest@active_directory');
+      const hit4 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
       expect(hit4.hits.hits).toHaveLength(1);
       expect(hit4.hits.hits[0]._source).toMatchObject({
         entity: {
@@ -524,7 +527,10 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       });
       const ext5 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
       expect(ext5.statusCode).toBe(200);
-      const hit5 = await searchDocById(esClient, 'user:postagg-idp-iam-ad-inlatest@active_directory');
+      const hit5 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
       expect(hit5.hits.hits).toHaveLength(1);
       expect(hit5.hits.hits[0]._source).toMatchObject({
         entity: {
@@ -646,6 +652,43 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
           id: 'user:local-user@local-host-1@local',
           type: 'Identity',
           name: 'local-user@workstation-42',
+          namespace: USER_ENTITY_NAMESPACE.Local,
+          confidence: ENTITY_CONFIDENCE.Medium,
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'Should set entity.name to user.name when non-IDP local document has no host.name',
+    async ({ apiClient, esClient }) => {
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T11:00:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'local-user-no-hostname' },
+        host: { id: 'local-host-no-name-1' },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        defaultHeaders,
+        'user',
+        '2026-03-18T10:59:00Z',
+        '2026-03-18T11:01:00Z'
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ count: 1 });
+
+      const hit = await searchDocById(
+        esClient,
+        'user:local-user-no-hostname@local-host-no-name-1@local'
+      );
+      expect(hit.hits.hits).toHaveLength(1);
+      expect(hit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:local-user-no-hostname@local-host-no-name-1@local',
+          type: 'Identity',
+          name: 'local-user-no-hostname',
           namespace: USER_ENTITY_NAMESPACE.Local,
           confidence: ENTITY_CONFIDENCE.Medium,
         },

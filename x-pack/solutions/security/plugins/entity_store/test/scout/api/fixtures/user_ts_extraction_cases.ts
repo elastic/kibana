@@ -445,7 +445,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     expectedMeta: {
       namespace: USER_ENTITY_NAMESPACE.Local,
       confidence: ENTITY_CONFIDENCE.Medium,
-      entityName: undefined,
+      entityName: 'alice.local',
     },
   },
   // --- documentsFilter failures ---

@@ -16,6 +16,7 @@ import {
 import type { Condition } from '@kbn/streamlang';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { isNotEmptyCondition } from '../definitions/common_fields';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 
 describe('getDocument', () => {
@@ -471,6 +472,39 @@ describe('applyWhenConditionTrueSetFields', () => {
       },
     ]);
     expect(doc['entity.name']).toBeUndefined();
+  });
+
+  it('uses user.name for local entity.name when host.name is missing (user.ts post-STATS rules)', () => {
+    const doc: Record<string, unknown> = {
+      'entity.namespace': USER_ENTITY_NAMESPACE.Local,
+      'user.name': 'alice.local',
+      'host.id': 'host-1',
+    };
+    applyWhenConditionTrueSetFields(doc, [
+      {
+        condition: {
+          and: [
+            { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+            isNotEmptyCondition('host.name'),
+          ],
+        },
+        fields: {
+          'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
+        },
+      },
+      {
+        condition: {
+          and: [
+            { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+            { not: isNotEmptyCondition('host.name') },
+          ],
+        },
+        fields: {
+          'entity.name': { source: 'user.name' },
+        },
+      },
+    ]);
+    expect(doc['entity.name']).toBe('alice.local');
   });
 });
 

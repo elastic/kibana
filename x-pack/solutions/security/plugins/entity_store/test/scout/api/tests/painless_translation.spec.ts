@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { expect } from '@kbn/scout-security/api';
 import { apiTest, type EsClient } from '@kbn/scout-security';
 import {
@@ -15,6 +14,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { ingestDoc } from '../fixtures/helpers';
+import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
 import {
   USER_TS_EXTRACTION_CASES,
   type UserTsExtractionCase,
@@ -22,11 +22,6 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidPainlessRuntimeMapping } from '../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
-import {
-  getDocument,
-  applyWhenConditionTrueSetFields,
-} from '../../../../common/domain/euid/commons';
-import { applyFieldEvaluations } from '../../../../common/domain/euid/field_evaluations';
 import { getEntityDefinitionWithoutId } from '../../../../common/domain/definitions/registry';
 import {
   EntityType,
@@ -77,36 +72,6 @@ async function ingestAndRunUserTsPainlessScenario(
   const hit = hits[0];
   assertUserRuntimeMatchesMemory(hit);
   return hit;
-}
-
-/**
- * Mirrors user entity pre-aggregation field rules (field evaluations + whenConditionTrueSetFieldsPreAgg)
- * so we can assert entity.namespace / entity.confidence / entity.name align with extracted entities.
- * The Painless runtime field only emits the EUID string, not these fields.
- */
-function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
-  namespace?: string;
-  confidence?: string;
-  entityName?: string;
-} {
-  const doc = cloneDeep(getDocument(hit));
-  const def = getEntityDefinitionWithoutId(USER_ENTITY_TYPE);
-  const { identityField } = def;
-  if ('fieldEvaluations' in identityField && identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
-    Object.assign(doc, evaluated);
-  }
-  if (def.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsPreAgg);
-  }
-  if (def.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsAfterStats);
-  }
-  return {
-    namespace: doc['entity.namespace'] as string | undefined,
-    confidence: doc['entity.confidence'] as string | undefined,
-    entityName: doc['entity.name'] as string | undefined,
-  };
 }
 
 function assertRuntimeEuidMatchesEntityTypeFormat(
@@ -217,13 +182,12 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         expect(expectedEuid).toMatch(/^user:.+/);
         expect(expectedEuid).toContain('@');
 
-        if (scenario.expectedMeta === undefined) {
-          throw new Error(`USER_TS_EXTRACTION_CASES missing expectedMeta for id=${scenario.id}`);
-        }
+        expect(scenario.expectedMeta).toBeDefined();
+        const expectedMeta = scenario.expectedMeta!;
         expect(deriveUserEntityPreAggMetadata(hit)).toStrictEqual({
-          namespace: scenario.expectedMeta.namespace,
-          confidence: scenario.expectedMeta.confidence,
-          entityName: scenario.expectedMeta.entityName,
+          namespace: expectedMeta.namespace,
+          confidence: expectedMeta.confidence,
+          entityName: expectedMeta.entityName,
         });
       }
     );

@@ -19,6 +19,7 @@ import {
   getEuidDslDocumentsContainsIdFilter,
 } from '../../../../common/domain/euid/dsl';
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
+import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
 import {
   USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
   USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT,
@@ -189,6 +190,14 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         expect(result.hits.hits).toHaveLength(1);
         expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
         expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
+
+        expect(scenario.expectedMeta).toBeDefined();
+        const expectedMeta = scenario.expectedMeta!;
+        expect(deriveUserEntityPreAggMetadata(result.hits.hits[0])).toStrictEqual({
+          namespace: expectedMeta.namespace,
+          confidence: expectedMeta.confidence,
+          entityName: expectedMeta.entityName,
+        });
       }
     );
   }
@@ -261,6 +270,13 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         );
         expect(subset).toHaveLength(1);
         expect(getEuidFromObject('user', subset[0])).toBe(scenario.expectedEuid);
+        expect(scenario.expectedMeta).toBeDefined();
+        const expectedMeta = scenario.expectedMeta!;
+        expect(deriveUserEntityPreAggMetadata(subset[0])).toStrictEqual({
+          namespace: expectedMeta.namespace,
+          confidence: expectedMeta.confidence,
+          entityName: expectedMeta.entityName,
+        });
       }
 
       expect(hasDocWith(hits, (s) => s.user?.name === 'john.doe')).toBe(true);

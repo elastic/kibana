@@ -198,12 +198,28 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       },
     },
   ],
-  /** Post-STATS: entity.name (local composition vs user.name) and High confidence when not local (logs ESQL only). */
+  /** Post-STATS: entity.name (local: user.name@host.name when host.name present, else user.name) and High confidence when not local (logs ESQL only). */
   whenConditionTrueSetFieldsAfterStats: [
     {
-      condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+      condition: {
+        and: [
+          { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+          isNotEmptyCondition('host.name'),
+        ],
+      },
       fields: {
         'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
+      },
+    },
+    {
+      condition: {
+        and: [
+          { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+          { not: isNotEmptyCondition('host.name') },
+        ],
+      },
+      fields: {
+        'entity.name': { source: 'user.name' },
       },
     },
     {
