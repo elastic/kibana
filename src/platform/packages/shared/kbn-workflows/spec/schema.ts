@@ -10,7 +10,13 @@
 import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import {
+  SCHEDULED_INTERVAL_ERROR,
+  SCHEDULED_INTERVAL_PATTERN,
+} from './schema/triggers/scheduled_trigger_schema';
 import { timezoneNames } from './schema/triggers/timezone_names';
+
+export { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN };
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -117,11 +123,8 @@ export const AlertRuleTriggerSchema = z.object({
 export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   with: z.union([
-    // New format: every: "5m", "2h", "1d", "30s"
     z.object({
-      every: z
-        .string()
-        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
+      every: z.string().regex(SCHEDULED_INTERVAL_PATTERN, SCHEDULED_INTERVAL_ERROR),
     }),
     z.object({
       rrule: z.object({
@@ -804,6 +807,7 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WaitForInputStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
