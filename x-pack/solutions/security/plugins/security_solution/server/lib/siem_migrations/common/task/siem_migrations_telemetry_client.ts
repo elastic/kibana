@@ -44,7 +44,7 @@ export abstract class SiemMigrationTelemetryClient<I extends ItemDocument = Item
     }
   }
 
-  public reportInlineQueryTelemetry(params: {
+  public reportSourceQueryKeywordsTelemetry(params: {
     type: 'rules' | 'dashboards';
     keywords: string[];
   }): void {
