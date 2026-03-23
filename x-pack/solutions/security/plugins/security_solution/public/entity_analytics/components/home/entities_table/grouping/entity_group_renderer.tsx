@@ -50,16 +50,17 @@ const openEntityFlyoutLabel = i18n.translate(
 const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAggregation> }) => {
   const { openRightPanel } = useExpandableFlyoutApi();
 
-  const entityName =
-    bucket.resolutionEntityName?.name?.buckets?.[0]?.key ??
-    String(bucket.key_as_string ?? bucket.key);
+  const targetEntityName = bucket.resolutionEntityName?.name?.buckets?.[0]?.key;
+  const displayName = targetEntityName ?? String(bucket.key_as_string ?? bucket.key);
 
   const entityType = bucket.resolutionEntityType?.type?.buckets?.[0]?.key as EntityType | undefined;
+
+  const canOpenFlyout = Boolean(targetEntityName && entityType);
 
   const handleOpenFlyout = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (!entityType) return;
+      if (!targetEntityName || !entityType) return;
 
       const panelKey = EntityPanelKeyByType[entityType];
       const panelParam = EntityPanelParamByType[entityType];
@@ -68,18 +69,18 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
       openRightPanel({
         id: panelKey,
         params: {
-          [panelParam]: entityName,
+          [panelParam]: targetEntityName,
           contextID: ENTITY_ANALYTICS_TABLE_ID,
           scopeId: ENTITY_ANALYTICS_TABLE_ID,
         },
       });
     },
-    [openRightPanel, entityName, entityType]
+    [openRightPanel, targetEntityName, entityType]
   );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      {entityType && (
+      {canOpenFlyout && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={openEntityFlyoutLabel}>
             <EuiButtonIcon
@@ -92,7 +93,7 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{entityName}</EuiText>
+        <EuiText size="s">{displayName}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

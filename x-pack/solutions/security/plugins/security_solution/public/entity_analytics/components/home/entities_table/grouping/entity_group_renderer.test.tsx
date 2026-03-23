@@ -113,6 +113,26 @@ describe('groupPanelRenderer', () => {
       expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
     });
 
+    it('hides expand button when target entity name is not available', () => {
+      const bucket = createMockBucket({
+        key: 'fallback-entity-id',
+        resolutionEntityName: {
+          doc_count: 0,
+          name: { buckets: [] },
+        },
+        resolutionEntityType: {
+          doc_count: 1,
+          type: { buckets: [{ key: 'user', doc_count: 1 }] },
+        },
+      });
+      const element = groupPanelRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<>{element}</>);
+
+      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.getByText('fallback-entity-id')).toBeInTheDocument();
+    });
+
     it('hides expand button when entity type is not available', () => {
       const bucket = createMockBucket({
         key: 'target-id',
