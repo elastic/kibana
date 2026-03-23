@@ -124,7 +124,7 @@ const getIntegrationByIdRoute = (
           const body: GetAutoImportIntegrationResponse = { integrationResponse: integration };
           return response.ok({ body });
         } catch (err) {
-          logger.error(`getIntegrationByIdRoute: Caught error:`, err);
+          logger.error(`getIntegrationByIdRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
@@ -252,12 +252,13 @@ const approveIntegrationRoute = (
           const authenticatedUser = await getCurrentUser();
 
           const { integration_id: integrationId } = request.params;
-          const { version } = request.body;
+          const { version, categories } = request.body;
 
           await automaticImportService.approveIntegration({
             integrationId,
             authenticatedUser,
             version,
+            categories,
           });
 
           return response.ok({ body: { message: 'Integration approved successfully' } });

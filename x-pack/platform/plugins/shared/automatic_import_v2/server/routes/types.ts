@@ -22,6 +22,7 @@ export interface ApproveIntegrationParams {
   integrationId: string;
   authenticatedUser: AuthenticatedUser;
   version: string;
+  categories?: string[];
 }
 
 export interface CreateDataStreamParams {

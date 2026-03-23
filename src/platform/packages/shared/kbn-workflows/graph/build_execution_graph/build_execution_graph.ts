@@ -9,6 +9,7 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
+import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
   DataSetStep,
@@ -16,50 +17,73 @@ import type {
   ForEachStep,
   IfStep,
   KibanaStep,
+  LoopBreakStep,
+  LoopContinueStep,
   LoopStepProps,
   MaxIterations,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
+  SwitchStep,
   TimeoutProp,
   WaitForInputStep,
   WaitStep,
   WhileStep,
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
+  WorkflowFailStep,
   WorkflowOnFailure,
+  WorkflowOutputStep,
   WorkflowRetry,
   WorkflowSettings,
   WorkflowYaml,
 } from '../../spec/schema';
 import type {
+  EnterCaseBranchNode,
   EnterConditionBranchNode,
   EnterContinueNode,
+  EnterDefaultBranchNode,
   EnterFallbackPathNode,
   EnterForeachNode,
   EnterIfNode,
   EnterNormalPathNode,
   EnterRetryNode,
+  EnterSwitchNode,
   EnterTimeoutZoneNode,
   EnterTryBlockNode,
   EnterWhileNode,
+  ExitCaseBranchNode,
   ExitConditionBranchNode,
   ExitContinueNode,
+  ExitDefaultBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitIfNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  ExitSwitchNode,
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   ExitWhileNode,
   GraphNodeUnion,
+  LoopBreakNode,
+  LoopContinueNode,
+  LoopEnterNode,
   WaitForInputGraphNode,
   WorkflowGraphType,
+  WorkflowOutputGraphNode,
 } from '../types';
+import { isLoopEnterNode } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach', 'while']);
+const flowControlStepTypes = new Set([
+  'if',
+  'foreach',
+  'while',
+  'loop.break',
+  'loop.continue',
+  'switch',
+]);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -117,6 +141,18 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
   }
 
+  if (currentStep.type === 'switch') {
+    return createSwitchGraph(getStepId(currentStep, context), currentStep as SwitchStep, context);
+  }
+
+  if (currentStep.type === 'loop.break') {
+    return visitLoopBreakStep(currentStep as LoopBreakStep, context);
+  }
+
+  if (currentStep.type === 'loop.continue') {
+    return visitLoopContinueStep(currentStep as LoopContinueStep, context);
+  }
+
   if ((currentStep as TimeoutProp).timeout) {
     const step = currentStep as BaseStep & TimeoutProp;
     return handleTimeout(
@@ -166,6 +202,20 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'workflow.executeAsync') {
     return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
+  }
+
+  if (currentStep.type === 'workflow.output') {
+    return visitWorkflowOutputStep(currentStep, context);
+  }
+
+  if (currentStep.type === 'workflow.fail') {
+    const transformedStep: WorkflowOutputStep = {
+      ...currentStep,
+      type: 'workflow.output',
+      status: 'failed',
+      with: (currentStep as WorkflowFailStep).with ?? {},
+    };
+    return visitWorkflowOutputStep(transformedStep, context);
   }
 
   return visitAtomicStep(currentStep, context);
@@ -273,6 +323,23 @@ export function visitWorkflowExecuteAsyncStep(
   return createLeafStepGraph(currentStep, context, 'workflow.executeAsync');
 }
 
+export function visitWorkflowOutputStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowOutputNode: WorkflowOutputGraphNode = {
+    id: stepId,
+    type: 'workflow.output',
+    stepId,
+    stepType: 'workflow.output',
+    configuration: currentStep as WorkflowOutputStep,
+  };
+  graph.setNode(workflowOutputNode.id, workflowOutputNode);
+  return graph;
+}
+
 export function visitAtomicStep(
   currentStep: BaseStep,
   context: GraphBuildContext
@@ -375,6 +442,99 @@ function createIfGraphForIfStepLevel(
     steps: [omit(stepWithIfCondition, ['if'])],
   } as IfStep;
   return createIfGraph(generatedStepId, ifStep, context);
+}
+
+function createSwitchGraph(
+  stepId: string,
+  switchStep: SwitchStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterSwitchNodeId = `enterSwitch_${stepId}`;
+  const exitSwitchNodeId = `exitSwitch_${stepId}`;
+
+  const enterSwitchNode: EnterSwitchNode = {
+    id: enterSwitchNodeId,
+    type: 'enter-switch',
+    stepId,
+    stepType: switchStep.type,
+    exitNodeId: exitSwitchNodeId,
+    configuration: {
+      ...omit(switchStep, ['cases', 'default']),
+    },
+  };
+  context.stack.push(enterSwitchNode);
+  graph.setNode(enterSwitchNodeId, enterSwitchNode);
+
+  const exitSwitchNode: ExitSwitchNode = {
+    type: 'exit-switch',
+    id: exitSwitchNodeId,
+    stepId,
+    stepType: switchStep.type,
+    startNodeId: enterSwitchNodeId,
+  };
+  graph.setNode(exitSwitchNodeId, exitSwitchNode);
+
+  const cases = switchStep.cases || [];
+  for (let i = 0; i < cases.length; i++) {
+    const caseItem = cases[i];
+    const enterCaseId = `enterCase_${stepId}_${i}`;
+    const exitCaseId = `exitCase_${stepId}_${i}`;
+
+    const enterCaseNode: EnterCaseBranchNode = {
+      id: enterCaseId,
+      type: 'enter-case-branch',
+      match: caseItem.match,
+      index: i,
+      stepId,
+      stepType: switchStep.type,
+    };
+    graph.setNode(enterCaseId, enterCaseNode);
+    graph.setEdge(enterSwitchNodeId, enterCaseId);
+
+    const exitCaseNode: ExitCaseBranchNode = {
+      id: exitCaseId,
+      type: 'exit-case-branch',
+      startNodeId: enterCaseId,
+      stepId,
+      stepType: switchStep.type,
+    };
+
+    const caseGraph = createStepsSequence(caseItem.steps || [], context);
+    insertGraphBetweenNodes(graph, caseGraph, enterCaseId, exitCaseId);
+    graph.setNode(exitCaseId, exitCaseNode);
+    graph.setEdge(exitCaseId, exitSwitchNodeId);
+  }
+
+  if (switchStep.default?.length) {
+    const enterDefaultId = `enterDefault_${stepId}`;
+    const exitDefaultId = `exitDefault_${stepId}`;
+
+    const enterDefaultNode: EnterDefaultBranchNode = {
+      id: enterDefaultId,
+      type: 'enter-default-branch',
+      stepId,
+      stepType: switchStep.type,
+    };
+    graph.setNode(enterDefaultId, enterDefaultNode);
+    graph.setEdge(enterSwitchNodeId, enterDefaultId);
+
+    const exitDefaultNode: ExitDefaultBranchNode = {
+      id: exitDefaultId,
+      type: 'exit-default-branch',
+      startNodeId: enterDefaultId,
+      stepId,
+      stepType: switchStep.type,
+    };
+
+    const defaultGraph = createStepsSequence(switchStep.default, context);
+    insertGraphBetweenNodes(graph, defaultGraph, enterDefaultId, exitDefaultId);
+    graph.setNode(exitDefaultId, exitDefaultNode);
+    graph.setEdge(exitDefaultId, exitSwitchNodeId);
+  }
+
+  context.stack.pop();
+  return graph;
 }
 
 function applyOnFailure(
@@ -785,10 +945,10 @@ function insertGraphBetweenNodes(
 }
 
 function normalizeMaxIterations(raw?: MaxIterations): {
-  maxIterations?: number;
-  onLimit?: 'continue' | 'fail';
+  maxIterations: number;
+  onLimit: 'continue' | 'fail';
 } {
-  if (raw == null) return {};
+  if (raw == null) return { maxIterations: DEFAULT_LOOP_MAX_ITERATIONS, onLimit: 'continue' };
   if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
   return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
 }
@@ -884,6 +1044,62 @@ function createWhileGraph(
 
   insertGraphBetweenNodes(graph, innerGraph, enterWhileNodeId, exitNodeId);
   context.stack.pop();
+  return graph;
+}
+
+function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
+  for (let i = context.stack.length - 1; i >= 0; i--) {
+    const node = context.stack[i];
+    if (isLoopEnterNode(node)) {
+      return node;
+    }
+  }
+  throw new Error(
+    'loop.break and loop.continue are only valid inside a loop body (foreach or while). ' +
+      'Move the step inside a loop, or remove it.'
+  );
+}
+
+function visitLoopBreakStep(
+  currentStep: LoopBreakStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
+
+  const loopBreakNode: LoopBreakNode = {
+    id: stepId,
+    type: 'loop-break',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+    loopStepId: enclosingLoop.stepId,
+  };
+  graph.setNode(loopBreakNode.id, loopBreakNode);
+  return graph;
+}
+
+function visitLoopContinueStep(
+  currentStep: LoopContinueStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
+
+  const loopContinueNode: LoopContinueNode = {
+    id: stepId,
+    type: 'loop-continue',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+  };
+  graph.setNode(loopContinueNode.id, loopContinueNode);
   return graph;
 }
 

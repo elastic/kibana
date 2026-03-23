@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { VersionedAttachment, UpdateOriginResponse } from '@kbn/agent-builder-common';
 import type {
+  CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
   ListAttachmentsResponse,
 } from '@kbn/agent-builder-plugin/common/http_api/attachments';
@@ -98,14 +99,14 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
         expect(body).to.have.property('success', true);
         expect(body).to.have.property('attachment');
         expect(body.attachment.id).to.equal(attachment.id);
-        expect(body.attachment.origin).to.eql({ saved_object_id: 'saved-object-123' });
+        expect(body.attachment.origin).to.eql('saved-object-123');
       });
 
       it('should persist the updated origin', async () => {
@@ -117,7 +118,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'persisted-saved-object-456' } })
+          .send({ origin: 'persisted-saved-object-456' })
           .expect(200);
 
         const listResponse = await supertest
@@ -129,7 +130,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         const updatedAttachment = listBody.results.find((a) => a.id === attachment.id);
 
         expect(updatedAttachment).to.be.ok();
-        expect(updatedAttachment!.origin).to.eql({ saved_object_id: 'persisted-saved-object-456' });
+        expect(updatedAttachment!.origin).to.eql('persisted-saved-object-456');
       });
 
       it('should return 404 for non-existent conversation', async () => {
@@ -138,7 +139,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/non-existent-conversation/attachments/some-attachment/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(404);
 
         const body: Payload = response.body;
@@ -154,7 +155,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/non-existent-attachment/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(404);
 
         const body: Payload = response.body;
@@ -176,7 +177,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(400);
 
         const body: Payload = response.body;
@@ -193,7 +194,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'first-saved-object' } })
+          .send({ origin: 'first-saved-object' })
           .expect(200);
 
         const response = await supertest
@@ -201,11 +202,11 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'second-saved-object' } })
+          .send({ origin: 'second-saved-object' })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
-        expect(body.attachment.origin).to.eql({ saved_object_id: 'second-saved-object' });
+        expect(body.attachment.origin).to.eql('second-saved-object');
       });
 
       it('should not create a new version when updating origin', async () => {
@@ -218,12 +219,54 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ origin: { saved_object_id: 'saved-object-123' } })
+          .send({ origin: 'saved-object-123' })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
         expect(body.attachment.current_version).to.equal(originalVersion);
         expect(body.attachment.versions.length).to.equal(1);
+      });
+    });
+
+    describe('GET /api/agent_builder/conversations/{conversation_id}/attachments/stale', () => {
+      it('returns not stale for text attachment without origin', async () => {
+        const conversationId = await createConversation();
+        const attachment = await createTextAttachment(conversationId);
+
+        const response = await supertest
+          .get(`/api/agent_builder/conversations/${conversationId}/attachments/stale`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        const body: CheckStaleAttachmentsResponse = response.body;
+        expect(body).to.have.property('attachments');
+        expect(body.attachments).to.be.an('array');
+        const resultsForAttachment = body.attachments.filter((a) => a.id === attachment.id);
+        expect(resultsForAttachment).to.have.length(1);
+        expect(resultsForAttachment[0].is_stale).to.equal(false);
+      });
+
+      it('returns empty attachments when conversation has no attachments', async () => {
+        const conversationId = await createConversation();
+
+        const response = await supertest
+          .get(`/api/agent_builder/conversations/${conversationId}/attachments/stale`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        const body: CheckStaleAttachmentsResponse = response.body;
+        expect(body.attachments).to.eql([]);
+      });
+
+      it('returns 404 for non-existent conversation', async () => {
+        const response = await supertest
+          .get(`/api/agent_builder/conversations/non-existent-conversation/attachments/stale`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(404);
+
+        const body: Payload = response.body;
+        expect(body).to.have.property('message');
+        expect(body.message).to.contain('not found');
       });
     });
   });

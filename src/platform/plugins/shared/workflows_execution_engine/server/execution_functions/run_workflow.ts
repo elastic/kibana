@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExecutionStatus, isTriggerType } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
@@ -26,6 +27,7 @@ export async function runWorkflow({
   dependencies,
   workflowsExecutionEngine,
   meteringService,
+  isEventDrivenExecutionEnabled,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -36,6 +38,7 @@ export async function runWorkflow({
   dependencies: ContextDependencies;
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
+  isEventDrivenExecutionEnabled?: () => boolean;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -59,6 +62,31 @@ export async function runWorkflow({
     workflowsExecutionEngine
   );
   setupSpan?.end();
+
+  // Execution-time gate: skip event-driven runs when the kill switch is disabled
+  if (isEventDrivenExecutionEnabled) {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (execution) {
+      const triggeredBy = execution.triggeredBy;
+      const isEventDriven = triggeredBy != null && !isTriggerType(triggeredBy);
+      if (isEventDriven && !isEventDrivenExecutionEnabled()) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowRunId,
+          status: ExecutionStatus.SKIPPED,
+          cancellationReason: 'Event-driven execution disabled by operator',
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system',
+        });
+        logger.debug(
+          `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+        );
+        return;
+      }
+    }
+  }
 
   // Span for runtime initialization (graph building, topsort, etc.)
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');

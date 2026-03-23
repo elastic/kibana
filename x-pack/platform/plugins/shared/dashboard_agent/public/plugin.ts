@@ -7,13 +7,16 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
+import { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { Subscription } from 'rxjs';
 
 export class DashboardAgentPlugin
   implements
@@ -24,6 +27,9 @@ export class DashboardAgentPlugin
       DashboardAgentPluginPublicStartDependencies
     >
 {
+  private dashboardApi: DashboardApi | undefined;
+  private dashboardAppApiSubscription: Subscription | undefined;
+
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
@@ -37,23 +43,25 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    plugins.agentBuilder.attachments.addAttachmentType(DASHBOARD_ATTACHMENT_TYPE, async () => {
+    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
+      this.dashboardApi = api;
+    });
+    plugins.agentBuilder.attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, async () => {
       const { getDashboardAttachmentUiDefinition } = await import('./attachment_types');
-      const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
-      const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
+
       return getDashboardAttachmentUiDefinition({
-        dashboardLocator,
+        agentBuilder: plugins.agentBuilder,
+        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
-        doesSavedDashboardExist: async (dashboardId: string) => {
-          const findDashboardsService = await findDashboardsServicePromise;
-          const result = await findDashboardsService.findById(dashboardId);
-          return result.status === 'success';
-        },
+        dashboardPlugin: plugins.dashboard,
+        getDashboardApi: () => this.dashboardApi,
       });
     });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.dashboardAppApiSubscription?.unsubscribe();
+  }
 }

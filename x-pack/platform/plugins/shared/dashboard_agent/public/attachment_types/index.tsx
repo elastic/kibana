@@ -7,22 +7,42 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import type { AttachmentLifecycleParams, AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardRendererProps,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
+import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
+import { onAttachmentMount } from './create_attachment_mount_handler';
 
-export function getDashboardAttachmentUiDefinition({
+export const getDashboardAttachmentUiDefinition = ({
+  agentBuilder: {
+    attachments,
+    events: { chat$ },
+  },
   dashboardLocator,
   unifiedSearch,
-  doesSavedDashboardExist,
+  dashboardPlugin,
+  getDashboardApi,
 }: {
+  agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-}): AttachmentUIDefinition<DashboardAttachment> {
+  dashboardPlugin: DashboardStart;
+  getDashboardApi: () => DashboardApi | undefined;
+}): AttachmentUIDefinition<DashboardAttachment> => {
+  const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
+  const checkSavedDashboardExist = async (dashboardId: string) => {
+    const findDashboardsService = await findDashboardsServicePromise;
+    const result = await findDashboardsService.findById(dashboardId);
+    return result.status === 'success';
+  };
   return {
     getLabel: (attachment) => {
       return (
@@ -33,21 +53,21 @@ export function getDashboardAttachmentUiDefinition({
       );
     },
     getIcon: () => 'productDashboard',
+    onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
+      onAttachmentMount({ ...params, dashboardPlugin, chat$ }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
-        registerActionButtons={callbacks.registerActionButtons}
-        updateOrigin={callbacks.updateOrigin}
+        {...callbacks}
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
-        doesSavedDashboardExist={doesSavedDashboardExist}
+        checkSavedDashboardExist={checkSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ openCanvas }) => {
-      if (!openCanvas) {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, updateOrigin }) => {
+      if (isCanvas) {
         return [];
       }
-
       return [
         {
           label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
@@ -55,9 +75,22 @@ export function getDashboardAttachmentUiDefinition({
           }),
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: openCanvas,
+          handler: () => {
+            const dashboardApi = getDashboardApi();
+            if (!dashboardApi) {
+              openCanvas?.();
+              return;
+            }
+
+            handlePreviewInDashboard({
+              attachment,
+              dashboardApi,
+              checkSavedDashboardExist,
+              updateOrigin,
+            });
+          },
         },
       ];
     },
-  };
-}
+  }
+};

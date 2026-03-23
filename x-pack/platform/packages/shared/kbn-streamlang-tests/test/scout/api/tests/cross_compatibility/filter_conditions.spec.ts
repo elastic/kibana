@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -53,8 +54,8 @@ apiTest.describe(
       expect(ingestResult[0]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'active', is_active: 'yes' } })
       );
-      expect(ingestResult[1].attributes?.is_active).toBeUndefined();
-      expect(ingestResult[2].attributes?.is_active).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.is_active).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_active).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.status': 'active', 'attributes.is_active': 'yes' })
@@ -101,7 +102,7 @@ apiTest.describe(
       expect(ingestResult[0]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'active', not_deleted: 'kept' } })
       );
-      expect(ingestResult[1].attributes?.not_deleted).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.not_deleted).toBeUndefined();
       expect(ingestResult[2]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'inactive', not_deleted: 'kept' } })
       );
@@ -158,8 +159,8 @@ apiTest.describe(
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { priority: 8, high_priority: 'high' } })
       );
-      expect(ingestResult[2].attributes?.high_priority).toBeUndefined();
-      expect(ingestResult[3].attributes?.high_priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.high_priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.high_priority).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.priority': 10, 'attributes.high_priority': 'high' })
@@ -214,7 +215,7 @@ apiTest.describe(
         expect(ingestResult[1]).toStrictEqual(
           expect.objectContaining({ attributes: { age: 18, adult: 'yes' } })
         );
-        expect(ingestResult[2].attributes?.adult).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.adult).toBeUndefined();
 
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
           expect.objectContaining({ 'attributes.age': 25, 'attributes.adult': 'yes' })
@@ -266,8 +267,8 @@ apiTest.describe(
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { quantity: 8, low_stock: 'low' } })
       );
-      expect(ingestResult[2].attributes?.low_stock).toBeUndefined();
-      expect(ingestResult[3].attributes?.low_stock).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.low_stock).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.low_stock).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.quantity': 5, 'attributes.low_stock': 'low' })
@@ -322,7 +323,7 @@ apiTest.describe(
         expect(ingestResult[1]).toStrictEqual(
           expect.objectContaining({ attributes: { size: 1024, small_file: 'small' } })
         );
-        expect(ingestResult[2].attributes?.small_file).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.small_file).toBeUndefined();
 
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
           expect.objectContaining({ 'attributes.size': 512, 'attributes.small_file': 'small' })
@@ -369,11 +370,11 @@ apiTest.describe(
       await testBed.ingest('esql-exists', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-exists', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ user_email: 'test@example.com', has_email: 'yes' })
       );
-      expect(ingestResult[1].attributes?.has_email).toBeUndefined();
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.has_email).toBeUndefined();
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ user_email: 'another@example.com', has_email: 'yes' })
       );
 
@@ -430,15 +431,15 @@ apiTest.describe(
       await testBed.ingest('esql-range', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-range', query);
 
-      expect(ingestResult[0].attributes?.in_range).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.in_range).toBeUndefined();
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { temperature: 20, in_range: 'optimal' } })
       );
       expect(ingestResult[2]).toStrictEqual(
         expect.objectContaining({ attributes: { temperature: 25, in_range: 'optimal' } })
       );
-      expect(ingestResult[3].attributes?.in_range).toBeUndefined();
-      expect(ingestResult[4].attributes?.in_range).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.in_range).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[4])?.attributes)?.in_range).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.temperature': 15, 'attributes.in_range': null })
@@ -493,28 +494,28 @@ apiTest.describe(
       await testBed.ingest('esql-contains', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-contains', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'synth-service-2', matched: 'matched' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({
           service_name: 'prefix-synth-service-2-suffix',
           matched: 'matched',
         })
       );
-      expect(ingestResult[2].attributes?.matched).toBeUndefined();
-      expect(ingestResult[3].attributes?.matched).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.matched).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.matched).toBeUndefined();
       // Case-insensitive matches
-      expect(ingestResult[4].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[4])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'SYNTH-SERVICE-2', matched: 'matched' })
       );
-      expect(ingestResult[5].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[5])?.attributes).toStrictEqual(
         expect.objectContaining({
           service_name: 'prefix-Synth-Service-2-suffix',
           matched: 'matched',
         })
       );
-      expect(ingestResult[6].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[6])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'SyNtH-sErViCe-2', matched: 'matched' })
       );
 
@@ -595,14 +596,14 @@ apiTest.describe(
       await testBed.ingest('esql-startswith', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-startswith', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'Error: Connection failed', is_error: 'error' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'Error: Timeout occurred', is_error: 'error' })
       );
-      expect(ingestResult[2].attributes?.is_error).toBeUndefined();
-      expect(ingestResult[3].attributes?.is_error).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_error).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.is_error).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -662,14 +663,14 @@ apiTest.describe(
       await testBed.ingest('esql-endswith', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-endswith', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ filename: 'application.log', is_log_file: 'log' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ filename: 'error.log', is_log_file: 'log' })
       );
-      expect(ingestResult[2].attributes?.is_log_file).toBeUndefined();
-      expect(ingestResult[3].attributes?.is_log_file).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_log_file).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.is_log_file).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -751,11 +752,11 @@ apiTest.describe(
       await testBed.ingest('esql-multiple-and', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-multiple-and', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'prod-api', priority: 'high' })
       );
-      expect(ingestResult[1].attributes?.priority).toBeUndefined();
-      expect(ingestResult[2].attributes?.priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.priority).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -811,14 +812,14 @@ apiTest.describe(
       await testBed.ingest('esql-not-contains', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-not-contains', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ log_level: 'INFO', not_debug: 'production' })
       );
-      expect(ingestResult[1].attributes?.not_debug).toBeUndefined();
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.not_debug).toBeUndefined();
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ log_level: 'ERROR', not_debug: 'production' })
       );
-      expect(ingestResult[3].attributes?.not_debug).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.not_debug).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -878,16 +879,16 @@ apiTest.describe(
       await testBed.ingest('esql-or-patterns', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-or-patterns', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'CRITICAL: System failure', important: 'critical' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'A fatal error occurred', important: 'critical' })
       );
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'Kernel panic', important: 'critical' })
       );
-      expect(ingestResult[3].attributes?.important).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.important).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -950,14 +951,14 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-includes-string', query);
 
         // Ingest pipeline results
-        expect(ingestResult[0].attributes).toStrictEqual(
+        expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
           expect.objectContaining({ tags: ['error', 'warning', 'info'], has_error_tag: 'yes' })
         );
-        expect(ingestResult[1].attributes?.has_error_tag).toBeUndefined();
-        expect(ingestResult[2].attributes).toStrictEqual(
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.has_error_tag).toBeUndefined();
+        expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
           expect.objectContaining({ tags: ['error'], has_error_tag: 'yes' })
         );
-        expect(ingestResult[3].attributes?.has_error_tag).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[3])?.attributes)?.has_error_tag).toBeUndefined();
 
         // ESQL results
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
@@ -1009,11 +1010,11 @@ apiTest.describe(
       const esqlResult = await esql.queryOnIndex('esql-includes-not', query);
 
       // Ingest pipeline results
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ roles: ['user', 'viewer'], no_admin: 'regular_user' })
       );
-      expect(ingestResult[1].attributes?.no_admin).toBeUndefined();
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.no_admin).toBeUndefined();
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ roles: ['editor'], no_admin: 'regular_user' })
       );
 
@@ -1061,14 +1062,14 @@ apiTest.describe(
       await testBed.ingest('esql-special-chars', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-special-chars', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ url_path: '/api/v1/users', is_api_path: 'api_v1' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ url_path: '/api/v1/products/123', is_api_path: 'api_v1' })
       );
-      expect(ingestResult[2].attributes?.is_api_path).toBeUndefined();
-      expect(ingestResult[3].attributes?.is_api_path).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_api_path).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.is_api_path).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -1131,14 +1132,14 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-single-array', query);
 
         // Single-element array ['important'] should match like 'important'
-        expect(ingestResult[0].attributes).toStrictEqual(
+        expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
           expect.objectContaining({ matched: 'yes' })
         );
-        expect(ingestResult[1].attributes).toStrictEqual(
+        expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
           expect.objectContaining({ matched: 'yes' })
         );
-        expect(ingestResult[2].attributes?.matched).toBeUndefined();
-        expect(ingestResult[3].attributes?.matched).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.matched).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[3])?.attributes)?.matched).toBeUndefined();
 
         // ES|QL should produce the same results
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(

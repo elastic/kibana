@@ -8,6 +8,7 @@
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { GRAPH_ATTACHMENT_TYPE } from '../../common/attachments';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -27,5 +28,9 @@ export const registerAttachmentUiDefinitions = ({
   attachments.addAttachmentType(AttachmentType.esql, async () => {
     const { createEsqlAttachmentDefinition } = await import('./esql_attachment');
     return createEsqlAttachmentDefinition({ locators });
+  });
+  attachments.addAttachmentType(GRAPH_ATTACHMENT_TYPE, async () => {
+    const { graphAttachmentDefinition } = await import('./graph_attachment/graph_attachment');
+    return graphAttachmentDefinition;
   });
 };

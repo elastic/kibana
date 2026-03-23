@@ -17,6 +17,9 @@
   ],
     "optionalPlugins": [
       "encryptedSavedObjects"
+    ],
+    "extraPublicDirs": [
+      "common"
     ]
   }
 }
