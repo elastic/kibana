@@ -239,6 +239,33 @@ describe('resolution filter pipeline regression', () => {
     expect(result).toBeUndefined();
   });
 
+  it('buildResolutionGroupFilter preserves non-resolution filters from parent groups', () => {
+    // When resolution is leaf in Entity Type > Resolution, the parent entity type
+    // filter must be preserved alongside the resolution bool query.
+    const entityTypeFilter = createFilter({
+      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
+    });
+    const rawFilters = [resolutionMatchPhraseFilter, entityTypeFilter]
+      .map(groupFilterMap)
+      .filter(Boolean) as Filter[];
+
+    const resolutionQueryFilter = buildResolutionGroupFilter(rawFilters);
+
+    // Resolution query is present
+    expect(resolutionQueryFilter).toBeDefined();
+    expect(resolutionQueryFilter?.[0].bool.should).toHaveLength(2);
+
+    // Entity type filter is NOT included in resolutionQueryFilter — it must be
+    // preserved separately by the caller (DataTableWithLocalPagination)
+    const nonResolutionFilters = rawFilters.filter(
+      (f) => !f?.query?.match_phrase?.[ENTITY_FIELDS.RESOLVED_TO]
+    );
+    expect(nonResolutionFilters).toHaveLength(1);
+    expect(nonResolutionFilters[0].query).toEqual({
+      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
+    });
+  });
+
   it('transformResolutionFilter is safe to apply to already-transformed filters (idempotent for non-match_phrase)', () => {
     // When resolution is a parent group level and entity type is the leaf,
     // transformResolutionFilter may see already-transformed bool/should filters.

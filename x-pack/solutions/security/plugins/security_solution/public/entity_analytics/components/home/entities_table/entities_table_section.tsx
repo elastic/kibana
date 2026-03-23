@@ -308,7 +308,13 @@ const DataTableWithLocalPagination = ({
       // value and builds its own bool/should. Applying transformResolutionFilter
       // first would remove the match_phrase, causing it to return undefined.
       const rawFilters = mergedFilters.map(groupFilterMap).filter(filterTypeGuard);
-      return buildResolutionGroupFilter(rawFilters) ?? [];
+      const resolutionQueryFilter = buildResolutionGroupFilter(rawFilters);
+      // Preserve non-resolution filters (e.g., entity type from parent group)
+      const nonResolutionFilters = rawFilters
+        .filter((f) => !f?.query?.match_phrase?.[ENTITY_FIELDS.RESOLVED_TO])
+        .map(getDataGridFilter)
+        .filter((f): f is NonNullable<Filter['query']> => Boolean(f));
+      return [...(resolutionQueryFilter ?? []), ...nonResolutionFilters];
     }
 
     // For non-resolution leaf, transform resolution filters first
