@@ -8,7 +8,10 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import type { EntityField, SetFieldsByCondition } from '../../../common/domain/definitions/entity_schema';
+import type {
+  EntityField,
+  SetFieldsByCondition,
+} from '../../../common/domain/definitions/entity_schema';
 import { getEuidEsqlDocumentsContainsIdFilter } from '../../../common/domain/euid/esql';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -57,9 +60,7 @@ describe('buildExtractionSourceClause', () => {
     expect(clause).toContain('FROM logs-*, metrics-*');
     expect(clause).toContain('METADATA _index');
     expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(
-      `${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`
-    );
+    expect(clause).not.toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(clause).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(clause).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
   });
@@ -82,7 +83,9 @@ describe('aggregationStats', () => {
 
   it('should prefix destinations with recentData when renameToRecent is true', () => {
     expect(aggregationStats([keywordField()], true)).toBe(
-      `${recentData('host.name')} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      `${recentData(
+        'host.name'
+      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
     );
   });
 
@@ -210,10 +213,7 @@ describe('extractPaginationParams', () => {
 
   it('should return undefined when row count is below docs limit', () => {
     const response = makeResponse(
-      [
-        { name: '@ts' },
-        { name: 'finalId' },
-      ],
+      [{ name: '@ts' }, { name: 'finalId' }],
       [
         ['2024-01-01', 'a'],
         ['2024-01-02', 'b'],
@@ -224,10 +224,7 @@ describe('extractPaginationParams', () => {
 
   it('should return cursors from the last row when row count reaches docs limit', () => {
     const response = makeResponse(
-      [
-        { name: '@ts' },
-        { name: 'finalId' },
-      ],
+      [{ name: '@ts' }, { name: 'finalId' }],
       [
         ['2024-01-01', 'first'],
         ['2024-01-02', 'last'],
@@ -306,21 +303,17 @@ describe('buildPaginationSection', () => {
   };
 
   it('should emit SORT and LIMIT only when pagination is absent', () => {
-    expect(
-      buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields)
-    ).toEqual([
+    expect(buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields)).toEqual([
       '| SORT @timestamp ASC, recent.id ASC',
       '| LIMIT 25',
     ]);
   });
 
   it('should add a WHERE cursor clause when pagination is provided without recovery', () => {
-    const parts = buildPaginationSection(
-      '2024-01-01T00:00:00.000Z',
-      25,
-      paginationFields,
-      { timestampCursor: '2024-06-01T00:00:00.000Z', idCursor: 'cursor-id' }
-    );
+    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
+      timestampCursor: '2024-06-01T00:00:00.000Z',
+      idCursor: 'cursor-id',
+    });
     expect(parts[0]).toBe('| SORT @timestamp ASC, recent.id ASC');
     expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-06-01T00:00:00.000Z")');
     expect(parts[1]).toContain('recent.id > "cursor-id"');

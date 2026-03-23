@@ -163,9 +163,7 @@ describe('streamlangConditionToPainlessDoc', () => {
         { field: 'user.name', eq: 'alice' },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe(
-      `(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`
-    );
+    ).toBe(`(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`);
   });
 
   it('should mix evaluated var and doc fields in and conditions', () => {
@@ -215,7 +213,9 @@ describe('streamlangConditionToPainlessDoc', () => {
         { field: 'entity.namespace', includes: 'okta' },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe('entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")');
+    ).toBe(
+      'entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")'
+    );
   });
 });
 
