@@ -24,14 +24,14 @@ import type {
   XYAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from './types';
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 
 /**
  * Converts persisted state to runtime state.
  *
- * Injects references to produce a fully formed XYState that can be used by the visualization.
+ * Injects references to produce a fully formed XYVisualizationState that can be used by the visualization.
  */
 export function convertPersistedState(
   state: XYPersistedState,
@@ -44,10 +44,10 @@ export function convertPersistedState(
 /**
  * Converts runtime state to persisted state.
  *
- * @param state The runtime XYState to convert.
+ * @param state The runtime XYVisualizationState to convert.
  * @returns An object containing the persistable state and any references.
  */
-export function convertToPersistable(state: XYState) {
+export function convertToPersistable(state: XYVisualizationState) {
   const persistableState: XYPersistedState = state;
   const references: Reference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
@@ -128,7 +128,9 @@ function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;
 }
 
-function needsInjectReferences(state: XYPersistedState | XYState): state is XYPersistedState {
+function needsInjectReferences(
+  state: XYPersistedState | XYVisualizationState
+): state is XYPersistedState {
   return state.layers.some(isPersistedAnnotationsLayer);
 }
 
@@ -136,15 +138,15 @@ function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
   references?: Reference[]
-): XYState {
+): XYVisualizationState {
   if (!references || !references.length) {
-    return state as XYState;
+    return state as XYVisualizationState;
   }
   if (!needsInjectReferences(state)) {
     // Runtime-format state still needs orphan cleanup: remove by-reference annotation
     // layers whose annotation group was deleted from the library.
     if (annotationGroups) {
-      const runtimeState = state as XYState;
+      const runtimeState = state as XYVisualizationState;
       const filteredLayers = runtimeState.layers.filter((layer) => {
         if (!isAnnotationsLayer(layer) || !isByReferenceAnnotationsLayer(layer)) return true;
         return layer.annotationGroupId in annotationGroups;
@@ -153,7 +155,7 @@ function injectReferences(
         return { ...runtimeState, layers: filteredLayers };
       }
     }
-    return state as XYState;
+    return state as XYVisualizationState;
   }
 
   if (!annotationGroups) {

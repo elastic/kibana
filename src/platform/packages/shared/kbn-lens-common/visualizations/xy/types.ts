@@ -125,7 +125,7 @@ export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
 /**
  * Runtime state... use XYPersistedLayerConfig for persisted state (i.e. what gets saved in the saved object)
  */
-export interface XYRuntimeState {
+export interface XYVisualizationState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;

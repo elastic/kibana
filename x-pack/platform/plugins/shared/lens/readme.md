@@ -140,7 +140,7 @@ The data source state (`state.datasourceStates.formBased.layers`) contains the c
 
 ### Visualization state
 
-The visualization state (`state.visualization`) depends on the chosen visualization type (`visualizationType`). Layer ids and accessor properties in this state have to correspond to the layer ids and column ids of the datasource state. Types for individual visualizations are exported as standalone interfaces (e.g. `XYState` or `HeatmapVisualizationState`).
+The visualization state (`state.visualization`) depends on the chosen visualization type (`visualizationType`). Layer ids and accessor properties in this state have to correspond to the layer ids and column ids of the datasource state. Types for individual visualizations are exported as standalone interfaces (e.g. `XYVisualizationState` or `HeatmapVisualizationState`).
 
 ### Filters
 

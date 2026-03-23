@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYVisualizationState as XYVisualizationState } from '@kbn/lens-common';
 import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
 import type { XYDecorations } from '../../../schema/charts/xy';
@@ -27,7 +27,7 @@ const curveTypeStateToAPI: Record<XYCurveType, $Values<XYApiLineInterpolation>> 
 };
 
 type XYLensAppearanceState = Pick<
-  XYLensState,
+  XYVisualizationState,
   | 'valueLabels'
   | 'curveType'
   | 'fillOpacity'

@@ -21,7 +21,7 @@ import type {
   XYPersistedState,
 } from '@kbn/lens-common';
 import type {
-  XYState,
+  XYVisualizationState,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -82,7 +82,7 @@ const exampleAnnotation2: EventAnnotationConfig = {
   label: 'Annotation2',
 };
 
-function exampleState(): XYState {
+function exampleState(): XYVisualizationState {
   return {
     legend: { position: Position.Bottom, isVisible: true },
     valueLabels: 'hide',
@@ -168,7 +168,7 @@ describe('xy_visualization', () => {
   });
 
   describe('#getVisualizationTypeId', () => {
-    function mixedState(...types: SeriesType[]): XYState {
+    function mixedState(...types: SeriesType[]): XYVisualizationState {
       const state = exampleState();
       return {
         ...state,
@@ -288,7 +288,7 @@ describe('xy_visualization', () => {
             },
           ]
         )
-      ).toEqual<XYState>({
+      ).toEqual<XYVisualizationState>({
         ...baseState,
         layers: [
           ...baseState.layers,
@@ -331,7 +331,7 @@ describe('xy_visualization', () => {
             },
           ]
         )
-      ).toEqual<XYState>({
+      ).toEqual<XYVisualizationState>({
         ...baseState,
         layers: [
           ...baseState.layers,
@@ -655,7 +655,7 @@ describe('xy_visualization', () => {
 
   describe('#removeLayer', () => {
     it('removes the specified layer', () => {
-      const prevState: XYState = {
+      const prevState: XYVisualizationState = {
         ...exampleState(),
         layers: [
           ...exampleState().layers,
@@ -2155,7 +2155,7 @@ describe('xy_visualization', () => {
             },
           ],
         ],
-      ] as Array<[string, XYState['layers']]>)(
+      ] as Array<[string, XYVisualizationState['layers']]>)(
         'should not require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2304,7 +2304,7 @@ describe('xy_visualization', () => {
             },
           ],
         ],
-      ] as Array<[string, XYState['layers']]>)(
+      ] as Array<[string, XYVisualizationState['layers']]>)(
         'should require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2325,7 +2325,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithBaseReferenceLine(): XYState {
+      function getStateWithBaseReferenceLine(): XYVisualizationState {
         return {
           ...exampleState(),
           layers: [
@@ -2681,7 +2681,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithAnnotationLayer(): XYState {
+      function getStateWithAnnotationLayer(): XYVisualizationState {
         return {
           ...exampleState(),
           layers: [
@@ -2908,8 +2908,8 @@ describe('xy_visualization', () => {
       });
 
       const getErrorMessages = (
-        vis: Visualization<XYState, XYPersistedState, ExtraAppendLayerArg>,
-        state: XYState,
+        vis: Visualization<XYVisualizationState, XYPersistedState, ExtraAppendLayerArg>,
+        state: XYVisualizationState,
         frameMock = { datasourceLayers: {} } as Partial<FramePublicAPI>
       ) =>
         vis.getUserMessages!(state, { frame: frameMock as FramePublicAPI })
@@ -3332,7 +3332,7 @@ describe('xy_visualization', () => {
                 ],
               },
             ],
-          } as XYState;
+          } as XYVisualizationState;
         }
 
         function getFrameMock() {
@@ -3358,7 +3358,7 @@ describe('xy_visualization', () => {
           });
         }
         test('When data layer is empty, should return error on dimension', () => {
-          const state: XYState = {
+          const state: XYVisualizationState = {
             ...exampleState(),
             layers: [
               {
@@ -3590,7 +3590,7 @@ describe('xy_visualization', () => {
               ],
             },
           ],
-        } as XYState;
+        } as XYVisualizationState;
       }
       function getFrameMock() {
         const datasourceMock = createMockDatasource();
@@ -3617,7 +3617,7 @@ describe('xy_visualization', () => {
 
       it('should not return an info message if annotation layer is ignoring the global filters but contains only manual annotations', () => {
         const initialState = createStateWithAnnotationProps({});
-        const state: XYState = {
+        const state: XYVisualizationState = {
           ...initialState,
           layers: [
             // replace the existing annotation layers with a new one
@@ -3770,7 +3770,7 @@ describe('xy_visualization', () => {
       };
       const xyState = {
         layers: [annotationLayer],
-      } as XYState;
+      } as XYVisualizationState;
 
       expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
         '1': 'Event',
@@ -3823,7 +3823,7 @@ describe('xy_visualization', () => {
       ];
       const xyState = {
         layers: annotationLayers,
-      } as XYState;
+      } as XYVisualizationState;
 
       expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
         '1': 'Event',
