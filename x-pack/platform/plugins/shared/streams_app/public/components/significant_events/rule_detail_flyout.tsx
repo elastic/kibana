@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiHealth,
   EuiSpacer,
   EuiText,
@@ -38,9 +39,11 @@ const IMPACT_LABEL: Record<SuggestedRule['impact'], string> = {
 interface RuleDetailFlyoutProps {
   rule: SuggestedRule;
   onClose: () => void;
+  /** When true renders as a standalone overlay flyout instead of a child session flyout */
+  standalone?: boolean;
 }
 
-export function RuleDetailFlyout({ rule, onClose }: RuleDetailFlyoutProps) {
+export function RuleDetailFlyout({ rule, onClose, standalone = false }: RuleDetailFlyoutProps) {
   const { euiTheme } = useEuiTheme();
 
   const panelStyle = css`
@@ -84,18 +87,28 @@ export function RuleDetailFlyout({ rule, onClose }: RuleDetailFlyoutProps) {
     // size must be a named size ('s'|'m'|'l'|'fill') — EuiManagedFlyout throws
     // a validation error at render time if a child flyout uses a numeric size.
     <EuiFlyout
-      session="inherit"
+      {...(!standalone && {
+        session: 'inherit' as const,
+        flyoutMenuProps: { title: rule.name, titleId: 'ruleDetailFlyoutTitle' },
+        hasChildBackground: true,
+      })}
+      {...(standalone && {
+        type: 'push' as const,
+        pushMinBreakpoint: 'xs' as const,
+        size: 's' as const,
+      })}
       onClose={onClose}
-      size="m"
+      size={standalone ? 's' : 'm'}
       aria-labelledby="ruleDetailFlyoutTitle"
       data-test-subj="streamsSignificantEventsRuleDetailFlyout"
-      flyoutMenuProps={{
-        title: rule.name,
-        titleId: 'ruleDetailFlyoutTitle',
-      }}
-      hasChildBackground
     >
-      {/* No EuiFlyoutHeader — the title is rendered in the menu bar via flyoutMenuProps */}
+      {standalone && (
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id="ruleDetailFlyoutTitle">{rule.name}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutBody>
         {/* Summary panel */}
         <div css={panelStyle}>

@@ -40,7 +40,9 @@ import React, { useState } from 'react';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { JobsTab } from './jobs_tab';
-import { SuggestedRulesFlyout } from './suggested_rules_flyout';
+import { RuleDetailFlyout } from './rule_detail_flyout';
+import { SuggestedRulesFlyout, MOCK_RULES } from './suggested_rules_flyout';
+import type { SuggestedRule } from './suggested_rules_flyout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1165,6 +1167,7 @@ function RulesTab() {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
+  const [selectedRuleDetail, setSelectedRuleDetail] = useState<SuggestedRule | null>(null);
   const pageSize = 20;
 
   const filteredRows = rows.filter((r) => {
@@ -1182,6 +1185,44 @@ function RulesTab() {
   };
 
   const columns = [
+    {
+      name: '',
+      width: '40px',
+      actions: [
+        {
+          render: (row: RuleRow) => (
+            <EuiButtonIcon
+              iconType="expand"
+              size="xs"
+              color="text"
+              aria-label={i18n.translate('xpack.streams.settings.rulesTab.expandAriaLabel', {
+                defaultMessage: 'View details for {name}',
+                values: { name: row.name },
+              })}
+              onClick={() => {
+                const matched =
+                  MOCK_RULES.find((r) => r.name === row.name) ??
+                  ({
+                    id: row.id,
+                    name: row.name,
+                    severity: (row.severity === 'warning' ? 'medium' : row.severity) as SuggestedRule['severity'],
+                    type: 'Rule',
+                    impact: (row.severity === 'warning' ? 'medium' : row.severity) as SuggestedRule['impact'],
+                    stream: row.stream,
+                    knowledgeIndicators: [],
+                    summary: i18n.translate('xpack.streams.settings.rulesTab.defaultSummary', {
+                      defaultMessage: 'No summary available for this rule.',
+                    }),
+                    query: `FROM ${row.stream}, ${row.stream}.*\n| WHERE KQL("status:error")`,
+                    rawDocument: `stream: ${row.stream}\nrule: ${row.name}\nstatus: ${row.status}`,
+                  } satisfies SuggestedRule);
+                setSelectedRuleDetail(matched);
+              }}
+            />
+          ),
+        },
+      ],
+    },
     {
       field: 'name' as const,
       name: i18n.translate('xpack.streams.settings.rulesTab.nameColumn', { defaultMessage: 'Rules' }),
@@ -1408,6 +1449,15 @@ function RulesTab() {
           }
         `}
       />
+
+      {/* Rule detail flyout — standalone overlay (expand icon on each row) */}
+      {selectedRuleDetail && (
+        <RuleDetailFlyout
+          rule={selectedRuleDetail}
+          onClose={() => setSelectedRuleDetail(null)}
+          standalone
+        />
+      )}
 
       {/* Suggested rules flyout — same as onboarding flow */}
       {isFlyoutOpen && (
