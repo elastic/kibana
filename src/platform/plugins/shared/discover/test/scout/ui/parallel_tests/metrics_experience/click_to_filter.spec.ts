@@ -61,6 +61,9 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
+    // Skipped: the onFilter handler for ES|QL mode is not yet wired up in
+    // use_discover_histogram.ts, so the filter action is a no-op. Remove
+    // .skip once the follow-up product change lands.
     spaceTest.skip(
       'should append WHERE clause when clicking a chart data point',
       async ({ pageObjects }) => {
