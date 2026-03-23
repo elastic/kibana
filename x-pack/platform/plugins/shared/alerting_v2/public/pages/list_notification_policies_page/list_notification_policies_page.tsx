@@ -114,7 +114,7 @@ export const ListNotificationPoliciesPage = () => {
     createNotificationPolicy(data);
   };
 
-  const { data, isLoading, isError, error } = useFetchNotificationPolicies({
+  const { data, isError, error, isFetching } = useFetchNotificationPolicies({
     page: page + 1,
     perPage,
     search: search || undefined,
@@ -405,7 +405,7 @@ export const ListNotificationPoliciesPage = () => {
             columns={columns}
             itemId="id"
             selection={selection}
-            loading={isLoading}
+            loading={isFetching}
             pagination={pagination}
             responsiveBreakpoint={false}
             css={css`
