@@ -129,6 +129,50 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     return FieldsMetadataDictionary.create(fields);
   }
 
+  /**
+   * Checks if any of the expected types are included in the allowed values for the event category.
+   */
+  async matchesAnyTypeForEventCategory(
+    categories: string[],
+    expectedTypes: string[]
+  ): Promise<boolean> {
+    const eventCategoryField = await this.getByName('event.category', { source: ['ecs'] });
+    if (!eventCategoryField || !eventCategoryField.allowed_values) {
+      return false;
+    }
+
+    return expectedTypes.some((expectedType) => {
+      return categories.some((category) => {
+        return (
+          eventCategoryField.allowed_values
+            ?.find((allowedValue) => allowedValue.name === category)
+            ?.expected_event_types?.includes(expectedType) ?? false
+        );
+      });
+    });
+  }
+
+  /**
+   * Returns immediate child fields of `fieldName` (one extra dot segment only).
+   * e.g. for `host`, includes `host.name` but not `host.name.grandchild`.
+   */
+  async getFieldChildren(
+    fieldName: FieldName,
+    { source = [] }: GetFieldsMetadataOptions = {}
+  ): Promise<FieldsMetadataDictionary> {
+    const fullDictionary = await this.find({ source });
+    const allFields = fullDictionary.getFields();
+    const children: Record<string, FieldMetadata> = {};
+
+    for (const [key, field] of Object.entries(allFields)) {
+      if (isDirectChildFieldName(fieldName, key)) {
+        children[key] = field;
+      }
+    }
+
+    return FieldsMetadataDictionary.create(children);
+  }
+
   private hasFleetPermissions(capabilities: FleetCapabilities) {
     const { fleet, fleetv2 } = capabilities;
 
@@ -159,4 +203,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       otelFieldsRepository
     );
   }
+}
+
+/** True if `fieldKey` is exactly one segment below `parentFieldName` (e.g. `host.name` under `host`). */
+export function isDirectChildFieldName(parentFieldName: string, fieldKey: string): boolean {
+  const prefix = `${parentFieldName}.`;
+  if (!fieldKey.startsWith(prefix)) {
+    return false;
+  }
+  const remainder = fieldKey.slice(prefix.length);
+  return remainder.length > 0 && !remainder.includes('.');
 }

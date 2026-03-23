@@ -43,4 +43,9 @@ export interface IFieldsMetadataClient {
     params?: GetFieldsMetadataOptions
   ): Promise<FieldMetadata | undefined>;
   find(params: FindFieldsMetadataOptions): Promise<FieldsMetadataDictionary>;
+  matchesAnyTypeForEventCategory(categories: string[], expectedTypes: string[]): Promise<boolean>;
+  getFieldChildren(
+    fieldName: FieldName,
+    params?: GetFieldsMetadataOptions
+  ): Promise<FieldsMetadataDictionary>;
 }

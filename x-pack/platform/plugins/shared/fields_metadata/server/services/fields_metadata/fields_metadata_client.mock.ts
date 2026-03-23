@@ -10,4 +10,6 @@ import type { IFieldsMetadataClient } from './types';
 export const createFieldsMetadataClientMock = (): jest.Mocked<IFieldsMetadataClient> => ({
   getByName: jest.fn(),
   find: jest.fn(),
+  getFieldChildren: jest.fn(),
+  matchesAnyTypeForEventCategory: jest.fn(),
 });
