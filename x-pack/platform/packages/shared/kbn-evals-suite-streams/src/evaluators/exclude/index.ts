@@ -54,7 +54,7 @@ export const createExcludeSemanticEvaluator = ({
       return { score: 1, explanation: 'Nothing to evaluate' };
     }
 
-    const allFollowUpFeatures = followUpRuns.flatMap((run) => run.features);
+    const allFollowUpFeatures = followUpRuns.flatMap((run) => run.rawFeatures);
 
     if (allFollowUpFeatures.length === 0) {
       const allExcluded = initialFeatures.length === excludedFeatures.length;
@@ -79,7 +79,7 @@ export const createExcludeSemanticEvaluator = ({
 
     const followUpRunsGrouped = followUpRuns.map((run, runIndex) => ({
       run_index: runIndex,
-      features: run.features.map(({ id, type, subtype, title, properties, description }) => ({
+      features: run.rawFeatures.map(({ id, type, subtype, title, properties, description }) => ({
         id,
         type,
         subtype,

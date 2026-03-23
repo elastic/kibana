@@ -36,7 +36,7 @@ export async function runExcludeExperiment({
 }): Promise<ExcludeExperimentOutput> {
   const abortController = new AbortController();
 
-  const initialSampleDocuments = await fetchSampleDocuments({
+  const sampleDocuments = await fetchSampleDocuments({
     esClient,
     sampleSize,
     log,
@@ -44,7 +44,7 @@ export async function runExcludeExperiment({
 
   const { features: initialFeatures } = await identifyFeatures({
     streamName: MANAGED_STREAM_NAME,
-    sampleDocuments: initialSampleDocuments,
+    sampleDocuments,
     systemPrompt: featuresPrompt,
     inferenceClient,
     logger,
@@ -79,12 +79,6 @@ export async function runExcludeExperiment({
   const outputs: ExcludeExperimentOutput['followUpRuns'] = [];
 
   for (let i = 0; i < followUpRuns; i++) {
-    const sampleDocuments = await fetchSampleDocuments({
-      esClient,
-      sampleSize,
-      log,
-    });
-
     const { features: rawFeatures, ignoredFeatures } = await identifyFeatures({
       streamName: MANAGED_STREAM_NAME,
       sampleDocuments,
