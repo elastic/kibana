@@ -5,12 +5,14 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
 import {
@@ -25,9 +27,14 @@ interface EditHighlightedFieldsButtonProps {
    */
   customHighlightedFields: string[];
   /**
-   * The data formatted for field browser
+   * Document record to extract highlighted fields from
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
+  /**
+   * The data formatted for field browser
+   * @deprecated Use hit instead
+   */
+  dataFormattedForFieldBrowser?: TimelineEventsDetailsItem[];
   /**
    * The function to set the edit loading state
    */
@@ -39,10 +46,16 @@ interface EditHighlightedFieldsButtonProps {
  */
 export const EditHighlightedFieldsButton: FC<EditHighlightedFieldsButtonProps> = ({
   customHighlightedFields,
-  dataFormattedForFieldBrowser,
+  hit,
   setIsEditLoading,
 }) => {
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const ruleId = useMemo(
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === 'signal'
+        ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
+        : (getFieldValue(hit, 'signal.rule.id') as string),
+    [hit]
+  );
   const { rule, isExistingRule, loading: isRuleLoading } = useRuleDetails({ ruleId });
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -83,7 +96,7 @@ export const EditHighlightedFieldsButton: FC<EditHighlightedFieldsButtonProps> =
       {isModalVisible && (
         <HighlightedFieldsModal
           customHighlightedFields={customHighlightedFields}
-          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+          hit={hit}
           rule={rule}
           setIsEditLoading={setIsEditLoading}
           setIsModalVisible={setIsModalVisible}
