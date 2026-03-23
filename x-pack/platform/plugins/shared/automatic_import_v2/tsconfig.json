@@ -10,7 +10,7 @@
     "common/**/*.ts",
     "test/scout/**/*",
     "../../../../typings/**/*"
-, "test/scout_automatic_import_v2"  ],
+    , "test/scout_automatic_import_v2"  ],
   "exclude": [
     "target/**/*"
   ],
@@ -56,6 +56,5 @@
     "@kbn/utility-types",
     "@kbn/code-editor",
     "@kbn/monaco",
-    "@kbn/scout"
   ]
 }
