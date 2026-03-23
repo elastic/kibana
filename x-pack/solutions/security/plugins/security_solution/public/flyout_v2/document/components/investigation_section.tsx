@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -18,7 +19,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
-import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide/investigation_guide';
+import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
@@ -50,7 +51,7 @@ export const InvestigationSection = memo(({ hit }: InvestigationSectionProps) =>
   const history = useHistory();
 
   const isAlert = useMemo(
-    () => (getFieldValue(hit, 'event.kind') as string) === EventKind.signal,
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]
   );
 
