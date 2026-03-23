@@ -152,26 +152,35 @@ export function ChatMessageText({
       },
       table: (props) => (
         <>
-          <EuiTable
-            {...props}
-            className={css`
-              .euiTableCellContent__text {
-                white-space: normal;
-              }
-            `}
-          />
+          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
           <EuiSpacer size="m" />
         </>
       ),
       th: (props) => {
         const { children, ...rest } = props;
-        return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
+        return (
+          <EuiTableHeaderCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
+            {children}
+          </EuiTableHeaderCell>
+        );
       },
       tr: (props) => <EuiTableRow {...props} />,
       td: (props) => {
         const { children, ...rest } = props;
         return (
-          <EuiTableRowCell truncateText={true} {...rest}>
+          <EuiTableRowCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
             {children}
           </EuiTableRowCell>
         );
