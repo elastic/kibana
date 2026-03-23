@@ -42,7 +42,6 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs: undefined,
         attachment,
-        conversationAttachments: [attachment],
       });
 
       expect(result).toBe(5);
@@ -55,7 +54,6 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs: undefined,
         attachment,
-        conversationAttachments: [attachment],
       });
 
       expect(result).toBe(3);
@@ -70,7 +68,6 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs,
         attachment,
-        conversationAttachments: [attachment],
       });
 
       expect(result).toBe(2);
@@ -78,7 +75,7 @@ describe('resolveAttachmentVersion', () => {
   });
 
   describe('when explicitVersion is undefined', () => {
-    it('returns the ref version when there is a single matching ref', () => {
+    it('returns the ref version when there is a matching ref', () => {
       const attachment = createMockAttachment(attachmentId);
       const attachmentRefs: AttachmentVersionRef[] = [{ attachment_id: attachmentId, version: 5 }];
 
@@ -87,37 +84,16 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs,
         attachment,
-        conversationAttachments: [attachment],
       });
 
       expect(result).toBe(5);
     });
 
-    it('returns the highest version when multiple refs match the attachmentId', () => {
-      const attachment = createMockAttachment(attachmentId);
-      const attachmentRefs: AttachmentVersionRef[] = [
-        { attachment_id: attachmentId, version: 2 },
-        { attachment_id: attachmentId, version: 8 },
-        { attachment_id: attachmentId, version: 5 },
-      ];
-
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        attachment,
-        conversationAttachments: [attachment],
-      });
-
-      expect(result).toBe(8);
-    });
-
-    it('only considers refs matching the attachmentId when finding the highest version', () => {
+    it('only considers refs matching the attachmentId', () => {
       const attachment = createMockAttachment(attachmentId);
       const attachmentRefs: AttachmentVersionRef[] = [
         { attachment_id: 'other-attachment', version: 100 },
         { attachment_id: attachmentId, version: 3 },
-        { attachment_id: attachmentId, version: 7 },
         { attachment_id: 'another-attachment', version: 50 },
       ];
 
@@ -126,55 +102,16 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs,
         attachment,
-        conversationAttachments: [attachment],
       });
 
-      expect(result).toBe(7);
-    });
-  });
-
-  describe('when no refs match but other refs exist (time boundary inference)', () => {
-    it('returns the highest version created before the latest ref time', () => {
-      // Attachment we're rendering has 3 versions
-      const attachment = createMockAttachment(attachmentId, [
-        { version: 1, created_at: '2024-01-01T10:00:00Z' },
-        { version: 2, created_at: '2024-01-02T10:00:00Z' },
-        { version: 3, created_at: '2024-01-04T10:00:00Z' }, // After the ref time
-      ]);
-
-      // Other attachment that IS in refs (created at 2024-01-03)
-      const otherAttachment = createMockAttachment('other-attachment', [
-        { version: 1, created_at: '2024-01-03T10:00:00Z' },
-      ]);
-
-      // Refs only contain the other attachment
-      const attachmentRefs: AttachmentVersionRef[] = [
-        { attachment_id: 'other-attachment', version: 1 },
-      ];
-
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        attachment,
-        conversationAttachments: [attachment, otherAttachment],
-      });
-
-      // Should return version 2, as it was created before the ref time (2024-01-03)
-      // Version 3 was created after, so it's excluded
-      expect(result).toBe(2);
+      expect(result).toBe(3);
     });
 
-    it('returns the highest version when all versions are before the latest ref time', () => {
+    it('returns latest version when no refs match', () => {
       const attachment = createMockAttachment(attachmentId, [
         { version: 1, created_at: '2024-01-01T10:00:00Z' },
         { version: 2, created_at: '2024-01-02T10:00:00Z' },
       ]);
-
-      const otherAttachment = createMockAttachment('other-attachment', [
-        { version: 1, created_at: '2024-01-05T10:00:00Z' },
-      ]);
-
       const attachmentRefs: AttachmentVersionRef[] = [
         { attachment_id: 'other-attachment', version: 1 },
       ];
@@ -184,35 +121,8 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs,
         attachment,
-        conversationAttachments: [attachment, otherAttachment],
       });
 
-      expect(result).toBe(2);
-    });
-
-    it('returns latest version when all versions are after the latest ref time', () => {
-      const attachment = createMockAttachment(attachmentId, [
-        { version: 1, created_at: '2024-01-10T10:00:00Z' },
-        { version: 2, created_at: '2024-01-11T10:00:00Z' },
-      ]);
-
-      const otherAttachment = createMockAttachment('other-attachment', [
-        { version: 1, created_at: '2024-01-05T10:00:00Z' },
-      ]);
-
-      const attachmentRefs: AttachmentVersionRef[] = [
-        { attachment_id: 'other-attachment', version: 1 },
-      ];
-
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        attachment,
-        conversationAttachments: [attachment, otherAttachment],
-      });
-
-      // Falls back to latest version
       expect(result).toBe(2);
     });
   });
@@ -229,7 +139,6 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs: undefined,
         attachment,
-        conversationAttachments: [attachment],
       });
 
       expect(result).toBe(2);
@@ -243,7 +152,6 @@ describe('resolveAttachmentVersion', () => {
         attachmentId,
         attachmentRefs: undefined,
         attachment,
-        conversationAttachments: [attachment],
       });
 
       expect(result).toBeUndefined();

@@ -12,6 +12,7 @@ describe('isOtelStream', () => {
     const now = new Date().toISOString();
 
     const wired = {
+      type: 'wired' as const,
       name: 'logs',
       description: '',
       updated_at: now,
@@ -30,6 +31,7 @@ describe('isOtelStream', () => {
     const now = new Date().toISOString();
 
     const classicOtelPattern = {
+      type: 'classic' as const,
       name: 'logs-foo.bar.otel-baz',
       description: '',
       updated_at: now,
@@ -48,6 +50,7 @@ describe('isOtelStream', () => {
     const now = new Date().toISOString();
 
     const classicNonOtel = {
+      type: 'classic' as const,
       name: 'logs-foo-bar-baz', // missing .otel- sequence
       description: '',
       updated_at: now,
