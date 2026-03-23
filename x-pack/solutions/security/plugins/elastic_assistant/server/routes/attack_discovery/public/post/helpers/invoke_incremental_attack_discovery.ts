@@ -13,6 +13,7 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Document } from '@langchain/core/documents';
 
+import { getAnonymizedAlerts } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/retriever/helpers/get_anonymized_alerts';
 import { incrementalAttackDiscovery } from '../../../../../lib/attack_discovery/incremental';
 import type {
   IncrementalMode,
@@ -43,18 +44,6 @@ export interface InvokeIncrementalAttackDiscoveryParams {
   size: number;
 }
 
-/**
- * Invokes incremental attack discovery with delta or progressive mode
- *
- * This wrapper orchestrates the incremental processing by:
- * 1. Fetching alerts from Elasticsearch
- * 2. Using incrementalAttackDiscovery to process in bounded rounds
- * 3. Calling the existing attack discovery graph for each round
- * 4. Tracking processed alerts across runs (for delta mode)
- *
- * @param params - Configuration for incremental attack discovery
- * @returns Attack discoveries and anonymized alerts
- */
 export const invokeIncrementalAttackDiscovery = async ({
   actionsClient,
   alertsIndexPattern,
@@ -81,81 +70,76 @@ export const invokeIncrementalAttackDiscovery = async ({
 }> => {
   logger.debug(() => `Invoking incremental attack discovery in ${mode} mode`);
 
-  // Fetch all alerts matching the query from Elasticsearch
-  const alertsResponse = await esClient.search({
-    index: alertsIndexPattern,
+  // Step 1: Fetch and anonymize ALL alerts once upfront
+  // This reuses the same fetch + anonymization logic as the standard AD graph
+  const anonymizedAlertStrings = await getAnonymizedAlerts({
+    alertsIndexPattern,
+    anonymizationFields,
+    end,
+    esClient,
+    filter,
+    onNewReplacements,
+    replacements: latestReplacements,
     size,
-    query: {
-      bool: {
-        must: [
-          ...(start || end
-            ? [
-                {
-                  range: {
-                    '@timestamp': {
-                      ...(start ? { gte: start } : {}),
-                      ...(end ? { lte: end } : {}),
-                    },
-                  },
-                },
-              ]
-            : []),
-          ...(filter ? [filter] : []),
-        ],
-      },
-    },
-    sort: [{ '@timestamp': 'desc' }],
-    _source: true,
+    start,
   });
 
-  const alerts: Alert[] = alertsResponse.hits.hits.map(hit => ({
-    id: hit._id as string,
-    content: JSON.stringify(hit._source),
-    timestamp: (hit._source as any)['@timestamp'] as string,
+  // Step 2: Build Alert objects from the anonymized strings
+  // Each alert's content is already the anonymized CSV — this is what the LLM sees
+  const alerts: Alert[] = anonymizedAlertStrings.map((content, i) => ({
+    id: `alert-${i}`,
+    content,
+    timestamp: new Date().toISOString(),
   }));
 
-  logger.debug(() => `Fetched ${alerts.length} alerts for incremental processing`);
+  logger.debug(() => `Fetched and anonymized ${alerts.length} alerts for incremental processing`);
 
-  // Track anonymized alerts across all rounds
-  const allAnonymizedAlerts: Document[] = [];
+  // Track all anonymized documents across rounds for the response
+  const allAnonymizedDocs: Document[] = [];
 
-  // Generate insights using the existing graph (this is the callback for each round)
+  // Step 3: Generate insights callback — passes round-specific alerts to the graph
+  // The graph's entry edge skips ES fetch when anonymizedDocuments is pre-populated
   const generateInsights = async (
     roundAlerts: Alert[],
     previousInsights?: AttackDiscovery[]
   ): Promise<AttackDiscovery[]> => {
-    // For each round, we call the existing attack discovery graph
-    // with the subset of alerts for this round
-    const { anonymizedAlerts, attackDiscoveries } = await invokeAttackDiscoveryGraph({
-      actionsClient,
-      alertsIndexPattern,
-      anonymizationFields,
-      apiConfig,
-      connectorTimeout,
-      end,
-      esClient,
-      filter,
-      langSmithProject,
-      langSmithApiKey,
-      latestReplacements,
-      logger,
-      onNewReplacements,
-      savedObjectsClient,
-      size: roundAlerts.length, // Process only the alerts in this round
-      start,
-    });
+    // Convert round alerts back to Document objects for the graph
+    const roundDocuments: Document[] = roundAlerts.map((a) => ({
+      pageContent: a.content,
+      metadata: {},
+    }));
 
-    // Collect anonymized alerts from this round
-    allAnonymizedAlerts.push(...anonymizedAlerts);
+    // Invoke the graph with pre-fetched documents — bypasses internal ES fetch
+    const { anonymizedAlerts: returnedDocs, attackDiscoveries } =
+      await invokeAttackDiscoveryGraph({
+        actionsClient,
+        alertsIndexPattern,
+        anonymizationFields,
+        apiConfig,
+        connectorTimeout,
+        end,
+        esClient,
+        filter,
+        langSmithProject,
+        langSmithApiKey,
+        latestReplacements,
+        logger,
+        onNewReplacements,
+        savedObjectsClient,
+        size: roundAlerts.length,
+        start,
+        anonymizedDocuments: roundDocuments,
+      });
 
+    allAnonymizedDocs.push(...returnedDocs);
     return attackDiscoveries ?? [];
   };
 
-  // Run incremental attack discovery
+  // Step 4: Run incremental attack discovery orchestration
   const result = await incrementalAttackDiscovery({
     mode,
     alerts,
-    existingInsights: [], // Could be loaded from previous runs
+    existingInsights: [],
     config: incrementalConfig,
     esClient,
     sessionId,
@@ -167,9 +151,8 @@ export const invokeIncrementalAttackDiscovery = async ({
       `Incremental attack discovery completed: ${result.stats.totalRounds} rounds, ${result.stats.totalAlertsProcessed} alerts processed`
   );
 
-  // Return in the format expected by the existing code
   return {
-    anonymizedAlerts: allAnonymizedAlerts,
+    anonymizedAlerts: allAnonymizedDocs,
     attackDiscoveries: result.insights,
   };
 };

@@ -8,7 +8,11 @@
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { Example } from '@kbn/evals';
 
-export type AttackDiscoveryInputMode = 'bundledAlerts' | 'searchAlerts' | 'graphState';
+export type AttackDiscoveryInputMode =
+  | 'bundledAlerts'
+  | 'searchAlerts'
+  | 'graphState'
+  | 'incrementalProgressive';
 
 export interface AnonymizedAlert {
   pageContent: string;
@@ -44,19 +48,37 @@ export interface AttackDiscoveryGraphStateInput extends Record<string, unknown> 
   combinedMaybePartialResults?: string;
 }
 
+export interface AttackDiscoveryIncrementalProgressiveInput extends Record<string, unknown> {
+  mode: 'incrementalProgressive';
+  anonymizedAlerts: ReadonlyArray<AnonymizedAlert>;
+  alertsPerRound: number;
+  maxRounds: number;
+}
+
 export type AttackDiscoveryTaskInput =
   | AttackDiscoveryBundledAlertsInput
   | AttackDiscoverySearchAlertsInput
-  | AttackDiscoveryGraphStateInput;
+  | AttackDiscoveryGraphStateInput
+  | AttackDiscoveryIncrementalProgressiveInput;
 
 export interface AttackDiscoveryTaskExpectedOutput {
   attackDiscoveries: AttackDiscovery[];
+}
+
+export interface RoundMetrics {
+  roundNumber: number;
+  alertCount: number;
+  insightCount: number;
+  durationMs: number;
+  inputTokens: number;
+  outputTokens: number;
 }
 
 export interface AttackDiscoveryTaskOutput {
   insights: AttackDiscovery[] | null;
   errors?: string[];
   raw?: unknown;
+  rounds?: RoundMetrics[];
   metadata?: {
     latency?: {
       startTime: number;

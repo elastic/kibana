@@ -19,6 +19,7 @@ import type {
   AnonymizedAlert,
 } from '../types';
 import { AttackDiscoveryGenerationPrompt } from '../prompts/attack_discovery_generation_prompt';
+import { runIncrementalProgressive } from './incremental_runner';
 
 const USE_BATCH_PROCESSING = process.env.ATTACK_DISCOVERY_USE_BATCH_PROCESSING === 'true';
 const BATCH_SIZE = Number(process.env.ATTACK_DISCOVERY_BATCH_SIZE) || 100;
@@ -207,6 +208,31 @@ export const runAttackDiscovery = async ({
           tokens: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
         },
       };
+    }
+
+    if (input.mode === 'incrementalProgressive') {
+      const prompt = await loadDefaultPrompt();
+
+      const result = await runIncrementalProgressive({
+        log,
+        alerts: input.anonymizedAlerts,
+        alertsPerRound: input.alertsPerRound,
+        maxRounds: input.maxRounds,
+        generateRoundInsights: async (roundAlerts, previousInsights) => {
+          return generateInsights({
+            inferenceClient,
+            log,
+            prompt,
+            alerts: roundAlerts,
+            combinedMaybePartialResults:
+              previousInsights.length > 0
+                ? JSON.stringify(previousInsights.map((ins) => ins.title))
+                : undefined,
+          });
+        },
+      });
+
+      return result;
     }
 
     if (input.mode === 'searchAlerts') {

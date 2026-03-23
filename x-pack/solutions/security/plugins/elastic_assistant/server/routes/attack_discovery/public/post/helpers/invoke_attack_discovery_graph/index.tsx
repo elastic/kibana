@@ -43,6 +43,7 @@ export const invokeAttackDiscoveryGraph = async ({
   savedObjectsClient,
   size,
   start,
+  anonymizedDocuments,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsIndexPattern: string;
@@ -60,6 +61,7 @@ export const invokeAttackDiscoveryGraph = async ({
   savedObjectsClient: SavedObjectsClientContract;
   start?: string;
   size: number;
+  anonymizedDocuments?: Document[];
 }): Promise<{
   anonymizedAlerts: Document[];
   attackDiscoveries: AttackDiscovery[] | null;
@@ -125,8 +127,10 @@ export const invokeAttackDiscoveryGraph = async ({
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');
 
+  const initialState = anonymizedDocuments?.length ? { anonymizedDocuments } : {};
+
   const result: AttackDiscoveryGraphState = await graph.invoke(
-    {},
+    initialState,
     {
       callbacks: [...(traceOptions?.tracers ?? [])],
       runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,

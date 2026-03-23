@@ -54,7 +54,7 @@ export interface IncrementalADFeatureFlags {
  * Default feature flags (conservative rollout)
  */
 export const DEFAULT_FEATURE_FLAGS: IncrementalADFeatureFlags = {
-  enabled: false, // Disabled by default - opt-in via config
+  enabled: true, // Enabled for testing
   enableDeltaMode: true,
   enableProgressiveMode: true,
   allowedModels: [], // All models allowed
