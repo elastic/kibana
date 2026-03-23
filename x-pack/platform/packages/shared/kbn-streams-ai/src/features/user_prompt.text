@@ -1,2 +1,7 @@
+{{#excluded_features}}
+`excluded_features` (do NOT regenerate features matching these):
+{{{excluded_features}}}
+{{/excluded_features}}
+
 `sample_documents`:
 {{{sample_documents}}}
