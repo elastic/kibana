@@ -104,7 +104,6 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
       {isEditPipelineFlyoutOpen && selectedDataStream && integrationId && integration && (
         <EditPipelineFlyout
           integrationId={integrationId}
-          integrationName={integration.title}
           dataStream={selectedDataStream}
           onClose={closeEditPipelineFlyout}
         />
