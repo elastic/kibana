@@ -8,6 +8,7 @@
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools/constants';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { notificationPoliciesReference } from '../referenced_content/notification_policies';
 
 export const alertRuleCreationSkill = defineSkillType({
   id: 'alert-rule-creation',
@@ -38,10 +39,13 @@ When the user wants to create a rule, execute the following internally. Never du
 - Metrics data (cpu, memory, disk fields) → threshold alert on the most relevant metric, grouped by host
 - Log data with error samples → error rate alert
 - Trace/APM data → latency or error rate by service
+- Sparse or intermittent data sources → no-data detection rule (fires when expected data stops arriving)
 
 The goal is to give the user a concrete starting point they can immediately preview and edit, rather than making them answer questions first. Pick sensible defaults: \`kind: "alert"\`, \`every: "5m"\`, \`lookback: "5m"\`, group by the primary entity field from knowledge indicators (e.g. \`host.name\`, \`service.name\`).
 
-Render the attachment from \`_renderInstructions\` as the first line of your response. Then briefly explain what the proposed rule detects and why, and tell the user they can click "Preview" to review and edit the full configuration, or ask you to adjust anything.
+**Validate before proposing** — Before calling \`propose_rule\`, call \`${internalNamespaces.alertingV2}.validate_esql_query\` with the query you've constructed. This runs the query with LIMIT 0 against the actual data source to catch missing fields, type mismatches, and syntax errors. If validation fails, attempt to fix the query based on the error message and validate once more. If the second attempt also fails, propose the rule anyway but mention the validation issue to the user so they can review it in the preview.
+
+Render the attachment from \`_renderInstructions\` as the first line of your response. Then briefly explain what the proposed rule detects and why, and tell the user they can click "Preview" to review and edit the full configuration, or ask you to adjust anything. **In the same response**, if the proposed rule is \`kind: "alert"\`, ask the user if they'd like to set up notifications for this rule. Use \`${internalNamespaces.alertingV2}.list_notification_policies\` to check for existing policies that might already match the rule's labels — if one exists, mention it; if not, let the user know they can configure notifications via notification policies and offer to guide them. Skip the notification question for \`signal\` kind rules. See the [notification-policies-reference](./notification-policies-reference.md) for details on how policies, episodes, and dispatching work.
 
 **Iterate if needed** — When the user asks for changes to the rule:
 
@@ -54,26 +58,69 @@ Render the attachment from \`_renderInstructions\` as the first line of your res
 
 - **alert**: Events carry \`episode.*\` fields for lifecycle tracking. Episodes trigger notification policies (email, Slack, PagerDuty). Use for operational alerting.
 - **signal**: Point-in-time observations, no lifecycle. Use for detection, correlation, or enrichment.
+- Choose \`kind\` based on volume and intent: high-volume data or detection-only use cases → \`signal\`; lower-volume operational alerting that needs human notification → \`alert\`.
 
 Both kinds use the same ES|QL execution pipeline. Events are queryable via \`$.alerting-events\`.
 
-## Reference: ES|QL Query Patterns
+## Reference: Query Building
+
+Consult the [query-building-reference](./query-building-reference.md) for field-type strategies, data-pattern-to-alert-condition mappings, and ES|QL query examples.
+`,
+  referencedContent: [
+    {
+      name: 'notification-policies-reference',
+      relativePath: '.',
+      content: notificationPoliciesReference,
+    },
+    {
+      name: 'query-building-reference',
+      relativePath: '.',
+      content: `# Query Building Reference
+
+## Field Type → Query Strategy
+
+Use the data source description to identify fields and translate them into ES|QL query components:
+
+- **keyword** fields → grouping (\`STATS ... BY host.name\`), filtering (\`WHERE service.name == "api"\`), set membership (\`WHERE log.level IN ("ERROR", "WARN")\`)
+- **long / double / float** fields → thresholds (\`WHERE avg_cpu > 0.9\`), aggregations (\`STATS avg_val = AVG(field)\`)
+- **Entity fields** from knowledge indicators → use \`properties.name\` as grouping dimensions (\`BY service.name\`, \`BY host.name\`)
+- **Status/level fields** (e.g. \`log.level\`, \`http.response.status_code\`, \`event.outcome\`) → drive alert conditions by filtering or counting specific values
+- **Value distribution skew** → when one value dominates (e.g. \`log.level: INFO (95%)\`), alerting on the rare values (ERROR, CRITICAL) is meaningful
+
+## Data Pattern → Alert Condition
+
+Use these mappings when deciding what a rule should detect:
+
+- **Low-frequency log patterns** → candidates for alert conditions (they stand out against the high-frequency baseline)
+- **Recurring error signatures** (e.g. "Connection refused", "OutOfMemoryError") → make good alert conditions as they indicate persistent or recurring issues
+- **Infrastructure indicators** → scope rules to infrastructure-level thresholds (CPU/memory per node or cluster)
+- **Dependency indicators** → suggest correlated alerting patterns (when service A depends on service B, an alert on B failing can be paired with a no-data or error-rate alert on A)
+- **Schema indicators** → determine ES|QL field naming conventions. ECS uses \`service.name\`, \`log.level\`; OTel uses \`resource.attributes.service.name\`, \`severity_text\`
+
+## ES|QL Query Patterns
 
 High CPU per host:
-\`\`\`esql
+\\\`\\\`\\\`esql
 FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.pct) BY host.name | WHERE avg_cpu > 0.9
-\`\`\`
+\\\`\\\`\\\`
 
 Error rate spike:
-\`\`\`esql
+\\\`\\\`\\\`esql
 FROM logs-* | WHERE log.level == "error" | STATS error_count = COUNT(*) | WHERE error_count > 100
-\`\`\`
+\\\`\\\`\\\`
 
 Failed logins per user:
-\`\`\`esql
+\\\`\\\`\\\`esql
 FROM logs-* | WHERE event.action == "authentication_failure" | STATS failures = COUNT(*) BY user.name | WHERE failures > 5
-\`\`\`
+\\\`\\\`\\\`
+
+No-data detection:
+\\\`\\\`\\\`esql
+FROM logs-* | STATS doc_count = COUNT(*) | WHERE doc_count == 0
+\\\`\\\`\\\`
 `,
+    },
+  ],
   getRegistryTools: () => [
     platformCoreTools.listIndices,
     platformCoreTools.indexExplorer,
