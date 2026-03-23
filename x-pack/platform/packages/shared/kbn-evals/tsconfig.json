@@ -27,6 +27,7 @@
     "@kbn/inference-tracing",
     "@kbn/apm-config-loader",
     "@kbn/repo-info",
+    "@kbn/kbn-client",
     "@kbn/std",
     "@kbn/test",
     "@kbn/inference-prompt-utils",
