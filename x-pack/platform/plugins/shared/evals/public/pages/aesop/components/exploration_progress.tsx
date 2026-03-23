@@ -80,12 +80,12 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
     queryKey: ['aesop', 'exploration', 'progress', executionId],
     queryFn: async () => {
       const response = await api.http.get(
-        `/internal/aesop/exploration/${executionId}/progress`
+        `/internal/aesop/exploration/${executionId}/progress`,
+        { version: '1' }
       );
       return response as WorkflowExecutionState;
     },
-    refetchInterval: (query) => {
-      const data = query.state.data;
+    refetchInterval: (data) => {
       // Poll every 2 seconds if running, stop if completed/failed
       return data?.status === 'running' ? 2000 : false;
     },

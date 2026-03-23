@@ -22,10 +22,15 @@ import {
   EuiText,
   EuiToolTip,
   EuiSteps,
+  EuiPanel,
+  EuiStat,
+  EuiCallOut,
+  EuiSuperSelect,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useHistory } from 'react-router-dom';
 import { useEvalsApi } from '../../hooks/use_evals_api';
+import { useLLMConnectors } from '../../hooks/use_llm_connectors';
 import { SkillReviewFlyout } from './components/skill_review_flyout';
 
 interface ProposedSkill {
@@ -55,6 +60,18 @@ export const ProposedSkillsList = () => {
   const history = useHistory();
   const [selectedSkill, setSelectedSkill] = useState<ProposedSkill | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending_review'>('pending_review');
+  const [discoveryConnectorId, setDiscoveryConnectorId] = useState<string>('');
+  const { data: connectors } = useLLMConnectors();
+
+  // Auto-select first .gen-ai connector once
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
+  React.useEffect(() => {
+    if (connectors?.length && !hasAutoSelected) {
+      const genAi = connectors.find((c) => c.actionTypeId === '.gen-ai');
+      setDiscoveryConnectorId(genAi?.id || connectors[0].id);
+      setHasAutoSelected(true);
+    }
+  }, [connectors, hasAutoSelected]);
 
   // Fetch proposed skills
   const { data, isLoading, error, refetch } = useQuery({
@@ -62,10 +79,50 @@ export const ProposedSkillsList = () => {
     queryFn: async () => {
       const response = await api.http.get('/internal/aesop/skills/proposed', {
         query: { status: statusFilter },
+        version: '1',
       });
       return response as { skills: ProposedSkill[]; total: number };
     },
   });
+
+  // Fetch last exploration — poll while running
+  const { data: explorationHistory } = useQuery({
+    queryKey: ['aesop', 'exploration-history'],
+    queryFn: async () => {
+      const response = await api.http.get('/internal/aesop/exploration/history', {
+        version: '1',
+      });
+      return response as { explorations: any[] };
+    },
+    refetchInterval: (data) => {
+      const latest = data?.explorations?.[0];
+      return latest?.status === 'running' ? 3000 : false;
+    },
+  });
+
+  const lastExploration = explorationHistory?.explorations?.[0];
+
+  // Trigger new exploration
+  const runExplorationMutation = useMutation({
+    mutationFn: async () => {
+      return await api.http.post('/internal/aesop/exploration/run', {
+        body: JSON.stringify({
+          connector_id: discoveryConnectorId || undefined,
+        }),
+        version: '1',
+      });
+    },
+    onSuccess: () => {
+      api.notifications.toasts.addSuccess(
+        'Skill discovery started with LLM — higher quality skills will appear when exploration completes'
+      );
+    },
+    onError: (err: Error) => {
+      api.notifications.toasts.addDanger(`Failed to start exploration: ${err.message}`);
+    },
+  });
+
+  const isDiscoveryRunning = lastExploration?.status === 'running' || runExplorationMutation.isPending;
 
   const columns = [
     {
@@ -120,14 +177,29 @@ export const ProposedSkillsList = () => {
     {
       field: 'review.status',
       name: 'Review',
-      width: '12%',
-      render: (status: string) => {
-        const colors = {
+      width: '15%',
+      render: (status: string, skill: ProposedSkill) => {
+        const colors: Record<string, string> = {
           pending_review: 'warning',
           approved: 'success',
           rejected: 'danger',
         };
-        return <EuiBadge color={colors[status as keyof typeof colors] || 'default'}>{status.replace('_', ' ')}</EuiBadge>;
+        const crossEval = (skill as any).cross_evaluation;
+        const reviewedBy = (skill as any).review?.reviewed_by;
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={colors[status] || 'default'}>
+                {reviewedBy === 'aesop-auto' ? 'auto-rejected' : status.replace('_', ' ')}
+              </EuiBadge>
+            </EuiFlexItem>
+            {crossEval?.action === 'flagged' && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning" iconType="alert">flagged</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
     },
     {
@@ -196,6 +268,81 @@ export const ProposedSkillsList = () => {
               </EuiButton>,
             ]}
           />
+
+          <EuiSpacer />
+
+          {/* Last exploration info + Run Discovery */}
+          <EuiPanel color="subdued">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="l" alignItems="center">
+                  {lastExploration ? (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiStat
+                          title={new Date(lastExploration.started_at).toLocaleDateString()}
+                          description="Last Discovery"
+                          titleSize="xs"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiStat
+                          title={lastExploration.indices_discovered || 0}
+                          description="Indices Explored"
+                          titleSize="xs"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiStat
+                          title={lastExploration.skills_proposed || 0}
+                          description="Skills Found"
+                          titleSize="xs"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color={lastExploration.status === 'completed' ? 'success' : lastExploration.status === 'running' ? 'primary' : 'danger'}>
+                          {lastExploration.status === 'running' ? 'running...' : lastExploration.status}
+                        </EuiBadge>
+                        {lastExploration.status === 'running' && <EuiLoadingSpinner size="s" />}
+                      </EuiFlexItem>
+                    </>
+                  ) : (
+                    <EuiFlexItem>
+                      <EuiText size="s" color="subdued">No exploration has been run yet</EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false} style={{ minWidth: 200 }}>
+                    <EuiSuperSelect
+                      options={(connectors || []).map((c) => ({
+                        value: c.id,
+                        inputDisplay: c.name,
+                      }))}
+                      valueOfSelected={discoveryConnectorId}
+                      onChange={setDiscoveryConnectorId}
+                      compressed
+                      prepend="LLM"
+                      disabled={isDiscoveryRunning}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="playFilled"
+                      fill
+                      onClick={() => runExplorationMutation.mutate()}
+                      isLoading={isDiscoveryRunning}
+                      disabled={isDiscoveryRunning || !discoveryConnectorId}
+                    >
+                      {isDiscoveryRunning ? 'Discovery Running...' : 'Run Skill Discovery'}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
 
           <EuiSpacer />
 

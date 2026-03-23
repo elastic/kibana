@@ -5,21 +5,6 @@
  * 2.0.
  */
 
-/**
- * AESOP Exploration Dashboard
- *
- * Real-time monitoring of self-exploration workflows:
- * - Active explorations (in-progress)
- * - Exploration history (completed runs)
- * - Discovery metrics (indices, relationships, patterns found)
- * - Trigger new exploration
- *
- * Production features:
- * - Real-time updates (polling every 5s)
- * - Error handling and retry
- * - Performance metrics visualization
- */
-
 import React, { useState } from 'react';
 import {
   EuiPage,
@@ -33,10 +18,6 @@ import {
   EuiButton,
   EuiHealth,
   EuiSpacer,
-  EuiFormRow,
-  EuiFieldText,
-  EuiComboBox,
-  EuiFieldNumber,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
@@ -69,38 +50,31 @@ export const ExplorationDashboard = () => {
   const queryClient = useQueryClient();
   const history = useHistory();
 
-  const [agentRole, setAgentRole] = useState('SOC analyst');
-  const [scopedIndices, setScopedIndices] = useState([
-    { label: '.alerts-security.alerts-*' },
-    { label: '.siem-signals-*' },
-    { label: 'logs-endpoint.*' },
-  ]);
-  const [explorationDepth, setExplorationDepth] = useState(100);
-  const [minPatternFreq, setMinPatternFreq] = useState(10);
+  const [isDeployingDashboard, setIsDeployingDashboard] = useState(false);
 
   // Fetch active + recent explorations
-  const { data: explorations, isLoading, error } = useQuery({
+  const {
+    data: explorations,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['aesop', 'explorations'],
     queryFn: async () => {
-      // Query workflow executions
       const response = await api.http.get('/internal/aesop/exploration/history', {
         query: { limit: 20 },
+        version: '1',
       });
       return response as { explorations: ExplorationRun[] };
     },
-    refetchInterval: 5000, // Poll every 5s for real-time updates
+    refetchInterval: 5000,
   });
 
-  // Trigger exploration mutation
+  // Trigger autonomous exploration — no user config needed
   const triggerExploration = useMutation({
     mutationFn: async () => {
       return await api.http.post('/internal/aesop/exploration/run', {
-        body: {
-          agent_role: agentRole,
-          scoped_indices: scopedIndices.map((i) => i.label),
-          exploration_depth: explorationDepth,
-          min_pattern_frequency: minPatternFreq,
-        },
+        body: JSON.stringify({}),
+        version: '1',
       });
     },
     onSuccess: () => {
@@ -108,9 +82,12 @@ export const ExplorationDashboard = () => {
     },
   });
 
-  const activeExplorations = explorations?.explorations.filter((e) => e.status === 'running') || [];
-  const completedExplorations = explorations?.explorations.filter((e) => e.status === 'completed') || [];
-  const failedExplorations = explorations?.explorations.filter((e) => e.status === 'failed') || [];
+  const activeExplorations =
+    explorations?.explorations.filter((e) => e.status === 'running') || [];
+  const completedExplorations =
+    explorations?.explorations.filter((e) => e.status === 'completed') || [];
+  const failedExplorations =
+    explorations?.explorations.filter((e) => e.status === 'failed') || [];
 
   const columns = [
     {
@@ -121,7 +98,7 @@ export const ExplorationDashboard = () => {
     },
     {
       field: 'agent_role',
-      name: 'Role',
+      name: 'Inferred Role',
       width: '12%',
     },
     {
@@ -196,12 +173,38 @@ export const ExplorationDashboard = () => {
     history.push(`/aesop/exploration/${executionId}`);
   };
 
+  const handleDeployDashboard = async () => {
+    setIsDeployingDashboard(true);
+    try {
+      const result = await api.http.post('/internal/aesop/monitoring/dashboard/deploy', {
+        version: '1',
+      });
+      const dashboardUrl = (result as any).url;
+      window.open(dashboardUrl, '_blank');
+    } catch (err) {
+      console.error('Failed to deploy dashboard:', err);
+    } finally {
+      setIsDeployingDashboard(false);
+    }
+  };
+
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageHeader
           pageTitle="AESOP: Self-Exploration Dashboard"
           description="Monitor autonomous exploration workflows and discovered patterns"
+          rightSideItems={[
+            <EuiButton
+              key="monitoring-dashboard"
+              iconType="visBarVerticalStacked"
+              onClick={handleDeployDashboard}
+              isLoading={isDeployingDashboard}
+              color="accent"
+            >
+              View Performance Dashboard
+            </EuiButton>,
+          ]}
         />
 
         <EuiSpacer />
@@ -230,7 +233,10 @@ export const ExplorationDashboard = () => {
           <EuiFlexItem>
             <EuiPanel>
               <EuiStat
-                title={completedExplorations.reduce((sum, e) => sum + (e.skills_proposed || 0), 0)}
+                title={completedExplorations.reduce(
+                  (sum, e) => sum + (e.skills_proposed || 0),
+                  0
+                )}
                 description="Skills Proposed"
                 titleColor="accent"
               />
@@ -249,83 +255,42 @@ export const ExplorationDashboard = () => {
 
         <EuiSpacer />
 
-        {/* Trigger New Exploration */}
+        {/* Start Autonomous Exploration */}
         <EuiPanel>
-          <EuiText><h3>Trigger New Exploration</h3></EuiText>
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiFormRow label="Agent Role">
-                <EuiFieldText
-                  value={agentRole}
-                  onChange={(e) => setAgentRole(e.target.value)}
-                  placeholder="SOC analyst"
-                />
-              </EuiFormRow>
+              <EuiText>
+                <h3>Start Autonomous Exploration</h3>
+              </EuiText>
+              <EuiText size="s" color="subdued">
+                AESOP will automatically discover available indices, infer your analyst role from
+                usage patterns, and calibrate sampling depth — no configuration needed.
+              </EuiText>
             </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiFormRow label="Scoped Indices">
-                <EuiComboBox
-                  selectedOptions={scopedIndices}
-                  onChange={setScopedIndices}
-                  onCreateOption={(value) => setScopedIndices([...scopedIndices, { label: value }])}
-                  placeholder="Enter index patterns"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
-              <EuiFormRow label="Exploration Depth">
-                <EuiFieldNumber
-                  value={explorationDepth}
-                  onChange={(e) => setExplorationDepth(parseInt(e.target.value) || 100)}
-                  min={10}
-                  max={1000}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFormRow label="Min Pattern Freq">
-                <EuiFieldNumber
-                  value={minPatternFreq}
-                  onChange={(e) => setMinPatternFreq(parseInt(e.target.value) || 10)}
-                  min={1}
-                  max={100}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false} style={{ justifyContent: 'flex-end', display: 'flex' }}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiButton
-                  fill
-                  iconType="play"
-                  onClick={() => triggerExploration.mutate()}
-                  isLoading={triggerExploration.isPending}
-                >
-                  Start Exploration
-                </EuiButton>
-              </EuiFormRow>
+              <EuiButton
+                fill
+                iconType="play"
+                onClick={() => triggerExploration.mutate()}
+                isLoading={triggerExploration.isLoading}
+                disabled={activeExplorations.length > 0}
+              >
+                {activeExplorations.length > 0
+                  ? 'Exploration Running...'
+                  : 'Start Exploration'}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
 
           {triggerExploration.isSuccess && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
-                title="Exploration started successfully"
-                color="success"
-                iconType="check"
-              >
+              <EuiCallOut title="Exploration started" color="success" iconType="check">
                 <p>
                   Execution ID: {(triggerExploration.data as any).execution_id}
                   <br />
-                  Estimated completion: ~15 minutes
-                  <br />
-                  Monitor progress below.
+                  The agent is autonomously discovering indices, inferring roles, and calibrating
+                  sampling. Monitor progress below.
                 </p>
               </EuiCallOut>
             </>
@@ -334,11 +299,7 @@ export const ExplorationDashboard = () => {
           {triggerExploration.isError && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
-                title="Failed to start exploration"
-                color="danger"
-                iconType="error"
-              >
+              <EuiCallOut title="Failed to start exploration" color="danger" iconType="error">
                 <p>{getErrorMessage(triggerExploration.error)}</p>
               </EuiCallOut>
             </>
@@ -351,7 +312,9 @@ export const ExplorationDashboard = () => {
         {activeExplorations.length > 0 && (
           <>
             <EuiPanel>
-              <EuiText><h3>Active Explorations</h3></EuiText>
+              <EuiText>
+                <h3>Active Explorations</h3>
+              </EuiText>
               <EuiSpacer size="m" />
               {activeExplorations.map((exploration) => (
                 <div key={exploration.execution_id}>
@@ -371,7 +334,9 @@ export const ExplorationDashboard = () => {
 
         {/* Exploration History */}
         <EuiPanel>
-          <EuiText><h3>Exploration History</h3></EuiText>
+          <EuiText>
+            <h3>Exploration History</h3>
+          </EuiText>
           <EuiSpacer size="m" />
 
           {isLoading ? (
@@ -383,34 +348,34 @@ export const ExplorationDashboard = () => {
           ) : explorations?.explorations.length === 0 ? (
             <EuiEmptyPrompt
               iconType="beaker"
-              title={<h2>Start Your First Exploration</h2>}
+              title={<h2>No Explorations Yet</h2>}
               body={
                 <>
                   <p>
                     AESOP autonomously explores your Elasticsearch data to discover patterns and
-                    generate Agent Builder skills tailored to your use case.
+                    generate Agent Builder skills — no configuration required.
                   </p>
                   <EuiSpacer size="m" />
                   <EuiSteps
                     steps={[
                       {
-                        title: 'Configure exploration parameters',
+                        title: 'Click "Start Exploration"',
                         children: (
                           <EuiText size="s" color="subdued">
-                            Set agent role, scoped indices, and exploration depth above
+                            AESOP discovers available indices and infers your role automatically
                           </EuiText>
                         ),
                       },
                       {
-                        title: 'Trigger exploration',
+                        title: 'Agent explores your data',
                         children: (
                           <EuiText size="s" color="subdued">
-                            Click "Start Exploration" to begin autonomous discovery
+                            Autonomous discovery of patterns, relationships, and workflows
                           </EuiText>
                         ),
                       },
                       {
-                        title: 'Review discovered skills',
+                        title: 'Review proposed skills',
                         children: (
                           <EuiText size="s" color="subdued">
                             Navigate to Proposed Skills to validate and approve
@@ -425,12 +390,10 @@ export const ExplorationDashboard = () => {
                 <EuiButton
                   fill
                   iconType="play"
-                  onClick={() => {
-                    // Scroll to trigger section
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                  onClick={() => triggerExploration.mutate()}
+                  isLoading={triggerExploration.isLoading}
                 >
-                  Configure & Start Exploration
+                  Start Exploration
                 </EuiButton>
               }
             />

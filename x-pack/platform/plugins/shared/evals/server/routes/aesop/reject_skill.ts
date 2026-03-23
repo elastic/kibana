@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { EvalsRequestHandlerContext } from '../../types';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
 import {
+  AESOPError,
   SkillNotFoundError,
   SkillAlreadyDeployedError,
   getErrorMessage,
@@ -20,17 +20,20 @@ const rejectSkillParamsSchema = z.object({
 });
 
 const rejectSkillBodySchema = z.object({
-  review_notes: z.string().min(1),
+  review_notes: z.string().optional().default(''),
   rejection_reason: z
     .enum([
       'poor_quality',
       'overlaps_existing',
       'not_useful',
       'security_concern',
+      'invalid_index_reference',
       'other',
     ])
+    .optional()
     .default('other'),
   suggested_improvements: z.string().optional(),
+  connector_id: z.string().optional(),
 });
 
 /**
@@ -47,7 +50,7 @@ const rejectSkillBodySchema = z.object({
  * - Audit logging
  * - Feedback loop for H3 (approval rate improvement over cycles)
  */
-export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerContext>) {
+export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/skills/{skillId}/reject',
@@ -56,9 +59,6 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
         authz: {
           requiredPrivileges: ['evals'],
         },
-      },
-      options: {
-        tags: ['access:evals'],
       },
     })
     .addVersion(
@@ -72,8 +72,8 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
         },
       },
       async (context, request, response) => {
-        const { elasticsearch } = context.core;
-        const esClient = elasticsearch.client.asCurrentUser;
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
         const { review_notes, rejection_reason, suggested_improvements } = request.body;
@@ -81,7 +81,7 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
         const startTime = Date.now();
 
         try {
-          context.logger.info('[AESOP] Rejecting skill', {
+          logger.info('[AESOP] Rejecting skill', {
             skill_id: skillId,
             rejection_reason,
             reviewed_by: request.auth.credentials?.username,
@@ -140,7 +140,7 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
           // 4. Store rejection feedback for next exploration cycle
           await esClient.index({
             index: '.aesop-rejection-feedback',
-            body: {
+            document: {
               skill_id: skillId,
               skill_name: skill.name,
               rejection_reason,
@@ -152,7 +152,6 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
               validation_score: skill.validation?.final_score,
               rejected_at: new Date().toISOString(),
               rejected_by: request.auth.credentials?.username || 'unknown',
-              // Learning signals for agent
               learning_signals: {
                 pattern_frequency_threshold: skill.source?.pattern_frequency < 10 ? 'too_low' : 'acceptable',
                 confidence_threshold: skill.confidence < 0.8 ? 'too_low' : 'acceptable',
@@ -164,26 +163,48 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
 
           const durationMs = Date.now() - startTime;
 
-          context.logger.info('[AESOP] Skill rejected successfully', {
+          logger.info('[AESOP] Skill rejected successfully', {
             skill_id: skillId,
             rejection_reason,
             duration_ms: durationMs,
           });
 
+          // 5. Cross-evaluate remaining pending skills with rejection context
+          const { connector_id: connectorId } = request.body;
+          if (connectorId) {
+            const evalsContext = await context.evals;
+            const actionsStart = evalsContext.getActionsStart();
+            if (actionsStart) {
+              // Fire-and-forget: evaluate siblings in the background
+              crossEvaluatePendingSkills({
+                esClient,
+                actionsClient: await actionsStart.getActionsClientWithRequest(request),
+                connectorId,
+                rejectedSkill: { id: skillId, name: skill.name, rejection_reason, review_notes },
+                logger,
+              }).catch((err) => {
+                logger.error('[AESOP] Background cross-evaluation failed', {
+                  error: err instanceof Error ? err.message : String(err),
+                });
+              });
+            }
+          }
+
           return response.ok({
             body: {
               success: true,
-              message: `Skill '${skill.name}' rejected. Feedback will inform next exploration cycle.`,
+              message: `Skill '${skill.name}' rejected. ${connectorId ? 'Evaluating remaining pending skills for similar issues.' : 'Feedback will inform next exploration cycle.'}`,
               skill_id: skillId,
               skill_name: skill.name,
               rejection_reason,
               feedback_stored: true,
+              cross_evaluation_triggered: !!connectorId,
             },
           });
         } catch (error) {
           const durationMs = Date.now() - startTime;
 
-          context.logger.error('[AESOP] Failed to reject skill', {
+          logger.error('[AESOP] Failed to reject skill', {
             error: getErrorMessage(error),
             skill_id: skillId,
             duration_ms: durationMs,
@@ -205,4 +226,199 @@ export function registerRejectSkillRoute(router: IRouter<EvalsRequestHandlerCont
         }
       }
     );
+}
+
+/**
+ * After a skill is rejected, evaluate all other pending skills to check
+ * if the same issues apply. Uses LLM to compare each pending skill against
+ * the rejection feedback.
+ */
+async function crossEvaluatePendingSkills({
+  esClient,
+  actionsClient,
+  connectorId,
+  rejectedSkill,
+  logger,
+}: {
+  esClient: any;
+  actionsClient: any;
+  connectorId: string;
+  rejectedSkill: { id: string; name: string; rejection_reason: string; review_notes: string };
+  logger: any;
+}) {
+  // Find all pending_review skills that haven't been validated yet
+  const result = await esClient.search({
+    index: '.aesop-proposed-skills',
+    body: {
+      query: {
+        bool: {
+          must: [{ term: { 'review.status': 'pending_review' } }],
+          must_not: [{ ids: { values: [rejectedSkill.id] } }],
+        },
+      },
+      size: 20,
+    },
+  });
+
+  const pendingSkills = result.hits.hits;
+  if (pendingSkills.length === 0) {
+    logger.info('[AESOP] No pending skills to cross-evaluate');
+    return;
+  }
+
+  logger.info(`[AESOP] Cross-evaluating ${pendingSkills.length} pending skills against rejection feedback`);
+
+  // Build a single LLM call with all pending skills for efficiency
+  const skillSummaries = pendingSkills.map((hit: any) => ({
+    id: hit._id,
+    name: hit._source.name,
+    description: hit._source.description,
+    markdown_preview: (hit._source.markdown || '').slice(0, 500),
+    confidence: hit._source.confidence,
+  }));
+
+  const prompt = `A security operations skill was just rejected by a human reviewer.
+
+## Rejected Skill
+**Name:** ${rejectedSkill.name}
+**Rejection Reason:** ${rejectedSkill.rejection_reason}
+**Reviewer Notes:** ${rejectedSkill.review_notes || 'No notes provided'}
+
+## Pending Skills to Evaluate
+${skillSummaries.map((s: any, i: number) => `### ${i + 1}. ${s.name} (ID: ${s.id})
+${s.description}
+Confidence: ${((s.confidence || 0) * 100).toFixed(0)}%
+Preview: ${s.markdown_preview}
+`).join('\n')}
+
+For each pending skill, determine if the rejection feedback applies to it.
+Respond with ONLY a JSON array (no markdown fences):
+[
+  { "id": "<skill_id>", "affected": true/false, "reason": "<why it is/isn't affected>", "severity": "high"|"medium"|"low"|"none" }
+]
+
+"affected" means the same issues that caused the rejection also apply to this skill.`;
+
+  try {
+    const llmResult = await actionsClient.execute({
+      actionId: connectorId,
+      params: {
+        subAction: 'run',
+        subActionParams: {
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a skill quality reviewer. Evaluate whether rejection feedback for one skill applies to other pending skills. Be precise and concise.',
+              },
+              { role: 'user', content: prompt },
+            ],
+            temperature: 0.2,
+          }),
+        },
+      },
+    });
+
+    if (llmResult.status === 'error') {
+      logger.warn(`[AESOP] Cross-evaluation LLM call failed: ${llmResult.message}`);
+      return;
+    }
+
+    const rawResponse = extractLLMText(llmResult.data);
+    const evaluations = parseCrossEvaluation(rawResponse);
+
+    // Act on affected skills based on severity
+    let autoRejected = 0;
+    let autoImproved = 0;
+
+    for (const evaluation of evaluations) {
+      if (!evaluation.affected || evaluation.severity === 'none') continue;
+
+      if (evaluation.severity === 'high') {
+        // Auto-reject: same fundamental issues, not worth improving
+        await esClient.update({
+          index: '.aesop-proposed-skills',
+          id: evaluation.id,
+          body: {
+            doc: {
+              review: {
+                status: 'rejected',
+                reviewed_by: 'aesop-auto',
+                reviewed_at: new Date().toISOString(),
+                review_notes: `Auto-rejected: shares same issues as rejected skill "${rejectedSkill.name}". ${evaluation.reason}`,
+                rejection_reason: rejectedSkill.rejection_reason,
+              },
+              cross_evaluation: {
+                triggered_by_rejection: rejectedSkill.id,
+                action: 'auto_rejected',
+                severity: evaluation.severity,
+                reason: evaluation.reason,
+                evaluated_at: new Date().toISOString(),
+              },
+            },
+          },
+          refresh: 'wait_for',
+        }).catch(() => {});
+
+        autoRejected++;
+        logger.info(`[AESOP] Auto-rejected skill ${evaluation.id}: ${evaluation.reason}`);
+      } else {
+        // Medium/low severity: flag with warning but keep for review
+        await esClient.update({
+          index: '.aesop-proposed-skills',
+          id: evaluation.id,
+          body: {
+            doc: {
+              cross_evaluation: {
+                triggered_by_rejection: rejectedSkill.id,
+                action: 'flagged',
+                severity: evaluation.severity,
+                reason: evaluation.reason,
+                evaluated_at: new Date().toISOString(),
+              },
+            },
+          },
+        }).catch(() => {});
+
+        autoImproved++;
+        logger.info(`[AESOP] Flagged skill ${evaluation.id} (${evaluation.severity}): ${evaluation.reason}`);
+      }
+    }
+
+    const totalAffected = evaluations.filter((e: any) => e.affected).length;
+    logger.info(`[AESOP] Cross-evaluation complete: ${totalAffected} affected, ${autoRejected} auto-rejected, ${autoImproved} flagged`);
+  } catch (error) {
+    logger.error(`[AESOP] Cross-evaluation failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+function extractLLMText(data: any): string {
+  if (typeof data === 'string') return data;
+  if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
+  if (data?.completion) return data.completion;
+  if (data?.content?.[0]?.text) return data.content[0].text;
+  if (data?.candidates?.[0]?.content?.parts?.[0]?.text) return data.candidates[0].content.parts[0].text;
+  return JSON.stringify(data);
+}
+
+function parseCrossEvaluation(response: string): Array<{ id: string; affected: boolean; reason: string; severity: string }> {
+  try {
+    let cleaned = response;
+    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
+    cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+    if (!cleaned.startsWith('[')) {
+      const match = cleaned.match(/\[[\s\S]*\]/);
+      if (match) cleaned = match[0];
+    }
+    const parsed = JSON.parse(cleaned);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item: any) => ({
+      id: String(item.id || ''),
+      affected: Boolean(item.affected),
+      reason: String(item.reason || ''),
+      severity: String(item.severity || 'none'),
+    }));
+  } catch {
+    return [];
+  }
 }

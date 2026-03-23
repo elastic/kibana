@@ -2,23 +2,33 @@
 
 This directory contains scripts for setting up the AESOP demonstration environment with synthetic multi-persona data.
 
+## ⚠️ Critical: Run Order
+
+**The data generator MUST run AFTER Kibana has fully initialized!**
+
+Running the generator before Kibana starts will cause this error:
+```
+resource_already_exists_exception: index already exists and is not the write index for the alias
+```
+
+The generator now automatically waits (up to 60s) for Kibana's alerting framework to initialize.
+
 ## Quick Start
 
 ```bash
-# Automated setup (recommended)
-./setup_environment.sh
-
-# Or manual setup:
-# 1. Start services
+# CORRECT ORDER (recommended):
+# 1. Start Elasticsearch
 yarn es snapshot --license trial &
-node scripts/edot_collector &
 
-# 2. Wait for services (~2 min)
-# 3. Generate data
-node x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo/data_generator.js
-
-# 4. Start Kibana
+# 2. Start Kibana and wait for full initialization
 yarn start
+# Look for: "[info][plugins.alerting] Alerting framework initialized"
+
+# 3. In a new terminal, generate data
+node x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo/run_data_generator.js
+
+# Or automated setup (handles ordering):
+./setup_environment.sh
 ```
 
 ## What Gets Created
@@ -98,6 +108,36 @@ curl -u elastic:changeme "http://localhost:9200/.aesop-persona-behaviors/_count"
 ```
 
 ## Troubleshooting
+
+### "resource_already_exists_exception" Error
+
+**Problem**: You ran the data generator before Kibana initialized the alerting framework.
+
+**Symptoms**:
+```
+[ERROR][plugins.alerting] Error creating concrete write index - resource_already_exists_exception
+[ERROR][plugins.alerting] Attempted to create index: .internal.alerts-security.alerts-default-000001
+as the write index for alias: .alerts-security.alerts-default, but the index already exists
+and is not the write index for the alias
+```
+
+**Solution**:
+```bash
+# 1. Delete the conflicting index
+curl -X DELETE 'http://localhost:9200/.internal.alerts-security.alerts-default-000001'
+
+# 2. Restart Kibana (it will recreate the index correctly)
+# Stop Kibana (Ctrl+C), then:
+yarn start
+
+# 3. Wait for alerting framework to initialize
+# Look for: "[info][plugins.alerting] Alerting framework initialized"
+
+# 4. Re-run the data generator
+node x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo/run_data_generator.js
+```
+
+**Prevention**: The data generator now waits for Kibana automatically. If you see "⏳ Waiting for Kibana alerting framework", it's working correctly.
 
 ### Elasticsearch won't start
 

@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { EvalsRequestHandlerContext } from '../../types';
 import { registerRunExplorationRoute } from './run_exploration';
 import { registerListProposedSkillsRoute } from './list_proposed_skills';
@@ -14,6 +15,18 @@ import { registerRejectSkillRoute } from './reject_skill';
 import { registerRunSkillValidationRoute } from './run_skill_validation';
 import { registerGetExplorationProgressRoute } from './get_exploration_progress';
 import { registerGetExecutionDetailRoute } from './get_execution_detail';
+import { registerDeployMonitoringDashboardRoute } from './deploy_monitoring_dashboard';
+import { registerDeployAlertingRulesRoute } from './deploy_alerting_rules';
+import { registerGetExplorationHistoryRoute } from './get_exploration_history';
+import { registerUpdateSkillRoute } from './update_skill';
+import { registerImproveSkillRoute } from './improve_skill';
+import { registerUnrejectSkillRoute } from './unreject_skill';
+import { registerRedeploySkillRoute } from './redeploy_skill';
+
+export interface AESOPRouteDependencies {
+  router: IRouter<EvalsRequestHandlerContext>;
+  logger: Logger;
+}
 
 /**
  * Registers all AESOP-related API routes (PRODUCTION).
@@ -25,6 +38,8 @@ import { registerGetExecutionDetailRoute } from './get_execution_detail';
  * - POST /internal/aesop/skills/{skillId}/validate - Run validation workflow
  * - POST /internal/aesop/skills/{skillId}/approve - Approve skill → deploy to Agent Builder
  * - POST /internal/aesop/skills/{skillId}/reject - Reject skill with feedback
+ * - POST /internal/aesop/monitoring/dashboard/deploy - Deploy performance monitoring dashboard
+ * - POST /internal/aesop/monitoring/alerts/deploy - Deploy alerting rules
  *
  * Production features:
  * - Comprehensive error handling (custom error classes)
@@ -32,13 +47,21 @@ import { registerGetExecutionDetailRoute } from './get_execution_detail';
  * - Audit logging (all operations logged)
  * - Performance monitoring (duration tracking)
  * - Real-time progress tracking (2-second polling)
+ * - APM instrumentation (custom metrics)
  */
-export function registerAESOPRoutes(router: IRouter<EvalsRequestHandlerContext>) {
-  registerRunExplorationRoute(router);
-  registerGetExplorationProgressRoute(router);
-  registerGetExecutionDetailRoute(router);
-  registerListProposedSkillsRoute(router);
-  registerRunSkillValidationRoute(router);
-  registerApproveSkillRoute(router);
-  registerRejectSkillRoute(router);  // ✅ PRODUCTION: Reject workflow implemented
+export function registerAESOPRoutes({ router, logger }: AESOPRouteDependencies) {
+  registerRunExplorationRoute({ router, logger });
+  registerGetExplorationHistoryRoute({ router, logger });
+  registerGetExplorationProgressRoute({ router, logger });
+  registerGetExecutionDetailRoute({ router, logger });
+  registerListProposedSkillsRoute({ router, logger });
+  registerRunSkillValidationRoute({ router, logger });
+  registerUpdateSkillRoute({ router, logger });
+  registerImproveSkillRoute({ router, logger });
+  registerApproveSkillRoute({ router, logger });
+  registerRejectSkillRoute({ router, logger });
+  registerUnrejectSkillRoute({ router, logger });
+  registerRedeploySkillRoute({ router, logger });
+  registerDeployMonitoringDashboardRoute({ router, logger });
+  registerDeployAlertingRulesRoute({ router, logger });
 }

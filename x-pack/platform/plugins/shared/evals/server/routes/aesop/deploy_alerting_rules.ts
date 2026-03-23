@@ -19,35 +19,14 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { EvalsRequestHandlerContext } from '../../types';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { ALERTING_RULES } from '../../lib/aesop/monitoring/alerting_rules';
 
 const deployAlertingRulesRequestSchema = z.object({
   rule_ids: z.array(z.string()).optional().describe('Specific rule IDs to deploy. If omitted, all rules are deployed.'),
   overwrite: z.boolean().default(true).describe('Whether to overwrite existing rules'),
   dry_run: z.boolean().default(false).describe('Preview rules without creating them'),
-});
-
-const deployAlertingRulesResponseSchema = z.object({
-  success: z.boolean(),
-  dry_run: z.boolean(),
-  rules_created: z.number(),
-  rules_updated: z.number(),
-  rules_skipped: z.number(),
-  rule_ids: z.array(z.string()),
-  errors: z.array(z.object({
-    rule_id: z.string(),
-    error: z.string(),
-  })).optional(),
-  preview: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    description: z.string(),
-    rule_type: z.string(),
-    tags: z.array(z.string()).optional(),
-  })).optional(),
 });
 
 /**
@@ -62,7 +41,7 @@ const deployAlertingRulesResponseSchema = z.object({
  * - High token usage
  * - Performance degradation
  */
-export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHandlerContext>) {
+export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/monitoring/alerts/deploy',
@@ -83,18 +62,13 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
           request: {
             body: buildRouteValidationWithZod(deployAlertingRulesRequestSchema),
           },
-          response: {
-            200: {
-              body: () => deployAlertingRulesResponseSchema,
-            },
-          },
         },
       },
       async (context, request, response) => {
         const { rule_ids: requestedRuleIds, overwrite, dry_run } = request.body;
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const coreContext = await context.core; const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-        context.logger.info('[AESOP Alerting] Deploying alerting rules', {
+        logger.info('[AESOP Alerting] Deploying alerting rules', {
           requested_rules: requestedRuleIds?.length ?? 'all',
           dry_run,
           overwrite,
@@ -115,7 +89,7 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
 
         // Dry run mode: return preview without creating
         if (dry_run) {
-          context.logger.info('[AESOP Alerting] Dry run mode - previewing rules without creating');
+          logger.info('[AESOP Alerting] Dry run mode - previewing rules without creating');
 
           return response.ok({
             body: {
@@ -184,7 +158,7 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
                 },
               },
             });
-            context.logger.info('[AESOP Alerting] Created alert rules index template');
+            logger.info('[AESOP Alerting] Created alert rules index template');
           }
 
           // Deploy each rule
@@ -197,7 +171,7 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
               });
 
               if (existingRule && !overwrite) {
-                context.logger.info(`[AESOP Alerting] Skipping existing rule: ${rule.id}`);
+                logger.info(`[AESOP Alerting] Skipping existing rule: ${rule.id}`);
                 skippedRules.push(rule.id);
                 continue;
               }
@@ -214,15 +188,15 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
               });
 
               if (existingRule) {
-                context.logger.info(`[AESOP Alerting] ✅ Updated rule: ${rule.id}`);
+                logger.info(`[AESOP Alerting] ✅ Updated rule: ${rule.id}`);
                 updatedRules.push(rule.id);
               } else {
-                context.logger.info(`[AESOP Alerting] ✅ Created rule: ${rule.id}`);
+                logger.info(`[AESOP Alerting] ✅ Created rule: ${rule.id}`);
                 createdRules.push(rule.id);
               }
             } catch (error) {
               const errorMessage = error instanceof Error ? error.message : String(error);
-              context.logger.error(`[AESOP Alerting] ❌ Failed to deploy rule: ${rule.id}`, {
+              logger.error(`[AESOP Alerting] ❌ Failed to deploy rule: ${rule.id}`, {
                 error: errorMessage,
               });
               errors.push({
@@ -234,7 +208,7 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
 
           const allDeployedRules = [...createdRules, ...updatedRules];
 
-          context.logger.info('[AESOP Alerting] ✅ Alerting rules deployment completed', {
+          logger.info('[AESOP Alerting] ✅ Alerting rules deployment completed', {
             total_rules: rulesToDeploy.length,
             created: createdRules.length,
             updated: updatedRules.length,
@@ -254,7 +228,7 @@ export function registerDeployAlertingRulesRoute(router: IRouter<EvalsRequestHan
             },
           });
         } catch (error) {
-          context.logger.error('[AESOP Alerting] Failed to deploy alerting rules', { error });
+          logger.error('[AESOP Alerting] Failed to deploy alerting rules', { error });
 
           return response.customError({
             statusCode: 500,
