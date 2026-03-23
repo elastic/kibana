@@ -150,7 +150,11 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       paginatedDimensions.map((dimension: Dimension) => {
         return {
           'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
-          label: <FieldNameWithIcon name={dimension.name} />,
+          label: (
+            <EuiText size="s">
+              <FieldNameWithIcon name={dimension.name} />
+            </EuiText>
+          ),
         };
       }),
     [paginatedDimensions]
