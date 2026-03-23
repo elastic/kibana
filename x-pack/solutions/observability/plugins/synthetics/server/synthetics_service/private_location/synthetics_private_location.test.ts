@@ -87,6 +87,7 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as SyntheticsServerSetup;
   beforeEach(() => {
     mockBuildPackagePolicy.mockReturnValue(undefined);
+    (serverMock.fleet.packagePolicyService.getByIDs as jest.Mock).mockResolvedValue([]);
   });
 
   describe('getPolicyNamespace', () => {
@@ -352,6 +353,7 @@ describe('SyntheticsPrivateLocation', () => {
         ...serverMock.fleet,
         packagePolicyService: {
           ...serverMock.fleet.packagePolicyService,
+          getByIDs: jest.fn().mockResolvedValue([{ id: 'testId-policyId' }]),
           delete(
             soClient: SavedObjectsClientContract,
             esClient: any,
@@ -368,6 +370,95 @@ describe('SyntheticsPrivateLocation', () => {
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }
+  });
+
+  it('deleteMonitors only deletes legacy package policy ids that exist', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const getByIDsMock = jest.fn().mockResolvedValue([{ id: 'testId-policyId' }]);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: getByIDsMock,
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    expect(deleteMock).toHaveBeenCalledTimes(1);
+    const deletedIds = deleteMock.mock.calls[0][2] as string[];
+    expect(deletedIds).toContain('testId-policyId');
+    expect(deletedIds).not.toContain('testId-policyId-test-space');
+    expect(deletedIds.length).toBe(1);
+  });
+
+  it('deleteMonitors deletes legacy package policy ids when they exist', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const getByIDsMock = jest
+      .fn()
+      .mockResolvedValue([{ id: 'testId-policyId' }, { id: 'testId-policyId-test-space' }]);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: getByIDsMock,
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    const deletedIds = deleteMock.mock.calls[0][2] as string[];
+    expect(deletedIds).toContain('testId-policyId');
+    expect(deletedIds).toContain('testId-policyId-test-space');
+  });
+
+  it('deleteMonitors only deletes new-format id when that policy exists', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const getByIDsMock = jest.fn().mockResolvedValue([{ id: 'testId-policyId-test-space' }]);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: getByIDsMock,
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    const deletedIds = deleteMock.mock.calls[0][2] as string[];
+    expect(deletedIds).toEqual(['testId-policyId-test-space']);
+    expect(deletedIds).not.toContain('testId-policyId');
+  });
+
+  it('deleteMonitors does not call delete when no matching policies exist', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: jest.fn().mockResolvedValue([]),
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    expect(deleteMock).not.toHaveBeenCalled();
   });
 
   it('formats monitors stream properly', () => {
