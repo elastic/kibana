@@ -110,7 +110,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
               i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
                 defaultMessage: 'Metric unit',
               }),
-              <EuiBadge>{unitLabel}</EuiBadge>,
+              <div>
+                <EuiBadge>{unitLabel}</EuiBadge>
+              </div>,
               'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
             ),
           ]
