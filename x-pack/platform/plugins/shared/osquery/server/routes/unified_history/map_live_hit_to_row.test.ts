@@ -89,5 +89,33 @@ describe('mapLiveHitToRow', () => {
     const row = mapLiveHitToRow({});
     expect(row.sourceType).toBe('live');
     expect(row.agentCount).toBe(0);
+    expect(row.tags).toEqual([]);
+  });
+
+  test('maps tags from source', () => {
+    const hit = {
+      _source: {
+        action_id: 'action-tags',
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+        tags: ['important', 'reviewed'],
+        queries: [{ query: 'SELECT 1', id: 'q1', agents: ['agent-1'] }],
+      },
+    };
+
+    const row = mapLiveHitToRow(hit);
+    expect(row.tags).toEqual(['important', 'reviewed']);
+  });
+
+  test('defaults tags to empty array when missing', () => {
+    const hit = {
+      _source: {
+        action_id: 'action-no-tags',
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+        queries: [{ query: 'SELECT 1', id: 'q1', agents: ['agent-1'] }],
+      },
+    };
+
+    const row = mapLiveHitToRow(hit);
+    expect(row.tags).toEqual([]);
   });
 });

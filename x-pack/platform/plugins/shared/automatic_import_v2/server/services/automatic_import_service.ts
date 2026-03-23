@@ -114,6 +114,13 @@ import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
 import type { AutomaticImportV2PluginStartDependencies } from '../types';
 
+function bumpMinorVersion(version: string): string {
+  const parts = version.split('.').map(Number);
+  const major = parts[0] ?? 0;
+  const minor = parts[1] ?? 0;
+  return `${major}.${minor + 1}.0`;
+}
+
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
@@ -140,19 +147,26 @@ export class AutomaticImportService {
     this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
 
     this.taskManagerSetup = taskManagerSetup;
-    this.taskManagerService = new TaskManagerService(loggerFactory, this.taskManagerSetup, core);
+    this.taskManagerService = new TaskManagerService(
+      loggerFactory,
+      this.taskManagerSetup,
+      core,
+      this.samplesIndexService
+    );
   }
 
   // Run initialize in the start phase of plugin
   public async initialize(
     savedObjectsClient: SavedObjectsClient,
-    taskManagerStart: TaskManagerStartContract
+    taskManagerStart: TaskManagerStartContract,
+    internalEsClient: ElasticsearchClient
   ): Promise<void> {
     this.savedObjectService = new AutomaticImportSavedObjectService(
       this.loggerFactory,
       savedObjectsClient
     );
     this.taskManagerService.initialize(taskManagerStart, this.savedObjectService);
+    this.samplesIndexService.initialize(internalEsClient);
   }
 
   public async createUpdateIntegration(params: CreateUpdateIntegrationParams): Promise<void> {
@@ -167,20 +181,21 @@ export class AutomaticImportService {
         this.logger.debug(
           `Integration ${integrationParams.integrationId} already exists, updating it`
         );
-        // Build a full IntegrationAttributes object for the saved objects update API
         const existing = await this.savedObjectService.getIntegration(
           integrationParams.integrationId
         );
-        const newVersion = existing.metadata?.version || '0.1.0';
+        const currentVersion = existing.metadata?.version || '0.1.0';
+        const wasApproved = existing.status === TASK_STATUSES.approved;
+        const newVersion = wasApproved ? bumpMinorVersion(currentVersion) : currentVersion;
 
         const updateData: IntegrationAttributes = {
           ...existing,
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
-          status:
-            existing.status === TASK_STATUSES.approved ? TASK_STATUSES.completed : existing.status,
+          status: wasApproved ? TASK_STATUSES.completed : existing.status,
           metadata: {
             ...existing.metadata,
+            version: newVersion,
             ...(integrationParams.title ? { title: integrationParams.title } : {}),
             ...(integrationParams.description
               ? { description: integrationParams.description }
@@ -276,7 +291,7 @@ export class AutomaticImportService {
 
   public async approveIntegration(params: ApproveIntegrationParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, authenticatedUser, version } = params;
+    const { integrationId, authenticatedUser, version, categories } = params;
 
     const existing = await this.savedObjectService.getIntegration(integrationId);
 
@@ -313,6 +328,7 @@ export class AutomaticImportService {
       status: TASK_STATUSES.approved,
       metadata: {
         ...existing.metadata,
+        ...(categories ? { categories } : {}),
       },
       changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
@@ -403,7 +419,6 @@ export class AutomaticImportService {
   public async deleteDataStream(
     integrationId: string,
     dataStreamId: string,
-    esClient: ElasticsearchClient,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
@@ -419,11 +434,7 @@ export class AutomaticImportService {
       dataStreamId,
     });
     // Delete the samples from the samples index
-    await this.samplesIndexService.deleteSamplesForDataStream(
-      integrationId,
-      dataStreamId,
-      esClient
-    );
+    await this.samplesIndexService.deleteSamplesForDataStream(integrationId, dataStreamId);
     // Delete the data stream from the saved objects
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
   }
@@ -462,6 +473,26 @@ export class AutomaticImportService {
       newTaskId: taskId,
       jobType: DATA_STREAM_CREATION_TASK_TYPE,
     });
+
+    const existing = await this.savedObjectService.getIntegration(integrationId);
+    if (existing.status === TASK_STATUSES.approved) {
+      const currentVersion = existing.metadata?.version || '0.1.0';
+      const newVersion = bumpMinorVersion(currentVersion);
+
+      const updateData: IntegrationAttributes = {
+        ...existing,
+        status: TASK_STATUSES.completed,
+        metadata: {
+          ...existing.metadata,
+          version: newVersion,
+        },
+      };
+
+      await this.savedObjectService.updateIntegration(updateData, newVersion);
+      this.logger.debug(
+        `Integration ${integrationId} status reset from approved to completed, version bumped to ${newVersion}`
+      );
+    }
 
     this.logger.debug(`Data stream ${dataStreamId} scheduled for reanalysis with task ${taskId}`);
   }
@@ -537,8 +568,7 @@ export class AutomaticImportService {
 
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
-      dataStreamId,
-      esClient
+      dataStreamId
     );
     if (samples.length === 0) {
       throw new Error(`No samples found for data stream ${dataStreamId}`);

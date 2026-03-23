@@ -246,6 +246,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   triggers?: string[];
   /**
+   * Optional priority used to sort suggestions when multiple visualizations
+   * compete. Higher values are sorted first. Defaults to 0.
+   */
+  suggestionPriority?: number;
+
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */
@@ -480,7 +486,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
+  getUserMessages?: (
+    state: T,
+    deps: { frame: FramePublicAPI; setState?: StateSetter<T> }
+  ) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state

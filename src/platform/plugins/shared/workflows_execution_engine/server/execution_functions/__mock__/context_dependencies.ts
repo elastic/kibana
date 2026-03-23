@@ -22,6 +22,7 @@ export const mockContextDependencies = () => ({
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   config: {
     enabled: true,
+    eventDriven: { enabled: true, logEvents: true },
     logging: { console: false },
     http: { allowedHosts: ['*'] },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb

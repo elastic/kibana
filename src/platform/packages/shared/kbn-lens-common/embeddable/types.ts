@@ -116,7 +116,7 @@ export interface PreventableEvent {
 }
 
 export interface LensByValueBase {
-  savedObjectId?: string; // really should be never but creates type issues
+  ref_id?: string; // really should be never but creates type issues
   attributes?: LensSavedObjectAttributes;
 }
 
@@ -140,7 +140,7 @@ export interface LensOverrides {
  * Lens embeddable props broken down by type
  */
 interface LensByReferenceBase {
-  savedObjectId?: string;
+  ref_id?: string;
   attributes?: never;
 }
 
@@ -168,7 +168,7 @@ export interface IntegrationCallbacks extends LensApiProps {
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
   getFullAttributes: () => LensDocument | undefined;
   updateAttributes: (newAttributes: LensRuntimeState['attributes']) => void;
-  updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
+  updateRefId: (newRefId: LensRuntimeState['ref_id']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
 }
@@ -439,13 +439,18 @@ export interface ExpressionWrapperProps {
 
 export type GetStateType = () => LensRuntimeState;
 
-export interface StructuredDatasourceStates {
-  formBased?: FormBasedPersistedState;
-  textBased?: TextBasedPersistedState;
-}
+export const LENS_DATASOURCE_ID = {
+  FORM_BASED: 'formBased',
+  TEXT_BASED: 'textBased',
+} as const;
 
 /** The supported datasource identifiers */
-export type SupportedDatasourceId = keyof StructuredDatasourceStates;
+export type LensDatasourceId = (typeof LENS_DATASOURCE_ID)[keyof typeof LENS_DATASOURCE_ID];
+
+export interface StructuredDatasourceStates {
+  [LENS_DATASOURCE_ID.FORM_BASED]?: FormBasedPersistedState;
+  [LENS_DATASOURCE_ID.TEXT_BASED]?: TextBasedPersistedState;
+}
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<

@@ -69,26 +69,56 @@ export const getRuleIntegrationCoverage = (
 export const useDetectionRulesByIntegration = (integrationPackages?: string | string[]) => {
   const { getDetectionRules, getIntegrations } = useSiemReadinessApi();
   const enabledRulesQuery = getDetectionRules;
+  const integrationItems = getIntegrations?.data?.items;
 
-  const installedPackages = useMemo(() => {
+  const enabledPackages = useMemo(() => {
     if (integrationPackages !== undefined) {
       return Array.isArray(integrationPackages) ? integrationPackages : [integrationPackages];
     }
-    return (
-      getIntegrations?.data?.items
-        ?.filter((pkg) => pkg.status === 'installed')
-        .map((pkg) => pkg.name) || []
-    );
-  }, [integrationPackages, getIntegrations?.data?.items]);
+
+    const allIntegrationPackages = integrationItems ?? [];
+    const enabledPackageNames: string[] = [];
+
+    for (const pkg of allIntegrationPackages) {
+      const isInstalled = pkg.status === 'installed';
+      const hasPolicies = (pkg.packagePoliciesInfo?.count ?? 0) > 0;
+
+      if (isInstalled && hasPolicies) {
+        enabledPackageNames.push(pkg.name);
+      }
+    }
+
+    return enabledPackageNames;
+  }, [integrationPackages, integrationItems]);
 
   const ruleIntegrationCoverage = useMemo(() => {
     if (!enabledRulesQuery.data?.data) {
       return null;
     }
-    return getRuleIntegrationCoverage(enabledRulesQuery.data.data, installedPackages);
-  }, [enabledRulesQuery.data?.data, installedPackages]);
+    return getRuleIntegrationCoverage(enabledRulesQuery.data.data, enabledPackages);
+  }, [enabledRulesQuery.data?.data, enabledPackages]);
+
+  const enabledPackagesSet = useMemo(() => new Set(enabledPackages), [enabledPackages]);
+
+  const disabledPackagesSet = useMemo(() => {
+    const disabled = new Set<string>();
+
+    for (const pkg of integrationItems ?? []) {
+      const isInstalled = pkg.status === 'installed';
+      const hasPolicies = (pkg.packagePoliciesInfo?.count ?? 0) > 0;
+
+      if (isInstalled && !hasPolicies) {
+        disabled.add(pkg.name);
+      }
+    }
+
+    return disabled;
+  }, [integrationItems]);
 
   return {
     ruleIntegrationCoverage,
+    enabledPackages,
+    enabledPackagesSet,
+    disabledPackagesSet,
   };
 };
