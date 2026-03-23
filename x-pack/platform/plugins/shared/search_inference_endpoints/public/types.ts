@@ -16,6 +16,7 @@ import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
@@ -34,6 +35,7 @@ export interface AppPluginStartDependencies {
   ml: MlPluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: CloudStart;
+  cloudConnect?: CloudConnectedPluginStart;
 }
 
 export interface AppPluginSetupDependencies {

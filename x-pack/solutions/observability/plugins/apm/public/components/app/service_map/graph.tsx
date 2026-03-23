@@ -42,6 +42,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import { ServiceMapMinimap } from './service_map_minimap';
 import type { Environment } from '../../../../common/environment_rt';
 import type {
   ServiceMapNode,
@@ -426,6 +427,7 @@ function GraphInner({
             </ControlButton>
           )}
         </Controls>
+        <ServiceMapMinimap />
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}

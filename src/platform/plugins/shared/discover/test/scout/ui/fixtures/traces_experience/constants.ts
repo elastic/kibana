@@ -25,6 +25,7 @@ export const RICH_TRACE = {
     TRANSACTION_DB_ERROR: 'Constraint violation: duplicate key',
     TRANSACTION_VALIDATION_ERROR: 'Validation error: invalid order ID',
     DB_SPAN_TIMEOUT: 'Query timeout on orders table',
+    PROCESS_ORDER_FAILURE: 'Order processing failed: item out of stock',
   },
   LOGS: {
     TRANSACTION_DB_ERROR: 'Constraint violation: duplicate key value violates unique constraint',
@@ -42,5 +43,7 @@ export const MINIMAL_TRACE = {
 };
 
 export const PRODUCER_TRACE = {
+  SERVICE_NAME: 'synth-traces-backend',
   TRANSACTION_NAME: 'Background job',
+  KAFKA_SPAN_NAME: 'Publish to kafka/orders',
 };

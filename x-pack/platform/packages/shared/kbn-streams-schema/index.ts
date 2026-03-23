@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-export { Streams } from './src/models/streams';
+export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
-export { Ingest } from './src/models/ingest';
-export { WiredIngest } from './src/models/ingest/wired';
-export { ClassicIngest } from './src/models/ingest/classic';
-export { Query } from './src/models/query';
+export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
+export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  ClassicIngest,
+  ClassicStream,
+  ClassicIngestUpsertRequest,
+} from './src/models/ingest/classic';
+export { Query, QueryStream } from './src/models/query';
 export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,
   getStreamNameFromViewName,
+  getWiredStreamViewQuery,
 } from './src/models/query/view_name';
 
 export {
@@ -89,9 +94,15 @@ export {
   type FieldDefinition,
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
+  type ClassicFieldDefinition,
+  type ClassicFieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
   type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
+  type FieldDefinitionType,
+  type AllFieldDefinitionType,
+  FIELD_DEFINITION_TYPES,
+  ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
@@ -100,6 +111,7 @@ export {
   type EsqlQuery,
   esqlQuerySchema,
   type StreamQuery,
+  type QueryLink,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
@@ -169,6 +181,8 @@ export type {
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
   validateStreamName,
+  type StreamNameValidationError,
+  type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
 } from './src/helpers/stream_name_validation';
@@ -176,6 +190,8 @@ export {
 export {
   type Feature,
   type BaseFeature,
+  type IdentifiedFeature,
+  type IgnoredFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
@@ -188,6 +204,8 @@ export {
   hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
 
@@ -232,3 +250,8 @@ export {
 } from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
+export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';

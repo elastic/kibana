@@ -50,21 +50,22 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
+  elasticConsole: 4451
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37566
   entityStore: 71717
-  esql: 19247
+  esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 23920
+  evals: 35000
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45042
   expressionGauge: 15748
   expressionHeatmap: 17563
   expressionLegacyMetricVis: 11834
-  expressionMetricVis: 17559
+  expressionMetricVis: 18100
   expressionPartitionVis: 29826
   expressions: 105076
   expressionTagcloud: 14009
@@ -101,7 +102,7 @@ pageLoadAssetSize:
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 70490
+  lens: 85000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -151,9 +152,9 @@ pageLoadAssetSize:
   screenshotting: 3252
   searchAssistant: 6150
   searchGettingStarted: 6678
-  searchHomepage: 7962
+  searchHomepage: 9007
   searchIndices: 9991
-  searchInferenceEndpoints: 8071
+  searchInferenceEndpoints: 9100
   searchNavigation: 7404
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -182,7 +183,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 192134
   transform: 16515
-  triggersActionsUi: 112000
+  triggersActionsUi: 114000
   uiActions: 35278
   unifiedDocViewer: 14513
   unifiedSearch: 19500
@@ -209,5 +210,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 89850
-  workflowsManagement: 21318
+  workflowsManagement: 23749
   workplaceAIApp: 65547

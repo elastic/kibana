@@ -81,6 +81,10 @@ jest.mock('./layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
+jest.mock('./service_map_minimap', () => ({
+  ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
+}));
+
 const createMockNode = (id: string, label: string): ServiceMapNode => ({
   id,
   position: { x: 100, y: 100 },

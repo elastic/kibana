@@ -89,7 +89,6 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
       <DefaultAlertActions<{}>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
-        isAlertDetailsEnabled={false}
         resolveRulePagePath={(alertRuleId) =>
           alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
         }

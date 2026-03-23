@@ -14,7 +14,8 @@ import type { SidebarAppConfig, SidebarAppId, SidebarStart } from '@kbn/core-chr
 import { createSidebarStore } from '@kbn/core-chrome-sidebar';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
-import { ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { SidebarComponentType } from '@kbn/core-chrome-sidebar';
 import { Sidebar } from './sidebar';
 
@@ -48,11 +49,11 @@ const startService = (...apps: Array<SidebarAppConfig<any, any>>): SidebarStart 
 
 const renderSidebar = (sidebar: SidebarStart) =>
   render(
-    <ChromeLayoutConfigProvider value={{ chromeStyle: 'classic' }}>
+    <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
       <SidebarServiceProvider value={{ sidebar }}>
         <Sidebar />
       </SidebarServiceProvider>
-    </ChromeLayoutConfigProvider>
+    </ChromeServiceProvider>
   );
 
 describe('Sidebar', () => {

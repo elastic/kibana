@@ -83,6 +83,31 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
       }) as Required<DashboardState>['pinned_panels'];
   }
 
+  function transformControlType(type: string) {
+    if (type === 'timeSlider') {
+      return 'time_slider_control';
+    }
+
+    if (type === 'rangeSliderControl') {
+      return 'range_slider_control';
+    }
+
+    if (type === 'optionsListControl') {
+      return 'options_list_control';
+    }
+
+    if (type === 'esqlControl') {
+      return 'esql_control';
+    }
+
+    return type;
+  }
+
+  standardizedPinnedPanels = standardizedPinnedPanels.map((control) => ({
+    ...control,
+    type: transformControlType(control.type),
+  })) as Required<DashboardState>['pinned_panels'];
+
   const controlState = pathToState ? get(state, pathToState) : null;
   let autoApplySelections: boolean | undefined;
   if (controlState !== null && typeof controlState === 'object') {
@@ -118,7 +143,8 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
       ignoreValidations !== DEFAULT_IGNORE_VALIDATIONS
     ) {
       standardizedPinnedPanels = standardizedPinnedPanels.map((control) => {
-        if (control.type === 'timeSlider' || control.type === 'esqlControl') return control;
+        if (control.type === 'time_slider_control' || control.type === 'esql_control')
+          return control;
         // these settings are only relevant for data controls
         return {
           ...control,
@@ -151,9 +177,15 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
     convertCamelCasedKeysToSnakeCase<Required<DashboardState>['pinned_panels'][number]>(panel)
   );
 
+  const hasExplicitPinnedPanels =
+    Object.hasOwn(state, 'pinned_panels') && Array.isArray(state.pinned_panels);
+
   return {
     autoApplyFilters:
       autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
-    pinned_panels: standardizedPinnedPanels.length ? standardizedPinnedPanels : undefined,
+    pinned_panels:
+      standardizedPinnedPanels.length || hasExplicitPinnedPanels
+        ? standardizedPinnedPanels
+        : undefined,
   };
 }

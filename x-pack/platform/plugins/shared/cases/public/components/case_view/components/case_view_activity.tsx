@@ -53,6 +53,8 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { TemplateFields } from './template_fields';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -97,6 +99,8 @@ export const CaseViewActivity = ({
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
   const { data: casesConfiguration } = useGetCaseConfiguration();
+
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
   const { userProfiles, reporterAsArray } = parseCaseUsers({
     caseUsers,
@@ -307,6 +311,7 @@ export const CaseViewActivity = ({
               userProfiles={userProfiles}
             />
           ) : null}
+
           <EditTags
             tags={caseData.tags}
             onSubmit={onSubmitTags}
@@ -335,6 +340,14 @@ export const CaseViewActivity = ({
             customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomField}
           />
+          {isTemplatesV2Enabled && (
+            <TemplateFields
+              caseData={caseData}
+              onUpdateField={onUpdateField}
+              isLoading={isLoading}
+              loadingKey={loadingKey}
+            />
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

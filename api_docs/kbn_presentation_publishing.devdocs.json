@@ -3874,7 +3874,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>>, options?: { borderlessByDefault: boolean; } | undefined) => ",
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>>) => ",
           "TitleManager"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
@@ -3901,39 +3901,11 @@
               "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "lineNumber": 56,
-            "columnNumber": 3,
+            "lineNumber": 55,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.initializeTitleManager.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "lineNumber": 57,
-            "columnNumber": 13,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.initializeTitleManager.$2.borderlessByDefault",
-                "type": "boolean",
-                "tags": [],
-                "label": "borderlessByDefault",
-                "description": [],
-                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-                "lineNumber": 58,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],

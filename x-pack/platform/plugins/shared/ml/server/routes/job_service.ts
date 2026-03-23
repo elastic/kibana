@@ -848,7 +848,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             end,
             analyzer,
             runtimeMappings,
-            indicesOptions
+            indicesOptions,
+            undefined
           );
 
           return response.ok({

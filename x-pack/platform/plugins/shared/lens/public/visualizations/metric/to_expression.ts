@@ -24,11 +24,11 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import {
   getColorMode,
-  getDefaultConfigForMode,
   getSecondaryLabelSelected,
-  getTrendPalette,
+  getSecondaryTrendPalettes,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
@@ -168,6 +168,12 @@ export const toExpression = (
       ? state.secondaryTrend
       : getDefaultConfigForMode(secondaryDynamicColorMode);
 
+  const secondaryTrendPalettes = getSecondaryTrendPalettes(
+    secondaryDynamicColorMode,
+    secondaryTrendConfig,
+    theme.getTheme()
+  );
+
   const hasMetricIcon = hasIcon(state.icon);
   // If an icon is present but no iconAlign is set (legacy state), default to 'left' alignment;
   // otherwise, use the configured or default alignment
@@ -191,11 +197,8 @@ export const toExpression = (
       secondaryTrendConfig.type === 'dynamic'
         ? getSecondaryDynamicTrendBaselineValue(isMetricNumeric, secondaryTrendConfig.baselineValue)
         : undefined,
-    secondaryTrendPalette: getTrendPalette(
-      secondaryDynamicColorMode,
-      secondaryTrendConfig,
-      theme.getTheme()
-    ),
+    secondaryTrendPalette: secondaryTrendPalettes?.palette,
+    secondaryTrendTextPalette: secondaryTrendPalettes?.textPalette,
     max: state.maxAccessor,
     breakdownBy:
       state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,

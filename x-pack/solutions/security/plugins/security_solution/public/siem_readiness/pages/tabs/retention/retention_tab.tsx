@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type {
   RetentionInfo,
   RetentionStatus,
@@ -36,6 +36,8 @@ import { RetentionWarningPrompt } from './retention_warning_prompt';
 import { buildRetentionCaseDescription, getRetentionCaseTitle } from './retention_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { isRetentionNonCompliant } from '../../../hooks/visibility_status_utils';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
 
@@ -102,6 +104,19 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return result;
   }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
 
+  // Check if any matched items exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  const hasUnfilteredData = useMemo(() => {
+    for (const category of categoriesData?.mainCategoriesMap ?? []) {
+      for (const retention of retentionData?.items ?? []) {
+        const hasMatch = category.indices.some((idx) =>
+          idx.indexName.includes(retention.indexName)
+        );
+        if (hasMatch) return true;
+      }
+    }
+    return false;
+  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
+
   // Count non-compliant items (deduplicated by indexName)
   const nonCompliantStats = useMemo(() => {
     const seen = new Set<string>();
@@ -111,7 +126,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
       for (const item of category.items) {
         if (!seen.has(item.indexName)) {
           seen.add(item.indexName);
-          if (item.status === 'non-compliant') {
+          if (isRetentionNonCompliant(item.status)) {
             nonCompliantCount++;
           }
         }
@@ -137,8 +152,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<RetentionInfoWithStatus>) => {
-    const nonCompliantCount = category.items.filter(
-      (item) => item.status === 'non-compliant'
+    const nonCompliantCount = category.items.filter((item) =>
+      isRetentionNonCompliant(item.status)
     ).length;
 
     const hasIssues = nonCompliantCount > 0;
@@ -414,28 +429,6 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   }
 
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.title', {
-            defaultMessage: 'No data streams found',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.description', {
-              defaultMessage: 'No data streams with security-relevant data were found.',
-            })}
-          </p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -489,6 +482,9 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortField="retentionDays"
         defaultSortDirection="asc"
         itemName="data streams / indices"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

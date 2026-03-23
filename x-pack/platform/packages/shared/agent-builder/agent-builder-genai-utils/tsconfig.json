@@ -33,5 +33,7 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
     "@kbn/esql-language",
+    "@kbn/datemath",
+    "@kbn/es-query",
   ]
 }

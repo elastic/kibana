@@ -23,6 +23,7 @@ import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { LoginPage } from './login_page';
+import { OverlaysPage } from './overlays';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export interface PageObjectsFixtures {
@@ -45,6 +46,7 @@ export interface PageObjects {
   inspector: Inspector;
   lens: LensApp;
   login: LoginPage;
+  overlays: OverlaysPage;
 }
 
 /**
@@ -67,6 +69,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
-    // Add new page objects here
+    overlays: createLazyPageObject(OverlaysPage, fixtures.page),
   };
 }

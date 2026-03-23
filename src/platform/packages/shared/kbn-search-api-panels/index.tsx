@@ -16,5 +16,6 @@ export * from './components/eis_update_callout';
 export * from './components/eis_ccm_promotional_tour';
 export * from './components/eis_ccm_promotional_callout';
 
+export * from './hooks/use_cloud_connect_status';
 export * from './types';
 export * from './utils';

@@ -900,6 +900,13 @@ export class DashboardApp {
     await this.page.locator(editVisualizationConfigurationSelector).click();
   }
 
+  /**
+   * Returns locator for a specific panel by embeddable id.
+   */
+  getPanelByEmbeddableId(id: string) {
+    return this.page.locator(`[data-test-embeddable-id="${id}"]`);
+  }
+
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
   async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Custom visualization' | 'Maps' | 'Links') {
     await this.addTopNavButton.click();

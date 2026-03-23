@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// GCS bucket
-export const GCS_BUCKET = 'obs-ai-datasets';
-export const GCS_BUCKET_FOLDER = 'sigevents';
+export const GCS_BUCKET = 'significant-events-datasets';
 
 // Wait times
 export const BASELINE_WAIT_MS = 3 * 60 * 1000;
@@ -19,7 +17,7 @@ export const POD_READY_POLL_INTERVAL_MS = 5_000;
 
 // OTel Demo namespace
 export const OTEL_DEMO_NAMESPACE = 'otel-demo';
-export const OTEL_DEMO_GCS_BASE_PATH_PREFIX = `${GCS_BUCKET_FOLDER}/${OTEL_DEMO_NAMESPACE}`;
+export const OTEL_DEMO_GCS_BASE_PATH_PREFIX = OTEL_DEMO_NAMESPACE;
 
 // OTel Demo scenarios
 export const SCENARIOS = [
