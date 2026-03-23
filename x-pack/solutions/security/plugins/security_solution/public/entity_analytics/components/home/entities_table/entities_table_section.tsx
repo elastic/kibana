@@ -309,9 +309,11 @@ const DataTableWithLocalPagination = ({
       // first would remove the match_phrase, causing it to return undefined.
       const rawFilters = mergedFilters.map(groupFilterMap).filter(filterTypeGuard);
       const resolutionQueryFilter = buildResolutionGroupFilter(rawFilters);
-      // Preserve non-resolution filters (e.g., entity type from parent group)
+      // Preserve non-resolution filters (e.g., entity type from parent group).
+      // Use meta.key to exclude ALL filter shapes targeting resolved_to —
+      // @kbn/grouping generates both match_phrase and script filters per group.
       const nonResolutionFilters = rawFilters
-        .filter((f) => !f?.query?.match_phrase?.[ENTITY_FIELDS.RESOLVED_TO])
+        .filter((f) => f?.meta?.key !== ENTITY_FIELDS.RESOLVED_TO)
         .map(getDataGridFilter)
         .filter((f): f is NonNullable<Filter['query']> => Boolean(f));
       return [...(resolutionQueryFilter ?? []), ...nonResolutionFilters];

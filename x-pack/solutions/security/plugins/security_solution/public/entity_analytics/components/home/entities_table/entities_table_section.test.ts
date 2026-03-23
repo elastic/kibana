@@ -14,7 +14,10 @@ import {
   groupFilterMap,
 } from './entities_table_section';
 
-const createFilter = (query: Filter['query']): Filter => ({ query, meta: {} });
+const createFilter = (query: Filter['query'], metaKey?: string): Filter => ({
+  query,
+  meta: metaKey ? { key: metaKey } : {},
+});
 
 describe('transformResolutionFilter', () => {
   it('transforms match_phrase on resolved_to into bool/should', () => {
@@ -230,11 +233,15 @@ describe('groupFilterMap', () => {
 });
 
 describe('resolution filter pipeline regression', () => {
-  const resolutionMatchPhraseFilter = createFilter({
-    match_phrase: {
-      [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-entity-id' },
+  // @kbn/grouping sets meta.key to the grouped field on all generated filters
+  const resolutionMatchPhraseFilter = createFilter(
+    {
+      match_phrase: {
+        [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-entity-id' },
+      },
     },
-  });
+    ENTITY_FIELDS.RESOLVED_TO
+  );
 
   it('buildResolutionGroupFilter works with raw match_phrase filters', () => {
     const rawFilters = [resolutionMatchPhraseFilter]
@@ -279,9 +286,11 @@ describe('resolution filter pipeline regression', () => {
     expect(resolutionQueryFilter?.[0].bool.should).toHaveLength(2);
 
     // Entity type filter is NOT included in resolutionQueryFilter — it must be
-    // preserved separately by the caller (DataTableWithLocalPagination)
+    // preserved separately by the caller (DataTableWithLocalPagination).
+    // In production, @kbn/grouping sets meta.key to the grouped field, so
+    // non-resolution filters are identified by meta.key !== RESOLVED_TO.
     const nonResolutionFilters = rawFilters.filter(
-      (f) => !f?.query?.match_phrase?.[ENTITY_FIELDS.RESOLVED_TO]
+      (f) => f?.meta?.key !== ENTITY_FIELDS.RESOLVED_TO
     );
     expect(nonResolutionFilters).toHaveLength(1);
     expect(nonResolutionFilters[0].query).toEqual({
