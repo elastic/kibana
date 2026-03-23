@@ -25,13 +25,12 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
 
   const { value: result, loading } = useAsync(async () => {
     if (!inference) {
-      const connectors: InferenceConnector[] = [];
-      return { connectors, anonymizationEnabled: false };
+      return [] as InferenceConnector[];
     }
     return inference.getConnectors();
   }, [inference]);
 
-  const connectors = result?.connectors ?? [];
+  const connectors = result ?? [];
 
   return {
     connectors,

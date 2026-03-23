@@ -53,7 +53,7 @@ export const useInferenceConnectors = () => {
     if (!inferenceConnectorsResult) {
       return [];
     }
-    return inferenceConnectorsResult.connectors.map(inferenceConnectorToActionConnector);
+    return inferenceConnectorsResult.map(inferenceConnectorToActionConnector);
   }, [inferenceConnectorsResult]);
 
   return {
