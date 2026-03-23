@@ -171,7 +171,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
-      const [logsResult, metricsResult] = await Promise.all([
+      const [logsResult, metricsResult] = await Promise.allSettled([
         elasticsearch.client.asCurrentUser.search({
           index: ['logs-*', 'logs.*'],
           ignore_unavailable: true,
@@ -192,8 +192,18 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         }),
       ]);
 
-      const hasLogs = (logsResult.hits.total as estypes.SearchTotalHits).value > 0;
-      const hasMetrics = (metricsResult.hits.total as estypes.SearchTotalHits).value > 0;
+      const resolveProbe = (result: PromiseSettledResult<estypes.SearchResponse>): boolean => {
+        if (result.status === 'fulfilled') {
+          return (result.value.hits.total as estypes.SearchTotalHits).value > 0;
+        }
+        if (isNoShardsAvailableError(result.reason)) {
+          return false;
+        }
+        throwHasDataSearchError(result.reason);
+      };
+
+      const hasLogs = resolveProbe(logsResult);
+      const hasMetrics = resolveProbe(metricsResult);
 
       return {
         hasData: hasLogs || hasMetrics,

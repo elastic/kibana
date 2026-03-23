@@ -97,47 +97,47 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
     const { start, osType } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
-    try {
-      const filters: estypes.QueryDslQueryContainer[] = [
-        { range: { '@timestamp': { gte: start } } },
-      ];
-      if (osType) {
-        filters.push({ term: { 'host.os.type': osType } });
-      }
-      const query: estypes.QueryDslQueryContainer = {
-        bool: { filter: filters },
-      };
-
-      const [logsResult, metricsResult] = await Promise.all([
-        elasticsearch.client.asCurrentUser.search({
-          index: ['logs-*.otel-*', 'logs.otel', 'logs.otel.*'],
-          ignore_unavailable: true,
-          allow_partial_search_results: true,
-          size: 0,
-          terminate_after: 1,
-          query,
-        }),
-        elasticsearch.client.asCurrentUser.search({
-          index: ['metrics-*.otel-*'],
-          ignore_unavailable: true,
-          allow_partial_search_results: true,
-          size: 0,
-          terminate_after: 1,
-          query,
-        }),
-      ]);
-
-      const hasLogs = (logsResult.hits.total as estypes.SearchTotalHits).value > 0;
-      const hasMetrics = (metricsResult.hits.total as estypes.SearchTotalHits).value > 0;
-
-      return { hasData: hasLogs || hasMetrics };
-    } catch (error) {
-      if (isNoShardsAvailableError(error)) {
-        return { hasData: false };
-      }
-
-      throwHasDataSearchError(error);
+    const filters: estypes.QueryDslQueryContainer[] = [{ range: { '@timestamp': { gte: start } } }];
+    if (osType) {
+      filters.push({ term: { 'host.os.type': osType } });
     }
+    const query: estypes.QueryDslQueryContainer = {
+      bool: { filter: filters },
+    };
+
+    const [logsResult, metricsResult] = await Promise.allSettled([
+      elasticsearch.client.asCurrentUser.search({
+        index: ['logs-*.otel-*', 'logs.otel', 'logs.otel.*'],
+        ignore_unavailable: true,
+        allow_partial_search_results: true,
+        size: 0,
+        terminate_after: 1,
+        query,
+      }),
+      elasticsearch.client.asCurrentUser.search({
+        index: ['metrics-*.otel-*'],
+        ignore_unavailable: true,
+        allow_partial_search_results: true,
+        size: 0,
+        terminate_after: 1,
+        query,
+      }),
+    ]);
+
+    const resolveProbe = (result: PromiseSettledResult<estypes.SearchResponse>): boolean => {
+      if (result.status === 'fulfilled') {
+        return (result.value.hits.total as estypes.SearchTotalHits).value > 0;
+      }
+      if (isNoShardsAvailableError(result.reason)) {
+        return false;
+      }
+      throwHasDataSearchError(result.reason);
+    };
+
+    const hasLogs = resolveProbe(logsResult);
+    const hasMetrics = resolveProbe(metricsResult);
+
+    return { hasData: hasLogs || hasMetrics };
   },
 });
 

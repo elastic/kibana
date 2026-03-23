@@ -62,13 +62,6 @@ const HOST_COMMAND = i18n.translate(
 const FETCH_INTERVAL = 2000;
 const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
-// Used to scope time-window detection to the user's OS and avoid false positives from other hosts.
-const OS_TYPE_MAP: Record<string, string> = {
-  linux: 'linux',
-  mac: 'darwin',
-  windows: 'windows',
-};
-
 export const OtelLogsPanel: React.FC = () => {
   useFlowBreadcrumb({
     text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
@@ -128,7 +121,6 @@ export const OtelLogsPanel: React.FC = () => {
     flowType: 'otel_logs',
     onboardingId: setupData?.onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
-    extraQueryParams: { osType: OS_TYPE_MAP[selectedTab] },
   });
 
   const isMetricsOnboardingEnabled = usePricingFeature(

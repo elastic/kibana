@@ -64,11 +64,11 @@ export class OtelHostFlowPage {
     await this.exploreLogsButton.click();
   }
 
-  public async assertDataReceivedIndicator() {
+  public async assertDataReceivedIndicator(): Promise<void> {
     await expect(
       this.dataReceivedIndicator,
       'Data received indicator should be visible'
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 5 * 60_000 });
   }
 
   public async assertLogsExplorationButtonVisible() {

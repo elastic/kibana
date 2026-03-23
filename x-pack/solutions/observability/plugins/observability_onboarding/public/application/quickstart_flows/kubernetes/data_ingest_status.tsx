@@ -41,6 +41,7 @@ export function DataIngestStatus({
 }: Props) {
   const [checkDataStartTime] = useState(Date.now());
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
+  const [dataReceivedNotified, setDataReceivedNotified] = useState(false);
   const {
     services: { analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
@@ -91,10 +92,11 @@ export function DataIngestStatus({
   // This drives the step status to 'complete' and must wait for metrics
   // if any action link requires them.
   useEffect(() => {
-    if (isReady) {
+    if (isReady && !dataReceivedNotified) {
       onDataReceived?.();
+      setDataReceivedNotified(true);
     }
-  }, [isReady, onDataReceived]);
+  }, [isReady, onDataReceived, dataReceivedNotified]);
 
   const isTroubleshootingVisible =
     hasData === false && Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
