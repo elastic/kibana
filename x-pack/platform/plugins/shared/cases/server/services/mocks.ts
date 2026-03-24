@@ -15,6 +15,8 @@ import type {
   ConnectorMappingsService,
   AttachmentService,
   TemplatesService,
+  CaseTaskService,
+  CaseTaskTemplateService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { LicensingService } from './licensing';
@@ -46,6 +48,8 @@ export type AttachmentServiceMock = jest.Mocked<AttachmentService & AttachmentSe
 export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
+export type CaseTaskServiceMock = jest.Mocked<CaseTaskService>;
+export type CaseTaskTemplateServiceMock = jest.Mocked<CaseTaskTemplateService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -233,4 +237,35 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as TemplatesServiceMock;
+};
+
+export const createCaseTaskServiceMock = (): CaseTaskServiceMock => {
+  const service: PublicMethodsOf<CaseTaskService> = lazyObject({
+    createTask: jest.fn(),
+    bulkCreateTasks: jest.fn(),
+    getTask: jest.fn(),
+    getTasksByCase: jest.fn(),
+    findTasks: jest.fn(),
+    getMyTasks: jest.fn(),
+    updateTask: jest.fn(),
+    bulkUpdateTasks: jest.fn(),
+    deleteTask: jest.fn(),
+    bulkDeleteTasks: jest.fn(),
+    reorderTasks: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskServiceMock;
+};
+
+export const createCaseTaskTemplateServiceMock = (): CaseTaskTemplateServiceMock => {
+  const service: PublicMethodsOf<CaseTaskTemplateService> = lazyObject({
+    createTemplate: jest.fn(),
+    getTemplate: jest.fn(),
+    findTemplates: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+    applyTemplate: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskTemplateServiceMock;
 };

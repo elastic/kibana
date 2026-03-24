@@ -35,6 +35,8 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
+export const CASE_TASK_SAVED_OBJECT = 'cases-tasks' as const;
+export const CASE_TASK_TEMPLATE_SAVED_OBJECT = 'cases-task-templates' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -107,6 +109,26 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
 export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
+
+/**
+ * Task routes
+ */
+export const CASES_TASKS_URL = `${CASES_URL}/tasks` as const;
+export const CASE_TASKS_URL = `${CASE_DETAILS_URL}/tasks` as const;
+export const CASE_TASK_DETAILS_URL = `${CASE_TASKS_URL}/{task_id}` as const;
+export const CASE_TASKS_BULK_CREATE_URL = `${CASE_TASKS_URL}/_bulk_create` as const;
+export const CASE_TASKS_BULK_UPDATE_URL = `${CASE_TASKS_URL}/_bulk_update` as const;
+export const CASE_TASKS_BULK_DELETE_URL = `${CASE_TASKS_URL}/_bulk_delete` as const;
+export const CASE_TASKS_REORDER_URL = `${CASE_TASKS_URL}/_reorder` as const;
+export const CASE_TASKS_APPLY_TEMPLATE_URL = `${CASE_TASKS_URL}/_apply_template` as const;
+export const CASES_TASKS_MY_URL = `${CASES_TASKS_URL}/_my` as const;
+export const CASES_TASKS_FIND_URL = `${CASES_TASKS_URL}/_find` as const;
+
+/**
+ * Task template routes
+ */
+export const CASES_TASK_TEMPLATES_URL = `${CASES_URL}/task_templates` as const;
+export const CASE_TASK_TEMPLATE_DETAILS_URL = `${CASES_TASK_TEMPLATES_URL}/{template_id}` as const;
 
 export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
 export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;

@@ -46,6 +46,11 @@ export enum ReadOperations {
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
   GetUserActionUsers = 'getUserActionUsers',
+  // Task operations
+  GetTask = 'getTask',
+  FindTasks = 'findTasks',
+  GetTaskTemplate = 'getTaskTemplate',
+  FindTaskTemplates = 'findTaskTemplates',
 }
 
 /**
@@ -65,6 +70,15 @@ export enum WriteOperations {
   UpdateConfiguration = 'updateConfiguration',
   ReopenCase = 'reopenCase',
   AssignCase = 'assignCase',
+  // Task operations
+  CreateTask = 'createTask',
+  UpdateTask = 'updateTask',
+  DeleteTask = 'deleteTask',
+  ReorderTasks = 'reorderTasks',
+  ApplyTaskTemplate = 'applyTaskTemplate',
+  CreateTaskTemplate = 'createTaskTemplate',
+  UpdateTaskTemplate = 'updateTaskTemplate',
+  DeleteTaskTemplate = 'deleteTaskTemplate',
 }
 
 /**

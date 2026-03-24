@@ -155,6 +155,14 @@ export const OBSERVABLES = i18n.translate('xpack.cases.caseView.userActions.obse
   defaultMessage: 'Observables',
 });
 
+export const TASK = i18n.translate('xpack.cases.caseView.userActions.task', {
+  defaultMessage: 'Task',
+});
+
+export const TASK_TEMPLATE = i18n.translate('xpack.cases.caseView.userActions.taskTemplate', {
+  defaultMessage: 'Task Template',
+});
+
 export const USER_ACTION_EDITED = (type: string) =>
   i18n.translate('xpack.cases.caseView.userActions.edited', {
     values: { type },
