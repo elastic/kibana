@@ -190,6 +190,7 @@ describe('tab_state_data_view actions', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideTable: false,
         })
       );
       await params.internalState.dispatch(
@@ -203,6 +204,7 @@ describe('tab_state_data_view actions', () => {
           rowHeight: true,
           breakdownField: true,
           hideChart: true,
+          hideTable: true,
         })
       );
     });
