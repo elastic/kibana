@@ -782,34 +782,6 @@ async function createLargeWiredHierarchyViaImport(
   );
 }
 
-/**
- * Create a large wired stream hierarchy under the root wired stream.
- *
- * @param strategy - 'fork' for serial fork (Phase 5A, safe for ~100 children)
- *                   'import' for content pack bulk import (Phase 5B, scales to 1000+)
- * @param count - Number of child streams to create
- */
-export async function createLargeWiredHierarchy(
-  kibanaServer: KibanaServer,
-  es: Client,
-  log: ToolingLog,
-  options: { count?: number; strategy?: WiredHierarchyStrategy } = {}
-) {
-  const { count = DEFAULT_WIRED_HIERARCHY_COUNT, strategy = 'import' } = options;
-
-  const maxShardsPerNode = count * 4;
-  await es.cluster.putSettings({
-    persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
-  });
-  log.info(`Raised cluster.max_shards_per_node to ${maxShardsPerNode}`);
-
-  if (strategy === 'fork') {
-    await createLargeWiredHierarchyViaFork(kibanaServer, log, WIRED_ROOT_STREAM, count);
-  } else {
-    await createLargeWiredHierarchyViaImport(kibanaServer, log, WIRED_ROOT_STREAM, count);
-  }
-}
-
 /** Setup for the large wired hierarchy journey. */
 export async function setupLargeWiredHierarchy(
   kibanaServer: KibanaServer,
