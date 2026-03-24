@@ -132,7 +132,7 @@ export const generateLeadsRoute = (
 
           const fetchStart = Date.now();
           const entityRecords = await fetchAllEntityStoreRecords(esClient, spaceId, logger);
-          logger.info(
+          logger.debug(
             `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
               entityRecords.length
             } records)`
@@ -157,7 +157,7 @@ export const generateLeadsRoute = (
 
           const generateStart = Date.now();
           const leads = await engine.generateLeads(leadEntities, { chatModel });
-          logger.info(
+          logger.debug(
             `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
               leads.length
             } leads)`
@@ -177,13 +177,13 @@ export const generateLeadsRoute = (
             executionId,
             logger
           );
-          logger.info(
+          logger.debug(
             `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
               formattedLeads.length
             } leads to "${generationMode}" index)`
           );
 
-          logger.info(`[LeadGeneration][Telemetry] Total route: ${Date.now() - routeStart}ms`);
+          logger.debug(`[LeadGeneration][Telemetry] Total route: ${Date.now() - routeStart}ms`);
 
           return response.ok({ body: { leads: formattedLeads, total: formattedLeads.length } });
         } catch (e) {
