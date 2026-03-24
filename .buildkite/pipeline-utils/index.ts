@@ -11,6 +11,7 @@ export * from './agent_images';
 export * from './buildkite';
 export * as CiStats from './ci-stats';
 export * from './github';
+export * from './moon';
 export * as TestFailures from './test-failures';
 export * from './utils';
 export * from './pr_labels';

@@ -23,7 +23,7 @@ import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
-  doAllChangesMatch,
+  getAffectedMoonDirectoryTargets,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
@@ -87,24 +87,27 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     const allSolutions = ['observability', 'search', 'security', 'workplaceai'];
-    const platformPaths = new RegExp(`^(src/|x-pack/platform/|x-pack/solutions/)`);
-    const allChangesUnderPlatformOrSolutions = await doAllChangesMatch(platformPaths);
+    try {
+      const affectedSolutions = await getAffectedMoonDirectoryTargets(
+        allSolutions.map((solution) => ({
+          name: solution,
+          sourceRootPrefix: `x-pack/solutions/${solution}/`,
+        }))
+      );
 
-    if (allChangesUnderPlatformOrSolutions) {
-      const modifiedSolutions = [];
-      for (const solution of allSolutions) {
-        if (await doAnyChangesMatch([new RegExp(`^x-pack/solutions/${solution}/`)])) {
-          modifiedSolutions.push(solution);
-        }
-      }
-      if (modifiedSolutions.length > 0 && modifiedSolutions.length < allSolutions.length) {
+      if (affectedSolutions.length > 0 && affectedSolutions.length < allSolutions.length) {
         execFileSync('buildkite-agent', [
           'meta-data',
           'set',
           'limit_test_groups_by_solution',
-          modifiedSolutions.join(','),
+          affectedSolutions.join(','),
         ]);
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : `${error}`;
+      console.warn(
+        `Unable to determine affected solution targets from Moon, running full set: ${message}`
+      );
     }
 
     if (prHasFIPSLabel()) {
