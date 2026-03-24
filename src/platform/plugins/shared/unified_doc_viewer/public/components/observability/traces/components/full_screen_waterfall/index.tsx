@@ -21,6 +21,7 @@ import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
@@ -34,6 +35,8 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
+  highlightedSpanId?: string;
+  scrollToHighlightedOnMount?: boolean;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: DocumentType | null;
@@ -51,6 +54,8 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
+  highlightedSpanId: initialHighlightedSpanId,
+  scrollToHighlightedOnMount,
   docId,
   docIndex,
   activeFlyoutType,
@@ -137,10 +142,9 @@ export const FullScreenWaterfall = ({
     };
   }, []);
 
-  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
-    setScrollElement(node);
-  }, []);
+  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(
+    initialHighlightedSpanId
+  );
 
   // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
   // disable the flyout open animation at mount time.
@@ -148,10 +152,7 @@ export const FullScreenWaterfall = ({
   const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
 
   useEffect(() => {
-    if (skipOpenAnimation) {
-      setIsWaterfallReady(true);
-      return;
-    }
+    if (skipOpenAnimation) return;
 
     const timerId = window.setTimeout(() => {
       setIsWaterfallReady(true);
@@ -198,17 +199,43 @@ export const FullScreenWaterfall = ({
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
-        {isWaterfallReady && scrollElement ? (
-          <FullTraceWaterfall
-            traceId={traceId}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            serviceName={serviceName}
-            scrollElement={scrollElement}
-            onNodeClick={onNodeClick}
-            onErrorClick={onErrorClick}
-          />
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflow,
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+          .euiFlyoutBody__overflow {
+            overflow: hidden;
+          }
+        `}
+      >
+        {isWaterfallReady ? (
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+            `}
+          >
+            <FullTraceWaterfall
+              traceId={traceId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceName={serviceName}
+              highlightedSpanId={highlightedSpanId}
+              scrollToHighlightedOnMount={scrollToHighlightedOnMount}
+              scrollStrategy="parent"
+              onNodeClick={(nodeSpanId) => {
+                setHighlightedSpanId(nodeSpanId);
+                onNodeClick(nodeSpanId);
+              }}
+              onErrorClick={(params) => {
+                setHighlightedSpanId(params.errorCount > 1 ? params.docId : undefined);
+                onErrorClick(params);
+              }}
+            />
+          </div>
         ) : (
           <EuiSkeletonText lines={4} />
         )}
@@ -222,7 +249,10 @@ export const FullScreenWaterfall = ({
           traceId={traceId}
           dataView={dataView}
           dataTestSubj="traceWaterfallDocumentFlyout"
-          onCloseFlyout={onCloseFlyout}
+          onCloseFlyout={() => {
+            setHighlightedSpanId(undefined);
+            onCloseFlyout();
+          }}
           activeSection={activeSection}
         />
       ) : null}
