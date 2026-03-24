@@ -368,20 +368,20 @@ These are already in state. Do NOT re-create them. Insert your processors AFTER 
 <review_iteration>
 If \`<review_feedback>\` is present, you are in review-iteration mode:
 - The full pipeline is in \`<current_pipeline>\` at the **end** of the user message — use it; do **not** call \`fetch_pipeline\` for routine fixes
-- Read each review issue — make targeted \`modify_pipeline\` changes (replace/remove by index from that JSON)
+- Read each review issue — make targeted \`modify_pipeline\` changes using exact indices from that JSON. Use one action type per call (e.g. all replaces in one call, then removes in a separate call if needed).
 - After fixes, call \`validate_pipeline\`
 - Describe what you changed per issue and the final validation result
 </review_iteration>
 
 <tools>
-- **modify_pipeline**: Modify the pipeline in state by inserting, replacing, or removing processors. Accepts a **batch** of operations in one call.
-  - **Batching**: Aim for a **middle ground** — combine **2–4 logical steps** per call (e.g. core parser + first renames, or a chunk of ECS renames + date + cleanup), not one tiny change per call and not the entire pipeline in one enormous batch unless you are very confident. Fewer calls saves tokens.
-  - **Indices**: Every \`index\` refers to the pipeline **before** this batch (the original snapshot). All operations are resolved in a **single pass** — no index drift between operations. You never need to account for how one operation shifts another's index. Mix inserts, replaces, and removes freely in any order.
-  - \`insert\`: inserts processor(s) AFTER the given index. Use index -1 to insert at position 0.
+- **modify_pipeline**: Modify the pipeline in state by inserting, replacing, or removing processors.
+  - **One action type per call**: Every operation in a single call MUST use the same \`action\` (all \`insert\`, all \`replace\`, or all \`remove\`). Mixed-action calls are rejected. If you need inserts AND replaces, make two separate calls.
+  - **Indices**: Every \`index\` refers to the pipeline **before** this call (the original snapshot). All operations of the same type are resolved in a single pass — no index drift between operations of the same action within one call.
+  - \`insert\`: inserts processor(s) AFTER the given index. Use index -1 to insert at position 0. Multiple inserts in one call are all relative to the original snapshot — they do not shift each other.
   - \`replace\`: replaces the processor at the given index with the provided processor(s).
   - \`remove\`: removes the processor at the given index.
   - **Output**: After applying changes, runs **quick ingest simulation on all samples** (not persisted) — success rate, example outputs, grouped errors — plus a **compact** custom-processor TOC. Use that feedback to iterate; **validate_pipeline** still does ECS checks and persists results.
-  - Example: \`{ "operations": [{ "action": "insert", "index": 2, "processors": [{"grok": {...}}] }] }\`
+  - Example (inserts only): \`{ "operations": [{ "action": "insert", "index": 2, "processors": [{"grok": {...}}] }, { "action": "insert", "index": 2, "processors": [{"date": {...}}] }] }\`
 - **test_pipeline**: **Optional / last-resort.** Simulates a **scratch** pipeline: standard boilerplate + the \`processors\` array you pass. Runs against **all** log samples. Does **not** read \`current_pipeline\` from state and does **not** persist anything — use to compare candidate processors (e.g. alternate grok patterns) when stuck, then apply the winner with \`modify_pipeline\`.
   - \`processors\` (required): non-empty array of processor object(s) to append after boilerplate.
   - \`errors_only\` (boolean, default false): Only return error information, skip successful output examples.
@@ -512,12 +512,12 @@ The pipeline follows this exact processor order. Items marked [PRE-SEEDED] are a
 
 <workflow>
 ## Primary path: modify_pipeline → validate_pipeline
-Build the pipeline with \`modify_pipeline\`, **batching several related operations per call** when possible. Each response includes **quick simulation** (all samples) — use it to see parse quality and errors without waiting for \`validate_pipeline\`.
+Build the pipeline with \`modify_pipeline\`. Each call must use a **single action type** (all inserts, all replaces, or all removes). Each response includes **quick simulation** (all samples) — use it to see parse quality and errors without waiting for \`validate_pipeline\`.
 
-Typical progression (often **2–4 modify_pipeline calls** total, not dozens):
-1. **Parsing + early structure** — One batch: main parser(s) after index 2, optionally immediate supporting processors (e.g. one gsub before kv).
-2. **Mapping + types + events** — Next batch(es): date/convert, ECS renames, namespaced fields, event.* / related.*, cleanup \`remove\`. Group what you can while indices stay predictable.
-3. **Fixups** — Smaller batches only when fixing a specific failure; use simulation lines from the last \`modify_pipeline\` to decide.
+Typical progression (often **3–5 modify_pipeline calls** total, not dozens):
+1. **Parsing** — Insert the main parser(s) after index 2 (all \`insert\` in one call).
+2. **Mapping + types + events** — Insert date/convert, ECS renames, namespaced fields, event.* / related.*, cleanup \`remove\` (group inserts into one call, then a separate \`remove\` call if needed).
+3. **Fixups** — Targeted \`replace\` or \`remove\` calls to fix specific failures; use the compact TOC from the last call to identify exact indices. Keep fixups as a single action type per call.
 
 ### Efficiency Rules
 - Fewest processors possible for best success rate
