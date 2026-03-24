@@ -19,7 +19,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import type { UnifiedDataTableSettings, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -460,7 +460,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [filteredDataView]
   );
 
-  const handleInitialStateChange = useCallback((state: Partial<{ isCompareActive: boolean }>) => {
+  const handleInitialStateChange = useCallback((state: Partial<UnifiedDataTableRestorableState>) => {
     if (state.isCompareActive !== undefined) {
       setIsCompareActive(state.isCompareActive);
     }
