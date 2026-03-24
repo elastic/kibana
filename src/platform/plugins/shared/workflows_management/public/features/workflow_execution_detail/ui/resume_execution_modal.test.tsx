@@ -99,6 +99,33 @@ describe('ResumeExecutionModal', () => {
       renderWithProviders(defaultProps);
       expect(screen.getByTestId('editorValue')).toHaveTextContent('{}');
     });
+
+    it('should initialize with serialised stepContext when provided', () => {
+      const schema = z.object({ approved: z.boolean() });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          stepContext: { approved: true } as Partial<StepContext>,
+        },
+      });
+      // toHaveTextContent normalises whitespace, so check for the key content
+      expect(screen.getByTestId('editorValue')).toHaveTextContent('"approved": true');
+    });
+
+    it('should fall back to empty object when initialcontextOverride has undefined stepContext', () => {
+      const schema = z.object({ approved: z.boolean() });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          stepContext: undefined as unknown as Partial<StepContext>,
+        },
+      });
+      // undefined stepContext must not produce "null" or cause the editor to be empty —
+      // it must fall back to '{}'.
+      expect(screen.getByTestId('editorValue')).toHaveTextContent('{}');
+    });
   });
 
   describe('submit behavior', () => {

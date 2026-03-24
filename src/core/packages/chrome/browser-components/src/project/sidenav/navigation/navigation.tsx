@@ -23,7 +23,7 @@ import { PanelStateManager } from './panel_state_manager';
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
   setWidth: (width: number) => void;
-  onToggleCollapsed: (isCollapsed: boolean) => void;
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {

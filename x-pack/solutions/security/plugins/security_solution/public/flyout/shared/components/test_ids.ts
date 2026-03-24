@@ -22,10 +22,6 @@ export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
   `${FLYOUT_NAVIGATION_TEST_ID}CollapseDetailButton` as const;
 export const HEADER_ACTIONS_TEST_ID = `${FLYOUT_NAVIGATION_TEST_ID}Actions` as const;
 
-export const TITLE_HEADER_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Icon`;
-export const TITLE_HEADER_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
-export const TITLE_LINK_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}LinkIcon`;
-
 /* History */
 export const FLYOUT_HISTORY_TEST_ID = `${PREFIX}History` as const;
 export const HISTORY_ROW_LOADING_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}RowLoading` as const;
