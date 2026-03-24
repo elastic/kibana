@@ -78,7 +78,7 @@ Both capture and restore scripts need `manage` privilege on `.kibana_*` system i
 # Create a user "test" with the system_indices_superuser role
 curl -u elastic:changeme -X POST "http://localhost:9200/_security/user/<username>" \
   -H 'Content-Type: application/json' -d '{
-  "password": <password>,
+  "password": "<password>",
   "roles": ["system_indices_superuser"]
 }'
 ```

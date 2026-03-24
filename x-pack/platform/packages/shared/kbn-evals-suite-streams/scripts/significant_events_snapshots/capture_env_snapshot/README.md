@@ -25,10 +25,6 @@ node scripts/capture_sigevents_env_snapshot.js \
   --snapshot-name my-snapshot \
   --run-id <run-id> \
   --indices <custom-logs-index> \
-  --indices .internal.alerts-streams.alerts-default-* \
-  --system-indices .kibana_streams_features-* \
-  --system-indices .kibana_streams_assets-* \
-  --system-indices .kibana_streams_insights-*
 ```
 
 ### Flags
@@ -81,7 +77,7 @@ Both capture and restore scripts need `manage` privilege on `.kibana_*` system i
 ```bash
 curl -u elastic:changeme -X POST "http://localhost:9200/_security/user/<username>" \
   -H 'Content-Type: application/json' -d '{
-  "password": <password>,
+  "password": "<password>",
   "roles": ["system_indices_superuser"]
 }'
 ```
