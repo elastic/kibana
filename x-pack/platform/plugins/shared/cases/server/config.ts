@@ -63,6 +63,9 @@ export const ConfigSchema = schema.object({
   templates: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  tasks: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 
