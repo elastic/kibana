@@ -9,7 +9,8 @@ Adding a new filter/tag requires updates in multiple places:
 3. **UI hover evaluation** (frontend expression evaluator — enables hover tooltips)
 4. **Autocompletion** (UI suggestions in Monaco editor)
 5. **Foreach schema awareness** (if the filter changes the output type, e.g. object → array)
-6. **OSS contribution** (optional, recommended)
+6. **Tests** (server-side and schema tests)
+7. **OSS contribution** (optional, recommended)
 
 ## Step 1: Register in the Engine
 
