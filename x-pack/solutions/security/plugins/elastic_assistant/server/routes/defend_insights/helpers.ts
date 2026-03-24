@@ -27,6 +27,7 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Moment } from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceConnector } from '@kbn/inference-common';
 import moment from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -421,6 +422,7 @@ export const invokeDefendInsightsGraph = async ({
   insightType,
   endpointIds,
   actionsClient,
+  getInferenceConnectorById,
   anonymizationFields,
   apiConfig,
   connectorTimeout,
@@ -439,6 +441,7 @@ export const invokeDefendInsightsGraph = async ({
   insightType: DefendInsightType;
   endpointIds: string[];
   actionsClient: PublicMethodsOf<ActionsClient>;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
   connectorTimeout: number;
@@ -495,7 +498,7 @@ export const invokeDefendInsightsGraph = async ({
 
   const defendInsightsPrompts = await getDefendInsightsPrompt({
     type: insightType,
-    actionsClient,
+    getInferenceConnectorById,
     connectorId: apiConfig.connectorId,
     model,
     provider: llmType,
