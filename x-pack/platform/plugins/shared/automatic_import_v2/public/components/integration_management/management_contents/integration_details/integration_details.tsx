@@ -143,7 +143,7 @@ export const IntegrationDetails = React.memo(() => {
                         isInvalid={field.errors.length > 0}
                         fullWidth
                         css={styles.formField}
-                        data-test-subj="integrationTitleInput"
+                        data-test-subj="integrationTitleInputV2"
                       />
                     </EuiFormRow>
                   )}
@@ -163,7 +163,7 @@ export const IntegrationDetails = React.memo(() => {
                         fullWidth
                         isInvalid={field.errors.length > 0}
                         css={styles.formField}
-                        data-test-subj="integrationDescriptionInput"
+                        data-test-subj="integrationDescriptionInputV2"
                       />
                     </EuiFormRow>
                   )}
@@ -187,7 +187,7 @@ export const IntegrationDetails = React.memo(() => {
                         onChange={(files) => processLogoFile(files, field, setLogoError)}
                         isInvalid={!!logoError}
                         css={styles.formField}
-                        data-test-subj="integrationLogoFilePicker"
+                        data-test-subj="integrationLogoFilePickerV2"
                       />
                     </EuiFormRow>
                   )}

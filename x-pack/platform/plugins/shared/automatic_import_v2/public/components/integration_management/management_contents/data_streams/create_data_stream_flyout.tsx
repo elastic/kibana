@@ -366,7 +366,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 onChange={(e) => field.setValue(e.target.value)}
                 isInvalid={field.errors.length > 0}
                 placeholder=""
-                data-test-subj="dataStreamTitleInput"
+                data-test-subj="dataStreamTitleInputV2"
                 css={styles.formField}
                 fullWidth
               />
@@ -387,7 +387,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 onChange={(e) => field.setValue(e.target.value)}
                 isInvalid={field.errors.length > 0}
                 placeholder=""
-                data-test-subj="dataStreamDescriptionInput"
+                data-test-subj="dataStreamDescriptionInputV2"
                 css={styles.formField}
                 fullWidth
               />
