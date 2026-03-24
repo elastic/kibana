@@ -14,7 +14,7 @@ import {
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
 } from './test_ids';
-import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_same_source_event';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -26,7 +26,7 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 
 const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
-jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
