@@ -255,7 +255,7 @@ describe('UiActionsService', () => {
       expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
       expect(await service2.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
 
-      service2.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action2', async () => testAction2);
+      service1.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action2', async () => testAction2);
 
       expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(2);
       expect(await service2.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
