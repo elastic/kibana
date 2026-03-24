@@ -9,10 +9,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createLeadGenerationEngine } from './lead_generation_engine';
 import type { LeadEntity, Observation, ObservationModule } from '../types';
 
-jest.mock('./llm_synthesize', () => ({
-  llmSynthesizeLeadContent: jest.fn(),
-}));
-
 const createMockEntity = (type: string, name: string): LeadEntity => ({
   record: { entity: { id: `euid-${name}`, name, type } } as never,
   type,

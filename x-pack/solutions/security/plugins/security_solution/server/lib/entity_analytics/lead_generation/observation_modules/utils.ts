@@ -31,9 +31,15 @@ export const extractIsPrivileged = (entity: LeadEntity): boolean => {
 };
 
 /** Groups entities by their type field. */
-export const groupEntitiesByType = (entities: LeadEntity[]): Map<string, LeadEntity[]> =>
-  entities.reduce((map, e) => {
-    const existing = map.get(e.type) ?? [];
-    map.set(e.type, [...existing, e]);
-    return map;
-  }, new Map<string, LeadEntity[]>());
+export const groupEntitiesByType = (entities: LeadEntity[]): Map<string, LeadEntity[]> => {
+  const map = new Map<string, LeadEntity[]>();
+  for (const e of entities) {
+    const group = map.get(e.type);
+    if (group) {
+      group.push(e);
+    } else {
+      map.set(e.type, [e]);
+    }
+  }
+  return map;
+};

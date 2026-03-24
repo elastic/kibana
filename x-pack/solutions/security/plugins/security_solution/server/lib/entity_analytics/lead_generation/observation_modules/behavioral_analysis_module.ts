@@ -311,6 +311,3 @@ const extractUserEmail = (entity: LeadEntity): string | undefined => {
   if (!user?.email) return undefined;
   return Array.isArray(user.email) ? user.email[0] : user.email;
 };
-
-/** @deprecated Use createBehavioralAnalysisModule. */
-export const createAlertAnalysisModule = createBehavioralAnalysisModule;

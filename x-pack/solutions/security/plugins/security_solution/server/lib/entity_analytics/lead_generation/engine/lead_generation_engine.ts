@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type {
   Lead,
   LeadEntity,
@@ -18,7 +17,6 @@ import type {
 } from '../types';
 import { DEFAULT_ENGINE_CONFIG } from '../types';
 import { entityToKey } from '../observation_modules/utils';
-import { llmSynthesizeLeadContent } from './llm_synthesize';
 
 // ---------------------------------------------------------------------------
 // Engine
@@ -54,10 +52,7 @@ export const createLeadGenerationEngine = ({
     /**
      * Run all enabled modules against the given entities and produce leads.
      */
-    async generateLeads(
-      entities: LeadEntity[],
-      options?: { chatModel?: InferenceChatModel }
-    ): Promise<Lead[]> {
+    async generateLeads(entities: LeadEntity[]): Promise<Lead[]> {
       const pipelineStart = Date.now();
 
       if (entities.length === 0) {
@@ -97,7 +92,7 @@ export const createLeadGenerationEngine = ({
 
       // 4. Group related entities into leads
       const groupStart = Date.now();
-      const leads = await groupIntoLeads(qualifyingEntities, config, logger, options?.chatModel);
+      const leads = await groupIntoLeads(qualifyingEntities, config, logger);
       const groupMs = Date.now() - groupStart;
       logger.info(
         `[LeadGenerationEngine][Telemetry] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
@@ -218,11 +213,12 @@ const calculatePriority = (observations: Observation[]): number => {
 const groupIntoLeads = async (
   scoredEntities: ScoredEntity[],
   _config: LeadGenerationEngineConfig,
-  logger: Logger,
-  chatModel?: InferenceChatModel
+  logger: Logger
 ): Promise<Lead[]> => {
-  resetUsedTitles();
-  const groups = groupByObservationPattern(scoredEntities);
+  const usedTitleTracker = new Map<string, number>();
+
+  // TODO: group related entities into a single lead when linked to same incident/campaign
+  const groups = scoredEntities.map((entity) => [entity]);
   const leads: Lead[] = [];
   const now = new Date();
 
@@ -231,19 +227,26 @@ const groupIntoLeads = async (
     const allObservations = group.flatMap((e) => e.observations);
     const maxPriority = Math.max(...group.map((e) => e.priority));
 
+    const observationsByEntityId = new Map<string, Observation[]>();
+    for (const obs of allObservations) {
+      const existing = observationsByEntityId.get(obs.entityId) ?? [];
+      existing.push(obs);
+      observationsByEntityId.set(obs.entityId, existing);
+    }
+
     const entityLabel = group.map((e) => e.entity.name).join(', ');
     const synthStart = Date.now();
-    const { title, byline, description, tags, recommendations } = await synthesizeLeadContent(
+    const { title, byline, description, tags, recommendations } = synthesizeLeadContent(
       group,
       allObservations,
-      logger,
-      chatModel
+      usedTitleTracker,
+      observationsByEntityId
     );
     const synthMs = Date.now() - synthStart;
     logger.info(
       `[LeadGenerationEngine][Telemetry] Lead ${i + 1}/${
         groups.length
-      } synthesis for [${entityLabel}]: ${synthMs}ms (${chatModel ? 'LLM' : 'rule-based'})`
+      } synthesis for [${entityLabel}]: ${synthMs}ms (rule-based)`
     );
 
     leads.push({
@@ -256,24 +259,14 @@ const groupIntoLeads = async (
       priority: maxPriority,
       chatRecommendations: recommendations,
       timestamp: now.toISOString(),
-      staleness: calculateStaleness(now, now),
+      staleness: 'fresh',
       observations: allObservations,
     });
   }
 
-  // Sort leads by priority descending
   leads.sort((a, b) => b.priority - a.priority);
 
   return leads;
-};
-
-/**
- * Each entity gets its own lead. The dominant observation pattern drives the
- * lead title and tags. In a future phase, entities can be grouped into a
- * single lead when they are linked to the same incident or campaign.
- */
-const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity[][] => {
-  return scoredEntities.map((entity) => [entity]);
 };
 
 // ---------------------------------------------------------------------------
@@ -289,7 +282,7 @@ const STALENESS_THRESHOLDS = {
   stale: 72 * 60 * 60 * 1000,
 };
 
-const calculateStaleness = (generatedAt: Date, now: Date): LeadStaleness => {
+export const calculateStaleness = (generatedAt: Date, now: Date): LeadStaleness => {
   const ageMs = now.getTime() - generatedAt.getTime();
 
   if (ageMs <= STALENESS_THRESHOLDS.fresh) {
@@ -305,44 +298,11 @@ const calculateStaleness = (generatedAt: Date, now: Date): LeadStaleness => {
 // Lead content synthesis (LLM-powered with rule-based fallback)
 // ---------------------------------------------------------------------------
 
-const synthesizeLeadContent = async (
+const synthesizeLeadContent = (
   group: ScoredEntity[],
   observations: Observation[],
-  logger: Logger,
-  chatModel?: InferenceChatModel
-): Promise<{
-  title: string;
-  byline: string;
-  description: string;
-  tags: string[];
-  recommendations: string[];
-}> => {
-  if (chatModel) {
-    try {
-      const llmResult = await llmSynthesizeLeadContent(chatModel, group, observations, logger);
-      const dominantPattern = selectDominantPattern(observations);
-      const byline = buildByline(group, observations, dominantPattern);
-
-      return {
-        title: llmResult.title,
-        byline,
-        description: llmResult.description,
-        tags: llmResult.tags,
-        recommendations: llmResult.recommendations,
-      };
-    } catch (error) {
-      logger.warn(
-        `[LeadGenerationEngine] LLM synthesis failed, falling back to rule-based: ${error}`
-      );
-    }
-  }
-
-  return ruleSynthesizeLeadContent(group, observations);
-};
-
-const ruleSynthesizeLeadContent = (
-  group: ScoredEntity[],
-  observations: Observation[]
+  usedTitleTracker: Map<string, number>,
+  observationsByEntityId: Map<string, Observation[]>
 ): {
   title: string;
   byline: string;
@@ -352,11 +312,11 @@ const ruleSynthesizeLeadContent = (
 } => {
   const observationTypes = [...new Set(observations.map((o) => o.type))];
 
-  const dominantPattern = selectDominantPattern(observations);
+  const dominantPattern = selectDominantPattern(observations, usedTitleTracker);
 
-  const title = buildRuleBasedTitle(group, dominantPattern);
-  const byline = buildByline(group, observations, dominantPattern);
-  const description = buildDescription(group, observations);
+  const title = dominantPattern.label;
+  const byline = buildByline(group, observationsByEntityId, dominantPattern);
+  const description = buildDescription(group, observationsByEntityId);
   const tags = buildTags(observationTypes, observations);
   const recommendations = buildRecommendations(group, observations);
 
@@ -403,14 +363,8 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
     ],
     distinctiveness: 1.2,
   },
-  investigation_status: {
-    labels: ['Under Investigation', 'Active Investigation', 'Entity Under Review'],
-    distinctiveness: 1.0,
-  },
-  watchlist_inclusion: {
-    labels: ['Watchlist Addition', 'Added to Watchlist', 'New Watchlist Member'],
-    distinctiveness: 0.9,
-  },
+  // Future: investigation_status — emitted by investigation tracking module (not yet implemented)
+  // Future: watchlist_inclusion — emitted by watchlist module (not yet implemented)
   multi_tactic_attack: {
     labels: [
       'Multi-Tactic Attack',
@@ -421,15 +375,7 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
     ],
     distinctiveness: 1.15,
   },
-  risk_escalation: {
-    labels: [
-      'Risk Score Escalation',
-      'Rapid Risk Increase',
-      'Anomalous Risk Spike',
-      'Sudden Risk Surge',
-    ],
-    distinctiveness: 1.1,
-  },
+  // Future: risk_escalation (bare) — modules only emit risk_escalation_24h, _7d, _90d
   risk_escalation_24h: {
     labels: [
       'Risk Score Escalation',
@@ -496,19 +442,12 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
     labels: ['Low Severity Alerts', 'Minor Alert Activity', 'Low-Level Detections'],
     distinctiveness: 0.4,
   },
-  low_risk_score: {
-    labels: ['Low Risk Entity', 'Baseline Risk Activity', 'Minimal Risk Indicator'],
-    distinctiveness: 0.3,
-  },
 };
 
-const usedTitleTracker = new Map<string, number>();
-
-const resetUsedTitles = (): void => {
-  usedTitleTracker.clear();
-};
-
-const selectDominantPattern = (observations: Observation[]): DominantPattern => {
+const selectDominantPattern = (
+  observations: Observation[],
+  usedTitleTracker: Map<string, number>
+): DominantPattern => {
   const bestByType = new Map<string, { score: number; confidence: number }>();
 
   for (const obs of observations) {
@@ -555,17 +494,14 @@ const selectDominantPattern = (observations: Observation[]): DominantPattern => 
   return { label: 'Suspicious Activity', key: 'unknown' };
 };
 
-const buildRuleBasedTitle = (_group: ScoredEntity[], pattern: DominantPattern): string =>
-  pattern.label;
-
 const buildByline = (
   group: ScoredEntity[],
-  observations: Observation[],
+  observationsByEntityId: Map<string, Observation[]>,
   _pattern: DominantPattern
 ): string => {
   if (group.length === 1) {
     const { entity } = group[0];
-    const entityObs = observations.filter((o) => o.entityId === entityToKey(entity));
+    const entityObs = observationsByEntityId.get(entityToKey(entity)) ?? [];
 
     const totalAlerts = extractNumber(entityObs, 'total_alerts');
     const distinctRules =
@@ -613,12 +549,15 @@ const extractNumber = (observations: Observation[], key: string): number => {
 
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-const buildDescription = (group: ScoredEntity[], observations: Observation[]): string => {
+const buildDescription = (
+  group: ScoredEntity[],
+  observationsByEntityId: Map<string, Observation[]>
+): string => {
   const lines: string[] = [];
 
   for (const scored of group) {
     const { entity } = scored;
-    const entityObs = observations.filter((o) => o.entityId === entityToKey(entity));
+    const entityObs = observationsByEntityId.get(entityToKey(entity)) ?? [];
     lines.push(
       `${entity.type} ${entity.name} (priority: ${scored.priority}/10, observations: ${entityObs.length}):`
     );
@@ -628,7 +567,7 @@ const buildDescription = (group: ScoredEntity[], observations: Observation[]): s
     lines.push('');
   }
 
-  return lines.join(' ').trim();
+  return lines.join('\n').trim();
 };
 
 /**

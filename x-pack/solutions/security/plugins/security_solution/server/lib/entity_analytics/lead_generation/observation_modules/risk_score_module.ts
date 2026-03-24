@@ -248,53 +248,57 @@ const fetchTimeSeriesRiskScores = async (
 ): Promise<Map<string, number[]>> => {
   const result = new Map<string, number[]>();
 
-  for (const [entityType, group] of groupEntitiesByType(entities).entries()) {
-    const names = group.map((e) => e.name);
-    try {
-      const response = await esClient.search({
-        index: `risk-score.risk-score-${spaceId}`,
-        size: 0,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            filter: [
-              { terms: { [`${entityType}.name`]: names } },
-              { range: { '@timestamp': { gte: 'now-90d', lte: 'now' } } },
-            ],
+  await Promise.all(
+    [...groupEntitiesByType(entities).entries()].map(async ([entityType, group]) => {
+      const names = group.map((e) => e.name);
+      try {
+        const response = await esClient.search({
+          index: `risk-score.risk-score-${spaceId}`,
+          size: 0,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          query: {
+            bool: {
+              filter: [
+                { terms: { [`${entityType}.name`]: names } },
+                { range: { '@timestamp': { gte: 'now-90d', lte: 'now' } } },
+              ],
+            },
           },
-        },
-        aggs: {
-          by_entity: {
-            terms: { field: `${entityType}.name`, size: names.length },
-            aggs: {
-              scores_over_time: {
-                date_histogram: { field: '@timestamp', calendar_interval: 'day' },
-                aggs: { avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } } },
+          aggs: {
+            by_entity: {
+              terms: { field: `${entityType}.name`, size: names.length },
+              aggs: {
+                scores_over_time: {
+                  date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+                  aggs: {
+                    avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+                  },
+                },
               },
             },
           },
-        },
-      });
+        });
 
-      const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-        []) as Array<{
-        key: string;
-        scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
-      }>;
+        const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+          []) as Array<{
+          key: string;
+          scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
+        }>;
 
-      for (const bucket of buckets) {
-        const scores = bucket.scores_over_time.buckets
-          .map((b) => b.avg_score.value)
-          .filter((v): v is number => v != null);
-        result.set(`${entityType}:${bucket.key}`, scores);
+        for (const bucket of buckets) {
+          const scores = bucket.scores_over_time.buckets
+            .map((b) => b.avg_score.value)
+            .filter((v): v is number => v != null);
+          result.set(`${entityType}:${bucket.key}`, scores);
+        }
+      } catch (error) {
+        logger.warn(
+          `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${error}`
+        );
       }
-    } catch (error) {
-      logger.warn(
-        `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${error}`
-      );
-    }
-  }
+    })
+  );
 
   return result;
 };
