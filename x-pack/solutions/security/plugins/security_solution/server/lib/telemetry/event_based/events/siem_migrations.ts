@@ -28,7 +28,7 @@ export const siemMigrationEventNames = {
   [SiemMigrationsEventTypes.MigrationSuccess]: 'Migration success',
   [SiemMigrationsEventTypes.MigrationAborted]: 'Migration aborted',
   [SiemMigrationsEventTypes.MigrationFailure]: 'Migration failure',
-  [SiemMigrationsEventTypes.SourceQueryKeywords]: 'Source Query keywords telemetry',
+  [SiemMigrationsEventTypes.SourceQueryKeywords]: 'Source Query keywords',
   // Rules
   [SiemMigrationsEventTypes.RuleTranslationFailure]: 'Rule translation failure',
   [SiemMigrationsEventTypes.RuleTranslationSuccess]: 'Rule translation success',
