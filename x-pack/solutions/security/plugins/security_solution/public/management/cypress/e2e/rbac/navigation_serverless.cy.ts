@@ -17,6 +17,7 @@ describe(
     const Selectors = ServerlessHeaders;
     const MenuButtonSelector = ServerlessHeaders.ASSETS_PANEL_BTN;
     const allPages = getNavigationPages(Selectors);
+    const uniqueNavSelectors = [...new Set(allPages.map((p) => p.selector))];
 
     it('without access to any of the subpages, none of those should be displayed', () => {
       login(ROLE.detections_admin);
@@ -24,8 +25,8 @@ describe(
       cy.get(ServerlessHeaders.MORE_MENU_BTN).should('not.exist');
       cy.get(MenuButtonSelector).should('not.exist');
 
-      for (const page of allPages) {
-        cy.get(page.selector).should('not.exist');
+      for (const selector of uniqueNavSelectors) {
+        cy.get(selector).should('not.exist');
       }
     });
 
@@ -36,10 +37,8 @@ describe(
       cy.get(MenuButtonSelector).click();
       cy.get(allPages[0].selector).click();
 
-      for (const page of allPages) {
-        if (page.selector !== Selectors.TRUSTED_DEVICES) {
-          cy.get(page.selector);
-        }
+      for (const selector of uniqueNavSelectors) {
+        cy.get(selector);
       }
     });
   }
