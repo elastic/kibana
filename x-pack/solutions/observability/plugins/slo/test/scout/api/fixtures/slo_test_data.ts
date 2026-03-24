@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EsSummaryDocument } from '@kbn/slo-plugin/server/services/summary_transform_generator/helpers/create_temp_summary';
 import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { EsSummaryDocument } from '../../../../server/services/summary_transform_generator/helpers/create_temp_summary';
 
 export const TEST_SPACE_ID = 'default';
 

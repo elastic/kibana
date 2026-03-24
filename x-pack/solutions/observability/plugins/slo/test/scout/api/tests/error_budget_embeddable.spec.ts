@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { apiTest as baseTest, mergeTests, sloDataFixture, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, SLO_ERROR_BUDGET_ID } from '../fixtures';
+import { COMMON_HEADERS, DASHBOARD_API_PATH, SLO_ERROR_BUDGET_ID } from '../fixtures';
+
+const apiTest = mergeTests(baseTest, sloDataFixture);
 
 apiTest.describe(
   'SLO Error Budget Embeddable',
