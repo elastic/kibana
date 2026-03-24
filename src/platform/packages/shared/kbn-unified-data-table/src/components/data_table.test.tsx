@@ -917,7 +917,6 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        setExpandedDocMock,
         columnsMetaOverride
       );
     },
