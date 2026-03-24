@@ -13,6 +13,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -26,6 +27,7 @@ interface WorkflowExecutionOverviewProps {
   showResumeUI?: boolean;
   executionId?: string;
   resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
 }
 
@@ -56,6 +58,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     showResumeUI = false,
     executionId,
     resumeMessage,
+    resumeSchema,
     shouldAutoResume = false,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -194,6 +197,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               <ResumeExecutionButton
                 executionId={executionId}
                 resumeMessage={resumeMessage}
+                resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}
               />
             </EuiFlexItem>
