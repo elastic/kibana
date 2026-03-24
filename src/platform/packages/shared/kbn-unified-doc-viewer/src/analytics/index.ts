@@ -12,8 +12,8 @@ export { registerDocViewerAnalyticsEvents } from './register_analytics_events';
 export {
   type UseDocViewerViewedEventParams,
   type UseDocViewerTabViewedEventParams,
-  type UseDocViewerFlyoutViewedEventParams,
+  type UseDocViewerSpanLogViewedEventParams,
   useDocViewerViewedEvent,
   useDocViewerTabViewedEvent,
-  useDocViewerFlyoutViewedEvent,
+  useDocViewerSpanLogViewedEvent,
 } from './doc_viewer_viewed_event';
