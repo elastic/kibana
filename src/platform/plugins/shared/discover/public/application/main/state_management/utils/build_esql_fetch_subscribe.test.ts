@@ -14,7 +14,6 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { omit } from 'lodash';
 import { FetchStatus } from '../../../types';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -52,13 +51,8 @@ async function getTestProps({
 
   // Reset the profile state to match the expected initial state for tests
   toolkit.internalState.dispatch(
-    toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-      resetDefaultProfileState: {
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      },
+    toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+      fieldsToReset: 'none',
     })
   );
 
@@ -605,18 +599,13 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
+  it('should call setProfileStateFieldsToReset correctly when index pattern changes', async () => {
     const { toolkit, dataState } = await setupTest({
       appState: { query: { esql: 'from pattern' } },
       defaultFetchStatus: FetchStatus.LOADING,
     });
     const documents$ = dataState.data$.documents$;
-    expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      hideChart: false,
-      rowHeight: false,
-      breakdownField: false,
-    });
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
@@ -631,25 +620,15 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: true,
-        rowHeight: true,
-        breakdownField: true,
-      })
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-        resetDefaultProfileState: {
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+      toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        fieldsToReset: 'none',
       })
     );
     toolkit.internalState.dispatch(
@@ -662,12 +641,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      })
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -683,12 +657,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern2' },
     });
     await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
-      })
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -749,29 +718,19 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setResetDefaultProfileState correctly when columns change', async () => {
+  it('should call setProfileStateFieldsToReset correctly when columns change', async () => {
     const { toolkit, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-      hideChart: false,
-    });
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result1,
     });
     await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      })
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -779,12 +738,7 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result2,
     });
     await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      })
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns'])
     );
   });
 });

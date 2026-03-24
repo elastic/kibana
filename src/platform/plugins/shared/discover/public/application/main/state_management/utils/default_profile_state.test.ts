@@ -11,7 +11,16 @@ import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { getDefaultProfileState } from './get_default_profile_state';
+import {
+  DEFAULT_PROFILE_STATE_FIELDS,
+  type DefaultProfileStateField,
+  type DefaultProfileStateFields,
+} from '../redux';
+import {
+  getDefaultProfileState,
+  getFieldsToReset,
+  getProfileStateSnapshot,
+} from './default_profile_state';
 
 const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
@@ -24,84 +33,73 @@ const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
 
 scopedProfilesManager.resolveDataSourceProfile({});
 
+const createDefaultProfileState = (fieldsToReset: DefaultProfileStateFields) => ({
+  resetId: 'test',
+  fieldsToReset,
+  snapshotsByProfileId: {},
+});
+
+const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
+  columns: fieldsToReset.includes('columns'),
+  rowHeight: fieldsToReset.includes('rowHeight'),
+  breakdownField: fieldsToReset.includes('breakdownField'),
+  hideChart: fieldsToReset.includes('hideChart'),
+});
+
 describe('getDefaultProfileState', () => {
   describe('getPreFetchState', () => {
     it('should return expected breakdownField', () => {
-      let appState = getDefaultProfileState({
+      const appStateWithBreakdownField = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState(['breakdownField']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
-      expect(appState).toEqual({
+      expect(appStateWithBreakdownField).toEqual({
         breakdownField: 'extension',
       });
-      appState = getDefaultProfileState({
+
+      const appStateWithoutBreakdownField = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState(['breakdownField']),
         dataView: emptyDataView,
       }).getPreFetchState();
-      expect(appState).toEqual(undefined);
+
+      expect(appStateWithoutBreakdownField).toBeUndefined();
     });
 
     it('should return expected hideChart', () => {
-      let appState = getDefaultProfileState({
+      const appStateWithHideChart = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: true,
-        },
+        defaultProfileState: createDefaultProfileState(['hideChart']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
-      expect(appState).toEqual({
+
+      expect(appStateWithHideChart).toEqual({
         hideChart: true,
       });
-      appState = getDefaultProfileState({
+
+      const appStateWithoutHideChart = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState('none'),
         dataView: emptyDataView,
       }).getPreFetchState();
-      expect(appState).toEqual(undefined);
+
+      expect(appStateWithoutHideChart).toBeUndefined();
     });
   });
 
   describe('getPostFetchState', () => {
     it('should return expected columns', () => {
-      let appState = getDefaultProfileState({
+      const appStateFromDataView = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: true,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState(['columns']),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
         esqlQueryColumns: undefined,
       });
-      expect(appState).toEqual({
+
+      expect(appStateFromDataView).toEqual({
         columns: ['message', 'extension', 'bytes'],
         grid: {
           columns: {
@@ -114,15 +112,10 @@ describe('getDefaultProfileState', () => {
           },
         },
       });
-      appState = getDefaultProfileState({
+
+      const appStateFromEsqlColumns = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: true,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState(['columns']),
         dataView: emptyDataView,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
@@ -131,7 +124,7 @@ describe('getDefaultProfileState', () => {
           { id: '2', name: 'bar', meta: { type: 'string' } },
         ],
       });
-      expect(appState).toEqual({
+      expect(appStateFromEsqlColumns).toEqual({
         columns: ['foo', 'bar'],
         grid: {
           columns: {
@@ -146,13 +139,7 @@ describe('getDefaultProfileState', () => {
     it('should return expected rowHeight', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: true,
-          breakdownField: false,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState(['rowHeight']),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: [],
@@ -166,19 +153,54 @@ describe('getDefaultProfileState', () => {
     it('should return undefined', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState('none'),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: [],
         esqlQueryColumns: undefined,
       });
-      expect(appState).toEqual(undefined);
+      expect(appState).toBeUndefined();
     });
+  });
+});
+
+describe('getProfileStateSnapshot', () => {
+  const appState = {
+    columns: ['message'],
+    rowHeight: 3,
+    breakdownField: 'extension',
+    hideChart: true,
+  };
+
+  it('should return undefined for none', () => {
+    expect(getProfileStateSnapshot(appState, 'none')).toBeUndefined();
+  });
+
+  it('should return all tracked fields for all', () => {
+    expect(getProfileStateSnapshot(appState, 'all')).toEqual(appState);
+  });
+
+  it('should return only requested fields', () => {
+    expect(getProfileStateSnapshot(appState, ['columns', 'hideChart'])).toEqual({
+      columns: ['message'],
+      hideChart: true,
+    });
+  });
+});
+
+describe('getFieldsToReset', () => {
+  it('should return none when no fields should reset', () => {
+    expect(getFieldsToReset(getResetByField([]))).toBe('none');
+  });
+
+  it('should return all when all fields should reset', () => {
+    expect(getFieldsToReset(getResetByField([...DEFAULT_PROFILE_STATE_FIELDS]))).toBe('all');
+  });
+
+  it('should return only selected fields', () => {
+    expect(getFieldsToReset(getResetByField(['columns', 'breakdownField']))).toEqual([
+      'columns',
+      'breakdownField',
+    ]);
   });
 });
