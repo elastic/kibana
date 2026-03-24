@@ -33,3 +33,4 @@ export {
   scheduleSmlCrawlerTasks,
   SML_CRAWLER_TASK_TYPE,
 } from './sml_task_definitions';
+export { smlIndexName, smlIndexMappingsProperties } from './sml_storage';

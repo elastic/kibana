@@ -302,10 +302,22 @@ const checkItemsAccess = async ({
 };
 
 /**
+ * Fields for `search_as_you_type` mapping (see `sml_storage.ts`): root plus shingle
+ * sub-fields used by `multi_match` with `bool_prefix` for typeahead-style matching.
+ */
+const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
+  'title^2',
+  'title._2gram',
+  'title._3gram',
+  'type',
+  'type._2gram',
+  'type._3gram',
+] as const;
+
+/**
  * Build the content query clause from an array of keywords.
  *
  * - `["*"]` or empty array → `match_all` (return everything)
- * - otherwise → `bool.should` with one `multi_match` per keyword (OR logic)
  */
 const buildContentQuery = (keywords: string[]): Record<string, unknown> => {
   const filtered = keywords.map((k) => k.trim()).filter(Boolean);
@@ -315,10 +327,24 @@ const buildContentQuery = (keywords: string[]): Record<string, unknown> => {
   return {
     bool: {
       should: filtered.map((keyword) => ({
-        multi_match: {
-          query: keyword,
-          fields: ['title^2', 'content'],
-          type: 'best_fields',
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: keyword,
+                type: 'bool_prefix',
+                fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+              },
+            },
+            {
+              multi_match: {
+                query: keyword,
+                fields: ['content'],
+                type: 'best_fields',
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       })),
       minimum_should_match: 1,

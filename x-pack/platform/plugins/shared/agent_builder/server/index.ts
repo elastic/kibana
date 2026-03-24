@@ -33,6 +33,7 @@ export type {
   SmlSearchResult,
   SmlIndexAttachmentParams,
 } from './services/sml';
+export { smlIndexName, smlIndexMappingsProperties } from './services/sml';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
