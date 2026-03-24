@@ -17,6 +17,7 @@ import {
   UNIT_SHORT_TO_FULL_MAP,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
+  DATE_TYPE_RELATIVE,
 } from '../constants';
 import type { TimeRange, TimeRangeTransformOptions } from '../types';
 
@@ -37,6 +38,21 @@ export function timeRangeToDisplayText(
     // capitalize
     const { value } = timeRange;
     return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  // For [RELATIVE, NOW] show "Last {count} {unit}" and for [NOW, RELATIVE] show "Next {count} {unit}"
+  const [startType, endType] = timeRange.type;
+  if (startType === DATE_TYPE_RELATIVE && endType === DATE_TYPE_NOW) {
+    const parts = dateMathToRelativeParts(timeRange.start);
+    if (parts) {
+      return formatCompactRelativeTime(parts.count, parts.unit, false);
+    }
+  }
+  if (startType === DATE_TYPE_NOW && endType === DATE_TYPE_RELATIVE) {
+    const parts = dateMathToRelativeParts(timeRange.end);
+    if (parts) {
+      return formatCompactRelativeTime(parts.count, parts.unit, true);
+    }
   }
 
   let startDateFormat = dateFormat;
@@ -162,6 +178,19 @@ function formatRelativeTime(count: number, unit: string, isFuture: boolean): str
   const direction = isFuture ? 'from now' : 'ago';
 
   return `${count} ${unitName}${plural} ${direction}`;
+}
+
+/**
+ * Formats a compact relative time label.
+ * e.g., (7, 'm', false) => "Last 7 minutes"
+ * e.g., (3, 'd', true) => "Next 3 days"
+ */
+function formatCompactRelativeTime(count: number, unit: string, isFuture: boolean): string {
+  const unitName = UNIT_SHORT_TO_FULL_MAP[unit] || unit;
+  const plural = count === 1 ? '' : 's';
+  const direction = isFuture ? 'Next' : 'Last';
+
+  return `${direction} ${count} ${unitName}${plural}`;
 }
 
 /**

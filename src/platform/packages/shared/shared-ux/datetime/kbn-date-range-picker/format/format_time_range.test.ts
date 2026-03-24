@@ -19,11 +19,11 @@ describe('timeRangeToDisplayText', () => {
   });
 
   it('handles relative to now', () => {
-    expect(toDisplay('-1w')).toBe('1 week ago → now');
+    expect(toDisplay('-1w')).toBe('Last 1 week');
   });
 
   it('handles now to relative', () => {
-    expect(toDisplay('now to +15m')).toBe('now → 15 minutes from now');
+    expect(toDisplay('now to +15m')).toBe('Next 15 minutes');
   });
 
   it('handles absolute to absolute', () => {
@@ -59,7 +59,9 @@ describe('timeRangeToDisplayText', () => {
   it.todo('uses abbreviations for absolute dates, with default format');
 
   it('supports a custom delimiter', () => {
-    expect(toDisplay('-1h', { delimiter: 'until' })).toBe('1 hour ago until now');
+    expect(toDisplay('-15m to -5m', { delimiter: 'until' })).toBe(
+      '15 minutes ago until 5 minutes ago'
+    );
   });
 
   it('supports a custom date format', () => {
