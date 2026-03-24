@@ -70,7 +70,6 @@ export const useBulkActionNotificationPolicies = () => {
     Error,
     BulkActionNotificationPoliciesBody
   >({
-    mutationKey: notificationPolicyKeys.bulkAction(),
     mutationFn: (body) => notificationPoliciesApi.bulkActionNotificationPolicies(body),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });

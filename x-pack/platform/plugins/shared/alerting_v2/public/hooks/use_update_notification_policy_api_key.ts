@@ -17,7 +17,6 @@ export const useUpdateNotificationPolicyApiKey = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, string>({
-    mutationKey: notificationPolicyKeys.updateApiKey(),
     mutationFn: (id) => notificationPoliciesApi.updateNotificationPolicyApiKey(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });

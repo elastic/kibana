@@ -18,7 +18,6 @@ export const useSnoozeNotificationPolicy = () => {
   const queryClient = useQueryClient();
 
   return useMutation<NotificationPolicyResponse, Error, { id: string; snoozedUntil: string }>({
-    mutationKey: notificationPolicyKeys.snooze(),
     mutationFn: ({ id, snoozedUntil }) =>
       notificationPoliciesApi.snoozeNotificationPolicy(id, snoozedUntil),
     onSuccess: () => {

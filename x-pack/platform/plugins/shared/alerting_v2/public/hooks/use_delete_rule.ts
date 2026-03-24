@@ -17,7 +17,6 @@ export const useDeleteRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.delete(),
     mutationFn: (id: string) => rulesApi.deleteRule(id),
     onSuccess: () => {
       toasts.addSuccess(

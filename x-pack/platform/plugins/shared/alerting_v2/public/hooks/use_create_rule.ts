@@ -18,7 +18,6 @@ export const useCreateRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.create(),
     mutationFn: (payload: CreateRuleData) => rulesApi.createRule(payload),
     onSuccess: () => {
       toasts.addSuccess(
