@@ -237,7 +237,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             }}
           />
 
-          {enableFormatSelector && isNumericColumn ? (
+          {isNumericColumn && enableFormatSelector ? (
             <FormatSelector
               selectedColumn={selectedField}
               onChange={onFormatChange}
