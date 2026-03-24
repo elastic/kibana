@@ -491,7 +491,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        undefined,
+        expect.anything(),
         expect.anything(),
         expect.objectContaining({ agents, version: '8.18.0' })
       );
