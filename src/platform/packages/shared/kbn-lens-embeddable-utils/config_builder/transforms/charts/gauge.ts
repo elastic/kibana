@@ -76,8 +76,8 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
       layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
     ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
-      : layer.metric.title?.value
-      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.value }
+      : layer.metric.title?.text
+      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
       : { labelMajorMode: 'auto' }),
     labelMinor: layer.metric.sub_title,
   };
@@ -159,7 +159,7 @@ function reverseBuildVisualizationState(
     const titleValue = visualization.labelMajor;
     if (!titleVisible || titleValue) {
       props.metric.title = {
-        ...(titleValue ? { value: titleValue } : {}),
+        ...(titleValue ? { text: titleValue } : {}),
         ...(!titleVisible ? { visible: false } : {}),
       };
     }

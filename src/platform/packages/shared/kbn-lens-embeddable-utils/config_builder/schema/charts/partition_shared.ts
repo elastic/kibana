@@ -44,7 +44,8 @@ export const valueDisplaySchema = schema.maybe(
     {
       meta: {
         id: 'valueDisplay',
-        description: 'Section value configuration',
+        description:
+          'Configure the visibility and the format of the values rendered on each chart partition section',
       },
     }
   )

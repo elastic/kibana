@@ -193,7 +193,6 @@ const datatableStateSharedOptionsSchema = {
       },
       {
         meta: {
-          title: 'Row Numbers',
           description: 'Configuration for row numbers',
         },
       }

@@ -106,9 +106,9 @@ const gaugeStateMetricOptionsSchema = {
             defaultValue: true,
           })
         ),
-        value: schema.maybe(schema.string({ meta: { description: 'Title text' } })),
+        text: schema.maybe(schema.string({ meta: { description: 'Title text' } })),
       },
-      { meta: { id: 'gaugeMetricTitle', description: 'Title configuration' } }
+      { meta: { description: 'Title configuration' } }
     )
   ),
   /**
@@ -138,7 +138,7 @@ const gaugeStateMetricOptionsSchema = {
           })
         ),
       },
-      { meta: { id: 'gaugeTicks', description: 'Ticks configuration' } }
+      { meta: { description: 'Ticks configuration' } }
     )
   ),
 };
