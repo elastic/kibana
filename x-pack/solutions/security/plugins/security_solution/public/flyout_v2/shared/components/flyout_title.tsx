@@ -59,6 +59,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
     const titleIcon = useMemo(() => {
       return iconType ? (
         <EuiIcon
+          aria-hidden={true}
           color={iconColor}
           type={iconType}
           size="m"
