@@ -136,7 +136,11 @@ export function DateRangePickerPanel({
     return null;
   }
 
-  return <div ref={containerRef}>{children}</div>;
+  return (
+    <div ref={containerRef} data-test-subj={`dateRangePickerPanel-${id}`}>
+      {children}
+    </div>
+  );
 }
 
 /**

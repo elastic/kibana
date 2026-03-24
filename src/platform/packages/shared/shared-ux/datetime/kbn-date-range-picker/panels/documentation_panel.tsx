@@ -52,7 +52,7 @@ const Content = () => (
  */
 export function DocumentationPanel() {
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerDocumentationPanel">
       <PanelHeader>
         <SubPanelHeading>{documentationPanelTexts.heading}</SubPanelHeading>
       </PanelHeader>

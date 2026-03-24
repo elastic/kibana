@@ -155,7 +155,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
   const isStart = side === 'start';
 
   return (
-    <div>
+    <div data-test-subj={`dateRangePicker${side === 'start' ? 'Start' : 'End'}DatePart`}>
       <EuiFormFieldset legend={{ children: label }}>
         <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
           <EuiButtonGroup
@@ -289,6 +289,7 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
               onClick={copy}
               onBlur={() => setIsCopied(false)}
               disabled={isDisabled}
+              data-test-subj="dateRangePickerCopyShorthandButton"
             />
           </EuiToolTip>
         }
@@ -296,6 +297,7 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
         value={displayValue}
         readOnly
         aria-label={customTimeRangePanelTexts.shorthandLabel}
+        data-test-subj="dateRangePickerShorthandField"
       />
     </EuiFormRow>
   );
@@ -391,7 +393,7 @@ export function CustomTimeRangePanel() {
   );
 
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerCustomRangePanel">
       <PanelHeader>
         <SubPanelHeading onGoBack={handleGoBack}>
           {customTimeRangePanelTexts.heading}
@@ -399,7 +401,7 @@ export function CustomTimeRangePanel() {
       </PanelHeader>
       <PanelBody spacingSide="both">
         <PanelBodySection>
-          <form id={formId} onSubmit={onSubmit}>
+          <form id={formId} onSubmit={onSubmit} data-test-subj="dateRangePickerCustomRangeForm">
             <EuiFlexGroup gutterSize="l" direction="column" responsive={false}>
               <DatePartPicker
                 label={customTimeRangePanelTexts.startDateLabel}
@@ -424,7 +426,14 @@ export function CustomTimeRangePanel() {
       </PanelBody>
       <PanelFooter
         primaryAction={
-          <EuiButton size="s" fill type="submit" form={formId} disabled={timeRange.isInvalid}>
+          <EuiButton
+            size="s"
+            fill
+            type="submit"
+            form={formId}
+            disabled={timeRange.isInvalid}
+            data-test-subj="dateRangePickerCustomRangeApplyButton"
+          >
             {customTimeRangePanelTexts.applyButton}
           </EuiButton>
         }
@@ -435,6 +444,7 @@ export function CustomTimeRangePanel() {
             label={customTimeRangePanelTexts.saveAsPresetCheckbox}
             checked={saveAsPreset}
             onChange={(e) => setSaveAsPreset(e.target.checked)}
+            data-test-subj="dateRangePickerCustomRangeSaveCheckbox"
           />
         )}
       </PanelFooter>

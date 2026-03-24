@@ -6,7 +6,7 @@ exports[`DateRangePicker renders 1`] = `
 >
   <div
     class="euiPopover emotion-euiPopover-inline"
-    data-test-subj="dateRangePickerDialogTriggerWrapper"
+    data-test-subj="dateRangePickerPopoverTriggerWrapper"
   >
     <div
       class="css-0"
@@ -39,6 +39,7 @@ exports[`DateRangePicker renders 1`] = `
                  
                 <span
                   class="euiBadge emotion-euiBadge-default"
+                  data-test-subj="dateRangePickerDurationBadge"
                   title="20min"
                 >
                   <span

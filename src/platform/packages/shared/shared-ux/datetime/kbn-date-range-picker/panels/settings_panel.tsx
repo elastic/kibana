@@ -36,7 +36,7 @@ export function SettingsPanel() {
   }, [settings, onSettingsChange]);
 
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerSettingsPanel">
       <PanelHeader>
         <SubPanelHeading>{settingsPanelTexts.heading}</SubPanelHeading>
       </PanelHeader>
@@ -49,6 +49,7 @@ export function SettingsPanel() {
                 checked={settings.roundRelativeTime}
                 onChange={handleRoundRelativeTimeChange}
                 compressed
+                data-test-subj="dateRangePickerRoundTimeSwitch"
               />
             </EuiFormRow>
             <PanelBodySectionInfo

@@ -206,7 +206,9 @@ export function DateRangePickerControl() {
               disabled={disabled}
               compressed={compressed}
             >
-              <EuiBadge>{displayShortDuration ?? '--'}</EuiBadge>
+              <EuiBadge data-test-subj="dateRangePickerDurationBadge">
+                {displayShortDuration ?? '--'}
+              </EuiBadge>
             </EuiFormControlButton>
           </EuiToolTip>
         )}

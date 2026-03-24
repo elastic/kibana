@@ -374,7 +374,7 @@ describe('DateRangePickerControl', () => {
     it('full', () => {
       const { container } = renderWithEuiTheme(<DateRangePicker {...defaultProps} width="full" />);
       expect(container.firstElementChild).toHaveStyle({ display: 'flex', 'inline-size': '100%' });
-      const popover = screen.getByTestId('dateRangePickerDialogTriggerWrapper');
+      const popover = screen.getByTestId('dateRangePickerPopoverTriggerWrapper');
       expect(popover).toHaveStyle({ 'inline-size': '100%' });
     });
   });
