@@ -94,7 +94,7 @@ export type ReadRuleExecutionResultsRequestBodyInput = z.input<
 
 export type ReadRuleExecutionResultsResponse = z.infer<typeof ReadRuleExecutionResultsResponse>;
 export const ReadRuleExecutionResultsResponse = z.object({
-  executions: z.array(UnifiedExecutionResult),
+  data: z.array(UnifiedExecutionResult),
   /**
    * Total number of results matching the filter.
    */

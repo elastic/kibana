@@ -26,7 +26,7 @@ const mockMetrics = {
 };
 
 const mockUnifiedExecutionResults = {
-  executions: [
+  data: [
     {
       execution_uuid: 'test-uuid-1',
       execution_start: '2026-03-11T11:00:00.000Z',
@@ -155,7 +155,7 @@ describe('readRuleExecutionResultsRoute', () => {
 
   it('should use default values for optional parameters', async () => {
     clients.ruleExecutionLog.getUnifiedExecutionResults.mockResolvedValue({
-      executions: [],
+      data: [],
       total: 0,
       page: 1,
       per_page: 20,

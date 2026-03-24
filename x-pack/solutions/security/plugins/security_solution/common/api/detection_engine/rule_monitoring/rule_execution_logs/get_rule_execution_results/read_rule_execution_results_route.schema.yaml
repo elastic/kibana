@@ -90,7 +90,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  executions:
+                  data:
                     type: array
                     items:
                       $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResult'
@@ -104,7 +104,7 @@ paths:
                     type: integer
                     description: Number of results per page (echoed from request).
                 required:
-                  - executions
+                  - data
                   - total
                   - page
                   - per_page

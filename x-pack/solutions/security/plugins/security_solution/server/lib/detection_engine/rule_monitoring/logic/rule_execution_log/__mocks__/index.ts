@@ -32,7 +32,7 @@ const ruleExecutionLogForRoutesMock = {
 
     getUnifiedExecutionResults: jest
       .fn<ReturnType<GetUnifiedExecutionResults>, Parameters<GetUnifiedExecutionResults>>()
-      .mockResolvedValue({ executions: [], total: 0, page: 1, per_page: 20 }),
+      .mockResolvedValue({ data: [], total: 0, page: 1, per_page: 20 }),
   }),
 };
 

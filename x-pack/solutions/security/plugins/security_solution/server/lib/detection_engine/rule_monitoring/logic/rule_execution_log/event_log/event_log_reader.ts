@@ -237,7 +237,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       });
 
       return {
-        executions: findResult.data.map(mapEventToUnifiedResult),
+        data: findResult.data.map(mapEventToUnifiedResult),
         total: findResult.total,
         page: findResult.page,
         per_page: findResult.per_page,

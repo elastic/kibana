@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).toEqual(200);
         expect(response.body.total).toEqual(1);
-        expect(response.body.executions[0]).toMatchObject({
+        expect(response.body.data[0]).toMatchObject({
           execution_uuid: executionId,
           outcome: { status: 'success' },
           execution_duration_ms: expect.any(Number),
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           schedule_delay_ms: expect.any(Number),
         });
-        expect(response.body.executions[0].execution_duration_ms).toBeGreaterThan(0);
+        expect(response.body.data[0].execution_duration_ms).toBeGreaterThan(0);
       });
 
       it('should return execution results with errors for failed executions', async () => {
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).toEqual(200);
         expect(response.body.total).toEqual(1);
-        expect(response.body.executions[0].outcome).toMatchObject({
+        expect(response.body.data[0].outcome).toMatchObject({
           status: 'failure',
           message: expect.stringContaining('unrecoverable error'),
         });
@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ filter: { from, to } });
 
         expect(response.status).toEqual(200);
-        expect(response.body.executions[0].outcome).toMatchObject({
+        expect(response.body.data[0].outcome).toMatchObject({
           status: 'warning',
           message: expect.stringContaining('matching indices'),
         });
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ filter: { from, to } });
 
         expect(response.status).toEqual(200);
-        expect(response.body.executions[0].backfill).toEqual({
+        expect(response.body.data[0].backfill).toEqual({
           from: moment(backfillStart).subtract(1, 'day').toISOString(),
           to: backfillStart,
         });
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).toEqual(200);
         expect(response.body.total).toEqual(0);
-        expect(response.body.executions).toEqual([]);
+        expect(response.body.data).toEqual([]);
       });
 
       it('should support pagination', async () => {
@@ -251,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(page1.status).toEqual(200);
         expect(page1.body).toMatchObject({ total: 3, page: 1, per_page: 2 });
-        expect(page1.body.executions).toHaveLength(2);
+        expect(page1.body.data).toHaveLength(2);
 
         const page2 = await supertest
           .post(readRuleExecutionResultsUrl(id))
@@ -262,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(page2.status).toEqual(200);
         expect(page2.body).toMatchObject({ total: 3, page: 2, per_page: 2 });
-        expect(page2.body.executions).toHaveLength(1);
+        expect(page2.body.data).toHaveLength(1);
       });
     });
 
@@ -293,8 +293,8 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ filter: { from, to } });
 
         expect(response.status).toEqual(200);
-        expect(response.body.executions).toHaveLength(3);
-        const resultTimestamps = response.body.executions.map((e: any) => e.execution_start);
+        expect(response.body.data).toHaveLength(3);
+        const resultTimestamps = response.body.data.map((e: any) => e.execution_start);
         expect(resultTimestamps).toEqual([...resultTimestamps].sort().reverse());
       });
     });
@@ -325,7 +325,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).toEqual(200);
         expect(response.body.total).toEqual(1);
-        expect(response.body.executions[0].outcome.status).toEqual('failure');
+        expect(response.body.data[0].outcome.status).toEqual('failure');
       });
 
       it('by run type: scheduled', async () => {
@@ -378,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).toEqual(200);
         expect(response.body.total).toEqual(1);
-        expect(response.body.executions[0].metrics).toBeTruthy();
+        expect(response.body.data[0].metrics).toBeTruthy();
       });
 
       it('by time range: only returns events within the specified window', async () => {
@@ -411,7 +411,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).toEqual(200);
         expect(response.body.total).toEqual(1);
-        expect(response.body.executions[0].execution_start).toEqual(insideTs);
+        expect(response.body.data[0].execution_start).toEqual(insideTs);
       });
     });
   });
