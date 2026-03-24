@@ -9,12 +9,10 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools';
 
-export const DETECTION_RULE_CREATE_EDIT_SKILL_ID = 'detection-rule-create-edit';
-
 export const getDetectionRuleEditSkill = () =>
   defineSkillType({
-    id: DETECTION_RULE_CREATE_EDIT_SKILL_ID,
-    name: DETECTION_RULE_CREATE_EDIT_SKILL_ID,
+    id: 'detection-rule-edit',
+    name: 'detection-rule-edit',
     basePath: 'skills/security/rules',
     description:
       'Guide to creating and editing security detection rules via the rule attachment. Use when a user asks to create, edit, modify, or update a detection rule or its fields (tags, severity, MITRE ATT&CK, schedule, query, etc.).',

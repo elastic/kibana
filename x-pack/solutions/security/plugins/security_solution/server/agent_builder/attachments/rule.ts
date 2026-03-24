@@ -13,7 +13,6 @@ import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
-import { DETECTION_RULE_CREATE_EDIT_SKILL_ID } from '../skills/detection_rule_edit';
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string(),
@@ -68,7 +67,7 @@ SECURITY RULE DATA:
 ---
 Complete in order:
 
-1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_CREATE_EDIT_SKILL_ID} skill from the skills/security/rules directory.
+1. When asked to modify, update, or create a detection rule, ALWAYS load the detection-rule-edit skill from the skills/security/rules directory.
 2. Use the available tools to research, create, or edit the rule and provide a response.`;
       return description;
     },
