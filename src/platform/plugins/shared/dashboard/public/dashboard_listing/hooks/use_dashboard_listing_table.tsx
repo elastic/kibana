@@ -234,7 +234,7 @@ export const useDashboardListingTable = ({
                 isGloballyAuthorized ||
                 accessControlClient.checkUserAccessControl({
                   accessControl: {
-                    owner: data?.access_control?.owner,
+                    owner: meta.owner,
                     accessMode: data?.access_control?.access_mode,
                   },
                   createdBy: meta.created_at,

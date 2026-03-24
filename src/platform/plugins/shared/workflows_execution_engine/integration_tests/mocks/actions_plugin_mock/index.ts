@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function isNotNullable<T>(v: T): v is NonNullable<T> {
-  return v != null;
-}
+export { FakeConnectors, getMockedConnectorResult } from './fake_connectors';
+export { UnsecuredActionsClientMock } from './unsecured_actions_client.mock';
+export { ScopedActionsClientMock } from './scoped_actions_client.mock';
