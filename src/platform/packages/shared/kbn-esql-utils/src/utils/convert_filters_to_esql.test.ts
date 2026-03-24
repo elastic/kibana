@@ -261,7 +261,7 @@ describe('convertFiltersToESQLExpression', () => {
         query: { exists: { field: 'host' } },
       };
       const result = convertFiltersToESQLExpression([filter]);
-      expect(result.esqlExpression).toBe('NOT (`host` IS NOT NULL)');
+      expect(result.esqlExpression).toBe('`host` IS NULL');
     });
 
     it('should handle field names with special characters', () => {
@@ -336,7 +336,7 @@ describe('convertFiltersToESQLExpression', () => {
         },
       };
       const result = convertFiltersToESQLExpression([filter]);
-      expect(result.esqlExpression).toBe('(`status` : 200 AND NOT (`host` IS NOT NULL))');
+      expect(result.esqlExpression).toBe('(`status` : 200 AND `host` IS NULL)');
     });
   });
 

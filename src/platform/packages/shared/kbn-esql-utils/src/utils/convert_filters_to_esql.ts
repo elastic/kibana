@@ -53,7 +53,8 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
       continue;
     }
 
-    const expression = translateSingleFilter(filter);
+    const negate = filter.meta?.negate ?? false;
+    const expression = translateSingleFilter(filter, negate);
 
     if (expression === null) {
       untranslatableFilters.push(filter);
@@ -65,8 +66,7 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
       continue;
     }
 
-    const finalExpression = filter.meta?.negate ? `NOT (${expression})` : expression;
-    translatedExpressions.push(finalExpression);
+    translatedExpressions.push(expression);
   }
 
   return {
@@ -75,34 +75,35 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
   };
 };
 
-const translateSingleFilter = (filter: Filter): string | null => {
+const translateSingleFilter = (filter: Filter, negate: boolean): string | null => {
   // Scripted filters are not translatable — check before phrase/range
   if (isScriptedPhraseFilter(filter) || isScriptedRangeFilter(filter)) {
     return null;
   }
 
+  // Exists filter handles negation natively: IS NOT NULL vs IS NULL
+  if (isExistsFilter(filter)) {
+    return translateExistsFilter(filter, negate);
+  }
+
   if (isPhraseFilter(filter)) {
-    return translatePhraseFilter(filter);
+    return wrapWithNot(translatePhraseFilter(filter), negate);
   }
 
   if (isPhrasesFilter(filter)) {
-    return translatePhrasesFilter(filter);
+    return wrapWithNot(translatePhrasesFilter(filter), negate);
   }
 
   if (isRangeFilter(filter)) {
-    return translateRangeFilter(filter);
-  }
-
-  if (isExistsFilter(filter)) {
-    return translateExistsFilter(filter);
+    return wrapWithNot(translateRangeFilter(filter), negate);
   }
 
   if (isCombinedFilter(filter)) {
-    return translateCombinedFilter(filter);
+    return wrapWithNot(translateCombinedFilter(filter), negate);
   }
 
   if (isQueryStringFilter(filter)) {
-    return translateQueryStringFilter(filter);
+    return wrapWithNot(translateQueryStringFilter(filter), negate);
   }
 
   if (isMatchAllFilter(filter)) {
@@ -110,6 +111,13 @@ const translateSingleFilter = (filter: Filter): string | null => {
   }
 
   return null;
+};
+
+const wrapWithNot = (expression: string | null, negate: boolean): string | null => {
+  if (expression === null) {
+    return null;
+  }
+  return negate ? `NOT (${expression})` : expression;
 };
 
 const translatePhraseFilter = (filter: PhraseFilter): string | null => {
@@ -181,14 +189,14 @@ const translateRangeFilter = (filter: RangeFilter): string | null => {
   return parts.join(' AND ');
 };
 
-const translateExistsFilter = (filter: ExistsFilter): string | null => {
+const translateExistsFilter = (filter: ExistsFilter, negate: boolean): string | null => {
   const field = filter.query?.exists?.field;
   if (!field) {
     return null;
   }
 
   const escapedField = escapeFieldName(field);
-  return `${escapedField} IS NOT NULL`;
+  return negate ? `${escapedField} IS NULL` : `${escapedField} IS NOT NULL`;
 };
 
 const translateCombinedFilter = (filter: CombinedFilter): string | null => {
@@ -202,7 +210,8 @@ const translateCombinedFilter = (filter: CombinedFilter): string | null => {
   const subExpressions: string[] = [];
 
   for (const subFilter of subFilters) {
-    const expression = translateSingleFilter(subFilter);
+    const subNegate = subFilter.meta?.negate ?? false;
+    const expression = translateSingleFilter(subFilter, subNegate);
     if (expression === null) {
       // If any sub-filter is untranslatable, the whole combined filter is untranslatable
       return null;
@@ -210,8 +219,7 @@ const translateCombinedFilter = (filter: CombinedFilter): string | null => {
     if (expression === '') {
       continue;
     }
-    const finalExpression = subFilter.meta?.negate ? `NOT (${expression})` : expression;
-    subExpressions.push(finalExpression);
+    subExpressions.push(expression);
   }
 
   if (subExpressions.length === 0) {
