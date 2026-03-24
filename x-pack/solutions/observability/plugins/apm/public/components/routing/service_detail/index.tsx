@@ -374,7 +374,7 @@ export const serviceDetailRoute = {
           }),
           element: <AlertsOverview />,
           searchBarOptions: {
-            hidden: true,
+            showUnifiedSearchBar: false,
           },
         }),
         params: t.partial({
