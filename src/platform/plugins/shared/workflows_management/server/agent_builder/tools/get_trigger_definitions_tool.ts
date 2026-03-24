@@ -8,7 +8,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { AlertEventPropsSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
+import { AlertEventSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
@@ -61,12 +61,9 @@ function compactLargeEnums(node: unknown): unknown {
  * other built-in triggers only get `BaseEventSchema` (spaceId).
  */
 function getEventContextSchema(triggerTypeId: string): unknown {
+  // TODO: support custom trigger event schemas
   if (triggerTypeId === 'alert') {
-    const merged = z.object({
-      ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
-      ...(AlertEventPropsSchema as z.ZodObject<z.ZodRawShape>).shape,
-    });
-    return zodToJsonSchemaSafe(merged);
+    return zodToJsonSchemaSafe(AlertEventSchema);
   }
   return zodToJsonSchemaSafe(BaseEventSchema);
 }
