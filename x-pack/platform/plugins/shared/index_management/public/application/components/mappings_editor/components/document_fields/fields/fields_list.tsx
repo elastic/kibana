@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLiveAnnouncer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldsListItemContainer } from './fields_list_item_container';
 import type { NormalizedField, State } from '../../../types';
+import { useLiveAnnouncement } from '../use_live_announcement';
 
 interface Props {
   fields?: NormalizedField[];
@@ -28,28 +30,44 @@ export const FieldsList = React.memo(function FieldsListComponent({
   isAddingFields,
   pendingFieldsRef,
 }: Props) {
+  const listLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListLabel', {
+    defaultMessage: 'Saved mapping fields',
+  });
+
+  const fieldsKey = useMemo(() => fields?.map((field) => field.id).join('|') ?? '', [fields]);
+  const itemsCount = fields?.length ?? 0;
+
+  const message = i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.fieldListUpdatedAnnouncementWithCount',
+    {
+      defaultMessage:
+        '{listLabel} list has been updated. {itemsCount, plural, one {# item} other {# items}}.',
+      values: { listLabel, itemsCount },
+    }
+  );
+  const liveAnnouncement = useLiveAnnouncement({ message, changeKey: fieldsKey });
+
   if (fields === undefined) {
     return null;
   }
+
   return (
-    <ul
-      data-test-subj="fieldsList"
-      aria-label={i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListLabel', {
-        defaultMessage: 'Saved mapping fields',
-      })}
-    >
-      {fields.map((field, index) => (
-        <FieldsListItemContainer
-          key={field.id}
-          fieldId={field.id}
-          treeDepth={treeDepth === undefined ? 0 : treeDepth}
-          isLastItem={index === fields.length - 1}
-          state={state}
-          setPreviousState={setPreviousState}
-          isAddingFields={isAddingFields}
-          pendingFieldsRef={pendingFieldsRef}
-        />
-      ))}
-    </ul>
+    <>
+      <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer>
+      <ul data-test-subj="fieldsList" aria-label={listLabel}>
+        {fields.map((field, index) => (
+          <FieldsListItemContainer
+            key={field.id}
+            fieldId={field.id}
+            treeDepth={treeDepth === undefined ? 0 : treeDepth}
+            isLastItem={index === fields.length - 1}
+            state={state}
+            setPreviousState={setPreviousState}
+            isAddingFields={isAddingFields}
+            pendingFieldsRef={pendingFieldsRef}
+          />
+        ))}
+      </ul>
+    </>
   );
 });
