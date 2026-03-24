@@ -7,7 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityStoreDataClient } from '../entity_store/entity_store_data_client';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
@@ -15,14 +16,14 @@ import { createLeadGenerationEngine } from './engine/lead_generation_engine';
 import { createRiskScoreModule } from './observation_modules/risk_score_module';
 import { createTemporalStateModule } from './observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from './observation_modules/behavioral_analysis_module';
-import { createEntityRetriever } from './entity_retriever';
+import { entityRecordToLeadEntity } from './entity_conversion';
 import { createLeadDataClient } from './lead_data_client';
 
 export interface RunPipelineParams {
   readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
-  readonly chatModel?: InferenceChatModel;
+  readonly entityStoreDataClient: EntityStoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
 }
@@ -39,16 +40,23 @@ export const runLeadGenerationPipeline = async ({
   esClient,
   logger,
   spaceId,
-  chatModel,
+  entityStoreDataClient,
   executionId: providedExecutionId,
   sourceType,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
 
-  const retriever = createEntityRetriever({ esClient, logger, spaceId });
   const fetchStart = Date.now();
-  const leadEntities = await retriever.fetchAllEntities();
+  const entityResponse = await entityStoreDataClient.searchEntities({
+    entityTypes: [EntityType.host, EntityType.user, EntityType.service],
+    filterQuery: '',
+    page: 1,
+    perPage: 10000,
+    sortField: 'entity.name',
+    sortOrder: 'asc',
+  });
+  const leadEntities = entityResponse.records.map(entityRecordToLeadEntity);
   logger.info(
     `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
@@ -74,7 +82,7 @@ export const runLeadGenerationPipeline = async ({
   );
 
   const generateStart = Date.now();
-  const leads = await engine.generateLeads(leadEntities, { chatModel });
+  const leads = await engine.generateLeads(leadEntities);
   logger.info(
     `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
       leads.length

@@ -23,7 +23,6 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as LeadGenerationTaskState,
 } from './state';
-import { runLeadGenerationPipeline } from '../run_pipeline';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -153,12 +152,14 @@ const runLeadGenerationTask = async ({
     logger.info('[LeadGeneration] Running scheduled lead generation task');
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    await runLeadGenerationPipeline({
-      esClient,
-      logger,
-      spaceId: state.namespace,
-      sourceType: 'scheduled',
-    });
+    // TODO(#15824): Construct EntityStoreDataClient using the API key pattern
+    // (see entity_store/tasks/health/health.ts). Requires appClientFactory,
+    // security plugin, and API key manager to be wired through RegisterParams.
+    // Until then, the scheduled task cannot run the pipeline.
+    logger.warn(
+      '[LeadGeneration] Scheduled task does not yet have EntityStoreDataClient wiring — skipping run. Use the ad-hoc generate route instead.'
+    );
+    void esClient;
   } catch (e) {
     logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${e.message}`);
   }

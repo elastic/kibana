@@ -7,10 +7,8 @@
 
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-const mockFetchAllEntities = jest.fn();
-jest.mock('./entity_retriever', () => ({
-  createEntityRetriever: () => ({ fetchAllEntities: mockFetchAllEntities }),
-}));
+const mockSearchEntities = jest.fn();
+const mockEntityStoreDataClient = { searchEntities: mockSearchEntities } as never;
 
 const mockGenerateLeads = jest.fn();
 const mockRegisterModule = jest.fn();
@@ -47,29 +45,35 @@ describe('runLeadGenerationPipeline', () => {
   });
 
   it('returns zero counts when no entities are found', async () => {
-    mockFetchAllEntities.mockResolvedValueOnce([]);
+    mockSearchEntities.mockResolvedValueOnce({ records: [], total: 0 });
 
     const result = await runLeadGenerationPipeline({
       esClient,
       logger,
       spaceId: 'default',
+      entityStoreDataClient: mockEntityStoreDataClient,
       sourceType: 'scheduled',
     });
 
     expect(result).toEqual({ total: 0 });
+    expect(mockSearchEntities).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityTypes: ['host', 'user', 'service'],
+      })
+    );
     expect(mockGenerateLeads).not.toHaveBeenCalled();
   });
 
   it('runs the full pipeline and returns counts', async () => {
-    const mockEntity = { type: 'user', name: 'testuser' };
-    mockFetchAllEntities.mockResolvedValueOnce([mockEntity]);
+    const mockRecord = { entity: { type: 'user', name: 'testuser', id: 'euid-testuser' } };
+    mockSearchEntities.mockResolvedValueOnce({ records: [mockRecord], total: 1 });
 
     const mockLead = {
       id: 'lead-1',
       title: 'Test Lead',
       byline: '',
       description: '',
-      entities: [mockEntity],
+      entities: [{ type: 'user', name: 'testuser', record: mockRecord }],
       tags: [],
       priority: 5,
       chatRecommendations: [],
@@ -83,6 +87,7 @@ describe('runLeadGenerationPipeline', () => {
       esClient,
       logger,
       spaceId: 'default',
+      entityStoreDataClient: mockEntityStoreDataClient,
       sourceType: 'adhoc',
       executionId: 'exec-123',
     });
@@ -97,33 +102,16 @@ describe('runLeadGenerationPipeline', () => {
     );
   });
 
-  it('passes chatModel to engine when provided', async () => {
-    const mockEntity = { type: 'host', name: 'server01' };
-    mockFetchAllEntities.mockResolvedValueOnce([mockEntity]);
-    mockGenerateLeads.mockResolvedValueOnce([]);
-
-    const fakeChatModel = {} as never;
-
-    await runLeadGenerationPipeline({
-      esClient,
-      logger,
-      spaceId: 'default',
-      sourceType: 'adhoc',
-      chatModel: fakeChatModel,
-    });
-
-    expect(mockGenerateLeads).toHaveBeenCalledWith([mockEntity], { chatModel: fakeChatModel });
-  });
-
   it('uses scheduled sourceType for Task Manager runs', async () => {
-    const mockEntity = { type: 'user', name: 'admin' };
-    mockFetchAllEntities.mockResolvedValueOnce([mockEntity]);
+    const mockRecord = { entity: { type: 'user', name: 'admin', id: 'euid-admin' } };
+    mockSearchEntities.mockResolvedValueOnce({ records: [mockRecord], total: 1 });
     mockGenerateLeads.mockResolvedValueOnce([]);
 
     await runLeadGenerationPipeline({
       esClient,
       logger,
       spaceId: 'test-space',
+      entityStoreDataClient: mockEntityStoreDataClient,
       sourceType: 'scheduled',
     });
 
