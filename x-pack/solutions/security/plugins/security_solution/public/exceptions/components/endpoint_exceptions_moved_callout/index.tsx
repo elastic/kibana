@@ -33,14 +33,14 @@ const TRANSLATIONS: Record<EndpointExceptionsMovedCalloutTitles, string> = {
     'xpack.securitySolution.endpoint.exceptionsNotEvaluatedCalloutTitle',
     {
       defaultMessage:
-        'Endpoint Exceptions has changed, your endpoint exceptions are no longer evaluated on the rules.',
+        'Endpoint exceptions are no longer evaluated during detection rule execution.',
     }
   ),
 
   cannotBeAddedToRules: i18n.translate(
     'xpack.securitySolution.endpoint.exceptionsCannotBeAddedCalloutTitle',
     {
-      defaultMessage: 'Endpoint Exceptions can no longer be added to rules here.',
+      defaultMessage: 'Endpoint Exceptions can no longer be added to detection rules.',
     }
   ),
 };
@@ -77,13 +77,13 @@ export const EndpointExceptionsMovedCallout = React.memo(
         >
           <FormattedMessage
             id="xpack.securitySolution.endpoint.exceptionsMovedCallout.message"
-            defaultMessage="We have made some improvements to Endpoint exceptions and part of that is moving it to {endpoints} under Manage/Assets."
+            defaultMessage="Endpoint exceptions are now managed from the {artifacts} page."
             values={{
-              endpoints: (
+              artifacts: (
                 <EuiLink href={endpointExceptionsLink}>
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.exceptionsMovedCallout.link"
-                    defaultMessage="Endpoints artifacts"
+                    defaultMessage="Artifacts"
                   />
                 </EuiLink>
               ),

@@ -21,7 +21,7 @@ describe('EndpointExceptionsMovedCalloutContainer', () => {
       </TestProviders>
     );
     expect(getByTestId('EndpointExceptionsMovedCallout')).toHaveTextContent(
-      'We have made some improvements to Endpoint exceptions'
+      'Endpoint exceptions are now managed from the Artifacts page'
     );
   });
 
@@ -48,7 +48,7 @@ describe('EndpointExceptionsMovedCalloutContainer', () => {
         </TestProviders>
       );
       expect(getByTestId('EndpointExceptionsMovedCallout')).toHaveTextContent(
-        'Endpoint Exceptions has changed, your endpoint exceptions are no longer evaluated on the rules.'
+        'Endpoint exceptions are no longer evaluated during detection rule execution.'
       );
     });
 
@@ -63,7 +63,7 @@ describe('EndpointExceptionsMovedCalloutContainer', () => {
         </TestProviders>
       );
       expect(getByTestId('EndpointExceptionsMovedCallout')).toHaveTextContent(
-        'Endpoint Exceptions can no longer be added to rules here.'
+        'Endpoint Exceptions can no longer be added to detection rules.'
       );
     });
   });
