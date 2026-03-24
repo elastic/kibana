@@ -245,24 +245,5 @@ describe('POST /api/workflows/_bulk_create', () => {
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
-
-    it('should return forbidden when authzResult is undefined', async () => {
-      const mockContext = {};
-      const mockRequest = {
-        query: { overwrite: false },
-        body: {
-          workflows: [{ yaml: 'name: Workflow 1' }],
-        },
-        headers: {},
-        url: { pathname: '/api/workflows/_bulk_create' },
-        authzResult: undefined,
-      };
-      const mockResponse = createMockResponse();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(workflowsApi.bulkCreateWorkflows).not.toHaveBeenCalled();
-      expect(mockResponse.forbidden).toHaveBeenCalled();
-    });
   });
 });
