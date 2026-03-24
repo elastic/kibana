@@ -25,8 +25,12 @@ jest.mock('./workflow_execution_panel', () => ({
   WorkflowExecutionPanel: () => <div data-test-subj="execution-panel" />,
 }));
 
+let capturedStepDetailsProps: Record<string, unknown> = {};
 jest.mock('./workflow_step_execution_details', () => ({
-  WorkflowStepExecutionDetails: () => <div data-test-subj="step-details" />,
+  WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
+    capturedStepDetailsProps = props;
+    return <div data-test-subj="step-details" />;
+  },
 }));
 
 jest.mock('../model/use_step_execution', () => ({
@@ -132,6 +136,153 @@ describe('WorkflowExecutionDetail - cache invalidation', () => {
     expect(mockRemoveQueries).toHaveBeenCalledWith({
       queryKey: ['stepExecution', 'exec-1'],
     });
+  });
+});
+
+describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
+  let mockRemoveQueries: jest.Mock;
+
+  const waitingStepExecution = {
+    id: 'step-exec-1',
+    stepId: 'request_approval',
+    stepType: 'waitForInput',
+    status: ExecutionStatus.WAITING_FOR_INPUT,
+    startedAt: '2024-01-01T00:00:00Z',
+    globalExecutionIndex: 0,
+  };
+
+  const waitingExecution = (steps: WorkflowYaml['steps']): WorkflowExecutionDto => ({
+    spaceId: 'default',
+    id: 'exec-waiting',
+    status: ExecutionStatus.WAITING_FOR_INPUT,
+    error: null,
+    isTestRun: false,
+    startedAt: '2024-01-01T00:00:00Z',
+    finishedAt: '',
+    workflowId: 'workflow-1',
+    workflowName: 'Test Workflow',
+    workflowDefinition: {
+      version: '1',
+      name: 'test',
+      enabled: true,
+      triggers: [],
+      steps,
+    } as WorkflowYaml,
+    stepId: undefined,
+    stepExecutions: [waitingStepExecution as any],
+    duration: 0,
+    triggeredBy: 'manual',
+    yaml: 'version: "1"',
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedStepDetailsProps = {};
+    mockRemoveQueries = jest.fn();
+    mockUseQueryClient.mockReturnValue({ removeQueries: mockRemoveQueries } as any);
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      setSelectedStepExecution: mockSetSelectedStepExecution,
+      selectedStepExecutionId: 'step-exec-1',
+    } as any);
+  });
+
+  it('resolves resumeMessage and resumeSchema for a top-level waitForInput step', () => {
+    const steps: WorkflowYaml['steps'] = [
+      {
+        name: 'request_approval',
+        type: 'waitForInput',
+        with: {
+          message: 'Top-level approval required',
+          schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+        },
+      } as any,
+    ];
+
+    mockUseWorkflowExecutionPolling.mockReturnValue({
+      workflowExecution: waitingExecution(steps),
+      isLoading: false,
+      error: null,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expect(capturedStepDetailsProps.resumeMessage).toBe('Top-level approval required');
+    expect(capturedStepDetailsProps.resumeSchema).toMatchObject({ type: 'object' });
+  });
+
+  it('resolves resumeMessage and resumeSchema for a waitForInput step nested inside if', () => {
+    const steps: WorkflowYaml['steps'] = [
+      {
+        name: 'should_ask',
+        type: 'if',
+        condition: 'true',
+        steps: [
+          {
+            name: 'request_approval',
+            type: 'waitForInput',
+            with: {
+              message: 'Nested approval required',
+              schema: { type: 'object', properties: { severity: { type: 'string' } } },
+            },
+          },
+        ],
+      } as any,
+    ];
+
+    mockUseWorkflowExecutionPolling.mockReturnValue({
+      workflowExecution: waitingExecution(steps),
+      isLoading: false,
+      error: null,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expect(capturedStepDetailsProps.resumeMessage).toBe('Nested approval required');
+    expect(capturedStepDetailsProps.resumeSchema).toMatchObject({ type: 'object' });
+  });
+
+  it('resolves resumeSchema for a waitForInput step nested inside foreach', () => {
+    const steps: WorkflowYaml['steps'] = [
+      {
+        name: 'process_each_item',
+        type: 'foreach',
+        foreach: '["alpha","beta"]',
+        steps: [
+          {
+            name: 'request_approval',
+            type: 'waitForInput',
+            with: {
+              message: 'Approve item {{ foreach.item }}',
+              schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+            },
+          },
+        ],
+      } as any,
+    ];
+
+    mockUseWorkflowExecutionPolling.mockReturnValue({
+      workflowExecution: waitingExecution(steps),
+      isLoading: false,
+      error: null,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expect(capturedStepDetailsProps.resumeSchema).toMatchObject({ type: 'object' });
+    expect(capturedStepDetailsProps.resumeMessage).toBe('Approve item {{ foreach.item }}');
   });
 });
 

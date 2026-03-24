@@ -22,7 +22,8 @@ describe('getEuiTableColumn ', () => {
     expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
-      width: '250px',
+      maxWidth: '18em',
+      minWidth: '6em',
       'data-test-subj': 'text-custom-field-column',
     });
   });
