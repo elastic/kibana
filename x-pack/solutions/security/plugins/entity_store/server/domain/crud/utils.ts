@@ -26,7 +26,7 @@ export function hashEuid(id: string): string {
   return createHash('md5').update(id).digest('hex');
 }
 
-// validateUpdateDocIdentification checks provided and generated EUIDs. It
+// validateDocIdentification checks provided and generated EUIDs. It
 // picks validId, preferring generated over supplied ID.
 export function validateDocIdentification(doc: Entity, generatedId: string | undefined): string {
   if (!doc.entity?.id && generatedId === undefined) {
