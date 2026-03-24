@@ -36,11 +36,12 @@ export const ENTITY_STORE_ROUTES = {
   UPDATE: ENTITY_STORE_BASE_ROUTE,
   UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
   STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
-  CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
   START: `${ENTITY_STORE_BASE_ROUTE}/start`,
   STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
+  CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
   FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
+  CRUD_GET: `${ENTITY_STORE_BASE_ROUTE}/entities`,
   CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
   CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
@@ -52,7 +53,6 @@ export const ENTITY_STORE_ROUTES = {
   ENTITY_MAINTAINERS_RUN: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/run/{id}`,
   ENTITY_MAINTAINERS_GET: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers`,
   ENTITY_MAINTAINERS_INIT: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/init`,
-  SEARCH_ENTITIES: `${ENTITY_STORE_BASE_ROUTE}/entities/search`,
 } as const satisfies Record<string, string>;
 
 export const getErrorMessage = (error: unknown): string => {
@@ -77,11 +77,11 @@ export const EntityType = {
 
 export type EntityType = (typeof EntityType.enum)[keyof typeof EntityType.enum];
 
-export const ALL_ENTITY_TYPES = Object.values(EntityType.enum) as EntityType[];
-
-/** Minimal shape for identity source fields (avoids importing domain/euid in page-load bundle). */
+export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 export interface IdentitySourceFields {
+  /** Fields that participate in identity (EUID composition). */
   requiresOneOf: string[];
+  /** All field names used in EUID composition, deduplicated. */
   identitySourceFields: string[];
 }
 
