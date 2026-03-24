@@ -93,6 +93,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
+        aria-label={strings.getAddFilterButtonLabel()}
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

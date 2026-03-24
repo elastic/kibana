@@ -16,6 +16,7 @@ import {
   EuiCode,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -79,15 +80,18 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
     };
   });
 
-export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
+export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+  return (
   <EuiFlyout
     closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
     size="s"
     onClose={onClose}
+    aria-labelledby={flyoutTitleId}
   >
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="s">
-        <h2>{strings.getTitle()}</h2>
+        <h2 id={flyoutTitleId}>{strings.getTitle()}</h2>
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
@@ -111,4 +115,5 @@ export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
       })}
     </EuiFlyoutBody>
   </EuiFlyout>
-);
+  );
+};

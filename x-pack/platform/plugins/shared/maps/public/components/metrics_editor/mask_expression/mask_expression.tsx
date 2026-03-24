@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { AGG_TYPE } from '../../../../common/constants';
 import type { AggDescriptor, FieldedAggDescriptor } from '../../../../common/descriptor_types';
@@ -92,6 +93,9 @@ export class MaskExpression extends Component<Props, State> {
         panelPaddingSize="s"
         anchorPosition="downCenter"
         repositionOnScroll={true}
+        aria-label={i18n.translate('xpack.maps.maskExpression.popoverAriaLabel', {
+          defaultMessage: 'Mask filter',
+        })}
       >
         <MaskEditor
           metric={this.props.metric}

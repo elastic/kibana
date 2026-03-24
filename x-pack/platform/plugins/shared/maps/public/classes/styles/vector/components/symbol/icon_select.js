@@ -204,6 +204,9 @@ export class IconSelect extends Component {
           anchorPosition="downLeft"
           panelPaddingSize="s"
           display="block"
+          aria-label={i18n.translate('xpack.maps.styles.vector.iconSelect.popoverAriaLabel', {
+            defaultMessage: 'Icon selector',
+          })}
         >
           <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
         </EuiPopover>
