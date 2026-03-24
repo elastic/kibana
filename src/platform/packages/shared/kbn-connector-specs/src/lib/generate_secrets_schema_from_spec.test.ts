@@ -125,25 +125,4 @@ describe('generateSecretsSchemaFromSpec', () => {
     expect(authTypes).toContain('bearer');
     expect(authTypes).toContain('oauth_authorization_code');
   });
-
-  test('includes all auth types when authMode is an empty string (unset form value)', () => {
-    const schema = generateSecretsSchemaFromSpec(
-      {
-        types: ['basic', 'bearer', 'oauth_authorization_code'],
-      },
-      { isPfxEnabled: true, authMode: '' as unknown as AuthMode }
-    );
-    const jsonSchema = z.toJSONSchema(schema) as {
-      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
-    };
-
-    const anyOfOptions = jsonSchema.anyOf || [];
-    const authTypes = anyOfOptions
-      .map((opt) => opt.properties?.authType?.const)
-      .filter(Boolean) as string[];
-
-    expect(authTypes).toContain('basic');
-    expect(authTypes).toContain('bearer');
-    expect(authTypes).toContain('oauth_authorization_code');
-  });
 });

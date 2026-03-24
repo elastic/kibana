@@ -244,14 +244,15 @@ describe('Field Builder', () => {
       expect(result?.message).toContain('First validation failed');
     });
 
-    it('should pass validation for optional fields with undefined value', () => {
+    it('should return error for optional fields with undefined value', () => {
       const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
       const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg(undefined, path));
+      const result = field.validate(createValidationArg(undefined, path)) as ValidationError;
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result.message).toEqual('Invalid option: expected one of "option_a"|"option_b"');
     });
 
     it('should return error for optional enum fields with null value', () => {
@@ -262,17 +263,18 @@ describe('Field Builder', () => {
       const result = field.validate(createValidationArg(null, path)) as ValidationError;
 
       expect(result).toBeDefined();
-      expect(result).toHaveProperty('message');
+      expect(result.message).toEqual('Invalid option: expected one of "option_a"|"option_b"');
     });
 
-    it('should pass validation for optional enum fields with empty string when using z.catch', () => {
-      const schema = z.enum(['option_a', 'option_b']).optional().catch(undefined);
+    it('should return error for optional enum fields with empty string', () => {
+      const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
       const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg('', path));
+      const result = field.validate(createValidationArg('', path)) as ValidationError;
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result.message).toEqual('Invalid option: expected one of "option_a"|"option_b"');
     });
 
     it('should still validate optional fields with non-empty invalid values', () => {
