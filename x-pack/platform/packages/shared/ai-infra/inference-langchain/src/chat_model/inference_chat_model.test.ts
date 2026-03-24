@@ -6,7 +6,7 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
@@ -40,6 +40,7 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     config: {},
     capabilities: {},
     isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...parts,
   };
 };

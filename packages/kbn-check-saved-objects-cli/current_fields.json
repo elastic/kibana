@@ -427,6 +427,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -438,6 +441,7 @@
     "install_started_at",
     "install_status",
     "install_version",
+    "installed_as_dependency",
     "installed_es",
     "installed_es.deferred",
     "installed_es.id",
@@ -446,6 +450,7 @@
     "installed_kibana",
     "installed_kibana_space_id",
     "internal",
+    "is_dependency_of",
     "keep_policies_up_to_date",
     "latest_executed_state",
     "latest_install_failed_attempts",
@@ -599,11 +604,13 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_enabled",
     "monitoring_output_id",
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -652,6 +659,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -738,6 +746,7 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_diagnostics",
     "monitoring_enabled",
     "monitoring_http",
@@ -746,6 +755,7 @@
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -844,6 +854,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -964,6 +975,11 @@
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
+  ],
   "observability-onboarding-state": [
     "progress",
     "state",
@@ -976,6 +992,7 @@
   "osquery-pack": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "enabled",
     "name",
@@ -990,6 +1007,7 @@
     "shards",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "osquery-pack-asset": [
@@ -1009,6 +1027,7 @@
   "osquery-saved-query": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "ecs_mapping",
     "id",
@@ -1018,6 +1037,7 @@
     "timeout",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "policy-settings-protection-updates-note": [
@@ -1095,6 +1115,7 @@
     "provider"
   ],
   "security-rule": [
+    "deprecated",
     "name",
     "risk_score",
     "rule_id",
@@ -1261,6 +1282,7 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
+  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
@@ -1353,6 +1375,13 @@
   "ui-metric": [
     "count"
   ],
+  "uiam_api_keys_provisioning_status": [
+    "@timestamp",
+    "entityId",
+    "entityType",
+    "message",
+    "status"
+  ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
   ],
@@ -1378,6 +1407,11 @@
   ],
   "usage-counters": [
     "domainId"
+  ],
+  "user_connector_token": [
+    "connectorId",
+    "credentialType",
+    "profileUid"
   ],
   "visualization": [
     "description",

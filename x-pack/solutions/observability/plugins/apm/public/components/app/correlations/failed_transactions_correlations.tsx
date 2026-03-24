@@ -463,6 +463,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               transactionType,
               sampleRangeFrom,
               sampleRangeTo,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

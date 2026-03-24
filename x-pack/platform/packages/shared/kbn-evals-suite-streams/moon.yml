@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/dissect-heuristics'
   - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/zod'
   - '@kbn/es-snapshot-loader'
   - '@kbn/es-errors'
 tags:

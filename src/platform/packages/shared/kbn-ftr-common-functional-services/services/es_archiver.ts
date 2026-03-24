@@ -30,6 +30,7 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
     kibanaServer,
     retry,
     defaults: config.get('uiSettings.defaults'),
+    globalDefaults: config.get('uiSettings.globalDefaults'),
   });
 
   return esArchiver;

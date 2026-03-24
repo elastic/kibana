@@ -129,6 +129,122 @@ describe('getScheduledQueryResultsRoute', () => {
     });
   });
 
+  describe('esFilters validation', () => {
+    it('should return bad request for invalid JSON in esFilters', async () => {
+      registerRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: { esFilters: 'not-valid-json' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'esFilters contains invalid JSON' },
+      });
+    });
+
+    it('should return bad request when esFilters is not an array', async () => {
+      registerRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: { esFilters: JSON.stringify({ meta: {} }) },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'esFilters must be a valid filters array' },
+      });
+    });
+
+    it('should return bad request when esFilters array contains non-filter objects', async () => {
+      registerRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: { esFilters: JSON.stringify([{ noMeta: true }]) },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'esFilters must be a valid filters array' },
+      });
+    });
+
+    it('should accept valid esFilters and pass them to search strategy', async () => {
+      const mockResultsResponse = {
+        edges: [{ _id: 'row-1' }],
+        rawResponse: { hits: { total: 1 } },
+        inspect: { dsl: [] },
+      };
+
+      const mockSearchFn = jest.fn().mockReturnValue(of(mockResultsResponse));
+
+      registerRoute();
+
+      const validFilters = JSON.stringify([
+        {
+          meta: {
+            key: 'agent.id',
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            params: { query: 'agent-123' },
+          },
+          query: { match_phrase: { 'agent.id': 'agent-123' } },
+          $state: { store: 'appState' },
+        },
+      ]);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: { esFilters: validFilters },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esFilters: validFilters,
+        }),
+        expect.any(Object)
+      );
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('should proceed without esFilters when not provided', async () => {
+      const mockResultsResponse = {
+        edges: [],
+        rawResponse: { hits: { total: 0 } },
+        inspect: { dsl: [] },
+      };
+
+      const mockSearchFn = jest.fn().mockReturnValue(of(mockResultsResponse));
+
+      registerRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+  });
+
   it('should return 500 when search strategy throws', async () => {
     const mockSearchFn = jest.fn().mockImplementation(() => {
       throw new Error('ES unavailable');

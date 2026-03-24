@@ -8,11 +8,12 @@
 import moment from 'moment-timezone';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -24,13 +25,14 @@ import deepEqual from 'fast-deep-equal';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { Direction } from '../../../../common/search_strategy';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_persisted_page_size';
 import { SavedQueryRowActions } from './saved_query_row_actions';
+import { SavedQueriesTable } from './saved_queries_table';
 
 export interface SavedQuerySO {
   name: string;
@@ -41,8 +43,10 @@ export interface SavedQuerySO {
   timeout?: number;
   ecs_mapping: ECSMapping;
   created_by?: string;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by?: string;
+  updated_by_profile_uid?: string;
   prebuilt?: boolean;
 }
 
@@ -170,7 +174,7 @@ const SavedQueriesPageComponent = () => {
     [permissions.runSavedQueries]
   );
 
-  const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
+  const renderUpdatedAt = useCallback((updatedAt: string, item: SavedQuerySO) => {
     if (!updatedAt) return '-';
 
     const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
@@ -280,25 +284,7 @@ const SavedQueriesPageComponent = () => {
     [sortDirection, sortField]
   );
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.savedQueryList.pageTitle"
-                defaultMessage="Saved queries"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    []
-  );
-
-  const RightColumn = useMemo(
+  const addSavedQueryButton = useMemo(
     () => (
       <EuiButton
         fill
@@ -315,8 +301,36 @@ const SavedQueriesPageComponent = () => {
     [permissions.writeSavedQueries, newQueryLinkProps]
   );
 
+  if (queryHistoryRework) {
+    return (
+      <div css={fullWidthContentCss}>
+        <EuiSpacer size="l" />
+        <SavedQueriesTable />
+      </div>
+    );
+  }
+
+  const LeftColumn = (
+    <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiText>
+          <h1>
+            <FormattedMessage
+              id="xpack.osquery.savedQueryList.pageTitle"
+              defaultMessage="Saved queries"
+            />
+          </h1>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={addSavedQueryButton}
+      rightColumnGrow={false}
+    >
       {data?.data && (
         <EuiInMemoryTable
           items={data?.data}

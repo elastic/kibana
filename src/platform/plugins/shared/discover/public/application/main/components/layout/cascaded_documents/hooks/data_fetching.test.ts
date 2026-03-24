@@ -50,7 +50,7 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toEqual([]);
+      expect(result.current.data).toEqual([]);
     });
 
     it('should return empty array when rows are empty', () => {
@@ -63,7 +63,7 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toEqual([]);
+      expect(result.current.data).toEqual([]);
     });
 
     it('should group rows by selected cascade groups', () => {
@@ -82,11 +82,12 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toHaveLength(2);
-      expect(result.current[0].groupValue).toBe('A');
-      expect(result.current[0].aggregatedValues.count).toBe(15); // 10 + 5 aggregated
-      expect(result.current[1].groupValue).toBe('B');
-      expect(result.current[1].aggregatedValues.count).toBe(20);
+      expect(result.current.data).toHaveLength(2);
+      expect(result.current.data[0].groupValue).toBe('A');
+      expect(result.current.data[0].aggregatedValues.count).toBe(15); // 10 + 5 aggregated
+      expect(result.current.data[1].groupValue).toBe('B');
+      expect(result.current.data[1].aggregatedValues.count).toBe(20);
+      expect(result.current.columnTypes.get('count')).toBe('number');
     });
 
     it('should skip undefined and null values in grouping', () => {
@@ -106,9 +107,9 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toHaveLength(2);
-      expect(result.current.find((r) => r.groupValue === 'A')).toBeDefined();
-      expect(result.current.find((r) => r.groupValue === 'B')).toBeDefined();
+      expect(result.current.data).toHaveLength(2);
+      expect(result.current.data.find((r) => r.groupValue === 'A')).toBeDefined();
+      expect(result.current.data.find((r) => r.groupValue === 'B')).toBeDefined();
     });
 
     it('should aggregate multiple applied functions', () => {
@@ -134,9 +135,11 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toHaveLength(1);
-      expect(result.current[0].aggregatedValues.count).toBe(15);
-      expect(result.current[0].aggregatedValues.sum).toBe(150);
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.count).toBe(15);
+      expect(result.current.data[0].aggregatedValues.sum).toBe(150);
+      expect(result.current.columnTypes.get('count')).toBe('number');
+      expect(result.current.columnTypes.get('sum')).toBe('number');
     });
 
     it('should aggregate multiple applied functions with array values', () => {
@@ -149,7 +152,7 @@ describe('data_fetching related hooks', () => {
         groupByFields: [{ field: 'category', type: 'column' }],
         appliedFunctions: [
           { identifier: 'count', aggregation: 'count' },
-          { identifier: 'ext', aggregation: 'ext' },
+          { identifier: 'ext', aggregation: 'values' },
         ],
       };
 
@@ -162,9 +165,11 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toHaveLength(1);
-      expect(result.current[0].aggregatedValues.count).toBe(15);
-      expect(result.current[0].aggregatedValues.ext).toEqual(['css', 'js', 'deb', 'rpm']);
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.count).toBe(15);
+      expect(result.current.data[0].aggregatedValues.ext).toEqual(['css', 'js', 'deb', 'rpm']);
+      expect(result.current.columnTypes.get('count')).toBe('number');
+      expect(result.current.columnTypes.get('ext')).toBe('array');
     });
 
     it('should resolve esql variable for group key', () => {
@@ -187,9 +192,9 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current).toHaveLength(2);
-      expect(result.current[0].groupValue).toBe('X');
-      expect(result.current[1].groupValue).toBe('Y');
+      expect(result.current.data).toHaveLength(2);
+      expect(result.current.data[0].groupValue).toBe('X');
+      expect(result.current.data[1].groupValue).toBe('Y');
     });
   });
 
