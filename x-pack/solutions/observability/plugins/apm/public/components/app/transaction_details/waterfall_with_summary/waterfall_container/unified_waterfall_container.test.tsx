@@ -9,7 +9,7 @@ import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { disableConsoleWarning, renderWithTheme } from '../../../../../utils/test_helpers';

@@ -328,13 +328,13 @@ spaceTest.describe(
         });
 
         await spaceTest.step('unified waterfall size warning is visible', async () => {
-          await expect(page.testSubj.locator('unifiedWaterfallSizeWarning')).toBeVisible();
+          await expect(page.testSubj.locator('waterfallSizeWarning')).toBeVisible();
         });
 
         await spaceTest.step(
           'warning "view in Discover" link opens traces experience',
           async () => {
-            await page.testSubj.locator('unifiedWaterfallSizeWarningDiscoverLink').click();
+            await page.testSubj.locator('waterfallSizeWarningDiscoverLink').click();
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
           }
