@@ -12,12 +12,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [
-      require.resolve('../../test_suites/discover/embeddable'), // 5 min
-      require.resolve('../../test_suites/context'), // 6 min
-    ],
+    testFiles: [require.resolve('../../test_suites/discover/esql')],
     junit: {
-      reportName: 'Serverless Search Functional Tests - Common Group 15',
+      reportName: 'Serverless Search Functional Tests - Common Group 21',
     },
   };
 }
