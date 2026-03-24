@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eslint-plugin-css'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/eslint-plugin-css'
+  title: '@kbn/eslint-plugin-css'
   description: Moon project for @kbn/eslint-plugin-css
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: packages/kbn-eslint-plugin-css
+  sourceRoot: packages/kbn-eslint-plugin-css
 dependsOn: []
 tags:
   - shared-common
@@ -30,14 +29,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

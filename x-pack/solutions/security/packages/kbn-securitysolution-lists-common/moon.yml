@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/securitysolution-lists-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-detection-engine'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-lists-common'
+  title: '@kbn/securitysolution-lists-common'
   description: Moon project for @kbn/securitysolution-lists-common
   channel: ''
   owner: '@elastic/security-detection-engine'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-lists-common
+  sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-lists-common
 dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/openapi-common'

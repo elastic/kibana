@@ -4,17 +4,16 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-observability'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-observability'
+  title: '@kbn/test-suites-xpack-observability'
   description: Moon project for @kbn/test-suites-xpack-observability
   channel: ''
-  metadata:
-    sourceRoot: x-pack/solutions/observability/test
+  sourceRoot: x-pack/solutions/observability/test
 dependsOn:
   - '@kbn/test'
   - '@kbn/expect'
