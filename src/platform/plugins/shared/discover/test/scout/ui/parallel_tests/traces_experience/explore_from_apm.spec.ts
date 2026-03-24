@@ -311,9 +311,12 @@ spaceTest.describe(
           'intercept unified trace API to force exceedsMax condition',
           async () => {
             await page.route('**/internal/apm/unified_traces/**', async (route) => {
-              const url = new URL(route.request().url());
-              url.searchParams.set('maxTraceItems', '2');
-              await route.continue({ url: url.toString() });
+              const response = await route.fetch();
+              const body = await response.json();
+              await route.fulfill({
+                response,
+                json: { ...body, traceDocsTotal: body.maxTraceItems + 1 },
+              });
             });
           }
         );
@@ -333,6 +336,7 @@ spaceTest.describe(
           async () => {
             await page.testSubj.locator('unifiedWaterfallSizeWarningDiscoverLink').click();
             await expectTracesExperienceEnabled(pageObjects);
+            await page.unrouteAll({ behavior: 'wait' });
           }
         );
       }

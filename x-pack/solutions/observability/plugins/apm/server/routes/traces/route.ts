@@ -141,7 +141,6 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     query: t.intersection([
       rangeRt,
       t.partial({
-        maxTraceItems: toNumberRt,
         serviceName: t.string,
         entryTransactionId: t.string,
       }),
@@ -166,7 +165,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end, serviceName, entryTransactionId } = params.query;
-    const maxTraceItems = params.query.maxTraceItems ?? config.ui.maxTraceItems;
+    const maxTraceItems = config.ui.maxTraceItems;
 
     const [{ traceItems, agentMarks, unifiedTraceErrors, traceDocsTotal }, entryTransaction] =
       await Promise.all([
