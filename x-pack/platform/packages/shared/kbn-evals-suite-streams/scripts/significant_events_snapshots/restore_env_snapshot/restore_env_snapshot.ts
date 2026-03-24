@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
@@ -15,6 +16,98 @@ import {
   parseRepeatableFlag,
   validateIndexPrivileges,
 } from '../lib/snapshot_utils';
+
+async function promptConfirm(question: string): Promise<boolean> {
+  const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>([
+    { type: 'confirm', name: 'confirmed', message: question, default: false },
+  ]);
+  return confirmed;
+}
+
+async function resolveExisting(esClient: Client, patterns: string[]): Promise<string[]> {
+  const found: string[] = [];
+  for (const pattern of patterns) {
+    try {
+      const response = await esClient.indices.resolveIndex({
+        name: pattern,
+        expand_wildcards: 'all',
+      });
+      found.push(
+        ...(response.indices ?? []).map((i) => i.name),
+        ...(response.data_streams ?? []).map((d) => d.name)
+      );
+    } catch {
+      // not found — skip
+    }
+  }
+  return found;
+}
+
+async function deleteExisting(esClient: Client, log: ToolingLog, names: string[]): Promise<void> {
+  for (const name of names) {
+    try {
+      await esClient.indices.deleteDataStream({ name });
+      log.info(`  deleted data stream: ${name}`);
+    } catch {
+      try {
+        await esClient.indices.delete({ index: name, ignore_unavailable: true });
+        log.info(`  deleted index: ${name}`);
+      } catch (err) {
+        log.warning(
+          `  failed to delete "${name}": ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+  }
+}
+
+async function ensureCleanEnvironment({
+  esClient,
+  log,
+  systemIndices,
+  dataIndices,
+  clean,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  systemIndices: string[];
+  dataIndices: string[];
+  clean: boolean;
+}): Promise<void> {
+  const existingSystem = await resolveExisting(esClient, systemIndices);
+  const existingData = await resolveExisting(esClient, dataIndices);
+  const allExisting = [...existingSystem, ...existingData];
+
+  if (allExisting.length === 0) {
+    log.debug('Environment is clean — no existing indices found');
+    return;
+  }
+
+  log.warning('Found existing indices that will conflict with the restore:');
+  for (const name of allExisting) {
+    log.warning(`  - ${name}`);
+  }
+
+  if (!clean) {
+    if (!process.stdin.isTTY) {
+      throw new Error(
+        `Environment is not clean. Re-run with --clean to automatically delete the listed indices, or delete them manually before restoring.`
+      );
+    }
+
+    const confirmed = await promptConfirm(
+      `This will permanently delete all existing Streams and Significant Events data (${allExisting.length} indices listed above) and replace it with the snapshot contents. Proceed?`
+    );
+    if (!confirmed) {
+      throw new Error(
+        `Restore aborted. Delete the listed indices manually or re-run with --clean.`
+      );
+    }
+  }
+
+  log.info('Cleaning up environment...');
+  await deleteExisting(esClient, log, [...existingSystem, ...existingData]);
+}
 
 export const restoreEnvSnapshot = async ({
   log,
@@ -40,6 +133,8 @@ export const restoreEnvSnapshot = async ({
     throw new Error('Required: --gcs-base-path <path>');
   }
 
+  const clean = Boolean(flags.clean);
+
   const indicesFlag = parseRepeatableFlag(flags.indices);
   const indices = indicesFlag.length > 0 ? indicesFlag : DEFAULT_INDICES;
 
@@ -62,6 +157,8 @@ export const restoreEnvSnapshot = async ({
   );
 
   const repository = createGcsRepository({ bucket: gcsBucket, basePath: gcsBasePath });
+
+  await ensureCleanEnvironment({ esClient, log, systemIndices, dataIndices: indices, clean });
 
   log.info('');
   log.info('Step 1/3 — Replaying data indices (with timestamp transformation)...');

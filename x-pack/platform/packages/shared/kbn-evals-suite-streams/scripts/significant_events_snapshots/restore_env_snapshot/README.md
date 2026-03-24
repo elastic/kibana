@@ -5,9 +5,10 @@ Restores a Streams/SigEvents environment from a GCS snapshot. Automates the full
 ## Prerequisites
 
 - Local Elasticsearch running.
-- A clean environment: the destination data stream (e.g. `logs.otel`) must be preferably clean, and there must be no `.kibana_streams*` indices. If they exist, delete them before restoring.
 - Access to the GCS bucket containing the snapshot (credentials available in your environment or keystore).
 - A user with `manage` privilege on the `.kibana_*` system indices (see [Creating a user with the required privileges](#creating-a-user-with-the-required-privileges)).
+
+> **Dirty environment?** If you have existing `logs.otel`, `.internal.alerts-streams.*`, or `.kibana_streams*` indices, the script will detect them and prompt you to delete them before proceeding. Pass `--clean` to skip the prompt and delete automatically.
 
 ## Why
 
@@ -50,6 +51,7 @@ node scripts/restore_sigevents_env_snapshot.js \
 | `--gcs-bucket` | GCS bucket containing the snapshot. | `significant-events-datasets` |
 | `--indices` | Data index to replay. Can be repeated. | `logs.otel` |
 | `--system-indices` | `.kibana` system index pattern to restore. Can be repeated. | `.kibana_streams_features-*` `.kibana_streams_assets-*` |
+| `--clean` | Delete conflicting indices before restoring without prompting | `false` |
 | `--es-url` | Elasticsearch URL | from `config/kibana.dev.yml` |
 | `--es-username` | Elasticsearch username | from `config/kibana.dev.yml` |
 | `--es-password` | Elasticsearch password | from `config/kibana.dev.yml` |
