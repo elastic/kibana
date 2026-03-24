@@ -65680,9 +65680,9 @@ paths:
               bulkDeleteWorkflowsRequestExample:
                 description: Example request for deleting multiple workflows
                 value:
-                  ids:
-                    - alert-triage-workflow
-                    - daily-report-workflow
+                  deleted: 2
+                  failures: []
+                  total: 2
             schema:
               additionalProperties: false
               type: object
@@ -65709,13 +65709,13 @@ paths:
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
               -d '{
-                "ids": ["alert-triage-workflow", "daily-report-workflow"]
+                "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
               }'
         - lang: Console
           source: |
             DELETE kbn://api/workflows
             {
-              "ids": ["alert-triage-workflow", "daily-report-workflow"]
+              "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
             }
       x-state: ''
       x-metaTags:
@@ -65753,6 +65753,7 @@ paths:
           schema:
             items:
               type: boolean
+            maxItems: 2
             type: array
         - description: Filter by creator.
           in: query
@@ -65761,6 +65762,7 @@ paths:
           schema:
             items:
               type: string
+            maxItems: 1000
             type: array
         - description: Filter by tags.
           in: query
@@ -65769,6 +65771,7 @@ paths:
           schema:
             items:
               type: string
+            maxItems: 1000
             type: array
         - description: Free-text search query.
           in: query
@@ -65810,9 +65813,9 @@ paths:
                             id: exec-001
                             startedAt: '2025-11-20T12:00:00.000Z'
                             status: completed
-                            workflowId: example-workflow
+                            workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                             workflowName: Example definition
-                        id: example-workflow
+                        id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                         name: Example definition
                         tags:
                           - example
@@ -65884,7 +65887,7 @@ paths:
                             type: console
                             with:
                               message: "{{ inputs.message }}"
-                    - id: second-workflow
+                    - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
                       yaml: |
                         name: Second workflow
                         enabled: false
@@ -65931,7 +65934,8 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "workflows": [
-                  { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" }
+                  { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" },
+                  { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
                 ]
               }'
         - lang: Console
@@ -65939,7 +65943,8 @@ paths:
             POST kbn://api/workflows?overwrite=false
             {
               "workflows": [
-                { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" }
+                { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" },
+                { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
               ]
             }
       x-state: ''
@@ -65977,17 +65982,15 @@ paths:
                   description: Example response with tag and createdBy aggregations
                   value:
                     createdBy:
-                      - key: elastic
-                        label: elastic
-                      - key: admin
-                        label: admin
+                      - doc_count: 2
+                        key: elastic
                     tags:
-                      - key: security
-                        label: security
-                      - key: reporting
-                        label: reporting
-                      - key: triage
-                        label: triage
+                      - doc_count: 1
+                        key: reporting
+                      - doc_count: 1
+                        key: security
+                      - doc_count: 1
+                        key: triage
           description: Indicates a successful response
       summary: Get workflow aggregations
       tags:
@@ -66001,109 +66004,6 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/aggs?fields=tags&fields=createdBy
-      x-state: ''
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/workflows/batch:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/batch</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
-      operationId: post-workflows-batch
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              getBatchWorkflowsRequestExample:
-                description: Example request to retrieve multiple workflows by their IDs
-                value:
-                  ids:
-                    - example-workflow
-                    - second-workflow
-              getBatchWorkflowsWithSourceRequestExample:
-                description: Example request to retrieve only the name and enabled fields
-                value:
-                  ids:
-                    - example-workflow
-                    - second-workflow
-                  source:
-                    - name
-                    - enabled
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                ids:
-                  description: Array of workflow IDs to look up.
-                  items:
-                    description: Workflow ID.
-                    maxLength: 255
-                    type: string
-                  maxItems: 500
-                  minItems: 1
-                  type: array
-                source:
-                  description: Array of source fields to include.
-                  items:
-                    description: Source field.
-                    maxLength: 255
-                    type: string
-                  maxItems: 10
-                  minItems: 1
-                  type: array
-              required:
-                - ids
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                getBatchWorkflowsResponseExample:
-                  description: Example response returning the requested workflows with projected fields
-                  value:
-                    - enabled: true
-                      id: example-workflow
-                      name: Example definition
-                    - enabled: false
-                      id: second-workflow
-                      name: Second workflow
-          description: Indicates a successful response
-      summary: Get workflows by IDs
-      tags:
-        - workflows
-      x-codeSamples:
-        - lang: curl
-          source: |
-            curl \
-              -X POST "${KIBANA_URL}/api/workflows/batch" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-                "ids": ["example-workflow", "second-workflow"],
-                "source": ["name", "enabled"]
-              }'
-        - lang: Console
-          source: |
-            POST kbn://api/workflows/batch
-            {
-              "ids": ["example-workflow", "second-workflow"],
-              "source": ["name", "enabled"]
-            }
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -66214,11 +66114,13 @@ paths:
                   description: Example response returning a workflow execution with step details
                   value:
                     duration: 3000
-                    error: null
                     executedBy: elastic
                     finishedAt: '2025-11-20T12:00:03.000Z'
                     id: exec-a1b2c3d4-e5f6-7890
+                    input:
+                      message: hello world
                     isTestRun: false
+                    output: hello world
                     spaceId: default
                     startedAt: '2025-11-20T12:00:00.000Z'
                     status: completed
@@ -66229,13 +66131,14 @@ paths:
                         id: step-exec-001
                         isTestRun: false
                         scopeStack: []
+                        spaceId: default
                         startedAt: '2025-11-20T12:00:01.000Z'
                         status: completed
                         stepExecutionIndex: 0
                         stepId: hello_world_step
                         stepType: console
                         topologicalIndex: 0
-                        workflowId: example-workflow
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                         workflowRunId: exec-a1b2c3d4-e5f6-7890
                     triggeredBy: manual
                     workflowDefinition:
@@ -66253,8 +66156,7 @@ paths:
                             message: '{{ inputs.message }}'
                       triggers:
                         - type: manual
-                    workflowId: example-workflow
-                    workflowName: Example definition
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     yaml: |
                       name: Example definition
                       enabled: true
@@ -66374,9 +66276,9 @@ paths:
                           stepId: hello_world_step
                           stepType: console
                           topologicalIndex: 0
-                          workflowId: child-workflow
+                          workflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
                           workflowRunId: child-exec-001
-                      workflowId: child-workflow
+                      workflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
                       workflowName: Child Workflow
           description: Indicates a successful response
       summary: Get child executions
@@ -66391,6 +66293,113 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/children
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/logs:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/logs</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-executions-executionid-logs
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: Filter logs by a specific step execution ID.
+          in: query
+          name: stepExecutionId
+          required: false
+          schema:
+            type: string
+        - description: Number of log entries per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 100
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Field to sort by.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            type: string
+        - description: Sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getExecutionLogsResponseExample:
+                  description: Example response returning paginated execution logs
+                  value:
+                    logs:
+                      - additionalData:
+                          executionId: exec-a1b2c3d4-e5f6-7890
+                          workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        connectorType: console
+                        duration: 150
+                        id: log-001
+                        level: info
+                        message: Workflow execution started
+                        stepId: hello_world_step
+                        stepName: Hello World
+                        timestamp: '2025-11-20T12:00:01.000Z'
+                      - additionalData:
+                          executionId: exec-a1b2c3d4-e5f6-7890
+                          workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        connectorType: console
+                        duration: 200
+                        id: log-002
+                        level: info
+                        message: Step completed successfully
+                        stepId: hello_world_step
+                        stepName: Hello World
+                        timestamp: '2025-11-20T12:00:02.000Z'
+                    page: 1
+                    size: 100
+                    total: 2
+          description: Indicates a successful response
+      summary: Get execution logs
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/logs?size=100&page=1" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/logs?size=100&page=1
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -66514,19 +66523,25 @@ paths:
                 getStepExecutionResponseExample:
                   description: Example response returning a single step execution
                   value:
+                    error: null
                     executionTimeMs: 1000
                     finishedAt: '2025-11-20T12:00:02.000Z'
                     globalExecutionIndex: 0
                     id: step-exec-001
+                    input:
+                      message: hello world
                     isTestRun: false
+                    output: hello world
                     scopeStack: []
+                    spaceId: default
                     startedAt: '2025-11-20T12:00:01.000Z'
+                    state: null
                     status: completed
                     stepExecutionIndex: 0
                     stepId: hello_world_step
                     stepType: console
                     topologicalIndex: 0
-                    workflowId: example-workflow
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     workflowRunId: exec-a1b2c3d4-e5f6-7890
           description: Indicates a successful response
       summary: Get a step execution
@@ -66572,8 +66587,8 @@ paths:
                 description: Example request to export workflows as a ZIP archive
                 value:
                   ids:
-                    - example-workflow
-                    - second-workflow
+                    - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
             schema:
               additionalProperties: false
               type: object
@@ -66607,13 +66622,116 @@ paths:
               -H "Content-Type: application/json" \
               -o workflows_export.zip \
               -d '{
-                "ids": ["example-workflow", "second-workflow"]
+                "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
               }'
         - lang: Console
           source: |
             POST kbn://api/workflows/export
             {
-              "ids": ["example-workflow", "second-workflow"]
+              "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/mget:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/mget</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: post-workflows-mget
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              mgetWorkflowsRequestExample:
+                description: Example request to retrieve multiple workflows by their IDs
+                value:
+                  ids:
+                    - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+              mgetWorkflowsWithSourceRequestExample:
+                description: Example request to retrieve only the name and enabled fields
+                value:
+                  ids:
+                    - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                  source:
+                    - name
+                    - enabled
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: Array of workflow IDs to look up.
+                  items:
+                    description: Workflow ID.
+                    maxLength: 255
+                    type: string
+                  maxItems: 500
+                  minItems: 1
+                  type: array
+                source:
+                  description: Array of source fields to include.
+                  items:
+                    description: Source field.
+                    maxLength: 255
+                    type: string
+                  maxItems: 10
+                  minItems: 1
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                mgetWorkflowsResponseExample:
+                  description: Example response returning the requested workflows with projected fields
+                  value:
+                    - enabled: true
+                      id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      name: Example definition
+                    - enabled: false
+                      id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                      name: Second workflow
+          description: Indicates a successful response
+      summary: Get workflows by IDs
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/mget" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
+                "source": ["name", "enabled"]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/mget
+            {
+              "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
+              "source": ["name", "enabled"]
             }
       x-state: ''
       x-metaTags:
@@ -66735,7 +66853,7 @@ paths:
                     inputs:
                       message: override message
                   stepId: hello_world_step
-                  workflowId: example-workflow
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                   workflowYaml: |
                     name: Example definition
                     enabled: true
@@ -66795,7 +66913,7 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "stepId": "hello_world_step",
-                "workflowId": "example-workflow",
+                "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                 "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
                 "contextOverride": { "inputs": { "message": "override message" } }
               }'
@@ -66804,7 +66922,7 @@ paths:
             POST kbn://api/workflows/step/test
             {
               "stepId": "hello_world_step",
-              "workflowId": "example-workflow",
+              "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
               "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
               "contextOverride": { "inputs": { "message": "override message" } }
             }
@@ -66840,7 +66958,7 @@ paths:
                 value:
                   inputs:
                     message: test message
-                  workflowId: example-workflow
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
               testWorkflowByYamlRequestExample:
                 description: Example request to test an unsaved workflow YAML draft
                 value:
@@ -66899,14 +67017,14 @@ paths:
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
               -d '{
-                "workflowId": "example-workflow",
+                "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                 "inputs": { "message": "test message" }
               }'
         - lang: Console
           source: |
             POST kbn://api/workflows/test
             {
-              "workflowId": "example-workflow",
+              "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
               "inputs": { "message": "test message" }
             }
       x-state: ''
@@ -66957,7 +67075,7 @@ paths:
               createWorkflowWithIdRequestExample:
                 description: Example request for creating a workflow with a custom ID
                 value:
-                  id: my-custom-workflow-id
+                  id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                   yaml: |
                     name: Example definition
                     enabled: true
@@ -67013,7 +67131,7 @@ paths:
                         - type: manual
                     description: This is a workflow example
                     enabled: true
-                    id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     lastUpdatedAt: '2025-11-20T10:30:00.000Z'
                     lastUpdatedBy: elastic
                     name: Example definition
@@ -67147,7 +67265,7 @@ paths:
                         - type: manual
                     description: This is a workflow example
                     enabled: true
-                    id: example-workflow
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     lastUpdatedAt: '2025-11-21T14:00:00.000Z'
                     lastUpdatedBy: elastic
                     name: Example definition
@@ -67266,45 +67384,12 @@ paths:
                 updateWorkflowResponseExample:
                   description: Example response returning the updated workflow
                   value:
-                    createdAt: '2025-11-20T10:30:00.000Z'
-                    createdBy: elastic
-                    definition:
-                      description: Updated workflow description
-                      enabled: true
-                      inputs:
-                        - default: hello world
-                          name: message
-                          type: string
-                      name: Updated example
-                      steps:
-                        - name: hello_world_step
-                          type: console
-                          with:
-                            message: '{{ inputs.message }}'
-                      triggers:
-                        - type: manual
-                    description: Updated workflow description
-                    enabled: true
-                    id: example-workflow
-                    lastUpdatedAt: '2025-11-22T09:15:00.000Z'
+                    enabled: false
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    lastUpdatedAt: '2026-03-23T13:38:59.568Z'
                     lastUpdatedBy: elastic
-                    name: Updated example
                     valid: true
-                    yaml: |
-                      name: Updated example
-                      enabled: true
-                      description: Updated workflow description
-                      triggers:
-                        - type: manual
-                      inputs:
-                        - name: message
-                          type: string
-                          default: "hello world"
-                      steps:
-                        - name: hello_world_step
-                          type: console
-                          with:
-                            message: "{{ inputs.message }}"
+                    validationErrors: []
           description: Indicates a successful response
       summary: Update a workflow
       tags:
@@ -67384,7 +67469,7 @@ paths:
                         - type: manual
                     description: This is a workflow example
                     enabled: false
-                    id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                    id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
                     lastUpdatedAt: '2025-11-22T11:00:00.000Z'
                     lastUpdatedBy: elastic
                     name: Example definition (copy)
@@ -67555,6 +67640,7 @@ paths:
                     - timed_out
                     - skipped
                   type: string
+                maxItems: 9
                 type: array
         - description: Filter by execution type.
           in: query
@@ -67571,6 +67657,7 @@ paths:
                     - test
                     - production
                   type: string
+                maxItems: 2
                 type: array
         - description: Filter by the user who triggered the execution.
           in: query
@@ -67624,8 +67711,7 @@ paths:
                         startedAt: '2025-11-20T12:00:00.000Z'
                         status: completed
                         triggeredBy: manual
-                        workflowId: example-workflow
-                        workflowName: Example definition
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                       - duration: 2000
                         error:
                           message: Step 'hello_world_step' failed
@@ -67637,8 +67723,7 @@ paths:
                         startedAt: '2025-11-20T13:00:00.000Z'
                         status: failed
                         triggeredBy: manual
-                        workflowId: example-workflow
-                        workflowName: Example definition
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     size: 20
                     total: 2
           description: Indicates a successful response
@@ -67715,12 +67800,13 @@ paths:
                 getWorkflowStepExecutionsResponseExample:
                   description: Example response returning step execution records for a workflow
                   value:
-                    page: 1
                     results:
                       - executionTimeMs: 1000
                         finishedAt: '2025-11-20T12:00:02.000Z'
                         globalExecutionIndex: 0
                         id: step-exec-001
+                        input:
+                          message: hello world
                         isTestRun: false
                         scopeStack: []
                         spaceId: default
@@ -67730,9 +67816,8 @@ paths:
                         stepId: hello_world_step
                         stepType: console
                         topologicalIndex: 0
-                        workflowId: example-workflow
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                         workflowRunId: exec-001
-                    size: 20
                     total: 1
           description: Indicates a successful response
       summary: Get workflow step executions
@@ -67742,11 +67827,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/steps?includeOutput=true" \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/steps?includeInput=true" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeOutput=true
+            GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeInput=true
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
