@@ -63,7 +63,7 @@ describe('getEventTitle', () => {
       getEventTitle({
         eventKind: 'event',
         eventCategory: 'process',
-        getFieldsData: (field) => (field === 'process.name' ? 'process name' : ''),
+        getFieldsData: (field: string) => (field === 'process.name' ? 'process name' : ''),
       })
     ).toBe('process name');
   });
@@ -92,7 +92,7 @@ const emptyGetFieldsData: GetFieldsData = () => [];
 describe('resolveUserNameForEntityInsights', () => {
   it('prefers user.name from document over user.id in identity map', () => {
     expect(
-      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'entity.id': 'e-1' }, (field) =>
+      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'entity.id': 'e-1' }, (field: string) =>
         field === 'user.name' ? ['alice'] : []
       )
     ).toBe('alice');
@@ -117,7 +117,7 @@ describe('resolveUserNameForEntityInsights', () => {
 describe('resolveHostNameForEntityInsights', () => {
   it('prefers host.name from document over host.id in identity map', () => {
     expect(
-      resolveHostNameForEntityInsights({ 'host.id': 'h-1' }, (field) =>
+      resolveHostNameForEntityInsights({ 'host.id': 'h-1' }, (field: string) =>
         field === 'host.name' ? ['srv'] : []
       )
     ).toBe('srv');
