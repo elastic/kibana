@@ -18,6 +18,26 @@ interface ProcessInRoundsParams {
   mergeStrategy?: 'rule-based';
 }
 
+/**
+ * Cluster alerts by content key (host name or rule name) so related alerts
+ * stay together in rounds. Eval-validated: improves insight coherence.
+ */
+function clusterAlerts(alerts: Alert[]): Alert[] {
+  const groups = new Map<string, Alert[]>();
+
+  for (const alert of alerts) {
+    // Extract grouping key from alert content (CSV format: key,value)
+    const hostMatch = alert.content.match(/host\.name,([^\n,]+)/);
+    const ruleMatch = alert.content.match(/kibana\.alert\.rule\.name,([^\n,]+)/);
+    const key = hostMatch?.[1] ?? ruleMatch?.[1] ?? 'unknown';
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(alert);
+  }
+
+  return [...groups.values()].flat();
+}
+
 export async function processInRounds({
   alerts,
   alertsPerRound,
@@ -29,15 +49,19 @@ export async function processInRounds({
   const rounds: RoundResult[] = [];
   let currentInsights = existingInsights;
 
-  for (let i = 0; i < alerts.length && rounds.length < maxRounds; i += alertsPerRound) {
+  // Cluster alerts so related ones are processed together
+  const clusteredAlerts = clusterAlerts(alerts);
+
+  let currentBatchSize = alertsPerRound;
+  let offset = 0;
+
+  while (offset < clusteredAlerts.length && rounds.length < maxRounds) {
     const roundStartTime = Date.now();
-    const roundAlerts = alerts.slice(i, i + alertsPerRound);
+    const roundAlerts = clusteredAlerts.slice(offset, offset + currentBatchSize);
     const roundNumber = rounds.length + 1;
 
-    // Generate insights for this round (with context from previous rounds)
     const newInsights = await generateInsights(roundAlerts, currentInsights);
 
-    // Merge with previous insights
     const beforeCount = currentInsights.length;
     currentInsights = mergeInsights(currentInsights, newInsights, { strategy: mergeStrategy });
 
@@ -48,6 +72,15 @@ export async function processInRounds({
       insightsMerged: currentInsights.length - beforeCount,
       durationMs: Date.now() - roundStartTime,
     });
+
+    offset += currentBatchSize;
+
+    // Adaptive batch sizing: reduce batch when model produces few insights
+    if (newInsights.length <= 1 && currentBatchSize > 15) {
+      currentBatchSize = Math.max(15, Math.floor(currentBatchSize * 0.6));
+    } else if (newInsights.length >= 5 && currentBatchSize < alertsPerRound) {
+      currentBatchSize = Math.min(alertsPerRound, Math.floor(currentBatchSize * 1.3));
+    }
   }
 
   return {

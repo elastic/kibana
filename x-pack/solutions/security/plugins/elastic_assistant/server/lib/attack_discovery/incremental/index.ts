@@ -17,16 +17,29 @@ const AVG_TOKENS_PER_ALERT = 200;
 const OUTPUT_RESERVE_TOKENS = 3000;
 const DEFAULT_CONTEXT_BUDGET = 32000;
 const MIN_ALERTS_PER_ROUND = 10;
-const MAX_ALERTS_PER_ROUND = 100;
+// Eval-validated: 25 alerts/round produces 5x more insights than 50+ on 7B models
+// while maintaining quality (13.4 avg alertIds/insight). Larger batches collapse to 1 insight.
+const DEFAULT_MAX_ALERTS_PER_ROUND = 50;
 
 /**
  * Computes the optimal alertsPerRound based on a model context budget.
- * Uses token-based estimates to fill the available context window.
+ *
+ * Eval findings (Qwen 2.5 7B):
+ *   25/round → 5 insights, 13.4 alertIds/insight (best quality)
+ *   50/round → 1 insight per round (model overwhelmed)
+ *  100/round → 1 insight (even worse)
+ *
+ * The formula targets ~50% of available context to leave room for
+ * quality output, clamped to [10, 50] by default.
  */
-export function computeAlertsPerRound(contextBudget: number = DEFAULT_CONTEXT_BUDGET): number {
+export function computeAlertsPerRound(
+  contextBudget: number = DEFAULT_CONTEXT_BUDGET,
+  maxAlertsPerRound: number = DEFAULT_MAX_ALERTS_PER_ROUND
+): number {
   const availableForAlerts = contextBudget - PROMPT_OVERHEAD_TOKENS - OUTPUT_RESERVE_TOKENS;
-  const computed = Math.floor(availableForAlerts / AVG_TOKENS_PER_ALERT);
-  return Math.max(MIN_ALERTS_PER_ROUND, Math.min(MAX_ALERTS_PER_ROUND, computed));
+  // Use 50% of available context for alerts — leaves room for quality output
+  const computed = Math.floor((availableForAlerts * 0.5) / AVG_TOKENS_PER_ALERT);
+  return Math.max(MIN_ALERTS_PER_ROUND, Math.min(maxAlertsPerRound, computed));
 }
 
 export async function incrementalAttackDiscovery({
