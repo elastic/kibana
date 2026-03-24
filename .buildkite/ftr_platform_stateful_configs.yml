@@ -435,4 +435,4 @@ enabled:
     # stateful config files that run deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
-  - x-pack/platform/test/api_integration/apis/streams/config.ts
+  - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts

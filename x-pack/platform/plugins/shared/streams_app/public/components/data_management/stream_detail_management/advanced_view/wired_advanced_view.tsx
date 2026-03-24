@@ -46,11 +46,9 @@ export function WiredAdvancedView({
     }
   }, [definition, contentPacks?.enabled, significantEvents?.enabled, onPageReady]);
 
-  const isReplicated = definition.replicated === true;
-
   return (
     <>
-      {!isReplicated && contentPacks.enabled && (
+      {contentPacks.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
@@ -68,30 +66,27 @@ export function WiredAdvancedView({
           <EuiSpacer />
         </>
       )}
-      {!isReplicated && (
-        <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
-          <EuiCallOut
-            announceOnMount={false}
-            iconType="warning"
-            color="primary"
-            title={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
-              {
-                defaultMessage:
-                  'Changes will be inherited by child streams unless they override them explicitly.',
-              }
-            )}
-          />
-          <EuiSpacer size="l" />
-        </IndexConfiguration>
+      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+        <EuiCallOut
+          announceOnMount={false}
+          iconType="warning"
+          color="primary"
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
+            {
+              defaultMessage:
+                'Changes will be inherited by child streams unless they override them explicitly.',
+            }
+          )}
+        />
+        <EuiSpacer size="l" />
+      </IndexConfiguration>
+      {(!isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME) && (
+        <>
+          <EuiSpacer />
+          <DeleteStreamPanel definition={definition} />
+        </>
       )}
-      {!isReplicated &&
-        (!isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME) && (
-          <>
-            <EuiSpacer />
-            <DeleteStreamPanel definition={definition} />
-          </>
-        )}
       <EuiSpacer />
     </>
   );
