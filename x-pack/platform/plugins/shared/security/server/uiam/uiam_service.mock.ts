@@ -27,5 +27,18 @@ export const uiamServiceMock = {
     exchangeOAuthToken: jest.fn().mockResolvedValue('mock-ephemeral-token'),
     revokeApiKey: jest.fn().mockResolvedValue(undefined),
     convertApiKeys: jest.fn().mockResolvedValue({ results: [] }),
+    createOAuthClient: jest.fn().mockResolvedValue({ id: 'mock-client-id', resource: 'urn:test' }),
+    listOAuthClients: jest.fn().mockResolvedValue({ clients: [] }),
+    updateOAuthClient: jest.fn().mockResolvedValue({ id: 'mock-client-id', resource: 'urn:test' }),
+    revokeOAuthClient: jest
+      .fn()
+      .mockResolvedValue({ id: 'mock-client-id', resource: 'urn:test', revoked: true }),
+    listOAuthConnections: jest.fn().mockResolvedValue({ connections: [] }),
+    revokeOAuthConnection: jest.fn().mockResolvedValue({
+      id: 'mock-connection-id',
+      client_id: 'mock-client-id',
+      resource: 'urn:test',
+      revoked: true,
+    }),
   }),
 };

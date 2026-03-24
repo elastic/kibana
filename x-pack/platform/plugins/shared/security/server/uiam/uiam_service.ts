@@ -91,6 +91,97 @@ export interface ConvertUiamApiKeysResponse {
 }
 
 /**
+ * Represents a client logo provided as a URL.
+ */
+export interface OAuthClientLogoUrl {
+  type: 'url';
+  url: string;
+}
+
+/**
+ * Represents a client logo provided as base64-encoded image data.
+ */
+export interface OAuthClientLogoBase64 {
+  type: 'base64';
+  media_type: string;
+  data: string;
+}
+
+export type OAuthClientLogo = OAuthClientLogoUrl | OAuthClientLogoBase64;
+
+/**
+ * Summary of active and revoked connection IDs for a client.
+ */
+export interface OAuthConnectionsSummary {
+  active?: string[];
+  revoked?: string[];
+}
+
+/**
+ * Represents the request body for creating an OAuth client via UIAM.
+ */
+export interface CreateOAuthClientRequestBody {
+  resource: string;
+  client_name?: string;
+  client_metadata?: Record<string, string>;
+  client_logo?: OAuthClientLogo;
+}
+
+/**
+ * Represents the request body for patching an OAuth client via UIAM.
+ */
+export interface PatchOAuthClientRequestBody {
+  client_name?: string | null;
+  client_metadata: Record<string, string>;
+  client_logo?: OAuthClientLogo | null;
+}
+
+/**
+ * Represents a single OAuth client returned by the UIAM service.
+ */
+export interface OAuthClientResponse {
+  id: string;
+  client_name?: string;
+  resource: string;
+  type?: string;
+  creation?: string;
+  revoked?: boolean;
+  revocation?: string;
+  revocation_reason?: string;
+  client_metadata?: Record<string, string>;
+  client_logo?: OAuthClientLogo;
+  connections?: OAuthConnectionsSummary;
+}
+
+/**
+ * Represents a single OAuth connection returned by the UIAM service.
+ */
+export interface OAuthConnectionResponse {
+  id: string;
+  client_id: string;
+  resource: string;
+  creation?: string;
+  revoked?: boolean;
+  revocation?: string;
+  revocation_reason?: string;
+  scopes?: string[];
+}
+
+/**
+ * Response containing a list of OAuth clients.
+ */
+export interface OAuthClientsResponse {
+  clients: OAuthClientResponse[];
+}
+
+/**
+ * Response containing a list of OAuth connections.
+ */
+export interface OAuthConnectionsResponse {
+  connections: OAuthConnectionResponse[];
+}
+
+/**
  * The service that integrates with UIAM for user authentication and session management.
  */
 export interface UiamServicePublic {
@@ -154,6 +245,73 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Creates an OAuth client via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param body The request body for creating the OAuth client.
+   */
+  createOAuthClient(
+    accessToken: string,
+    body: CreateOAuthClientRequestBody
+  ): Promise<OAuthClientResponse>;
+
+  /**
+   * Lists OAuth clients via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId Optional client ID filter.
+   */
+  listOAuthClients(accessToken: string, clientId?: string): Promise<OAuthClientsResponse>;
+
+  /**
+   * Updates an OAuth client's metadata via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client to update.
+   * @param body The request body for updating the OAuth client.
+   */
+  updateOAuthClient(
+    accessToken: string,
+    clientId: string,
+    body: PatchOAuthClientRequestBody
+  ): Promise<OAuthClientResponse>;
+
+  /**
+   * Revokes an OAuth client via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client to revoke.
+   * @param reason Optional reason for revocation.
+   */
+  revokeOAuthClient(
+    accessToken: string,
+    clientId: string,
+    reason?: string
+  ): Promise<OAuthClientResponse>;
+
+  /**
+   * Lists OAuth connections via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId Optional client ID filter.
+   * @param connectionId Optional connection ID filter.
+   */
+  listOAuthConnections(
+    accessToken: string,
+    clientId?: string,
+    connectionId?: string
+  ): Promise<OAuthConnectionsResponse>;
+
+  /**
+   * Revokes an OAuth connection via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to revoke.
+   * @param reason Optional reason for revocation.
+   */
+  revokeOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string,
+    reason?: string
+  ): Promise<OAuthConnectionResponse>;
 }
 
 interface UiamServiceOptions {
@@ -430,6 +588,220 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
 
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.createOAuthClient}.
+   */
+  async createOAuthClient(
+    accessToken: string,
+    body: CreateOAuthClientRequestBody
+  ): Promise<OAuthClientResponse> {
+    try {
+      this.#logger.debug('Attempting to create OAuth client.');
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/oauth/clients`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(body),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully created OAuth client with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to create OAuth client: ${getDetailedErrorMessage(err)}`);
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.listOAuthClients}.
+   */
+  async listOAuthClients(accessToken: string, clientId?: string): Promise<OAuthClientsResponse> {
+    try {
+      this.#logger.debug('Attempting to list OAuth clients.');
+
+      const url = new URL(`${this.#config.url}/uiam/api/v1/oauth/clients`);
+      if (clientId) {
+        url.searchParams.set('client_id', clientId);
+      }
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully listed OAuth clients.');
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to list OAuth clients: ${getDetailedErrorMessage(err)}`);
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.updateOAuthClient}.
+   */
+  async updateOAuthClient(
+    accessToken: string,
+    clientId: string,
+    body: PatchOAuthClientRequestBody
+  ): Promise<OAuthClientResponse> {
+    try {
+      this.#logger.debug(`Attempting to update OAuth client: ${clientId}`);
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/oauth/clients/${clientId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(body),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully updated OAuth client: ${clientId}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to update OAuth client ${clientId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeOAuthClient}.
+   */
+  async revokeOAuthClient(
+    accessToken: string,
+    clientId: string,
+    reason?: string
+  ): Promise<OAuthClientResponse> {
+    try {
+      this.#logger.debug(`Attempting to revoke OAuth client: ${clientId}`);
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/oauth/clients/${clientId}/_revoke`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ reason }),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully revoked OAuth client: ${clientId}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to revoke OAuth client ${clientId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.listOAuthConnections}.
+   */
+  async listOAuthConnections(
+    accessToken: string,
+    clientId?: string,
+    connectionId?: string
+  ): Promise<OAuthConnectionsResponse> {
+    try {
+      this.#logger.debug('Attempting to list OAuth connections.');
+
+      const url = new URL(`${this.#config.url}/uiam/api/v1/oauth/connections`);
+      if (clientId) {
+        url.searchParams.set('client_id', clientId);
+      }
+      if (connectionId) {
+        url.searchParams.set('connection_id', connectionId);
+      }
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully listed OAuth connections.');
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to list OAuth connections: ${getDetailedErrorMessage(err)}`);
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeOAuthConnection}.
+   */
+  async revokeOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string,
+    reason?: string
+  ): Promise<OAuthConnectionResponse> {
+    try {
+      this.#logger.debug(`Attempting to revoke OAuth connection: ${connectionId}`);
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${
+            this.#config.url
+          }/uiam/api/v1/oauth/clients/${clientId}/connections/${connectionId}/_revoke`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ reason }),
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully revoked OAuth connection: ${connectionId}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(err)}`
+      );
       throw err;
     }
   }

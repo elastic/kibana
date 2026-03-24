@@ -14,6 +14,8 @@ import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import {
   type GrantUiamApiKeyRequestBody,
   type GrantUiamApiKeyResponse,
+  type OAuthClientResponse,
+  type OAuthConnectionResponse,
   UiamService,
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
@@ -886,6 +888,314 @@ describe('UiamService', () => {
         }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#createOAuthClient', () => {
+    it('properly calls UIAM service to create an OAuth client', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'urn:test:resource',
+        client_name: 'Test Client',
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.createOAuthClient('access-token', {
+          resource: 'urn:test:resource',
+          client_name: 'Test Client',
+        })
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/clients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({ resource: 'urn:test:resource', client_name: 'Test Client' }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('throws error if creation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Bad request' } }),
+      });
+
+      await expect(
+        uiamService.createOAuthClient('access-token', { resource: 'urn:test' })
+      ).rejects.toThrowError('Bad request');
+    });
+  });
+
+  describe('#listOAuthClients', () => {
+    it('properly calls UIAM service to list OAuth clients', async () => {
+      const mockResponse = { clients: [] };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.listOAuthClients('access-token')).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/clients', {
+        method: 'GET',
+        headers: {
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('includes client_id query parameter when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ clients: [] }),
+      });
+
+      await uiamService.listOAuthClients('access-token', 'specific-client-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients?client_id=specific-client-id',
+        {
+          method: 'GET',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if listing fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Forbidden' } }),
+      });
+
+      await expect(uiamService.listOAuthClients('access-token')).rejects.toThrowError('Forbidden');
+    });
+  });
+
+  describe('#updateOAuthClient', () => {
+    it('properly calls UIAM service to update an OAuth client', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'urn:test',
+        client_name: 'Updated Name',
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.updateOAuthClient('access-token', 'client-id', {
+          client_name: 'Updated Name',
+          client_metadata: { key: 'value' },
+        })
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ client_name: 'Updated Name', client_metadata: { key: 'value' } }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if update fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Client not found' } }),
+      });
+
+      await expect(
+        uiamService.updateOAuthClient('access-token', 'missing-id', {
+          client_metadata: {},
+        })
+      ).rejects.toThrowError('Client not found');
+    });
+  });
+
+  describe('#revokeOAuthClient', () => {
+    it('properly calls UIAM service to revoke an OAuth client', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'urn:test',
+        revoked: true,
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.revokeOAuthClient('access-token', 'client-id', 'no longer needed')
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/_revoke',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ reason: 'no longer needed' }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if revocation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Already revoked' } }),
+      });
+
+      await expect(uiamService.revokeOAuthClient('access-token', 'client-id')).rejects.toThrowError(
+        'Already revoked'
+      );
+    });
+  });
+
+  describe('#listOAuthConnections', () => {
+    it('properly calls UIAM service to list OAuth connections', async () => {
+      const mockResponse = { connections: [] };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.listOAuthConnections('access-token')).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/connections', {
+        method: 'GET',
+        headers: {
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('includes query parameters when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ connections: [] }),
+      });
+
+      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id',
+        {
+          method: 'GET',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if listing fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Internal Server Error' } }),
+      });
+
+      await expect(uiamService.listOAuthConnections('access-token')).rejects.toThrowError(
+        'Internal Server Error'
+      );
+    });
+  });
+
+  describe('#revokeOAuthConnection', () => {
+    it('properly calls UIAM service to revoke an OAuth connection', async () => {
+      const mockResponse: OAuthConnectionResponse = {
+        id: 'conn-id',
+        client_id: 'client-id',
+        resource: 'urn:test',
+        revoked: true,
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.revokeOAuthConnection('access-token', 'client-id', 'conn-id', 'revoked')
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id/_revoke',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ reason: 'revoked' }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if revocation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.revokeOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).rejects.toThrowError('Connection not found');
     });
   });
 });
