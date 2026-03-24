@@ -81,7 +81,7 @@ export const RecoveryBaseAndConditionField = ({
   }, [getValues, setValue]);
 
   const handleRemoveBaseQuery = useCallback(() => {
-    setValue('recoveryPolicy.query.base', undefined);
+    setValue('recoveryPolicy.query.base', null);
     setIsBaseQueryVisible(false);
   }, [setValue]);
 

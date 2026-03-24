@@ -40,7 +40,7 @@ export interface RuleGrouping {
 export interface RecoveryPolicy {
   type: RecoveryPolicyType;
   query?: {
-    base?: string;
+    base?: string | null;
     condition?: string;
   };
 }
