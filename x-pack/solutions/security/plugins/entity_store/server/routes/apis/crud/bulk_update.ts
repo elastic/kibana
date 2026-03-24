@@ -20,10 +20,7 @@ const bodySchema = z.object({
   entities: z.array(
     z.object({
       type: z.enum(ALL_ENTITY_TYPES),
-      doc: z.preprocess(
-        (val) => unflattenObject(val as Record<string, unknown>),
-        Entity
-      ),
+      doc: z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity),
     })
   ),
 });
