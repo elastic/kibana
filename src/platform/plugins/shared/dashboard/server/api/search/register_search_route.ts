@@ -10,13 +10,13 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { getRouteConfig } from '../get_route_config';
-import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
+import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
-  const searchRoute = router.post({
-    path: `${basePath}/search`,
+  const searchRoute = router.get({
+    path: `${basePath}`,
     summary: `Search dashboards`,
     ...routeConfig,
   });
@@ -26,7 +26,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
       version: routeVersion,
       validate: {
         request: {
-          body: searchRequestBodySchema,
+          query: searchRequestParamsSchema,
         },
         response: {
           200: {
@@ -38,7 +38,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       let result;
       try {
-        result = await search(ctx, req.body);
+        result = await search(ctx, req.query);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
