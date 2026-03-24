@@ -57,7 +57,7 @@ taskDefinitions.registerTaskDefinitions({
   limitedTaskTypeWithCost: {
     title: 'Limited Concurrency Task Type with Cost',
     maxConcurrency: 2,
-    cost: TaskCost.Normal,
+    cost: TaskCost.Tiny,
     createTaskRunner: jest.fn(),
   },
   taskType1: {
@@ -145,80 +145,20 @@ describe('selectTasksByCapacity', () => {
 
     it('returns definition cost when instance cost is not set', () => {
       const task = mockInstance({ taskType: 'limitedTaskTypeWithCost' });
-      expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Normal);
+      expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Tiny);
     });
 
     it('returns TaskCost.Normal for type without definition cost', () => {
       const task = mockInstance({ taskType: 'taskType1' });
       expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Normal);
     });
-  });
 
-  describe('cost-based capacity', () => {
-    it('should limit by cost budget: maxConcurrency * defCost, each task consumes its cost', () => {
-      // limitedTaskTypeWithCost has maxConcurrency: 2, cost: Normal (2). Budget = 4.
-      // Two Normal (2) tasks fit; one ExtraLarge (10) would exceed.
-      const batches = [
-        asLimited('limitedTaskTypeWithCost'),
-        asUnlimited(new Set(['taskType1', 'taskType2'])),
-      ];
-      const tasks = [
-        mockInstance({
-          id: `id-1`,
-          taskType: 'limitedTaskTypeWithCost',
-        }),
-        mockInstance({
-          id: `id-2`,
-          taskType: 'limitedTaskTypeWithCost',
-        }),
-        mockInstance({
-          id: `id-3`,
-          taskType: 'limitedTaskTypeWithCost',
-          cost: InstanceTaskCost.ExtraLarge,
-        }),
-      ];
-
-      const selected = selectTasksByCapacity({
-        definitions: taskDefinitions,
-        tasks,
-        batches,
+    it('returns instance cost when set for type without definition cost', () => {
+      const task = mockInstance({
+        taskType: 'taskType1',
+        cost: InstanceTaskCost.ExtraLarge,
       });
-      // Budget 4: first task cost 2 -> remaining 2; second task cost 2 -> remaining 0; third (cost 10) does not fit
-      expect(selected).toHaveLength(2);
-      expect(selected).toEqual([tasks[0], tasks[1]]);
-    });
-
-    it('should respect per-task cost override when selecting by capacity', () => {
-      const batches = [
-        asLimited('limitedTaskTypeWithCost'),
-        asUnlimited(new Set(['taskType1', 'taskType2'])),
-      ];
-      const tasks = [
-        mockInstance({
-          id: `id-1`,
-          taskType: 'limitedTaskTypeWithCost',
-          cost: InstanceTaskCost.Tiny,
-        }),
-        mockInstance({
-          id: `id-2`,
-          taskType: 'limitedTaskTypeWithCost',
-          cost: InstanceTaskCost.Tiny,
-        }),
-        mockInstance({
-          id: `id-3`,
-          taskType: 'limitedTaskTypeWithCost',
-          cost: InstanceTaskCost.Tiny,
-        }),
-      ];
-
-      const selected = selectTasksByCapacity({
-        definitions: taskDefinitions,
-        tasks,
-        batches,
-      });
-      // Budget 4 (maxConcurrency 2 * cost 2): three Tiny (1) tasks = 3, all fit
-      expect(selected).toHaveLength(3);
-      expect(selected).toEqual(tasks);
+      expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
     });
   });
 });

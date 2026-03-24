@@ -23,60 +23,46 @@ export function getTaskCost(task: ConcreteTaskInstance, definitions: TaskTypeDic
   return instanceCost ?? definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
 }
 
-// given a list of tasks and capacity info, select the tasks that meet capacity.
-// For limited task types, maxConcurrency is treated as a cost budget: each task
-// consumes its (instance or definition) cost from the budget.
+// given a list of tasks and capacity info, select the tasks that meet capacity
 export function selectTasksByCapacity({
   definitions,
   tasks,
   batches,
 }: SelectTasksByCapacityOpts): ConcreteTaskInstance[] {
+  // create a map of task type - concurrency
   const limitedBatches = batches.filter(isLimited);
-  // remaining cost budget per task type. For shared concurrency types, all share the same budget.
-  const remainingBudgetByType = new Map<string, number>();
-
+  const limitedMap = new Map<string, number | null>();
   for (const limitedBatch of limitedBatches) {
     const { tasksTypes: taskType } = limitedBatch;
+
+    // get concurrency from task definition
     const taskDef = definitions.get(taskType);
-    const defCost = taskDef?.cost ?? TaskCost.Normal;
-    const maxConcurrency = taskDef?.maxConcurrency ?? 0;
-    const budget = maxConcurrency * defCost;
-    remainingBudgetByType.set(taskType, budget);
-    const sharesConcurrencyWith = sharedConcurrencyTaskTypes(taskType);
-    if (sharesConcurrencyWith) {
-      const minBudget = Math.min(
-        budget,
-        ...sharesConcurrencyWith.map((t) => {
-          const d = definitions.get(t);
-          return (d?.maxConcurrency ?? 0) * (d?.cost ?? TaskCost.Normal);
-        })
-      );
-      for (const t of sharesConcurrencyWith) {
-        remainingBudgetByType.set(t, minBudget);
-      }
-    }
+    limitedMap.set(taskType, taskDef?.maxConcurrency ?? null);
   }
 
+  // apply the limited concurrency
   const result: ConcreteTaskInstance[] = [];
   for (const task of tasks) {
-    const remaining = remainingBudgetByType.get(task.taskType);
-    if (remaining == null) {
+    // get concurrency of this task type
+    const concurrency = limitedMap.get(task.taskType);
+    if (concurrency == null) {
       result.push(task);
       continue;
     }
 
-    const taskCost = getTaskCost(task, definitions);
-    if (remaining >= taskCost) {
+    if (concurrency > 0) {
       result.push(task);
 
-      const newRemaining = remaining - taskCost;
+      // get any shared concurrency task types
       const sharesConcurrencyWith = sharedConcurrencyTaskTypes(task.taskType);
       if (sharesConcurrencyWith) {
         for (const taskType of sharesConcurrencyWith) {
-          remainingBudgetByType.set(taskType, newRemaining);
+          if (limitedMap.has(taskType)) {
+            limitedMap.set(taskType, concurrency - 1);
+          }
         }
       } else {
-        remainingBudgetByType.set(task.taskType, newRemaining);
+        limitedMap.set(task.taskType, concurrency - 1);
       }
     }
   }
