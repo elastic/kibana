@@ -123,7 +123,7 @@ export const GenericEntityFlyoutContent = ({
       >
         <ExpandablePanel
           header={{
-            iconType: 'arrowStart',
+            iconType: 'chevronLimitLeft',
             title: (
               <EuiTitle
                 css={css`

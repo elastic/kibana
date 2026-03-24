@@ -6347,6 +6347,23 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.PROCESS_RUNTIME_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESS_RUNTIME_VERSION",
+        "description": [],
+        "signature": [
+          "\"process.runtime.version\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.PROCESSOR_EVENT",
         "type": "string",
         "tags": [],

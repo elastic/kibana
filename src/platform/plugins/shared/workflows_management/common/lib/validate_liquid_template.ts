@@ -31,6 +31,9 @@ function getLiquidInstance(): Liquid {
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
       return value;
     });
+    liquidInstance.registerFilter('entries', (value: unknown): unknown => {
+      return value;
+    });
   }
   return liquidInstance;
 }

@@ -160,7 +160,7 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'chevronLimitLeft' : '',
         title: (
           <EuiTitle
             css={css`

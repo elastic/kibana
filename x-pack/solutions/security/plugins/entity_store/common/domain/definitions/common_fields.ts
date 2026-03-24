@@ -96,7 +96,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
     // Raw indices have no entity.lifecycle.*; derive from @timestamp like last_seen.
     newestValue({
-      source: '@timestamp',
+      source: `${prefix}.lifecycle.last_activity`,
       destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
     }),
