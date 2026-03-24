@@ -181,10 +181,14 @@ describe('get_trigger_type_suggestions', () => {
         });
       });
 
-      it('should set sortText with priority prefix', () => {
+      it('should set sortText so built-in triggers sort before event-driven, each group alphabetical', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
+        const builtIn = ['alert', 'manual', 'scheduled'];
         result.forEach((suggestion) => {
-          expect(suggestion.sortText).toBe(`!${suggestion.label}`);
+          const label =
+            typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+          const prefix = builtIn.includes(label) ? '0_' : '1_';
+          expect(suggestion.sortText).toBe(`!${prefix}${label}`);
         });
       });
 
