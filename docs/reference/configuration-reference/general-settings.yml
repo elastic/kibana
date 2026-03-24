@@ -237,7 +237,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
-        note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityResponseHeaders-disableEmbedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
+        note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityresponseheaders-disableembedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
 
       - setting: csp.report_only.form_action
         description: |
@@ -844,7 +844,7 @@ groups:
       - setting: savedObjects.maxImportPayloadBytes
         id: savedobjects-maximportpayloadbytes
         description: |
-          The maximum byte size of a saved objects import that the {{kib}} server will accept. This setting exists to prevent the {{kib}} server from running out of memory when handling a large import payload. Note that this setting overrides the more general [`server.maxPayload`](#server-maxPayload) for saved object imports only.
+          The maximum byte size of a saved objects import that the {{kib}} server will accept. This setting exists to prevent the {{kib}} server from running out of memory when handling a large import payload. Note that this setting overrides the more general [`server.maxPayload`](#server-maxpayload) for saved object imports only.
         datatype: int
         default: 26214400
         applies_to:
@@ -904,7 +904,7 @@ groups:
       - setting: server.basePath
         id: server-basepath
         description: |
-          Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
+          Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewritebasepath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
         datatype: string
         applies_to:
           stack: ga
@@ -934,7 +934,7 @@ groups:
 
       - setting: server.keepaliveTimeout
         description: |
-          The number of milliseconds to wait for additional data before restarting the [`server.socketTimeout`](#server-socketTimeout) counter.
+          The number of milliseconds to wait for additional data before restarting the [`server.socketTimeout`](#server-sockettimeout) counter.
         datatype: int
         default: 120000
         applies_to:
@@ -986,7 +986,7 @@ groups:
           - "stack: preview"
           - "ech: unavailable"
           - "self: ga"
-        note: "By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedProtocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration."
+        note: "By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedprotocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration."
 
       - setting: server.shutdownTimeout
         id: server-shutdownTimeout
@@ -1043,7 +1043,7 @@ groups:
 
       - setting: server.requestId.ipAllowlist
         description: |
-          A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, [`server.requestId.allowFromAnyIp`](#server-requestId-allowFromAnyIp) must also be set to `false.`
+          A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, [`server.requestId.allowFromAnyIp`](#server-requestid-allowfromanyip) must also be set to `false.`
         datatype: string
         applies_to:
           stack: ga
@@ -1053,7 +1053,7 @@ groups:
       - setting: server.rewriteBasePath
         id: server-rewritebasepath
         description: |
-          Specifies whether {{kib}} should rewrite requests that are prefixed with [`server.basePath`](#server-basePath) or require that they are rewritten by your reverse proxy.
+          Specifies whether {{kib}} should rewrite requests that are prefixed with [`server.basePath`](#server-basepath) or require that they are rewritten by your reverse proxy.
         datatype: bool
         default: false
         applies_to:
@@ -1362,7 +1362,7 @@ groups:
         description: |
           Path to a PKCS#12 keystore that contains an X.509 server certificate and its corresponding private key. If the keystore contains any additional certificates, those will be used as a trusted certificate chain for {{kib}}. All of these are used by {{kib}} to establish trust when receiving inbound SSL/TLS connections from end users. The certificate chain is also used by {{kib}} to verify client certificates from end users when PKI authentication is enabled.
 
-          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateAuthorities) and/or [`server.ssl.truststore.path`](#server-ssl-truststore-path).
+          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateauthorities) and/or [`server.ssl.truststore.path`](#server-ssl-truststore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -1384,7 +1384,7 @@ groups:
         description: |
           Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which make up a trusted certificate chain for {{kib}}. This chain is used by {{kib}} to establish trust when receiving inbound SSL/TLS connections from end users. If PKI authentication is enabled, this chain is also used by {{kib}} to verify client certificates from end users.
 
-          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateAuthorities) and/or [`server.ssl.keystore.path`](#server-ssl-keystore-path).
+          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateauthorities) and/or [`server.ssl.keystore.path`](#server-ssl-keystore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -1458,7 +1458,7 @@ groups:
       - setting: telemetry.allowChangingOptInStatus
         id: telemetry-allowchangingoptinstatus
         description: |
-          When `false`, users cannot change the opt-in status through [Advanced Settings](/reference/advanced-settings.md), and {{kib}} only looks at the value of [`telemetry.optIn`](#settings-telemetry-optIn) to determine whether to send telemetry data or not.
+          When `false`, users cannot change the opt-in status through [Advanced Settings](/reference/advanced-settings.md), and {{kib}} only looks at the value of [`telemetry.optIn`](#settings-telemetry-optin) to determine whether to send telemetry data or not.
         datatype: bool
         default: true
         applies_to:
@@ -1471,7 +1471,7 @@ groups:
         description: |
           Set to `false` to stop sending any telemetry data to Elastic. Reporting your cluster statistics helps us improve your user experience. When `false`, the telemetry data is never sent to Elastic.
 
-          This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowChangingOptInStatus) to `false`.
+          This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowchangingoptinstatus) to `false`.
         datatype: bool
         default: true
         applies_to:
