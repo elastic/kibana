@@ -19,15 +19,11 @@ import {
   ATTACH_TO_TIMELINE_CALLOUT_TEST_ID,
   ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID,
 } from './test_ids';
-import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { Flyouts } from '../../shared/constants/flyouts';
-import { TimelineId } from '../../../../../common/types';
 import { ReqStatus } from '../../../../notes';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
-import type { State } from '../../../../common/store';
+import { useTimelineConfig } from '../../shared/hooks/use_timeline_config';
 
-jest.mock('../../shared/hooks/use_which_flyout');
+jest.mock('../../shared/hooks/use_timeline_config');
 jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 
 jest.mock('../../../../common/components/user_privileges');
@@ -55,23 +51,20 @@ const panelContextValue = {
   searchHit: { _index: 'test', _id: 'test-id' },
 } as unknown as DocumentDetailsContext;
 
-const mockGlobalStateWithSavedTimeline: State = {
-  ...mockGlobalState,
-  timeline: {
-    ...mockGlobalState.timeline,
-    timelineById: {
-      ...mockGlobalState.timeline.timelineById,
-      [TimelineId.active]: {
-        ...mockGlobalState.timeline.timelineById[TimelineId.test],
-        savedObjectId: 'savedObjectId',
-        status: TimelineStatusEnum.active,
-        pinnedEventIds: {},
-      },
-    },
-  },
+const mockTimelineConfig = {
+  timelineSavedObjectId: 'savedObjectId',
+  isTimelineSaved: true,
+  onNoteAddInTimeline: jest.fn(),
+  attachToTimeline: true,
+  setAttachToTimeline: jest.fn(),
+  attachToTimelineElement: (
+    <div data-test-subj="attach-to-timeline-callout">
+      <input data-test-subj="attach-to-timeline-checkbox" type="checkbox" />
+    </div>
+  ),
 };
 
-const mockStore = createMockStore(mockGlobalStateWithSavedTimeline);
+const mockStore = createMockStore(mockGlobalState);
 const renderNotesDetails = () =>
   render(
     <TestProviders store={mockStore}>
@@ -93,7 +86,7 @@ describe('NotesDetails', () => {
         },
       },
     });
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
+    (useTimelineConfig as jest.Mock).mockReturnValue(mockTimelineConfig);
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
   });
 
@@ -104,11 +97,11 @@ describe('NotesDetails', () => {
 
   it('should render loading spinner if notes are being fetched', () => {
     const store = createMockStore({
-      ...mockGlobalStateWithSavedTimeline,
+      ...mockGlobalState,
       notes: {
-        ...mockGlobalStateWithSavedTimeline.notes,
+        ...mockGlobalState.notes,
         status: {
-          ...mockGlobalStateWithSavedTimeline.notes.status,
+          ...mockGlobalState.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Loading,
         },
       },
@@ -127,11 +120,11 @@ describe('NotesDetails', () => {
 
   it('should render no data message for alerts if no notes are present', () => {
     const store = createMockStore({
-      ...mockGlobalStateWithSavedTimeline,
+      ...mockGlobalState,
       notes: {
-        ...mockGlobalStateWithSavedTimeline.notes,
+        ...mockGlobalState.notes,
         status: {
-          ...mockGlobalStateWithSavedTimeline.notes.status,
+          ...mockGlobalState.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Succeeded,
         },
       },
@@ -161,11 +154,11 @@ describe('NotesDetails', () => {
 
   it('should render no data message for events if no notes are present', () => {
     const store = createMockStore({
-      ...mockGlobalStateWithSavedTimeline,
+      ...mockGlobalState,
       notes: {
-        ...mockGlobalStateWithSavedTimeline.notes,
+        ...mockGlobalState.notes,
         status: {
-          ...mockGlobalStateWithSavedTimeline.notes.status,
+          ...mockGlobalState.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Succeeded,
         },
       },
@@ -185,15 +178,15 @@ describe('NotesDetails', () => {
 
   it('should render error toast if fetching notes fails', () => {
     const store = createMockStore({
-      ...mockGlobalStateWithSavedTimeline,
+      ...mockGlobalState,
       notes: {
-        ...mockGlobalStateWithSavedTimeline.notes,
+        ...mockGlobalState.notes,
         status: {
-          ...mockGlobalStateWithSavedTimeline.notes.status,
+          ...mockGlobalState.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Failed,
         },
         error: {
-          ...mockGlobalStateWithSavedTimeline.notes.error,
+          ...mockGlobalState.notes.error,
           fetchNotesByDocumentIds: { type: 'http', status: 500 },
         },
       },
@@ -231,7 +224,7 @@ describe('NotesDetails', () => {
   });
 
   it('should not render the callout and attach to timeline checkbox if not timeline flyout', () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
+    (useTimelineConfig as jest.Mock).mockReturnValue(undefined);
 
     const { getByTestId, queryByTestId } = renderNotesDetails();
 

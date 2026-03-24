@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -20,11 +19,6 @@ import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/
 import { FlyoutLoading } from '../../../flyout/shared/components/flyout_loading';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { EventKind } from '../constants/event_kinds';
-
-const OVERVIEW_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',
-  { defaultMessage: 'Overview' }
-);
 
 export interface OverviewTabProps {
   /**
@@ -58,7 +52,7 @@ export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) =
   }
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
+    <>
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection hit={hit} />
@@ -66,7 +60,7 @@ export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) =
       <VisualizationsSection hit={hit} renderCellActions={renderCellActions} />
       <EuiHorizontalRule margin="m" />
       <InsightsSection hit={hit} />
-    </EuiPanel>
+    </>
   );
 });
 
