@@ -230,8 +230,8 @@ describe('EventsAndEntityRelationships story', () => {
     // Verify entity nodes have correct icons
     const expectedNodes = [
       { labelContains: 'john.doe', expectedIcon: 'user' },
-      { labelContains: 'prod-ec2-instance-01', expectedIcon: 'compute' },
-      { labelContains: 'prod-ec2-instance-02', expectedIcon: 'compute' },
+      { labelContains: 'prod-ec2-instance-01', expectedIcon: 'processor' },
+      { labelContains: 'prod-ec2-instance-02', expectedIcon: 'processor' },
       { labelContains: 'AdminRole', expectedIcon: 'key' },
     ];
 
@@ -374,10 +374,10 @@ describe('EventsAndRelationshipsStacked story', () => {
     // Verify entity nodes have correct icons
     const expectedNodes = [
       { labelContains: 'john.doe', expectedIcon: 'user' },
-      { labelContains: 'prod-ec2-instance-01', expectedIcon: 'compute' },
+      { labelContains: 'prod-ec2-instance-01', expectedIcon: 'processor' },
       { labelContains: 'user-1@company.com', expectedIcon: 'user' },
       { labelContains: 'user-2@company.com', expectedIcon: 'user' },
-      { labelContains: 'hosts', expectedIcon: 'compute' },
+      { labelContains: 'hosts', expectedIcon: 'processor' },
     ];
 
     for (const { labelContains, expectedIcon } of expectedNodes) {

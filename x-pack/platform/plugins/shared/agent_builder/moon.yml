@@ -119,6 +119,7 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/fs'
   - '@kbn/react-hooks'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
