@@ -34,6 +34,8 @@ interface StoryArgs {
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
   applicationMarginTop: number;
+  applicationMarginBottom: number;
+  applicationMarginRight: number;
   includeSidebar: boolean;
   includeBanner: boolean;
   includeFooter: boolean;
@@ -176,6 +178,8 @@ export const Layout: StoryObj<PropsAndArgs> = {
     applicationTopBarHeight: 48,
     applicationBottomBarHeight: 48,
     applicationMarginTop: 0,
+    applicationMarginBottom: 0,
+    applicationMarginRight: 0,
   },
   argTypes: {
     debug: {
@@ -226,6 +230,14 @@ export const Layout: StoryObj<PropsAndArgs> = {
     applicationMarginTop: {
       control: 'number',
       description: 'Top margin of the application area',
+    },
+    applicationMarginBottom: {
+      control: 'number',
+      description: 'Bottom margin of the application area',
+    },
+    applicationMarginRight: {
+      control: 'number',
+      description: 'Right margin of the application area',
     },
   },
   render: (args) => <LayoutExample {...args} />,
