@@ -106,7 +106,7 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
 
   const result = renderWithTheme(
-    <IntlProvider locale="en">
+    <IntlProvider>
       <Router history={history}>
         <UnifiedWaterfallContainer
           traceItems={traceItems}
