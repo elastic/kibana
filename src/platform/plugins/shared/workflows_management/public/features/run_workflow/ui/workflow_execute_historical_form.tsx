@@ -143,13 +143,6 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       setSelectedExecutionId(id);
     }, []);
 
-    const handleChange = useCallback(
-      (newValue: string) => {
-        setValue(newValue);
-      },
-      [setValue]
-    );
-
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
         if (!inputs) return;
@@ -221,7 +214,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                       maxLines: 15,
                     }}
                     width="100%"
-                    onChange={handleChange}
+                    onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj={'workflow-historical-json-editor'}
                     overflowWidgetsContainerZIndexOverride={6001}
