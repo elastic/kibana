@@ -7,236 +7,158 @@
 
 import type { Filter } from '@kbn/es-query';
 import { ENTITY_FIELDS } from './constants';
-import {
-  transformResolutionFilter,
-  buildResolutionGroupFilter,
-  extractMatchPhraseValue,
-  groupFilterMap,
-} from './entities_table_section';
+import { processGroupFilters } from './entities_table_section';
 
 const createFilter = (query: Filter['query'], metaKey?: string): Filter => ({
   query,
   meta: metaKey ? { key: metaKey } : {},
 });
 
-describe('transformResolutionFilter', () => {
-  it('transforms match_phrase on resolved_to into bool/should', () => {
-    const filter = createFilter({
-      match_phrase: {
-        [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-entity-id' },
-      },
-    });
+describe('processGroupFilters', () => {
+  it('replaces resolution match_phrase and script filters with a single bool/should', () => {
+    const filters = [
+      createFilter(
+        { match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-id' } } },
+        ENTITY_FIELDS.RESOLVED_TO
+      ),
+      createFilter(
+        { script: { script: { source: `doc['resolved_to'].size() == 1` } } },
+        ENTITY_FIELDS.RESOLVED_TO
+      ),
+    ];
 
-    const result = transformResolutionFilter(filter);
+    const result = processGroupFilters(filters);
 
-    expect(result.query).toEqual({
+    expect(result).toHaveLength(1);
+    expect(result[0].query).toEqual({
       bool: {
         should: [
-          { term: { [ENTITY_FIELDS.ENTITY_ID]: 'target-entity-id' } },
-          { term: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-entity-id' } },
+          { term: { [ENTITY_FIELDS.ENTITY_ID]: 'target-id' } },
+          { term: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-id' } },
         ],
         minimum_should_match: 1,
       },
     });
+    expect(result[0].meta).toEqual({});
   });
 
   it('handles match_phrase with plain string value', () => {
-    const filter = createFilter({
-      match_phrase: {
-        [ENTITY_FIELDS.RESOLVED_TO]: 'target-entity-id',
-      },
-    });
+    const filters = [
+      createFilter(
+        { match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-id' } },
+        ENTITY_FIELDS.RESOLVED_TO
+      ),
+    ];
 
-    const result = transformResolutionFilter(filter);
+    const result = processGroupFilters(filters);
 
-    expect(result.query).toBeDefined();
-    expect(result.query?.bool?.should).toEqual([
-      { term: { [ENTITY_FIELDS.ENTITY_ID]: 'target-entity-id' } },
-      { term: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-entity-id' } },
+    expect(result).toHaveLength(1);
+    expect(result[0].query?.bool?.should).toEqual([
+      { term: { [ENTITY_FIELDS.ENTITY_ID]: 'target-id' } },
+      { term: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-id' } },
     ]);
   });
 
-  it('passes through match_phrase on other fields unchanged', () => {
-    const filter = createFilter({
-      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
-    });
+  it('passes non-resolution filters through unchanged', () => {
+    const entityTypeFilter = createFilter(
+      { match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } } },
+      'entity.EngineMetadata.Type'
+    );
 
-    const result = transformResolutionFilter(filter);
+    const result = processGroupFilters([entityTypeFilter]);
 
-    expect(result).toBe(filter);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(entityTypeFilter);
   });
 
-  it('passes through filters without match_phrase unchanged', () => {
-    const filter = createFilter({
-      bool: { filter: [{ term: { field: 'value' } }] },
-    });
+  it('preserves non-resolution filters alongside the resolution replacement', () => {
+    const entityTypeFilter = createFilter(
+      { match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } } },
+      'entity.EngineMetadata.Type'
+    );
+    const resolutionFilter = createFilter(
+      { match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-id' } } },
+      ENTITY_FIELDS.RESOLVED_TO
+    );
+    const scriptFilter = createFilter(
+      { script: { script: { source: 'doc["resolved_to"].size() == 1' } } },
+      ENTITY_FIELDS.RESOLVED_TO
+    );
 
-    const result = transformResolutionFilter(filter);
+    const result = processGroupFilters([resolutionFilter, scriptFilter, entityTypeFilter]);
 
-    expect(result).toBe(filter);
+    expect(result).toHaveLength(2);
+    expect(result[0].query?.bool?.should).toBeDefined();
+    expect(result[1]).toBe(entityTypeFilter);
   });
 
-  it('preserves filter meta', () => {
-    const filter: Filter = {
+  it('passes through already-processed filters (no meta.key on replacement)', () => {
+    const alreadyProcessed: Filter = {
       query: {
-        match_phrase: {
-          [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-id' },
-        },
-      },
-      meta: { alias: 'test', disabled: false },
-    };
-
-    const result = transformResolutionFilter(filter);
-
-    expect(result.meta).toEqual({ alias: 'test', disabled: false });
-  });
-});
-
-describe('extractMatchPhraseValue', () => {
-  it('extracts query value from match_phrase', () => {
-    const filter = createFilter({
-      match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'entity-123' } },
-    });
-
-    expect(extractMatchPhraseValue(filter)).toBe('entity-123');
-  });
-
-  it('returns undefined for non-match_phrase filters', () => {
-    const filter = createFilter({
-      bool: { should: [{ term: { field: 'value' } }] },
-    });
-
-    expect(extractMatchPhraseValue(filter)).toBeUndefined();
-  });
-
-  it('returns undefined for empty filter', () => {
-    const filter = createFilter(undefined);
-
-    expect(extractMatchPhraseValue(filter)).toBeUndefined();
-  });
-
-  it('extracts value only from specified field when field param is provided', () => {
-    const filter = createFilter({
-      match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
-    });
-
-    expect(extractMatchPhraseValue(filter, ENTITY_FIELDS.RESOLVED_TO)).toBeUndefined();
-    expect(extractMatchPhraseValue(filter, 'entity.EngineMetadata.Type')).toBe('user');
-  });
-});
-
-describe('buildResolutionGroupFilter', () => {
-  it('builds bool/should from match_phrase filters', () => {
-    const filters = [
-      createFilter({
-        match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-entity' } },
-      }),
-    ];
-
-    const result = buildResolutionGroupFilter(filters);
-
-    expect(result).toEqual([
-      {
         bool: {
           should: [
-            { term: { [ENTITY_FIELDS.ENTITY_ID]: 'target-entity' } },
-            { term: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-entity' } },
+            { term: { [ENTITY_FIELDS.ENTITY_ID]: 'target-id' } },
+            { term: { [ENTITY_FIELDS.RESOLVED_TO]: 'target-id' } },
           ],
           minimum_should_match: 1,
         },
       },
-    ]);
+      meta: {},
+    };
+
+    const result = processGroupFilters([alreadyProcessed]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(alreadyProcessed);
   });
 
-  it('returns undefined when no match_phrase filters exist', () => {
-    const filters = [
-      createFilter({
-        bool: { should: [{ term: { field: 'value' } }] },
-      }),
-    ];
-
-    expect(buildResolutionGroupFilter(filters)).toBeUndefined();
+  it('returns empty array for empty input', () => {
+    expect(processGroupFilters([])).toEqual([]);
   });
 
-  it('returns undefined for empty filter array', () => {
-    expect(buildResolutionGroupFilter([])).toBeUndefined();
+  it('drops filters without a query', () => {
+    const noQueryFilter = { meta: {} } as Filter;
+    const validFilter = createFilter({ term: { field: 'value' } });
+
+    const result = processGroupFilters([noQueryFilter, validFilter]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(validFilter);
   });
 
-  it('ignores non-resolution match_phrase filters', () => {
-    const filters = [
-      createFilter({
-        match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } },
-      }),
-    ];
-
-    expect(buildResolutionGroupFilter(filters)).toBeUndefined();
-  });
-
-  it('uses first match_phrase value when multiple filters present', () => {
-    const filters = [
-      createFilter({
-        match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'first-entity' } },
-      }),
-      createFilter({
-        match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'second-entity' } },
-      }),
-    ];
-
-    const result = buildResolutionGroupFilter(filters);
-
-    expect(result?.[0].bool.should).toEqual(
-      expect.arrayContaining([{ term: { [ENTITY_FIELDS.ENTITY_ID]: 'first-entity' } }])
+  it('drops resolution filters when none contain a match_phrase', () => {
+    const scriptOnly = createFilter(
+      { script: { script: { source: 'doc["resolved_to"].size() == 1' } } },
+      ENTITY_FIELDS.RESOLVED_TO
     );
-  });
-});
+    const entityTypeFilter = createFilter(
+      { match_phrase: { 'entity.EngineMetadata.Type': { query: 'user' } } },
+      'entity.EngineMetadata.Type'
+    );
 
-describe('groupFilterMap', () => {
-  it('passes through any filter with a query', () => {
-    const filter = createFilter({
-      term: { field: 'value' },
-    });
+    const result = processGroupFilters([scriptOnly, entityTypeFilter]);
 
-    expect(groupFilterMap(filter)).toBe(filter);
-  });
-
-  it('returns null for null input', () => {
-    expect(groupFilterMap(null)).toBeNull();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(entityTypeFilter);
   });
 
-  it('returns null for filter without query', () => {
-    expect(groupFilterMap({ meta: {} } as Filter)).toBeNull();
-  });
-});
+  it('uses first target entity ID when multiple resolution filters present', () => {
+    const filters = [
+      createFilter(
+        { match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'first-target' } } },
+        ENTITY_FIELDS.RESOLVED_TO
+      ),
+      createFilter(
+        { match_phrase: { [ENTITY_FIELDS.RESOLVED_TO]: { query: 'second-target' } } },
+        ENTITY_FIELDS.RESOLVED_TO
+      ),
+    ];
 
-describe('resolution filter pipeline regression', () => {
-  // @kbn/grouping sets meta.key to the grouped field on all generated filters
-  const resolutionMatchPhraseFilter = createFilter(
-    {
-      match_phrase: {
-        [ENTITY_FIELDS.RESOLVED_TO]: { query: 'target-entity-id' },
-      },
-    },
-    ENTITY_FIELDS.RESOLVED_TO
-  );
+    const result = processGroupFilters(filters);
 
-  it('buildResolutionGroupFilter works with raw match_phrase filters', () => {
-    const rawFilters = [resolutionMatchPhraseFilter]
-      .map(groupFilterMap)
-      .filter(Boolean) as Filter[];
-
-    const result = buildResolutionGroupFilter(rawFilters);
-
-    expect(result).toBeDefined();
-    expect(result?.[0].bool.should).toHaveLength(2);
-  });
-
-  it('transformResolutionFilter is safe to apply to already-transformed filters (idempotent for non-match_phrase)', () => {
-    // When resolution is a parent group level and entity type is the leaf,
-    // transformResolutionFilter may see already-transformed bool/should filters.
-    // It should pass them through unchanged.
-    const alreadyTransformed = transformResolutionFilter(resolutionMatchPhraseFilter);
-    const doubleTransformed = transformResolutionFilter(alreadyTransformed);
-
-    expect(doubleTransformed).toBe(alreadyTransformed);
+    expect(result).toHaveLength(1);
+    expect(result[0].query?.bool?.should).toEqual(
+      expect.arrayContaining([{ term: { [ENTITY_FIELDS.ENTITY_ID]: 'first-target' } }])
+    );
   });
 });

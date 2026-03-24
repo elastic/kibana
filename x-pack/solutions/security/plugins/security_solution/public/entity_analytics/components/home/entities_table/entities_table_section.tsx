@@ -11,7 +11,6 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   DEFAULT_TABLE_SECTION_HEIGHT,
   ENTITY_FIELDS,
-  ENTITY_GROUPING_OPTIONS,
   TEST_SUBJ_GROUPING,
   TEST_SUBJ_GROUPING_LOADING,
 } from './constants';
@@ -108,8 +107,6 @@ interface GroupContentProps {
   groupSelectorComponent?: JSX.Element;
 }
 
-const filterTypeGuard = (filter: Filter | null): filter is Filter => filter !== null;
-
 const mergeCurrentAndParentFilters = (
   currentGroupFilters: Filter[],
   parentGroupFilters: string | undefined
@@ -137,29 +134,53 @@ const buildResolutionBoolQuery = (targetEntityId: string) => ({
   },
 });
 
-export const groupFilterMap = (filter: Filter | null): Filter | null => {
-  return filter?.query ? filter : null;
-};
-
 /**
- * Transforms a resolution group filter from a simple match_phrase on resolved_to
- * into a bool/should that matches both the target entity (by entity.id) and its
- * aliases (by resolved_to). Without this, expanding a resolution group only shows
- * aliases because the target entity doesn't have resolved_to set.
+ * Processes group filters from @kbn/grouping, replacing resolution-specific
+ * filters with a single correct bool/should query that includes both the target
+ * entity (by entity.id) and its aliases (by resolved_to).
+ *
+ * @kbn/grouping generates multiple filter shapes per expanded group (match_phrase,
+ * script, etc.), all tagged with meta.key equal to the grouped field. For resolution
+ * groups, these standard filters exclude the target entity (which has no resolved_to
+ * set), so we replace ALL resolution filters with a single correct bool/should and
+ * pass non-resolution filters through unchanged.
+ *
+ * The replacement filter intentionally omits meta.key so downstream calls won't
+ * re-identify it as a resolution filter needing transformation.
  */
-export const transformResolutionFilter = (filter: Filter): Filter => {
-  const matchPhrase = filter?.query?.match_phrase as MatchPhraseQuery | undefined;
-  if (!matchPhrase) return filter;
+export const processGroupFilters = (filters: Filter[]): Filter[] => {
+  const resolutionFilters: Filter[] = [];
+  const otherFilters: Filter[] = [];
 
-  const resolvedToEntry = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
-  if (!resolvedToEntry) return filter;
+  for (const f of filters) {
+    if (f?.query) {
+      if (f?.meta?.key === ENTITY_FIELDS.RESOLVED_TO) {
+        resolutionFilters.push(f);
+      } else {
+        otherFilters.push(f);
+      }
+    }
+  }
 
-  const targetEntityId = getMatchPhraseStringValue(resolvedToEntry);
+  if (resolutionFilters.length === 0) return otherFilters;
 
-  return {
-    ...filter,
+  const targetEntityId = resolutionFilters
+    .map((f) => {
+      const matchPhrase = f?.query?.match_phrase as MatchPhraseQuery | undefined;
+      if (!matchPhrase) return undefined;
+      const value = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
+      return value ? getMatchPhraseStringValue(value) : undefined;
+    })
+    .find(Boolean);
+
+  if (!targetEntityId) return otherFilters;
+
+  const resolutionFilter: Filter = {
     query: buildResolutionBoolQuery(targetEntityId),
+    meta: {},
   };
+
+  return [resolutionFilter, ...otherFilters];
 };
 
 const GroupContent = ({
@@ -174,17 +195,9 @@ const GroupContent = ({
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
 
-    const newParentGroupFilters = mergeCurrentAndParentFilters(
-      currentGroupFilters,
-      parentGroupFilters
-    )
-      .map(transformResolutionFilter)
-      .map(groupFilterMap)
-      .filter(filterTypeGuard)
-      // Drop non-bool resolution filters (e.g., @kbn/grouping script filters
-      // that check field cardinality and incorrectly exclude the target entity).
-      // transformResolutionFilter already creates a correct bool/should replacement.
-      .filter((f) => f?.meta?.key !== ENTITY_FIELDS.RESOLVED_TO || Boolean(f?.query?.bool));
+    const newParentGroupFilters = processGroupFilters(
+      mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
+    );
 
     return (
       <GroupWithLocalPagination
@@ -203,7 +216,6 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
-      selectedGroup={selectedGroup}
     />
   );
 };
@@ -242,7 +254,7 @@ const GroupWithLocalPagination = ({
       grouping={grouping}
       renderChildComponent={(currentGroupFilters) => (
         <GroupContent
-          currentGroupFilters={currentGroupFilters.map(groupFilterMap).filter(filterTypeGuard)}
+          currentGroupFilters={currentGroupFilters.filter((f) => f?.query)}
           state={state}
           groupingLevel={groupingLevel}
           selectedGroup={selectedGroup}
@@ -268,73 +280,23 @@ interface DataTableWithLocalPaginationProps {
   state: EntityURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
-  selectedGroup: string;
 }
-
-const getDataGridFilter = (filter: Filter | null) => {
-  if (!filter) return null;
-  return {
-    ...(filter?.query ?? {}),
-  };
-};
-
-export const extractMatchPhraseValue = (filter: Filter, field?: string): string | undefined => {
-  const matchPhrase = filter?.query?.match_phrase as MatchPhraseQuery | undefined;
-  if (!matchPhrase) return undefined;
-  const value = field ? matchPhrase[field] : Object.values(matchPhrase)[0];
-  return value ? getMatchPhraseStringValue(value) : undefined;
-};
-
-export const buildResolutionGroupFilter = (
-  filters: Filter[]
-): Array<NonNullable<Filter['query']>> | undefined => {
-  const targetEntityId = filters
-    .map((f) => extractMatchPhraseValue(f, ENTITY_FIELDS.RESOLVED_TO))
-    .find(Boolean);
-  if (!targetEntityId) return undefined;
-
-  return [buildResolutionBoolQuery(targetEntityId)];
-};
 
 const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
-  selectedGroup,
 }: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
-  const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
-
-  const combinedFilters = useMemo(() => {
-    const mergedFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters);
-
-    if (isResolutionGrouping) {
-      // Use raw filters — buildResolutionGroupFilter extracts the match_phrase
-      // value and builds its own bool/should. Applying transformResolutionFilter
-      // first would remove the match_phrase, causing it to return undefined.
-      const rawFilters = mergedFilters.map(groupFilterMap).filter(filterTypeGuard);
-      const resolutionQueryFilter = buildResolutionGroupFilter(rawFilters);
-      // Preserve non-resolution filters (e.g., entity type from parent group).
-      // Use meta.key to exclude ALL filter shapes targeting resolved_to —
-      // @kbn/grouping generates both match_phrase and script filters per group.
-      const nonResolutionFilters = rawFilters
-        .filter((f) => f?.meta?.key !== ENTITY_FIELDS.RESOLVED_TO)
-        .map(getDataGridFilter)
-        .filter((f): f is NonNullable<Filter['query']> => Boolean(f));
-      return [...(resolutionQueryFilter ?? []), ...nonResolutionFilters];
-    }
-
-    // For non-resolution leaf, transform resolution filters first
-    // (handles case where resolution is a parent group level)
-    return mergedFilters
-      .map(transformResolutionFilter)
-      .map(groupFilterMap)
-      .filter(filterTypeGuard)
-      .map(getDataGridFilter)
-      .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
-  }, [currentGroupFilters, parentGroupFilters, isResolutionGrouping]);
+  const combinedFilters = useMemo(
+    () =>
+      processGroupFilters(mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters))
+        .map((f) => f.query)
+        .filter((q): q is NonNullable<Filter['query']> => Boolean(q)),
+    [currentGroupFilters, parentGroupFilters]
+  );
 
   const newState: EntityURLStateResult = {
     ...state,
