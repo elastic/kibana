@@ -219,6 +219,7 @@ const StatusFilterPopover = ({
     ariaLabel={i18n.translate('xpack.alertingV2.rulesList.statusFilter.ariaLabel', {
       defaultMessage: 'Filter rules by status',
     })}
+    buttonWidth={140}
     value={value}
     onChange={onChange}
   />
@@ -352,10 +353,11 @@ export const RulesListPage = () => {
       ) : null}
       {!isError ? (
         <>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <EuiFieldSearch
                 fullWidth
+                isClearable
                 value={searchInput}
                 placeholder={i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
                   defaultMessage: 'Search rules',
