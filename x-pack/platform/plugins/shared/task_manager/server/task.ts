@@ -259,6 +259,7 @@ export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-s
 
 export interface TaskUserScope {
   apiKeyId: string;
+  uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
 }
@@ -370,9 +371,14 @@ export interface TaskInstance {
   partition?: number;
 
   /**
-   * Used to allow tasks to be scoped to a user via their API key
+   * Used to allow tasks to be scoped to a user via their ES API key
    */
   apiKey?: string;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their UIAM API key
+   */
+  uiamApiKey?: string;
 
   /**
    * Meta data related to the API key associated with this task
@@ -516,6 +522,7 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
+  uiamApiKey?: string;
   userScope?: TaskUserScope;
 };
 

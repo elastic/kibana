@@ -67,11 +67,15 @@ import {
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
-import type { ApiKeyInvalidationFn } from './invalidate_api_keys/invalidate_api_keys_task';
+import type {
+  ApiKeyInvalidationFn,
+  UiamApiKeyInvalidationFn,
+} from './invalidate_api_keys/invalidate_api_keys_task';
 import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
+import { createApiKeyStrategy } from './lib/api_key_strategy';
 
 export interface TaskManagerSetupContract {
   /**
@@ -104,6 +108,7 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
     registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
     registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => void;
+    registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => void;
   };
 
 export interface TaskManagerPluginsStart {
@@ -150,6 +155,7 @@ export class TaskManagerPlugin
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -172,6 +178,10 @@ export class TaskManagerPlugin
     if (this.invalidateApiKeyFn) {
       return this.invalidateApiKeyFn(params);
     }
+  }
+
+  private get invalidateUiamApiKey(): UiamApiKeyInvalidationFn | undefined {
+    return this.invalidateUiamApiKeyFn;
   }
 
   public setup(
@@ -277,6 +287,7 @@ export class TaskManagerPlugin
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
       invalidateApiKeyFn: this.invalidateApiKey.bind(this),
+      invalidateUiamApiKeyFn: () => this.invalidateUiamApiKey,
       logger: this.logger,
       removalDelay: this.config.invalidate_api_key_task.removalDelay,
       taskTypeDictionary: this.definitions,
@@ -341,6 +352,7 @@ export class TaskManagerPlugin
     }
 
     const serializer = savedObjects.createSerializer();
+    const apiKeyStrategy = createApiKeyStrategy(this.config.api_key_type, security);
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
@@ -358,6 +370,7 @@ export class TaskManagerPlugin
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
       basePath: http.basePath,
       executionContext,
+      apiKeyStrategy,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -413,6 +426,7 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
         startingCapacity,
+        apiKeyStrategy,
       });
     }
 
@@ -474,6 +488,9 @@ export class TaskManagerPlugin
       },
       registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => {
         this.invalidateApiKeyFn = fn;
+      },
+      registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => {
+        this.invalidateUiamApiKeyFn = fn;
       },
     };
   }

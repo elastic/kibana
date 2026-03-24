@@ -54,6 +54,7 @@ interface RegisterInvalidateApiKeyTaskOpts {
   configInterval: string;
   coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>;
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  invalidateUiamApiKeyFn?: () => UiamApiKeyInvalidationFn | undefined;
   logger: Logger;
   removalDelay: string;
   taskTypeDictionary: TaskTypeDictionary;
@@ -65,6 +66,7 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
     configInterval,
     coreStartServices,
     invalidateApiKeyFn,
+    invalidateUiamApiKeyFn,
     removalDelay,
     taskTypeDictionary,
   } = opts;
@@ -76,6 +78,7 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
         configInterval,
         coreStartServices,
         invalidateApiKeyFn,
+        invalidateUiamApiKeyFn,
         removalDelay,
       }),
     },
@@ -84,11 +87,23 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
 
 type InvalidateApiKeysTaskRunnerOpts = Pick<
   RegisterInvalidateApiKeyTaskOpts,
-  'logger' | 'configInterval' | 'coreStartServices' | 'invalidateApiKeyFn' | 'removalDelay'
+  | 'logger'
+  | 'configInterval'
+  | 'coreStartServices'
+  | 'invalidateApiKeyFn'
+  | 'invalidateUiamApiKeyFn'
+  | 'removalDelay'
 >;
 
 export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
-  const { logger, configInterval, coreStartServices, invalidateApiKeyFn, removalDelay } = opts;
+  const {
+    logger,
+    configInterval,
+    coreStartServices,
+    invalidateApiKeyFn,
+    invalidateUiamApiKeyFn,
+    removalDelay,
+  } = opts;
   return () => {
     return {
       async run() {
@@ -100,6 +115,7 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
 
           const totalInvalidated = await runInvalidate({
             invalidateApiKeyFn,
+            invalidateUiamApiKeyFn: invalidateUiamApiKeyFn?.(),
             logger,
             removalDelay,
             savedObjectsClient,

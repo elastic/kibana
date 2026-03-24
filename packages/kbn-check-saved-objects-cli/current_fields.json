@@ -1363,7 +1363,8 @@
     "status",
     "taskType",
     "userScope",
-    "userScope.apiKeyId"
+    "userScope.apiKeyId",
+    "userScope.uiamApiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
