@@ -170,7 +170,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
       title: storageFields[QUERY_TITLE],
       description: storageFields[QUERY_DESCRIPTION],
       /**
-       * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
+       * The versioned schema migration converts the `kql` and `feature` filter to esql, making safe their removal here.
        */
       esql: {
         query: storageFields[QUERY_ESQL_QUERY],

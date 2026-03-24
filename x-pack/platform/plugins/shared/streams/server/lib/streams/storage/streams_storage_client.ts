@@ -14,7 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Streams } from '@kbn/streams-schema';
-import { migrateOnRead } from './migrate_on_read';
+import { streamsVersioning } from './versioning';
 
 const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -36,9 +36,7 @@ export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, Stream
 
 /**
  * This ensures there's only one way to initialize a storage client for streams, with the proper
- * settings and migration on read.
- * @param esClient
- * @param logger
+ * settings and versioning.
  */
 export function createStreamsStorageClient(
   esClient: ElasticsearchClient,
@@ -48,9 +46,7 @@ export function createStreamsStorageClient(
     esClient,
     logger,
     streamsStorageSettings,
-    {
-      migrateSource: migrateOnRead,
-    }
+    { versioning: streamsVersioning }
   );
 
   return adapter.getClient();

@@ -9,6 +9,7 @@ import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/se
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
+<<<<<<< HEAD
 import { ensureMetadata } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
@@ -28,6 +29,13 @@ import { queryStorageSettings, getQueryStorageSettingsWithSemantic } from '../st
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 import { checkInferenceAvailability, getElserInferenceId } from './helpers/inference_availability';
+=======
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { StreamsPluginStartDependencies } from '../../../../types';
+import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
+import { QueryClient, type StoredQueryLink } from './query_client';
+import { queryVersioning } from './versioning';
+>>>>>>> 150daa184cbe4ad8154cf90f3171809bc2dd6186
 
 export class QueryService {
   constructor(
@@ -60,6 +68,7 @@ export class QueryService {
     const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
       esClient,
       this.logger.get('queries'),
+<<<<<<< HEAD
       settings,
       {
         migrateSource: (source) => {
@@ -128,6 +137,10 @@ export class QueryService {
           return migrated as StoredQueryLink;
         },
       }
+=======
+      queryStorageSettings,
+      { versioning: queryVersioning }
+>>>>>>> 150daa184cbe4ad8154cf90f3171809bc2dd6186
     );
 
     return new QueryClient(
