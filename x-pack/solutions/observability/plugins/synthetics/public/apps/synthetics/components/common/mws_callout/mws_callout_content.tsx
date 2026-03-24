@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
 import { useSyncInterval } from './use_sync_interval';
-import { SyncNowButton } from './sync_now_button';
+import { SyncNowLink } from './sync_now_link';
 
 export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[] }) => {
   const syncInterval = useSyncInterval();
@@ -48,12 +48,10 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
-              defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for maintenance window changes to be applied to private location monitors."
-              values={{ syncInterval }}
+              defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for maintenance window changes to be applied to private location monitors. {syncNowLink}"
+              values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
             />
           </EuiText>
-          <EuiSpacer size="s" />
-          <SyncNowButton />
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>

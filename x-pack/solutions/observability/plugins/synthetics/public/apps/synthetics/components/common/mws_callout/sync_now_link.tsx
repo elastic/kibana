@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { triggerMwSync } from '../../../state/settings/api';
 
-export const SyncNowButton = () => {
+export const SyncNowLink = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = useCallback(async () => {
@@ -35,17 +35,14 @@ export const SyncNowButton = () => {
   }, []);
 
   return (
-    <EuiButton
-      size="s"
-      color="warning"
-      fill
-      onClick={handleClick}
-      isLoading={isLoading}
-      data-test-subj="triggerMwSyncButton"
-    >
-      {i18n.translate('xpack.synthetics.maintenanceWindowCallout.syncNow', {
-        defaultMessage: 'Sync now',
-      })}
-    </EuiButton>
+    <EuiLink onClick={handleClick} disabled={isLoading} data-test-subj="triggerMwSyncButton">
+      {isLoading
+        ? i18n.translate('xpack.synthetics.maintenanceWindowCallout.syncing', {
+            defaultMessage: 'Syncing...',
+          })
+        : i18n.translate('xpack.synthetics.maintenanceWindowCallout.syncNow', {
+            defaultMessage: 'Sync now',
+          })}
+    </EuiLink>
   );
 };
