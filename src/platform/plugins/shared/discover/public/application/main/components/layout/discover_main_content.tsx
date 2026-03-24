@@ -119,7 +119,7 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
   const showChart = useAppStateSelector((state) => !state.hideChart);
   const showTable = useAppStateSelector((state) => !state.hideTable);
-  const showPanelsToggle = !isChartAvailable || !showChart || !showTable;
+  const showPanelsToggle = !isChartAvailable || !showChart;
 
   const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
