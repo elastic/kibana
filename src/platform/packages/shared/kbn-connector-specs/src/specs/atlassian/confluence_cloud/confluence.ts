@@ -37,7 +37,7 @@ const buildBaseUrl = (ctx: ActionContext): string => {
   }
   if (sub.includes('.')) {
     throw new Error(
-      'Confluence Cloud subdomain must be a bare subdomain (e.g. your-domain), not a full hostname'
+      'Confluence Cloud subdomain must be a bare subdomain (for example, your-domain), not a full hostname'
     );
   }
   if (!BARE_SUBDOMAIN_REGEX.test(sub)) {
@@ -95,7 +95,8 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       .trim()
       .min(1)
       .regex(BARE_SUBDOMAIN_REGEX, {
-        message: 'Subdomain may only contain letters, numbers, and hyphens (e.g. your-domain)',
+        message:
+          'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
       })
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
