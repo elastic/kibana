@@ -9,12 +9,11 @@
 
 import type { Pair, Scalar } from 'yaml';
 import { isMap, isPair, isScalar, parseDocument, visit } from 'yaml';
-
 import {
   isDynamicWorkflowReference,
   WORKFLOW_EXECUTE_TYPES,
   WORKFLOW_REFERENCE_KEY,
-} from './workflow_import_constants';
+} from '../../../../common/lib/import';
 
 /**
  * Rewrites `workflow-id` references inside `workflow.execute` and
