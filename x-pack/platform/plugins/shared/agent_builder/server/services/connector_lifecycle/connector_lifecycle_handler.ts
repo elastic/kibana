@@ -179,6 +179,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
                 includedHiddenTypes: ['action'],
               }),
               logger,
+              request,
             });
             logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
           } catch (smlError) {
@@ -256,6 +257,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
                 includedHiddenTypes: ['action'],
               }),
               logger,
+              request,
             });
             logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
           } catch (smlError) {
