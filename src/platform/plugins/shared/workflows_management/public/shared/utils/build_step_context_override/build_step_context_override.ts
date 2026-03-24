@@ -34,6 +34,8 @@ import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodType;
+  /** Original JSON Schema (avoids lossy Zod → JSON Schema round-trip for Monaco validation) */
+  rawJsonSchema?: JsonModelSchemaType;
 }
 
 export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {

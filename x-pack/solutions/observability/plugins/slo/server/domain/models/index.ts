@@ -10,5 +10,6 @@ export { Duration, DurationUnit, toDurationUnit, toMomentUnitOfTime } from '@kbn
 export type * from './error_budget';
 export type * from './indicators';
 export type * from './slo';
+export type * from './composite_slo';
 export * from './time_window';
 export type * from './slo_template';
