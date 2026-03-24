@@ -11,6 +11,19 @@ import { tags } from '@kbn/scout-oblt';
 import { ONBOARDING_COMMON_HEADERS } from '../fixtures/constants';
 import { apiTest } from '../fixtures';
 
+/** Matches deployment-agnostic FTR `custom_roles/noAccessUserRole` (cookie session, not API key). */
+const NO_ACCESS_USER_ROLE = {
+  elasticsearch: {
+    cluster: [] as string[],
+    indices: [] as Array<{ names: string[]; privileges: string[] }>,
+  },
+  kibana: [] as Array<{
+    base: string[];
+    feature: Record<string, string[]>;
+    spaces: string[];
+  }>,
+};
+
 apiTest.describe(
   'Observability onboarding GET flow progress',
   { tag: tags.deploymentAgnostic },
@@ -54,14 +67,14 @@ apiTest.describe(
 
     apiTest(
       'returns 404 for user without access to the onboarding session',
-      async ({ apiClient, requestAuth }) => {
-        const noAccessCredentials = await requestAuth.getNoAccessOnboardingApiKey();
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_ACCESS_USER_ROLE);
         const response = await apiClient.get(
           `internal/observability_onboarding/flow/${onboardingId}/progress`,
           {
             headers: {
               ...ONBOARDING_COMMON_HEADERS,
-              ...noAccessCredentials.apiKeyHeader,
+              ...cookieHeader,
             },
             responseType: 'json',
           }
@@ -80,10 +93,7 @@ apiTest.describe(
           const stepResponse = await apiClient.post(
             `internal/observability_onboarding/flow/${onboardingId}/step/ea-status`,
             {
-              headers: {
-                ...ONBOARDING_COMMON_HEADERS,
-                ...adminCredentials.apiKeyHeader,
-              },
+              headers: adminInteractiveHeaders,
               responseType: 'json',
               body: {
                 status: 'complete',
@@ -100,10 +110,7 @@ apiTest.describe(
           const response = await apiClient.get(
             `internal/observability_onboarding/flow/${onboardingId}/progress`,
             {
-              headers: {
-                ...ONBOARDING_COMMON_HEADERS,
-                ...adminCredentials.apiKeyHeader,
-              },
+              headers: adminInteractiveHeaders,
               responseType: 'json',
             }
           );
@@ -138,10 +145,7 @@ apiTest.describe(
             const response = await apiClient.get(
               `internal/observability_onboarding/flow/${onboardingId}/progress`,
               {
-                headers: {
-                  ...ONBOARDING_COMMON_HEADERS,
-                  ...adminCredentials.apiKeyHeader,
-                },
+                headers: adminInteractiveHeaders,
                 responseType: 'json',
               }
             );
@@ -177,10 +181,7 @@ apiTest.describe(
           const response = await apiClient.get(
             `internal/observability_onboarding/flow/${onboardingId}/progress`,
             {
-              headers: {
-                ...ONBOARDING_COMMON_HEADERS,
-                ...adminCredentials.apiKeyHeader,
-              },
+              headers: adminInteractiveHeaders,
               responseType: 'json',
             }
           );
