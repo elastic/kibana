@@ -34,7 +34,11 @@ const noMatchesLabel = i18n.translate(
 
 export interface CommandMenuListOption {
   readonly key: string;
+  /**
+   * Plain string for accessibility and default label; use `renderLabel` for rich rows (e.g. SML type/title + highlight).
+   */
   readonly label: string;
+  readonly renderLabel?: React.ReactNode;
 }
 
 interface CommandMenuListProps {
@@ -58,9 +62,12 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         options.map((option) => ({
           label: option.label,
           key: option.key,
+          data: option.renderLabel ? { commandMenuRenderLabel: option.renderLabel } : undefined,
         })),
       [options]
     );
+
+    const hasCustomRender = options.some((o) => o.renderLabel != null);
 
     useImperativeHandle(ref, () => ({
       isKeyDownEventHandled: (event: React.KeyboardEvent): boolean => {
@@ -120,6 +127,18 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
+          searchable={false}
+          isPreFiltered
+          renderOption={
+            hasCustomRender
+              ? (option) => {
+                  const data = option.data as
+                    | { commandMenuRenderLabel?: React.ReactNode }
+                    | undefined;
+                  return data?.commandMenuRenderLabel ?? option.label;
+                }
+              : undefined
+          }
           listProps={{
             showIcons: false,
             bordered: false,
