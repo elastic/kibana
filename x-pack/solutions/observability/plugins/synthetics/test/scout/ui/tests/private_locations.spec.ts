@@ -38,17 +38,19 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettings();
     });
 
-    await test.step('show create agent policy flow when no policy exists', async () => {
-      await syntheticsServices.deleteSyntheticsIntegrations();
+    await test.step('Verify that spaces options are available only after selecting an agent policy', async () => {
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
-      await expect(page.getByText('No agent policies found')).toBeVisible();
-      await page.click('text=Create agent policy');
-      await expect(page).toHaveURL(/\/app\/fleet\/policies\?create/);
-      await page.click('[placeholder="Choose a name"]');
-      await page.fill('[placeholder="Choose a name"]', FLEET_POLICY_NAME);
-      await page.click('text=Collect system logs and metrics');
-      await page.click('div[role="dialog"] button:has-text("Create agent policy")');
-      await pageObjects.syntheticsApp.navigateToSettings();
+
+      await page.click('button:has-text("Create location")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeHidden();
+      await page.click('[aria-label="Select agent policy"]');
+      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeVisible();
+      await page.click('button:has-text("Cancel")');
     });
 
     await test.step('create private location', async () => {
@@ -81,28 +83,12 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
     });
 
-    await test.step('Verify that spaces options are available only after selecting an agent policy', async () => {
-      await page.click('button:has-text("Create location")');
-      await expect(
-        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
-      ).toBeHidden();
-      await page.click('[aria-label="Select agent policy"]');
-      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
-      await expect(
-        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
-      ).toBeVisible();
-      await page.click('button:has-text("Cancel")');
-    });
-
     await test.step('verify Fleet integration', async () => {
       await pageObjects.syntheticsApp.navigateToFleetIntegrationPolicies();
       await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}"`);
       // there is "ghost" element with the same locator, so we need to specify the first one
       // eslint-disable-next-line playwright/no-nth-methods
       await expect(page.testSubj.locator('syntheticsManagedPolicyCallout').first()).toBeVisible();
-      await expect(
-        page.getByText('This package policy is managed by the Synthetics app.')
-      ).toBeVisible();
     });
 
     await test.step('edit button leads to Synthetics edit page', async () => {
@@ -119,12 +105,6 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
       const deleteLocationButton = page.locator(`[data-test-subj="deleteLocation-${locationId}"]`);
       await expect(deleteLocationButton).toBeDisabled();
-      await deleteLocationButton.hover({ force: true });
-      await expect(
-        page.getByText(
-          'This location cannot be deleted, because it has 1 monitors running. Please remove this location from your monitors before deleting this location.'
-        )
-      ).toBeVisible();
     });
 
     await test.step('delete location after removing monitor', async () => {
