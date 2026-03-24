@@ -57,7 +57,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         // Enable experimental features for entity analytics home page tests
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['entityAnalyticsNewHomePageEnabled'])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'entityAnalyticsNewHomePageEnabled',
+        ])}`,
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
