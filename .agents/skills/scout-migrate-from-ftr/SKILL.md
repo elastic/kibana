@@ -38,7 +38,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don't use `esArchiver` in spec files).
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-security`/`@kbn/scout-oblt`/`@kbn/scout-search`) and import `expect` from `/ui` or `/api`.
 - Replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)`.
-- Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie), plus custom roles. Avoid FTR-style role mutation.
+- Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie / `cookieHeader`), plus custom roles. Avoid FTR-style role mutation. For Scout **API** tests, see **Scout API auth (`cookieHeader` vs API key)** under step 4.
 
 ## Core workflow
 
@@ -117,6 +117,32 @@ test('create and edit entity', async () => {
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-<solution>`), and import `expect` from `/ui` or `/api`.
 - If the test needs rison-encoded query params, use `@kbn/rison` and add it to `test/scout*/ui/tsconfig.json` `kbn_references`.
 
+#### Scout API auth (`cookieHeader` vs API key)
+
+FTR often used `roleScopedSupertest` with `useCookieHeader: true` and `withInternalHeaders` for **internal** routes. In Scout API tests, map that to **`samlAuth`** and merge **`cookieHeader`** with your common headers (`kbn-xsrf`, `x-elastic-internal-origin`, etc.) on `apiClient` requests.
+
+```ts
+const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+const adminInteractiveHeaders = {
+  ...MY_COMMON_HEADERS,
+  ...cookieHeader,
+};
+await apiClient.post('internal/my_plugin/flow', {
+  headers: adminInteractiveHeaders,
+  responseType: 'json',
+});
+```
+
+**When to prefer `cookieHeader` (interactive user) over `requestAuth.getApiKey(...)`**
+
+- Handlers that call **`core.security.authc.apiKeys.create`** (or otherwise create **nested** API keys for the current user) often **fail with HTTP 500** if the incoming request is authenticated with an **API key**. Use **`samlAuth.asInteractiveUser('admin')`** (or the same role FTR used with cookies) for those routes—see observability onboarding `POST internal/observability_onboarding/flow` migration (`89c171c3851c1c6f70f55749b5477b1f0adfffb8`).
+- **Negative / least-privilege tests** that in FTR used a **custom role + cookie** (e.g. empty `kibana: []` privileges) and expect **404** from scoped saved-object access: use **`await samlAuth.asInteractiveUser(customRoleDescriptor)`** and **`cookieHeader`** on the request. **`requestAuth.getApiKeyForCustomRole(...)`** can still resolve **200** for the same role shape because API-key privilege resolution differs from an interactive session—match FTR with cookies.
+
+**When API keys are still appropriate**
+
+- Public `api/*` routes, or internal routes that **do not** create nested keys and were explicitly tested with API key in FTR (e.g. some “terminal” step reporters).
+- Use `requestAuth.getApiKey('admin')` / `getApiKeyForCustomRole` per `scout-api-testing`; combine with `cookieHeader` in the **same** spec when different calls need different auth modes.
+
 ### 5) Split loadTestFile suites
 
 - Each `loadTestFile` target becomes its own Scout spec.
@@ -129,7 +155,21 @@ test('create and edit entity', async () => {
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
 - Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
-- If using synthtrace generators, add `@kbn/synthtrace-client` (and `@kbn/scout-synthtrace` when merging `synthtraceFixture` / `getSynthtraceClient`) to the test tsconfig `kbn_references`.
+
+#### Synthtrace in Scout **API** tests
+
+Import the fixture from **`@kbn/scout-synthtrace`** (not from `@kbn/scout` / `@kbn/scout-oblt` alone). Merge it into your module’s `apiTest` in `test/scout*/api/fixtures/index.ts`:
+
+```ts
+import { apiTest as baseApiTest, mergeTests } from '@kbn/scout-oblt'; // or '@kbn/scout' for platform-only modules
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
+```
+
+Specs then receive worker fixtures such as **`logsSynthtraceEsClient`** (`index` / `clean`) for `@kbn/synthtrace-client` generators (`log`, `timerange`, etc.).
+
+In `test/scout*/api/tsconfig.json`, add **`kbn_references`**: `@kbn/scout-oblt` (or `@kbn/scout`), **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`** (add `@kbn/synthtrace` only if types require it). UI-only synthtrace patterns that use `mergeTests` + `synthtraceFixture` in UI fixtures follow the same **`@kbn/scout-synthtrace`** import.
 
 ### 7) Extract component/unit tests where possible
 
@@ -157,7 +197,7 @@ test('create and edit entity', async () => {
 - Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
 - UI tests must have at least one supported tag (Scout validates UI tags at runtime). API tests should also be tagged.
 - Avoid checking raw data in UI tests; prefer page object methods over direct selectors.
-- Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` unless you intentionally need every deployment-agnostic target (see **Tags when the FTR suite was “deployment agnostic”** under step 2).
+- Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` (see **Tags when the FTR suite was “deployment agnostic”** under step 2).
 - Run Scout tests in both stateful and serverless if the plugin supports both.
 
 ### 10) Review against Scout best practices
@@ -191,3 +231,5 @@ test('create and edit entity', async () => {
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
 - Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
 - Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
+- Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
+- Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).
