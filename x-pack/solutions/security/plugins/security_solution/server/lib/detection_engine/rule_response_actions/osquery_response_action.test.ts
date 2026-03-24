@@ -86,7 +86,7 @@ describe('osqueryResponseAction', () => {
       expect(createParams.ecs_mapping).toEqual({ 'process.name': { field: 'name' } });
     });
 
-    it('passes pack_id in per-alert calls when queries contain dynamic parameters', () => {
+    it('passes pack_id in per-alert calls when queries contain dynamic parameters', async () => {
       const alerts = [
         createMockAlert(),
         createMockAlert({
@@ -103,7 +103,7 @@ describe('osqueryResponseAction', () => {
         },
       };
 
-      osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
+      await osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
 
       expect(mockService.create).toHaveBeenCalledTimes(2);
       expect(mockService.create).toHaveBeenNthCalledWith(
