@@ -63,9 +63,12 @@ export class DataMappingPopover extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         ownFocus
-        aria-label={i18n.translate('xpack.maps.styles.fieldMetaOptions.dataMappingPopoverAriaLabel', {
-          defaultMessage: 'Data mapping',
-        })}
+        aria-label={i18n.translate(
+          'xpack.maps.styles.fieldMetaOptions.dataMappingPopoverAriaLabel',
+          {
+            defaultMessage: 'Data mapping',
+          }
+        )}
       >
         {this.props.children}
       </EuiPopover>

@@ -33,9 +33,12 @@ export function JoinDocumentationPopover() {
       }}
       repositionOnScroll
       ownFocus
-      aria-label={i18n.translate('xpack.maps.layerPanel.joinEditor.joinDocumentationPopoverAriaLabel', {
-        defaultMessage: 'Join documentation',
-      })}
+      aria-label={i18n.translate(
+        'xpack.maps.layerPanel.joinEditor.joinDocumentationPopoverAriaLabel',
+        {
+          defaultMessage: 'Join documentation',
+        }
+      )}
     >
       <EuiPopoverTitle>
         <FormattedMessage id="xpack.maps.layerPanel.joinEditor.title" defaultMessage="Joins" />
