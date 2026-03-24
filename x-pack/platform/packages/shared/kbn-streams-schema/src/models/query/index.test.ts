@@ -22,6 +22,7 @@ describe('QueryStream', () => {
         },
       },
       {
+        type: 'query' as const,
         name: 'query-stream-with-descriptions',
         description: '',
         updated_at: new Date().toISOString(),
@@ -35,6 +36,7 @@ describe('QueryStream', () => {
         },
       },
       {
+        type: 'query' as const,
         name: 'query-stream-empty-descriptions',
         description: '',
         updated_at: new Date().toISOString(),
@@ -117,6 +119,7 @@ describe('QueryStream', () => {
       },
       {
         stream: {
+          type: 'query' as const,
           name: 'query-stream-with-descriptions',
           description: '',
           updated_at: new Date().toISOString(),
@@ -192,6 +195,7 @@ describe('QueryStream', () => {
       },
       {
         stream: {
+          type: 'query' as const,
           description: '',
           query: {
             view: 'stream.query-stream',
@@ -206,6 +210,7 @@ describe('QueryStream', () => {
       },
       {
         stream: {
+          type: 'query' as const,
           description: '',
           query: {
             view: 'stream.query-stream',

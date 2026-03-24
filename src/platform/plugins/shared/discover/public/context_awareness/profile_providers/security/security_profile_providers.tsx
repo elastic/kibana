@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
-import { EnhancedAlertEventOverviewLazy } from './components';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { EnhancedAlertEventOverviewLazy, EnhancedAlertFlyoutHeaderLazy } from './components';
 import { SECURITY_PROFILE_ID } from './constants';
 import { extendProfileProvider } from '../extend_profile_provider';
 import { createSecurityDocumentProfileProvider } from './security_document_profile';
@@ -26,10 +27,17 @@ export const createSecurityDocumentProfileProviders = (
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
-        const isAlert = getFieldValue(params.record, 'event.kind') === 'signal';
+        const isAlert = getFieldValue(params.record, EVENT_KIND) === 'signal';
 
         return {
           ...prevDocViewer,
+          renderHeader: (props) => (
+            <EnhancedAlertFlyoutHeaderLazy
+              {...props}
+              providerServices={providerServices}
+              fallbackRenderHeader={prevDocViewer.renderHeader}
+            />
+          ),
           docViewsRegistry: (registry) => {
             registry.add({
               id: 'doc_view_alerts_overview',
