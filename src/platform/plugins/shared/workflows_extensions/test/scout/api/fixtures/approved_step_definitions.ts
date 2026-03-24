@@ -86,7 +86,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'security.renderAlertNarrative',
-    handlerHash: '46234ab4e74122540d4cdb2771778aec0b2f9cc59ef540365d9a66c1af99a13e',
+    handlerHash: '1719b8db582f3695a5bac6df5434285f101ebf4fa032702613f28dd33d978988',
   },
   {
     id: 'security.buildAlertEntityGraph',
