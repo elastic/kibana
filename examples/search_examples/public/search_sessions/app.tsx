@@ -298,6 +298,7 @@ export const SearchSessionsExampleApp = ({
                 <EuiFlexItem grow={false}>
                   <EuiFormLabel>Numeric Field to Aggregate</EuiFormLabel>
                   <EuiComboBox
+                    aria-label="Numeric Field to Aggregate"
                     options={formatFieldsToComboBox(getNumeric(fields))}
                     selectedOptions={formatFieldToComboBox(selectedField)}
                     singleSelection={true}

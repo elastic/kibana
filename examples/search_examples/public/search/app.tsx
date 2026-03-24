@@ -560,6 +560,7 @@ export const SearchExamplesApp = ({
           <EuiFlexItem>
             <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
             <EuiComboBox
+              aria-label={`Field (using ${bucketAggType} buckets)`}
               options={formatFieldsToComboBox(getAggregatableStrings(fields))}
               selectedOptions={formatFieldToComboBox(selectedBucketField)}
               singleSelection={true}
@@ -578,6 +579,7 @@ export const SearchExamplesApp = ({
           <EuiFlexItem>
             <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
             <EuiComboBox
+              aria-label={`Numeric Field (using ${metricAggType} metrics)`}
               options={formatFieldsToComboBox(getNumeric(fields))}
               selectedOptions={formatFieldToComboBox(selectedNumericField)}
               singleSelection={true}
@@ -596,6 +598,7 @@ export const SearchExamplesApp = ({
           <EuiFlexItem>
             <EuiFormLabel>Fields to queryString</EuiFormLabel>
             <EuiComboBox
+              aria-label="Fields to queryString"
               options={formatFieldsToComboBox(fields)}
               selectedOptions={formatFieldsToComboBox(selectedFields)}
               singleSelection={false}
