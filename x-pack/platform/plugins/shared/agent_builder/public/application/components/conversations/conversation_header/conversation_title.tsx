@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -16,11 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  useConversationTitle,
-  useHasActiveConversation,
-  useHasPersistedConversation,
-} from '../../../hooks/use_conversation';
+import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -44,47 +40,15 @@ interface ConversationTitleProps {
 }
 
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
-  const { title, isLoading } = useConversationTitle();
-  const hasActiveConversation = useHasActiveConversation();
+  const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [previousTitle, setPreviousTitle] = useState('');
-  const [currentText, setCurrentText] = useState('');
 
-  useEffect(() => {
-    if (isLoading || !hasActiveConversation) return;
-
-    const fullText = title || labels.newConversation;
-
-    // Typewriter: ONLY when transitioning from "New conversation" to actual title
-    if (previousTitle === labels.newConversation && title) {
-      if (currentText.length < fullText.length) {
-        const timeout = setTimeout(() => {
-          setCurrentText(fullText.substring(0, currentText.length + 1));
-        }, 50);
-        return () => clearTimeout(timeout);
-      }
-    } else if (title && title !== previousTitle) {
-      // Normal title change: immediate
-      setCurrentText(fullText);
-    } else if (!title) {
-      // Reset when switching to new conversation (no title)
-      setCurrentText('');
-    }
-
-    // Always track the previous title
-    setPreviousTitle(fullText);
-  }, [title, currentText, isLoading, previousTitle, hasActiveConversation]);
-
-  const displayedTitle = currentText || previousTitle;
-
-  if (!hasActiveConversation) {
-    return null;
-  }
+  const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
 
   // No popover for unsaved conversations — just show the title
   if (!hasPersistedConversation) {
