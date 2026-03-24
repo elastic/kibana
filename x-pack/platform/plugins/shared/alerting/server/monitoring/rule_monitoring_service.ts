@@ -33,17 +33,6 @@ export class RuleMonitoringService {
   public setMonitoring(monitoringFromSO: RuleMonitoring | undefined) {
     if (monitoringFromSO) {
       this.monitoring = monitoringFromSO;
-
-      const metricsSO = monitoringFromSO.run.last_run.metrics;
-
-      Object.assign(this.frameworkMetrics, {
-        total_search_duration_ms: metricsSO.total_search_duration_ms ?? undefined,
-      });
-      Object.assign(this.metrics, {
-        total_indexing_duration_ms: metricsSO.total_indexing_duration_ms ?? undefined,
-        gap_duration_s: metricsSO.gap_duration_s ?? undefined,
-        gap_range: metricsSO.gap_range ?? undefined,
-      });
     }
   }
 
