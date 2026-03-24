@@ -1078,7 +1078,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(actorNode).to.have.property('shape', 'rectangle');
         expect(actorNode).to.have.property('color', 'primary');
         expect(actorNode).to.have.property('tag', 'Entities');
-        expect(actorNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(actorNode).to.have.property('icon', 'magnifyExclamation');
         expect(actorNode.documentsData).to.have.length(2);
         expectExpect(actorNode.documentsData).toContainEqual({
           id: 'actor-mv-1',
@@ -1097,7 +1097,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(targetNode).to.have.property('shape', 'rectangle');
         expect(targetNode).to.have.property('color', 'primary');
         expect(targetNode).to.have.property('tag', 'Entities');
-        expect(targetNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(targetNode).to.have.property('icon', 'magnifyExclamation');
         expect(targetNode.documentsData).to.have.length(3);
         expectExpect(targetNode.documentsData).toContainEqual({
           id: 'target-mv-1',
@@ -1724,7 +1724,7 @@ export default function (providerContext: FtrProviderContext) {
             // Without enrichment, the label should be the entity ID (not the enriched name)
             expect(actorNode.label).to.equal('admin@example.com');
             // Without enrichment, should have default icon/shape for unknown entity
-            expect(actorNode.icon).to.equal('magnifyWithExclamation');
+            expect(actorNode.icon).to.equal('magnifyExclamation');
             // Entity should indicate it's NOT available in entity store
             expect(actorNode.documentsData).to.have.length(1);
             expectExpect(actorNode.documentsData).toContainEqual(
@@ -1743,7 +1743,7 @@ export default function (providerContext: FtrProviderContext) {
             ) as EntityNodeDataModel;
             expect(targetNode).not.to.be(undefined);
             expect(targetNode.label).to.equal('projects/your-project-id/roles/customRole');
-            expect(targetNode.icon).to.equal('magnifyWithExclamation');
+            expect(targetNode.icon).to.equal('magnifyExclamation');
             expect(targetNode.documentsData).to.have.length(1);
             expectExpect(targetNode.documentsData).toContainEqual(
               expectExpect.objectContaining({
@@ -2225,7 +2225,7 @@ export default function (providerContext: FtrProviderContext) {
               // Label should be the entity name since it exists
               expect(actorNode.label).to.equal('partial-user@example.com');
               // Icon and shape should be defaults since type is missing
-              expect(actorNode.icon).to.equal('magnifyWithExclamation');
+              expect(actorNode.icon).to.equal('magnifyExclamation');
               expect(actorNode.shape).to.equal('rectangle');
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(

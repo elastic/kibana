@@ -8,6 +8,7 @@
 import assert from 'assert';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
+  AnalyticsServiceSetup,
   Logger,
   LoggerFactory,
   SavedObject,
@@ -135,7 +136,8 @@ export class AutomaticImportService {
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
     taskManagerSetup: TaskManagerSetupContract,
-    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    analytics: AnalyticsServiceSetup
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.loggerFactory = loggerFactory;
@@ -151,6 +153,7 @@ export class AutomaticImportService {
       loggerFactory,
       this.taskManagerSetup,
       core,
+      analytics,
       this.samplesIndexService
     );
   }
@@ -351,13 +354,16 @@ export class AutomaticImportService {
     request: KibanaRequest
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions } = params;
+    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions, integrationName } =
+      params;
 
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       connectorId,
+      integrationName,
+      dataStreamName: dataStreamParams.title,
       ...(langSmithOptions ? { langSmithOptions } : {}),
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
@@ -451,6 +457,12 @@ export class AutomaticImportService {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const { integrationId, dataStreamId, connectorId, langSmithOptions } = params;
 
+    // Fetch names for telemetry and existing logic
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    const dataStream = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
+    const integrationName = integration.metadata.title;
+    const dataStreamName = dataStream.attributes.title;
+
     // Ensure the task is no longer running (useful for API scripts)
     await this.taskManagerService.removeDataStreamCreationTask({
       integrationId,
@@ -462,6 +474,8 @@ export class AutomaticImportService {
         integrationId,
         dataStreamId,
         connectorId,
+        integrationName,
+        dataStreamName,
         langSmithOptions,
       },
       request
@@ -474,16 +488,15 @@ export class AutomaticImportService {
       jobType: DATA_STREAM_CREATION_TASK_TYPE,
     });
 
-    const existing = await this.savedObjectService.getIntegration(integrationId);
-    if (existing.status === TASK_STATUSES.approved) {
-      const currentVersion = existing.metadata?.version || '0.1.0';
+    if (integration.status === TASK_STATUSES.approved) {
+      const currentVersion = integration.metadata?.version || '0.1.0';
       const newVersion = bumpMinorVersion(currentVersion);
 
       const updateData: IntegrationAttributes = {
-        ...existing,
+        ...integration,
         status: TASK_STATUSES.completed,
         metadata: {
-          ...existing.metadata,
+          ...integration.metadata,
           version: newVersion,
         },
       };
@@ -542,14 +555,15 @@ export class AutomaticImportService {
     integrationId: string;
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
-    esClient: ElasticsearchClient;
+    internalEsClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
+    const { integrationId, dataStreamId, ingestPipeline, internalEsClient, fieldsMetadataClient } =
+      params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -576,7 +590,7 @@ export class AutomaticImportService {
 
     let simulateResponse: estypes.IngestSimulateResponse;
     try {
-      simulateResponse = await esClient.ingest.simulate({
+      simulateResponse = await internalEsClient.ingest.simulate({
         pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
         docs: samples.map((sample) => ({
           _source: { message: sample },
@@ -602,7 +616,11 @@ export class AutomaticImportService {
       fieldsMetadataClient
     );
 
-    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+    const validationResult = await validateFieldMappings(
+      internalEsClient,
+      fieldMapping,
+      this.logger
+    );
     if (!validationResult.valid) {
       this.logger.warn(
         `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(

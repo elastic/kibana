@@ -11,9 +11,10 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
 import { useCreateTemplate } from './use_create_template';
+import { useUpdateTemplate } from './use_update_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 interface UseTemplatesActionsProps {
   onDeleteSuccess?: () => void;
@@ -31,6 +32,10 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   });
 
   const { mutate: bulkExportTemplates, isLoading: isExporting } = useBulkExportTemplates();
+
+  const { mutate: updateTemplate, isLoading: isUpdating } = useUpdateTemplate({
+    disableDefaultSuccessToast: true,
+  });
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -63,6 +68,7 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
             definition: clonedDefinition,
             description: template.description,
             tags: template.tags,
+            isEnabled: template.isEnabled,
           },
         },
         {
@@ -97,6 +103,23 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     setTemplateToDelete(null);
   }, []);
 
+  const handleIsEnabledChange = useCallback(
+    (template: Template) => {
+      updateTemplate(
+        {
+          templateId: template.templateId,
+          template: { isEnabled: template.isEnabled === false },
+        },
+        {
+          onSuccess: () => {
+            showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
+          },
+        }
+      );
+    },
+    [updateTemplate, showSuccessToast]
+  );
+
   return {
     handleEdit,
     handleClone,
@@ -108,5 +131,7 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     isDeleting,
     isCloning,
     isExporting,
+    isUpdating,
+    handleIsEnabledChange,
   };
 };
