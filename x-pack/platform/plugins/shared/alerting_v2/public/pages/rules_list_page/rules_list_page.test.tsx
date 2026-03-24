@@ -10,7 +10,7 @@ import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
+import { RulesListPage, SEARCH_DEBOUNCE_MS, buildRulesListFilter } from './rules_list_page';
 
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
@@ -260,7 +260,10 @@ describe('RulesListPage', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith({
       page: 1,
       perPage: 20,
+      filter: undefined,
       search: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
     });
 
     act(() => {
@@ -271,7 +274,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'Rule One',
+        sortField: undefined,
+        sortOrder: undefined,
       });
     });
   });
@@ -301,7 +307,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'prod',
+        sortField: undefined,
+        sortOrder: undefined,
       });
     });
 
@@ -317,7 +326,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
       });
     });
   });
@@ -339,7 +351,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 2,
         perPage: 20,
+        filter: undefined,
         search: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
       });
     });
 
@@ -350,7 +365,10 @@ describe('RulesListPage', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith({
       page: 2,
       perPage: 20,
+      filter: undefined,
       search: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
     });
 
     act(() => {
@@ -361,7 +379,111 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'Rule',
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+    });
+  });
+
+  it('renders filter controls', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('rulesListStatusFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListModeFilter')).toBeInTheDocument();
+  });
+
+  it('does not show an active count on the status filter when nothing is selected', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('rulesListStatusFilter')).toHaveTextContent(/^Status$/);
+  });
+
+  it('passes status filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListStatusFilter'));
+    fireEvent.click(screen.getByTestId('rulesListStatusFilterOption-true'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: 'enabled: true',
+        search: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+    });
+  });
+
+  it('passes mode filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListModeFilter'));
+    fireEvent.click(screen.getByTestId('rulesListModeFilterOption-signal'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: 'kind: signal',
+        search: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+    });
+  });
+
+  it('changes sort parameters when a sortable header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByText('Status'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'enabled',
+        sortOrder: 'asc',
       });
     });
   });
@@ -611,6 +733,18 @@ describe('RulesListPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
       });
+    });
+  });
+
+  describe('buildRulesListFilter', () => {
+    it('returns undefined when no filters are selected', () => {
+      expect(buildRulesListFilter({})).toBeUndefined();
+    });
+
+    it('builds a combined KQL filter for status and mode', () => {
+      expect(buildRulesListFilter({ enabled: false, kind: 'signal' })).toBe(
+        'enabled: false AND kind: signal'
+      );
     });
   });
 
