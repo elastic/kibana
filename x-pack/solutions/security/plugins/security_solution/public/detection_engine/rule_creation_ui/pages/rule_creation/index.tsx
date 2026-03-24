@@ -21,6 +21,8 @@ import styled from 'styled-components';
 
 import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -848,6 +850,11 @@ const CreateRulePageComponent: React.FC<{
     []
   );
 
+  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -881,6 +888,14 @@ const CreateRulePageComponent: React.FC<{
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
+                      {isEndpointExceptionsMovedFFEnabled && (
+                        <EndpointExceptionsMovedCallout
+                          id="ruleCreation"
+                          dismissable
+                          title="cannotBeAddedToRules"
+                        />
+                      )}
+
                       <CustomHeaderPageMemo
                         backOptions={backComponent ? undefined : backOptions}
                         backComponent={backComponent}

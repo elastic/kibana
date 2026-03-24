@@ -45,7 +45,8 @@ steps:
       message: "Scheduled execution fired"
 `;
 
-spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/259162
+spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 
