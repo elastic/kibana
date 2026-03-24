@@ -503,7 +503,7 @@ export class SyntheticsService {
         }
       }
     } finally {
-      finder.close().catch(() => {});
+      finder.close().catch(() => this.logger.debug('Failed to close PIT finder', { error: err }));
     }
 
     if (this.locations.every(loc => bucketsByLocation[loc.id].length === 0)) return;
