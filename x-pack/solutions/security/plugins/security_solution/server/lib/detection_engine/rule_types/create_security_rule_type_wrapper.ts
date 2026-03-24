@@ -34,9 +34,6 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
-import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -61,7 +58,6 @@ import {
   SECURITY_RULE_ID,
   SECURITY_TO,
 } from './utils/apm_field_names';
-import { checkErrorDetails } from './utils/check_error_details';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -210,9 +206,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
 
-          const wrapperWarnings = [];
-          const wrapperErrors = [];
-
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
           const secondaryTimestamp =
             primaryTimestamp !== TIMESTAMP && !timestampOverrideFallbackDisabled
@@ -261,16 +254,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
-                await ruleExecutionLogger.logExecutionResult({
-                  status: RuleExecutionStatusEnum.failed,
-                  message: `Data view is not found.\nError: ${exc}`,
+                ruleExecutionLogger.error(`Data view is not found.\nError: ${exc}`, {
                   userError: true,
                 });
               } else {
-                await ruleExecutionLogger.logExecutionResult({
-                  status: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed.\nError: ${exc}`,
-                });
+                ruleExecutionLogger.error(`Check for indices to search failed.\nError: ${exc}`);
               }
 
               return { state: result.state };
@@ -294,7 +282,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               isServerless: isServerless ?? false,
             });
 
-          wrapperWarnings.push(...warnings);
           warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
 
           const {
@@ -315,7 +302,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             alerting,
           });
           if (rangeTuplesWarningMessage != null) {
-            wrapperWarnings.push(rangeTuplesWarningMessage);
             ruleExecutionLogger.warn(rangeTuplesWarningMessage);
           }
 
@@ -334,7 +320,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 ruleParams: params,
               });
             }
-            wrapperErrors.push(gapErrorMessage);
             ruleExecutionLogger.error(gapErrorMessage);
           }
 
@@ -420,6 +405,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
 
+                // Log rule run result errors and warnings explicitly here.
+                // This may lead to the same errors or warnings logged twice.
+                // Duplicates issue will be address in https://github.com/elastic/kibana/issues/259389.
+                runResult.errors.forEach((message) =>
+                  ruleExecutionLogger.error(message, { userError: runResult.userError })
+                );
+                runResult.warningMessages.forEach((message) => ruleExecutionLogger.warn(message));
+
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
@@ -491,41 +484,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 alertsCreated: createdSignalsCount > 0,
                 disabledActions,
               });
-              wrapperWarnings.push(disabledActionsWarning);
               ruleExecutionLogger.warn(disabledActionsWarning);
             }
-
-            let status: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded;
-            let statusMessage = 'Rule execution completed successfully';
-
-            const hasWarnings = result.warningMessages.length > 0;
-            const hasErrors = result.errors.length > 0;
-
-            if (hasErrors || wrapperErrors.length > 0) {
-              status = RuleExecutionStatusEnum.failed;
-              statusMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
-            } else if (hasWarnings || wrapperWarnings.length > 0) {
-              status = RuleExecutionStatusEnum['partial failure'];
-              statusMessage = truncateList(result.warningMessages.concat(wrapperWarnings)).join(
-                '\n\n'
-              );
-            }
-
-            ruleExecutionLogger.logExecutionResult({
-              status,
-              message: statusMessage,
-              userError:
-                result.userError ||
-                result.errors.every((err) => checkErrorDetails(err).isUserError),
-            });
           } catch (error) {
-            const errorMessage = error.message ?? '(no error message given)';
-
-            ruleExecutionLogger.logExecutionResult({
-              status: RuleExecutionStatusEnum.failed,
-              message: `An error occurred during rule execution. ${errorMessage}`,
-              userError: checkErrorDetails(errorMessage).isUserError,
-            });
+            ruleExecutionLogger.error(error.message ?? '(no error message given)');
           } finally {
             await ruleExecutionLogger.close();
           }

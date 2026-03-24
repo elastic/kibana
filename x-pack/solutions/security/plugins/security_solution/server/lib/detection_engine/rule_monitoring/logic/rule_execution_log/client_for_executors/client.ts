@@ -15,6 +15,7 @@ import type {
 import type {
   RuleExecutionSettings,
   LogLevel,
+  RuleExecutionStatus,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   consoleLogLevelFromExecutionStatus,
@@ -23,7 +24,7 @@ import {
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { ExtMeta } from '../../utils/console_logging';
-import { truncateValue } from '../../utils/normalization';
+import { truncateList, truncateValue } from '../../utils/normalization';
 import type { IEventLogWriter } from '../event_log/event_log_writer';
 import {
   LogLevelEnum,
@@ -34,11 +35,13 @@ import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_nam
 import type {
   ExecutionResult,
   IRuleExecutionLogForExecutors,
+  LogErrorMessageOptions,
   LogMessageOptions,
   RuleExecutionContext,
   RuleExecutionLogMetrics,
 } from './client_interface';
 import { getCorrelationIds } from './correlation_ids';
+import { checkErrorDetails } from '../../../../rule_types/utils/check_error_details';
 
 export function createRuleExecutionLogClientForExecutors(
   settings: RuleExecutionSettings,
@@ -55,7 +58,8 @@ export function createRuleExecutionLogClientForExecutors(
 
   // Buffers the execution related data
   const executionResultBuffer: ExecutionResultBuffer = {
-    executionResult: undefined,
+    errors: [],
+    warnings: [],
     metrics: {},
     closed: false,
   };
@@ -87,13 +91,20 @@ export function createRuleExecutionLogClientForExecutors(
     },
 
     warn(message: string, options?: LogMessageOptions): void {
+      executionResultBuffer.warnings.push(message);
+
       writeMessage(message, {
         eventLogLevel: LogLevelEnum.warn,
         consoleLogLevel: options?.consoleLogLevel,
       });
     },
 
-    error(message: string, options?: LogMessageOptions): void {
+    error(message: string, options?: LogErrorMessageOptions): void {
+      executionResultBuffer.errors.push({
+        message,
+        userError: options?.userError ?? false,
+      });
+
       writeMessage(message, {
         eventLogLevel: LogLevelEnum.error,
         consoleLogLevel: options?.consoleLogLevel,
@@ -129,23 +140,11 @@ export function createRuleExecutionLogClientForExecutors(
       );
     },
 
-    logExecutionResult(args: ExecutionResult): void {
-      executionResultBuffer.executionResult = args;
-    },
-
     closed(): boolean {
       return executionResultBuffer.closed;
     },
 
     async close(): Promise<void> {
-      const executionResult = executionResultBuffer.executionResult;
-
-      if (!executionResult) {
-        throw new Error(
-          'Rule execution result must be set before closing the rule execution log client'
-        );
-      }
-
       if (this.closed()) {
         throw new Error('The logger has been closed');
       }
@@ -153,6 +152,8 @@ export function createRuleExecutionLogClientForExecutors(
       executionResultBuffer.closed = true;
 
       await withSecuritySpan('IRuleExecutionLogForExecutors.close', async () => {
+        const executionResult: ExecutionResult = determineExecutionResult(executionResultBuffer);
+
         const correlationIds = baseCorrelationIds.withStatus(executionResult.status);
         const logMeta = correlationIds.getLogMeta();
 
@@ -178,6 +179,31 @@ export function createRuleExecutionLogClientForExecutors(
         }
       });
     },
+  };
+
+  const determineExecutionResult = ({
+    errors,
+    warnings,
+  }: ExecutionResultBuffer): ExecutionResult => {
+    let status: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded;
+    let message = 'Rule execution completed successfully';
+
+    if (errors.length > 0) {
+      status = RuleExecutionStatusEnum.failed;
+      message = truncateList(errors.map((e) => e.message)).join(', ');
+    } else if (warnings.length > 0) {
+      status = RuleExecutionStatusEnum['partial failure'];
+      message = truncateList(warnings).join('\n\n');
+    }
+
+    return {
+      status,
+      message,
+      userError: errors.every(
+        ({ message: errorMessage, userError }) =>
+          userError || checkErrorDetails(new Error(errorMessage)).isUserError
+      ),
+    };
   };
 
   const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
@@ -310,7 +336,8 @@ export function createRuleExecutionLogClientForExecutors(
 }
 
 interface ExecutionResultBuffer {
-  executionResult: ExecutionResult | undefined;
+  errors: Array<{ message: string; userError: boolean }>;
+  warnings: string[];
   metrics: RuleExecutionLogMetrics;
   closed: boolean;
 }

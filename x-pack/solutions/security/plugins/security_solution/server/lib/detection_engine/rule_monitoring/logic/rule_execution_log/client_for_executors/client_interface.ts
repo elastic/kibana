@@ -53,7 +53,7 @@ export interface IRuleExecutionLogForExecutors {
    * Writes an error message to the event log at ERROR level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  error(message: string, options?: LogMessageOptions): void;
+  error(message: string, options?: LogErrorMessageOptions): void;
 
   /**
    * Logs a rule execution metric like a number of source events found and a number of generated alerts.
@@ -70,12 +70,6 @@ export interface IRuleExecutionLogForExecutors {
    * Metric names are type-checked against RuleExecutionMetrics.
    */
   logMetrics(metrics: Partial<RuleExecutionLogMetrics>): void;
-
-  /**
-   * Logs rule execution result at the end of rule execution. This includes the final rule outcome (failed, partial failure, succeeded)
-   * and an optional message describing the outcome.
-   */
-  logExecutionResult(args: ExecutionResult): void;
 
   /**
    * Whether the logger is closed
@@ -136,6 +130,13 @@ export interface LogMessageOptions {
    * Override the console log level. Defaults to DEBUG when not specified.
    */
   consoleLogLevel?: LogLevel;
+}
+
+export interface LogErrorMessageOptions extends LogMessageOptions {
+  /**
+   * Whether this is a user side error.
+   */
+  userError?: boolean;
 }
 
 /**

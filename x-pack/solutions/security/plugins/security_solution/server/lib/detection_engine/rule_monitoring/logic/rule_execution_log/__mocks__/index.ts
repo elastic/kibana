@@ -53,7 +53,6 @@ const ruleExecutionLogForExecutorsMock = {
 
     logMetric: jest.fn(),
     logMetrics: jest.fn(),
-    logExecutionResult: jest.fn(),
 
     closed: jest.fn(),
     close: jest.fn(),
