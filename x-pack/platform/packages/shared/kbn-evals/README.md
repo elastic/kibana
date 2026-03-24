@@ -375,10 +375,17 @@ node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-i
 If you are _not_ using Scout to start Kibana (e.g. you are targeting your own dev Kibana), configure the HTTP exporter in `kibana.dev.yml`:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - http:
       url: 'http://localhost:4318/v1/traces'
 ```
+
+> **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required when enabling OpenTelemetry tracing — Elastic APM and OTel tracing cannot run simultaneously. The Scout `evals_tracing` config set handles this automatically, but when configuring `kibana.dev.yml` directly you must set both.
 
 If you want EDOT to store traces in a specific Elasticsearch cluster, override via env:
 

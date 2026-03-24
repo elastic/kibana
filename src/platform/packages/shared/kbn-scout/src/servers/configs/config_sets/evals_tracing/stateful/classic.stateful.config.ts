@@ -128,6 +128,8 @@ export const servers: ScoutServerConfig = {
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [
+            '--elastic.apm.active=false',
+            '--elastic.apm.contextPropagationOnly=false',
             '--telemetry.enabled=true',
             '--telemetry.tracing.enabled=true',
             '--telemetry.tracing.sample_rate=1',

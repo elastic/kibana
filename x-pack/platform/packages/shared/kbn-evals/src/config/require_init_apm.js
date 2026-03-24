@@ -23,6 +23,8 @@ const tracingExporters = process.env.TRACING_EXPORTERS;
 if (tracingExporters) {
   JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
   argv.push(
+    '--elastic.apm.active=false',
+    '--elastic.apm.contextPropagationOnly=false',
     '--telemetry.enabled=true',
     '--telemetry.tracing.enabled=true',
     '--telemetry.tracing.sample_rate=1',
