@@ -12,9 +12,7 @@ import type { AlertWithAgent } from './types';
 import { osqueryResponseAction } from './osquery_response_action';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 
-const createMockAlert = (
-  overrides: Partial<AlertWithAgent> = {}
-): AlertWithAgent =>
+const createMockAlert = (overrides: Partial<AlertWithAgent> = {}): AlertWithAgent =>
   ({
     _id: 'alert-1',
     _index: '.alerts-default',
@@ -42,7 +40,13 @@ describe('osqueryResponseAction', () => {
 
   describe('pack_id passthrough', () => {
     it('passes pack_id when packId is set on the response action', async () => {
-      const alerts = [createMockAlert(), createMockAlert({ _id: 'alert-2', agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' } })];
+      const alerts = [
+        createMockAlert(),
+        createMockAlert({
+          _id: 'alert-2',
+          agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' },
+        }),
+      ];
 
       const responseAction: RuleResponseOsqueryAction = {
         actionTypeId: '.osquery',
@@ -85,7 +89,10 @@ describe('osqueryResponseAction', () => {
     it('passes pack_id in per-alert calls when queries contain dynamic parameters', async () => {
       const alerts = [
         createMockAlert(),
-        createMockAlert({ _id: 'alert-2', agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' } }),
+        createMockAlert({
+          _id: 'alert-2',
+          agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' },
+        }),
       ];
 
       const responseAction: RuleResponseOsqueryAction = {
