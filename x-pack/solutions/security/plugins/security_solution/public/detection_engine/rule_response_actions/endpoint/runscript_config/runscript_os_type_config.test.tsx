@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
 import {
   RUNSCRIPT_CONFIG_REQUIRES_ONE_OS,
-  RunscriptConfig,
   SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT,
   TIMEOUT_VALUE_MUST_BE_GREATER_THAN_ZERO,
   TIMEOUT_VALUE_MUST_BE_NUMBER,
-} from './runscript_config';
-import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
-import { responseActionsHttpMocks } from '../../../management/mocks/response_actions_http_mocks';
-import { EndpointScriptsGenerator } from '../../../../common/endpoint/data_generators/endpoint_scripts_generator';
+} from './translations';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../../../management/mocks/response_actions_http_mocks';
+import { EndpointScriptsGenerator } from '../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import type {
   EndpointScript,
   ResponseActionScriptsApiResponse,
-} from '../../../../common/endpoint/types';
+} from '../../../../../common/endpoint/types';
 import { waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { RunscriptConfig } from './runscript_config';
 
-jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('Automated Response actions - Runscript Configuration', () => {
+describe('Automated Response actions - Runscript OS type config component', () => {
   let testContext: AppContextTestRender;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -73,43 +73,6 @@ describe('Automated Response actions - Runscript Configuration', () => {
     render = () => {
       return testContext.render(<FormContext />);
     };
-  });
-
-  it('should render nothing if feature flag is disabled', () => {
-    testContext.setExperimentalFlag({ responseActionsEndpointAutomatedRunScript: false });
-    const { queryByTestId } = render();
-
-    expect(queryByTestId('runscript-config-field')).toBeNull();
-  });
-
-  it('should render nothing if user does not have authz to runscript', () => {
-    testContext.getUserPrivilegesMockSetter(useUserPrivilegesMock).set({
-      canWriteExecuteOperations: false,
-    });
-    const { queryByTestId } = render();
-
-    expect(queryByTestId('runscript-config-field')).toBeNull();
-  });
-
-  it('should render expected UI elements', () => {
-    const { getByTestId } = render();
-
-    expect(getByTestId('runscript-config-field')).toBeInTheDocument();
-
-    expect(getByTestId('runscript-config-field-linux')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-linux-scriptSelector')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-linux-scriptParams')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-linux-timeout')).toBeInTheDocument();
-
-    expect(getByTestId('runscript-config-field-macos')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-macos-scriptSelector')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-macos-scriptParams')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-macos-timeout')).toBeInTheDocument();
-
-    expect(getByTestId('runscript-config-field-windows')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-windows-scriptSelector')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-windows-scriptParams')).toBeInTheDocument();
-    expect(getByTestId('runscript-config-field-windows-timeout')).toBeInTheDocument();
   });
 
   it('should display arguments and timeout fields disabled if no script selected', () => {
