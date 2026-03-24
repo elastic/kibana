@@ -18,6 +18,8 @@ import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
+import { UpsellingProvider } from '../../../common/components/upselling_provider';
+import { DiscoverInTimelineContextProvider } from '../../../common/components/discover_in_timeline/provider';
 
 export const flyoutProviders = ({
   services,
@@ -49,7 +51,11 @@ export const flyoutProviders = ({
           <Provider store={store}>
             <ReactQueryClientProvider>
               <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
-                {flyoutContent}
+                <UpsellingProvider upsellingService={services.upselling}>
+                  <DiscoverInTimelineContextProvider>
+                    {flyoutContent}
+                  </DiscoverInTimelineContextProvider>
+                </UpsellingProvider>
               </UserPrivilegesProvider>
             </ReactQueryClientProvider>
           </Provider>

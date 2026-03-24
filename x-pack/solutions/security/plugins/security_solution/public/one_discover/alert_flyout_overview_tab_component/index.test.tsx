@@ -16,12 +16,21 @@ import { createStore } from 'redux';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
   OverviewTab: () => <div>{'MockOverviewTab'}</div>,
 }));
 
 jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../common/components/discover_in_timeline/provider', () => ({
+  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 const mockUseInitDataViewManager = jest.fn();
@@ -42,8 +51,11 @@ describe('AlertFlyoutOverviewTab', () => {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
     application: {
-      capabilities: {},
+      capabilities: {
+        securitySolution: { show: true, crud: true },
+      },
     },
+    upselling: {},
   } as unknown as StartServices;
 
   beforeEach(() => {

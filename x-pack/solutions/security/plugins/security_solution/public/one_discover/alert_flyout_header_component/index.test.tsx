@@ -26,6 +26,16 @@ jest.mock('../../flyout_v2/document/header', () => ({
   Header: (props: unknown) => mockDocumentHeader(props),
 }));
 
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../common/components/discover_in_timeline/provider', () => ({
+  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 describe('AlertFlyoutHeader', () => {
   beforeEach(() => {
     mockDocumentHeader.mockClear();
@@ -37,8 +47,11 @@ describe('AlertFlyoutHeader', () => {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
     application: {
-      capabilities: {},
+      capabilities: {
+        securitySolution: { show: true, crud: true },
+      },
     },
+    upselling: {},
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
