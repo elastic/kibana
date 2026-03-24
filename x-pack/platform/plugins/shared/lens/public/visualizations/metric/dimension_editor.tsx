@@ -27,7 +27,6 @@ import {
   applyPaletteParams,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
@@ -45,7 +44,6 @@ import {
   LENS_METRIC_STATE_DEFAULTS,
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
-import { DatatableInspectorTables } from '../../../common/expressions';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
@@ -53,6 +51,7 @@ import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getSecondaryLabelSelected } from './helpers';
 import { getDefaultConfigForMode } from './palette_config';
+import { getColumnFromActiveData } from '../utils';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -63,26 +62,6 @@ export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> 
 };
 
 type SubProps = VisualizationDimensionEditorProps<MetricVisualizationState> & { idPrefix: string };
-
-function getColumnFromActiveData({
-  accessor,
-  layerId,
-  frame,
-}: {
-  accessor: string | undefined;
-  layerId: string;
-  frame: SubProps['frame'];
-}) {
-  const columns =
-    frame.activeData?.[layerId]?.columns ??
-    frame.activeData?.[DatatableInspectorTables.Default]?.columns;
-
-  if (!accessor || !columns) {
-    return undefined;
-  }
-
-  return getColumnByAccessor(accessor, columns);
-}
 
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<MetricVisualizationState>
@@ -229,13 +208,13 @@ function TrendEditor({
 }: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource' | 'frame'>) {
   const secondaryMetricTypeFallback = getColumnFromActiveData({
     accessor,
-    frame,
     layerId: state.layerId,
+    activeData: frame?.activeData,
   })?.meta?.type;
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
-    frame,
     layerId: state.layerId,
+    activeData: frame?.activeData,
   })?.meta?.type;
   const { isNumeric: secondaryMetricCanTrend } = getAccessorType(
     datasource,
@@ -473,14 +452,14 @@ function SecondaryMetricEditor({
   state,
   datasource,
 }: SubProps) {
-  const column = getColumnFromActiveData({ accessor, frame, layerId });
+  const column = getColumnFromActiveData({ accessor, activeData: frame?.activeData, layerId });
   const columnName = column?.name;
   const defaultSecondaryLabel = columnName || '';
   const secondaryMetricTypeFallback = column?.meta?.type;
 
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
-    frame,
+    activeData: frame?.activeData,
     layerId,
   })?.meta?.type;
 
@@ -728,7 +707,7 @@ const supportingVisualization = (state: MetricVisualizationState) =>
 function PrimaryMetricEditor({ state, setState, datasource, accessor, frame }: SubProps) {
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
-    frame,
+    activeData: frame?.activeData,
     layerId: state.layerId,
   })?.meta?.type;
   const { isNumeric: isMetricNumeric } = getAccessorType(
@@ -886,7 +865,7 @@ export function DimensionEditorAdditionalSection({
 
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
-    frame,
+    activeData: frame?.activeData,
     layerId: state.layerId,
   })?.meta?.type;
   const { isNumeric: isMetricNumeric } = getAccessorType(
@@ -1294,7 +1273,7 @@ export function DimensionEditorDataExtraComponent({
 }: Omit<Props, 'paletteService'>) {
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
-    frame,
+    activeData: frame?.activeData,
     layerId: state.layerId,
   })?.meta?.type;
 
