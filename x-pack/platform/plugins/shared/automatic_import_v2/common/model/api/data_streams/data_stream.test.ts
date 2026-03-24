@@ -396,7 +396,7 @@ describe('data stream schemas', () => {
       expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
-    it('strips unknown properties', () => {
+    it('rejects unknown top-level properties (strict schema)', () => {
       const payload = {
         samples: ['Sample 1', 'Sample 2'],
         originalSource: validOriginalSource,
@@ -404,12 +404,9 @@ describe('data stream schemas', () => {
       };
 
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
-      expectParseSuccess(result);
+      expectParseError(result);
 
-      expect(result.data).toEqual({
-        samples: ['Sample 1', 'Sample 2'],
-        originalSource: validOriginalSource,
-      });
+      expect(stringifyZodError(result.error)).toMatch(/unrecognized|Unrecognized/i);
     });
   });
 
