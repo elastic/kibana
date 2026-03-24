@@ -34,22 +34,30 @@ describe('meta', () => {
     expect(get(meta, `metas[1].${META_FIELD_X_OAS_DISCONTINUED}`)).toBeUndefined();
   });
 
-  it('sets meta with all fields provided', () => {
+  it('sets discontinued metadata when provided', () => {
     const type = new MyType({
       meta: {
-        description: 'my description',
         deprecated: true,
         'x-discontinued': '9.0.0',
+      },
+    });
+    const meta = type.getSchema().describe();
+    expect(get(meta, 'flags.description')).toBeUndefined();
+    expect(get(meta, `metas[0].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
+    expect(get(meta, `metas[1].${META_FIELD_X_OAS_DISCONTINUED}`)).toBe('9.0.0');
+    expect(get(meta, `metas[2].${META_FIELD_X_OAS_AVAILABILITY}`)).toBeUndefined();
+  });
+
+  it('sets availability metadata when provided', () => {
+    const type = new MyType({
+      meta: {
         availability: { stability: 'stable', since: '9.4.0' },
       },
     });
     const meta = type.getSchema().describe();
-    expect(get(meta, 'flags.description')).toBe('my description');
-
-    expect(get(meta, `metas[0].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
-
-    expect(get(meta, `metas[1].${META_FIELD_X_OAS_DISCONTINUED}`)).toBe('9.0.0');
-    expect(get(meta, `metas[2].${META_FIELD_X_OAS_AVAILABILITY}`)).toEqual({
+    expect(get(meta, 'flags.description')).toBeUndefined();
+    expect(get(meta, `metas[0].${META_FIELD_X_OAS_DISCONTINUED}`)).toBeUndefined();
+    expect(get(meta, `metas[0].${META_FIELD_X_OAS_AVAILABILITY}`)).toEqual({
       stability: 'stable',
       since: '9.4.0',
     });
