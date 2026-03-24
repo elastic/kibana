@@ -25,7 +25,7 @@ export function registerExportWorkflowsRoute({ router, api, logger, spaces }: Ro
       access: 'public',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Export workflows',
-      description: 'Export one or more workflows as a ZIP archive.',
+      description: 'Export one or more workflows YAML files as a ZIP archive.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
