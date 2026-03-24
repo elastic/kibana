@@ -27,6 +27,7 @@ export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointException
         color="primary"
         iconType="info"
         onDismiss={onDismiss}
+        data-test-subj="endpointExceptionsPerPolicyOptInCallout"
       >
         {i18n.translate(
           'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutDescription',

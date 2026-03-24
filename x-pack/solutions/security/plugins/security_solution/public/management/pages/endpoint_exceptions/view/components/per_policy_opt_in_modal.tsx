@@ -28,7 +28,11 @@ export interface EndpointExceptionsPerPolicyOptInModalProps {
 export const EndpointExceptionsPerPolicyOptInModal: React.FC<EndpointExceptionsPerPolicyOptInModalProps> =
   memo(({ onDismiss, onConfirm, isLoading }) => {
     return (
-      <EuiModal aria-label="Endpoint Exceptions Per Policy Opt-In" onClose={onDismiss}>
+      <EuiModal
+        aria-label="Endpoint Exceptions Per Policy Opt-In"
+        onClose={onDismiss}
+        data-test-subj="endpointExceptionsPerPolicyOptInModal"
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage

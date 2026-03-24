@@ -9,7 +9,7 @@ import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../co
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../common/endpoint/constants';
 import { useHttp } from '../../../common/lib/kibana';
 
-export const useSendEndpointPerPolicyOptIn = () => {
+export const useSendEndpointExceptionsPerPolicyOptIn = () => {
   const http = useHttp();
 
   return useMutation<void, Error>({
@@ -19,7 +19,7 @@ export const useSendEndpointPerPolicyOptIn = () => {
   });
 };
 
-export const useGetEndpointPerPolicyOptIn = () => {
+export const useGetEndpointExceptionsPerPolicyOptIn = () => {
   const http = useHttp();
 
   return useQuery<boolean, Error>({

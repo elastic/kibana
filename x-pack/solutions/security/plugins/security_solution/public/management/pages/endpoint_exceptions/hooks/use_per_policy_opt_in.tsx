@@ -11,8 +11,8 @@ import { EndpointExceptionsPerPolicyOptInCallout } from '../view/components/per_
 import { EndpointExceptionsPerPolicyOptInModal } from '../view/components/per_policy_opt_in_modal';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import {
-  useGetEndpointPerPolicyOptIn,
-  useSendEndpointPerPolicyOptIn,
+  useGetEndpointExceptionsPerPolicyOptIn,
+  useSendEndpointExceptionsPerPolicyOptIn,
 } from '../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 
 const STORAGE_KEY = 'endpointExceptionsPerPolicyOptInCalloutDismissed';
@@ -24,8 +24,8 @@ export const usePerPolicyOptIn = (): {
   const { sessionStorage } = useKibana().services;
   const toasts = useToasts();
 
-  const { mutate, isLoading } = useSendEndpointPerPolicyOptIn();
-  const { data: isPerPolicyOptIn } = useGetEndpointPerPolicyOptIn();
+  const { mutate, isLoading } = useSendEndpointExceptionsPerPolicyOptIn();
+  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(
     sessionStorage.get(STORAGE_KEY) === true
