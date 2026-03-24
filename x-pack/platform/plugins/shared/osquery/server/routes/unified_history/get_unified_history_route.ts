@@ -74,6 +74,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ),
               startDate: schema.maybe(schema.string()),
               endDate: schema.maybe(schema.string()),
+              tags: schema.maybe(schema.string()),
+              sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                defaultValue: 'desc',
+              }),
             }),
           },
         },
@@ -95,20 +99,33 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             sourceFilters: sourceFiltersRaw,
             startDate,
             endDate,
+            tags: tagsRaw,
+            sortDirection,
           } = request.query;
 
           const decoded = decodeCursor(nextPage);
           const userIds = userIdsRaw ? userIdsRaw.split(',').filter(Boolean) : undefined;
+          let tags: string[] | undefined;
+          if (tagsRaw) {
+            try {
+              tags = JSON.parse(tagsRaw);
+            } catch {
+              tags = tagsRaw.split(',').filter(Boolean);
+            }
+          }
 
           const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
             ? new Set(sourceFiltersRaw.split(',').filter(Boolean) as SourceFilter[])
             : undefined;
 
           const hasUserFilter = userIds && userIds.length > 0;
+          const hasTagsFilter = tags && tags.length > 0;
           const includeLive =
             !activeFilters || activeFilters.has('live') || activeFilters.has('rule');
+          // Scheduled queries are excluded when user or tags filters are active because
+          // scheduled execution docs don't carry user_id or tags fields.
           const includeScheduled =
-            (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter;
+            (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter && !hasTagsFilter;
 
           const fetchSize = pageSize + 1;
 
@@ -135,9 +152,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 searchAfter: decoded.actionSearchAfter,
                 kuery,
                 userIds,
+                tags,
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
               })
             : undefined;
 
@@ -153,6 +172,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
               })
             : undefined;
 
@@ -215,7 +235,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             filteredLiveRows,
             allScheduledRows,
             pageSize,
-            scheduledOffset
+            scheduledOffset,
+            sortDirection
           );
 
           const { nextActionSearchAfter, nextScheduledCursor, nextScheduledOffset } =

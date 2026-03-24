@@ -11,28 +11,42 @@
         "label": "AppMenuBar",
         "description": [],
         "signature": [
-          "() => React.JSX.Element | null"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element | null; }"
         ],
         "path": "src/core/packages/chrome/browser-components/src/project/app_menu.tsx",
         "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
         "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-components",
+            "id": "def-public.AppMenuBar.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser-components",
         "id": "def-public.ChromeComponentsProvider",
         "type": "Function",
-        "tags": [
-          "temporary",
-          "see"
-        ],
+        "tags": [],
         "label": "ChromeComponentsProvider",
         "description": [
-          "\nProvides `ChromeComponentsDeps` to all context-aware Chrome components (`Header`,\n`ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,\n`AppMenuBar`, `Sidebar`). Wrap the layout tree once with `chrome.componentDeps`.\n"
+          "\nProvides `ChromeComponentsDeps` to all context-aware Chrome components (`Header`,\n`ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,\n`AppMenuBar`, `Sidebar`).\n\nThe layout layer passes whole service contracts (narrowed via `Pick`) and wraps the\nlayout tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks."
         ],
         "signature": [
           "({ value, children, }: React.PropsWithChildren<{ value: ",
@@ -40,7 +54,7 @@
           "; }>) => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 118,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +72,7 @@
               "; }>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 118,
+            "lineNumber": 37,
             "columnNumber": 98,
             "deprecated": false,
             "trackAdoption": false,
@@ -79,7 +93,7 @@
           "() => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/shared/chromeless_header.tsx",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -95,15 +109,32 @@
         "label": "ClassicHeader",
         "description": [],
         "signature": [
-          "() => React.JSX.Element"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element; }"
         ],
         "path": "src/core/packages/chrome/browser-components/src/classic/header.tsx",
-        "lineNumber": 34,
-        "columnNumber": 1,
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
         "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-components",
+            "id": "def-public.ClassicHeader.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -117,7 +148,7 @@
           "() => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/project/sidenav/grid_layout_sidenav.tsx",
-        "lineNumber": 17,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -205,7 +236,7 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/core/packages/chrome/browser-components/src/shared/header_top_banner.tsx",
-        "lineNumber": 42,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -221,47 +252,8 @@
               "HeaderTopBannerProps"
             ],
             "path": "src/core/packages/chrome/browser-components/src/shared/header_top_banner.tsx",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 59,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser-components",
-        "id": "def-public.LoadingIndicator",
-        "type": "Function",
-        "tags": [],
-        "label": "LoadingIndicator",
-        "description": [],
-        "signature": [
-          "({ loadingCount$, showAsBar, customLogo, maxAmount, valueAmount, }: ",
-          "LoadingIndicatorProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/core/packages/chrome/browser-components/src/shared/loading_indicator.tsx",
-        "lineNumber": 27,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.LoadingIndicator.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  loadingCount$,\n  showAsBar = false,\n  customLogo,\n  maxAmount,\n  valueAmount,\n}",
-            "description": [],
-            "signature": [
-              "LoadingIndicatorProps"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/shared/loading_indicator.tsx",
-            "lineNumber": 27,
-            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -278,74 +270,49 @@
         "label": "ProjectHeader",
         "description": [],
         "signature": [
-          "() => React.JSX.Element"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element; }"
         ],
         "path": "src/core/packages/chrome/browser-components/src/project/header.tsx",
-        "lineNumber": 161,
+        "lineNumber": 98,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser-components",
-        "id": "def-public.Sidebar",
-        "type": "Function",
-        "tags": [],
-        "label": "Sidebar",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "SidebarProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/core/packages/chrome/browser-components/src/sidebar/index.tsx",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.Sidebar.$1",
-            "type": "Object",
+            "id": "def-public.ProjectHeader.$1",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "SidebarProps"
+              "P"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/sidebar/index.tsx",
-            "lineNumber": 16,
-            "columnNumber": 54,
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser-components",
-        "id": "def-public.useChromeComponentsDeps",
+        "id": "def-public.useHasAppMenu",
         "type": "Function",
-        "tags": [
-          "temporary"
-        ],
-        "label": "useChromeComponentsDeps",
+        "tags": [],
+        "label": "useHasAppMenu",
         "description": [
-          "\nReads `ChromeComponentsDeps` from the nearest `ChromeComponentsProvider`.\nThrows if called outside the provider.\n"
+          "\nReturns `true` when an app menu is currently active — either a legacy action\nmenu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`\nregistered via `chrome.setAppMenu()`."
         ],
         "signature": [
-          "() => ",
-          "ChromeComponentsDeps"
+          "() => boolean"
         ],
-        "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 129,
-        "columnNumber": 14,
+        "path": "src/core/packages/chrome/browser-components/src/shared/chrome_hooks.ts",
+        "lineNumber": 272,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -356,78 +323,17 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-chrome-browser-components",
-        "id": "def-public.ChromeApplicationContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeApplicationContext",
-        "description": [
-          "\nMinimal application contract needed by Chrome components.\nReplaces `InternalApplicationStart` to break the dependency on the private\n`@kbn/core-application-browser-internal` package."
-        ],
-        "signature": [
-          "ChromeApplicationContext",
-          " extends Pick<",
-          "ApplicationStart",
-          ", \"navigateToUrl\" | \"navigateToApp\" | \"currentAppId$\">"
-        ],
-        "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 34,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeApplicationContext.currentActionMenu$",
-            "type": "Object",
-            "tags": [],
-            "label": "currentActionMenu$",
-            "description": [
-              "Current app's action menu mount point."
-            ],
-            "signature": [
-              "Observable",
-              "<",
-              "MountPoint",
-              "<HTMLElement> | undefined>"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 41,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser-components",
         "id": "def-public.ChromeComponentsDeps",
         "type": "Interface",
         "tags": [],
         "label": "ChromeComponentsDeps",
         "description": [],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 77,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "ChromeComponentsConfig"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 78,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "@kbn/core-chrome-browser-components",
             "id": "def-public.ChromeComponentsDeps.application",
@@ -436,26 +342,38 @@
             "label": "application",
             "description": [],
             "signature": [
-              "ChromeApplicationContext"
+              "{ navigateToUrl: (url: string, options?: ",
+              "NavigateToUrlOptions",
+              " | undefined) => Promise<void>; currentAppId$: ",
+              "Observable",
+              "<string | undefined>; currentActionMenu$: ",
+              "Observable",
+              "<",
+              "MountPoint",
+              "<HTMLElement> | undefined>; }"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 79,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.basePath",
+            "id": "def-public.ChromeComponentsDeps.http",
             "type": "Object",
             "tags": [],
-            "label": "basePath",
+            "label": "http",
             "description": [],
             "signature": [
-              "IBasePath"
+              "{ basePath: ",
+              "IBasePath",
+              "; getLoadingCount$: () => ",
+              "Observable",
+              "<number>; }"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 80,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -471,219 +389,27 @@
               "DocLinksStart"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 81,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.navControls",
+            "id": "def-public.ChromeComponentsDeps.customBranding",
             "type": "Object",
             "tags": [],
-            "label": "navControls",
+            "label": "customBranding",
             "description": [],
             "signature": [
-              "NavControlsObservables"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 82,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.classic",
-            "type": "Object",
-            "tags": [],
-            "label": "classic",
-            "description": [
-              "Classic-layout-specific chrome state."
-            ],
-            "signature": [
-              "ClassicChromeObservables"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 83,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.project",
-            "type": "Object",
-            "tags": [],
-            "label": "project",
-            "description": [
-              "Project/solution-layout-specific chrome state."
-            ],
-            "signature": [
-              "ProjectChromeObservables"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 85,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.loadingCount$",
-            "type": "Object",
-            "tags": [],
-            "label": "loadingCount$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<number>"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 87,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.helpMenu",
-            "type": "Object",
-            "tags": [],
-            "label": "helpMenu",
-            "description": [],
-            "signature": [
-              "{ menuLinks$: ",
-              "Observable",
-              "<",
-              "ChromeHelpMenuLink",
-              "[]>; extension$: ",
-              "Observable",
-              "<",
-              "ChromeHelpExtension",
-              " | undefined>; supportUrl$: ",
-              "Observable",
-              "<string>; globalExtensionMenuLinks$: ",
-              "Observable",
-              "<",
-              "ChromeGlobalHelpExtensionMenuLink",
-              "[]>; }"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 88,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.navLinks$",
-            "type": "Object",
-            "tags": [],
-            "label": "navLinks$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<",
-              "ChromeNavLink",
-              "[]>"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 94,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.customBranding$",
-            "type": "Object",
-            "tags": [],
-            "label": "customBranding$",
-            "description": [],
-            "signature": [
+              "{ customBranding$: ",
               "Observable",
               "<",
               "CustomBranding",
-              ">"
+              ">; }"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 95,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.breadcrumbsAppendExtensions$",
-            "type": "Object",
-            "tags": [],
-            "label": "breadcrumbsAppendExtensions$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<",
-              "ChromeBreadcrumbsAppendExtension",
-              "[]>"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 96,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.appMenu$",
-            "type": "Object",
-            "tags": [],
-            "label": "appMenu$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<",
-              "AppMenuConfig",
-              " | undefined>"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 97,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.headerBanner$",
-            "type": "Object",
-            "tags": [],
-            "label": "headerBanner$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<",
-              "ChromeUserBanner",
-              " | undefined>"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 98,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.ChromeComponentsDeps.sideNav",
-            "type": "Object",
-            "tags": [],
-            "label": "sideNav",
-            "description": [],
-            "signature": [
-              "{ collapsed$: ",
-              "Observable",
-              "<boolean>; initialCollapsed: boolean; onToggleCollapsed: (collapsed: boolean) => void; }"
-            ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 99,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -693,7 +419,29 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-components",
+        "id": "def-public.Sidebar",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Sidebar",
+        "description": [],
+        "signature": [
+          "React.ComponentClass<",
+          "SidebarProps",
+          ", any> | React.FunctionComponent<",
+          "SidebarProps",
+          ">"
+        ],
+        "path": "src/core/packages/chrome/browser-components/src/sidebar/index.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

@@ -91,7 +91,7 @@ describe('TraceItemRow', () => {
       showAccordion: true,
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
-      highlightedTraceId: 'highlighted-id',
+      highlightedSpanId: 'highlighted-id',
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
@@ -150,7 +150,7 @@ describe('TraceItemRow', () => {
       showAccordion: false,
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
-      highlightedTraceId: 'highlighted-id',
+      highlightedSpanId: 'highlighted-id',
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
@@ -167,7 +167,7 @@ describe('TraceItemRow', () => {
       showAccordion: true,
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
-      highlightedTraceId: 'span-1',
+      highlightedSpanId: 'span-1',
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
@@ -193,7 +193,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
@@ -210,7 +210,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'other-span': [],
@@ -230,7 +230,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [
@@ -255,7 +255,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [
@@ -278,7 +278,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [
@@ -301,7 +301,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [{ item, offset: 20, duration: 30, self: true }],
@@ -322,7 +322,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
@@ -342,7 +342,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedTraceId: 'highlighted-id',
+        highlightedSpanId: 'highlighted-id',
         showCriticalPath: false,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
@@ -351,6 +351,68 @@ describe('TraceItemRow', () => {
       );
       const bar = getByTestId('bar');
       expect(bar).toHaveAttribute('data-color', 'red');
+    });
+  });
+
+  describe('interactivity (hover behaviour conditioned on onClick)', () => {
+    it('is interactive when onClick is provided, regardless of whether another span is highlighted', () => {
+      mockUseTraceWaterfallContext.mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        onErrorClick: jest.fn(),
+        highlightedSpanId: 'some-other-span',
+        criticalPathSegmentsById: {},
+        showCriticalPath: false,
+      } as unknown as TraceWaterfallContextProps);
+
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('role', 'button');
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '0');
+    });
+
+    it('is not interactive when onClick is not provided', () => {
+      mockUseTraceWaterfallContext.mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: undefined,
+        onErrorClick: jest.fn(),
+        highlightedSpanId: undefined,
+        criticalPathSegmentsById: {},
+        showCriticalPath: false,
+      } as unknown as TraceWaterfallContextProps);
+
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+
+      expect(getByTestId('traceItemRowContent')).not.toHaveAttribute('role', 'button');
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '-1');
+    });
+
+    it('remains interactive when onClick is provided and current item is highlighted', () => {
+      mockUseTraceWaterfallContext.mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        onErrorClick: jest.fn(),
+        highlightedSpanId: 'span-1', // this item is highlighted
+        criticalPathSegmentsById: {},
+        showCriticalPath: false,
+      } as unknown as TraceWaterfallContextProps);
+
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('role', 'button');
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '0');
     });
   });
 

@@ -18,9 +18,11 @@ interface LiveActionsQueryOptions {
   searchAfter?: SortValues;
   kuery?: string;
   userIds?: string[];
+  tags?: string[];
   spaceId: string;
   startDate?: string;
   endDate?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export const buildLiveActionsQuery = ({
@@ -28,9 +30,11 @@ export const buildLiveActionsQuery = ({
   searchAfter,
   kuery,
   userIds,
+  tags,
   spaceId,
   startDate,
   endDate,
+  sortDirection = 'desc',
 }: LiveActionsQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -73,6 +77,10 @@ export const buildLiveActionsQuery = ({
     filters.push({ terms: { user_id: userIds } });
   }
 
+  if (tags && tags.length > 0) {
+    filters.push({ terms: { tags } });
+  }
+
   return {
     body: {
       query: {
@@ -82,8 +90,8 @@ export const buildLiveActionsQuery = ({
       },
       size: pageSize,
       sort: [
-        { '@timestamp': { order: 'desc' as const } },
-        { _shard_doc: { order: 'asc' as const } },
+        { '@timestamp': { order: sortDirection } },
+        { _shard_doc: { order: sortDirection === 'desc' ? 'asc' : 'desc' } },
       ],
       ...(searchAfter ? { search_after: searchAfter } : {}),
       _source: true,
