@@ -18,6 +18,8 @@ export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string(),
 });
 
+const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
+
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
 /**
@@ -67,7 +69,7 @@ SECURITY RULE DATA:
 ---
 Complete in order:
 
-1. When asked to modify, update, or create a detection rule, ALWAYS load the detection-rule-edit skill from the skills/security/rules directory.
+1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
 2. Use the available tools to research, create, or edit the rule and provide a response.`;
       return description;
     },
