@@ -19,7 +19,10 @@ export const BulkOperations = ({
 }: {
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
-  setMonitorPendingReset: (val: { resetIds: string[]; skippedIds: string[] }) => void;
+  setMonitorPendingReset: (val: {
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  }) => void;
 }) => {
   const { isUnhealthy, canResetFix } = useMonitorIntegrationHealth();
 
@@ -30,10 +33,15 @@ export const BulkOperations = ({
   const selectedConfigIds = selectedItems.map((item) => item[ConfigKey.CONFIG_ID]);
   const unhealthyConfigIds = selectedConfigIds.filter((id) => isUnhealthy(id));
   const resetIds = unhealthyConfigIds.filter((id) => canResetFix(id));
-  const skippedIds = unhealthyConfigIds.filter((id) => !canResetFix(id));
+  const skippedMonitors = selectedItems
+    .filter((item) => {
+      const id = item[ConfigKey.CONFIG_ID];
+      return isUnhealthy(id) && !canResetFix(id);
+    })
+    .map((item) => ({ id: item[ConfigKey.CONFIG_ID], name: item[ConfigKey.NAME] }));
 
   const onReset = () => {
-    setMonitorPendingReset({ resetIds, skippedIds });
+    setMonitorPendingReset({ resetIds, skippedMonitors });
   };
 
   if (selectedItems.length === 0) {

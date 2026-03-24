@@ -19,12 +19,12 @@ import { kibanaService } from '../../../../../../utils/kibana_service';
 
 export const ResetMonitorModal = ({
   configIds,
-  skippedConfigIds = [],
+  skippedMonitors = [],
   onClose,
   resetMonitors,
 }: {
   configIds: string[];
-  skippedConfigIds?: string[];
+  skippedMonitors?: Array<{ id: string; name: string }>;
   onClose: () => void;
   resetMonitors: (ids: string[]) => Promise<{ error?: Error }>;
 }) => {
@@ -79,16 +79,17 @@ export const ResetMonitorModal = ({
           })}
         </p>
       </EuiText>
-      {skippedConfigIds.length > 0 && (
+      {skippedMonitors.length > 0 && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
             color="warning"
             iconType="warning"
+            announceOnMount={false}
             title={i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.title', {
               defaultMessage:
                 '{count, plural, one {# monitor} other {# monitors}} will not be reset',
-              values: { count: skippedConfigIds.length },
+              values: { count: skippedMonitors.length },
             })}
           >
             <EuiText size="s">
@@ -109,8 +110,8 @@ export const ResetMonitorModal = ({
               <EuiSpacer size="xs" />
               <EuiText size="s">
                 <ul>
-                  {skippedConfigIds.map((id) => (
-                    <li key={id}>{id}</li>
+                  {skippedMonitors.map(({ id, name }) => (
+                    <li key={id}>{name}</li>
                   ))}
                 </ul>
               </EuiText>

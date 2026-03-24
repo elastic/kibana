@@ -74,7 +74,9 @@ test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
         await expect(
           page.testSubj.locator('syntheticsMonitorInspectShowFlyoutExampleButton')
         ).toBeVisible();
-        await expect(page.getByText(locationLabel)).toBeVisible();
+        await expect(
+          page.testSubj.locator('syntheticsMonitorConfigLocations').getByText(locationLabel)
+        ).toBeVisible();
         await pageObjects.syntheticsApp.findEditMonitorConfiguration(config.monitorEditDetails);
         await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
         await expect(page.getByText('Monitor updated successfully.')).toBeVisible({

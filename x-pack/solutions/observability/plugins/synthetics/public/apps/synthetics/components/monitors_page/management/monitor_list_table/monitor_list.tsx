@@ -55,7 +55,7 @@ export const MonitorList = ({
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
     resetIds: string[];
-    skippedIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
   const { resetMonitors } = useMonitorIntegrationHealth();
 
@@ -158,7 +158,7 @@ export const MonitorList = ({
       {monitorPendingReset !== null && monitorPendingReset.resetIds.length > 0 && (
         <ResetMonitorModal
           configIds={monitorPendingReset.resetIds}
-          skippedConfigIds={monitorPendingReset.skippedIds}
+          skippedMonitors={monitorPendingReset.skippedMonitors}
           onClose={() => setMonitorPendingReset(null)}
           resetMonitors={resetMonitors}
         />
