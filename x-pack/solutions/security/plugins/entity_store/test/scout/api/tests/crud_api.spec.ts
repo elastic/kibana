@@ -72,6 +72,55 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(check.found).toBe(true);
   });
 
+  apiTest(
+    'Should use generated EUID on create when entity.id is not supplied',
+    async ({ apiClient, esClient }) => {
+      // Do not supply entity.id! The EUID should be generated from identity fields
+      // For a host entity, EUID is derived from host.name: "host:<host.name>"
+      const entityObj = {
+        host: { name: 'create-generated-euid' },
+      } as Entity;
+
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const expectedEuid = 'host:create-generated-euid';
+
+      // Entity should be stored using the generated EUID
+      const byGenerated = await esClient.get({
+        index: LATEST_INDEX,
+        id: hashEuid(expectedEuid),
+      });
+      expect(byGenerated.found).toBe(true);
+
+      // The stored entity.id should be the generated EUID
+      const source = byGenerated._source as HostEntity;
+      expect(source.host?.entity?.id).toBe(expectedEuid);
+    }
+  );
+
+  apiTest(
+    'Should reject create when supplied entity.id does not match generated EUID',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: { id: 'wrong-supplied-id' },
+        host: { name: 'create-mismatch-test' },
+      };
+
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(400);
+      expect(create.body.message).toContain('does not match generated EUID');
+    }
+  );
+
   apiTest('Should require a force flag for restricted fields', async ({ apiClient }) => {
     // First create the entity so we can test force flag on update
     const entityId = 'required-id-force';

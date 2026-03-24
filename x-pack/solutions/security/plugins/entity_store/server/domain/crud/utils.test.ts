@@ -14,11 +14,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { BadCRUDRequestError } from '../errors';
-import {
-  hashEuid,
-  validateAndTransformDocForUpsert,
-  validateUpdateDocIdentification,
-} from './utils';
+import { hashEuid, validateAndTransformDocForUpsert, validateDocIdentification } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry', () => ({
   ...jest.requireActual('../../../common/domain/definitions/registry'),
@@ -63,35 +59,35 @@ describe('crud_client utils', () => {
     });
   });
 
-  describe('validateUpdateDocIdentification', () => {
-    it('passes when doc has entity.id and no generatedId', () => {
+  describe('validateDocIdentification', () => {
+    it('returns doc entity.id when no generatedId', () => {
       const doc: Entity = { entity: { id: 'my-id' } };
-      expect(() => validateUpdateDocIdentification(doc, undefined)).not.toThrow();
+      expect(validateDocIdentification(doc, undefined)).toBe('my-id');
     });
 
-    it('passes when doc has no entity.id but generatedId is provided', () => {
+    it('returns generatedId when doc has no entity.id', () => {
       const doc = { host: { name: 'some-host' } } as Entity;
-      expect(() => validateUpdateDocIdentification(doc, 'generated-id')).not.toThrow();
+      expect(validateDocIdentification(doc, 'generated-id')).toBe('generated-id');
     });
 
-    it('passes when doc entity.id matches generatedId', () => {
+    it('returns generatedId when doc entity.id matches generatedId', () => {
       const doc: Entity = { entity: { id: 'same-id' } };
-      expect(() => validateUpdateDocIdentification(doc, 'same-id')).not.toThrow();
+      expect(validateDocIdentification(doc, 'same-id')).toBe('same-id');
+    });
+
+    it('prefers generatedId over doc entity.id when both present', () => {
+      const doc: Entity = { entity: { id: 'supplied-id' } };
+      expect(() => validateDocIdentification(doc, 'different-id')).toThrow(
+        new BadCRUDRequestError(
+          'Supplied ID supplied-id does not match generated EUID different-id'
+        )
+      );
     });
 
     it('throws when doc has no entity.id and generatedId is undefined', () => {
       const doc = { host: { name: 'some-host' } } as Entity;
-      expect(() => validateUpdateDocIdentification(doc, undefined)).toThrow(
+      expect(() => validateDocIdentification(doc, undefined)).toThrow(
         new BadCRUDRequestError('Could not derive EUID from document or find it in entity.id')
-      );
-    });
-
-    it('throws when doc entity.id does not match generatedId', () => {
-      const doc: Entity = { entity: { id: 'supplied-id' } };
-      expect(() => validateUpdateDocIdentification(doc, 'different-id')).toThrow(
-        new BadCRUDRequestError(
-          'Supplied ID supplied-id does not match generated EUID different-id'
-        )
       );
     });
   });
@@ -112,19 +108,24 @@ describe('crud_client utils', () => {
       );
     });
 
-    it('uses generatedId over supplied doc id', () => {
+    it('throws when doc entity.id does not match generatedId', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
-      const result = validateAndTransformDocForUpsert(
-        'generic',
-        'default',
-        doc,
-        'generated-id',
-        true
+      expect(() =>
+        validateAndTransformDocForUpsert('generic', 'default', doc, 'generated-id', true)
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID doc-id does not match generated EUID generated-id')
       );
+    });
 
-      expect(result.id).toBe('generated-id');
+    it('uses generatedId when doc entity.id matches', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc: Entity = { entity: { id: 'same-id' }, host: { name: 'some-host' } };
+      const result = validateAndTransformDocForUpsert('generic', 'default', doc, 'same-id', true);
+
+      expect(result.id).toBe('same-id');
     });
 
     it('uses generatedId when doc has no entity.id', () => {
