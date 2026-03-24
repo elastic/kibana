@@ -10,7 +10,8 @@ body:
   - type: textarea
     id: what
     attributes:
-      label: What feature do you want added?
+      label: What?
+      description: Describe what feature should be added.
       placeholder: "I want Kibana to..."
     validations:
       required: true
@@ -19,7 +20,7 @@ body:
     id: why
     attributes:
       label: Why?
-      description: Describe why you want this added, what use-case does this enable?
+      description: Describe why this should be added, what use-case does this enable?
       placeholder: "This allows me to..."
     validations:
       required: true
