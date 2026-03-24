@@ -67,7 +67,8 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
   const handleCountChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      const parsed = raw === '' ? '' : parseFloat(raw);
+      const numeric = parseFloat(raw);
+      const parsed = raw === '' || isNaN(numeric) ? '' : numeric;
 
       setCountInput(parsed);
 

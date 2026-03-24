@@ -121,7 +121,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
    * Displayed informally in the panel footer.
    */
   timeZone?: string;
-  /** Seconds until the next auto-refresh or `null` when auto-refresh is inactive or paused. */
+  /** Seconds until the next auto-refresh. While paused, this value is frozen at the last countdown value. `null` when auto-refresh is disabled or the interval is invalid. */
   autoRefreshSecondsRemaining: number | null;
   /** Toggles `settings.autoRefresh.isPaused` (play/pause on the input append). No-op when `settings.autoRefresh` is not set. */
   toggleAutoRefresh: () => void;

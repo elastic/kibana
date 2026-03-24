@@ -69,7 +69,8 @@ export function msToAutoRefreshInterval(
   if (intervalMs % MS_PER.second === 0) {
     return { count: intervalMs / MS_PER.second, unit: 's' };
   }
-  return { count: Math.round(intervalMs / MS_PER.second), unit: 's' };
+
+  return { count: Math.ceil(intervalMs / MS_PER.second), unit: 's' };
 }
 
 /**
