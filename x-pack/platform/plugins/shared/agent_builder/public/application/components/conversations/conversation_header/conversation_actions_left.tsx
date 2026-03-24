@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { ConversationsHistoryButton } from './conversations_history_button';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
 import { NewConversationButton } from './new_conversation_button';
 
@@ -16,7 +15,6 @@ export const ConversationLeftActions: React.FC<{}> = () => {
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <ConversationsHistoryButton />
       {hasActiveConversation && <NewConversationButton />}
     </EuiFlexGroup>
   );
