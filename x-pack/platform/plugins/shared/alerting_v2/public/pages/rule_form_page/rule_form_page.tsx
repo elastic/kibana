@@ -72,14 +72,6 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
     error,
   } = useFetchRule(ruleId);
 
-  // Block rendering until we have confirmed-fresh data. With React Query's
-  // stale-while-revalidate behaviour, `isLoading` is false when there is
-  // cached-but-stale data, so the form would otherwise mount with the old
-  // rule and never reinitialise (StandaloneRuleForm uses `defaultValues`).
-  // `!isFetchedAfterMount && isFetching` is true only during the *first*
-  // fetch after this component mounts (stale cache scenario), not during
-  // subsequent background refetches (e.g. window-focus), so the form is
-  // not torn down while the user is mid-edit.
   if (isLoading || (!isFetchedAfterMount && isFetching)) {
     return <EuiLoadingSpinner size="xl" />;
   }

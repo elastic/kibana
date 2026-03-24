@@ -15,7 +15,6 @@ import { StateTransitionTimeframeField } from './state_transition_timeframe_fiel
 
 type DelayMode = 'immediate' | 'breaches' | 'duration';
 
-/** Distinct ids per group — duplicate ids across two EuiButtonGroups break a11y and can confuse selection. */
 const MODE_OPTION_IDS = {
   immediate: 'alert_delay_mode_immediate',
   breaches: 'alert_delay_mode_breaches',

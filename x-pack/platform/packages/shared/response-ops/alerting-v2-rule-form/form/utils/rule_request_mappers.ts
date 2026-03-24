@@ -111,8 +111,6 @@ const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
   if (kind !== 'alert' || stateTransition == null) return undefined;
 
-  // Prefer explicit mode fields (user toggles). Fall back to deriving from counts only when
-  // the field is missing (e.g. legacy callers) — never let stale counts override `immediate`.
   const alertMode =
     formValues.stateTransitionAlertDelayMode ??
     deriveAlertDelayModeFromStateTransition(stateTransition);

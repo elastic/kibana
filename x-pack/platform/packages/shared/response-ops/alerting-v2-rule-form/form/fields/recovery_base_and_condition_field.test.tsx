@@ -377,7 +377,7 @@ describe('RecoveryBaseAndConditionField', () => {
       await user.click(screen.getByTestId('removeRecoveryBaseQueryButton'));
 
       // Form value should be cleared
-      expect(formRef?.getValues('recoveryPolicy.query.base')).toBeUndefined();
+      expect(formRef?.getValues('recoveryPolicy.query.base')).toBeNull();
     });
 
     it('hides the base query editor when remove is clicked and validation reflects removal', async () => {

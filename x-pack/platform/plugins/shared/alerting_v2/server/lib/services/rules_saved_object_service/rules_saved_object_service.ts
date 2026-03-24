@@ -158,11 +158,6 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }): Promise<void> {
     await this.client.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, attrs, {
       ...(version ? { version } : {}),
-      // buildUpdateRuleAttributes already constructs the complete attributes object
-      // (starting from ...existingAttrs then overriding each field). The SO client's
-      // default mergeAttributes:true deep-merges nested objects, which silently
-      // preserves stale sub-fields (e.g. old pending_count inside state_transition
-      // when only recovering_count is sent). Disabling the merge avoids this.
       mergeAttributes: false,
     });
   }
