@@ -59,7 +59,7 @@ export class WorkflowExecutionRuntimeManager {
 
   private workflowExecutionState: WorkflowExecutionState;
   private entryTransactionId?: string;
-  private workflowTransaction?: any; // APM transaction instance
+  private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
@@ -204,15 +204,47 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    if (scopeStack.isEmpty()) {
+      return;
+    }
+
     const entered = currentNode.type.replace(/^exit-/, 'enter-');
 
-    if (entered !== scopeStack.getCurrentScope()?.nodeType) {
+    if (entered !== scopeStack.getCurrentScope().nodeType) {
       return;
     }
 
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
         .stackFrames,
+    });
+  }
+
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    this.workflowExecutionState.updateWorkflowExecution({
+      context: {
+        ...(this.workflowExecution.context || {}),
+        output: outputs,
+      },
+    });
+  }
+
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    this.workflowExecutionState.updateWorkflowExecution({ status });
+  }
+
+  /**
+   * Sets workflow status to CANCELLED with a reason (and cancelledAt, cancelledBy).
+   * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
+   */
+  public setWorkflowCancelled(reason: string): void {
+    const cancelledAt = new Date().toISOString();
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.CANCELLED,
+      cancellationReason: reason,
+      cancelledAt,
+      cancelledBy: 'workflow',
     });
   }
 
@@ -238,10 +270,6 @@ export class WorkflowExecutionRuntimeManager {
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
-      if (!currentScope) {
-        break;
-      }
-
       const matched = shouldStop?.(currentScope) ?? false;
       if (matched && !inclusive) {
         break;

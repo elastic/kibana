@@ -33,7 +33,6 @@ import {
 import { getOptionDisabledState } from './dimensions_selector_helpers';
 
 interface DimensionsSelectorProps {
-  fields: Array<{ dimensions: Dimension[] }>;
   dimensions: Dimension[];
   selectedDimensions: Dimension[];
   fullWidth?: boolean;
@@ -43,7 +42,6 @@ interface DimensionsSelectorProps {
 }
 
 export const DimensionsSelector = ({
-  fields,
   dimensions,
   selectedDimensions,
   onChange,
@@ -64,45 +62,15 @@ export const DimensionsSelector = ({
     [localSelectedDimensions]
   );
 
-  const intersectingDimensions = useMemo(() => {
-    if (selectedNamesSet.size === 0) {
-      return new Set(dimensions.map((d) => d.name));
-    }
-
-    const result = new Set<string>();
-    for (const field of fields) {
-      const fieldDimNames = new Set(field.dimensions.map((d) => d.name));
-
-      if (fieldDimNames.size < selectedNamesSet.size) {
-        continue;
-      }
-
-      let hasAllSelected = true;
-      for (const sel of selectedNamesSet) {
-        if (!fieldDimNames.has(sel)) {
-          hasAllSelected = false;
-          break;
-        }
-      }
-
-      if (hasAllSelected) {
-        fieldDimNames.forEach((name) => result.add(name));
-      }
-    }
-
-    return result;
-  }, [fields, selectedNamesSet, dimensions]);
-
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
 
     const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
-      const isIntersecting = intersectingDimensions.has(dimension.name);
+
       const isDisabled = getOptionDisabledState({
         singleSelection,
         isSelected,
-        isIntersecting,
         isAtMaxLimit,
       });
 
@@ -152,7 +120,6 @@ export const DimensionsSelector = ({
     dimensions,
     selectedNamesSet,
     localSelectedDimensions,
-    intersectingDimensions,
     singleSelection,
     euiTheme.levels.menu,
   ]);

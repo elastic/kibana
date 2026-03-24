@@ -121,23 +121,25 @@ paths:
             $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
       requestBody:
         required: true
-        additionalProperties: false
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               required:
-                - samples
                 - originalSource
               properties:
                 samples:
                   type: array
                   items:
-                    minItems: 1
                     type: string
-                  description: The samples to upload
+                  description: The samples to upload (when source is file)
+                sourceIndex:
+                  type: string
+                  minLength: 1
+                  description: Index name to pick samples from.
                 originalSource:
-                  description: The original source of the samples
+                  description: The original source of the samples (file name or index name)
                   $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/OriginalSource"
                 langSmithOptions:
                   description: The LangSmith tracing options

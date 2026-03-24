@@ -92,7 +92,7 @@ const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnTyp
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   schema.object(
     {
-      savedObjectId: schema.string(),
+      ref_id: schema.string(),
       ...getSharedPanelSchema(getDrilldownsSchema),
     },
     {

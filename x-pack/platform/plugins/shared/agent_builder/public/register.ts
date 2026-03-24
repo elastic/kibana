@@ -40,6 +40,13 @@ const BASE_DEEP_LINKS = [
     path: '/agents',
     title: i18n.translate('xpack.agentBuilder.agents.title', { defaultMessage: 'Agents' }),
   },
+  {
+    id: 'connectors',
+    path: '/connectors',
+    title: i18n.translate('xpack.agentBuilder.connectors.title', {
+      defaultMessage: 'Connectors',
+    }),
+  },
 ];
 
 const SKILLS_DEEP_LINK = {

@@ -115,6 +115,8 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+  /** Caller-supplied execution metadata, separate from workflow inputs */
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProviderInput {
@@ -140,6 +142,8 @@ export interface EsWorkflowStepExecution {
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
+  /** Whether this step execution belongs to a test run of the workflow. */
+  isTestRun?: boolean;
   startedAt: string;
   finishedAt?: string;
   executionTimeMs?: number;
@@ -242,13 +246,17 @@ export type EsWorkflowCreate = Omit<
   'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
 >;
 
+export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
+const MAX_BULK_CREATE_WORKFLOWS = 500;
+export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+
 export const CreateWorkflowCommandSchema = z.object({
-  yaml: z.string(),
-  id: z.string().optional(),
+  yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
+  id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
 });
 
 export const BulkCreateWorkflowsCommandSchema = z.object({
-  workflows: z.array(CreateWorkflowCommandSchema),
+  workflows: z.array(CreateWorkflowCommandSchema).max(MAX_BULK_CREATE_WORKFLOWS),
 });
 
 export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
@@ -280,6 +288,7 @@ export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
+  workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
