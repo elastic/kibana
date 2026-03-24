@@ -83,15 +83,14 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     onShowCriticalPathChange,
     children,
     entryTransactionId,
-    traceDocsTotal,
-    maxTraceItems,
+    traceDocsTotal = 0,
+    maxTraceItems = 0,
     discoverHref,
   } = props;
   const highlightedSpanId = props.highlightedSpanId;
   const scrollToHighlightedOnMount =
     props.scrollStrategy === 'parent' ? props.scrollToHighlightedOnMount : undefined;
-  const exceedMax =
-    traceDocsTotal !== undefined && maxTraceItems !== undefined && traceDocsTotal > maxTraceItems;
+  const exceedMax = traceDocsTotal > maxTraceItems;
 
   return (
     <TraceWaterfallContextProvider
@@ -122,7 +121,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
             traceDocsTotal={traceDocsTotal}
             maxTraceItems={maxTraceItems}
             discoverHref={discoverHref}
-            data-test-subj='unifiedWaterfallSizeWarning'
+            data-test-subj="unifiedWaterfallSizeWarning"
           />
           <EuiSpacer size="m" />
         </>
