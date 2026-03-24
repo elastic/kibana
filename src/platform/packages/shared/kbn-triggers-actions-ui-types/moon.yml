@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/triggers-actions-ui-types'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/triggers-actions-ui-types'
+  title: '@kbn/triggers-actions-ui-types'
   description: Moon project for @kbn/triggers-actions-ui-types
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-triggers-actions-ui-types
+  sourceRoot: src/platform/packages/shared/kbn-triggers-actions-ui-types
 dependsOn:
   - '@kbn/alerting-types'
 tags:
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
