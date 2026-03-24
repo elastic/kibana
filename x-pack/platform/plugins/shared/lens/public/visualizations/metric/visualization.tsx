@@ -580,17 +580,30 @@ export const getMetricVisualization = ({
       datasource,
       state.secondaryMetricAccessor
     );
-    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
 
-    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
+    let updatedState = state;
+
+    // Clear primary metric palette when it becomes non-numeric
+    if (!isPrimaryMetricNumeric && state.palette) {
+      updatedState = {
+        ...updatedState,
+        palette: undefined,
+      };
+    }
+
+    // Fix secondary metric coloring when it becomes non-numeric or when the trend configuration is invalid
+    const colorMode = getColorMode(updatedState.secondaryTrend, isSecondaryMetricNumeric);
+    if (
+      isSecondaryTrendConfigInvalid(updatedState.secondaryTrend, colorMode, isPrimaryMetricNumeric)
+    ) {
       return {
-        ...state,
+        ...updatedState,
         secondaryLabel: undefined,
         secondaryTrend: getDefaultConfigForMode(colorMode),
         secondaryLabelPosition: 'before',
       };
     }
-    return state;
+    return updatedState;
   },
 
   getPersistableState: (state, datasource, datasourceState) => {
