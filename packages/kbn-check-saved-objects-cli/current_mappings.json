@@ -329,22 +329,7 @@
           "owner": {
             "type": "keyword"
           }
-        },
-        "type": "object"
-      },
-      "auth": {
-        "properties": {
-          "apiKey": {
-            "type": "binary"
-          },
-          "createdByUser": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        },
-        "type": "object"
+        }
       },
       "createdAt": {
         "type": "date"
@@ -356,12 +341,6 @@
         "type": "keyword"
       },
       "description": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
         "type": "text"
       },
       "destinations": {
@@ -372,8 +351,7 @@
           "type": {
             "type": "keyword"
           }
-        },
-        "type": "object"
+        }
       },
       "enabled": {
         "type": "boolean"
@@ -382,12 +360,6 @@
         "type": "keyword"
       },
       "name": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
         "type": "text"
       },
       "snoozedUntil": {
@@ -1694,6 +1666,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1736,9 +1711,6 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
-      },
-      "installed_as_dependency": {
-        "type": "boolean"
       },
       "name": {
         "type": "keyword"
