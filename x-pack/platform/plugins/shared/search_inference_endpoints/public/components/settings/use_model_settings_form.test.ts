@@ -59,8 +59,8 @@ describe('useModelSettingsForm', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
     expect(result.current.sections).toHaveLength(1);
-    expect(result.current.sections[0].id).toBe('search');
-    expect(result.current.sections[0].name).toBe('Search');
+    expect(result.current.sections[0].featureId).toBe('search');
+    expect(result.current.sections[0].featureName).toBe('Search');
     expect(result.current.sections[0].children).toHaveLength(2);
   });
 
@@ -173,6 +173,66 @@ describe('useModelSettingsForm', () => {
     });
 
     expect(mockSaveSettings).not.toHaveBeenCalled();
+  });
+
+  it('falls back to parent recommendedEndpoints when child has none', () => {
+    const childWithNoRecommended: InferenceFeatureConfig = {
+      ...childFeature2,
+      recommendedEndpoints: [],
+    };
+    mockUseRegisteredFeatures.mockReturnValue({
+      features: [parentFeature, childFeature1, childWithNoRecommended],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.assignments.child_2).toEqual([]);
+  });
+
+  it('falls back to parent recommendedEndpoints when parent has them and child has none', () => {
+    const parentWithEndpoints: InferenceFeatureConfig = {
+      ...parentFeature,
+      recommendedEndpoints: ['parent-ep'],
+    };
+    const childWithNoRecommended: InferenceFeatureConfig = {
+      ...childFeature2,
+      recommendedEndpoints: [],
+    };
+    mockUseRegisteredFeatures.mockReturnValue({
+      features: [parentWithEndpoints, childFeature1, childWithNoRecommended],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.assignments.child_2).toEqual(['parent-ep']);
+  });
+
+  it('resetSection falls back to parent recommendedEndpoints when child has none', () => {
+    const parentWithEndpoints: InferenceFeatureConfig = {
+      ...parentFeature,
+      recommendedEndpoints: ['parent-ep'],
+    };
+    const childWithNoRecommended: InferenceFeatureConfig = {
+      ...childFeature2,
+      recommendedEndpoints: [],
+    };
+    mockUseRegisteredFeatures.mockReturnValue({
+      features: [parentWithEndpoints, childFeature1, childWithNoRecommended],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    act(() => {
+      result.current.updateEndpoints('child_2', ['custom-ep']);
+    });
+    act(() => {
+      result.current.resetSection('search');
+    });
+
+    expect(result.current.assignments.child_2).toEqual(['parent-ep']);
   });
 
   it('isLoading is true when any dependency is loading', () => {
