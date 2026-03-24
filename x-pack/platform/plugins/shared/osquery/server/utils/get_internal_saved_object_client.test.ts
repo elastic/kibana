@@ -54,19 +54,18 @@ describe('get_internal_saved_object_client', () => {
     expect(coreStart.http.basePath.set).toHaveBeenCalledWith(expect.any(Object), '/s/space-a');
   });
 
-  it('creates internal scoped client for active space', async () => {
+  it('creates scoped client using the real request', async () => {
     const coreStart = createCoreStartMock();
     const request = httpServerMock.createKibanaRequest();
     const osqueryContext = {
-      service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
-      },
       getStartServices: jest.fn().mockResolvedValue([coreStart]),
     };
 
     const client = await createInternalSavedObjectsClientForSpaceId(osqueryContext, request);
 
-    expect(osqueryContext.service.getActiveSpace).toHaveBeenCalledWith(request);
+    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
     expect(client).toEqual({ scoped: true });
   });
 });

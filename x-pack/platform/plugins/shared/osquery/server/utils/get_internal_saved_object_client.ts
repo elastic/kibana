@@ -39,11 +39,12 @@ export function getInternalSavedObjectsClientForSpaceId(
 }
 
 export async function createInternalSavedObjectsClientForSpaceId(
-  osqueryContext: { service: { getActiveSpace: Function }; getStartServices: Function },
+  osqueryContext: { getStartServices: Function },
   request: KibanaRequest
 ): Promise<SavedObjectsClient> {
-  const space = await osqueryContext.service.getActiveSpace(request);
   const [core] = await osqueryContext.getStartServices();
 
-  return getInternalSavedObjectsClientForSpaceId(core, space?.id ?? DEFAULT_SPACE_ID);
+  return core.savedObjects.getScopedClient(request, {
+    excludedExtensions: [SECURITY_EXTENSION_ID],
+  }) as SavedObjectsClient;
 }
