@@ -11,4 +11,4 @@ export const INTERNAL_API_HEADERS = {
 };
 
 export const RULE_API_PATH = '/internal/alerting/v2/rule';
-export const ALERTING_EVENTS_INDEX = '.alerting-events';
+export const ALERTING_EVENTS_INDEX = '.rule-events';

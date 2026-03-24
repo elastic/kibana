@@ -8,7 +8,7 @@
 import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
 
 export const getAlertEpisodesViewDefinition = (): EsqlViewDefinition => ({
-  key: 'view:alerting-episodes',
+  key: 'view:alert-episodes',
   name: '$.alert-episodes',
   query: `FROM .rule-events
 | INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id
