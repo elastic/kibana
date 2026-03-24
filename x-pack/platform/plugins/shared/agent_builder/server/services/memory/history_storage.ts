@@ -11,7 +11,7 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { MemoryVersionRecord } from './types';
 
-export const memoryHistoryIndexName = chatSystemIndex('memory-history');
+export const memoryHistoryIndexName = chatSystemIndex('memhistory');
 
 const storageSettings = {
   name: memoryHistoryIndexName,

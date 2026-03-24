@@ -92,6 +92,10 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlAttach,
   platformCoreTools.memorySearch,
   platformCoreTools.memoryRead,
+  platformCoreTools.memoryWrite,
+  platformCoreTools.memoryPatch,
+  platformCoreTools.memoryList,
+  platformCoreTools.memoryDelete,
 ];
 
 /**

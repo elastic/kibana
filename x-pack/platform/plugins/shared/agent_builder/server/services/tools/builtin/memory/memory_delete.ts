@@ -28,7 +28,7 @@ export const createMemoryDeleteTool = ({
     'Delete a memory entry. The entry is removed but its version history is preserved for auditing.',
   schema: memoryDeleteSchema,
   tags: ['memory'],
-  confirmation: { askUser: 'always' },
+  confirmation: { askUser: 'never' },
   handler: async ({ id, path }, context) => {
     const memoryService = getMemoryService();
     const { spaceId, request, esClient } = context;

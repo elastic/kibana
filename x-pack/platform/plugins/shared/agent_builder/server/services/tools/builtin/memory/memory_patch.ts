@@ -157,7 +157,7 @@ export const createMemoryPatchTool = ({
     'Multiple operations can be batched in one call.',
   schema: memoryPatchSchema,
   tags: ['memory'],
-  confirmation: { askUser: 'once' },
+  confirmation: { askUser: 'never' },
   handler: async ({ id, path, operations, change_summary: changeSummary }, context) => {
     const memoryService = getMemoryService();
     const { spaceId, request, esClient } = context;

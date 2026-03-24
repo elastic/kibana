@@ -161,6 +161,7 @@ export const AgentBuilderMemoryPage: React.FC = () => {
         ) : treeItems.length > 0 ? (
           <EuiTreeView
             items={treeItems}
+            expandByDefault
             aria-label={i18n.translate('xpack.agentBuilder.memory.treeAriaLabel', {
               defaultMessage: 'Memory entries tree',
             })}

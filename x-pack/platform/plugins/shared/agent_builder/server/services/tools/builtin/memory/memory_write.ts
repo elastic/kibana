@@ -37,7 +37,7 @@ export const createMemoryWriteTool = ({
     'Use this for new entries or full rewrites.',
   schema: memoryWriteSchema,
   tags: ['memory'],
-  confirmation: { askUser: 'once' },
+  confirmation: { askUser: 'never' },
   handler: async ({ path, title, content, tags, change_summary: changeSummary }, context) => {
     const memoryService = getMemoryService();
     const { spaceId, request, esClient } = context;

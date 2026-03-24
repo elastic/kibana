@@ -11,7 +11,7 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { CompactionLogEntry } from './types';
 
-export const compactionLogIndexName = chatSystemIndex('memory-compaction-log');
+export const compactionLogIndexName = chatSystemIndex('memcompaction');
 
 const storageSettings = {
   name: compactionLogIndexName,
