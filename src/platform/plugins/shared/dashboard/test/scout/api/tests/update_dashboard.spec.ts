@@ -84,6 +84,27 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
     );
   });
 
+  apiTest('validation - returns error when access_control is provided', async ({ apiClient }) => {
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'Refresh Requests (Updated)',
+        access_control: {
+          access_mode: 'write_restricted',
+        },
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      "[request body.access_control]: a value wasn't expected to be present"
+    );
+  });
+
   apiTest('validation - returns error if panels is not an array', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
