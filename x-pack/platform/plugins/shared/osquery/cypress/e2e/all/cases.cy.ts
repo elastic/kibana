@@ -7,11 +7,7 @@
 
 import { ServerlessRoleName } from '../../support/roles';
 import { initializeDataViews } from '../../tasks/login';
-import {
-  addLiveQueryToCase,
-  checkActionItemsInResults,
-  viewRecentCaseAndCheckResults,
-} from '../../tasks/live_query';
+import { addLiveQueryToCase, viewRecentCaseAndCheckResults } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 

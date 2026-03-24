@@ -8,7 +8,6 @@
 import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import {
-  checkActionItemsInResults,
   checkResults,
   fillInQueryTimeout,
   inputQuery,
@@ -18,7 +17,7 @@ import {
   typeInOsqueryFieldInput,
   verifyQueryTimeout,
 } from '../../tasks/live_query';
-import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR, RESULTS_TABLE } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';

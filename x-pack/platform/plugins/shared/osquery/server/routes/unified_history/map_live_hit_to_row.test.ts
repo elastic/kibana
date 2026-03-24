@@ -249,7 +249,13 @@ describe('mapLiveHitToRow', () => {
         pack_id: 'pack-1',
         pack_name: 'my_pack',
         queries: [
-          { query: 'SELECT 1', id: 'q1', agents: ['agent-1'], saved_query_id: 'sq-1', timeout: 300 },
+          {
+            query: 'SELECT 1',
+            id: 'q1',
+            agents: ['agent-1'],
+            saved_query_id: 'sq-1',
+            timeout: 300,
+          },
           { query: 'SELECT 2', id: 'q2', agents: ['agent-1'] },
         ],
       },

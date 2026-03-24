@@ -8,7 +8,6 @@
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
-  checkActionItemsInResults,
   checkResults,
   selectAllAgents,
   submitQuery,
