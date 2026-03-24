@@ -7,7 +7,7 @@
 
 import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
 import { PLATFORM_WITH_INSTALL_SERVERS, type EXTENDED_PLATFORM_TYPE } from '../../../hooks';
-import type { DownloadSource, FleetProxy } from '../../../types';
+import type { DownloadSource, ProxyConfig } from '../../../types';
 
 function getFleetServerHostsEnrollArgs({
   apiKey,
@@ -18,7 +18,7 @@ function getFleetServerHostsEnrollArgs({
 }: {
   apiKey: string;
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetProxy?: ProxyConfig;
   showInstallServers?: boolean;
   platform: EXTENDED_PLATFORM_TYPE;
 }) {
@@ -44,7 +44,7 @@ export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
   return source.endsWith('/') ? source.substring(0, source.length - 1) : source;
 };
 
-export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => {
+export const getDownloadSourceProxyArgs = (downloadSourceProxy?: ProxyConfig) => {
   const windows = `${downloadSourceProxy?.url ? `-Proxy "${downloadSourceProxy.url}"` : ''} ${
     downloadSourceProxy?.proxy_headers
       ? `-Headers @{${Object.entries(downloadSourceProxy.proxy_headers)
@@ -86,9 +86,9 @@ export const ManualInstructions = ({
 }: {
   apiKey: string;
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetProxy?: ProxyConfig;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: ProxyConfig;
   agentVersion: string;
   gcpProjectId?: string;
   gcpOrganizationId?: string;
