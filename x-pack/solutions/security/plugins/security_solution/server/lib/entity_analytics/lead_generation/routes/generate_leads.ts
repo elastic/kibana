@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -17,14 +17,19 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { StartPlugins } from '../../../../plugin_contract';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
-import { entityRecordToLeadEntity } from '../entity_conversion';
+import { fetchAllLeadEntities } from '../entity_conversion';
 import { createLeadDataClient } from '../lead_data_client';
 
-export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const generateLeadsRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  getStartServices: StartServicesAccessor<StartPlugins>
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -49,10 +54,11 @@ export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], 
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const secSol = await context.securitySolution;
-          const spaceId = secSol.getSpaceId();
+          const { getSpaceId } = await context.securitySolution;
+          const spaceId = getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const entityStoreDataClient = secSol.getEntityStoreDataClient();
+          const [, startPlugins] = await getStartServices();
+          const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const executionUuid = uuidv4();
 
           // Fire-and-forget: run the pipeline in the background, return executionUuid immediately
@@ -61,15 +67,7 @@ export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], 
 
             try {
               const fetchStart = Date.now();
-              const entityResponse = await entityStoreDataClient.searchEntities({
-                entityTypes: ['host', 'user', 'service'],
-                filterQuery: '',
-                page: 1,
-                perPage: 10000,
-                sortField: 'entity.name',
-                sortOrder: 'asc',
-              });
-              const leadEntities = entityResponse.records.map(entityRecordToLeadEntity);
+              const leadEntities = await fetchAllLeadEntities(crudClient, logger);
               logger.info(
                 `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
                   leadEntities.length

@@ -48,6 +48,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AnonymizationPluginStart } from '@kbn/anonymization-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -96,6 +97,7 @@ export interface SecuritySolutionPluginStartDependencies {
   inference: InferenceServerStart;
   anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
+  entityStore: EntityStoreStartContract;
 }
 
 export interface SecuritySolutionPluginSetup {

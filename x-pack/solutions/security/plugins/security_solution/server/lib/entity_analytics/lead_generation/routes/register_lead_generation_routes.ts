@@ -20,7 +20,7 @@ export const registerLeadGenerationRoutes = ({
   logger,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
-  generateLeadsRoute(router, logger);
+  generateLeadsRoute(router, logger, getStartServices);
   getLeadsRoute(router, logger);
   getLeadByIdRoute(router, logger);
   getLeadGenerationStatusRoute(router, logger);
