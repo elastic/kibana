@@ -33,7 +33,7 @@ import type {
   EuiDataGridColumnSortingConfig,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -83,8 +83,9 @@ export const QueryStreamSchemaEditor = ({
         const currentDescriptions = definition.stream.field_descriptions ?? {};
         const newDescriptions = { ...currentDescriptions };
 
-        if (updatedField.description && updatedField.description.trim().length > 0) {
-          newDescriptions[updatedField.name] = updatedField.description.trim();
+        const trimmedDescription = updatedField.description?.trim();
+        if (trimmedDescription && trimmedDescription.length > 0) {
+          newDescriptions[updatedField.name] = trimmedDescription;
         } else {
           delete newDescriptions[updatedField.name];
         }
@@ -398,23 +399,20 @@ const createQueryStreamCellRenderer =
         return EMPTY_CONTENT;
       }
       return (
-        <EuiToolTip
-          content={field.description}
-          anchorClassName={css`
-            width: 100%;
-          `}
-        >
-          <div
-            tabIndex={0}
-            className={css`
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            `}
-          >
-            {field.description}
-          </div>
-        </EuiToolTip>
+        <div css={css`width: 100%;`}>
+          <EuiToolTip content={field.description}>
+            <div
+              tabIndex={0}
+              css={css`
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              `}
+            >
+              {field.description}
+            </div>
+          </EuiToolTip>
+        </div>
       );
     }
 
