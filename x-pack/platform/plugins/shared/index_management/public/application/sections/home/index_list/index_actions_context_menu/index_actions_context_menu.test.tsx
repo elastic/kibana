@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { of } from 'rxjs';
 
 import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
@@ -16,6 +17,7 @@ import { IndexActionsContextMenu } from './index_actions_context_menu';
 import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
 import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
+import { RequestResultType } from '../index_table/get_doc_count';
 
 // EUI context menus keep inactive panels mounted with `pointer-events: none`,
 // which can cause user-event to throw when interacting with menu items.
@@ -577,6 +579,38 @@ describe('IndexActionsContextMenu', () => {
               isFrozen: false,
             } satisfies Partial<Index>,
           ] as Index[],
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...convertible} />);
+
+        await openContextMenu();
+        const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
+
+        expect(convertBtn).not.toBeDisabled();
+      });
+
+      it('SHOULD use loaded doc count when index documents are missing', async () => {
+        const props = getBaseProps();
+        const docCount$ = of({
+          'index-1': { status: RequestResultType.Success, count: 10 },
+        });
+        const convertible: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName: jest.fn(),
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
         };
 
         renderWithProviders(<IndexActionsContextMenu {...convertible} />);

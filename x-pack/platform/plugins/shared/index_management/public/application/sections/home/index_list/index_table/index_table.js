@@ -741,6 +741,7 @@ export class IndexTable extends Component {
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
                           indicesListURLParams={location.search || ''}
+                          docCountApi={this.docCountApi}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}
