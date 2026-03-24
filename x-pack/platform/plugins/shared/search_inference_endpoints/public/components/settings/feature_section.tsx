@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
-import * as i18n from '../../../common/translations';
+import { i18n } from '@kbn/i18n';
+import * as translations from '../../../common/translations';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { SubFeatureCard } from './sub_feature_card';
 
@@ -46,25 +47,38 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
             <p>{parentDescription}</p>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
-            {i18n.SETTINGS_RESET_DEFAULTS}
-          </EuiLink>
-        </EuiFlexItem>
+        {features.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
+              {translations.SETTINGS_RESET_DEFAULTS}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiPanel hasBorder paddingSize="l">
-        <EuiFlexGroup direction="column" gutterSize="xl">
-          {features.map(({ endpointIds, feature }) => (
-            <EuiFlexItem key={feature.featureId} grow={false}>
-              <SubFeatureCard
-                featureId={feature.featureId}
-                feature={feature}
-                endpointIds={endpointIds}
-                onEndpointsChange={onEndpointsChange}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        {features.length === 0 ? (
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.featureSection.noSubFeatures',
+                { defaultMessage: 'No registered sub-features.' }
+              )}
+            </p>
+          </EuiText>
+        ) : (
+          <EuiFlexGroup direction="column" gutterSize="xl">
+            {features.map(({ endpointIds, feature }) => (
+              <EuiFlexItem key={feature.featureId} grow={false}>
+                <SubFeatureCard
+                  featureId={feature.featureId}
+                  feature={feature}
+                  endpointIds={endpointIds}
+                  onEndpointsChange={onEndpointsChange}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
     </EuiFlexGroup>
   );

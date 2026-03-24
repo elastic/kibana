@@ -113,16 +113,16 @@ export const ModelSettings: React.FC = () => {
             data-test-subj="settings-no-features"
           />
         ) : (
-          sections.map(({ id, name, description, children }) => (
-            <React.Fragment key={id}>
+          sections.map((section) => (
+            <React.Fragment key={section.featureId}>
               <FeatureSection
-                parentName={name}
-                parentDescription={description}
-                features={children.map((f) => ({
+                parentName={section.featureName}
+                parentDescription={section.featureDescription}
+                features={section.children.map((f) => ({
                   endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                   feature: f,
                 }))}
-                onReset={() => setResetParentKey(id)}
+                onReset={() => setResetParentKey(section.featureId)}
                 onEndpointsChange={updateEndpoints}
               />
               <EuiSpacer size="xl" />

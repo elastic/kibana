@@ -8,17 +8,33 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
+import type { InferenceFeatureResponse } from '../../../common/types';
 
 type Assignments = Record<string, string[]>;
 
+export interface FeatureSection extends InferenceFeatureResponse {
+  children: InferenceFeatureResponse[];
+}
+
+export interface ModelSettingsForm {
+  isLoading: boolean;
+  isSaving: boolean;
+  isDirty: boolean;
+  assignments: Assignments;
+  sections: FeatureSection[];
+  updateEndpoints: (featureId: string, endpointIds: string[]) => void;
+  save: () => void;
+  resetSection: (sectionId: string) => void;
+}
+
 const getEffectiveEndpoints = (
   feature: { recommendedEndpoints: string[]; parentFeatureId?: string },
-  parentEndpointsMap: Map<string, string[]>
+  recommendedEndpointsById: Map<string, string[]>
 ): string[] =>
   feature.recommendedEndpoints.length > 0
     ? feature.recommendedEndpoints
     : feature.parentFeatureId
-    ? parentEndpointsMap.get(feature.parentFeatureId) ?? []
+    ? recommendedEndpointsById.get(feature.parentFeatureId) ?? []
     : [];
 
 const toApiFormat = (assignments: Assignments) =>
@@ -27,29 +43,40 @@ const toApiFormat = (assignments: Assignments) =>
     endpoints: ids.map((id) => ({ id })),
   }));
 
-export const useModelSettingsForm = () => {
+export const useModelSettingsForm = (): ModelSettingsForm => {
   const { features: registeredFeatures, isLoading: isFeaturesLoading } = useRegisteredFeatures();
   const { data: settingsData, isLoading: isSettingsLoading } = useInferenceSettings();
   const { mutate: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
 
   const isLoading = isFeaturesLoading || isSettingsLoading;
 
-  const sections = useMemo(() => {
-    const children = registeredFeatures.filter((f) => f.parentFeatureId !== undefined);
-    const parentIds = [...new Set(children.map((f) => f.parentFeatureId!))];
+  const sections = useMemo((): FeatureSection[] => {
+    const featureById = new Map(registeredFeatures.map((f) => [f.featureId, f]));
+    const toSection = (f: InferenceFeatureResponse): FeatureSection => ({ ...f, children: [] });
 
-    return parentIds.map((parentId) => {
-      const parent = registeredFeatures.find((f) => f.featureId === parentId);
-      return {
-        id: parentId,
-        name: parent?.featureName ?? parentId,
-        description: parent?.featureDescription ?? '',
-        children: children.filter((f) => f.parentFeatureId === parentId),
-      };
-    });
+    const sectionMap = registeredFeatures.reduce<Map<string, FeatureSection>>((result, feature) => {
+      if (feature.parentFeatureId) {
+        const parent = featureById.get(feature.parentFeatureId);
+        if (parent) {
+          if (!result.has(feature.parentFeatureId)) {
+            result.set(feature.parentFeatureId, toSection(parent));
+          }
+          result.get(feature.parentFeatureId)!.children.push(feature);
+        } else if (!result.has(feature.featureId)) {
+          // orphaned child (invalid parentFeatureId) — register as standalone section
+          result.set(feature.featureId, toSection(feature));
+        }
+      } else if (!result.has(feature.featureId)) {
+        result.set(feature.featureId, toSection(feature));
+      }
+
+      return result;
+    }, new Map<string, FeatureSection>());
+
+    return Array.from(sectionMap.values());
   }, [registeredFeatures]);
 
-  const parentEndpointsMap = useMemo(
+  const recommendedEndpointsById = useMemo(
     () => new Map(registeredFeatures.map((f) => [f.featureId, f.recommendedEndpoints])),
     [registeredFeatures]
   );
@@ -65,11 +92,11 @@ export const useModelSettingsForm = () => {
       sections.flatMap(({ children }) =>
         children.map((f): [string, string[]] => [
           f.featureId,
-          savedMap.get(f.featureId) ?? [...getEffectiveEndpoints(f, parentEndpointsMap)],
+          savedMap.get(f.featureId) ?? [...getEffectiveEndpoints(f, recommendedEndpointsById)],
         ])
       )
     );
-  }, [settingsData, sections, parentEndpointsMap]);
+  }, [settingsData, sections, recommendedEndpointsById]);
 
   const [assignments, setAssignments] = useState<Assignments>(defaultAssignments);
 
@@ -92,20 +119,20 @@ export const useModelSettingsForm = () => {
 
   const resetSection = useCallback(
     (sectionId: string) => {
-      const section = sections.find((s) => s.id === sectionId);
+      const section = sections.find((s) => s.featureId === sectionId);
       if (!section) return;
 
       const resetEntries = Object.fromEntries(
         section.children.map((f) => [
           f.featureId,
-          [...getEffectiveEndpoints(f, parentEndpointsMap)],
+          [...getEffectiveEndpoints(f, recommendedEndpointsById)],
         ])
       );
       const updated = { ...assignments, ...resetEntries };
       setAssignments(updated);
       saveSettings({ features: toApiFormat(updated) });
     },
-    [assignments, sections, saveSettings, parentEndpointsMap]
+    [assignments, sections, saveSettings, recommendedEndpointsById]
   );
 
   return {
