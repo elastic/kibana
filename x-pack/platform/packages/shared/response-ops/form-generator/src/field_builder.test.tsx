@@ -244,37 +244,34 @@ describe('Field Builder', () => {
       expect(result?.message).toContain('First validation failed');
     });
 
-    it('should return error for optional fields with undefined value', () => {
+    it('should skip validation for optional fields with empty string value', () => {
       const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
       const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg(undefined, path)) as ValidationError;
+      const result = field.validate(createValidationArg('', path));
 
-      expect(result).toBeDefined();
-      expect(result.message).toEqual('Invalid option: expected one of "option_a"|"option_b"');
+      expect(result).toBeUndefined();
     });
 
-    it('should return error for optional enum fields with null value', () => {
+    it('should skip validation for optional fields with undefined value', () => {
       const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
       const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg(null, path)) as ValidationError;
+      const result = field.validate(createValidationArg(undefined, path));
 
-      expect(result).toBeDefined();
-      expect(result.message).toEqual('Invalid option: expected one of "option_a"|"option_b"');
+      expect(result).toBeUndefined();
     });
 
-    it('should return error for optional enum fields with empty string', () => {
+    it('should skip validation for optional fields with null value', () => {
       const schema = z.enum(['option_a', 'option_b']).optional();
       const path = 'field';
 
       const field = getFieldFromSchema({ schema, path, formConfig, meta });
-      const result = field.validate(createValidationArg('', path)) as ValidationError;
+      const result = field.validate(createValidationArg(null, path));
 
-      expect(result).toBeDefined();
-      expect(result.message).toEqual('Invalid option: expected one of "option_a"|"option_b"');
+      expect(result).toBeUndefined();
     });
 
     it('should still validate optional fields with non-empty invalid values', () => {
