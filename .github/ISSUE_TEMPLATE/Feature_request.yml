@@ -1,0 +1,56 @@
+name: Feature request
+description: Kibana can't do all the things, but maybe it can do your things.
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new feature! Please fill out the sections below so we can evaluate your request.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What feature do you want added?
+      placeholder: "I want Kibana to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: Describe why you want this added, what use-case does this enable?
+      placeholder: "This allows me to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How would we know this feature is complete?
+      placeholder: |
+        - Users can ...
+        - The system should ...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Important (workaround exists)
+        - Critical (blocking my workflow)
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add screenshots, mockups, links to related issues, or any other context.
+    validations:
+      required: false
