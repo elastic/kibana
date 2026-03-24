@@ -12,33 +12,31 @@ import {
   type HookHandlerResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import type { InternalSetupServices, InternalStartServices } from '../../services';
-import { getCurrentSpaceId } from '../../utils/spaces';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import type { MemoryHookServices } from './types';
 
 const MAX_INJECTED_ENTRIES = 5;
 const MAX_CONTENT_LENGTH = 2000;
 
 export interface RegisterMemoryContextHookDeps {
   logger: Logger;
-  getInternalServices: () => InternalStartServices;
+  getMemoryServices: () => MemoryHookServices;
 }
 
 /**
  * Registers a blocking beforeAgent hook that searches memory for entries
  * relevant to the user's input and injects them into the agent's context.
- *
- * This makes agents memory-aware by default — they see relevant knowledge
- * without needing to explicitly call memory_search.
  */
 export const registerMemoryContextHook = (
-  serviceSetups: InternalSetupServices,
+  agentBuilder: AgentBuilderPluginSetup,
   deps: RegisterMemoryContextHookDeps
 ): void => {
   const logger = deps.logger.get('memoryContext');
 
-  serviceSetups.hooks.register({
+  agentBuilder.hooks.register({
     id: 'memory-context-injection',
-    priority: 10, // Run early so other hooks see enriched input
+    priority: 10,
     hooks: {
       [HookLifecycle.beforeAgent]: {
         mode: HookExecutionMode.blocking,
@@ -51,11 +49,8 @@ export const registerMemoryContextHook = (
           }
 
           try {
-            const { memory, spaces } = deps.getInternalServices();
-            const spaceId = getCurrentSpaceId({
-              request: context.request,
-              spaces,
-            });
+            const { memory, spaces } = deps.getMemoryServices();
+            const spaceId = spaces?.spacesService?.getSpaceId(context.request) ?? DEFAULT_SPACE_ID;
 
             const results = await memory.search({
               query: userMessage,
@@ -67,7 +62,6 @@ export const registerMemoryContextHook = (
               return;
             }
 
-            // Build context block with relevant memory entries
             const memoryBlock = results
               .map((r) => {
                 const snippet =

@@ -32,7 +32,6 @@ import {
   ToolsService,
   SkillsService,
   PluginsService,
-  MemoryService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -145,7 +144,6 @@ export class AgentBuilderPlugin
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
     const pluginsService = new PluginsService({ http });
-    const memoryService = new MemoryService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
@@ -212,7 +210,6 @@ export class AgentBuilderPlugin
       toolsService,
       skillsService,
       pluginsService,
-      memoryService,
       startDependencies,
       accessChecker,
       eventsService,

@@ -6,7 +6,7 @@
  */
 
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { MemoryService } from '../../../memory';
+import type { MemoryService } from '../../../lib/memory';
 
 export interface MemoryToolsOptions {
   getMemoryService: () => MemoryService;

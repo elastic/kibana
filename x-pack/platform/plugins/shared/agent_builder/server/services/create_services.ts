@@ -30,7 +30,6 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { MemoryServiceImpl } from './memory';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -222,11 +221,6 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
-    const memory = new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient: elasticsearch.client.asInternalUser,
-    });
-
     this.internalStart = {
       tools,
       agents,
@@ -245,7 +239,6 @@ export class ServiceManager {
       sml,
       plugins,
       consumption,
-      memory,
     };
 
     return this.internalStart;

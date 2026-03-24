@@ -8,14 +8,14 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { createBadRequestError } from '@kbn/agent-builder-common';
-import { createSpaceDslFilter } from '../../utils/spaces';
+import { badRequest, notFound } from '@hapi/boom';
 import type { MemoryStorage } from './storage';
 import { createMemoryStorage } from './storage';
 import type { MemoryHistoryStorage } from './history_storage';
 import { createMemoryHistoryStorage } from './history_storage';
 import type { CompactionLogStorage } from './compaction_log_storage';
 import { createCompactionLogStorage } from './compaction_log_storage';
+import { createSpaceDslFilter } from './space_filter';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
@@ -45,9 +45,6 @@ interface CompactionDocument {
   _source: CompactionLogEntry;
 }
 
-const createNotFoundError = (id: string) =>
-  createBadRequestError(`Memory entry with id '${id}' not found`);
-
 const getParentPath = (path: string): string => {
   const parts = path.split('/');
   return parts.length > 1 ? parts.slice(0, -1).join('/') : '';
@@ -70,7 +67,7 @@ export class MemoryServiceImpl implements MemoryService {
     // Check for duplicate path
     const existing = await this._getByPath(path, space);
     if (existing) {
-      throw createBadRequestError(`Memory entry at path '${path}' already exists`);
+      throw badRequest(`Memory entry at path '${path}' already exists`);
     }
 
     const now = new Date().toISOString();
@@ -99,7 +96,7 @@ export class MemoryServiceImpl implements MemoryService {
   async get({ id, space }: { id: string; space: string }): Promise<MemoryEntry> {
     const doc = await this._getById(id, space);
     if (!doc) {
-      throw createNotFoundError(id);
+      throw notFound(`Memory entry with id '${id}' not found`);
     }
     return doc._source;
   }
@@ -119,7 +116,7 @@ export class MemoryServiceImpl implements MemoryService {
     const { id, space, user, changeSummary } = params;
     const doc = await this._getById(id, space);
     if (!doc) {
-      throw createNotFoundError(id);
+      throw notFound(`Memory entry with id '${id}' not found`);
     }
 
     const current = doc._source;
@@ -158,7 +155,7 @@ export class MemoryServiceImpl implements MemoryService {
   async delete({ id, space, user }: { id: string; space: string; user: string }): Promise<void> {
     const doc = await this._getById(id, space);
     if (!doc) {
-      throw createNotFoundError(id);
+      throw notFound(`Memory entry with id '${id}' not found`);
     }
 
     await this.storage.getClient().delete({ id: doc._id });
@@ -178,13 +175,13 @@ export class MemoryServiceImpl implements MemoryService {
   }): Promise<MemoryEntry> {
     const doc = await this._getById(id, space);
     if (!doc) {
-      throw createNotFoundError(id);
+      throw notFound(`Memory entry with id '${id}' not found`);
     }
 
     // Check if target path already exists
     const existing = await this._getByPath(newPath, space);
     if (existing) {
-      throw createBadRequestError(`Memory entry at path '${newPath}' already exists`);
+      throw badRequest(`Memory entry at path '${newPath}' already exists`);
     }
 
     const oldPath = doc._source.path;
@@ -342,7 +339,7 @@ export class MemoryServiceImpl implements MemoryService {
     });
 
     if (response.hits.hits.length === 0) {
-      throw createBadRequestError(`Version ${version} not found for entry '${entryId}'`);
+      throw notFound(`Version ${version} not found for entry '${entryId}'`);
     }
 
     return (response.hits.hits[0] as HistoryDocument)._source;
@@ -362,7 +359,7 @@ export class MemoryServiceImpl implements MemoryService {
     const targetVersion = await this.getVersion({ entryId, version, space });
     const doc = await this._getById(entryId, space);
     if (!doc) {
-      throw createNotFoundError(entryId);
+      throw notFound(`Memory entry with id '${entryId}' not found`);
     }
 
     const now = new Date().toISOString();

@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { getUserFromRequest } from '../../../utils';
+import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
 
 const memoryWriteSchema = z.object({

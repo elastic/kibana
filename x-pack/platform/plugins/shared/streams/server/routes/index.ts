@@ -34,6 +34,7 @@ import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/streams/queries/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
+import { internalMemoryRoutes } from './internal/memory/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -56,6 +57,7 @@ export const streamsRouteRepository = {
   ...internalTasksRoutes,
   ...internalOnboardingRoutes,
   ...internalQueriesRoutes,
+  ...internalMemoryRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

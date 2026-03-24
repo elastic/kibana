@@ -22,12 +22,14 @@ import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
 import { SettingsTab } from './components/settings/tab';
+import { MemoryTab } from './components/memory/tab';
 
 const discoveryTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
   'significant_events',
+  'memory',
   'settings',
 ] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
@@ -118,6 +120,14 @@ export function SignificantEventsDiscoveryPage() {
       isSelected: tab === 'significant_events',
     },
     {
+      id: 'memory',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
+        defaultMessage: 'Memory',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
+      isSelected: tab === 'memory',
+    },
+    {
       id: 'settings',
       label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
         defaultMessage: 'Settings',
@@ -158,6 +168,7 @@ export function SignificantEventsDiscoveryPage() {
         {tab === 'knowledge_indicators' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'significant_events' && <InsightsTab />}
+        {tab === 'memory' && <MemoryTab />}
         {tab === 'settings' && <SettingsTab />}
       </StreamsAppPageTemplate.Body>
     </>

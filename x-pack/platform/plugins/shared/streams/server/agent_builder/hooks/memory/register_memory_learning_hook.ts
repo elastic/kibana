@@ -8,41 +8,33 @@
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import type { InternalSetupServices, InternalStartServices } from '../../services';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
+import type { MemoryHookServices } from './types';
 
 /** Number of tool calls between learning reflections. */
 const DEFAULT_LEARNING_INTERVAL = 5;
 
 export interface RegisterMemoryLearningHookDeps {
   logger: Logger;
-  getInternalServices: () => InternalStartServices;
+  getMemoryServices: () => MemoryHookServices;
   learningInterval?: number;
 }
 
 // Track round counts per conversation to know when to trigger learning.
-// Keyed by conversationId (or runId as fallback).
 const roundCounters = new Map<string, number>();
 
 /**
  * Registers a non-blocking afterToolCall hook that periodically triggers
- * a learning reflection. Every N tool calls, the hook asks the LLM:
- * "What new facts, corrections, or insights did you learn from this conversation?"
- *
- * The LLM's structured suggestions are then written to memory as new entries
- * (with user confirmation handled by the memory_write tool's built-in policy).
- *
- * In practice the learning hook injects a system-level hint into the agent's
- * context suggesting it propose memory writes — the actual writes go through
- * the normal tool pipeline and require user confirmation.
+ * a learning reflection.
  */
 export const registerMemoryLearningHook = (
-  serviceSetups: InternalSetupServices,
+  agentBuilder: AgentBuilderPluginSetup,
   deps: RegisterMemoryLearningHookDeps
 ): void => {
   const logger = deps.logger.get('memoryLearning');
   const interval = deps.learningInterval ?? DEFAULT_LEARNING_INTERVAL;
 
-  serviceSetups.hooks.register({
+  agentBuilder.hooks.register({
     id: 'memory-periodic-learning',
     hooks: {
       [HookLifecycle.afterToolCall]: {
@@ -64,11 +56,9 @@ export const registerMemoryLearningHook = (
           }
 
           try {
-            const { memory } = deps.getInternalServices();
+            const { memory } = deps.getMemoryServices();
             const { spaceId, modelProvider } = context.toolHandlerContext;
 
-            // Check if memory service has any entries at all — skip learning
-            // on brand-new spaces to avoid noise.
             const tree = await memory.getTree({ space: spaceId });
 
             const learningPrompt = [
@@ -104,7 +94,6 @@ export const registerMemoryLearningHook = (
               return;
             }
 
-            // Parse the learnings and write them to memory
             const learnings = parseLearnings(responseText);
             const user = `agent:${context.agentId ?? 'system'}`;
 
@@ -158,7 +147,6 @@ interface Learning {
 
 const parseLearnings = (text: string): Learning[] => {
   try {
-    // Try to extract JSON array from the response
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
       return [];

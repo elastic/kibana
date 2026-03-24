@@ -20,6 +20,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import type { StreamsConfig } from '../common/config';
@@ -83,6 +84,7 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private spacesStart?: SpacesPluginStart;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -201,6 +203,7 @@ export class StreamsPlugin
         getScopedClients,
         server: this.server,
         logger: this.logger,
+        getSpaces: () => this.spacesStart,
       });
     }
 
@@ -366,6 +369,7 @@ export class StreamsPlugin
       this.server.taskManager = plugins.taskManager;
     }
 
+    this.spacesStart = plugins.spaces;
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     const soClient = core.savedObjects.getUnsafeInternalClient();

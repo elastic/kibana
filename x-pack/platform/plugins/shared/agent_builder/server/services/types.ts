@@ -34,7 +34,6 @@ import type { AuditLogService } from '../audit';
 import type { AgentExecutionService, TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
-import type { MemoryService } from './memory';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -65,7 +64,6 @@ export interface InternalStartServices {
   sml: SmlService;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
-  memory: MemoryService;
 }
 
 export interface ServiceSetupDeps {

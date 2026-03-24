@@ -55,12 +55,4 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
-  memory: {
-    tree: ['memory', 'tree'] as const,
-    byId: (entryId: string) => ['memory', entryId],
-    byPath: (path: string) => ['memory', 'by-path', path],
-    search: (query: string) => ['memory', 'search', query],
-    history: (entryId: string) => ['memory', 'history', entryId],
-    compactionLog: ['memory', 'compaction-log'] as const,
-  },
 };

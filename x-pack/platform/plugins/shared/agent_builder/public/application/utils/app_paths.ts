@@ -43,9 +43,4 @@ export const appPaths = {
     list: '/plugins',
     details: ({ pluginId }: { pluginId: string }) => `/plugins/${pluginId}`,
   },
-  memory: {
-    list: '/memory',
-    entry: ({ entryId }: { entryId: string }) => `/memory/${entryId}`,
-    history: ({ entryId }: { entryId: string }) => `/memory/${entryId}/history`,
-  },
 };
