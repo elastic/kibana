@@ -27,6 +27,7 @@ import {
   modelVersion7,
   modelVersion8,
   modelVersion9,
+  modelVersion10,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -286,6 +287,17 @@ export const createCaseSavedObjectType = (
       [CASE_EXTENDED_FIELDS]: {
         type: 'flattened',
       },
+      task_summary: {
+        type: 'object',
+        properties: {
+          total: { type: 'integer' },
+          open: { type: 'integer' },
+          in_progress: { type: 'integer' },
+          completed: { type: 'integer' },
+          cancelled: { type: 'integer' },
+          next_due_date: { type: 'date' },
+        },
+      },
     },
   },
   migrations: caseMigrations,
@@ -299,6 +311,7 @@ export const createCaseSavedObjectType = (
     7: modelVersion7,
     8: modelVersion8,
     9: modelVersion9,
+    10: modelVersion10,
   },
   management: {
     importableAndExportable: true,
