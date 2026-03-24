@@ -94,6 +94,7 @@
     "**/esbuild": "0.27.2",
     "**/express-rate-limit": "8.3.0",
     "**/fast-xml-parser": "5.5.7",
+    "**/flatted": "3.4.2",
     "**/hoist-non-react-statics": "3.3.2",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
     "**/langchain": "1.2.30",
