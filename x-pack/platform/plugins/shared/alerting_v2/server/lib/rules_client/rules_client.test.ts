@@ -442,9 +442,12 @@ describe('RulesClient', () => {
         data: { state_transition: { recovering_count: 3 } },
       });
 
-      const savedAttrs = mockSavedObjectsClient.update.mock.calls[0][2] as RuleSavedObjectAttributes;
+      const savedAttrs = mockSavedObjectsClient.update.mock
+        .calls[0][2] as RuleSavedObjectAttributes;
       expect(savedAttrs.state_transition).toEqual({ recovering_count: 3 });
-      expect((savedAttrs.state_transition as Record<string, unknown>)?.pending_count).toBeUndefined();
+      expect(
+        (savedAttrs.state_transition as Record<string, unknown>)?.pending_count
+      ).toBeUndefined();
     });
 
     it('clears artifacts when update payload sets artifacts to null', async () => {
