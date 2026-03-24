@@ -14,6 +14,7 @@ import {
   QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_KQL_BODY,
+  QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
   RULE_BACKED,
@@ -47,3 +48,13 @@ export const queryStorageSettings = {
 } satisfies IndexStorageSettings;
 
 export type QueryStorageSettings = typeof queryStorageSettings;
+
+export const getQueryStorageSettingsWithSemantic = (inferenceId: string): IndexStorageSettings => ({
+  name: '.kibana_streams_assets',
+  schema: {
+    properties: {
+      ...queryStorageSettings.schema.properties,
+      [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+    },
+  },
+});

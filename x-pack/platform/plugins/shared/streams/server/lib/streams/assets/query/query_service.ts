@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { ensureMetadata } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
@@ -23,9 +24,10 @@ import {
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
+import { queryStorageSettings, getQueryStorageSettingsWithSemantic } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
+import { checkInferenceAvailability, getElserInferenceId } from './helpers/inference_availability';
 
 export class QueryService {
   constructor(
@@ -46,10 +48,19 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
-      core.elasticsearch.client.asInternalUser,
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const isServerless = core.elasticsearch.getCapabilities().serverless;
+    const inferenceEndpointId = getElserInferenceId(isServerless);
+    const inferenceAvailable = await checkInferenceAvailability(esClient, inferenceEndpointId);
+
+    const settings: IndexStorageSettings = inferenceAvailable
+      ? getQueryStorageSettingsWithSemantic(inferenceEndpointId)
+      : queryStorageSettings;
+
+    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
+      esClient,
       this.logger.get('queries'),
-      queryStorageSettings,
+      settings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -126,7 +137,8 @@ export class QueryService {
         rulesClient,
         logger: this.logger,
       },
-      isSignificantEventsEnabled
+      isSignificantEventsEnabled,
+      inferenceAvailable
     );
   }
 }

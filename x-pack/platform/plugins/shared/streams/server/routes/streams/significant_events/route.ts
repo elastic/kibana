@@ -100,6 +100,12 @@ const readStreamSignificantEventsRoute = createServerRoute({
         .string()
         .optional()
         .describe('Query string to filter significant events on metadata fields'),
+      searchMode: z
+        .enum(['keyword', 'semantic', 'hybrid'])
+        .optional()
+        .describe(
+          'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+        ),
     }),
   }),
 
@@ -131,7 +137,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize, query } = params.query;
+    const { from, to, bucketSize, query, searchMode } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -140,6 +146,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         to,
         bucketSize,
         query,
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );

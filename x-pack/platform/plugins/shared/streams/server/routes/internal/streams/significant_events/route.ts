@@ -159,6 +159,12 @@ const readAllSignificantEventsRoute = createServerRoute({
         .union([z.string().transform((val) => [val]), z.array(z.string())])
         .optional()
         .describe('Stream names to filter significant events'),
+      searchMode: z
+        .enum(['keyword', 'semantic', 'hybrid'])
+        .optional()
+        .describe(
+          'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+        ),
     }),
   }),
   options: {
@@ -183,7 +189,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -192,6 +198,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );

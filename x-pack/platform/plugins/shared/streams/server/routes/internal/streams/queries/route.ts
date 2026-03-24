@@ -16,6 +16,13 @@ import { readSignificantEventsFromAlertsIndices } from '../../../../lib/signific
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
+const searchModeSchema = z
+  .enum(['keyword', 'semantic', 'hybrid'])
+  .optional()
+  .describe(
+    'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+  );
+
 const requestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
   to: dateFromString.describe('End of the time range'),
@@ -25,6 +32,7 @@ const requestParamsSchema = z.object({
     .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
     .optional()
     .describe('Stream names to filter significant events'),
+  searchMode: searchModeSchema,
 });
 
 export const getUnbackedQueriesCountRoute = createServerRoute({
@@ -165,6 +173,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       page = 1,
       perPage = 10,
       status,
+      searchMode,
     } = params.query;
 
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
@@ -175,6 +184,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         query,
         streamNames,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );
