@@ -27,6 +27,7 @@ import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
 import { AgentPlugins } from './components/agents/plugins/agent_plugins';
 import { AgentTools } from './components/agents/tools/agent_tools';
+import { AgentOverview } from './components/agents/overview/agent_overview';
 
 export type SidebarView = 'conversation' | 'agentSettings' | 'manage';
 
@@ -88,7 +89,7 @@ export const agentRoutes: RouteDefinition[] = [
     navSection: navSections.about,
     navIcon: 'sparkles',
     isAgentDisplayName: true,
-    element: <RouteDisplay />,
+    element: <AgentOverview />,
   },
   {
     path: '/agents/:agentId/skills',
@@ -112,6 +113,7 @@ export const agentRoutes: RouteDefinition[] = [
     navLabel: navLabels.connectors,
     navIcon: 'plugs',
     navSection: navSections.capabilities,
+    isConnectors: true,
     element: <RouteDisplay />,
   },
   {
