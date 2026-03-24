@@ -116,8 +116,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       }
     );
 
-    // the API seems to throw a 500 error if the saved query is not found
-    expect(readResponse).toHaveStatusCode(500);
+    expect(readResponse).toHaveStatusCode(404);
   });
 
   apiTest('filters by search term and createdBy', async ({ apiClient }) => {

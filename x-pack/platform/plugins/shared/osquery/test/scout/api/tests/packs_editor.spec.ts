@@ -142,8 +142,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
 
-    // the API seems to throw a 500 error if the pack is not found
-    expect(readResponse).toHaveStatusCode(500);
+    expect(readResponse).toHaveStatusCode(404);
   });
 
   apiTest('finds packs with search and enabled filters', async ({ apiClient }) => {
