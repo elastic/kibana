@@ -92,10 +92,12 @@ export function ConnectorListButtonBase({
               size="s"
               items={connectorsResult.connectors.map((connector) => (
                 <EuiContextMenuItem
-                  key={connector.id}
-                  icon={connector.id === connectorsResult.selectedConnector ? 'check' : 'empty'}
+                  key={connector.connectorId}
+                  icon={
+                    connector.connectorId === connectorsResult.selectedConnector ? 'check' : 'empty'
+                  }
                   onClick={() => {
-                    connectorsResult.selectConnector(connector.id);
+                    connectorsResult.selectConnector(connector.connectorId);
                     closePopover();
                   }}
                 >

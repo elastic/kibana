@@ -12,8 +12,7 @@ import { tags } from '@kbn/scout';
 import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
-// Fails after new Scout tags applied, needs a fix
-apiTest.describe.skip(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Split Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -233,7 +232,10 @@ apiTest.describe.skip(
         (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
       );
       expect(doc1).toStrictEqual(
-        expect.objectContaining({ tags: ['foo', 'bar', 'baz'], 'event.kind': 'test' })
+        expect.objectContaining({
+          tags: ['foo', 'bar', 'baz'],
+          event: expect.objectContaining({ kind: 'test' }),
+        })
       );
 
       // Second doc should keep original tags (where condition not matched)
@@ -241,7 +243,10 @@ apiTest.describe.skip(
         (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
       );
       expect(doc2).toStrictEqual(
-        expect.objectContaining({ tags: 'one,two,three', 'event.kind': 'production' })
+        expect.objectContaining({
+          tags: 'one,two,three',
+          event: expect.objectContaining({ kind: 'production' }),
+        })
       );
     });
 
@@ -284,7 +289,7 @@ apiTest.describe.skip(
           expect.objectContaining({
             tags: 'foo,bar,baz', // Original preserved
             tags_array: ['foo', 'bar', 'baz'], // New field created
-            'event.kind': 'test',
+            event: expect.objectContaining({ kind: 'test' }),
           })
         );
 
@@ -295,7 +300,7 @@ apiTest.describe.skip(
         expect(doc2).toStrictEqual(
           expect.objectContaining({
             tags: 'one,two,three',
-            'event.kind': 'production',
+            event: expect.objectContaining({ kind: 'production' }),
           })
         );
         expect(asDoc(doc2)?.tags_array).toBeUndefined();
