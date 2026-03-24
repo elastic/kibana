@@ -21,8 +21,39 @@ import {
   type WorkflowExecutionTelemetryEventsMap,
   WorkflowExecutionTelemetryEventTypes,
 } from './events/workflows_execution/types';
-import { extractExecutionMetadata } from './utils/extract_execution_metadata';
+import {
+  extractExecutionMetadata,
+  type WorkflowExecutionTelemetryMetadata,
+} from './utils/extract_execution_metadata';
 import { extractWorkflowMetadata } from './utils/extract_workflow_metadata';
+
+/**
+ * Shared base fields for all workflow execution telemetry events (IDs, trigger, alert rule, composition).
+ */
+function buildBaseExecutionTelemetryFields(
+  workflowExecution: EsWorkflowExecution,
+  executionMetadata: WorkflowExecutionTelemetryMetadata
+) {
+  return {
+    workflowExecutionId: workflowExecution.id,
+    workflowId: workflowExecution.workflowId,
+    spaceId: workflowExecution.spaceId,
+    triggerType:
+      (workflowExecution.triggeredBy as 'manual' | 'scheduled' | 'alert' | 'workflow-step') ||
+      'manual',
+    isTestRun: workflowExecution.isTestRun || false,
+    ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
+    ...(executionMetadata.compositionDepth !== undefined && {
+      compositionDepth: executionMetadata.compositionDepth,
+    }),
+    ...(executionMetadata.parentWorkflowId && {
+      parentWorkflowId: executionMetadata.parentWorkflowId,
+    }),
+    ...(executionMetadata.parentWorkflowInvocation && {
+      parentWorkflowInvocation: executionMetadata.parentWorkflowInvocation,
+    }),
+  };
+}
 
 /**
  * Base telemetry client for workflow execution engine.
@@ -118,12 +149,7 @@ export class WorkflowExecutionTelemetryClient {
         workflowExecutionEventNames[
           WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted
         ],
-      workflowExecutionId: workflowExecution.id,
-      workflowId: workflowExecution.workflowId,
-      spaceId: workflowExecution.spaceId,
-      triggerType: (workflowExecution.triggeredBy as 'manual' | 'scheduled' | 'alert') || 'manual',
-      isTestRun: workflowExecution.isTestRun || false,
-      ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
+      ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
       startedAt: workflowExecution.createdAt,
       completedAt,
       duration,
@@ -197,12 +223,7 @@ export class WorkflowExecutionTelemetryClient {
     const eventData: WorkflowExecutionFailedParams = {
       eventName:
         workflowExecutionEventNames[WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed],
-      workflowExecutionId: workflowExecution.id,
-      workflowId: workflowExecution.workflowId,
-      spaceId: workflowExecution.spaceId,
-      triggerType: (workflowExecution.triggeredBy as 'manual' | 'scheduled' | 'alert') || 'manual',
-      isTestRun: workflowExecution.isTestRun || false,
-      ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
+      ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
       startedAt: workflowExecution.createdAt,
       failedAt,
       duration,
@@ -270,12 +291,7 @@ export class WorkflowExecutionTelemetryClient {
         workflowExecutionEventNames[
           WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled
         ],
-      workflowExecutionId: workflowExecution.id,
-      workflowId: workflowExecution.workflowId,
-      spaceId: workflowExecution.spaceId,
-      triggerType: (workflowExecution.triggeredBy as 'manual' | 'scheduled' | 'alert') || 'manual',
-      isTestRun: workflowExecution.isTestRun || false,
-      ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
+      ...buildBaseExecutionTelemetryFields(workflowExecution, executionMetadata),
       startedAt: workflowExecution.createdAt,
       cancelledAt,
       duration,

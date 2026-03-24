@@ -6,19 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
 import { InvestigationSection } from '../components/investigation_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
-
-const OVERVIEW_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',
-  { defaultMessage: 'Overview' }
-);
 
 export interface OverviewTabProps {
   /**
@@ -36,7 +30,7 @@ export interface OverviewTabProps {
  */
 export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => {
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
+    <>
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection hit={hit} />
@@ -44,7 +38,7 @@ export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) =
       <VisualizationsSection hit={hit} renderCellActions={renderCellActions} />
       <EuiHorizontalRule margin="m" />
       <InsightsSection hit={hit} />
-    </EuiPanel>
+    </>
   );
 });
 
