@@ -34,7 +34,8 @@ describe('Basic smoke test', function () {
       await serverlessKibana?.stop();
     });
 
-    test('it can start Kibana running against serverless ES', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/167249
+    test.skip('it can start Kibana running against serverless ES', async () => {
       const { body } = await request.get(root, '/api/status').expect(200);
       expect(body).toMatchObject({ status: { overall: { level: 'available' } } });
     });
