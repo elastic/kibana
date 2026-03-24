@@ -293,6 +293,116 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(resp.hits.hits).toHaveLength(2);
   });
 
+  apiTest('Should create an entity from a flat document', async ({ apiClient, esClient }) => {
+    const flatDoc = {
+      'entity.id': 'flat-create-id',
+    };
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: flatDoc,
+    });
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toStrictEqual({ ok: true });
+
+    expect(await countEntitiesByID(esClient, LATEST_INDEX, 'flat-create-id')).toBe(1);
+  });
+
+  apiTest('Should update an entity from a flat document', async ({ apiClient, esClient }) => {
+    // Create entity first (nested)
+    const createObj: Entity = {
+      entity: { id: 'host:flat-update' },
+      host: { name: 'flat-update' },
+    };
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: createObj,
+    });
+    expect(create.statusCode).toBe(200);
+
+    // Update with a flat document
+    const flatUpdateDoc = {
+      'entity.id': 'host:flat-update',
+      'entity.name': 'flat-updated-name',
+      'host.name': 'flat-update',
+    };
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: flatUpdateDoc,
+    });
+    expect(update.statusCode).toBe(200);
+
+    const entities = await esClient.search({
+      index: LATEST_INDEX,
+      query: { term: { 'host.entity.id': 'host:flat-update' } },
+    });
+    expect(entities.hits.hits).toHaveLength(1);
+    const received = entities.hits.hits[0]._source as HostEntity;
+    expect(received.host?.entity?.name).toBe('flat-updated-name');
+  });
+
+  apiTest(
+    'Should replace values (not merge into arrays) when updating twice with flat documents',
+    async ({ apiClient, esClient }) => {
+      // Create a host entity
+      const createObj: Entity = {
+        entity: { id: 'host:flat-double-update' },
+        host: { name: 'flat-double-update' },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: createObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      // First update with flat doc
+      const firstUpdate = await apiClient.put(
+        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            'entity.id': 'host:flat-double-update',
+            'entity.name': 'first-name',
+            'host.name': 'flat-double-update',
+          },
+        }
+      );
+      expect(firstUpdate.statusCode).toBe(200);
+
+      // Second update with flat doc on the same paths
+      const secondUpdate = await apiClient.put(
+        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            'entity.id': 'host:flat-double-update',
+            'entity.name': 'second-name',
+            'host.name': 'flat-double-update',
+          },
+        }
+      );
+      expect(secondUpdate.statusCode).toBe(200);
+
+      const entities = await esClient.search({
+        index: LATEST_INDEX,
+        query: { term: { 'host.entity.id': 'host:flat-double-update' } },
+      });
+      expect(entities.hits.hits).toHaveLength(1);
+      const received = entities.hits.hits[0]._source as HostEntity;
+
+      // Values must be strings, not arrays. Confirms replace, not merge
+      expect(received.host?.entity?.name).toBe('second-name');
+      expect(typeof received.host?.entity?.name).toBe('string');
+      expect(received.host?.name).toBe('flat-double-update');
+      expect(typeof received.host?.name).toBe('string');
+    }
+  );
+
   apiTest('Should delete an entity', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
       entity: {

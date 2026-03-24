@@ -250,5 +250,58 @@ describe('crud_client utils', () => {
         validateAndTransformDocForUpsert('generic', 'default', doc, undefined, true)
       ).not.toThrow();
     });
+
+    describe('flattened documents', () => {
+      it('handles unflattened doc with generatedId for generic type', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('generic', [createField('entity.attributes.watchlists', true)])
+        );
+
+        // Simulate a flat doc that has been unflattened at the route level
+        const doc: Entity = {
+          entity: {
+            attributes: {
+              watchlists: ['privileged_watchlist_id'],
+            },
+          },
+        };
+        const result = validateAndTransformDocForUpsert(
+          'generic',
+          'default',
+          doc,
+          'generated-id',
+          false
+        );
+
+        expect(result.id).toBe('generated-id');
+        expect(result.doc).toHaveProperty('entity.id', 'generated-id');
+        expect(result.doc).toHaveProperty('entity.attributes.watchlists', [
+          'privileged_watchlist_id',
+        ]);
+      });
+
+      it('handles unflattened doc for host type', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('host', [createField('host.name')])
+        );
+
+        const doc: Entity = {
+          entity: { id: 'host:flat-host' },
+          host: { name: 'flat-host' },
+        };
+        const result = validateAndTransformDocForUpsert(
+          'host',
+          'default',
+          doc,
+          undefined,
+          false
+        );
+
+        expect(result.id).toBe('host:flat-host');
+        expect(result.doc).not.toHaveProperty('entity');
+        expect(result.doc).toHaveProperty('host.entity.id', 'host:flat-host');
+        expect(result.doc).toHaveProperty('host.name', 'flat-host');
+      });
+    });
   });
 });
