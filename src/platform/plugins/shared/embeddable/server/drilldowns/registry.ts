@@ -54,6 +54,10 @@ export function getDrilldownRegistry() {
                 .map((trigger) => schema.literal(trigger)) as [Type<string>]
             ),
             type: schema.literal(type),
+          }, {
+            meta: {
+              title: type
+            }
           })
         );
 

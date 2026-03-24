@@ -83,20 +83,23 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
   }
 
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
-  const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
-    schema.object(
-      {
-        ...basePanelProps,
-        type: schema.literal(type),
-        config: configSchema,
-      },
-      {
-        meta: {
-          id: `kbn-dashboard-panel-${type}`,
+  const panelSchemas = Object.entries(embeddableSchemas)
+    .sort(([aType], [bType]) => aType.localeCompare(bType))
+    .map(([type, configSchema]) =>
+      schema.object(
+        {
+          ...basePanelProps,
+          type: schema.literal(type),
+          config: configSchema,
         },
-      }
-    )
-  );
+        {
+          meta: {
+            id: `kbn-dashboard-panel-${type}`,
+            title: type,
+          },
+        }
+      )
+    );
 
   return schema.discriminatedUnion(
     'type',
@@ -136,6 +139,11 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         meta: { description: 'The unique ID of the section.' },
       })
     ),
+  }, {
+    meta: {
+      description: 'Collapsable section',
+      title: 'section'
+    }
   });
 }
 
