@@ -15,6 +15,9 @@ export {
   createMockExecutionListItemDto,
   createMockWorkflowExecutionDto,
   createMockWorkflowExecutionListDto,
+  createMockWorkflowDetailDto,
+  createMockWorkflowListItemDto,
+  createMockWorkflowYaml,
 } from './mock_workflow_factories';
 export { createMockMonacoModel, createMockMonacoEditor, mockMonacoModule } from './mock_monaco';
 export { mockCodeEditorModule } from './mock_code_editor';
