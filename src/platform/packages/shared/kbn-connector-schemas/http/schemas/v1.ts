@@ -17,40 +17,24 @@ export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
 export const HeadersSchema = z.record(z.string(), z.string());
 
-function normalizeAuthTypeForUnauthenticatedConnectors(value: unknown): unknown {
-  if (!value || typeof value !== 'object') {
-    return value;
-  }
-
-  const config = value as Record<string, unknown>;
-  if (config.hasAuth === false && config.authType === undefined) {
-    return { ...config, authType: null };
-  }
-
-  return value;
-}
-
-export const ConfigSchema = z.preprocess(
-  normalizeAuthTypeForUnauthenticatedConnectors,
-  z
-    .object({
-      url: z.string().url(),
-      headers: HeadersSchema.nullable().default(null),
-      hasAuth: AuthConfiguration.hasAuth,
-      authType: AuthConfiguration.authType,
-      certType: AuthConfiguration.certType,
-      ca: AuthConfiguration.ca,
-      verificationMode: AuthConfiguration.verificationMode,
-      accessTokenUrl: AuthConfiguration.accessTokenUrl,
-      clientId: AuthConfiguration.clientId,
-      scope: AuthConfiguration.scope,
-      additionalFields: AuthConfiguration.additionalFields,
-      proxyUrl: z.string().url().nullable().default(null),
-      proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
-      hasProxyAuth: z.boolean().default(false),
-    })
-    .strict()
-);
+export const ConfigSchema = z
+  .object({
+    url: z.string().url(),
+    headers: HeadersSchema.nullable().default(null),
+    hasAuth: AuthConfiguration.hasAuth,
+    authType: AuthConfiguration.authType,
+    certType: AuthConfiguration.certType,
+    ca: AuthConfiguration.ca,
+    verificationMode: AuthConfiguration.verificationMode,
+    accessTokenUrl: AuthConfiguration.accessTokenUrl,
+    clientId: AuthConfiguration.clientId,
+    scope: AuthConfiguration.scope,
+    additionalFields: AuthConfiguration.additionalFields,
+    proxyUrl: z.string().url().nullable().default(null),
+    proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
+    hasProxyAuth: z.boolean().default(false),
+  })
+  .strict();
 
 export const SecretsSchema = z
   .object({
