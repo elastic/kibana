@@ -42,6 +42,7 @@ export const ENTITY_STORE_ROUTES = {
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
   FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
   CRUD_GET: `${ENTITY_STORE_BASE_ROUTE}/entities`,
+  SEARCH_ENTITIES: `${ENTITY_STORE_BASE_ROUTE}/entities/search`,
   CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
   CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
