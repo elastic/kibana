@@ -10,6 +10,13 @@ import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
+import {
+  aggregateCustomRulesUsageFromJobs,
+  emptyCustomRulesUsage,
+  type MlCustomRulesUsage,
+} from './custom_rules_usage_aggregation';
+
+export type { MlCustomRulesUsage };
 
 export interface MlUsageData {
   alertRules: {
@@ -33,6 +40,7 @@ export interface MlUsageData {
       };
     };
   };
+  customRules: MlCustomRulesUsage;
 }
 
 export function registerCollector(
@@ -106,6 +114,42 @@ export function registerCollector(
               },
             },
           },
+        },
+      },
+      customRules: {
+        total_count: {
+          type: 'long',
+          _meta: { description: 'Total number of custom rules across all detectors in all jobs' },
+        },
+        jobs_with_rules_count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of jobs that have at least one custom rule on any detector',
+          },
+        },
+        detectors_with_rules_count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of detectors that have at least one custom rule',
+          },
+        },
+        count_by_action: {
+          skip_result: {
+            type: 'long',
+            _meta: { description: 'Number of rules with the skip_result action' },
+          },
+          skip_model_update: {
+            type: 'long',
+            _meta: { description: 'Number of rules with the skip_model_update action' },
+          },
+        },
+        count_with_conditions: {
+          type: 'long',
+          _meta: { description: 'Number of rules that have one or more numeric conditions' },
+        },
+        count_with_scope: {
+          type: 'long',
+          _meta: { description: 'Number of rules that have scope (filter list) configuration' },
         },
       },
     },
@@ -226,6 +270,14 @@ export function registerCollector(
         }
       );
 
+      let customRulesData = emptyCustomRulesUsage();
+      try {
+        const { jobs = [] } = await esClient.ml.getJobs();
+        customRulesData = aggregateCustomRulesUsageFromJobs(jobs);
+      } catch {
+        // ML API may be unavailable; keep zeroes so alertRules data is still returned
+      }
+
       return {
         alertRules: {
           [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
@@ -236,6 +288,7 @@ export function registerCollector(
             count_by_check_type: resultsByCheckType,
           },
         },
+        customRules: customRulesData,
       };
     },
   });

@@ -9971,6 +9971,56 @@
               }
             }
           }
+        },
+        "customRules": {
+          "properties": {
+            "total_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of custom rules across all detectors in all jobs"
+              }
+            },
+            "jobs_with_rules_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of jobs that have at least one custom rule on any detector"
+              }
+            },
+            "detectors_with_rules_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of detectors that have at least one custom rule"
+              }
+            },
+            "count_by_action": {
+              "properties": {
+                "skip_result": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of rules with the skip_result action"
+                  }
+                },
+                "skip_model_update": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of rules with the skip_model_update action"
+                  }
+                }
+              }
+            },
+            "count_with_conditions": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules that have one or more numeric conditions"
+              }
+            },
+            "count_with_scope": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules that have scope (filter list) configuration"
+              }
+            }
+          }
         }
       }
     },
