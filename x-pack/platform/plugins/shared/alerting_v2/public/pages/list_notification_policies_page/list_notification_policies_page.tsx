@@ -100,8 +100,7 @@ export const ListNotificationPoliciesPage = () => {
     variables: unsnoozeVariables,
   } = useUnsnoozeNotificationPolicy();
 
-  const { mutate: updateApiKey, isLoading: isUpdatingApiKey } =
-    useUpdateNotificationPolicyApiKey();
+  const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateNotificationPolicyApiKey();
 
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } =
     useBulkActionNotificationPolicies();
