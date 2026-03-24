@@ -24,6 +24,7 @@ import { createTemporalStateModule } from '../observation_modules/temporal_state
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
 import { fetchAllLeadEntities } from '../entity_conversion';
 import { createLeadDataClient } from '../lead_data_client';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -50,7 +51,7 @@ export const generateLeadsRoute = (
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -139,6 +140,6 @@ export const generateLeadsRoute = (
           const error = transformError(e);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
-      }
+      })
     );
 };

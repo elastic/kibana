@@ -206,7 +206,7 @@ export const createLeadDataClient = ({
           { index: { _index: indexName, _id: lead.id } },
           leadToEsDoc(lead, executionId, sourceType),
         ]);
-        await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
+        await esClient.bulk({ body: bulkBody });
         logger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
       }
 
