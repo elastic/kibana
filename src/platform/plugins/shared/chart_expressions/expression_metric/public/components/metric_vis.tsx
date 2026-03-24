@@ -77,14 +77,27 @@ function buildTrendConfig(
 ): TrendConfig | undefined {
   if (!palette) return undefined;
 
+  const isPrimaryNumeric = typeof value === 'number';
+  // When baseline is 'primary' but the primary value is non-numeric at runtime,
+  // disable compare-to-primary and fall back to baseline 0.
+  // This handles cases related to wrong datatypes that cannot be handled in the toExpression
+  const compareToPrimary = baseline === 'primary' && isPrimaryNumeric;
+
+  let baselineValue: number | undefined;
+  if (baseline === 'primary') {
+    baselineValue = isPrimaryNumeric ? value : 0;
+  } else {
+    baselineValue = Number(baseline);
+  }
+
   return {
     showIcon: visuals !== 'value',
     showValue: visuals !== 'icon',
-    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    baselineValue,
     palette,
     textPalette,
     borderColor: undefined,
-    compareToPrimary: baseline === 'primary',
+    compareToPrimary,
   };
 }
 
@@ -189,12 +202,16 @@ export const MetricVis = ({
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
-      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
+      // When baseline is 'primary' but the primary value is non-numeric at runtime,
+      // reset the label to use the column name
+      const isCompareToPrimaryInvalid =
+        config.metric.secondaryTrend.baseline === 'primary' && typeof value !== 'number';
+
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
         secondaryMetric,
-        secondaryLabel: config.metric.secondaryLabel,
+        secondaryLabel: isCompareToPrimaryInvalid ? undefined : config.metric.secondaryLabel,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,
       });
