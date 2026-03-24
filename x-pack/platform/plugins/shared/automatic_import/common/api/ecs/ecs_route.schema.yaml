@@ -36,6 +36,7 @@ paths:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
                 additionalProcessors:
                   type: array
+                  maxItems: 200
                   items:
                     $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
                 connectorId:

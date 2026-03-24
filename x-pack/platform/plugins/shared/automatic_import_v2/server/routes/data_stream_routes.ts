@@ -219,7 +219,7 @@ const updateDataStreamPipelineRoute = (
             integrationId,
             dataStreamId,
             ingestPipeline,
-            esClient: automaticImportv2.esClient,
+            internalEsClient: automaticImportv2.internalEsClient,
             fieldsMetadataClient: automaticImportv2.fieldsMetadataClient,
           });
 
