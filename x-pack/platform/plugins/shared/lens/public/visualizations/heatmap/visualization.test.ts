@@ -461,6 +461,7 @@ describe('heatmap', () => {
                         // X-axis
                         isXAxisLabelVisible: [true],
                         isXAxisTitleVisible: [true],
+                        xScaleType: ['ordinal'],
                       },
                     },
                   ],
@@ -635,6 +636,7 @@ describe('heatmap', () => {
                         // X-axis
                         isXAxisLabelVisible: [false],
                         isXAxisTitleVisible: [false],
+                        xScaleType: ['ordinal'],
                       },
                     },
                   ],

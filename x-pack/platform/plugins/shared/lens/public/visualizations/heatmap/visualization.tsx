@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Ast } from '@kbn/interpreter';
-import { Position } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
@@ -20,6 +20,7 @@ import type {
   HeatmapExpressionFunctionDefinition,
   HeatmapGridExpressionFunctionDefinition,
   HeatmapLegendExpressionFunctionDefinition,
+  HeatmapScaleType,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type {
@@ -88,6 +89,37 @@ export const filterOperationsAxis = (op: OperationMetadata) =>
 export const isCellValueSupported = (op: OperationMetadata) => {
   return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
 };
+
+export function getScaleType(
+  metadata: OperationMetadata | null,
+  defaultScale: ScaleType
+): HeatmapScaleType {
+  if (!metadata) {
+    return defaultScale === ScaleType.Time
+      ? 'time'
+      : defaultScale === ScaleType.Linear
+      ? 'linear'
+      : 'ordinal';
+  }
+
+  if (metadata.scale === 'ordinal') {
+    return 'ordinal';
+  }
+  if (metadata.scale === 'interval' || metadata.scale === 'ratio') {
+    return metadata.dataType === 'date' ? 'time' : 'linear';
+  }
+
+  switch (metadata.dataType) {
+    case 'boolean':
+    case 'string':
+    case 'ip':
+      return 'ordinal';
+    case 'date':
+      return 'time';
+    default:
+      return 'linear';
+  }
+}
 
 function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerType'> {
   return {
@@ -345,6 +377,13 @@ export const getHeatmapVisualization = ({
 
     const disableXAxisSorting = isTimeBasedXAxisSortingDisabled(state, datasourceLayers);
 
+    // Compute xScaleType from metadata
+    let xScaleType: HeatmapScaleType | undefined;
+    if (state.xAccessor) {
+      const operation = datasource?.getOperationForColumnId(state.xAccessor) ?? null;
+      xScaleType = getScaleType(operation, ScaleType.Linear);
+    }
+
     const legendFn = buildExpressionFunction<HeatmapLegendExpressionFunctionDefinition>(
       'heatmap_legend',
       {
@@ -375,6 +414,7 @@ export const getHeatmapVisualization = ({
         isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible ?? false,
         xTitle: state.gridConfig.xTitle,
         xSortPredicate: disableXAxisSorting ? undefined : state.gridConfig.xSortPredicate,
+        xScaleType,
       }
     );
 
@@ -413,6 +453,13 @@ export const getHeatmapVisualization = ({
 
     const disableXAxisSorting = isTimeBasedXAxisSortingDisabled(state, datasourceLayers);
 
+    // Compute xScaleType from metadata
+    let xScaleType: HeatmapScaleType | undefined;
+    if (state.xAccessor) {
+      const operation = datasource?.getOperationForColumnId(state.xAccessor) ?? null;
+      xScaleType = getScaleType(operation, ScaleType.Linear);
+    }
+
     const legendFn = buildExpressionFunction<HeatmapLegendExpressionFunctionDefinition>(
       'heatmap_legend',
       {
@@ -438,6 +485,7 @@ export const getHeatmapVisualization = ({
         isXAxisTitleVisible: false,
         xTitle: state.gridConfig.xTitle,
         xSortPredicate: disableXAxisSorting ? undefined : state.gridConfig.xSortPredicate,
+        xScaleType,
       }
     );
 
