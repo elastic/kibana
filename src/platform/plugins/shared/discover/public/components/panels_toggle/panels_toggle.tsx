@@ -21,6 +21,13 @@ import {
   useInternalStateDispatch,
 } from '../../application/main/state_management/redux';
 
+const disabledCollapsingTooltip = i18n.translate(
+  'discover.panelsToggle.atLeastOnePanelMustRemain',
+  {
+    defaultMessage: 'At least one panel must remain open',
+  }
+);
+
 export interface PanelsToggleProps {
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   omitChartButton?: boolean;
@@ -59,33 +66,31 @@ const temporaryCollapseTableIcon: IconType = (props) => (
   </svg>
 );
 
-const disabledCollapsingTooltip = i18n.translate(
-  'discover.panelsToggle.atLeastOnePanelMustRemain',
-  {
-    defaultMessage: 'At least one panel must remain open',
-  }
-);
-
 const getSidebarButton = ({
   isHidden,
   toggleSidebar,
 }: {
   isHidden: boolean;
   toggleSidebar: () => void;
-}) => ({
-  label: isHidden
+}) => {
+  const label = isHidden
     ? i18n.translate('discover.panelsToggle.showSidebarButton', {
         defaultMessage: 'Expand field list',
       })
     : i18n.translate('discover.panelsToggle.hideSidebarButton', {
         defaultMessage: 'Collapse field list',
-      }),
-  iconType: isHidden ? 'transitionLeftIn' : 'transitionLeftOut',
-  'data-test-subj': isHidden ? 'dscShowSidebarButton' : 'dscHideSidebarButton',
-  'aria-expanded': !isHidden,
-  'aria-controls': 'discover-sidebar',
-  onClick: toggleSidebar,
-});
+      });
+
+  return {
+    label,
+    iconType: isHidden ? 'transitionLeftIn' : 'transitionLeftOut',
+    'data-test-subj': isHidden ? 'dscShowSidebarButton' : 'dscHideSidebarButton',
+    'aria-expanded': !isHidden,
+    'aria-controls': 'discover-sidebar',
+    toolTipContent: label,
+    onClick: toggleSidebar,
+  };
+};
 
 const getChartButton = ({
   isHidden,
@@ -95,22 +100,26 @@ const getChartButton = ({
   isHidden: boolean;
   toggleChart: () => void;
   isDisabled?: boolean;
-}) => ({
-  label: isHidden
+}) => {
+  const label = isHidden
     ? i18n.translate('discover.panelsToggle.showChartButton', {
         defaultMessage: 'Expand visualization',
       })
     : i18n.translate('discover.panelsToggle.hideChartButton', {
         defaultMessage: 'Collapse visualization',
-      }),
-  iconType: isHidden ? 'transitionTopIn' : 'transitionTopOut',
-  'data-test-subj': isHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
-  'aria-expanded': !isHidden,
-  'aria-controls': 'unifiedHistogramCollapsablePanel',
-  isDisabled,
-  toolTipContent: isDisabled ? disabledCollapsingTooltip : undefined,
-  onClick: toggleChart,
-});
+      });
+
+  return {
+    label,
+    iconType: isHidden ? 'transitionTopIn' : 'transitionTopOut',
+    'data-test-subj': isHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
+    'aria-expanded': !isHidden,
+    'aria-controls': 'unifiedHistogramCollapsablePanel',
+    isDisabled,
+    toolTipContent: isDisabled ? disabledCollapsingTooltip : label,
+    onClick: toggleChart,
+  };
+};
 
 const getTableButton = ({
   isHidden,
@@ -120,21 +129,25 @@ const getTableButton = ({
   isHidden: boolean;
   toggleTable: () => void;
   isDisabled?: boolean;
-}) => ({
-  label: isHidden
+}) => {
+  const label = isHidden
     ? i18n.translate('discover.panelsToggle.showTableButton', {
         defaultMessage: 'Expand data table',
       })
     : i18n.translate('discover.panelsToggle.hideTableButton', {
         defaultMessage: 'Collapse data table',
-      }),
-  iconType: isHidden ? temporaryCollapseTableIcon : temporaryExpandTableIcon,
-  'data-test-subj': isHidden ? 'dscShowTableButton' : 'dscHideTableButton',
-  'aria-expanded': !isHidden,
-  isDisabled,
-  toolTipContent: isDisabled ? disabledCollapsingTooltip : undefined,
-  onClick: toggleTable,
-});
+      });
+
+  return {
+    label,
+    iconType: isHidden ? temporaryCollapseTableIcon : temporaryExpandTableIcon,
+    'data-test-subj': isHidden ? 'dscShowTableButton' : 'dscHideTableButton',
+    'aria-expanded': !isHidden,
+    isDisabled,
+    toolTipContent: isDisabled ? disabledCollapsingTooltip : label,
+    onClick: toggleTable,
+  };
+};
 
 /**
  * @param sidebarToggleState$
