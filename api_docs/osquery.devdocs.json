@@ -251,7 +251,7 @@
                 "OsqueryResponseActionsParamsFormProps"
               ],
               "path": "x-pack/platform/plugins/shared/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
-              "lineNumber": 16,
+              "lineNumber": 18,
               "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false

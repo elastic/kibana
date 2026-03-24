@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/deeplinks-workflows'
   - '@kbn/lens-plugin'
   - '@kbn/core-security-server-mocks'
+  - '@kbn/kql'
   - '@kbn/scout'
 tags:
   - plugin

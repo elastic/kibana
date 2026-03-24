@@ -51,6 +51,7 @@ export const useFetchNotificationPolicies = ({
         sortOrder,
       }),
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
     onError: (error: Error) => {
       toasts.addError(error, {
         title: i18n.translate('xpack.alertingV2.notificationPolicies.fetchError', {
