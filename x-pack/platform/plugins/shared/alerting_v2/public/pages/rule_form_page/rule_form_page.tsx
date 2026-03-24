@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -34,15 +40,20 @@ export const RuleFormPage = () => {
   const { search } = useLocation();
   const cloneFromId = new URLSearchParams(search).get('cloneFrom');
 
+  let content: React.ReactNode;
   if (ruleId) {
-    return <FetchedRuleFormPage ruleId={ruleId} mode="edit" />;
+    content = <FetchedRuleFormPage ruleId={ruleId} mode="edit" />;
+  } else if (cloneFromId) {
+    content = <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
+  } else {
+    content = <RuleFormPageContent />;
   }
 
-  if (cloneFromId) {
-    return <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
-  }
-
-  return <RuleFormPageContent />;
+  return (
+    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+      {content}
+    </EuiPageTemplate.Section>
+  );
 };
 
 interface FetchedRuleFormPageProps {

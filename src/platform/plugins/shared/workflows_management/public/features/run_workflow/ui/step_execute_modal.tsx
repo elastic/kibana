@@ -29,6 +29,7 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
 import { StepExecuteManualForm } from './step_execute_manual_form';
+import { sanitizeText } from '../../../shared/lib/sanitize_text';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { useWorkflowsMonacoTheme } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
@@ -127,7 +128,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     const modalTitleId = useGeneratedHtmlId();
 
     const handleInputChange = useCallback((value: string) => {
-      setInputsJson(value);
+      setInputsJson(sanitizeText(value));
     }, []);
 
     const handleChangeTab = useCallback(
@@ -240,7 +241,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
               {selectedTab === 'manual' && (
                 <StepExecuteManualForm
                   value={inputsJson}
-                  onChange={handleInputChange}
+                  setValue={handleInputChange}
                   errors={executionInputErrors}
                   warnings={executionInputWarnings}
                   contextJsonSchema={contextJsonSchema}

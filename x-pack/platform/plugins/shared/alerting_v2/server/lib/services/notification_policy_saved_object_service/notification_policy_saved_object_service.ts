@@ -156,10 +156,22 @@ export class NotificationPolicySavedObjectService
     });
   }
 
-  public async findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
+  public async findAllDecrypted(params?: {
+    filter?: { enabled: boolean };
+  }): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
+    const kqlFilter =
+      params?.filter?.enabled !== undefined
+        ? `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: ${params.filter.enabled}`
+        : undefined;
+
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
-        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE }
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          namespaces: ['*'],
+          perPage: 1000,
+          ...(kqlFilter ? { filter: kqlFilter } : {}),
+        }
       );
 
     const results: NotificationPolicySavedObjectBulkGetItem[] = [];
@@ -169,7 +181,7 @@ export class NotificationPolicySavedObjectService
         if (doc.error) {
           results.push({ id: doc.id, error: doc.error });
         } else {
-          results.push({ id: doc.id, attributes: doc.attributes });
+          results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
         }
       }
     }

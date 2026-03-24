@@ -5,6 +5,7 @@ plugins:
     - alerting
     - alerting_v2
     - apm
+    - automatic_import_v2
     - banners
     - cloud_security_posture
     - console

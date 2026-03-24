@@ -36,6 +36,12 @@ export type BulkUpdateResultItem =
   | { id: string; success: true }
   | { id: string; success: false; error: SavedObjectError };
 
+export interface RulesFindAllResultItem {
+  id: string;
+  attributes: RuleSavedObjectAttributes;
+  namespaces?: string[];
+}
+
 export interface RulesSavedObjectServiceContract {
   create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
   get(
@@ -43,6 +49,7 @@ export interface RulesSavedObjectServiceContract {
     spaceId?: string
   ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
+  findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
   update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
   bulkUpdate(
     items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
@@ -109,6 +116,35 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       }
       return { id: doc.id, attributes: doc.attributes, version: doc.version };
     });
+  }
+
+  public async findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]> {
+    if (ruleIds.length === 0) {
+      return [];
+    }
+
+    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const filter = ruleIds
+      .map((id) => `${RULE_SAVED_OBJECT_TYPE}.id: "${RULE_SAVED_OBJECT_TYPE}:${id}"`)
+      .join(' OR ');
+
+    const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      namespaces: namespace ? [namespace] : ['*'],
+      filter,
+    });
+
+    const results: RulesFindAllResultItem[] = [];
+    for await (const response of finder.find()) {
+      for (const doc of response.saved_objects) {
+        if (!('error' in doc && doc.error)) {
+          results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
+        }
+      }
+    }
+    await finder.close();
+    return results;
   }
 
   public async update({

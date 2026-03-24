@@ -131,8 +131,9 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/as-code-filters-schema'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
-  - '@kbn/alerting-v2-rule-form'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/cps-utils'
   - '@kbn/as-code-data-views-schema'
 tags:
