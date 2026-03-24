@@ -46,40 +46,29 @@ function getFunctionNodeFromAst(ast: ESQLAstQueryExpression) {
  */
 export function replaceFunctionParams(functionString: string, params: Params): string {
   try {
-    // 1. Build a temporary query using the esql composer, substituting column-name
-    //    placeholders (??name) with properly escaped column references via synth.col.
-    let resolvedFunctionString = functionString;
+    // Build a temporary query with the function string, then use setParam + inlineParams
+    // to handle placeholder substitution and escaping via the composer API.
+    const tempQuery = esql(`TS metrics-* | STATS ${functionString}`);
     for (const [key, value] of Object.entries(params)) {
       if (value == null) continue;
       const strValue = String(value);
-      const doubleParamPattern = `??${key}`;
-      const singleParamPattern = `?${key}`;
-
-      if (resolvedFunctionString.includes(doubleParamPattern)) {
-        // ?? placeholders represent column/field names - use synth.col for proper escaping
+      // ?? placeholders represent column/field names - use synth.col for proper escaping
+      if (functionString.includes(`??${key}`)) {
         const columnParts = strValue.split('.');
-        const columnNode = synth.col(columnParts);
-        const columnStr = BasicPrettyPrinter.print(columnNode);
-        resolvedFunctionString = resolvedFunctionString.replace(doubleParamPattern, columnStr);
-      } else if (resolvedFunctionString.includes(singleParamPattern)) {
-        // ? placeholders represent literal values - quote strings
-        const quotedValue = typeof value === 'string' ? `"${value}"` : strValue;
-        resolvedFunctionString = resolvedFunctionString.replace(singleParamPattern, quotedValue);
+        tempQuery.setParam(key, synth.col(columnParts));
+      } else {
+        // ? placeholders represent literal values
+        tempQuery.setParam(key, typeof value === 'number' || typeof value === 'boolean' ? value : strValue);
       }
     }
-
-    // 2. Build a temporary query to parse and pretty-print the resolved function.
-    const tempQuery = `TS metrics-* | STATS ${resolvedFunctionString}`;
-    const query = esql(tempQuery);
-    const functionNode = getFunctionNodeFromAst(query.ast);
+    tempQuery.inlineParams();
+    const functionNode = getFunctionNodeFromAst(tempQuery.ast);
 
     if (functionNode) {
-      // 3. Print only the function node back to a string.
       return BasicPrettyPrinter.print(functionNode).trim();
     }
 
-    // Fallback if the AST structure isn't what we expect.
-    return resolvedFunctionString;
+    return functionString;
   } catch (e) {
     // If parsing or any other step fails, return the original string as a safe fallback.
     return functionString;
