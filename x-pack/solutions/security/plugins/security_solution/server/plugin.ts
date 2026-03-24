@@ -45,6 +45,10 @@ import {
   createVulnerabilityCheckAlertType,
   createCveWatchAlertType,
 } from './lib/detection_engine/rule_types';
+import {
+  registerCveFeedTask,
+  startCveFeedTask,
+} from './lib/detection_engine/rule_types/vulnerability_check/cve_feed_task';
 import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestConstants, ManifestTask } from './endpoint/lib/artifacts';
@@ -298,6 +302,22 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
     });
 
+    core.savedObjects.registerType({
+      name: 'vulnerability-posture-view',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+          description: { type: 'text' },
+          filters: { type: 'object', enabled: false },
+          isDefault: { type: 'boolean' },
+          createdAt: { type: 'date' },
+          updatedAt: { type: 'date' },
+        },
+      },
+    });
+
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.setup(core, plugins);
 
@@ -523,6 +543,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         )
       );
       plugins.alerting.registerType(securityRuleTypeWrapper(createCveWatchAlertType()));
+
+      // Register the CVE feed ingestion task so the CVE index stays populated
+      if (plugins.taskManager) {
+        registerCveFeedTask({
+          taskManager: plugins.taskManager,
+          logger,
+          core: core.getStartServices().then(([coreStart]) => coreStart),
+        });
+      }
     }
 
     const trialCompanionDeps: TrialCompanionRoutesDeps = {
@@ -870,6 +899,18 @@ export class Plugin implements ISecuritySolutionPlugin {
           esClient: core.elasticsearch.client.asInternalUser,
         })
         .catch(() => {}); // it shouldn't refuse, but just in case
+
+      // Start CVE feed ingestion task (ensures the task is scheduled; ingestion runs in the task runner)
+      if (this.config.experimentalFeatures.vulnerabilityCheckerEnabled) {
+        startCveFeedTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        }).catch((err) => {
+          this.logger.error(
+            `[vulnerability-checker] Failed to start CVE feed task: ${err.message}`
+          );
+        });
+      }
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(
