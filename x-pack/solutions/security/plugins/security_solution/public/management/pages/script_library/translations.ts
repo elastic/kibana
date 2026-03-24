@@ -57,7 +57,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         defaultMessage: 'Operating systems',
       }),
       tags: i18n.translate('xpack.securitySolution.scriptLibrary.table.tagsColumnTitle', {
-        defaultMessage: 'Types',
+        defaultMessage: 'Categories',
       }),
       updatedBy: i18n.translate(
         'xpack.securitySolution.scriptLibrary.table.modifiedByColumnTitle',
@@ -398,7 +398,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           label: i18n.translate(
             'xpack.securitySolution.scriptLibrary.table.flyout.body.tagsLabel',
             {
-              defaultMessage: 'Types',
+              defaultMessage: 'Categories',
             }
           ),
         },
