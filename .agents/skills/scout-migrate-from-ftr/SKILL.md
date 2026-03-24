@@ -62,6 +62,17 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
 - Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
 
+#### Tags when the FTR suite was “deployment agnostic”
+
+FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec—it selects **many** targets (including stateful/search/security and serverless/search/security, etc.).
+
+- **Tests colocated under a solution plugin or package** (`x-pack/solutions/observability|security|search/...`, using `@kbn/scout-oblt`, `@kbn/scout-security`, or `@kbn/scout-search`): Prefer **explicit solution targets** instead of `tags.deploymentAgnostic`, so CI only runs where that solution is present and supported. Typical pattern (adjust domain to your solution):
+  - Observability: `{ tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }` (and add `tags.serverless.observability.logs_essentials` only if the feature is meant to run on that project type).
+  - Security / Search: use the corresponding `tags.serverless.*` and `tags.stateful.*` entries from the same Scout package—**match sibling specs** in that module.
+- **Tests colocated under platform** (`src/platform/**`, `x-pack/platform/**`, `@kbn/scout` only): If the original intent was “run everywhere the deployment-agnostic FTR job runs”, **`tags.deploymentAgnostic`** is still appropriate.
+
+API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
+
 ### 3) Translate the test structure
 
 - `describe/it` -> `test.describe/test` or `apiTest.describe/apiTest` (but don't assume 1:1 `it` -> `test`).
@@ -146,7 +157,7 @@ test('create and edit entity', async () => {
 - Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
 - UI tests must have at least one supported tag (Scout validates UI tags at runtime). API tests should also be tagged.
 - Avoid checking raw data in UI tests; prefer page object methods over direct selectors.
-- Preserve or update tags for deployment targets when needed.
+- Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` unless you intentionally need every deployment-agnostic target (see **Tags when the FTR suite was “deployment agnostic”** under step 2).
 - Run Scout tests in both stateful and serverless if the plugin supports both.
 
 ### 10) Review against Scout best practices
@@ -173,6 +184,7 @@ test('create and edit entity', async () => {
 - Placing Scout tests outside `test/scout*/{ui,api}/{tests,parallel_tests}`.
 - Ignoring existing parallel Scout config (mixing `tests/` with `parallel_tests/`).
 - Using the wrong Scout package (solution tests in security/observability/search must import from their solution Scout package, not `@kbn/scout`).
+- Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only “deployment agnostic” in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
 - Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
