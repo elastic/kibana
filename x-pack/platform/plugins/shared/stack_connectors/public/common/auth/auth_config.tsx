@@ -34,11 +34,9 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isEqual } from 'lodash';
 import { AuthType, SSLCertType, MAX_HEADERS } from '@kbn/connector-schemas/common/auth/constants';
 import { useSecretHeaders } from './use_secret_headers';
-import { useSecretQueryParams } from './use_secret_query_params';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
-import { QueryParamFields } from './query_param_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 
@@ -76,8 +74,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
       '__internal__.hasHeaders',
       '__internal__.hasCA',
       '__internal__.headers',
-      '__internal__.hasQueryParams',
-      '__internal__.queryParams',
     ],
   });
   const {
@@ -86,19 +82,11 @@ export const AuthConfig: FunctionComponent<Props> = ({
     isFetching: isFetchingHeaders,
   } = useSecretHeaders(connectorId, isEdit);
 
-  const {
-    data: secretQueryParamKeys = [],
-    isLoading: isLoadingQueryParams,
-    isFetching: isFetchingQueryParams,
-  } = useSecretQueryParams(connectorId);
-
   const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
-  const loadingQueryParams = isLoadingQueryParams || isFetchingQueryParams;
   const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
-  const hasQueryParams = __internal__ != null ? __internal__.hasQueryParams : false;
 
   // Default Values
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
@@ -116,76 +104,33 @@ export const AuthConfig: FunctionComponent<Props> = ({
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
   useEffect(() => {
-    // Each section runs independently — headers don't wait for query params and vice versa.
-    // Using a single updateFieldValues call avoids the race where two separate effects
-    // both spread stale __internal__ and the second overwrites the first's changes.
-    if (loadingHeaders && loadingQueryParams) return;
+    if (loadingHeaders) return;
 
     const currentFormData = getFormData();
     const updates: Record<string, unknown> = { ...currentFormData.__internal__ };
     let needsUpdate = false;
 
-    if (!loadingHeaders) {
-      // --- Headers ---
-      const secretHeaderKeysSet = new Set(secretHeaderKeys);
-      const currentHeaders: Array<InternalFormData> = (
-        currentFormData.__internal__?.headers ?? []
-      ).map((header: InternalFormData) => {
-        if (secretHeaderKeysSet.has(header.key)) {
-          return { ...header, value: '', type: 'secret' };
-        }
-        return header;
-      });
-      const currentHeadersKeysSet = new Set(currentHeaders.map((h) => h.key));
-      const newSecretHeaders = secretHeaderKeys
-        .filter((key) => !currentHeadersKeysSet.has(key))
-        .map((key) => ({ key, value: '', type: 'secret' }));
-      let mergedHeaders: Array<InternalFormData> = [...currentHeaders, ...newSecretHeaders];
-      if (mergedHeaders.length === 0 && hasHeaders) {
-        mergedHeaders = [{ key: '', value: '', type: 'config' }];
+    const secretHeaderKeysSet = new Set(secretHeaderKeys);
+    const currentHeaders: Array<InternalFormData> = (
+      currentFormData.__internal__?.headers ?? []
+    ).map((header: InternalFormData) => {
+      if (secretHeaderKeysSet.has(header.key)) {
+        return { ...header, value: '', type: 'secret' };
       }
-      if (!isEqual(currentHeaders, mergedHeaders)) {
-        updates.headers = mergedHeaders;
-        /*
-         * If the user modifies the form, whatever is returned from useSecretHeaders
-         * might not be up to date.
-         * hasHeaders can only be updated on first render or after the form is submitted.
-         */
-        if (!isModified) updates.hasHeaders = mergedHeaders.length > 0;
-        needsUpdate = true;
-      }
+      return header;
+    });
+    const currentHeadersKeysSet = new Set(currentHeaders.map((h) => h.key));
+    const newSecretHeaders = secretHeaderKeys
+      .filter((key) => !currentHeadersKeysSet.has(key))
+      .map((key) => ({ key, value: '', type: 'secret' }));
+    let mergedHeaders: Array<InternalFormData> = [...currentHeaders, ...newSecretHeaders];
+    if (mergedHeaders.length === 0 && hasHeaders) {
+      mergedHeaders = [{ key: '', value: '', type: 'config' }];
     }
-
-    if (!loadingQueryParams) {
-      // --- Query Params ---
-      const secretQueryParamKeysSet = new Set(secretQueryParamKeys);
-      const currentQueryParams: Array<{ key: string; value: string }> = (
-        currentFormData.__internal__?.queryParams ?? []
-      ).map((param: { key: string; value: string }) => {
-        if (secretQueryParamKeysSet.has(param.key)) {
-          return { ...param, value: '' };
-        }
-        return param;
-      });
-      const currentQueryParamKeysSet = new Set(currentQueryParams.map((p) => p.key));
-      const newSecretQueryParams = secretQueryParamKeys
-        .filter((key) => !currentQueryParamKeysSet.has(key))
-        .map((key) => ({ key, value: '' }));
-      let mergedQueryParams: Array<{ key: string; value: string }> = [
-        ...currentQueryParams,
-        ...newSecretQueryParams,
-      ];
-      if (mergedQueryParams.length === 0 && hasQueryParams) {
-        mergedQueryParams = [{ key: '', value: '' }];
-      }
-      if (!isEqual(currentQueryParams, mergedQueryParams)) {
-        updates.queryParams = mergedQueryParams;
-        /*
-         * hasQueryParams can only be updated on first render or after the form is submitted.
-         */
-        if (!isModified) updates.hasQueryParams = mergedQueryParams.length > 0;
-        needsUpdate = true;
-      }
+    if (!isEqual(currentHeaders, mergedHeaders)) {
+      updates.headers = mergedHeaders;
+      if (!isModified) updates.hasHeaders = mergedHeaders.length > 0;
+      needsUpdate = true;
     }
 
     if (needsUpdate) {
@@ -195,12 +140,9 @@ export const AuthConfig: FunctionComponent<Props> = ({
     connectorId,
     getFormData,
     secretHeaderKeys,
-    secretQueryParamKeys,
     updateFieldValues,
     hasHeaders,
-    hasQueryParams,
     loadingHeaders,
-    loadingQueryParams,
     isModified,
   ]);
 
@@ -286,31 +228,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
         </EuiFlexGroup>
       ) : (
         <>{hasHeaders && <HeaderFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}</>
-      )}
-      <EuiSpacer size="m" />
-      <UseField
-        style={{ visibility: loadingQueryParams ? 'hidden' : 'visible' }}
-        path="__internal__.hasQueryParams"
-        component={ToggleField}
-        config={{
-          defaultValue: false,
-          label: i18n.QUERY_PARAMS_SWITCH,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            disabled: readOnly,
-            'data-test-subj': 'httpQueryParamsSwitch',
-          },
-        }}
-      />
-      {loadingQueryParams ? (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <>{hasQueryParams && <QueryParamFields readOnly={readOnly} />}</>
       )}
       <EuiSpacer size="m" />
       <UseField

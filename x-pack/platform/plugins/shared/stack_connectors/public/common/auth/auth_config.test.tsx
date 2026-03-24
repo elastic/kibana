@@ -13,20 +13,16 @@ import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useSecretHeaders } from './use_secret_headers';
-import { useSecretQueryParams } from './use_secret_query_params';
 
 jest.mock('./use_secret_headers');
-jest.mock('./use_secret_query_params');
 
 const useSecretHeadersMock = useSecretHeaders as jest.Mock;
-const useSecretQueryParamsMock = useSecretQueryParams as jest.Mock;
 
 describe('AuthConfig renders', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
-    useSecretQueryParamsMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
   afterEach(() => {
@@ -131,36 +127,6 @@ describe('AuthConfig renders', () => {
     });
   });
 
-  it('toggles query params as expected', async () => {
-    const testFormData = {
-      config: {
-        hasAuth: false,
-      },
-      __internal__: {
-        hasCA: false,
-        hasHeaders: false,
-        hasQueryParams: false,
-      },
-    };
-
-    render(
-      <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-        <AuthConfig readOnly={false} />
-      </AuthFormTestProvider>
-    );
-
-    const queryParamsToggle = await screen.findByTestId('httpQueryParamsSwitch');
-
-    expect(queryParamsToggle).toBeInTheDocument();
-
-    await userEvent.click(queryParamsToggle);
-
-    expect(await screen.findByTestId('httpQueryParamsText')).toBeInTheDocument();
-    expect(await screen.findByTestId('httpQueryParamKeyInput')).toBeInTheDocument();
-    expect(await screen.findByTestId('httpQueryParamValueInput')).toBeInTheDocument();
-    expect(await screen.findByTestId('httpAddQueryParamButton')).toBeInTheDocument();
-  });
-
   it('renders all fields for authType=Basic', async () => {
     const testFormData = {
       config: {
@@ -250,7 +216,6 @@ describe('AuthConfig renders', () => {
       __internal__: {
         hasHeaders: true,
         hasCA: false,
-        hasQueryParams: false,
         headers: [{ key: 'config-key', value: 'text', type: 'config' }],
       },
     };
@@ -290,7 +255,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [
                 { key: 'config-key', value: 'text', type: 'config' },
                 { key: 'secret-key', value: 'foobar', type: 'secret' },
@@ -330,7 +294,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
             },
           },
           isValid: true,
@@ -358,7 +321,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: false,
               hasCA: false,
-              hasQueryParams: false,
             },
           },
           isValid: true,
@@ -372,7 +334,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          hasQueryParams: false,
           headers: [],
         },
       };
@@ -397,7 +358,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [{ key: 'secret-key', value: 'foobar', type: 'secret' }],
             },
           },
@@ -490,7 +450,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [
                 { key: 'key-1', value: 'text-1', type: 'secret' },
                 { key: 'key-2', value: 'text-2', type: 'config' },
@@ -531,7 +490,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          hasQueryParams: false,
           headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
@@ -557,7 +515,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
@@ -575,7 +532,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          hasQueryParams: false,
           headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
@@ -597,7 +553,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
@@ -640,7 +595,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: false,
               hasCA: false,
-              hasQueryParams: false,
             },
           },
           isValid: true,
@@ -659,7 +613,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: true,
-          hasQueryParams: false,
           headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
@@ -688,7 +641,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: true,
-              hasQueryParams: false,
               headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
@@ -740,7 +692,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          hasQueryParams: false,
           headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
@@ -768,7 +719,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
@@ -816,7 +766,6 @@ describe('AuthConfig renders', () => {
             __internal__: {
               hasHeaders: true,
               hasCA: false,
-              hasQueryParams: false,
               headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
@@ -831,7 +780,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          hasQueryParams: false,
           headers: [
             { key: 'same-key', value: 'text 1', type: 'config' },
             { key: 'same-key', value: 'text 2', type: 'config' },
@@ -861,7 +809,6 @@ describe('AuthConfig renders', () => {
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          hasQueryParams: false,
           headers: [{ key: '', value: 'text', type: 'config' }],
         },
       };
@@ -974,7 +921,6 @@ describe('AuthConfig renders', () => {
           __internal__: {
             hasHeaders: false,
             hasCA: false,
-            hasQueryParams: false,
           },
         },
         isValid: true,

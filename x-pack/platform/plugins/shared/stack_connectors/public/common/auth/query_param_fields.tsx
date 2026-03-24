@@ -14,17 +14,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiPanel,
-  useEuiTheme,
   EuiText,
-  EuiBadge,
-  EuiIconTip,
 } from '@elastic/eui';
 import { UseArray, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-
-import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 
@@ -37,8 +31,6 @@ interface Props {
 }
 
 export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -76,117 +68,78 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
               )}
               <EuiSpacer size="s" />
 
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    css={css`
-                      max-width: fit-content;
-                    `}
-                    data-test-subj="encryptedQueryParamsBadge"
-                  >
-                    <span
-                      css={css`
-                        margin-right: 5px;
-                      `}
-                    >
-                      {i18n.ENCRYPTED_QUERY_PARAMS_BADGE}
-                    </span>
-                    <EuiIconTip
-                      type="info"
-                      size="s"
-                      content={i18n.ENCRYPTED_QUERY_PARAMS_TOOLTIP_CONTENT}
-                      position="top"
-                    />
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-
               {items.map((item) => (
-                <EuiFlexGroup key={item.id} direction="column" gutterSize="s">
-                  <EuiPanel
-                    hasBorder={true}
-                    hasShadow={false}
-                    css={{
-                      marginBottom: '20px',
-                      background: euiTheme.colors.backgroundBaseSubdued,
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                    data-test-subj="httpQueryParamPanel"
-                  >
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <UseField
-                          path={`${item.path}.key`}
-                          config={{
-                            label: i18n.KEY_LABEL,
-                            validations: [
-                              {
-                                validator: emptyField(i18n.QUERY_PARAM_MISSING_KEY_ERROR),
-                              },
-                              {
-                                validator: ({ value, form, path }) => {
-                                  if (!value) return;
-                                  const queryParams =
-                                    form.getFormData().__internal__?.queryParams ?? [];
-                                  const duplicates = queryParams.filter(
-                                    (param: { key: string }, id: number) =>
-                                      param.key === value &&
-                                      `${path}` !== `__internal__.queryParams[${id}].key`
-                                  );
-                                  if (duplicates.length > 0) {
-                                    return { message: i18n.SAME_QUERY_PARAM_KEY_ERROR };
-                                  }
-                                },
-                              },
-                            ],
-                          }}
-                          component={TextField}
-                          componentProps={{
-                            euiFieldProps: {
-                              readOnly,
-                              'data-test-subj': 'httpQueryParamKeyInput',
+                <EuiFlexGroup
+                  key={item.id}
+                  data-test-subj="httpQueryParamPanel"
+                  css={{ marginBottom: 8 }}
+                >
+                  <EuiFlexItem>
+                    <UseField
+                      path={`${item.path}.key`}
+                      config={{
+                        label: i18n.KEY_LABEL,
+                        validations: [
+                          {
+                            validator: emptyField(i18n.QUERY_PARAM_MISSING_KEY_ERROR),
+                          },
+                          {
+                            validator: ({ value, form, path }) => {
+                              if (!value) return;
+                              const queryParams =
+                                form.getFormData().__internal__?.queryParams ?? [];
+                              const duplicates = queryParams.filter(
+                                (param: { key: string }, id: number) =>
+                                  param.key === value &&
+                                  `${path}` !== `__internal__.queryParams[${id}].key`
+                              );
+                              if (duplicates.length > 0) {
+                                return { message: i18n.SAME_QUERY_PARAM_KEY_ERROR };
+                              }
                             },
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <UseField
-                          path={`${item.path}.value`}
-                          config={{
-                            label: i18n.VALUE_LABEL,
-                            validations: [
-                              {
-                                validator: emptyField(i18n.QUERY_PARAM_MISSING_VALUE_ERROR),
-                              },
-                            ],
-                          }}
-                          component={PasswordField}
-                          componentProps={{
-                            euiFieldProps: {
-                              readOnly,
-                              'data-test-subj': 'httpQueryParamValueInput',
-                              type: 'dual',
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          color="danger"
-                          onClick={() => removeItem(item.id)}
-                          iconType="minusInCircle"
-                          aria-label={i18n.DELETE_QUERY_PARAM_BUTTON}
-                          data-test-subj="httpRemoveQueryParamButton"
-                          css={{
-                            marginTop: '28px',
-                            background: euiTheme.colors.backgroundBaseDanger,
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
+                          },
+                        ],
+                      }}
+                      component={TextField}
+                      componentProps={{
+                        euiFieldProps: {
+                          readOnly,
+                          'data-test-subj': 'httpQueryParamKeyInput',
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <UseField
+                      path={`${item.path}.value`}
+                      config={{
+                        label: i18n.VALUE_LABEL,
+                        validations: [
+                          {
+                            validator: emptyField(i18n.QUERY_PARAM_MISSING_VALUE_ERROR),
+                          },
+                        ],
+                      }}
+                      component={PasswordField}
+                      componentProps={{
+                        euiFieldProps: {
+                          readOnly,
+                          'data-test-subj': 'httpQueryParamValueInput',
+                          type: 'dual',
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      color="danger"
+                      onClick={() => removeItem(item.id)}
+                      iconType="minusInCircle"
+                      aria-label={i18n.DELETE_QUERY_PARAM_BUTTON}
+                      data-test-subj="httpRemoveQueryParamButton"
+                      css={{ marginTop: 28 }}
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               ))}
             </>

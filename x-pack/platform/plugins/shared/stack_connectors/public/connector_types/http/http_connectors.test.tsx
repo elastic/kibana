@@ -19,6 +19,10 @@ jest.mock('../../common/auth/auth_config', () => ({
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
 }));
 
+jest.mock('../../common/auth/use_secret_query_params', () => ({
+  useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
+}));
+
 describe('HttpActionConnectorFields', () => {
   const connector = {
     id: 'test',
