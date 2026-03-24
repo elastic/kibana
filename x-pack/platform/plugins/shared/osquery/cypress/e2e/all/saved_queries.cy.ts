@@ -16,6 +16,7 @@ import {
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
   EDIT_PACK_HEADER_BUTTON,
+  rowActionsMenuSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
 } from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
@@ -71,7 +72,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       const suffix = generateRandomStringName(1)[0];
       const savedQueryId = `Saved-Query-Id-${suffix}`;
       const savedQueryDescription = `Test saved query description ${suffix}`;
-      cy.contains('New live query').click();
+      cy.contains('Run query').click();
       selectAllAgents();
       inputQuery(BIG_QUERY);
       getAdvancedButton().click();
@@ -143,10 +144,11 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       submitQuery();
 
       // edit saved query
-      cy.contains('Saved queries').click();
+      navigateTo('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
 
-      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get(rowActionsMenuSelector(savedQueryId)).click();
+      cy.contains('Edit query').click();
       cy.get('input[name="description"]').type(` Edited{downArrow}{enter}`);
 
       // Run in test configuration
@@ -175,7 +177,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // delete saved query
       cy.contains(savedQueryId);
-      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get(rowActionsMenuSelector(savedQueryId)).click();
+      cy.contains('Edit query').click();
 
       deleteAndConfirm('query');
       cy.contains(savedQueryId).should('exist');
@@ -203,9 +206,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('shows ID must be unique error', () => {
       cy.intercept('GET', '**/api/osquery/saved_queries**').as('savedQueriesLoaded');
-      cy.contains('Saved queries').click();
+      cy.contains('Queries').click();
       cy.wait('@savedQueriesLoaded');
-      cy.contains('Add saved query').click();
+      cy.contains('Save query').click();
       cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
 
       cy.contains('ID must be unique').should('not.exist');
@@ -216,8 +219,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('checks default values on new saved query', () => {
-    cy.contains('Saved queries').click();
-    cy.contains('Add saved query').click();
+    cy.contains('Queries').click();
+    cy.contains('Save query').click();
     // ADD MORE FIELDS HERE
     cy.getBySel('resultsTypeField').within(() => {
       cy.contains('Snapshot');
@@ -262,7 +265,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     it('checks result type on prebuilt saved query', () => {
       // Navigate to page 2 where users_elastic is located
       cy.getBySel('pagination-button-1').click();
-      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
+      cy.get(rowActionsMenuSelector('users_elastic')).click();
+      cy.contains('Edit query').click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
       });
@@ -283,7 +287,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     it('user can not delete prebuilt saved query but can delete normal saved query', () => {
       // Navigate to page 2 where users_elastic is located
       cy.getBySel('pagination-button-1').click();
-      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
+      cy.get(rowActionsMenuSelector('users_elastic')).click();
+      cy.contains('Edit query').click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 

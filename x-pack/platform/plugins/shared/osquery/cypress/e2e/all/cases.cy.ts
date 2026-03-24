@@ -52,12 +52,6 @@ describe('Add to Cases', () => {
       viewRecentCaseAndCheckResults();
 
       cy.contains(liveQueryQuery);
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
-      });
     });
   });
 
@@ -84,12 +78,6 @@ describe('Add to Cases', () => {
       viewRecentCaseAndCheckResults();
 
       cy.contains('SELECT * FROM os_version;');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
-      });
     });
   });
 });

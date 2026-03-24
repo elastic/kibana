@@ -74,7 +74,7 @@ describe('ALL - Custom space', () => {
       });
 
       it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
-        cy.contains('New live query').click();
+        cy.contains('Run query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');
         submitQuery();
