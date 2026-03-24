@@ -45,7 +45,7 @@ export function createAddAnomalyChartsPanelAction(
       },
     ],
     order: 30,
-    getIconType: () => 'anomalyChart',
+    getIconType: () => 'chartAnomaly',
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
         defaultMessage: 'Anomaly chart',
