@@ -48,5 +48,10 @@ export const CREATE_NEW_INTEGRATION_LINK = 'createNewIntegrationLink';
 export const UPLOAD_INTEGRATION_PACKAGE_LINK = 'uploadIntegrationPackageLink';
 export const CREATE_INTEGRATION_UPLOAD_SUCCESS = 'createIntegrationUploadSuccess';
 
-// Data streams table
+export const CREATE_NEW_INTEGRATION_BTN = 'createNewIntegrationBtn';
+export const CREATE_NEW_INTEGRATION_DROPDOWN_BTN = 'createNewIntegrationDropdownBtn';
+export const UPLOAD_INTEGRATION_PACKAGE_BTN = 'uploadIntegrationPackageBtn';
+
+export const MANAGE_INTEGRATION_ACTIONS_BTN = 'manageIntegrationActionsBtn';
+
 export const INPUT_TYPES_TABLE_COLUMN_TAGS = 'input-types-table-column-tags';
