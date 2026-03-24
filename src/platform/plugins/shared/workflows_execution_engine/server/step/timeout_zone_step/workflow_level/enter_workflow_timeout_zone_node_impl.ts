@@ -45,8 +45,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
       let stack = monitoredStepExecutionRuntime.scopeStack;
 
       while (!stack.isEmpty()) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const currentScope = stack.getCurrentScope()!;
+        const currentScope = stack.getCurrentScope();
         stack = stack.exitScope();
         const scopeStepExecutionRuntime =
           this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
