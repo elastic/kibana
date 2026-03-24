@@ -57,21 +57,19 @@ apiTest.describe(
     let transformHelper: SloTransformAssertions;
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(
-      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
-        await sloFtrDataForgeSuite.setup();
-        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
-        transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
-          samlAuth.session.getApiCredentialsForRole('admin')
-        );
-      }
-    );
+    apiTest.beforeAll(async ({ apiClient, esClient, samlAuth, requestAuth, sloHostsDataForge }) => {
+      await sloHostsDataForge.setup();
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+      transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
+        samlAuth.session.getApiCredentialsForRole('admin')
+      );
+    });
 
-    apiTest.afterAll(async ({ kbnClient, sloFtrDataForgeSuite }) => {
+    apiTest.afterAll(async ({ kbnClient, sloHostsDataForge }) => {
       await kbnClient.spaces.delete('space1').catch(() => {});
       await kbnClient.spaces.delete('space2').catch(() => {});
-      await sloFtrDataForgeSuite.teardown();
+      await sloHostsDataForge.teardown();
     });
 
     apiTest('creates a new slo and transforms', async ({ apiClient }) => {
@@ -199,11 +197,11 @@ apiTest.describe(
     apiTest(
       'creates two SLOs with matching ids across different spaces',
       async ({ apiClient, kbnClient }) => {
-        await kbnClient.spaces.create({ id: 'space1', name: 'space1', initials: '1' });
-        await kbnClient.spaces.create({ id: 'space2', name: 'space2', initials: '2' });
-
         const spaceId1 = 'space1';
         const spaceId2 = 'space2';
+
+        await kbnClient.spaces.create({ id: spaceId1, name: spaceId1, initials: '1' });
+        await kbnClient.spaces.create({ id: spaceId2, name: spaceId2, initials: '2' });
 
         const sloApiResponse = await apiClient.post(`s/${spaceId1}/api/observability/slos`, {
           headers,

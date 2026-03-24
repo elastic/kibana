@@ -11,7 +11,7 @@
  */
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTestWithoutDataForge as apiTest } from '../fixtures';
+import { apiTest } from '../fixtures';
 
 // eslint-disable-next-line playwright/no-skipped-test -- parity with FTR describe.skip; tracked in #258358
 apiTest.describe.skip(

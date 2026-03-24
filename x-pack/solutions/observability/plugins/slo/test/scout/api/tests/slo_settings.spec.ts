@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../server/services/slo_settings_repository';
-import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
+import { apiTest, mergeSloApiHeaders } from '../fixtures';
 
 apiTest.describe(
   'SLO settings API',

@@ -35,20 +35,18 @@ apiTest.describe(
     let transformHelper: SloTransformAssertions;
     let pipelineHelper: SloPipelineAssertions;
 
-    apiTest.beforeAll(
-      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
-        await sloFtrDataForgeSuite.setup();
-        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
-        transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
-          samlAuth.session.getApiCredentialsForRole('admin')
-        );
-        pipelineHelper = createSloPipelineAssertions(esClient);
-      }
-    );
+    apiTest.beforeAll(async ({ apiClient, esClient, samlAuth, requestAuth, sloHostsDataForge }) => {
+      await sloHostsDataForge.setup();
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+      transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
+        samlAuth.session.getApiCredentialsForRole('admin')
+      );
+      pipelineHelper = createSloPipelineAssertions(esClient);
+    });
 
-    apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
-      await sloFtrDataForgeSuite.teardown();
+    apiTest.afterAll(async ({ sloHostsDataForge }) => {
+      await sloHostsDataForge.teardown();
     });
 
     apiTest('deletes SLO and related resources', async ({ apiClient, esClient }) => {

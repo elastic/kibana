@@ -21,14 +21,14 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, sloFtrDataForgeSuite }) => {
-      await sloFtrDataForgeSuite.setup();
+    apiTest.beforeAll(async ({ requestAuth, sloHostsDataForge }) => {
+      await sloHostsDataForge.setup();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
-    apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
-      await sloFtrDataForgeSuite.teardown();
+    apiTest.afterAll(async ({ sloHostsDataForge }) => {
+      await sloHostsDataForge.teardown();
     });
 
     apiTest('finds SLOs by different tags', async ({ apiClient }) => {

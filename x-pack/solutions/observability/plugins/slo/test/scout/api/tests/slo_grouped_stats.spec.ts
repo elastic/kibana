@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
-  apiTestWithoutDataForge as apiTest,
+  apiTest,
   cleanupSloSummaryDocs,
   createApmSummaryDoc,
   insertSloSummaryDocs,

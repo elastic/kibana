@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
+import { apiTest, mergeSloApiHeaders } from '../fixtures';
 
 const SLO_TEMPLATE_SO_TYPE = 'slo_template';
 

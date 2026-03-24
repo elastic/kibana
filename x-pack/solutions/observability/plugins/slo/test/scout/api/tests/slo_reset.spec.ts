@@ -14,12 +14,12 @@ apiTest.describe(
   'Reset SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ sloFtrDataForgeSuite }) => {
-      await sloFtrDataForgeSuite.setup();
+    apiTest.beforeAll(async ({ sloHostsDataForge }) => {
+      await sloHostsDataForge.setup();
     });
 
-    apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
-      await sloFtrDataForgeSuite.teardown();
+    apiTest.afterAll(async ({ sloHostsDataForge }) => {
+      await sloHostsDataForge.teardown();
     });
 
     apiTest('resets the related resources', async ({ apiClient, requestAuth, esClient }) => {

@@ -8,10 +8,10 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../server/services/slo_settings_repository';
-import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
+import { apiTest, mergeSloApiHeaders } from '../fixtures';
 
 apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic] }, () => {
-  apiTest('PUT updates settings (non-serverless only)', async ({ apiClient, requestAuth }) => {
+  apiTest('PUT updates settings', async ({ apiClient, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKey('admin');
     const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
 

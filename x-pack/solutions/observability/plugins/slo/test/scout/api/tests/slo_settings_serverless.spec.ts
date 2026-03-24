@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../server/services/slo_settings_repository';
-import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
+import { apiTest, mergeSloApiHeaders } from '../fixtures';
 
 function pickKeys<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
@@ -25,7 +25,7 @@ apiTest.describe(
   'SLO settings API (serverless)',
   { tag: [...tags.serverless.observability.complete] },
   () => {
-    apiTest('PUT updates setting (serverless)', async ({ apiClient, requestAuth }) => {
+    apiTest('PUT updates setting', async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
 

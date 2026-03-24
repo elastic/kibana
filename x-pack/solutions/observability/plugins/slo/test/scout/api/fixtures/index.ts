@@ -8,13 +8,11 @@
 import type { RequestAuthFixture } from '@kbn/scout-oblt';
 import type { ApiClientFixture, ApiServicesFixture } from '@kbn/scout-oblt';
 import { apiTest as baseTest, mergeTests, sloDataFixture } from '@kbn/scout-oblt';
-import {
-  setupSloFtrDataForgeSuite,
-  teardownSloFtrDataForgeSuite,
-} from './slo_data_forge_lifecycle';
-import { createSloScoutApi, mergeSloApiHeaders, type SloScoutApi } from './slo_scout_api';
+import { setupSloHostsDataForge, teardownSloHostsDataForge } from './slo_data_forge_lifecycle';
+import { mergeSloApiHeaders } from './slo_api_http';
+import { createSloLifecycleApi, type SloLifecycleApi } from '../services/slo_lifecycle_api_service';
 
-export type SloPluginApiServicesFixture = ApiServicesFixture & { slo: SloScoutApi };
+export type SloPluginApiServicesFixture = ApiServicesFixture & { slo: SloLifecycleApi };
 
 const apiTestWithSloServices = baseTest.extend<{}, { apiServices: SloPluginApiServicesFixture }>({
   apiServices: [
@@ -31,7 +29,10 @@ const apiTestWithSloServices = baseTest.extend<{}, { apiServices: SloPluginApiSe
       use: (extended: SloPluginApiServicesFixture) => Promise<void>
     ) => {
       const adminCredentials = await requestAuth.getApiKey('admin');
-      const slo = createSloScoutApi(apiClient, mergeSloApiHeaders(adminCredentials.apiKeyHeader));
+      const slo = createSloLifecycleApi(
+        apiClient,
+        mergeSloApiHeaders(adminCredentials.apiKeyHeader)
+      );
       const extendedApiServices: SloPluginApiServicesFixture = { ...apiServices, slo };
       await use(extendedApiServices);
     },
@@ -39,36 +40,32 @@ const apiTestWithSloServices = baseTest.extend<{}, { apiServices: SloPluginApiSe
   ],
 });
 
-/**
- * `apiTest` from `@kbn/scout-oblt` plus `apiServices.slo` and `sloData`, without FTR data-forge lifecycle.
- * For embeddable-only specs use `mergeTests` with `import { apiTest as scoutApiTest, mergeTests, sloDataFixture } from '@kbn/scout-oblt'`.
- */
-export const apiTestWithoutDataForge = mergeTests(apiTestWithSloServices, sloDataFixture);
-
-/** FTR-style data-forge lifecycle: call `setup` from `beforeAll` and `teardown` from `afterAll`. */
-export interface SloFtrDataForgeSuite {
+/** Opt-in `fake_hosts` data forge + data view + SLO cleanup; call `setup` / `teardown` from suite hooks. */
+export interface SloHostsDataForgeSuite {
   setup(): Promise<void>;
   teardown(): Promise<void>;
 }
 
-export interface SloFtrDataForgeSuiteWorkerFixtures {
-  sloFtrDataForgeSuite: SloFtrDataForgeSuite;
+export interface SloHostsDataForgeWorkerFixtures {
+  sloHostsDataForge: SloHostsDataForgeSuite;
 }
 
+const sloScoutApiTestCore = mergeTests(apiTestWithSloServices, sloDataFixture);
+
 /**
- * `apiTestWithoutDataForge` plus worker `sloFtrDataForgeSuite` — call
- * `sloFtrDataForgeSuite.setup()` / `teardown()` in suite hooks (not auto-run).
+ * Single SLO Scout API test entry: `@kbn/scout-oblt` `apiTest` + `apiServices.slo` + `sloData` + `sloHostsDataForge`.
+ * Call `sloHostsDataForge.setup()` / `teardown()` in hooks only when the suite needs the `fake_hosts` forge.
  */
-export const apiTest = apiTestWithoutDataForge.extend<{}, SloFtrDataForgeSuiteWorkerFixtures>({
-  sloFtrDataForgeSuite: [
+export const apiTest = sloScoutApiTestCore.extend<{}, SloHostsDataForgeWorkerFixtures>({
+  sloHostsDataForge: [
     async ({ apiServices, esClient, kbnClient, log }, use) => {
       const deps = { apiServices, esClient, kbnClient, log };
-      const suite: SloFtrDataForgeSuite = {
+      const suite: SloHostsDataForgeSuite = {
         async setup() {
-          await setupSloFtrDataForgeSuite(deps);
+          await setupSloHostsDataForge(deps);
         },
         async teardown() {
-          await teardownSloFtrDataForgeSuite(deps);
+          await teardownSloHostsDataForge(deps);
         },
       };
       await use(suite);
@@ -84,29 +81,15 @@ export {
   SLO_ERROR_BUDGET_ID,
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from './constants';
-export {
-  SLO_FTR_DATA_VIEW_ID,
-  SLO_FTR_DATA_VIEW_ID_HEALTH_SCAN,
-  SLO_FTR_DATA_VIEW_TITLE,
-  createSloFtrDataView,
-  deleteSloFtrDataView,
-  installSloFtrDataForge,
-  removeSloFtrDataForge,
-} from './slo_data_forge_lifecycle';
 export { createSloPipelineAssertions, type SloPipelineAssertions } from './slo_pipeline_assertions';
-export {
-  createSloScoutApi,
-  mergeSloApiHeaders,
-  sloApiPathWithQuery,
-  type SloScoutApi,
-} from './slo_scout_api';
+export { mergeSloApiHeaders, sloApiPathWithQuery } from './slo_api_http';
 export {
   cleanupSloSummaryDocs,
   countSloSummaryDocs,
   insertSloSummaryDocs,
   refreshSloSummaryIndex,
 } from './slo_summary_index_test_helpers';
-export { pollUntilTrue, sleep } from './slo_poll';
+export { pollUntilTrue } from './slo_poll';
 export {
   createSloTransformAssertions,
   type SloTransformAssertions,

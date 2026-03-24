@@ -23,19 +23,17 @@ apiTest.describe(
     let headers: Record<string, string>;
     let transformHelper: SloTransformAssertions;
 
-    apiTest.beforeAll(
-      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
-        await sloFtrDataForgeSuite.setup();
-        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
-        transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
-          samlAuth.session.getApiCredentialsForRole('admin')
-        );
-      }
-    );
+    apiTest.beforeAll(async ({ apiClient, esClient, samlAuth, requestAuth, sloHostsDataForge }) => {
+      await sloHostsDataForge.setup();
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+      transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
+        samlAuth.session.getApiCredentialsForRole('admin')
+      );
+    });
 
-    apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
-      await sloFtrDataForgeSuite.teardown();
+    apiTest.afterAll(async ({ sloHostsDataForge }) => {
+      await sloHostsDataForge.teardown();
     });
 
     apiTest('with revision bump updates the definition', async ({ apiClient }) => {
