@@ -9,7 +9,6 @@
 
 import { css } from '@emotion/react';
 import { useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
-import { CALENDAR_MONTH_ESTIMATED_HEIGHT } from './calendar.constants';
 
 /**
  * Fixed panel height for the calendar scroll area.
