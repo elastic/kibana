@@ -506,7 +506,7 @@ export class SyntheticsService {
       finder.close().catch(() => this.logger.debug('Failed to close PIT finder', { error: err }));
     }
 
-    if (this.locations.every(loc => bucketsByLocation[loc.id].length === 0)) return;
+    if (this.locations.every((loc) => bucketsByLocation[loc.id].length === 0)) return;
     const output = await this.getOutput();
     if (!output) {
       sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
