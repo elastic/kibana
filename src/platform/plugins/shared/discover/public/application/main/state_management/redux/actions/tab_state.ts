@@ -40,8 +40,7 @@ import type {
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RawAppStatePayload = {
+export interface RawAppStatePayload {
   appState: DiscoverAppState;
   /**
    * Marks app state changes that come from URL syncing or other internal updates
@@ -50,7 +49,7 @@ export type RawAppStatePayload = {
    * rarely be needed outside of URL syncing and specific edge cases.
    */
   isSystemTriggered?: boolean;
-};
+}
 
 type AppStatePayload = TabActionPayload<RawAppStatePayload>;
 

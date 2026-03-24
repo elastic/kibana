@@ -85,9 +85,9 @@ const initialState: DiscoverInternalState = {
   },
 };
 
-export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
+export type TabActionPayload<T extends object = object> = { tabId: string } & T;
 
-type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
+type TabAction<T extends object = object> = PayloadAction<TabActionPayload<T>>;
 
 const withTab = <TPayload extends TabActionPayload>(
   state: DiscoverInternalState,
