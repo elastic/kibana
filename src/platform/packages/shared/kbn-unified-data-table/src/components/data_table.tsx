@@ -132,6 +132,19 @@ export enum DataLoadingState {
   loaded = 'loaded',
 }
 
+export type RenderDocumentViewCallback = (
+  hit: DataTableRecord,
+  displayedRows: DataTableRecord[],
+  displayedColumns: string[],
+  expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
+  columnsMeta?: DataTableColumnsMeta
+) => JSX.Element | undefined;
+
+export interface RenderDocumentViewMeta {
+  displayedRows: DataTableRecord[];
+  displayedColumns: string[];
+}
+
 /**
  * Unified Data Table props
  */
@@ -325,15 +338,17 @@ interface InternalUnifiedDataTableProps {
     data: DataPublicPluginStart;
   };
   /**
-   * Callback to render DocumentView when the document is expanded
+   * Accepts one of two types:
+   * - Callback to render the document view when a document is expanded
+   * - 'external' const to indicate the consumer will handle rendering
+   *   the doc view themselves when a document is expanded
    */
-  renderDocumentView?: (
-    hit: DataTableRecord,
-    displayedRows: DataTableRecord[],
-    displayedColumns: string[],
-    expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
-    columnsMeta?: DataTableColumnsMeta
-  ) => JSX.Element | undefined;
+  renderDocumentView?: RenderDocumentViewCallback | 'external';
+  /**
+   * Callback to set associated metadata when rendering the document view,
+   * only used when {@link renderDocumentView} is set to `manual`
+   */
+  setRenderDocumentViewMeta?: (meta: RenderDocumentViewMeta | undefined) => void;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -546,6 +561,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       totalHits,
       onFetchMoreRecords,
       renderDocumentView,
+      setRenderDocumentViewMeta,
       setExpandedDoc,
       expandedDoc,
       configRowHeight,
@@ -737,6 +753,26 @@ const InternalUnifiedDataTable = React.forwardRef<
       currentPageSize,
       currentPageIndex,
       changeCurrentPageIndex,
+    ]);
+
+    // When the document view is rendered externally, we need to provide some metadata
+    // to the consumer to allow them to properly render the doc viewer component
+    useEffect(() => {
+      if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
+        return;
+      }
+
+      if (expandedDoc) {
+        setRenderDocumentViewMeta({ displayedColumns, displayedRows });
+      } else {
+        setRenderDocumentViewMeta(undefined);
+      }
+    }, [
+      displayedColumns,
+      displayedRows,
+      expandedDoc,
+      renderDocumentView,
+      setRenderDocumentViewMeta,
     ]);
 
     const unifiedDataTableContextValue = useMemo<DataTableContext>(
@@ -1455,7 +1491,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(
+            typeof renderDocumentView === 'function' &&
+            renderDocumentView(
               expandedDoc,
               displayedRows,
               displayedColumns,

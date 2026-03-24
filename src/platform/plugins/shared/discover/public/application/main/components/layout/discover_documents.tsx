@@ -26,6 +26,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
+  RenderDocumentViewMeta,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -212,6 +213,7 @@ function DiscoverDocumentsComponent({
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
+  const [renderDocumentViewMeta, setRenderDocumentViewMeta] = useState<RenderDocumentViewMeta>();
   const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const setExpandedDoc = useCallback(
@@ -589,7 +591,8 @@ function DiscoverDocumentsComponent({
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-            renderDocumentView={renderDocumentView}
+            renderDocumentView="external"
+            setRenderDocumentViewMeta={setRenderDocumentViewMeta}
             renderCustomToolbar={renderCustomToolbarWithElements}
             services={services}
             totalHits={totalHits}
@@ -608,6 +611,15 @@ function DiscoverDocumentsComponent({
           />
         </CellActionsProvider>
       </div>
+      {expandedDoc &&
+        renderDocumentViewMeta &&
+        renderDocumentView(
+          expandedDoc,
+          renderDocumentViewMeta.displayedRows,
+          renderDocumentViewMeta.displayedColumns,
+          setExpandedDoc,
+          columnsMeta
+        )}
     </EuiFlexItem>
   );
 }
