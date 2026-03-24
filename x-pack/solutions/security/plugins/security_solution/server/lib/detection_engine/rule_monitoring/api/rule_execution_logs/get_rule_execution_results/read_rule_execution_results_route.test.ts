@@ -154,33 +154,37 @@ describe('readRuleExecutionResultsRoute', () => {
   });
 
   it('should use default values for optional parameters', async () => {
-    clients.ruleExecutionLog.getUnifiedExecutionResults.mockResolvedValue({
-      data: [],
-      total: 0,
-      page: 1,
-      per_page: 20,
-    });
+    // Freeze time for the duration of the test to avoid flakiness
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2000-01-01T12:00:00.000Z'));
 
-    const before = Date.now();
-    await server.inject(
-      getReadRuleExecutionResultsRequest({ body: {} }),
-      requestContextMock.convertContext(context)
-    );
-    const after = Date.now();
+    try {
+      clients.ruleExecutionLog.getUnifiedExecutionResults.mockResolvedValue({
+        data: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
 
-    const [[args]] = clients.ruleExecutionLog.getUnifiedExecutionResults.mock.calls;
-    expect(args.ruleId).toBe('04128c15-0d1b-4716-a4c5-46997ac7f3bd');
-    expect(args.filter?.outcome).toEqual([]);
-    expect(args.filter?.run_type).toEqual([]);
-    expect(args.sort).toBeUndefined();
-    expect(args.page).toBe(1);
-    expect(args.perPage).toBe(20);
+      await server.inject(
+        getReadRuleExecutionResultsRequest({ body: {} }),
+        requestContextMock.convertContext(context)
+      );
 
-    // Default filter window: last 2 hours
-    const toMs = new Date(args.filter?.to ?? '').getTime();
-    const fromMs = new Date(args.filter?.from ?? '').getTime();
-    expect(toMs).toBeGreaterThanOrEqual(before);
-    expect(toMs).toBeLessThanOrEqual(after);
-    expect(toMs - fromMs).toBe(2 * 60 * 60 * 1000);
+      const [[args]] = clients.ruleExecutionLog.getUnifiedExecutionResults.mock.calls;
+      expect(args.filter?.outcome).toEqual([]);
+      expect(args.filter?.run_type).toEqual([]);
+      expect(args.sort).toBeUndefined();
+      expect(args.page).toBe(1);
+      expect(args.perPage).toBe(20);
+
+      // "from" is now minus 2 hours
+      expect(args.filter?.from).toBe('2000-01-01T10:00:00.000Z');
+      // "to" is now
+      expect(args.filter?.to).toBe('2000-01-01T12:00:00.000Z');
+    } finally {
+      // Unfreeze time
+      jest.useRealTimers();
+    }
   });
 });

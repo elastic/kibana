@@ -51,7 +51,7 @@ import {
   RULE_SAVED_OBJECT_TYPE,
 } from '../../event_log/event_log_constants';
 import * as f from '../../event_log/event_log_fields';
-import { buildUnifiedExecutionEventFilter } from './build_unified_execution_event_filter';
+import { constructUnifiedExecutionEventKqlFilter } from './construct_unified_execution_event_kql_filter';
 import { mapEventToUnifiedResult } from './map_event_to_unified_result';
 
 export interface IEventLogReader {
@@ -227,7 +227,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
 
       const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
         return eventLog.findEventsBySavedObjectIds(RULE_SAVED_OBJECT_TYPE, [ruleId], {
-          filter: buildUnifiedExecutionEventFilter({ outcome, runType }),
+          filter: constructUnifiedExecutionEventKqlFilter({ outcome, runType }),
           sort: [{ sort_field: mapUnifiedSortField(sortField), sort_order: sortOrder }],
           page,
           per_page: perPage,
