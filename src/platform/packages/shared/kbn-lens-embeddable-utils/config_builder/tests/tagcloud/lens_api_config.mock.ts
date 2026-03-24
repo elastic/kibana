@@ -101,7 +101,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    label: { visible: false },
+    caption: { visible: false },
   },
   tag_by: {
     operation: 'terms',
@@ -164,7 +164,7 @@ export const comprehensiveTagcloudWithDataView = {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    label: { visible: false },
+    caption: { visible: false },
   },
   tag_by: {
     operation: 'terms',
@@ -226,7 +226,7 @@ export const comprehensiveEsqlTagcloud = {
   metric: {
     operation: 'value',
     column: 'bytes',
-    label: { visible: false },
+    caption: { visible: false },
   },
   tag_by: {
     operation: 'value',

@@ -517,8 +517,10 @@ describe('XY', () => {
                     label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { visible: true },
-                    text_field: 'order_id',
+                    text: {
+                      visible: true,
+                      field: 'order_id',
+                    },
                     color: {
                       type: 'static',
                       color: '#0000ff',
