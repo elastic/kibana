@@ -38,7 +38,6 @@ export async function getDataStreamDetails({
 
   // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
   const esClientAsCurrentUser = esClient.asCurrentUser;
-  const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
 
   const dataStreamPrivileges = (
     await datasetQualityPrivileges.getHasIndexPrivileges(
@@ -80,7 +79,7 @@ export async function getDataStreamDetails({
     const avgDocSizeInBytes =
       dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
         ? isServerless
-          ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
+          ? await getMeteringAvgDocSizeInBytes(esClient.asSecondaryAuthUser, dataStream)
           : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
         : 0;
 

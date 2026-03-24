@@ -35,6 +35,16 @@ class DatasetQualityPrivileges {
 
       return indexPrivileges.index;
     } catch (error) {
+      if (error instanceof errors.ResponseError && isSecurityDisabledError(error)) {
+        return Object.fromEntries(
+          indexes.map((index) => [
+            index,
+            Object.fromEntries(
+              privileges.map((p) => [p, true])
+            ) as unknown as SecurityHasPrivilegesPrivileges,
+          ])
+        );
+      }
       if (
         error instanceof errors.ResponseError &&
         isUnknownPrivilegeError(error, FAILURE_STORE_PRIVILEGES)
@@ -81,20 +91,27 @@ class DatasetQualityPrivileges {
     esClient: ElasticsearchClient,
     space = '*'
   ): Promise<boolean> {
-    const applicationPrivileges = await esClient.security.hasPrivileges({
-      application: [
-        {
-          application: 'kibana-.kibana',
-          privileges: ['feature_fleet.read'],
-          resources: [space],
-        },
-      ],
-    });
+    try {
+      const applicationPrivileges = await esClient.security.hasPrivileges({
+        application: [
+          {
+            application: 'kibana-.kibana',
+            privileges: ['feature_fleet.read'],
+            resources: [space],
+          },
+        ],
+      });
 
-    return (
-      applicationPrivileges.application?.['kibana-.kibana']?.[space]?.['feature_fleet.read'] ??
-      false
-    );
+      return (
+        applicationPrivileges.application?.['kibana-.kibana']?.[space]?.['feature_fleet.read'] ??
+        false
+      );
+    } catch (error) {
+      if (error instanceof errors.ResponseError && isSecurityDisabledError(error)) {
+        return true;
+      }
+      throw error;
+    }
   }
 
   public async getDatasetPrivileges(
@@ -176,6 +193,11 @@ class DatasetQualityPrivileges {
 }
 
 export const datasetQualityPrivileges = new DatasetQualityPrivileges();
+
+function isSecurityDisabledError(error: errors.ResponseError): boolean {
+  const body = error.body as { error?: string } | undefined;
+  return Boolean(body?.error && body.error.includes('no handler found'));
+}
 
 function isUnknownPrivilegeError(
   error: errors.ResponseError,

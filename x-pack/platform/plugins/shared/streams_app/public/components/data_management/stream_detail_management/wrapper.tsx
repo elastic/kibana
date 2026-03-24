@@ -231,7 +231,7 @@ export function Wrapper({
                 defaultMessage: 'Replicated stream',
               })}
               color="warning"
-              iconType="iInCircle"
+              iconType="warning"
             >
               {i18n.translate('xpack.streams.replicated.callout.body', {
                 defaultMessage:

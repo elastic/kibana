@@ -577,6 +577,7 @@ export class StreamsClient {
         const privileges = await checkAccess({
           name,
           esClient: this.dependencies.esClient,
+          isSecurityEnabled: this.dependencies.isSecurityEnabled,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -604,7 +605,11 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, esClient: this.dependencies.esClient }).then((privileges) => {
+      checkAccess({
+        name,
+        esClient: this.dependencies.esClient,
+        isSecurityEnabled: this.dependencies.isSecurityEnabled,
+      }).then((privileges) => {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
@@ -868,11 +873,16 @@ export class StreamsClient {
       )
       .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
+    if (!this.dependencies.isSecurityEnabled) {
+      return streams;
+    }
+
     const privileges = await checkAccessBulk({
       names: streams
         .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
       esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {

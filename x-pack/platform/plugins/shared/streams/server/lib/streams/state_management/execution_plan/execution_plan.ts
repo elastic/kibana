@@ -140,6 +140,11 @@ export class ExecutionPlan {
       return true;
     }
 
+    // Skip permission checks when security is disabled
+    if (!this.dependencies.isSecurityEnabled) {
+      return true;
+    }
+
     // Use security API to check if user has all required permissions
     const securityClient = this.dependencies.esClient.security;
 
