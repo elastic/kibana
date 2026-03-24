@@ -191,7 +191,8 @@ export class EncryptedSavedObjectsService {
    * @param type Saved object type.
    */
   public getEncryptedAttributes(type: string): ReadonlySet<string> | undefined {
-    return this.typeDefinitions.get(type)?.attributesToEncrypt;
+    const attributes = this.typeDefinitions.get(type)?.attributesToEncrypt;
+    return attributes ? new Set(attributes) : undefined;
   }
 
   /**

@@ -63,7 +63,7 @@ const result = await savedObjectsClient.esql({
   namespaces: ['default'],
   metadata: ['_id', '_source'],
   // generates: FROM .kibana METADATA _id, _source | WHERE ...
-  pipeline: '| WHERE my-type.title LIKE "test*" | LIMIT 100',
+  pipeline: '| WHERE my_type.title LIKE "test*" | LIMIT 100',
 });
 ```
 
@@ -85,14 +85,14 @@ import { esql } from '@kbn/esql-language';
 const userInput = req.body.searchTerm;
 
 const pipeline = esql`
-  | WHERE my-type.title LIKE ${{ searchTerm: userInput }}
+  | WHERE my_type.title LIKE ${{ searchTerm: userInput }}
   | LIMIT 100
 `;
 
 const params = pipeline.getParams();
 
 const result = await savedObjectsClient.esql({
-  type: ['my-type'],
+  type: ['my_type'],
   namespaces: ['default'],
   pipeline: pipeline.print(),
   // Convert named params to the format expected by the ES client.
@@ -104,7 +104,7 @@ const result = await savedObjectsClient.esql({
 });
 ```
 
-The pipeline sent to Elasticsearch will be `| WHERE my-type.title LIKE ?searchTerm | LIMIT 100` — with `searchTerm` as a separate parameter, never interpolated into the pipeline string.
+The pipeline sent to Elasticsearch will be `| WHERE my_type.title LIKE ?searchTerm | LIMIT 100` — with `searchTerm` as a separate parameter, never interpolated into the pipeline string.
 
 <DocCallOut title="Avoid the plain ${value} syntax for user input">
   The composer also supports a plain `${value}` syntax (without the double braces), but this **inlines** the value directly into the query string as an escaped literal (e.g., `"O\"Brien"`). While the escaping provides some protection, it is NOT true parameterization. Use `${{ name: value }}` for any untrusted input. The plain `${value}` syntax is acceptable for developer-controlled constants like column names.
@@ -116,9 +116,9 @@ ES|QL also supports positional `?` placeholders natively. Params are plain value
 
 ```ts
 const result = await savedObjectsClient.esql({
-  type: ['my-type'],
+  type: ['my_type'],
   namespaces: ['default'],
-  pipeline: '| WHERE my-type.title LIKE ? | LIMIT 100',
+  pipeline: '| WHERE my_type.title LIKE ? | LIMIT 100',
   params: [userInput],
 });
 ```

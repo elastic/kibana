@@ -200,7 +200,10 @@ export interface ISavedObjectsRepository {
   ): Promise<SavedObjectsSearchResponse<T, A>>;
 
   /**
-   * Performs an ES|QL query against the saved objects indices, returning the raw Elasticsearch response
+   * Performs an ES|QL query against the saved objects indices, returning the raw Elasticsearch response.
+   * Callers provide only the processing pipeline (everything after `FROM`) via `options.pipeline`.
+   * The `FROM` clause is auto-generated from `options.type` via index resolution, and source commands
+   * (`FROM`, `ROW`, `SHOW`, `METRICS`) in the pipeline are rejected.
    * @param options {@link SavedObjectsEsqlOptions} - options for the ES|QL query operation
    * @returns the {@link SavedObjectsEsqlResponse}
    *

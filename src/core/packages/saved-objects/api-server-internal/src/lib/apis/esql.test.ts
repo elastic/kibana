@@ -430,7 +430,8 @@ describe('esql', () => {
     });
 
     it('should not attempt _source decryption when _source column is missing', async () => {
-      encryptionExtension.isEncryptableType.mockReturnValue(false);
+      encryptionExtension.isEncryptableType.mockReturnValue(true);
+      encryptionExtension.getEncryptedAttributes.mockReturnValue(new Set(['secret']));
       client.esql.query.mockResolvedValue(MOCK_ESQL_RESPONSE as any);
 
       await repository.esql(options);
