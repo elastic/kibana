@@ -35,7 +35,7 @@ export function registerAgentBuilderTools({
     createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server,
-      logger: logger.get('search_knowledge_indicators_tool'),
+      logger: logger.get('search_kis_tool'),
     }),
   ];
 
