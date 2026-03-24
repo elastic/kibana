@@ -71,6 +71,10 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
+import type {
+  EditorCommand,
+  JumpToStepEntry,
+} from '../../../features/actions_menu_popover/ui/actions_menu';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
@@ -117,6 +121,8 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineNumbers: 'on',
   glyphMargin: true,
   scrollBeyondLastLine: false,
+  folding: true,
+  showFoldingControls: 'always',
   tabSize: 2,
   lineNumbersMinChars: 2,
   insertSpaces: true,
@@ -586,6 +592,57 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
+  const editorCommands: EditorCommand[] = useMemo(
+    () => [
+      { id: 'foldAll', label: 'Collapse all' },
+      { id: 'unfoldAll', label: 'Expand all' },
+      { id: 'find', label: 'Find and Replace' },
+    ],
+    []
+  );
+
+  const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
+    if (!workflowLookup) return [];
+    return Object.entries(workflowLookup.steps).map(([stepId, stepInfo]) => ({
+      id: stepId,
+      label: `#${stepId}`,
+      lineStart: stepInfo.lineStart,
+    }));
+  }, [workflowLookup]);
+
+  const handleCommandSelected = useCallback(
+    (commandId: string) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      switch (commandId) {
+        case 'foldAll':
+          editor.trigger('actionsMenu', 'editor.foldAll', null);
+          break;
+        case 'unfoldAll':
+          editor.trigger('actionsMenu', 'editor.unfoldAll', null);
+          break;
+        case 'find':
+          editor.trigger('actionsMenu', 'actions.find', null);
+          break;
+      }
+      closeActionsPopover();
+      editor.focus();
+    },
+    [closeActionsPopover]
+  );
+
+  const handleJumpToStep = useCallback(
+    (lineNumber: number) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      editor.revealLineInCenter(lineNumber);
+      editor.setPosition({ lineNumber, column: 1 });
+      closeActionsPopover();
+      editor.focus();
+    },
+    [closeActionsPopover]
+  );
+
   const options = useMemo(() => {
     return { ...editorOptions, readOnly: isExecutionYaml };
   }, [isExecutionYaml]);
@@ -645,6 +702,10 @@ export const WorkflowYAMLEditor = ({
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
         panelProps={{ css: styles.actionsMenuPopoverPanel }}
+        commands={editorCommands}
+        jumpToStepEntries={jumpToStepEntries}
+        onCommandSelected={handleCommandSelected}
+        onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}

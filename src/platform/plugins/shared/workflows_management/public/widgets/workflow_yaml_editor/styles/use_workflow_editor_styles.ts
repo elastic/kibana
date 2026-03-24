@@ -20,9 +20,11 @@ export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
  */
 export const useWorkflowEditorStyles = () => {
   return useMemoCss({
-    actionsMenuPopoverPanel: css({
-      minInlineSize: '600px',
-    }),
+    actionsMenuPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
+      css({
+        minInlineSize: '600px',
+        borderRadius: euiTheme.border.radius.medium,
+      }),
 
     container: ({ euiTheme }: UseEuiTheme) =>
       css({

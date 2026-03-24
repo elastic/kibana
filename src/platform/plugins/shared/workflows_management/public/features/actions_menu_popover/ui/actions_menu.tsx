@@ -38,11 +38,32 @@ import {
   isActionOption,
 } from '../types';
 
-export interface ActionsMenuProps {
-  onActionSelected: (action: ActionOptionData) => void;
+export interface EditorCommand {
+  id: string;
+  label: string;
 }
 
-export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
+export interface JumpToStepEntry {
+  id: string;
+  label: string;
+  lineStart: number;
+}
+
+export interface ActionsMenuProps {
+  onActionSelected: (action: ActionOptionData) => void;
+  commands?: EditorCommand[];
+  jumpToStepEntries?: JumpToStepEntry[];
+  onCommandSelected?: (commandId: string) => void;
+  onJumpToStep?: (lineNumber: number) => void;
+}
+
+export function ActionsMenu({
+  onActionSelected,
+  commands,
+  jumpToStepEntries,
+  onCommandSelected,
+  onJumpToStep,
+}: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
@@ -249,6 +270,9 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
       searchProps={{
         id: 'actions-menu-search',
         name: 'actions-menu-search',
+        placeholder: i18n.translate('workflows.actionsMenu.searchPlaceholder', {
+          defaultMessage: 'Search step, command or # to go to a step',
+        }),
         value: searchTerm,
         onChange: handleSearchChange,
       }}
@@ -268,8 +292,8 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 {currentPath.length === 0 ? (
                   <h3>
                     <FormattedMessage
-                      id="workflows.actionsMenu.selectAction"
-                      defaultMessage="Select an action"
+                      id="workflows.actionsMenu.title"
+                      defaultMessage="Actions menu"
                     />
                   </h3>
                 ) : (
@@ -289,12 +313,160 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
             <EuiFlexItem>{search}</EuiFlexItem>
           </EuiFlexGroup>
 
+          <EuiTitle size="xxxs" css={styles.sectionLabel}>
+            <h4>
+              <FormattedMessage id="workflows.actionsMenu.addStep" defaultMessage="Add step" />
+            </h4>
+          </EuiTitle>
           {list}
+          {searchTerm.length > 0 && currentPath.length === 0 && (
+            <EuiFlexGroup
+              css={styles.viewAllSteps}
+              justifyContent="spaceBetween"
+              alignItems="center"
+            >
+              <EuiButtonEmpty
+                size="xs"
+                iconType="arrowRight"
+                iconSide="right"
+                onClick={() => {
+                  setSearchTerm('');
+                  setOptions(defaultOptions);
+                }}
+              >
+                <FormattedMessage
+                  id="workflows.actionsMenu.viewAllSteps"
+                  defaultMessage="View all steps"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexGroup>
+          )}
+          <CommandsAndStepsSection
+            searchTerm={searchTerm}
+            commands={commands}
+            jumpToStepEntries={jumpToStepEntries}
+            onCommandSelected={onCommandSelected}
+            onJumpToStep={onJumpToStep}
+          />
         </>
       )}
     </EuiSelectable>
   );
 }
+
+function CommandsAndStepsSection({
+  searchTerm,
+  commands,
+  jumpToStepEntries,
+  onCommandSelected,
+  onJumpToStep,
+}: {
+  searchTerm: string;
+  commands?: EditorCommand[];
+  jumpToStepEntries?: JumpToStepEntry[];
+  onCommandSelected?: (commandId: string) => void;
+  onJumpToStep?: (lineNumber: number) => void;
+}) {
+  const styles = useMemoCss(sectionStyles);
+
+  const term = searchTerm.trim().toLowerCase();
+  const isJumpToStepSearch = searchTerm.trimStart().startsWith('#');
+
+  const filteredCommands = useMemo(
+    () => (commands ?? []).filter((cmd) => !term || cmd.label.toLowerCase().includes(term)),
+    [commands, term]
+  );
+
+  const jumpTerm = isJumpToStepSearch ? term.slice(1).trim() : '';
+  const filteredSteps = useMemo(
+    () =>
+      isJumpToStepSearch
+        ? (jumpToStepEntries ?? []).filter(
+            (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
+          )
+        : [],
+    [jumpToStepEntries, jumpTerm, isJumpToStepSearch]
+  );
+
+  if (filteredCommands.length === 0 && filteredSteps.length === 0) return null;
+
+  return (
+    <div css={styles.container}>
+      {filteredCommands.length > 0 && (
+        <>
+          <EuiTitle size="xxxs" css={styles.sectionTitle}>
+            <h4>
+              <FormattedMessage
+                id="workflows.actionsMenu.commandsSection"
+                defaultMessage="Commands"
+              />
+            </h4>
+          </EuiTitle>
+          {filteredCommands.map((cmd) => (
+            <button
+              key={cmd.id}
+              type="button"
+              css={styles.entry}
+              onClick={() => onCommandSelected?.(cmd.id)}
+            >
+              <EuiHighlight search={searchTerm}>{cmd.label}</EuiHighlight>
+            </button>
+          ))}
+        </>
+      )}
+      {filteredSteps.length > 0 && (
+        <>
+          <EuiTitle size="xxxs" css={styles.sectionTitle}>
+            <h4>
+              <FormattedMessage
+                id="workflows.actionsMenu.jumpToStepSection"
+                defaultMessage="Jump to a step"
+              />
+            </h4>
+          </EuiTitle>
+          {filteredSteps.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              css={styles.entry}
+              onClick={() => onJumpToStep?.(entry.lineStart)}
+            >
+              <EuiHighlight search={searchTerm}>{entry.label}</EuiHighlight>
+            </button>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+const sectionStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingBottom: euiTheme.size.s,
+    }),
+  sectionTitle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.xxs}`,
+      color: euiTheme.colors.textSubdued,
+      borderTop: euiTheme.border.thin,
+    }),
+  entry: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'block',
+      width: '100%',
+      textAlign: 'left',
+      padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: euiTheme.size.m,
+      color: euiTheme.colors.textParagraph,
+      '&:hover': {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+    }),
+};
 
 const componentStyles = {
   selectable: ({ euiTheme }: UseEuiTheme) =>
@@ -314,6 +486,17 @@ const componentStyles = {
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
+    }),
+  sectionLabel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.xs}`,
+      color: euiTheme.colors.textSubdued,
+      borderTop: euiTheme.border.thin,
+    }),
+  viewAllSteps: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+      borderTop: euiTheme.border.thin,
     }),
   actionOption: css({
     gap: '12px',
