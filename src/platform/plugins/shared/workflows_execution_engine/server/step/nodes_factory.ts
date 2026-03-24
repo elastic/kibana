@@ -382,6 +382,7 @@ export class NodesFactory {
           workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
           workflowLogger: this.workflowLogger,
+          maxWorkflowDepth: this.dependencies.workflowsExecutionEngine.getMaxWorkflowDepth(),
         });
       case 'workflow.output':
         this.workflowLogger.logDebug(`Creating workflow.output step`, {
