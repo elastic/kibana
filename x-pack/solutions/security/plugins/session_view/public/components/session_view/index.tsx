@@ -440,7 +440,7 @@ export const SessionView = ({
               <EuiButtonIcon
                 isSelected={showTTY}
                 display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
+                iconType="chartWaterfall"
                 onClick={onToggleTTY}
                 size="m"
                 aria-label={TOGGLE_TTY_PLAYER}
@@ -473,7 +473,7 @@ export const SessionView = ({
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               onClick={toggleDetailPanel}
-              iconType="list"
+              iconType="listBullet"
               aria-label={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
                 defaultMessage: 'Open details panel',
               })}

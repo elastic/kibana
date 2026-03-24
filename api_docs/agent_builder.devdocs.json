@@ -119,7 +119,7 @@
       "label": "AgentBuilderPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 74,
+      "lineNumber": 73,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -137,7 +137,7 @@
         "\nPublic start contract for the browser-side agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 76,
+      "lineNumber": 75,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -161,7 +161,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 80,
+          "lineNumber": 79,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -185,7 +185,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 84,
+          "lineNumber": 83,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -209,7 +209,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 88,
+          "lineNumber": 87,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -233,7 +233,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 92,
+          "lineNumber": 91,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -254,7 +254,7 @@
             "OpenConversationSidebarReturn"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 96,
+          "lineNumber": 95,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -273,7 +273,7 @@
                 " | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 113,
+              "lineNumber": 112,
               "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
@@ -299,7 +299,7 @@
             " | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 114,
+          "lineNumber": 113,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -316,7 +316,7 @@
                 " | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 119,
+              "lineNumber": 118,
               "columnNumber": 16,
               "deprecated": false,
               "trackAdoption": false,
@@ -338,7 +338,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 120,
+          "lineNumber": 119,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -354,7 +354,7 @@
                 "EmbeddableConversationProps"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 120,
+              "lineNumber": 119,
               "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
@@ -374,7 +374,7 @@
             "() => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 121,
+          "lineNumber": 120,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -396,7 +396,7 @@
             "<string, Record<string, unknown>>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 122,
+          "lineNumber": 121,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -415,7 +415,7 @@
                 "<string, Record<string, unknown>>"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 128,
+              "lineNumber": 127,
               "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
@@ -445,7 +445,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 129,
+          "lineNumber": 128,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -463,7 +463,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 149,
+              "lineNumber": 148,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -482,7 +482,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 150,
+              "lineNumber": 149,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -495,13 +495,13 @@
               "tags": [],
               "label": "origin",
               "description": [
-                "- The origin reference object (shape depends on attachment type)"
+                "- Origin string for the attachment (e.g. saved object id); same value passed to `resolve` on the server"
               ],
               "signature": [
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 151,
+              "lineNumber": 150,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -2185,7 +2185,7 @@
               },
               ") => Promise<",
               "AttachmentInput",
-              "<string, Record<string, unknown>> | undefined>"
+              "<string, unknown> | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
             "lineNumber": 92,
