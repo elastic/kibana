@@ -12,7 +12,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
-  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
   ENTITY_ANALYTICS_WATCHLISTS_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
@@ -90,33 +90,32 @@ const eaOverviewLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
-  // Hide overview when threat hunting is enabled
-  hideWhenExperimentalKey: 'entityThreatHuntingEnabled',
+  hideWhenExperimentalKey: 'entityAnalyticsNewHomePageEnabled',
 };
 
-const threatHuntingLinks: LinkItem = {
-  id: SecurityPageName.entityAnalyticsThreatHunting,
-  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting', {
-    defaultMessage: 'Entity Threat Hunting',
+const homePageLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHomePage,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage', {
+    defaultMessage: 'Entity Analytics',
   }),
   description: i18n.translate(
-    'xpack.securitySolution.navigation.entityAnalytics.threatHunting.description',
+    'xpack.securitySolution.navigation.entityAnalytics.homePage.description',
     {
       defaultMessage:
-        'Threat hunting interface for analyzing entity risk scores, anomalies, and investigating potential security threats across users, hosts, and services.',
+        'Entity analytics interface for analyzing entity risk scores, anomalies, and investigating potential security threats across users, hosts, and services.',
     }
   ),
-  path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting.keywords', {
-      defaultMessage: 'threat hunting',
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage.keywords', {
+      defaultMessage: 'entity analytics',
     }),
   ],
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
-  experimentalKey: 'entityThreatHuntingEnabled',
+  experimentalKey: 'entityAnalyticsNewHomePageEnabled',
 };
 
 export const entityAnalyticsLinks: LinkItem = {
@@ -129,7 +128,7 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks, threatHuntingLinks, watchlistsLinks],
+  links: [eaOverviewLinks, privMonLinks, homePageLinks, watchlistsLinks],
   hideTimeline: true,
   skipUrlState: true,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
