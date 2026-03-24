@@ -13,7 +13,6 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
