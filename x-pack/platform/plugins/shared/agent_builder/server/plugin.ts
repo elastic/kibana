@@ -9,6 +9,11 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import {
+  AGENT_BUILDER_INFERENCE_FEATURE_ID,
+  AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
+  AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
+} from '@kbn/agent-builder-common/constants';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -75,6 +80,24 @@ export class AgentBuilderPlugin
       this.logger.info('AgentBuilder telemetry initialized');
     } else {
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
+    }
+
+    if (setupDeps.searchInferenceEndpoints) {
+      setupDeps.searchInferenceEndpoints.features.register({
+        featureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
+        featureName: 'Agent Builder',
+        featureDescription: 'Parent feature for Agent Builder',
+        taskType: 'chat_completion',
+        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
+      });
+
+      setupDeps.searchInferenceEndpoints.features.register({
+        featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
+        featureName: 'Agent Builder',
+        featureDescription: 'Agent Builder inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
+      });
     }
 
     // Register server-side EBT events for Agent Builder
