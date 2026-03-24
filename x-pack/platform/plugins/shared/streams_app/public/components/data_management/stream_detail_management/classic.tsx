@@ -95,29 +95,27 @@ export function ClassicStreamDetailManagement({
 
   const tabs: ManagementTabs = {};
 
-  if (definition.data_stream_exists && !definition.replicated) {
-    tabs.retention = {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+  tabs.retention = {
+    content: (
+      <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+          defaultMessage:
+            'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+        })}
+      >
+        <span data-test-subj="retentionTab" tabIndex={0}>
+          {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+            defaultMessage: 'Retention',
           })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    };
-    if (processing) {
-      tabs.processing = processing;
-    }
+        </span>
+      </EuiToolTip>
+    ),
+  };
+  if (processing && !definition.replicated) {
+    tabs.processing = processing;
   }
 
   tabs.schema = {
