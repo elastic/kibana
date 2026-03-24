@@ -12,13 +12,14 @@ import {
   EuiText,
   EuiSpacer,
   EuiListGroup,
+  EuiDescriptionList,
   EuiTablePagination,
   useEuiTheme,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -63,80 +64,90 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     (activePage + 1) * pageSize
   );
 
-  // Helper function to create description list items
-  const createDescriptionListItem = useCallback(
-    (title: string, value: React.ReactNode, dataTestSubj?: string) => ({
-      label: (
-        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj={dataTestSubj}>
-          <EuiFlexItem
-            grow={false}
+  const overviewMetadataRows = useMemo(() => {
+    const labelMinWidthPx = euiTheme.base * 11.25;
+
+    const title = (text: string) => (
+      <EuiText size="xs">
+        <strong>{text}</strong>
+      </EuiText>
+    );
+
+    const rows: Array<{
+      title: NonNullable<React.ReactNode>;
+      description: NonNullable<React.ReactNode>;
+    }> = [
+      {
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+            defaultMessage: 'Data stream',
+          })
+        ),
+        description: (
+          <EuiText
+            color="primary"
+            size="s"
             css={css`
-              min-width: ${euiTheme.base * 11.25}px;
+              word-break: break-word;
+              overflow-wrap: anywhere;
             `}
           >
-            <EuiText size="xs">
-              <strong>{title}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{value}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    }),
-    [euiTheme.base]
-  );
+            {metricItem.dataStream ?? ''}
+          </EuiText>
+        ),
+      },
+      {
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+            defaultMessage: 'Field type',
+          })
+        ),
+        description: (
+          <div>
+            <EuiBadge>{metricItem.fieldTypes?.[0] ?? ''}</EuiBadge>
+          </div>
+        ),
+      },
+    ];
 
-  // Create description list items
-  const descriptionListItems = useMemo(
-    () => [
-      createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-          defaultMessage: 'Data stream',
-        }),
-        <EuiText color="primary" size="s">
-          {metricItem.dataStream ?? ''}
-        </EuiText>
-      ),
-      createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-          defaultMessage: 'Field type',
-        }),
-        <div>
-          <EuiBadge>{metricItem.fieldTypes?.[0] ?? ''}</EuiBadge>
-        </div>
-      ),
-      ...(unitLabel
-        ? [
-            createDescriptionListItem(
-              i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                defaultMessage: 'Metric unit',
-              }),
-              <div>
-                <EuiBadge>{unitLabel}</EuiBadge>
-              </div>,
-              'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
-            ),
-          ]
-        : []),
-      ...(metricItem.metricTypes?.[0]
-        ? [
-            createDescriptionListItem(
-              i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                defaultMessage: 'Metric type',
-              }),
-              <MetricTypeBadge instrument={metricItem.metricTypes?.[0]} />,
-              'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
-            ),
-          ]
-        : []),
-    ],
-    [
-      metricItem.dataStream,
-      metricItem.fieldTypes,
-      metricItem.metricTypes,
-      unitLabel,
-      createDescriptionListItem,
-    ]
-  );
+    if (unitLabel) {
+      rows.push({
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+            defaultMessage: 'Metric unit',
+          })
+        ),
+        description: (
+          <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
+            <EuiBadge>{unitLabel}</EuiBadge>
+          </div>
+        ),
+      });
+    }
+
+    if (metricItem.metricTypes?.[0]) {
+      rows.push({
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+            defaultMessage: 'Metric type',
+          })
+        ),
+        description: (
+          <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
+            <MetricTypeBadge instrument={metricItem.metricTypes?.[0]} />
+          </div>
+        ),
+      });
+    }
+
+    return { rows, labelMinWidthPx };
+  }, [
+    euiTheme.base,
+    metricItem.dataStream,
+    metricItem.fieldTypes,
+    metricItem.metricTypes,
+    unitLabel,
+  ]);
 
   useWindowSize(); // trigger re-render on window resize to recalculate the container height
 
@@ -171,23 +182,48 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           padding: ${euiTheme.size.xs} ${euiTheme.size.m};
         `}
       >
-        <EuiListGroup
+        <EuiDescriptionList
+          compressed
+          type="column"
+          align="left"
+          columnWidths={[`${overviewMetadataRows.labelMinWidthPx}px`, '1fr']}
+          listItems={overviewMetadataRows.rows}
           data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
-          listItems={descriptionListItems}
-          flush
-          gutterSize="none"
-          wrapText
-          maxWidth={false}
+          titleProps={{
+            css: css`
+              min-width: ${overviewMetadataRows.labelMinWidthPx}px;
+            `,
+          }}
+          descriptionProps={{
+            css: css`
+              min-width: 0;
+            `,
+          }}
           css={css`
-            .euiListGroupItem:not(:last-child) {
+            align-items: stretch;
+            row-gap: 2px;
+            column-gap: 0;
+
+            & > .euiDescriptionList__title,
+            & > .euiDescriptionList__description {
+              padding: ${euiTheme.size.s} ${euiTheme.size.xs};
+            }
+
+            & > .euiDescriptionList__title {
+              display: flex;
+              align-items: center;
+            }
+
+            & > * {
               border-bottom: ${euiTheme.border.thin};
             }
-            .euiListGroupItem__text {
-              padding: ${euiTheme.size.s} ${euiTheme.size.xs};
+            & > *:nth-last-child(-n + 2) {
+              border-bottom: none;
             }
           `}
         />
       </EuiPanel>
+
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>
           <EuiSpacer size="m" />
