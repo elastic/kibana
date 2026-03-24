@@ -7,14 +7,20 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ConversationRightActions } from '../conversation_header/conversation_actions_right';
-import { ConversationLeftActions } from '../conversation_header/conversation_actions_left';
 import { ConversationTitle } from '../conversation_header/conversation_title';
+import { EmbeddableMenuButton } from './embeddable_menu_button';
+import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
 
-const centerSectionStyles = css`
-  align-items: center;
-`;
+const newConversationTitleLabel = i18n.translate(
+  'xpack.agentBuilder.embeddableHeader.newConversation',
+  {
+    defaultMessage: 'New Conversation',
+  }
+);
 
 interface EmbeddableConversationHeaderProps {
   onClose?: () => void;
@@ -27,24 +33,66 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
+  const { euiTheme } = useEuiTheme();
+  const agentId = useAgentId();
+  const { agents } = useAgentBuilderAgents();
+  const hasActiveConversation = useHasActiveConversation();
+  const currentAgent = agents.find((a) => a.id === agentId);
+
   return (
-    <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <ConversationLeftActions />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true} css={centerSectionStyles}>
-        <ConversationTitle
-          ariaLabelledBy={ariaLabelledBy}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ConversationRightActions
-          onClose={onClose}
-          onRenameConversation={() => setIsEditing(true)}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div
+      css={css`
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        width: 100%;
+      `}
+    >
+      <EmbeddableMenuButton />
+
+      {/* Center: title + agent subtitle — overflow hidden ensures nothing escapes the column */}
+      <div
+        css={css`
+          overflow: hidden;
+        `}
+      >
+        {hasActiveConversation ? (
+          <ConversationTitle
+            ariaLabelledBy={ariaLabelledBy}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+          />
+        ) : (
+          <h4
+            id={ariaLabelledBy}
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `}
+          >
+            {newConversationTitleLabel}
+          </h4>
+        )}
+        {currentAgent && (
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `}
+          >
+            {currentAgent.name}
+          </EuiText>
+        )}
+      </div>
+
+      {/* Right: kebab menu + close */}
+      <ConversationRightActions onClose={onClose} onRenameConversation={() => setIsEditing(true)} />
+    </div>
   );
 };

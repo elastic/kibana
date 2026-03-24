@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -43,7 +43,6 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
   const hasActiveConversation = useHasActiveConversation();
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
-  const [isHovering, setIsHovering] = useState(false);
   const [previousTitle, setPreviousTitle] = useState('');
   const [currentText, setCurrentText] = useState('');
 
@@ -74,9 +73,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
 
   const displayedTitle = currentText || previousTitle;
 
-  const handlePencilClick = () => {
+  const handleRenameClick = () => {
     setIsEditing(true);
-    setIsHovering(false);
   };
 
   const handleCancel = () => {
@@ -92,42 +90,42 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
     return <RenameConversationInput onCancel={handleCancel} />;
   }
 
-  const titleStyles = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-  `;
-
-  // Only show rename icon when there is a conversation ID !== 'new'
+  // Only show rename icon when there is a persisted conversation ID
   const canRename = hasPersistedConversation;
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      responsive={false}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+    <div
+      css={css`
+        display: inline-flex;
+        max-width: 100%;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+      `}
       data-test-subj="agentBuilderConversationTitle"
     >
-      <EuiFlexItem grow={false}>
-        <h4 id={ariaLabelledBy} css={titleStyles}>
-          {displayedTitle}
-        </h4>
-      </EuiFlexItem>
+      <h4
+        id={ariaLabelledBy}
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+          flex: 0 1 auto;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        `}
+      >
+        {displayedTitle}
+      </h4>
       {canRename && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="pencil"
-            aria-label={labels.rename}
-            onClick={handlePencilClick}
-            color="text"
-            data-test-subj="agentBuilderConversationRenameButton"
-            css={css`
-              opacity: ${isHovering ? 1 : 0};
-              transition: opacity 0.2s ease;
-            `}
-          />
-        </EuiFlexItem>
+        <EuiButtonIcon
+          iconType="arrowRight"
+          aria-label={labels.rename}
+          onClick={handleRenameClick}
+          color="text"
+          size="xs"
+          data-test-subj="agentBuilderConversationRenameButton"
+        />
       )}
-    </EuiFlexGroup>
+    </div>
   );
 };
