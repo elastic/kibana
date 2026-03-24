@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - TSVB Open in Lens - group 1', () => {
+  describe('lens app - TSVB Open in Lens - group 2', () => {
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -62,7 +62,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     after(async () => {
-      await esArchiver.unload(esArchive);
+      await esNode.unload(esArchive);
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);

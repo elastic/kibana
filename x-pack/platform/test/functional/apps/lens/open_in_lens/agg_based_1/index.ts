@@ -63,7 +63,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     after(async () => {
-      await esArchiver.unload(esArchive);
+      await esNode.unload(esArchive);
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
