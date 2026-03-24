@@ -4491,7 +4491,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.group]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.group]: Additional properties are not allowed ('group' was unexpected)]`
       );
     });
 
@@ -4510,7 +4510,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.frequency]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.frequency]: Additional properties are not allowed ('frequency' was unexpected)]`
       );
     });
 
@@ -4527,7 +4527,7 @@ describe('create()', () => {
 
       const data = getMockData({ systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.alertsFilter]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.alertsFilter]: Additional properties are not allowed ('alertsFilter' was unexpected)]`
       );
     });
 

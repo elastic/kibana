@@ -12,7 +12,7 @@ import type {
   PackageInfo,
   AgentPolicy,
   EnrollmentAPIKey,
-  FleetProxy,
+  EnrollmentSettingsProxy,
   DownloadSource,
 } from '../../../../types';
 
@@ -23,7 +23,7 @@ export interface MultiPageStep {
 
 export interface MultiPageStepLayoutProps {
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetProxy?: EnrollmentSettingsProxy;
   downloadSource?: DownloadSource;
   agentPolicy?: AgentPolicy;
   error?: Error;
