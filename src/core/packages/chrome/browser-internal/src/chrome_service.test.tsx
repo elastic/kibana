@@ -35,6 +35,9 @@ import {
   ChromelessHeader,
   ClassicHeader,
 } from '@kbn/core-chrome-browser-components';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
 import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
@@ -238,31 +241,38 @@ describe('start', () => {
     });
   });
 
-  describe('componentDeps', () => {
-    it('exposes componentDeps for use by the layout service', async () => {
-      const { chrome } = await start();
-      expect(chrome.componentDeps).toBeDefined();
-      expect(chrome.componentDeps.config).toBeDefined();
+  describe('render smoke tests', () => {
+    const buildComponentDeps = (startDeps: ReturnType<typeof defaultStartDeps>) => ({
+      application: startDeps.application,
+      http: startDeps.http,
+      docLinks: startDeps.docLinks,
+      customBranding: startDeps.customBranding,
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+      const startDeps = defaultStartDeps();
+      const { chrome } = await start({ startDeps });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          <ChromeComponentsProvider value={chrome.componentDeps}>
-            <ClassicHeader />
-          </ChromeComponentsProvider>
+          <CoreEnvContextProvider value={coreContextMock.create().env}>
+            <ChromeServiceProvider value={{ chrome }}>
+              <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
+                <ClassicHeader />
+              </ChromeComponentsProvider>
+            </ChromeServiceProvider>
+          </CoreEnvContextProvider>
         </KibanaRenderContextProvider>
       );
     });
 
     it('ChromelessHeader renders within ChromeComponentsProvider', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+      const startDeps = defaultStartDeps();
+      await start({ startDeps });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          <ChromeComponentsProvider value={chrome.componentDeps}>
+          <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
             <ChromelessHeader />
           </ChromeComponentsProvider>
         </KibanaRenderContextProvider>
@@ -687,6 +697,31 @@ describe('start', () => {
         const updatedIsCollapsed = await firstValueFrom(isCollapsed$);
         service.stop();
         expect(updatedIsCollapsed).toBe(!isCollapsed);
+      });
+    });
+
+    describe('width', () => {
+      it('should return 0 by default', async () => {
+        const { chrome, service } = await start();
+
+        expect(chrome.sideNav.getWidth()).toBe(0);
+        expect(await firstValueFrom(chrome.sideNav.getWidth$())).toBe(0);
+
+        service.stop();
+      });
+
+      it('should update the width observable', async () => {
+        const { chrome, service } = await start();
+        const widths: number[] = [];
+        const subscription = chrome.sideNav.getWidth$().subscribe((width) => widths.push(width));
+
+        chrome.sideNav.setWidth(120);
+
+        expect(chrome.sideNav.getWidth()).toBe(120);
+        expect(widths).toEqual([0, 120]);
+
+        subscription.unsubscribe();
+        service.stop();
       });
     });
   });

@@ -255,7 +255,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const onEditRuleClick = () => {
     if (useUnifiedRulesPage) {
       const { pathname, search, hash } = history.location;
-      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
+      const returnPath = `${pathname}${search}${hash}` || `/rule/${rule.id}`;
       history.push({
         pathname: getEditRuleRoute(rule.id),
         state: {
