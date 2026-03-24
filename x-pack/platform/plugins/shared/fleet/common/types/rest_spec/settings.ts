@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Settings,
-  AgentPolicy,
-  FleetServerHost,
-  FleetProxy,
-  DownloadSource,
-  Output,
-} from '../models';
+import type { Settings, AgentPolicy, FleetServerHost, DownloadSource, Output } from '../models';
 
 export interface GetSettingsResponse {
   item: Settings;
@@ -45,17 +38,23 @@ export type EnrollmentSettingsFleetServerPolicy = Pick<
   | 'data_output_id'
 >;
 
+export interface EnrollmentSettingsProxy {
+  id: string;
+  name: string;
+  url: string;
+}
+
 export interface GetEnrollmentSettingsResponse {
   fleet_server: {
     policies: EnrollmentSettingsFleetServerPolicy[];
     has_active: boolean;
     es_output?: Output;
-    es_output_proxy?: FleetProxy;
+    es_output_proxy?: EnrollmentSettingsProxy;
     host?: FleetServerHost;
-    host_proxy?: FleetProxy;
+    host_proxy?: EnrollmentSettingsProxy;
   };
   download_source?: DownloadSource;
-  download_source_proxy?: FleetProxy;
+  download_source_proxy?: EnrollmentSettingsProxy;
 }
 export interface PutSpaceSettingsRequest {
   body: {
