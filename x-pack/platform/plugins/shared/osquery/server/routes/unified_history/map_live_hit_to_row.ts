@@ -28,7 +28,7 @@ export const getField = (
 };
 
 export interface LiveActionHit {
-  _source?: Record<string, unknown>;
+  _source?: ActionSource;
   fields?: Record<string, unknown>;
   sort?: Array<string | number>;
 }
@@ -61,7 +61,7 @@ interface ActionSource {
 
 export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
   const hitFields = (hit.fields ?? {}) as Record<string, unknown>;
-  const source = (hit._source ?? {}) as ActionSource;
+  const source: ActionSource = hit._source ?? {};
 
   const get = (name: string) => getField(hitFields, source as Record<string, unknown>, name);
 

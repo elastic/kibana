@@ -77,12 +77,12 @@ describe('osqueryResponseAction', () => {
 
       expect(mockService.create).toHaveBeenCalledTimes(1);
       const createParams = mockService.create.mock.calls[0][0];
-      expect(createParams.pack_id).toBeUndefined();
+      expect(createParams).not.toHaveProperty('pack_id');
       expect(createParams.saved_query_id).toBe('saved-1');
       expect(createParams.ecs_mapping).toEqual({ 'process.name': { field: 'name' } });
     });
 
-    it('passes pack_id in per-alert calls when queries contain dynamic parameters', async () => {
+    it('passes pack_id in per-alert calls when queries contain dynamic parameters', () => {
       const alerts = [
         createMockAlert(),
         createMockAlert({ _id: 'alert-2', agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' } }),
