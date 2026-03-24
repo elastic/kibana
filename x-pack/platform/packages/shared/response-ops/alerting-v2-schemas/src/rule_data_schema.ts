@@ -270,6 +270,7 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   id: z.string().describe('Unique rule identifier.'),
+  enabled: z.boolean().describe('Whether the rule is enabled.'),
   createdBy: z.string().nullable().describe('User who created the rule.'),
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
