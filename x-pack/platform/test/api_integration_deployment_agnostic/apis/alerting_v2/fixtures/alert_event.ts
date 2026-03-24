@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { AlertEvent } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 
-const ALERTING_EVENTS_INDEX = '.alerting-events';
+const ALERTING_EVENTS_INDEX = '.rule-events';
 
 export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent => ({
   '@timestamp': new Date().toISOString(),

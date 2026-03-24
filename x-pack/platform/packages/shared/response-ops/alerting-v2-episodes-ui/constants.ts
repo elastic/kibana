@@ -11,10 +11,10 @@ export const PAGE_SIZE_VARIABLE = 'pageSize';
 /**
  * A query to get aggregated alerting v2 episodes data with @timestamp/LIMIT-based pagination.
  *
- * This will be simplified when the `$.alerting-episodes` ES|QL view is available.
+ * This will be simplified when the `$.alert-episodes` ES|QL view is available.
  */
 export const ALERTING_EPISODES_PAGINATED_QUERY = `
-FROM .alerting-events
+FROM .rule-events
 | WHERE ?${LAST_EPISODE_TIMESTAMP_VARIABLE} IS NULL OR @timestamp < ?${LAST_EPISODE_TIMESTAMP_VARIABLE}
 | INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id
 | EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
@@ -27,6 +27,6 @@ FROM .alerting-events
  * A query to get the total count of alerting episodes (used for pagination).
  */
 export const ALERTING_EPISODES_COUNT_QUERY = `
-FROM .alerting-events
+FROM .rule-events
 | STATS total = COUNT_DISTINCT(episode.id)
 `;
