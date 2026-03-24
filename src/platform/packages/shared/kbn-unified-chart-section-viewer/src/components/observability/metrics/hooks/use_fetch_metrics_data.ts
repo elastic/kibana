@@ -10,14 +10,14 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { getFieldIconType } from '@kbn/field-utils';
 import type {
   Dimension,
   MetricsESQLResponse,
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
-import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
@@ -53,12 +53,12 @@ export function useFetchMetricsData({
     [esql, selectedDimensions]
   );
 
-  const [{ value, error, loading }, executeFetch] =
-    useAsyncFn(async (): Promise<ParsedMetricsResult | null> => {
+  const [{ value, error, loading }, executeFetch] = useAsyncFn(
+    async (signal: AbortSignal): Promise<ParsedMetricsResult | null> => {
       const result = await executeEsqlQuery<MetricsESQLResponse>({
         esqlQuery: metricsInfoQuery,
         search: services.data.search.search,
-        signal: fetchParams.abortController?.signal,
+        signal,
         dataView: fetchParams.dataView,
         timeRange: fetchParams.timeRange,
         filters: fetchParams.filters ?? [],
@@ -66,7 +66,12 @@ export function useFetchMetricsData({
         uiSettings: services.uiSettings,
       });
 
-      const parsed = parseMetricsResponse(result);
+      const getFieldType = (name: string) => {
+        const field = fetchParams.dataView?.getFieldByName(name);
+        return field ? getFieldIconType(field) : undefined;
+      };
+
+      const parsed = parseMetricsResponse(result, getFieldType);
 
       return {
         metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
@@ -76,22 +81,27 @@ export function useFetchMetricsData({
           a.name.localeCompare(b.name)
         ),
       };
-    }, [
+    },
+    [
       metricsInfoQuery,
       fetchParams.dataView,
       fetchParams.timeRange,
-      fetchParams.abortController,
       fetchParams.filters,
       fetchParams.esqlVariables,
       services.data.search.search,
       services.uiSettings,
-    ]);
+    ]
+  );
 
   useEffect(() => {
     if (!shouldFetch || !fetchParams.dataView) {
       return;
     }
-    executeFetch();
+    const abortController = new AbortController();
+    executeFetch(abortController.signal);
+    return () => {
+      abortController.abort();
+    };
   }, [
     shouldFetch,
     selectedDimensionNames,
