@@ -18,7 +18,7 @@ jest.mock('../../../services/rest/create_call_apm_api', () => ({
 }));
 jest.mock('.', () => ({
   TraceWaterfall: jest.fn(({ traceItems }: { traceItems: unknown[] }) => (
-    <div data-testid="traceWaterfall">items: {traceItems.length}</div>
+    <div data-test-subj="traceWaterfall">items: {traceItems.length}</div>
   )),
 }));
 jest.mock('react-virtualized', () => {
@@ -62,7 +62,7 @@ describe('FullTraceWaterfallRenderer', () => {
 
     renderComponent();
 
-    expect(screen.getByTestId('loading')).toBeInTheDocument();
+    expect(screen.getByTestId('traceWaterfallLoading')).toBeInTheDocument();
   });
 
   it('shows error callout when data is undefined after load', () => {
