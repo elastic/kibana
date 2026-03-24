@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSelectable,
@@ -60,10 +68,19 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
   ) => {
     const { euiTheme } = useEuiTheme();
     const [activeIndex, setActiveIndex] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       setActiveIndex(0);
     }, [options.length]);
+
+    const scrollActiveIntoView = useCallback((index: number) => {
+      const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
+      const item = items?.[index];
+      if (item) {
+        item.scrollIntoView({ block: 'nearest' });
+      }
+    }, []);
 
     const selectableOptions: EuiSelectableOption[] = useMemo(
       () =>
@@ -81,9 +98,13 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
         if (event.key === keys.ARROW_DOWN) {
-          setActiveIndex((prev) => Math.min(prev + 1, options.length - 1));
+          const nextIndex = Math.min(activeIndex + 1, options.length - 1);
+          setActiveIndex(nextIndex);
+          scrollActiveIntoView(nextIndex);
         } else if (event.key === keys.ARROW_UP) {
-          setActiveIndex((prev) => Math.max(prev - 1, 0));
+          const nextIndex = Math.max(activeIndex - 1, 0);
+          setActiveIndex(nextIndex);
+          scrollActiveIntoView(nextIndex);
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
           if (options.length > 0) {
             onSelect(options[activeIndex]);
@@ -141,6 +162,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     return (
       <div
+        ref={containerRef}
         css={[containerStyles, activeHighlightStyles]}
         data-test-subj={dataTestSubj}
         onMouseDown={(e) => {
