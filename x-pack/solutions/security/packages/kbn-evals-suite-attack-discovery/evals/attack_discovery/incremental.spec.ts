@@ -13,8 +13,15 @@ evaluate.describe('Incremental Attack Discovery', { tag: tags.stateful.classic }
   evaluate(
     'progressive 200 alerts in rounds of 50',
     async ({ executorClient, inferenceClient, log, attackDiscoveryClient }) => {
-      // Fetch real alerts from the cluster for the eval
-      const alerts = await attackDiscoveryClient.searchAlertsAsContext({ size: 200 });
+      // Fetch real alerts — try insights-alerts first (load_attack_discovery_data), then default
+      let alerts = await attackDiscoveryClient.searchAlertsAsContext({
+        alertsIndexPattern: 'insights-alerts-*',
+        size: 200,
+        start: 'now-365d',
+      });
+      if (alerts.length === 0) {
+        alerts = await attackDiscoveryClient.searchAlertsAsContext({ size: 200 });
+      }
 
       if (alerts.length === 0) {
         log.warning('No alerts found in cluster — skipping incremental eval');

@@ -88,13 +88,7 @@ const generateInsights = async ({
     },
   });
 
-  const toolCall = response.toolCalls[0];
-  if (!toolCall) {
-    throw new Error('No tool call found in LLM response');
-  }
-
   // Extract token usage from response.tokens (not response.usage!)
-  // executeUntilValid returns tokens in response.tokens, not response.usage
   const tokens = (response as any).tokens;
   const inputTokens = tokens?.prompt ?? tokens?.input ?? 0;
   const outputTokens = tokens?.completion ?? tokens?.output ?? 0;
@@ -105,10 +99,46 @@ const generateInsights = async ({
     log.warning(`❌ No token data found (checked response.tokens and response.usage)`);
   }
 
-  return {
-    insights: (toolCall.function.arguments as { insights: AttackDiscovery[] }).insights,
-    usage: { inputTokens, outputTokens },
-  };
+  // Try tool call first, then fall back to parsing JSON from text response
+  // (OSS models often return JSON in text instead of tool calls)
+  const toolCall = response.toolCalls[0];
+  if (toolCall) {
+    return {
+      insights: (toolCall.function.arguments as { insights: AttackDiscovery[] }).insights,
+      usage: { inputTokens, outputTokens },
+    };
+  }
+
+  // Fallback: parse JSON from text response (for OSS models that don't support tool calling)
+  const textContent = (response as any).content ?? (response as any).output ?? '';
+  if (textContent) {
+    log.warning('No tool call found — attempting to parse insights from text response');
+    try {
+      // Try to extract JSON from the response text
+      const jsonMatch = textContent.match(/\{[\s\S]*"insights"\s*:\s*\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0].endsWith('}') ? jsonMatch[0] : jsonMatch[0] + '}');
+        return {
+          insights: parsed.insights as AttackDiscovery[],
+          usage: { inputTokens, outputTokens },
+        };
+      }
+
+      // Try to parse the entire response as JSON array of insights
+      const arrayMatch = textContent.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        const parsed = JSON.parse(arrayMatch[0]);
+        return {
+          insights: parsed as AttackDiscovery[],
+          usage: { inputTokens, outputTokens },
+        };
+      }
+    } catch (parseError) {
+      log.warning(`Failed to parse JSON from text response: ${(parseError as Error).message}`);
+    }
+  }
+
+  throw new Error('No tool call found in LLM response and could not parse JSON from text');
 };
 
 export const runAttackDiscovery = async ({

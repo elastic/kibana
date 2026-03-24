@@ -105,6 +105,16 @@ export const useAttackDiscovery = ({
           filter: effectiveFilter,
           size: effectiveSize,
           start: effectiveStart,
+          // Enable incremental progressive mode for large alert sets
+          ...(effectiveSize >= 50
+            ? {
+                incrementalMode: 'progressive' as const,
+                incrementalConfig: {
+                  alertsPerRound: 50,
+                  maxRounds: 10,
+                },
+              }
+            : {}),
         };
 
         if (
