@@ -13,9 +13,6 @@ import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
 } from '@kbn/data-views-plugin/common';
 import type { AsCodeRuntimeField } from '@kbn/as-code-data-views-schema';
-import isNil from 'lodash/isNil';
-
-const DEFAULT_POPULARITY = 0;
 
 export function toStoredRuntimeFields(
   runtimeFields: AsCodeRuntimeField[] = []
@@ -78,12 +75,8 @@ export function toStoredFieldAttributes(
   for (const runtimeField of runtimeFields) {
     if (runtimeField.type === RUNTIME_FIELD_COMPOSITE_TYPE) {
       for (const field of runtimeField.fields) {
-        const shouldBeSkipped =
-          isNil(field.popularity) && isNil(field.custom_label) && isNil(field.custom_description);
-        if (shouldBeSkipped) continue;
         const compositeName = `${runtimeField.name}.${field.name}`;
         fieldAttrs[compositeName] = {
-          count: field.popularity ?? DEFAULT_POPULARITY,
           ...(field.custom_label && { customLabel: field.custom_label }),
           ...(field.custom_description && { customDescription: field.custom_description }),
         };
@@ -92,7 +85,6 @@ export function toStoredFieldAttributes(
     }
 
     fieldAttrs[runtimeField.name] = {
-      count: runtimeField.popularity ?? DEFAULT_POPULARITY,
       ...(runtimeField.custom_label && { customLabel: runtimeField.custom_label }),
       ...(runtimeField.custom_description && {
         customDescription: runtimeField.custom_description,

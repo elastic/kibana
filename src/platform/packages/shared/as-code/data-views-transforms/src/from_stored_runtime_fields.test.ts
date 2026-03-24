@@ -96,19 +96,6 @@ describe('fromStoredRuntimeFields', () => {
     });
 
     describe('field attributes', () => {
-      it('maps fieldAttrs count to popularity', () => {
-        const result = fromStoredRuntimeFields(
-          { my_field: { type: 'keyword' } },
-          {},
-          {
-            my_field: { count: 42 },
-          }
-        );
-        const field = result[0];
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.popularity).toBe(42);
-      });
-
       it('maps fieldAttrs customLabel to custom_label', () => {
         const result = fromStoredRuntimeFields(
           { my_field: { type: 'keyword' } },
@@ -139,7 +126,6 @@ describe('fromStoredRuntimeFields', () => {
         const result = fromStoredRuntimeFields({ my_field: { type: 'keyword' } }, {}, {});
         const field = result[0];
         if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.popularity).toBeUndefined();
         expect(field.custom_label).toBeUndefined();
         expect(field.custom_description).toBeUndefined();
       });
@@ -216,10 +202,9 @@ describe('fromStoredRuntimeFields', () => {
             },
           },
           {},
-          { 'my_composite.sub': { count: 5, customLabel: 'Sub Label', customDescription: 'desc' } }
+          { 'my_composite.sub': { customLabel: 'Sub Label', customDescription: 'desc' } }
         );
         if (result[0].type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result[0].fields[0].popularity).toBe(5);
         expect(result[0].fields[0].custom_label).toBe('Sub Label');
         expect(result[0].fields[0].custom_description).toBe('desc');
       });
@@ -283,7 +268,6 @@ describe('fromStoredRuntimeFields', () => {
           },
         });
         if (result[0].type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result[0].fields[0].popularity).toBeUndefined();
         expect(result[0].fields[0].custom_label).toBeUndefined();
         expect(result[0].fields[0].custom_description).toBeUndefined();
       });

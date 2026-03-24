@@ -55,7 +55,6 @@ function getCommonProperties(
   const fieldAttr = fieldAttrs[name];
   const format = fieldFormats[name];
   return {
-    popularity: fieldAttr?.count,
     custom_label: fieldAttr?.customLabel,
     custom_description: fieldAttr?.customDescription,
     format: format?.id ? { type: format.id, params: format.params } : undefined,

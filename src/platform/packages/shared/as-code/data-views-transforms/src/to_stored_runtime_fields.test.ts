@@ -253,21 +253,9 @@ describe('toStoredFieldAttributes', () => {
   });
 
   describe('primitive fields', () => {
-    it('adds an entry keyed by name', () => {
+    it('always writes the entry even when all optional attrs are absent', () => {
       const result = toStoredFieldAttributes([{ type: 'keyword', name: 'my_field' }]);
       expect(result).toHaveProperty('my_field');
-    });
-
-    it('sets count to popularity when present', () => {
-      const result = toStoredFieldAttributes([
-        { type: 'keyword', name: 'my_field', popularity: 5 },
-      ]);
-      expect(result!.my_field.count).toBe(5);
-    });
-
-    it('sets count to 0 (DEFAULT_POPULARITY) when popularity is undefined', () => {
-      const result = toStoredFieldAttributes([{ type: 'keyword', name: 'my_field' }]);
-      expect(result!.my_field.count).toBe(0);
     });
 
     it('sets customLabel when custom_label is present', () => {
@@ -278,7 +266,9 @@ describe('toStoredFieldAttributes', () => {
     });
 
     it('omits customLabel entirely when custom_label is absent', () => {
-      const result = toStoredFieldAttributes([{ type: 'keyword', name: 'my_field' }]);
+      const result = toStoredFieldAttributes([
+        { type: 'keyword', name: 'my_field', custom_description: 'A description' },
+      ]);
       expect(result!.my_field).not.toHaveProperty('customLabel');
     });
 
@@ -290,18 +280,15 @@ describe('toStoredFieldAttributes', () => {
     });
 
     it('omits customDescription entirely when custom_description is absent', () => {
-      const result = toStoredFieldAttributes([{ type: 'keyword', name: 'my_field' }]);
+      const result = toStoredFieldAttributes([
+        { type: 'keyword', name: 'my_field', custom_label: 'My Label' },
+      ]);
       expect(result!.my_field).not.toHaveProperty('customDescription');
-    });
-
-    it('always writes the entry even when all optional attrs are absent', () => {
-      const result = toStoredFieldAttributes([{ type: 'keyword', name: 'my_field' }]);
-      expect(result).toHaveProperty('my_field');
     });
   });
 
   describe('composite fields', () => {
-    it('skips subfields where all attrs are undefined', () => {
+    it('always writes an entry for each subfield keyed as "parentName.subFieldName"', () => {
       const result = toStoredFieldAttributes([
         {
           type: RUNTIME_FIELD_COMPOSITE_TYPE,
@@ -309,7 +296,7 @@ describe('toStoredFieldAttributes', () => {
           fields: [{ name: 'sub', type: 'keyword' }],
         },
       ]);
-      expect(result).not.toHaveProperty('my_composite.sub');
+      expect(result).toHaveProperty(['my_composite.sub']);
     });
 
     it('writes entry for subfields with at least one attr set, keyed as "parentName.subFieldName"', () => {
@@ -323,38 +310,15 @@ describe('toStoredFieldAttributes', () => {
       expect(result).toHaveProperty(['my_composite.sub']);
     });
 
-    it('sets count to 0 when subfield popularity is undefined but another attr is present', () => {
-      const result = toStoredFieldAttributes([
-        {
-          type: RUNTIME_FIELD_COMPOSITE_TYPE,
-          name: 'my_composite',
-          fields: [{ name: 'sub', type: 'keyword', custom_label: 'Sub Label' }],
-        },
-      ]);
-      expect(result!['my_composite.sub'].count).toBe(0);
-    });
-
-    it('sets count to popularity when subfield popularity is present', () => {
-      const result = toStoredFieldAttributes([
-        {
-          type: RUNTIME_FIELD_COMPOSITE_TYPE,
-          name: 'my_composite',
-          fields: [{ name: 'sub', type: 'keyword', popularity: 7 }],
-        },
-      ]);
-      expect(result!['my_composite.sub'].count).toBe(7);
-    });
-
     it('omits customLabel and customDescription when absent on subfield', () => {
       const result = toStoredFieldAttributes([
         {
           type: RUNTIME_FIELD_COMPOSITE_TYPE,
           name: 'my_composite',
-          fields: [{ name: 'sub', type: 'keyword', popularity: 1 }],
+          fields: [{ name: 'sub', type: 'keyword', custom_description: 'desc' }],
         },
       ]);
       expect(result!['my_composite.sub']).not.toHaveProperty('customLabel');
-      expect(result!['my_composite.sub']).not.toHaveProperty('customDescription');
     });
 
     it('does not write an entry for the composite parent name itself', () => {
@@ -362,7 +326,7 @@ describe('toStoredFieldAttributes', () => {
         {
           type: RUNTIME_FIELD_COMPOSITE_TYPE,
           name: 'my_composite',
-          fields: [{ name: 'sub', type: 'keyword', popularity: 1 }],
+          fields: [{ name: 'sub', type: 'keyword', custom_label: 'Sub Label' }],
         },
       ]);
       expect(result).not.toHaveProperty('my_composite');
@@ -376,7 +340,7 @@ describe('toStoredFieldAttributes', () => {
         {
           type: RUNTIME_FIELD_COMPOSITE_TYPE,
           name: 'comp',
-          fields: [{ name: 'sub', type: 'long', popularity: 3 }],
+          fields: [{ name: 'sub', type: 'long', custom_label: 'Sub' }],
         },
       ]);
       expect(result).toHaveProperty('prim');
