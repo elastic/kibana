@@ -24,9 +24,7 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
-  SEARCH_INDICES,
   SEARCH_HOMEPAGE,
-  SEARCH_INDEX_MANAGEMENT,
   SEARCH_APPS_TITLE,
 } from '../common/constants';
 
@@ -98,8 +96,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       SEARCH_HOMEPAGE,
       SEARCH_GETTING_STARTED,
-      SEARCH_INDICES,
-      SEARCH_INDEX_MANAGEMENT,
     ];
 
     if (customIntegrations) {
