@@ -55,9 +55,9 @@ import { TagsFilterPopover } from './components/tags_filter_popover';
 import { SourceFilterPopover } from './components/source_filter_popover';
 import { RunByFilterPopover } from './components/run_by_filter_popover';
 import { TableToolbar } from '../components/table_toolbar';
-import type { SortDirection } from '../components/table_toolbar';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 import { useHistoryUrlParams } from './use_history_url_params';
+import type { SortDirection } from './use_history_url_params';
 
 const EMPTY_ARRAY: UnifiedHistoryRow[] = [];
 const EMPTY_TAGS: string[] = [];
@@ -209,7 +209,6 @@ const UnifiedHistoryTableComponent = () => {
     ...ALL_COLUMN_IDS,
   ]);
   const visibleColumns = useMemo(() => storedColumns ?? [...ALL_COLUMN_IDS], [storedColumns]);
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isPaused, setIsPaused] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(5000);
 
@@ -223,6 +222,7 @@ const UnifiedHistoryTableComponent = () => {
       end: endDate,
       pageSize: urlPageSize,
       tags: selectedTags,
+      sortDirection,
     },
     setFilter,
     setFilters,
@@ -310,10 +310,10 @@ const UnifiedHistoryTableComponent = () => {
 
   const handleSortChange = useCallback(
     (_field: string, direction: SortDirection) => {
-      setSortDirection(direction);
+      setFilter('sortDirection', direction);
       resetPagination();
     },
-    [resetPagination]
+    [setFilter, resetPagination]
   );
 
   const handleVisibleColumnsChange = useCallback(
