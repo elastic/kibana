@@ -189,14 +189,15 @@ EOF
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 is_pr_with_label "ci:project-deploy-ai4soc" && deploy "security" "ai_soc"
+is_pr_with_label "ci:project-deploy-observability" && deploy "observability"
 is_pr_with_label "ci:project-deploy-log_essentials" && deploy "observability" "logs_essentials"
 is_pr_with_label "ci:project-deploy-workplace_ai" && deploy "workplaceai"
-if is_pr_with_label "ci:project-deploy-observability" ; then
-  # Only deploy observability if the PR is targeting main
-  if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
-    create_github_issue_oblt_test_environments
-    buildkite-agent annotate --context obl-test-info --style info 'See linked [Deploy Serverless Kibana] issue in pull request for project deployment information'
-  fi
-fi
+# if is_pr_with_label "ci:project-deploy-observability" ; then
+#   # Only deploy observability if the PR is targeting main
+#   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
+#     create_github_issue_oblt_test_environments
+#     buildkite-agent annotate --context obl-test-info --style info 'See linked [Deploy Serverless Kibana] issue in pull request for project deployment information'
+#   fi
+# fi
 
 exit 0;
