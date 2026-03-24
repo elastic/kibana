@@ -12,7 +12,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 
-import type { IntegrationType } from '../../privilege_monitoring/data_sources';
+import type { IntegrationType } from '../entity_sources/infra';
 
 export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
 

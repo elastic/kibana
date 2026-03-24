@@ -44,7 +44,7 @@ export const createEntitySourcesService = ({
       if (source.type === 'index') {
         return {
           type: 'index' as const,
-          field: source.indexPattern || '', // TODO: this is wrong, I think we need to store the id field in the source SO now.
+          field: source.identifierField || '',
         };
       }
 
