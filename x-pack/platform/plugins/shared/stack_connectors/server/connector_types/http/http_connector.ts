@@ -168,9 +168,11 @@ function renderParameterTemplates(
 }
 
 function combineUrl(basePath: string, path?: string): string {
-  const basePathNormalized = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-  const pathNormalized = path?.startsWith('/') ? path : path ? `/${path}` : '';
-  return `${basePathNormalized}${pathNormalized}`;
+  if (!path) return basePath;
+  const url = new URL(basePath);
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  return url.toString();
 }
 
 function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
