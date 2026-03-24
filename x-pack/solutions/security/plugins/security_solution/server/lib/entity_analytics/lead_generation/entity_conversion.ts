@@ -7,20 +7,20 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity } from './types';
 
-/**
- * Convert an Entity Store V2 record into a LeadEntity, extracting the
- * convenience `type` and `name` fields from the nested `entity` object.
- * Falls back to `entity.id` (EUID) when `entity.name` is absent.
- */
-export const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
+// The Entity type from entity_store — distinct from security_solution's Entity type.
+// Both share entity.name / entity.type / entity.id which is all we read here.
+type EntityStoreEntity = Awaited<
+  ReturnType<EntityStoreCRUDClient['listEntities']>
+>['entities'][number];
+
+export const entityRecordToLeadEntity = (record: EntityStoreEntity): LeadEntity => {
   const entityField = (record as Record<string, unknown>).entity as
     | { name?: string; type?: string; id?: string }
     | undefined;
   return {
-    record,
+    record: record as LeadEntity['record'],
     type: entityField?.type ?? 'unknown',
     name: entityField?.name ?? entityField?.id ?? 'unknown',
   };
@@ -36,7 +36,7 @@ export const fetchAllLeadEntities = async (
   crudClient: EntityStoreCRUDClient,
   logger: Logger
 ): Promise<LeadEntity[]> => {
-  const all: Entity[] = [];
+  const all: EntityStoreEntity[] = [];
   let searchAfter: Array<string | number> | undefined;
 
   while (true) {
