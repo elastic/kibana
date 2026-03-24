@@ -10,180 +10,185 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnostic }, () => {
-  let editorCredentials: RoleApiCredentials;
-  const createdSavedObjectIds: string[] = [];
+// TODO: replace '@local-stateful-classic' with tags.stateful.classic once #258883 and #259343 are released
+apiTest.describe(
+  'Osquery saved queries - editor',
+  { tag: ['@local-stateful-classic', ...tags.serverless.security.complete] },
+  () => {
+    let editorCredentials: RoleApiCredentials;
+    const createdSavedObjectIds: string[] = [];
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
-  });
-
-  apiTest.afterAll(async ({ apiServices }) => {
-    for (const soId of createdSavedObjectIds) {
-      await apiServices.osquery.savedQueries.delete(soId);
-    }
-  });
-
-  apiTest('creates and reads a saved query', async ({ apiClient }) => {
-    const queryBody = testData.getMinimalSavedQuery();
-
-    const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
-      headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-      body: queryBody,
-      responseType: 'json',
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     });
-    expect(createResponse).toHaveStatusCode(200);
-    expect(createResponse.body.data).toBeDefined();
-    const savedObjectId = createResponse.body.data.saved_object_id;
-    createdSavedObjectIds.push(savedObjectId);
-    expect(createResponse.body.data.id).toBe(queryBody.id);
 
-    const readResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
+    apiTest.afterAll(async ({ apiServices }) => {
+      for (const soId of createdSavedObjectIds) {
+        await apiServices.osquery.savedQueries.delete(soId);
       }
-    );
-    expect(readResponse).toHaveStatusCode(200);
-    expect(readResponse.body.data).toBeDefined();
-    expect(readResponse.body.data.id).toBe(queryBody.id);
-    expect(readResponse.body.data.query).toBe(queryBody.query);
-  });
-
-  apiTest('updates a saved query', async ({ apiClient }) => {
-    const queryBody = testData.getMinimalSavedQuery();
-    const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
-      headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-      body: queryBody,
-      responseType: 'json',
     });
-    expect(createResponse).toHaveStatusCode(200);
-    expect(createResponse.body.data).toBeDefined();
-    const savedObjectId = createResponse.body.data.saved_object_id;
-    createdSavedObjectIds.push(savedObjectId);
 
-    const updatedId = `${queryBody.id}-updated`;
-    const updateResponse = await apiClient.put(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        body: { id: updatedId, query: 'select 2;', interval: 3600 },
-        responseType: 'json',
-      }
-    );
-    expect(updateResponse).toHaveStatusCode(200);
-    expect(updateResponse.body.data).toBeDefined();
-    expect(updateResponse.body.data.id).toBe(updatedId);
+    apiTest('creates and reads a saved query', async ({ apiClient }) => {
+      const queryBody = testData.getMinimalSavedQuery();
 
-    const readResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
-      }
-    );
-    expect(readResponse).toHaveStatusCode(200);
-    expect(readResponse.body.data).toBeDefined();
-    expect(readResponse.body.data.id).toBe(updatedId);
-    expect(readResponse.body.data.query).toBe('select 2;');
-  });
-
-  apiTest('deletes a saved query', async ({ apiClient }) => {
-    const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
-      headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-      body: testData.getMinimalSavedQuery(),
-      responseType: 'json',
-    });
-    expect(createResponse).toHaveStatusCode(200);
-    expect(createResponse.body.data).toBeDefined();
-    const savedObjectId = createResponse.body.data.saved_object_id;
-
-    const deleteResponse = await apiClient.delete(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
-      }
-    );
-    expect(deleteResponse).toHaveStatusCode(200);
-
-    const readResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
-      }
-    );
-
-    expect(readResponse).toHaveStatusCode(404);
-  });
-
-  apiTest('filters by search term and createdBy', async ({ apiClient }) => {
-    const uniquePrefix = `findtest-${Date.now()}`;
-    let createdByUser: string | undefined;
-
-    for (const suffix of ['alpha', 'beta', 'gamma']) {
       const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        body: testData.getMinimalSavedQuery({ id: `${uniquePrefix}-${suffix}` }),
+        body: queryBody,
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
       expect(createResponse.body.data).toBeDefined();
-      createdSavedObjectIds.push(createResponse.body.data.saved_object_id);
-      createdByUser ??= createResponse.body.data.created_by;
-    }
+      const savedObjectId = createResponse.body.data.saved_object_id;
+      createdSavedObjectIds.push(savedObjectId);
+      expect(createResponse.body.data.id).toBe(queryBody.id);
 
-    const searchResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?search=${uniquePrefix}-alpha`,
-      {
+      const readResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(readResponse).toHaveStatusCode(200);
+      expect(readResponse.body.data).toBeDefined();
+      expect(readResponse.body.data.id).toBe(queryBody.id);
+      expect(readResponse.body.data.query).toBe(queryBody.query);
+    });
+
+    apiTest('updates a saved query', async ({ apiClient }) => {
+      const queryBody = testData.getMinimalSavedQuery();
+      const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: queryBody,
         responseType: 'json',
-      }
-    );
-    expect(searchResponse).toHaveStatusCode(200);
-    expect(searchResponse.body.total).toBeGreaterThan(0);
-    const found = searchResponse.body.data.some(
-      (q: { id: string }) => q.id === `${uniquePrefix}-alpha`
-    );
-    expect(found).toBe(true);
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body.data).toBeDefined();
+      const savedObjectId = createResponse.body.data.saved_object_id;
+      createdSavedObjectIds.push(savedObjectId);
 
-    const noMatchResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?search=zzzznonexistent999`,
-      {
+      const updatedId = `${queryBody.id}-updated`;
+      const updateResponse = await apiClient.put(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          body: { id: updatedId, query: 'select 2;', interval: 3600 },
+          responseType: 'json',
+        }
+      );
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(updateResponse.body.data).toBeDefined();
+      expect(updateResponse.body.data.id).toBe(updatedId);
+
+      const readResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(readResponse).toHaveStatusCode(200);
+      expect(readResponse.body.data).toBeDefined();
+      expect(readResponse.body.data.id).toBe(updatedId);
+      expect(readResponse.body.data.query).toBe('select 2;');
+    });
+
+    apiTest('deletes a saved query', async ({ apiClient }) => {
+      const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: testData.getMinimalSavedQuery(),
         responseType: 'json',
-      }
-    );
-    expect(noMatchResponse).toHaveStatusCode(200);
-    expect(noMatchResponse.body.total).toBe(0);
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body.data).toBeDefined();
+      const savedObjectId = createResponse.body.data.saved_object_id;
 
-    expect(createdByUser).toBeDefined();
+      const deleteResponse = await apiClient.delete(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(deleteResponse).toHaveStatusCode(200);
 
-    const createdByResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=${encodeURIComponent(
-        createdByUser!
-      )}&pageSize=100`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
-      }
-    );
-    expect(createdByResponse).toHaveStatusCode(200);
-    expect(createdByResponse.body.total).toBeGreaterThan(0);
-    const creators = createdByResponse.body.data.map((q: { created_by: string }) => q.created_by);
-    const uniqueCreators = [...new Set(creators)];
-    expect(uniqueCreators).toStrictEqual([createdByUser]);
+      const readResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
 
-    const noUserResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=nonexistentuser`,
-      {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
+      expect(readResponse).toHaveStatusCode(404);
+    });
+
+    apiTest('filters by search term and createdBy', async ({ apiClient }) => {
+      const uniquePrefix = `findtest-${Date.now()}`;
+      let createdByUser: string | undefined;
+
+      for (const suffix of ['alpha', 'beta', 'gamma']) {
+        const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          body: testData.getMinimalSavedQuery({ id: `${uniquePrefix}-${suffix}` }),
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        expect(createResponse.body.data).toBeDefined();
+        createdSavedObjectIds.push(createResponse.body.data.saved_object_id);
+        createdByUser ??= createResponse.body.data.created_by;
       }
-    );
-    expect(noUserResponse).toHaveStatusCode(200);
-    expect(noUserResponse.body.total).toBe(0);
-  });
-});
+
+      const searchResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?search=${uniquePrefix}-alpha`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(searchResponse).toHaveStatusCode(200);
+      expect(searchResponse.body.total).toBeGreaterThan(0);
+      const found = searchResponse.body.data.some(
+        (q: { id: string }) => q.id === `${uniquePrefix}-alpha`
+      );
+      expect(found).toBe(true);
+
+      const noMatchResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?search=zzzznonexistent999`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(noMatchResponse).toHaveStatusCode(200);
+      expect(noMatchResponse.body.total).toBe(0);
+
+      expect(createdByUser).toBeDefined();
+
+      const createdByResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=${encodeURIComponent(
+          createdByUser!
+        )}&pageSize=100`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(createdByResponse).toHaveStatusCode(200);
+      expect(createdByResponse.body.total).toBeGreaterThan(0);
+      const creators = createdByResponse.body.data.map((q: { created_by: string }) => q.created_by);
+      const uniqueCreators = [...new Set(creators)];
+      expect(uniqueCreators).toStrictEqual([createdByUser]);
+
+      const noUserResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=nonexistentuser`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(noUserResponse).toHaveStatusCode(200);
+      expect(noUserResponse.body.total).toBe(0);
+    });
+  }
+);
