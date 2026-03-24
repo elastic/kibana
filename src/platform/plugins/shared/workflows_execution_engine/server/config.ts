@@ -10,7 +10,11 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
+import {
+  DEFAULT_MAX_STEP_SIZE,
+  DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE,
+  DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE,
+} from './step/errors';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -34,6 +38,8 @@ const configSchema = schema.object({
     ),
   }),
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
+  maxCumulativeOutputSize: schema.byteSize({ defaultValue: DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE }),
+  maxWorkflowOutputSize: schema.byteSize({ defaultValue: DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {

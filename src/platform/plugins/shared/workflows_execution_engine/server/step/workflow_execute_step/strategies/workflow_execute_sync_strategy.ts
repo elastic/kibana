@@ -13,6 +13,12 @@ import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
+import {
+  safeOutputSize,
+  parseByteSize,
+  WorkflowOutputSizeExceeded,
+  DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE,
+} from '../../../step/errors';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
@@ -219,9 +225,17 @@ export class WorkflowExecuteSyncStrategy {
           );
         }
 
-        // Pass the output directly as the step output (not wrapped in an object)
         const stepOutput: Record<string, unknown> | undefined =
           output === null ? undefined : (output as Record<string, unknown>);
+
+        if (stepOutput != null) {
+          const maxOutputBytes = this.resolveMaxWorkflowOutputSize(execution);
+          const outputBytes = safeOutputSize(stepOutput);
+          if (maxOutputBytes > 0 && outputBytes > 0 && outputBytes > maxOutputBytes) {
+            throw new WorkflowOutputSizeExceeded(maxOutputBytes, outputBytes);
+          }
+        }
+
         return { status: 'completed', output: stepOutput };
       }
 
@@ -318,5 +332,18 @@ export class WorkflowExecuteSyncStrategy {
       .filter((output): output is JsonValue => output !== undefined);
 
     return outputs.length > 0 ? outputs : null;
+  }
+
+  private resolveMaxWorkflowOutputSize(execution: any): number {
+    try {
+      const settings = execution.workflowDefinition?.settings;
+      const yamlLimit = settings?.['max-workflow-output-size'];
+      if (yamlLimit) {
+        return parseByteSize(yamlLimit);
+      }
+      return parseByteSize(DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE);
+    } catch {
+      return parseByteSize(DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE);
+    }
   }
 }

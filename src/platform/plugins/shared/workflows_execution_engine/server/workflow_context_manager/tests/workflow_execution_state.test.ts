@@ -498,4 +498,23 @@ describe('WorkflowExecutionState', () => {
       ).toEqual(['11', '22', '33', '44']);
     });
   });
+
+  describe('cumulative output tracking', () => {
+    it('should start at 0', () => {
+      expect(underTest.cumulativeOutputBytes).toBe(0);
+    });
+
+    it('should accumulate bytes', () => {
+      underTest.addOutputBytes(100);
+      underTest.addOutputBytes(200);
+      expect(underTest.cumulativeOutputBytes).toBe(300);
+    });
+
+    it('should track across many calls', () => {
+      for (let i = 0; i < 100; i++) {
+        underTest.addOutputBytes(1024);
+      }
+      expect(underTest.cumulativeOutputBytes).toBe(100 * 1024);
+    });
+  });
 });

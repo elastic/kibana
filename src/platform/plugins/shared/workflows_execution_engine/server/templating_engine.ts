@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { Context, toValueSync } from 'liquidjs';
+import { createWorkflowLiquidEngine, SizeLimitedEmitter } from '@kbn/workflows';
+import { TemplateSizeLimitExceeded } from './step/errors';
 
 export class WorkflowTemplatingEngine {
   /**
@@ -36,8 +38,8 @@ export class WorkflowTemplatingEngine {
     });
   }
 
-  public render<T>(obj: T, context: Record<string, unknown>): T {
-    return this.renderValueRecursively(obj, context) as T;
+  public render<T>(obj: T, context: Record<string, unknown>, maxOutputBytes?: number): T {
+    return this.renderValueRecursively(obj, context, maxOutputBytes) as T;
   }
 
   public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
@@ -62,37 +64,35 @@ export class WorkflowTemplatingEngine {
     }
   }
 
-  private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
-    // Handle null and undefined
+  private renderValueRecursively(
+    value: unknown,
+    context: Record<string, unknown>,
+    maxOutputBytes?: number
+  ): unknown {
     if (value === null || value === undefined) {
       return value;
     }
 
     if (typeof value === 'string' && value.startsWith('${{') && value.endsWith('}}')) {
-      // remove the first $ only as the evaluateExpression removes the {{ and }} later
       return this.evaluateExpression(value.substring(1), context);
     }
 
-    // Handle string values - render them using the template engine
     if (typeof value === 'string') {
-      return this.renderString(value, context);
+      return this.renderString(value, context, maxOutputBytes);
     }
 
-    // Handle arrays - recursively render each element
     if (Array.isArray(value)) {
-      return value.map((item) => this.renderValueRecursively(item, context));
+      return value.map((item) => this.renderValueRecursively(item, context, maxOutputBytes));
     }
 
-    // Handle objects - recursively render each property
     if (typeof value === 'object') {
       const renderedObject: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
-        renderedObject[key] = this.renderValueRecursively(val, context);
+        renderedObject[key] = this.renderValueRecursively(val, context, maxOutputBytes);
       }
       return renderedObject;
     }
 
-    // Return primitive values as-is (numbers, booleans, etc.)
     return value;
   }
 
@@ -105,13 +105,39 @@ export class WorkflowTemplatingEngine {
     }
   }
 
-  private renderString(template: string, context: Record<string, unknown>): string {
+  private renderString(
+    template: string,
+    context: Record<string, unknown>,
+    maxOutputBytes?: number
+  ): string {
     try {
       this.validateTemplate(template);
+
+      if (maxOutputBytes && maxOutputBytes > 0) {
+        const tpl = this.engine.parse(template);
+        const ctx = new Context(context, this.engine.options, { sync: true });
+        const emitter = new SizeLimitedEmitter(
+          maxOutputBytes,
+          (limit) => new TemplateSizeLimitExceeded(limit)
+        );
+        toValueSync(this.engine.renderer.renderTemplates(tpl, ctx, emitter));
+        return emitter.buffer;
+      }
+
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
+      // Walk the error cause chain — LiquidJS may wrap our error in originalError or cause
+      let cause: unknown = error;
+      while (cause != null) {
+        if (cause instanceof TemplateSizeLimitExceeded) {
+          throw cause;
+        }
+        const errObj = cause as { originalError?: unknown; cause?: unknown };
+        const next = errObj.originalError ?? errObj.cause;
+        if (next === cause || next == null) break;
+        cause = next;
+      }
       const errorMessage = error instanceof Error ? error.message : String(error);
-      // customer-facing error message without the default line number and column number
       const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
       throw new Error(customerFacingErrorMessage);
     }

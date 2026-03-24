@@ -8,7 +8,17 @@
  */
 
 import { Readable } from 'stream';
-import { formatBytes, parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
+import {
+  formatBytes,
+  parseByteSize,
+  resolveMaxStepSizeBytes,
+  ResponseSizeLimitError,
+  safeOutputSize,
+  TemplateSizeLimitExceeded,
+  WorkflowOutputBudgetExceeded,
+  WorkflowOutputSizeExceeded,
+  WorkflowStepCountExceeded,
+} from './errors';
 
 describe('formatBytes', () => {
   it('should format 0 bytes', () => {
@@ -115,5 +125,80 @@ describe('ResponseSizeLimitError', () => {
     expect(error.message).toContain('10 MB');
     expect(error.message).toContain('exceeded the');
     expect(error.details?.limitBytes).toBe(10 * 1024 * 1024);
+  });
+});
+
+describe('resolveMaxStepSizeBytes', () => {
+  it('should use step-level config when node has max-step-size', () => {
+    const node = { configuration: { 'max-step-size': '5mb' } } as any;
+    expect(resolveMaxStepSizeBytes(node, undefined, undefined)).toBe(5 * 1024 * 1024);
+  });
+
+  it('should prefer step-level over workflow and config when all are present', () => {
+    const node = { configuration: { 'max-step-size': '5mb' } } as any;
+    const workflowExecution = {
+      workflowDefinition: { settings: { 'max-step-size': '15mb' } },
+    } as any;
+    const config = { maxResponseSize: { getValueInBytes: () => 2 * 1024 * 1024 } } as any;
+    expect(resolveMaxStepSizeBytes(node, workflowExecution, config)).toBe(5 * 1024 * 1024);
+  });
+
+  it('should fall back to workflow settings when node has no config', () => {
+    const workflowExecution = {
+      workflowDefinition: { settings: { 'max-step-size': '15mb' } },
+    } as any;
+    expect(resolveMaxStepSizeBytes(undefined, workflowExecution, undefined)).toBe(15 * 1024 * 1024);
+  });
+
+  it('should fall back to plugin config when node and workflow have no config', () => {
+    const config = { maxResponseSize: { getValueInBytes: () => 2 * 1024 * 1024 } } as any;
+    expect(resolveMaxStepSizeBytes(undefined, undefined, config)).toBe(2 * 1024 * 1024);
+  });
+
+  it('should return default when all are undefined', () => {
+    expect(resolveMaxStepSizeBytes(undefined, undefined, undefined)).toBe(10 * 1024 * 1024);
+  });
+});
+
+describe('TemplateSizeLimitExceeded', () => {
+  it('should create an error with the correct type and message', () => {
+    const error = new TemplateSizeLimitExceeded(1024);
+    expect(error.type).toBe('TemplateSizeLimitExceeded');
+    expect(error.message).toContain('1 KB');
+    expect(error.message).toContain('Template rendering');
+    expect(error.details?.limitBytes).toBe(1024);
+  });
+});
+
+describe('WorkflowOutputBudgetExceeded', () => {
+  it('should create an error with the correct type, message, and details', () => {
+    const error = new WorkflowOutputBudgetExceeded(100 * 1024 * 1024, 120 * 1024 * 1024, 'step1');
+    expect(error.type).toBe('WorkflowOutputBudgetExceeded');
+    expect(error.message).toContain('100 MB');
+    expect(error.message).toContain('120 MB');
+    expect(error.message).toContain('step1');
+    expect(error.details?.budgetBytes).toBe(100 * 1024 * 1024);
+    expect(error.details?.totalBytes).toBe(120 * 1024 * 1024);
+  });
+});
+
+describe('WorkflowStepCountExceeded', () => {
+  it('should have correct name and message', () => {
+    const error = new WorkflowStepCountExceeded(200, 150);
+    expect(error.name).toBe('WorkflowStepCountExceeded');
+    expect(error.message).toContain('200');
+    expect(error.message).toContain('150');
+    expect(error.message).toContain('maximum');
+  });
+});
+
+describe('WorkflowOutputSizeExceeded', () => {
+  it('should create an error with the correct type, message, and details', () => {
+    const error = new WorkflowOutputSizeExceeded(5 * 1024 * 1024, 8 * 1024 * 1024);
+    expect(error.type).toBe('WorkflowOutputSizeExceeded');
+    expect(error.message).toContain('5 MB');
+    expect(error.message).toContain('8 MB');
+    expect(error.details?.limitBytes).toBe(5 * 1024 * 1024);
+    expect(error.details?.actualBytes).toBe(8 * 1024 * 1024);
   });
 });

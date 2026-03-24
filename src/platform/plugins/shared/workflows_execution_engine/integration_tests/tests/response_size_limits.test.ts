@@ -246,7 +246,8 @@ steps:
         );
         const dataStep = stepExecutions.find((s) => s.stepId === 'generate_large_data');
         expect(dataStep?.status).toBe(ExecutionStatus.FAILED);
-        expect(dataStep?.error?.type).toBe('StepSizeLimitExceeded');
+        // Template rendering via SizeLimitedEmitter fires before the string fully materializes
+        expect(dataStep?.error?.type).toBe('TemplateSizeLimitExceeded');
       });
     });
 
@@ -314,8 +315,89 @@ steps:
         );
         const inputStep = stepExecutions.find((s) => s.stepId === 'receive_large_input');
         expect(inputStep?.status).toBe(ExecutionStatus.FAILED);
-        expect(inputStep?.error?.type).toBe('StepSizeLimitExceeded');
-        expect(inputStep?.error?.message).toContain('input');
+        // SizeLimitedEmitter fires during template rendering, before the input fully materializes
+        expect(inputStep?.error?.type).toBe('TemplateSizeLimitExceeded');
+        expect(inputStep?.error?.message).toContain('100 B');
+      });
+    });
+  });
+
+  describe('Phase 2: LiquidJS template size limit (TemplateSizeLimitExceeded)', () => {
+    describe('template for-loop exceeds max-step-size', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+
+        // Step has max-step-size: 50b; template produces 4000 chars
+        const workflowYaml = `
+steps:
+  - name: template_bomb
+    type: data.set
+    max-step-size: 50b
+    with:
+      result: "{% for i in (1..1000) %}AAAA{% endfor %}"
+`;
+        await workflowRunFixture.runWorkflow({ workflowYaml });
+      });
+
+      it('step fails with TemplateSizeLimitExceeded when rendered output exceeds max-step-size', () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        );
+        const bombStep = stepExecutions.find((s) => s.stepId === 'template_bomb');
+        expect(bombStep?.status).toBe(ExecutionStatus.FAILED);
+        expect(bombStep?.error?.type).toBe('TemplateSizeLimitExceeded');
+        expect(bombStep?.error?.message).toContain('50 B');
+      });
+    });
+  });
+
+  describe('Phase 2: Cumulative output budget (WorkflowOutputBudgetExceeded)', () => {
+    describe('two steps exceed workflow budget set via YAML settings', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+
+        // Budget: 1kb; each large_response step returns ~615 bytes of JSON
+        // After step2, cumulative total ~1230b > 1024b → budget exceeded
+        const workflowYaml = `
+settings:
+  max-total-output-size: 1kb
+steps:
+  - name: step1
+    type: ${FakeConnectors.large_response.actionTypeId}
+    connector-id: ${FakeConnectors.large_response.name}
+    with:
+      sizeBytes: 600
+  - name: step2
+    type: ${FakeConnectors.large_response.actionTypeId}
+    connector-id: ${FakeConnectors.large_response.name}
+    with:
+      sizeBytes: 600
+`;
+        await workflowRunFixture.runWorkflow({ workflowYaml });
+      });
+
+      it('workflow fails with WorkflowOutputBudgetExceeded after cumulative output crosses budget', () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
+        expect(workflowExecutionDoc?.error?.type).toBe('WorkflowOutputBudgetExceeded');
+      });
+
+      it('step1 completes and step2 fails with WorkflowOutputBudgetExceeded', () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        );
+        const step1 = stepExecutions.find((s) => s.stepId === 'step1');
+        const step2 = stepExecutions.find((s) => s.stepId === 'step2');
+        expect(step1?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(step2?.status).toBe(ExecutionStatus.FAILED);
+        expect(step2?.error?.type).toBe('WorkflowOutputBudgetExceeded');
       });
     });
   });

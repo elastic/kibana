@@ -90,6 +90,9 @@ export const WorkflowSettingsSchema = z.object({
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
   concurrency: ConcurrencySettingsSchema.optional(),
   'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
+  'max-steps': z.number().positive().finite().optional(),
+  'max-total-output-size': ByteSizeSchema.optional(), // e.g., '150mb'
+  'max-workflow-output-size': ByteSizeSchema.optional(), // e.g., '5mb'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 

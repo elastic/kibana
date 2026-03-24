@@ -26,6 +26,8 @@ export const mockContextDependencies = () => ({
     logging: { console: false },
     http: { allowedHosts: ['*'] },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
+    maxCumulativeOutputSize: new ByteSizeValue(150 * 1024 * 1024), // 150mb
+    maxWorkflowOutputSize: new ByteSizeValue(5 * 1024 * 1024), // 5mb
     collectQueueMetrics: false,
   },
 });

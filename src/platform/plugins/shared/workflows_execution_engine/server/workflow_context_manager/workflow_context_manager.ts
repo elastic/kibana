@@ -25,6 +25,7 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
+import { resolveMaxStepSizeBytes } from '../step/errors';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
 
@@ -146,7 +147,12 @@ export class WorkflowContextManager {
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
     const context = this.getContext();
-    return this.templateEngine.render(obj, { ...context, ...additionalContext });
+    const maxOutputBytes = resolveMaxStepSizeBytes(
+      this.node,
+      this.workflowExecutionState.getWorkflowExecution(),
+      this.dependencies.config
+    );
+    return this.templateEngine.render(obj, { ...context, ...additionalContext }, maxOutputBytes);
   }
 
   public evaluateExpressionInContext(template: string): unknown {

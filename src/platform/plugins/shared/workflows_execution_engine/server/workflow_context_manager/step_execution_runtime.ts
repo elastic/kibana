@@ -15,6 +15,12 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import {
+  DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE,
+  parseByteSize,
+  safeOutputSize,
+  WorkflowOutputBudgetExceeded,
+} from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
 
@@ -162,7 +168,42 @@ export class StepExecutionRuntime {
     }
 
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
+
+    if (stepOutput != null) {
+      const outputBytes = safeOutputSize(stepOutput);
+      if (outputBytes > 0) {
+        this.workflowExecutionState.addOutputBytes(outputBytes);
+        const budgetBytes = this.resolveCumulativeOutputBudget();
+        if (budgetBytes > 0 && this.workflowExecutionState.cumulativeOutputBytes > budgetBytes) {
+          throw new WorkflowOutputBudgetExceeded(
+            budgetBytes,
+            this.workflowExecutionState.cumulativeOutputBytes,
+            this.node.stepId
+          );
+        }
+      }
+    }
+
     this.logStepComplete(stepExecutionUpdate);
+  }
+
+  private resolveCumulativeOutputBudget(): number {
+    try {
+      const settings = this.workflowExecution?.workflowDefinition?.settings;
+      const yamlLimit = settings?.['max-total-output-size'];
+      if (yamlLimit) {
+        return parseByteSize(yamlLimit);
+      }
+
+      const config = this.contextManager.getDependencies().config;
+      if (config?.maxCumulativeOutputSize) {
+        return config.maxCumulativeOutputSize.getValueInBytes();
+      }
+
+      return parseByteSize(DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE);
+    } catch {
+      return parseByteSize(DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE);
+    }
   }
 
   public failStep(error: Error): void {

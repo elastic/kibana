@@ -19,6 +19,7 @@ export class WorkflowExecutionState {
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+  private _cumulativeOutputBytes = 0;
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -27,6 +28,14 @@ export class WorkflowExecutionState {
    * (e.g., in loops or retries).
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
+
+  public get cumulativeOutputBytes(): number {
+    return this._cumulativeOutputBytes;
+  }
+
+  public addOutputBytes(bytes: number): void {
+    this._cumulativeOutputBytes += bytes;
+  }
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,

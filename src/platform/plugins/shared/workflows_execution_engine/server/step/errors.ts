@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line max-classes-per-file
+import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import type { WorkflowsExecutionEngineConfig } from '../config';
 
 export const DEFAULT_MAX_STEP_SIZE = '10mb';
+export const DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE = '150mb';
+export const DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE = '5mb';
+export const DEFAULT_MAX_STEPS_PER_WORKFLOW = 150;
 
 const BYTE_UNITS: Array<{ unit: string; size: number }> = [
   { unit: 'GB', size: 1024 * 1024 * 1024 },
@@ -79,6 +86,41 @@ export function safeOutputSize(output: unknown): number {
 }
 
 /**
+ * Resolves the effective max-step-size in bytes from the resolution chain:
+ * step-level > workflow settings > plugin config > hardcoded default.
+ * Used by BaseAtomicNodeImplementation and WorkflowContextManager (for LiquidJS limits).
+ */
+export function resolveMaxStepSizeBytes(
+  node: GraphNodeUnion | undefined,
+  workflowExecution: EsWorkflowExecution | undefined,
+  config: WorkflowsExecutionEngineConfig | undefined
+): number {
+  try {
+    const nodeConfig =
+      node && 'configuration' in node
+        ? (node.configuration as Record<string, unknown> | undefined)
+        : undefined;
+    const stepLimit = nodeConfig?.['max-step-size'];
+    if (stepLimit) {
+      return parseByteSize(stepLimit as string | number);
+    }
+
+    const workflowLimit = workflowExecution?.workflowDefinition?.settings?.['max-step-size'];
+    if (workflowLimit) {
+      return parseByteSize(workflowLimit);
+    }
+
+    if (config?.maxResponseSize) {
+      return config.maxResponseSize.getValueInBytes();
+    }
+
+    return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+  } catch {
+    return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+  }
+}
+
+/**
  * Error thrown when a step's response or output exceeds the configured size limit.
  * Used by both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (base class output guard).
  */
@@ -94,6 +136,67 @@ export class ResponseSizeLimitError extends ExecutionError {
       details: {
         limitBytes,
       },
+    });
+  }
+}
+
+/**
+ * Error thrown when a LiquidJS template render produces output exceeding the step's size limit.
+ * Thrown mid-render by the SizeLimitedEmitter to prevent OOM.
+ */
+export class TemplateSizeLimitExceeded extends ExecutionError {
+  constructor(limitBytes: number) {
+    super({
+      type: 'TemplateSizeLimitExceeded',
+      message:
+        `Template rendering produced output exceeding the ${formatBytes(limitBytes)} size limit. ` +
+        `Simplify the template or increase 'max-step-size'.`,
+      details: { limitBytes },
+    });
+  }
+}
+
+/**
+ * Error thrown when the cumulative output across all steps exceeds the workflow budget.
+ */
+export class WorkflowOutputBudgetExceeded extends ExecutionError {
+  constructor(budgetBytes: number, totalBytes: number, stepName: string) {
+    super({
+      type: 'WorkflowOutputBudgetExceeded',
+      message:
+        `Workflow exceeded the cumulative output budget of ${formatBytes(budgetBytes)} ` +
+        `after step "${stepName}" (total accumulated: ${formatBytes(totalBytes)}). ` +
+        `Consider using '_source' filtering, reducing response sizes, or splitting into child workflows.`,
+      details: { budgetBytes, totalBytes },
+    });
+  }
+}
+
+/**
+ * Error thrown at definition time when a workflow has too many steps.
+ */
+export class WorkflowStepCountExceeded extends Error {
+  constructor(count: number, maxSteps: number) {
+    super(
+      `Workflow exceeds the maximum of ${maxSteps} steps (found ${count}). ` +
+        `Consider splitting into child workflows using 'workflow.execute'.`
+    );
+    this.name = 'WorkflowStepCountExceeded';
+  }
+}
+
+/**
+ * Error thrown when the final workflow output exceeds the configured limit.
+ */
+export class WorkflowOutputSizeExceeded extends ExecutionError {
+  constructor(limitBytes: number, actualBytes: number) {
+    super({
+      type: 'WorkflowOutputSizeExceeded',
+      message:
+        `Workflow output (${formatBytes(actualBytes)}) exceeded the ` +
+        `${formatBytes(limitBytes)} limit. ` +
+        `Configure 'max-workflow-output-size' in workflow settings to increase the limit.`,
+      details: { limitBytes, actualBytes },
     });
   }
 }
