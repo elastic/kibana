@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { isEqual } from 'lodash';
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
@@ -34,11 +36,36 @@ export const baseFeatureSchema = z.object({
   properties: z.record(z.string(), z.unknown()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()).optional(),
+  evidence_doc_ids: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
-  meta: z.record(z.string(), z.any()).optional(),
+  filter: conditionSchema.optional(),
+  meta: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type BaseFeature = z.infer<typeof baseFeatureSchema>;
+
+// Stricter schema for LLM-identified features — makes subtype, title, evidence, tags required
+export const identifiedFeatureSchema = baseFeatureSchema
+  .omit({ subtype: true, title: true, evidence: true, tags: true })
+  .and(
+    z.object({
+      subtype: z.string(),
+      title: z.string(),
+      evidence: z.array(z.string()),
+      tags: z.array(z.string()),
+    })
+  );
+
+export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
+
+export const ignoredFeatureSchema = z.object({
+  feature_id: z.string(),
+  feature_title: z.string(),
+  excluded_feature_id: z.string(),
+  reason: z.string(),
+});
+
+export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
 export const featureSchema = baseFeatureSchema.and(
   z.object({
@@ -46,13 +73,20 @@ export const featureSchema = baseFeatureSchema.and(
     status: featureStatusSchema,
     last_seen: z.string(),
     expires_at: z.string().optional(),
+    excluded_at: z.string().optional(),
   })
 );
 
 export type Feature = z.infer<typeof featureSchema>;
+export type FeatureWithFilter = Feature & { filter: Condition };
 
 export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;
+}
+
+export function isFeatureWithFilter(feature: unknown): feature is FeatureWithFilter {
+  const result = featureSchema.safeParse(feature);
+  return result.success && Boolean(result.data.filter);
 }
 
 export function isComputedFeature(feature: BaseFeature): boolean {

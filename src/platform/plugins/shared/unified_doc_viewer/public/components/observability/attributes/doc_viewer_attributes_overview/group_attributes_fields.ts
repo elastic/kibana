@@ -15,6 +15,7 @@ interface GroupAttributesFieldsParams {
   flattened: Record<string, unknown>;
   searchTerm: string;
   shouldShowFieldHandler: (fieldName: string) => boolean;
+  isEsqlMode: boolean;
   areNullValuesHidden?: boolean;
 }
 
@@ -23,6 +24,7 @@ export function groupAttributesFields({
   flattened,
   searchTerm,
   shouldShowFieldHandler,
+  isEsqlMode,
   areNullValuesHidden,
 }: GroupAttributesFieldsParams): {
   attributesFields: AttributeField[];
@@ -39,7 +41,7 @@ export function groupAttributesFields({
 
     if (!shouldShowFieldHandler(fieldName)) return;
     if (!lowerFieldName.includes(lowerSearchTerm)) return;
-    if (areNullValuesHidden && flattened[fieldName] == null) return;
+    if (isEsqlMode && areNullValuesHidden && flattened[fieldName] == null) return;
 
     const field: AttributeField = {
       name: fieldName,

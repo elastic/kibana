@@ -8,7 +8,6 @@
 import type { RootSchema } from '@elastic/ebt/client';
 import type {
   StreamEndpointLatencyProps,
-  StreamsSystemIdentificationIdentifiedProps,
   StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
   StreamsInsightsGeneratedProps,
@@ -70,40 +69,6 @@ const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
   },
 };
 
-const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdentificationIdentifiedProps> =
-  {
-    count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems identified',
-      },
-    },
-    input_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of input tokens used for the generation request',
-      },
-    },
-    output_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of output tokens used for the generation request',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-  };
-
 const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
   input_tokens_used: {
     type: 'long',
@@ -137,12 +102,6 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
       type: 'long',
       _meta: {
         description: 'The number of significant events queries generated',
-      },
-    },
-    systems_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems used to generate the queries',
       },
     },
     input_tokens_used: {
@@ -306,6 +265,25 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The total number of tokens used for the identification request',
     },
   },
+  excluded_features_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of excluded features present at the time of identification',
+    },
+  },
+  llm_ignored_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of features the LLM reported as matching excluded features',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
   total_duration_ms: {
     type: 'long',
     _meta: {
@@ -336,12 +314,29 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The state of the features identification task (success, failure, or canceled)',
     },
   },
+  filters_capped: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the filters were capped',
+    },
+  },
+  total_filters: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of filters available in features',
+    },
+  },
+  has_filtered_documents: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the sample query found documents after filters were applied',
+    },
+  },
 };
 
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsSystemIdentificationIdentifiedSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
   streamsInsightsGeneratedSchema,

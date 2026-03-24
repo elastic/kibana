@@ -79,7 +79,7 @@ export interface IShims {
   ) => Promise<any>;
   isCloud: boolean;
   cloudBaseUrl?: string;
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
   useCloudConnectStatus: UseCloudConnectStatusHook;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
@@ -95,7 +95,7 @@ export class Legacy {
     data,
     isCloud,
     cloudBaseUrl,
-    hasEnterpriseLicense,
+    isAirGapped,
     triggersActionsUi,
     usageCollection,
     appMountParameters,
@@ -152,7 +152,7 @@ export class Legacy {
         }),
       isCloud,
       cloudBaseUrl,
-      hasEnterpriseLicense,
+      isAirGapped,
       useCloudConnectStatus:
         cloudConnect?.hooks.useCloudConnectStatus ?? defaultCloudConnectStatusHook,
       triggersActionsUi,

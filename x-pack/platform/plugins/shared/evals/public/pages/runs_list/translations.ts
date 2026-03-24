@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.evals.runsList.pageTitle', {
-  defaultMessage: 'Evaluations',
-});
-
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.evals.runsList.searchPlaceholder', {
   defaultMessage: 'Filter by branch...',
 });
@@ -50,4 +46,12 @@ export const COLUMN_CI = i18n.translate('xpack.evals.runsList.columns.ci', {
 
 export const CI_BUILD_LINK = i18n.translate('xpack.evals.runsList.ciBuildLink', {
   defaultMessage: 'Build',
+});
+
+export const SUITE_FILTER_ARIA_LABEL = i18n.translate('xpack.evals.runsList.suiteFilterAriaLabel', {
+  defaultMessage: 'Filter runs by suite',
+});
+
+export const SUITE_FILTER_ALL_OPTION = i18n.translate('xpack.evals.runsList.suiteFilterAllOption', {
+  defaultMessage: 'All suites',
 });

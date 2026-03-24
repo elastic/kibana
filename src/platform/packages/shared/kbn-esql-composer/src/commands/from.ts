@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '@kbn/esql-language';
+import { parse } from '@elastic/esql';
 import { createPipeline } from '../pipeline/create_pipeline';
 import type { QueryPipeline } from '../types';
 

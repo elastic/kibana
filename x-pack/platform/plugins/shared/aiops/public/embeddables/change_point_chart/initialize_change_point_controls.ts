@@ -13,7 +13,7 @@ import type { ChangePointEmbeddableState } from '../../../common/embeddables/cha
 
 type ChangePointEmbeddableCustomState = Omit<
   ChangePointEmbeddableState,
-  'timeRange' | 'title' | 'description' | 'hide_title' | 'hide_border'
+  'time_range' | 'title' | 'description' | 'hide_title' | 'hide_border'
 >;
 
 export const changePointComparators: StateComparators<ChangePointEmbeddableCustomState> = {

@@ -22,12 +22,14 @@ import type {
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import {
   ScriptsLibraryClient,
   type ScriptsLibraryClientInterface,
@@ -102,6 +104,7 @@ export interface EndpointAppContextServiceStartContract {
   connectorActions: ActionsPluginStartContract;
   telemetryConfigProvider: TelemetryConfigProvider;
   spacesService: SpacesServiceStart | undefined;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /**
@@ -268,6 +271,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.esClient;
+  }
+
+  public getAgentBuilder(): AgentBuilderPluginStart {
+    if (this.startDependencies?.agentBuilder == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.agentBuilder;
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
@@ -464,6 +474,23 @@ export class EndpointAppContextService {
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 
+  public getActiveSpaceId(httpRequest: KibanaRequest): string {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getSpaceId(httpRequest);
+  }
+
+  public getAccessibleSpaces(httpRequest: KibanaRequest): Promise<Space[]> {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const spacesClient = this.startDependencies.spacesService.createSpacesClient(httpRequest);
+    return spacesClient.getAll();
+  }
+
   public getReferenceDataClient(): ReferenceDataClientInterface {
     if (!this.startDependencies?.savedObjectsServiceStart) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -489,11 +516,16 @@ export class EndpointAppContextService {
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClientInterface {
+  getScriptsLibraryClient(
+    spaceId: string,
+    username: string,
+    rulesClient?: RulesClient
+  ): ScriptsLibraryClientInterface {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
+      rulesClient,
     });
   }
 }

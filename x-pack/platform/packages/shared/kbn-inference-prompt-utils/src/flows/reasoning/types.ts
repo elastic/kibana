@@ -20,6 +20,16 @@ export type ReasoningPower = 'low' | 'medium' | 'high';
 
 export interface ReasoningPromptOptions {
   inferenceClient: BoundInferenceClient;
+  /**
+   * Duration in milliseconds after which no additional reasoning steps will be taken,
+   * even if the maximum number of steps has not been reached.
+   */
+  maxDurationMs?: number;
+  /**
+   * Maximum number of steps the LLM can take.
+   *
+   * If not specified, the default value is 10.
+   */
   maxSteps?: number;
   prevMessages?: undefined;
   power?: ReasoningPower;

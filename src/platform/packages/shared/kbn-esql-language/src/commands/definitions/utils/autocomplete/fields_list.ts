@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isFunctionExpression, within, isAssignment, isColumn } from '../../../../ast';
-import type { ESQLAstAllCommands, ESQLAstField } from '../../../../types';
+import { isFunctionExpression, within, isAssignment, isColumn } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import {
   getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,
@@ -20,6 +20,8 @@ import { getAssignmentExpressionRoot } from '../expressions';
 import { suggestForExpression } from './expressions';
 import { withAutoSuggest } from './helpers';
 import type { ExpressionContextOptions } from './expressions/types';
+
+const ENDS_WITH_WHITESPACE_REGEX = /\s$/;
 
 export async function suggestFieldsList(
   query: string,
@@ -34,10 +36,16 @@ export async function suggestFieldsList(
     functionsToIgnore?: ExpressionContextOptions['functionsToIgnore'];
     /** Suggestions to show after a complete field expression */
     afterCompleteSuggestions?: ISuggestionItem[];
+    /** Include pipe/comma suggestions after a complete field expression */
+    includePipeAndCommaSuggestions?: boolean;
     /** If true, consideres a single column as a completed field expression */
     allowSingleColumnFields?: boolean;
     /** the preferred field type */
     preferredExpressionType?: ExpressionContextOptions['preferredExpressionType'];
+    /** Columns to exclude from suggestions (e.g. already used in BY clause) */
+    ignoredColumnsForEmptyExpression?: string[];
+    /** If true, disables col0 and assignment suggestions (for contexts where assignments are not supported) */
+    disableNewColumnSuggestion?: boolean;
   }
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
@@ -70,12 +78,17 @@ export async function suggestFieldsList(
     options: {
       preferredExpressionType: options?.preferredExpressionType,
       functionsToIgnore: options?.functionsToIgnore,
+      ignoredColumnsForEmptyExpression: options?.ignoredColumnsForEmptyExpression,
     },
   });
 
   const { position, isComplete, insideFunction } = computed;
 
-  if (position === 'empty_expression' && !insideAssignment) {
+  if (
+    position === 'empty_expression' &&
+    !insideAssignment &&
+    !options?.disableNewColumnSuggestion
+  ) {
     suggestions.push(
       getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
     );
@@ -87,10 +100,19 @@ export async function suggestFieldsList(
     (!isColumn(expressionRoot) || insideAssignment || options?.allowSingleColumnFields) &&
     !insideFunction
   ) {
-    suggestions.push(
-      withAutoSuggest(pipeCompleteItem),
-      withAutoSuggest({ ...commaCompleteItem, text: ', ' })
-    );
+    if (options?.includePipeAndCommaSuggestions !== false) {
+      const commaSuggestion = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
+
+      if (ENDS_WITH_WHITESPACE_REGEX.test(innerText)) {
+        commaSuggestion.rangeToReplace = {
+          start: innerText.length - 1,
+          end: innerText.length,
+        };
+      }
+
+      suggestions.push(pipeCompleteItem, commaSuggestion);
+    }
+
     if (options?.afterCompleteSuggestions) {
       suggestions.push(...options.afterCompleteSuggestions);
     }
@@ -100,9 +122,10 @@ export async function suggestFieldsList(
   if (
     isColumn(expressionRoot) &&
     !insideAssignment &&
+    !options?.disableNewColumnSuggestion &&
     !context?.columns?.has(expressionRoot.name)
   ) {
-    suggestions.push(withAutoSuggest(assignCompletionItem));
+    suggestions.push(assignCompletionItem);
   }
 
   return suggestions;

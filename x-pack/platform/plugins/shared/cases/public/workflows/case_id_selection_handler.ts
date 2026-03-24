@@ -9,7 +9,7 @@ import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { SortFieldCase } from '../../common/ui';
 import { getCases, resolveCase } from '../containers/api';
 import { DEFAULT_FILTER_OPTIONS } from '../containers/constants';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
 interface CaseSelectionShape {
   id: string;

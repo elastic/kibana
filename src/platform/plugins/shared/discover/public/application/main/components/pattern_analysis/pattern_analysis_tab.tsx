@@ -55,7 +55,6 @@ export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'f
         dataView={props.dataView}
         switchToDocumentView={props.switchToDocumentView}
         savedSearch={savedSearch}
-        stateContainer={props.stateContainer}
         trackUiMetric={props.trackUiMetric}
         renderViewModeToggle={props.renderViewModeToggle}
       />

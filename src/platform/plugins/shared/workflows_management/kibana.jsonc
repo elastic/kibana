@@ -22,6 +22,7 @@
       "triggersActionsUi",
       "spaces",
       "esUiShared",
+      "share",
       "stackConnectors",
       "data",
       "dataViews",
@@ -30,9 +31,7 @@
       "embeddable",
       "licensing"
     ],
-    "optionalPlugins": [
-      "alerting",
-      "serverless"
-    ]
+    "optionalPlugins": ["alerting", "serverless"],
+    "runtimePluginDependencies": ["agentBuilder"]
   }
 }

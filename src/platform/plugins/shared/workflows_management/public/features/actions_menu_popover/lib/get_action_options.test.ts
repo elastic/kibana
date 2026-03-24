@@ -8,12 +8,14 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { isDynamicConnector } from '@kbn/workflows';
+import { isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
 
@@ -24,6 +26,7 @@ jest.mock('../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
 }));
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isDynamicConnector: jest.fn(),
 }));
 jest.mock('../../../shared/ui/step_icons/get_step_icon_type', () => ({
@@ -53,14 +56,7 @@ describe('getActionOptions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockWorkflowsExtensions = {
-      getStepDefinition: jest.fn(),
-      getAllStepDefinitions: jest.fn(),
-      hasStepDefinition: jest.fn(),
-      getAllTriggerDefinitions: jest.fn(() => []),
-      getTriggerDefinition: jest.fn(),
-      hasTriggerDefinition: jest.fn(),
-    };
+    mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
@@ -72,15 +68,14 @@ describe('getActionOptions', () => {
   it('should return all base action groups', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
 
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(7);
     expect(result[0].id).toBe('triggers');
     expect(result[1].id).toBe('elasticsearch');
     expect(result[2].id).toBe('kibana');
     expect(result[3].id).toBe('ai');
     expect(result[4].id).toBe('data');
     expect(result[5].id).toBe('external');
-    expect(result[6].id).toBe('http');
-    expect(result[7].id).toBe('flowControl');
+    expect(result[6].id).toBe('flowControl');
   });
 
   it('should include trigger options', () => {
@@ -94,14 +89,46 @@ describe('getActionOptions', () => {
     }
   });
 
+  it('should set stability tech_preview for registered event-driven trigger options', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'When a case is created or updated.',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      const builtInCount = 3;
+      expect(triggersGroup.options).toHaveLength(builtInCount + 1);
+      const casesOption = triggersGroup.options.find((opt) => opt.id === 'cases.updated');
+      expect(casesOption).toBeDefined();
+      if (casesOption && isActionOption(casesOption)) {
+        expect(casesOption.stability).toBe('tech_preview');
+      }
+    }
+  });
+
   it('should include flow control options', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const flowControlGroup = result.find((group) => group.id === 'flowControl');
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(3);
-      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual(['if', 'foreach', 'wait']);
+      expect(flowControlGroup.options).toHaveLength(7);
+      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
+        'if',
+        'switch',
+        'foreach',
+        'while',
+        'wait',
+        'workflow.execute',
+        'workflow.executeAsync',
+      ]);
     }
   });
 
@@ -116,7 +143,7 @@ describe('getActionOptions', () => {
       label: 'Custom Connector Label',
       description: 'Custom Connector Description',
       icon: 'customIcon',
-      actionsMenuCatalog: 'kibana' as const,
+      category: StepCategory.Kibana,
       inputSchema: z.object({}),
       outputSchema: z.object({}),
     };
@@ -292,7 +319,7 @@ describe('getActionOptions', () => {
     }
   });
 
-  it('should use default catalog when custom step definition has no catalog', () => {
+  it('should add connectors to the correct group based on category', () => {
     const mockConnector = {
       type: 'custom.connector',
       description: 'Custom Connector',
@@ -303,6 +330,7 @@ describe('getActionOptions', () => {
       label: 'Custom Connector Label',
       description: 'Custom Connector Description',
       icon: 'customIcon',
+      category: StepCategory.External,
       inputSchema: z.object({}),
       outputSchema: z.object({}),
     };
@@ -311,11 +339,12 @@ describe('getActionOptions', () => {
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
-    const kibanaGroup = result.find((group) => group.id === 'kibana');
+    const externalGroup = result.find((group) => group.id === 'external');
 
-    expect(kibanaGroup).toBeDefined();
-    if (kibanaGroup && isActionGroup(kibanaGroup)) {
-      expect(kibanaGroup.options).toHaveLength(1);
+    expect(externalGroup).toBeDefined();
+    if (externalGroup && isActionGroup(externalGroup)) {
+      expect(externalGroup.options).toHaveLength(1);
+      expect(externalGroup.options[0].id).toBe('custom.connector');
     }
   });
 });

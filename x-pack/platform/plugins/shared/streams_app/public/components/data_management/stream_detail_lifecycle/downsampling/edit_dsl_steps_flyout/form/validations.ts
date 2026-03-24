@@ -150,7 +150,7 @@ export const afterSmallerThanDataRetention = ({
     if (ms >= 0 && ms >= retentionMs) {
       return {
         message: i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanRetentionError', {
-          defaultMessage: 'Must be smaller than the data retention period ({retention}).',
+          defaultMessage: 'Must not exceed the data retention period ({retention}).',
           values: { retention: retentionEsFormat },
         }),
       };

@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { EventKind } from '../constants/event_kinds';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -20,7 +21,7 @@ import {
 
 export const ALERT_REASON_BANNER = {
   title: i18n.translate(
-    'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
+    'xpack.securitySolution.flyout.document.about.reason.alertReasonPreviewTitle',
     {
       defaultMessage: 'Preview alert reason',
     }
@@ -45,7 +46,10 @@ export interface AlertReasonProps {
 }
 
 export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
 
   const viewPreview = useMemo(
@@ -59,7 +63,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
             iconSide="right"
             data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
             aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.about.reason.alertReasonButtonAriaLabel',
+              'xpack.securitySolution.flyout.document.about.reason.alertReasonButtonAriaLabel',
               {
                 defaultMessage: 'Show full reason',
               }
@@ -67,7 +71,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
             disabled={!reason}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
+              id="xpack.securitySolution.flyout.document.about.reason.alertReasonButtonLabel"
               defaultMessage="Show full reason"
             />
           </EuiButtonEmpty>
@@ -80,7 +84,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
     reason
   ) : (
     <FormattedMessage
-      id="xpack.securitySolution.flyout.right.about.reason.noReasonDescription"
+      id="xpack.securitySolution.flyout.document.about.reason.noReasonDescription"
       defaultMessage="There's no source event information for this alert."
     />
   );
@@ -100,7 +104,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
                 <EuiFlexItem grow={false}>
                   <h5>
                     <FormattedMessage
-                      id="xpack.securitySolution.flyout.right.about.reason.alertReasonTitle"
+                      id="xpack.securitySolution.flyout.document.about.reason.alertReasonTitle"
                       defaultMessage="Alert reason"
                     />
                   </h5>
@@ -110,7 +114,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
             ) : (
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.about.reason.documentReasonTitle"
+                  id="xpack.securitySolution.flyout.document.about.reason.documentReasonTitle"
                   defaultMessage="Document reason"
                 />
               </p>

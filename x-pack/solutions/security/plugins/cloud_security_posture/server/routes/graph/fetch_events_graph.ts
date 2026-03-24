@@ -16,20 +16,16 @@ import {
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import {
-  getEnrichPolicyId,
-  getEntitiesLatestIndexName,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
-import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import {
   generateFieldHintCases,
   formatJsonProperty,
-  buildLookupJoinEsql,
-  buildEnrichPolicyEsql,
-  checkIfEntitiesIndexLookupMode,
+  buildEntityEnrichment,
+  checkEnrichmentAvailability,
 } from './utils';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
 
 interface BuildEsqlQueryParams {
@@ -84,11 +80,11 @@ export const fetchEvents = async ({
 
   // Check if the entities lookup index exists and is in lookup mode (preferred)
   // If not, fall back to checking if the enrich policy exists (deprecated)
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
-  const isEnrichPolicyExists = isLookupIndexAvailable
-    ? false
-    : await checkEnrichPolicyExists(esClient, logger, spaceId);
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
+  const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(
+    esClient,
+    logger,
+    spaceId
+  );
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -178,29 +174,6 @@ const buildDslFilter = (
   },
 });
 
-const checkEnrichPolicyExists = async (
-  esClient: IScopedClusterClient,
-  logger: Logger,
-  spaceId: string
-): Promise<boolean> => {
-  try {
-    const { policies } = await esClient.asInternalUser.enrich.getPolicy({
-      name: getEnrichPolicyId(spaceId),
-    });
-
-    logger.debug(
-      `Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${
-        policies?.length
-      } policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`
-    );
-    return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
-  } catch (error) {
-    logger.error(`Error fetching enrich policy ${error.message}`);
-    logger.error(error);
-    return false;
-  }
-};
-
 /**
  * Generates ESQL statement for evaluating pinned IDs.
  * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
@@ -279,9 +252,6 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-  const enrichPolicyName = getEnrichPolicyId(spaceId);
-
   const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
 
   // Generate target entity ID collection logic
@@ -328,15 +298,9 @@ ${targetFieldHintCases},
     ""
 )
 ${
-  isLookupIndexAvailable
+  isLookupIndexAvailable || isEnrichPolicyExists
     ? `
-${buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId))}
-
-${buildEnrichedEntityFieldsEsql()}
-`
-    : isEnrichPolicyExists
-    ? `
-${buildEnrichPolicyEsql(enrichPolicyName)}
+${buildEntityEnrichment(isLookupIndexAvailable, isEnrichPolicyExists, spaceId)}
 
 ${buildEnrichedEntityFieldsEsql()}
 `

@@ -9,6 +9,8 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { StepCategory } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Step type ID for the external step.
@@ -56,6 +58,37 @@ export const externalStepCommonDefinition: CommonStepDefinition<
   typeof ConfigSchema
 > = {
   id: ExternalStepTypeId,
+  category: StepCategory.External,
+  label: i18n.translate('workflowsExtensionsExample.externalStep.label', {
+    defaultMessage: 'External Step',
+  }),
+  description: i18n.translate('workflowsExtensionsExample.externalStep.description', {
+    defaultMessage: 'Executes an external service operation',
+  }),
+  documentation: {
+    details: i18n.translate('workflowsExtensionsExample.externalStep.documentation.details', {
+      defaultMessage: `The ${ExternalStepTypeId} step allows you to store values in the workflow context that can be referenced in later steps using template syntax like {templateSyntax}.`,
+      values: { templateSyntax: '`{{ steps.stepName.output.response }}`' }, // Needs to be extracted so it is not interpreted as a variable by the i18n plugin
+    }),
+    examples: [
+      `## Execute an external service operation
+\`\`\`yaml
+- name: external_step
+  type: ${ExternalStepTypeId}
+  with:
+    input: "Hello World"
+\`\`\``,
+
+      `## Execute an external service operation with a proxy
+\`\`\`yaml
+- name: external_step
+  type: ${ExternalStepTypeId}
+  proxyId: "my-proxy"
+  with:
+    input: "Hello World"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,

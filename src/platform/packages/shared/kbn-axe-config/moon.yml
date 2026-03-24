@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/axe-config'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/axe-config'
+  title: '@kbn/axe-config'
   description: Moon project for @kbn/axe-config
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-axe-config
+  sourceRoot: src/platform/packages/shared/kbn-axe-config
 tags:
   - shared-common
   - package

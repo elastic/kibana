@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-cards-navigation'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-cards-navigation'
+  title: '@kbn/management-cards-navigation'
   description: Moon project for @kbn/management-cards-navigation
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/cards_navigation
+  sourceRoot: src/platform/packages/shared/kbn-management/cards_navigation
 dependsOn:
   - '@kbn/i18n'
 tags:

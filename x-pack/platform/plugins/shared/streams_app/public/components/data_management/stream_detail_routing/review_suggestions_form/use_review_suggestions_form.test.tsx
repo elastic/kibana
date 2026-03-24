@@ -410,4 +410,192 @@ describe('useReviewSuggestionsForm', () => {
 
     expect(result.current.suggestionReason).toBe('all_data_partitioned');
   });
+
+  describe('bulk selection', () => {
+    it('toggleSuggestionSelection adds and removes names from selection', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.toggleSuggestionSelection('logs.api');
+      });
+
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(true);
+      expect(result.current.isSuggestionSelected('logs.api')).toBe(true);
+
+      act(() => {
+        result.current.toggleSuggestionSelection('logs.ui');
+      });
+
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
+
+      act(() => {
+        result.current.toggleSuggestionSelection('logs.api');
+      });
+
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(false);
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
+    });
+
+    it('selectAllSuggestions selects all suggestions', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.selectAllSuggestions();
+      });
+
+      expect(result.current.selectedSuggestionNames.size).toBe(2);
+      expect(result.current.isSuggestionSelected('logs.api')).toBe(true);
+      expect(result.current.isSuggestionSelected('logs.ui')).toBe(true);
+    });
+
+    it('clearSuggestionSelection clears all selections', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.selectAllSuggestions();
+      });
+
+      expect(result.current.selectedSuggestionNames.size).toBe(2);
+
+      act(() => {
+        result.current.clearSuggestionSelection();
+      });
+
+      expect(result.current.selectedSuggestionNames.size).toBe(0);
+    });
+
+    it('removeSuggestion removes the name from selection', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.toggleSuggestionSelection('logs.ui');
+      });
+
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
+
+      act(() => {
+        result.current.removeSuggestion(0);
+      });
+
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(false);
+    });
+
+    it('bulkAcceptSuggestions removes multiple suggestions at once', async () => {
+      const mockResponse = {
+        partitions: [
+          { name: 'logs.api', condition },
+          { name: 'logs.ui', condition },
+          { name: 'logs.db', condition },
+        ],
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn((observer) => {
+          observer.next(mockResponse);
+          observer.complete();
+        }),
+      };
+      mockStreamsRepositoryClient.stream.mockReturnValue(mockObservable);
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.toggleSuggestionSelection('logs.api');
+        result.current.toggleSuggestionSelection('logs.db');
+      });
+
+      act(() => {
+        result.current.bulkAcceptSuggestions(['logs.api', 'logs.db']);
+      });
+
+      expect(result.current.suggestions).toHaveLength(1);
+      expect(result.current.suggestions![0].name).toBe('logs.ui');
+      expect(result.current.selectedSuggestionNames.size).toBe(0);
+    });
+
+    it('bulkAcceptSuggestions resets form when all suggestions are removed', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.bulkAcceptSuggestions(['logs.api', 'logs.ui']);
+      });
+
+      expect(result.current.suggestions).toBeUndefined();
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'suggestion.preview',
+          condition: { always: {} },
+          name: '',
+          index: 0,
+          toggle: false,
+        })
+      );
+    });
+  });
 });

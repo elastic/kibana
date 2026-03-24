@@ -6,6 +6,7 @@
  */
 
 import type { ColorMapping } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { SerializedValue } from '@kbn/data-plugin/common';
 import { MultiFieldKey, RangeKey } from '@kbn/data-plugin/common';
 
@@ -26,8 +27,11 @@ export function convertToRawColorMappings(
     colorMapping.assignments.length === 0;
   delete (colorMapping as DeprecatedColorMappingConfig).assignmentMode;
 
+  const paletteId = colorMapping.paletteId as KbnPaletteId;
+
   return {
     ...colorMapping,
+    paletteId,
     assignments: colorMapping.assignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
       return convertColorMappingAssignment(oldAssignment, columnMeta);
@@ -38,7 +42,7 @@ export function convertToRawColorMappings(
         ? ({
             type: 'loop',
           } satisfies ColorMapping.Config['specialAssignments'][number]['color'])
-        : oldAssignment.color;
+        : (oldAssignment.color as ColorMapping.Config['specialAssignments'][number]['color']);
 
       if (isValidColorMappingAssignment(oldAssignment)) {
         return {
@@ -53,7 +57,7 @@ export function convertToRawColorMappings(
         rules: [oldAssignment.rule],
       };
     }),
-  };
+  } as ColorMapping.Config;
 }
 
 function convertColorMappingAssignment(
@@ -61,7 +65,7 @@ function convertColorMappingAssignment(
   columnMeta?: ColumnMeta | null
 ): ColorMapping.Assignment {
   return {
-    color: oldAssignment.color,
+    color: oldAssignment.color as ColorMapping.Assignment['color'],
     touched: oldAssignment.touched,
     rules: convertColorMappingRule(oldAssignment.rule, columnMeta),
   };

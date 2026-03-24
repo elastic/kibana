@@ -198,7 +198,7 @@ describe('Executor', () => {
     } catch (e) {
       expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       expect(e.message).toBe(
-        'Request validation failed (Error: [foo]: definition for this key is missing)'
+        "Request validation failed (Error: [foo]: Additional properties are not allowed ('foo' was unexpected))"
       );
     }
   });
@@ -255,9 +255,10 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Request validation failed (Field \\"id\\": Required)"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Request validation failed (✖ Invalid input: expected string, received undefined
+        → at id)"
+    `);
   });
 
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {

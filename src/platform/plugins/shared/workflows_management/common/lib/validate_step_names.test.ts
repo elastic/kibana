@@ -232,6 +232,94 @@ describe('validateStepNameUniqueness', () => {
     expect(innerStepError?.occurrences).toBe(2);
   });
 
+  it('should detect duplicate names between fallback steps across different steps', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'step1',
+          type: 'console',
+          'on-failure': {
+            fallback: [{ name: 'notify_failure', type: 'email' }],
+          },
+        } as any,
+        {
+          name: 'step2',
+          type: 'console',
+          'on-failure': {
+            fallback: [{ name: 'notify_failure', type: 'email' }],
+          },
+        } as any,
+      ],
+    };
+
+    const result = validateStepNameUniqueness(workflow);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].stepName).toBe('notify_failure');
+    expect(result.errors[0].occurrences).toBe(2);
+  });
+
+  it('should detect duplicate names between a step and a fallback step', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'step1',
+          type: 'console',
+          'on-failure': {
+            fallback: [{ name: 'step2', type: 'email' }],
+          },
+        } as any,
+        { name: 'step2', type: 'console' },
+      ],
+    };
+
+    const result = validateStepNameUniqueness(workflow);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].stepName).toBe('step2');
+    expect(result.errors[0].occurrences).toBe(2);
+  });
+
+  it('should allow unique fallback step names across different steps', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'step1',
+          type: 'console',
+          'on-failure': {
+            fallback: [{ name: 'notify_step1_failure', type: 'email' }],
+          },
+        } as any,
+        {
+          name: 'step2',
+          type: 'console',
+          'on-failure': {
+            fallback: [{ name: 'notify_step2_failure', type: 'email' }],
+          },
+        } as any,
+      ],
+    };
+
+    const result = validateStepNameUniqueness(workflow);
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it('should handle workflow with no steps', () => {
     const workflow: WorkflowYaml = {
       version: '1',

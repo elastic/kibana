@@ -10,20 +10,20 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   deleteRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: {
         request: {
           params: schema.object({
@@ -33,6 +33,17 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
               },
             }),
           }),
+        },
+        response: {
+          200: {
+            description: 'Indicates the dashboard is deleted successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard with the given ID is not found.',
+          },
         },
       },
     },
@@ -48,12 +59,12 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
           });
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest();
+        return res.badRequest({ body: { message: e.message } });
       }
 
-      return res.ok();
+      return res.noContent();
     }
   );
 }

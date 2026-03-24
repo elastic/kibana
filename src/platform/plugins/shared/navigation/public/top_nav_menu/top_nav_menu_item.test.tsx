@@ -66,7 +66,7 @@ describe('TopNavMenu', () => {
     const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       run: jest.fn(),
@@ -122,7 +122,7 @@ describe('TopNavMenu', () => {
     ensureMenuItemDisabled({
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       disableButton: true,
@@ -135,7 +135,7 @@ describe('TopNavMenu', () => {
     ensureMenuItemDisabled({
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       disableButton: () => true,
@@ -148,7 +148,7 @@ describe('TopNavMenu', () => {
     const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       isMobileMenu: true,

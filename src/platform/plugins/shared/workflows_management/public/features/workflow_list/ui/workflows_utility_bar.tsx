@@ -26,6 +26,7 @@ import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 interface WorkflowsUtilityBarProps {
   totalWorkflows: number;
   selectedWorkflows: WorkflowListItemDto[];
+  allWorkflows: WorkflowListItemDto[];
   deselectWorkflows: () => void;
   onRefresh: () => void;
   showStart: number;
@@ -35,6 +36,7 @@ interface WorkflowsUtilityBarProps {
 export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
   totalWorkflows,
   selectedWorkflows,
+  allWorkflows,
   deselectWorkflows,
   onRefresh,
   showStart,
@@ -52,6 +54,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
 
   const { panels, modals } = useWorkflowBulkActions({
     selectedWorkflows,
+    allWorkflows,
     onAction: closePopover,
     onActionSuccess,
     deselectWorkflows,

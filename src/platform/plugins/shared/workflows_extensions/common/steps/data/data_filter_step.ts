@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -33,6 +35,87 @@ export const dataFilterStepCommonDefinition: CommonStepDefinition<
   DataFilterStepConfigSchema
 > = {
   id: DataFilterStepTypeId,
+  category: StepCategory.Data,
+  label: i18n.translate('workflowsExtensions.dataFilterStep.label', {
+    defaultMessage: 'Filter Collection',
+  }),
+  description: i18n.translate('workflowsExtensions.dataFilterStep.description', {
+    defaultMessage: 'Filter arrays using KQL conditions to return only matching items',
+  }),
+  documentation: {
+    details: `The data.filter step filters arrays using Kibana Query Language (KQL) conditions. Use \`item.field\` to reference item properties and \`index\` to access the item's position. Always returns an array of matching items. Use \`limit\` to cap the number of matches returned.`,
+    examples: [
+      `## Filter by single field
+\`\`\`yaml
+- name: get-active-incidents
+  type: data.filter
+  items: "\${{ steps.fetch_incidents.output }}"
+  with:
+    condition: "item.state: active"
+
+# Output: Array of items where state equals "active"
+\`\`\``,
+
+      `## Filter with complex KQL condition
+\`\`\`yaml
+- name: filter-critical-alerts
+  type: data.filter
+  items: "\${{ steps.fetch_alerts.output }}"
+  with:
+    condition: "item.status: active AND item.severity > 2"
+
+# Output: Array of active alerts with severity greater than 2
+\`\`\``,
+
+      `## Filter with limit for performance
+\`\`\`yaml
+- name: get-recent-errors
+  type: data.filter
+  items: "\${{ steps.fetch_logs.output }}"
+  with:
+    condition: "item.level: error"
+    limit: 10
+
+# Output: First 10 matching items (early exit optimization)
+\`\`\``,
+
+      `## Chain filter with count using Liquid
+\`\`\`yaml
+- name: filter-enabled
+  type: data.filter
+  items: "\${{ steps.fetch_data.output }}"
+  with:
+    condition: "item.enabled: true"
+
+- name: log-count
+  type: console
+  with:
+    message: "Matched {{steps.filter-enabled.output | size}} out of {{steps.fetch_data.output | size}} items"
+\`\`\``,
+
+      `## Filter using index
+\`\`\`yaml
+- name: get-first-ten
+  type: data.filter
+  items: "\${{ steps.fetch_items.output }}"
+  with:
+    condition: "index < 10"
+
+# Output: First 10 items from the array
+\`\`\``,
+
+      `## Filter with wildcards
+\`\`\`yaml
+- name: find-error-messages
+  type: data.filter
+  items: "\${{ steps.fetch_logs.output }}"
+  with:
+    condition: "item.message: *error* OR item.message: *failed*"
+
+# Output: Items where message contains "error" or "failed"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
