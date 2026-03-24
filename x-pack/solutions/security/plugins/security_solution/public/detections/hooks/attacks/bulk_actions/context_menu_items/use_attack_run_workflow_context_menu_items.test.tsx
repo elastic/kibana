@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useBulkAttackRunWorkflowItems } from '../bulk_action_items/use_bulk_attack_run_workflow_items';
@@ -19,9 +18,13 @@ const mockUseBulkAttackRunWorkflowItems = useBulkAttackRunWorkflowItems as jest.
   typeof useBulkAttackRunWorkflowItems
 >;
 
-const defaultAttacks = [{ attackId: 'attack-1', relatedAlertIds: ['alert-1', 'alert-2'] }];
-const spaceId = 'default';
-const expectedIndex = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`;
+const defaultAttacks = [
+  {
+    attackId: 'attack-1',
+    attackIndex: '.alerts-security.attack.discovery.alerts-default-000001',
+    relatedAlertIds: ['alert-1', 'alert-2'],
+  },
+];
 
 const mockRenderContent = jest.fn((props) => React.createElement('div', null, 'Workflow Panel'));
 
@@ -85,7 +88,14 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
       expect(mockRenderContent).toHaveBeenCalled();
       const callArgs = mockRenderContent.mock.calls[0][0];
       expect(callArgs.alertItems).toEqual([
-        { _id: 'attack-1', data: [], ecs: { _id: 'attack-1', _index: '' } },
+        {
+          _id: 'attack-1',
+          data: [],
+          ecs: {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default-000001',
+          },
+        },
       ]);
     });
 
@@ -125,16 +135,38 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
 
     it('should map multiple attacks to alert items', () => {
       const attacks = [
-        { attackId: 'attack-1', relatedAlertIds: ['alert-1'] },
-        { attackId: 'attack-2', relatedAlertIds: ['alert-2'] },
+        {
+          attackId: 'attack-1',
+          attackIndex: '.alerts-security.attack.discovery.alerts-default-000001',
+          relatedAlertIds: ['alert-1'],
+        },
+        {
+          attackId: 'attack-2',
+          attackIndex: '.alerts-security.attack.discovery.alerts-default-000002',
+          relatedAlertIds: ['alert-2'],
+        },
       ];
 
       renderHook(() => useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: attacks }));
 
       const callArgs = mockRenderContent.mock.calls[0][0];
       expect(callArgs.alertItems).toEqual([
-        { _id: 'attack-1', data: [], ecs: { _id: 'attack-1', _index: '' } },
-        { _id: 'attack-2', data: [], ecs: { _id: 'attack-2', _index: '' } },
+        {
+          _id: 'attack-1',
+          data: [],
+          ecs: {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default-000001',
+          },
+        },
+        {
+          _id: 'attack-2',
+          data: [],
+          ecs: {
+            _id: 'attack-2',
+            _index: '.alerts-security.attack.discovery.alerts-default-000002',
+          },
+        },
       ]);
     });
   });
@@ -143,6 +175,19 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
     it('should return empty items and panels', () => {
       const { result } = renderHook(() =>
         useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: [] })
+      );
+
+      expect(result.current.items).toHaveLength(0);
+      expect(result.current.panels).toHaveLength(0);
+    });
+  });
+
+  describe('when attacksForWorkflowRun do not have concrete index', () => {
+    it('should return empty items and panels', () => {
+      const { result } = renderHook(() =>
+        useAttackRunWorkflowContextMenuItems({
+          attacksForWorkflowRun: [{ attackId: 'attack-1', relatedAlertIds: ['alert-1'] }],
+        })
       );
 
       expect(result.current.items).toHaveLength(0);

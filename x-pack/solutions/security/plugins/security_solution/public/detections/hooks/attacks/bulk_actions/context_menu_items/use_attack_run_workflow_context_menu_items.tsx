@@ -24,26 +24,30 @@ export const useAttackRunWorkflowContextMenuItems = ({
   closePopover,
 }: UseAttackRunWorkflowContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackRunWorkflowItems();
+  const attacksWithIndex = useMemo(
+    () => attacksForWorkflowRun.filter((attack) => Boolean(attack.attackIndex)),
+    [attacksForWorkflowRun]
+  );
 
   const attackItems = useMemo(
     () =>
-      attacksForWorkflowRun.map((attack) => ({
+      attacksWithIndex.map((attack) => ({
         _id: attack.attackId,
         data: [],
-        ecs: { _id: attack.attackId, _index: attack.attackIndex ?? '' },
+        ecs: { _id: attack.attackId, _index: attack.attackIndex },
       })),
-    [attacksForWorkflowRun]
+    [attacksWithIndex]
   );
 
   return useMemo(
     () =>
-      attacksForWorkflowRun.length > 0
+      attacksWithIndex.length > 0
         ? transformBulkActionsToContextMenuItems({
             bulkActionItems,
             alertItems: attackItems,
             closePopover,
           })
         : { items: [], panels: [] },
-    [bulkActionItems, attackItems, closePopover, attacksForWorkflowRun.length]
+    [attacksWithIndex.length, bulkActionItems, attackItems, closePopover]
   );
 };

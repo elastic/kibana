@@ -6,11 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import type { RenderContentPanelProps } from '@kbn/response-ops-alerts-table/types';
 
-import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import * as alertsTableI18n from '../../../../components/alerts_table/translations';
 import {
   AlertWorkflowsPanel,
@@ -23,7 +21,6 @@ import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
  * Hook that provides bulk action items and panels for running workflows on attacks.
  */
 export const useBulkAttackRunWorkflowItems = (): BulkAttackActionItems => {
-  const spaceId = useSpaceId() ?? 'default';
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
@@ -34,21 +31,12 @@ export const useBulkAttackRunWorkflowItems = (): BulkAttackActionItems => {
     [loading, hasIndexWrite, hasAttackIndexWrite, workflowUIEnabled, canExecuteWorkflow]
   );
 
-  const attackDiscoveryIndexName = useMemo(
-    () => `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
-    [spaceId]
-  );
-
-  const renderContent = useCallback(
-    ({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
-      const alertIds = alertItems.map(({ _id, ecs }) => ({
-        _id,
-        _index: ecs._index || attackDiscoveryIndexName,
-      }));
-      return <AlertWorkflowsPanel alertIds={alertIds} onClose={closePopoverMenu} />;
-    },
-    [attackDiscoveryIndexName]
-  );
+  const renderContent = useCallback(({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
+    const alertIds = alertItems.flatMap(({ _id, ecs }) =>
+      ecs._index ? [{ _id, _index: ecs._index }] : []
+    );
+    return <AlertWorkflowsPanel alertIds={alertIds} onClose={closePopoverMenu} />;
+  }, []);
 
   const items = useMemo(
     () =>
