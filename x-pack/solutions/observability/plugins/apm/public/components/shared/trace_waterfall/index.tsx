@@ -122,6 +122,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
             traceDocsTotal={traceDocsTotal}
             maxTraceItems={maxTraceItems}
             discoverHref={discoverHref}
+            data-test-subj='unifiedWaterfallSizeWarning'
           />
           <EuiSpacer size="m" />
         </>
