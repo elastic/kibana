@@ -9,13 +9,13 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { UserConnectorToken } from '../types';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
-const RETENTION_DAYS = 90;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export async function cleanupStaleUserConnectorTokens(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<number> {
-  const cutoffDate = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const cutoffDate = new Date(Date.now() - 90 * MS_PER_DAY);
 
   let finder:
     | ReturnType<typeof unsecuredSavedObjectsClient.createPointInTimeFinder<UserConnectorToken>>
