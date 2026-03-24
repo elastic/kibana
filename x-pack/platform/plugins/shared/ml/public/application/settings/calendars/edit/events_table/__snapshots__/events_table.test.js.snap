@@ -233,7 +233,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                   class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page
-                  :
+                  : 
                   5
                 </span>
                 <span
@@ -641,7 +641,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                     class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
-                    :
+                    : 
                     5
                   </span>
                   <span
