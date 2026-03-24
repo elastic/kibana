@@ -1387,4 +1387,60 @@ describe('generateOtelcolConfig', () => {
       expect(result.extensions?.['beatsauth/default']).toEqual({});
     });
   });
+
+  describe('otel_exporter_config_yaml merging', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+
+    it('should merge user YAML into the exporter config', () => {
+      const outputWithExporterYaml: Output = {
+        ...defaultOutput,
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithExporterYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual(
+        expect.objectContaining({ flush_interval: '10s' })
+      );
+    });
+
+    it('should not allow user YAML to override endpoints or auth', () => {
+      const outputWithOverrides: Output = {
+        ...defaultOutput,
+        otel_exporter_config_yaml: 'endpoints:\n  - http://evil.com\nauth: null',
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithOverrides);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual(
+        expect.objectContaining({
+          endpoints: defaultOutput.hosts,
+          auth: { authenticator: 'beatsauth/default' },
+        })
+      );
+    });
+
+    it('should handle null otel_exporter_config_yaml gracefully', () => {
+      const outputWithNull: Output = {
+        ...defaultOutput,
+        otel_exporter_config_yaml: null,
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithNull);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: defaultOutput.hosts,
+        auth: { authenticator: 'beatsauth/default' },
+      });
+    });
+
+    it('should handle undefined otel_exporter_config_yaml gracefully', () => {
+      const result = generateOtelcolConfig(inputs, defaultOutput);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: defaultOutput.hosts,
+        auth: { authenticator: 'beatsauth/default' },
+      });
+    });
+  });
 });

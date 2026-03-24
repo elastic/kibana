@@ -330,7 +330,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           </EuiFormRow>
 
           {renderOutputTypeSection(inputs.typeInput.value)}
-
           {isRemoteESOutput ? null : (
             <EuiFormRow
               fullWidth
@@ -370,6 +369,45 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               </>
             </EuiFormRow>
           )}
+
+          {isESOutput && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
+                    defaultMessage="OpenTelemetry Exporter Configuration"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
+                    defaultMessage="Advanced Exporter Parameters"
+                  />
+                }
+                {...inputs.otelExporterConfigInput.formRowProps}
+              >
+                <YamlCodeEditorWithPlaceholder
+                  value={inputs.otelExporterConfigInput.value}
+                  onChange={(value) => inputs.otelExporterConfigInput.setValue(value)}
+                  disabled={inputs.otelExporterConfigInput.props.disabled}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
+                    {
+                      defaultMessage:
+                        '# YAML settings here will be added to the exporter section of OTel policies.',
+                    }
+                  )}
+                />
+              </EuiFormRow>
+            </>
+          )}
+
           <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
             <EuiSwitch
               {...inputs.defaultOutputInput.props}

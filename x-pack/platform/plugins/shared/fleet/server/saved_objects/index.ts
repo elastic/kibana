@@ -595,6 +595,7 @@ export const getSavedObjectTypes = (
           service_token: { type: 'keyword', index: false },
           config: { type: 'flattened' },
           config_yaml: { type: 'text' },
+          otel_exporter_config_yaml: { type: 'text' },
           is_preconfigured: { type: 'boolean', index: false },
           is_internal: { type: 'boolean', index: false },
           ssl: { type: 'binary' },

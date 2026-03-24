@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
+
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
 import type {
   FullAgentPolicyInput,
@@ -459,12 +461,17 @@ function generateOtelcolExporter(
     case outputType.Elasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
       const beatsauthID = `beatsauth/${outputID}`;
+      const extraExporterConfig = dataOutput.otel_exporter_config_yaml
+        ? (load(dataOutput.otel_exporter_config_yaml) as Record<string, unknown>) ?? {}
+        : {};
       return {
         extensions: {
           [beatsauthID]: buildBeatsauthConfig(dataOutput, proxy),
         },
         exporters: {
           [`elasticsearch/${outputID}`]: {
+            ...extraExporterConfig,
+            // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             auth: { authenticator: beatsauthID },
           },

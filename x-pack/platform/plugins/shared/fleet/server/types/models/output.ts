@@ -70,6 +70,7 @@ const BaseSchema = {
   ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ssl: schema.maybe(
     schema.oneOf([
       schema.literal(null),

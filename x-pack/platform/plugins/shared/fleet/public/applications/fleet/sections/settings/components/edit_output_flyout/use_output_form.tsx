@@ -95,6 +95,7 @@ export interface OutputFormInputsType {
   logstashHostsInput: ReturnType<typeof useComboInput>;
   presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
+  otelExporterConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
@@ -234,6 +235,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     output?.config_yaml ?? '',
     validateYamlConfig,
     isDisabled('config_yaml')
+  );
+
+  const otelExporterConfigInput = useInput(
+    (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
+    validateYamlConfig,
+    isDisabled('otel_exporter_config_yaml')
   );
 
   const defaultOutputInput = useSwitchInput(
@@ -604,6 +611,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     logstashHostsInput,
     presetInput,
     additionalYamlConfigInput,
+    otelExporterConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
@@ -670,6 +678,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+    const otelExporterConfigValid = otelExporterConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const serviceTokenValid = serviceTokenInput.validate();
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
@@ -738,6 +747,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         elasticsearchUrlsValid &&
         additionalYamlConfigValid &&
+        otelExporterConfigValid &&
         nameInputValid &&
         caTrustedFingerprintValid &&
         diskQueuePathValid
@@ -757,6 +767,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
+    otelExporterConfigInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
     serviceTokenSecretInput,
@@ -1034,6 +1045,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
