@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './tag_utils';
-export * from './transform_utils';
-export * from './file_utils';
-export * from './search_configs';
-export * from './affected_modules';
+import execa from 'execa';
+
+import { REPO_ROOT } from '@kbn/repo-info';
+
+/** Returns true when the current repository is a shallow Git checkout. */
+export const isShallowRepository = async (): Promise<boolean> => {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', '--is-shallow-repository'], {
+      cwd: REPO_ROOT,
+      stdin: 'ignore',
+    });
+
+    return stdout.trim() === 'true';
+  } catch {
+    return false;
+  }
+};
