@@ -14,6 +14,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPageHeader,
   EuiPopover,
   EuiSelectable,
@@ -40,6 +41,7 @@ export const SEARCH_DEBOUNCE_MS = 300;
 interface FilterPopoverOption {
   value: string;
   label: string;
+  iconType?: string;
 }
 
 const MODE_FILTER_OPTIONS: FilterPopoverOption[] = [
@@ -48,12 +50,14 @@ const MODE_FILTER_OPTIONS: FilterPopoverOption[] = [
     label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
       defaultMessage: 'Alerting',
     }),
+    iconType: 'bell',
   },
   {
     value: 'signal',
     label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
       defaultMessage: 'Detect only',
     }),
+    iconType: 'radar',
   },
 ];
 
@@ -116,9 +120,10 @@ const SingleSelectionFilterPopover = ({
 
   const selectableOptions = useMemo<EuiSelectableOption[]>(
     () =>
-      options.map(({ value: optionValue, label: optionLabel }) => ({
+      options.map(({ value: optionValue, label: optionLabel, iconType }) => ({
         key: optionValue,
         label: optionLabel,
+        prepend: iconType ? <EuiIcon type={iconType} aria-hidden={true} /> : undefined,
         checked: value === optionValue ? 'on' : undefined,
         'data-test-subj': `${dataTestSubj}Option-${optionValue}`,
       })),
@@ -359,10 +364,12 @@ export const RulesListPage = () => {
                 data-test-subj="rulesListSearchBar"
               />
             </EuiFlexItem>
-            <EuiFilterGroup>
-              <StatusFilterPopover value={statusFilter} onChange={setStatusFilter} />
-              <ModeFilterPopover value={modeFilter} onChange={setModeFilter} />
-            </EuiFilterGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <StatusFilterPopover value={statusFilter} onChange={setStatusFilter} />
+                <ModeFilterPopover value={modeFilter} onChange={setModeFilter} />
+              </EuiFilterGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <RulesListTableContainer
