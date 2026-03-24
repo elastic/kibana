@@ -92,4 +92,30 @@ describe('createBadgeElement', () => {
     const parsed = JSON.parse(badge.getAttribute(COMMAND_METADATA_ATTRIBUTE)!);
     expect(parsed).toEqual({ id: 'skill-1', version: '2' });
   });
+
+  it('applies EUI text truncation classes and title for skill badges', () => {
+    const badge = createCommandBadgeElement({
+      commandId: CommandId.Skill,
+      label: 'Summarize',
+      id: 'skill-1',
+      metadata: {},
+    });
+
+    expect(badge.classList.contains('eui-textTruncate')).toBe(true);
+    expect(badge.classList.contains('eui-displayInlineBlock')).toBe(true);
+    expect(badge.title).toBe('/Summarize');
+  });
+
+  it('applies EUI text truncation classes and title for SML badges', () => {
+    const badge = createCommandBadgeElement({
+      commandId: CommandId.Sml,
+      label: 'dashboard/My chart',
+      id: 'chunk-1',
+      metadata: {},
+    });
+
+    expect(badge.classList.contains('eui-textTruncate')).toBe(true);
+    expect(badge.classList.contains('eui-displayInlineBlock')).toBe(true);
+    expect(badge.title).toBe('@dashboard/My chart');
+  });
 });

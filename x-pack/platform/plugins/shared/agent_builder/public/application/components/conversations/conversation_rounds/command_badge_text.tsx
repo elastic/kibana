@@ -7,8 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-import { deserializeCommandBadge } from '../conversation_input/message_editor/command_badge';
+import { EuiTextTruncate, useEuiTheme } from '@elastic/eui';
+import {
+  COMMAND_BADGE_MAX_WIDTH_CH,
+  deserializeCommandBadge,
+} from '../conversation_input/message_editor/command_badge';
 import { getCommandDefinition } from '../conversation_input/message_editor/command_menu';
 
 interface CommandBadgeTextProps {
@@ -41,10 +44,21 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
         if (segment.type === 'text') {
           return <React.Fragment key={index}>{segment.value}</React.Fragment>;
         }
+
         return (
-          <span key={index} css={badgeStyle}>
+          <span
+            key={index}
+            css={[
+              badgeStyle,
+              css`
+                display: inline-block;
+                max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
+                vertical-align: middle;
+              `,
+            ]}
+          >
             {getCommandDefinition(segment.data.commandId)?.sequence ?? ''}
-            {segment.data.label}
+            <EuiTextTruncate text={segment.data.label} />
           </span>
         );
       })}

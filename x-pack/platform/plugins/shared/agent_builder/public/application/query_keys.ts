@@ -48,6 +48,9 @@ export const queryKeys = {
     all: ['skills', 'list'] as const,
     byId: (skillId?: string) => ['skills', skillId],
   },
+  sml: {
+    search: (keywords: readonly string[]) => ['sml', 'search', ...keywords] as const,
+  },
   plugins: {
     all: ['plugins', 'list'] as const,
     byId: (pluginId?: string) => ['plugins', pluginId],

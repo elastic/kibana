@@ -24,7 +24,11 @@ export const createCommandBadgeElement = (data: CommandBadgeData): HTMLSpanEleme
   span.setAttribute(COMMAND_METADATA_ATTRIBUTE, JSON.stringify({ id: data.id, ...data.metadata }));
 
   const sequence = getCommandDefinition(data.commandId)?.sequence ?? '';
-  span.textContent = `${sequence}${data.label}`;
+  const displayText = `${sequence}${data.label}`;
+  span.textContent = displayText;
+  span.classList.add('eui-displayInlineBlock', 'eui-textTruncate');
+  span.title = displayText;
+
   return span;
 };
 

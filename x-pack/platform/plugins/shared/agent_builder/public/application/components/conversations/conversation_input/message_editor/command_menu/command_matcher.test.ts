@@ -6,30 +6,10 @@
  */
 
 import { matchCommand } from './command_matcher';
-import { sortedCommandDefinitions } from './command_definitions';
 import { CommandId } from './types';
-import type { CommandDefinition } from './types';
 
 describe('matchCommand', () => {
   describe('multiple command sequences', () => {
-    const originalDefinitions = [...sortedCommandDefinitions];
-
-    beforeAll(() => {
-      const mockAttachment: CommandDefinition = {
-        id: CommandId.Attachment,
-        scheme: 'attachment',
-        sequence: '@',
-        name: 'Attachment',
-        menuComponent: null as unknown as CommandDefinition['menuComponent'],
-      };
-      sortedCommandDefinitions.push(mockAttachment);
-    });
-
-    afterAll(() => {
-      sortedCommandDefinitions.length = 0;
-      sortedCommandDefinitions.push(...originalDefinitions);
-    });
-
     it('matches the command sequence closest to the cursor', () => {
       const result = matchCommand('@foo /bar');
       expect(result.isActive).toBe(true);
@@ -40,7 +20,7 @@ describe('matchCommand', () => {
     it('matches earlier sequence when it is closest to cursor', () => {
       const result = matchCommand('/foo @bar');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Attachment);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
       expect(result.activeCommand?.query).toBe('bar');
     });
   });
@@ -82,6 +62,32 @@ describe('matchCommand', () => {
       const result = matchCommand('/summarize text');
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.query).toBe('summarize text');
+    });
+
+    it('matches "@" at start of input', () => {
+      const result = matchCommand('@');
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('');
+      expect(result.activeCommand?.commandStartOffset).toBe(0);
+    });
+
+    it('matches "@" after whitespace', () => {
+      const result = matchCommand('hello @');
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('');
+    });
+
+    it('does not match "@" mid-word', () => {
+      const result = matchCommand('user@host');
+      expect(result.isActive).toBe(false);
+    });
+
+    it('captures query text after @ command', () => {
+      const result = matchCommand('@pac');
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.query).toBe('pac');
     });
   });
 

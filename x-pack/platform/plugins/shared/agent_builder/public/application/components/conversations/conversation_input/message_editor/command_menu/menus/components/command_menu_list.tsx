@@ -89,6 +89,10 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const containerStyles = css`
       width: ${MENU_WIDTH}px;
+      /* EuiHighlight uses EuiMark (<mark>); clear fill so list row background stays distinct */
+      mark {
+        background-color: transparent;
+      }
     `;
 
     const activeHighlightStyles = css`
@@ -132,10 +136,18 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           renderOption={
             hasCustomRender
               ? (option) => {
-                  const data = option.data as
-                    | { commandMenuRenderLabel?: React.ReactNode }
-                    | undefined;
-                  return data?.commandMenuRenderLabel ?? option.label;
+                  // EuiSelectable merges `option.data` onto the object passed to `renderOption`
+                  // (see EuiSelectableList), so `commandMenuRenderLabel` is top-level, not under `data`.
+                  const merged = option as {
+                    label: string;
+                    data?: { commandMenuRenderLabel?: React.ReactNode };
+                    commandMenuRenderLabel?: React.ReactNode;
+                  };
+                  return (
+                    merged.commandMenuRenderLabel ??
+                    merged.data?.commandMenuRenderLabel ??
+                    merged.label
+                  );
                 }
               : undefined
           }

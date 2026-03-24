@@ -302,24 +302,30 @@ const checkItemsAccess = async ({
 };
 
 /**
- * Fields for `search_as_you_type` mapping (see `sml_storage.ts`): root plus shingle
- * sub-fields used by `multi_match` with `bool_prefix` for typeahead-style matching.
+ * Fields for `search_as_you_type` (see
+ * https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/search-as-you-type ).
+ *
+ * - **Title**: root + shingle + `._index_prefix` — shingles help order when the title has
+ *   multiple tokens; `._index_prefix` powers prefix completion on the last token.
+ * - **Type**: indexed as SAYT but values are effectively a **single token** (e.g. `lens`,
+ *   `visualization`). Shingle subfields (`type._2gram`, `type._3gram`) add little for
+ *   single-token text; we query `type` + `type._index_prefix` only for prefix typeahead.
  */
 const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
   'title^2',
   'title._2gram',
   'title._3gram',
+  'title._index_prefix',
   'type',
-  'type._2gram',
-  'type._3gram',
+  'type._index_prefix',
 ] as const;
 
 /**
- * Build the content query clause from an array of keywords.
+ * Build the search query from keywords. Only `type` and `title` (search_as_you_type + bool_prefix) are searched — not `content`.
  *
  * - `["*"]` or empty array → `match_all` (return everything)
  */
-const buildContentQuery = (keywords: string[]): Record<string, unknown> => {
+const buildSmlSearchQuery = (keywords: string[]): Record<string, unknown> => {
   const filtered = keywords.map((k) => k.trim()).filter(Boolean);
   if (filtered.length === 0 || (filtered.length === 1 && filtered[0] === '*')) {
     return { match_all: {} };
@@ -327,24 +333,10 @@ const buildContentQuery = (keywords: string[]): Record<string, unknown> => {
   return {
     bool: {
       should: filtered.map((keyword) => ({
-        bool: {
-          should: [
-            {
-              multi_match: {
-                query: keyword,
-                type: 'bool_prefix',
-                fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
-              },
-            },
-            {
-              multi_match: {
-                query: keyword,
-                fields: ['content'],
-                type: 'best_fields',
-              },
-            },
-          ],
-          minimum_should_match: 1,
+        multi_match: {
+          query: keyword,
+          type: 'bool_prefix',
+          fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
         },
       })),
       minimum_should_match: 1,
@@ -376,7 +368,7 @@ const searchSml = async ({
   );
 
   try {
-    const contentQuery = buildContentQuery(keywords);
+    const smlQuery = buildSmlSearchQuery(keywords);
 
     const response = await esClient.search<SmlDocument>({
       index: smlIndexName,
@@ -385,7 +377,7 @@ const searchSml = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          must: [contentQuery],
+          must: [smlQuery],
           filter: [
             {
               bool: {

@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
 import type { CommandMenuHandle } from './command_menu';
-import { COMMAND_BADGE_ATTRIBUTE, isElementCommandBadge } from './command_badge';
+import {
+  COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_BADGE_MAX_WIDTH_CH,
+  isElementCommandBadge,
+} from './command_badge';
 import { serializeEditorContent } from './serialize';
 import { getSelectionRange, insertNodeAtCursor } from './utils';
 
@@ -135,6 +139,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       padding: 0 ${euiTheme.size.xs};
       cursor: default;
       user-select: all;
+      max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
+      vertical-align: middle;
     }
   `;
   const editorStyles = [
