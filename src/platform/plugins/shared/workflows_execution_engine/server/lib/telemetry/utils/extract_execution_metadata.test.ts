@@ -23,15 +23,31 @@ describe('extractCompositionContext', () => {
     expect(extractCompositionContext(compositionFixture('manual', {}))).toEqual({});
   });
 
-  it('returns compositionDepth and parentWorkflowId for child execution', () => {
+  it('returns compositionDepth, parentWorkflowId, and parentWorkflowInvocation when set', () => {
     expect(
       extractCompositionContext(
         compositionFixture('workflow-step', {
           parentDepth: 0,
           parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
         })
       )
-    ).toEqual({ compositionDepth: 1, parentWorkflowId: 'parent-wf-id' });
+    ).toEqual({
+      compositionDepth: 1,
+      parentWorkflowId: 'parent-wf-id',
+      parentWorkflowInvocation: 'sync',
+    });
+  });
+
+  it('includes parentWorkflowInvocation async', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('workflow-step', {
+          parentDepth: 0,
+          parentWorkflowInvocation: 'async',
+        })
+      )
+    ).toEqual({ compositionDepth: 1, parentWorkflowInvocation: 'async' });
   });
 
   it('uses compositionDepth 1 when parentDepth is not a number', () => {

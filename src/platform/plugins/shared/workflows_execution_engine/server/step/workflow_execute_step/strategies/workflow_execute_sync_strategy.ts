@@ -122,6 +122,7 @@ export class WorkflowExecuteSyncStrategy {
           spaceId,
           inputs,
           triggeredBy: 'workflow-step',
+          parentWorkflowInvocation: 'sync',
           parentWorkflowId: workflowExecution.workflowId,
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,

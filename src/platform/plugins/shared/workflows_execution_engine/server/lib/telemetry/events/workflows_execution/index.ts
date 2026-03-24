@@ -30,6 +30,7 @@ const baseWorkflowExecutionSchema: RootSchema<{
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
+  parentWorkflowInvocation?: 'sync' | 'async';
 }> = {
   workflowExecutionId: {
     type: 'keyword',
@@ -88,6 +89,14 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'The workflow ID of the parent workflow that invoked this sub-workflow. Only present for sub-workflow executions.',
+      optional: true,
+    },
+  },
+  parentWorkflowInvocation: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whether the parent started this sub-workflow with workflow.execute (sync) or workflow.executeAsync (async). Only present for sub-workflow executions.',
       optional: true,
     },
   },

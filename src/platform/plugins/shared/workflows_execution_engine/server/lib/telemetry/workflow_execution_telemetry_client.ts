@@ -49,6 +49,9 @@ function buildBaseExecutionTelemetryFields(
     ...(executionMetadata.parentWorkflowId && {
       parentWorkflowId: executionMetadata.parentWorkflowId,
     }),
+    ...(executionMetadata.parentWorkflowInvocation && {
+      parentWorkflowInvocation: executionMetadata.parentWorkflowInvocation,
+    }),
   };
 }
 

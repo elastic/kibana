@@ -257,6 +257,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).not.toHaveProperty('compositionDepth');
       expect(eventData).not.toHaveProperty('parentWorkflowId');
+      expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
     });
 
     it('should include compositionDepth and parentWorkflowId for sub-workflow executions', () => {
@@ -265,6 +266,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         context: {
           parentDepth: 0,
           parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
         },
       });
 
@@ -278,6 +280,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         triggerType: 'workflow-step',
         compositionDepth: 1,
         parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'sync',
       });
     });
   });
@@ -385,6 +388,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         context: {
           parentDepth: 1,
           parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'async',
         },
         error: {
           message: 'Child failed',
@@ -402,6 +406,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         triggerType: 'workflow-step',
         compositionDepth: 2,
         parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'async',
         errorMessage: 'Child failed',
       });
     });
@@ -455,6 +460,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         context: {
           parentDepth: 0,
           parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
         },
         cancellationReason: 'Parent cancelled',
         cancelledAt: '2024-01-01T00:00:30.000Z',
@@ -470,6 +476,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         triggerType: 'workflow-step',
         compositionDepth: 1,
         parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'sync',
         cancellationReason: 'Parent cancelled',
       });
     });

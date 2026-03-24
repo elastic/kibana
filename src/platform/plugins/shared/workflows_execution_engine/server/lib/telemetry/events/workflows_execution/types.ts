@@ -45,6 +45,11 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * Only present for sub-workflow executions.
    */
   parentWorkflowId?: string;
+  /**
+   * Whether the parent used workflow.execute (sync) or workflow.executeAsync to start this run.
+   * Only present for sub-workflow executions when recorded on the execution context.
+   */
+  parentWorkflowInvocation?: 'sync' | 'async';
 }
 
 /**

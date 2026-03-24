@@ -101,6 +101,11 @@ export interface WorkflowExecutionTelemetryMetadata {
    * Only present for sub-workflow executions when available in context.
    */
   parentWorkflowId?: string;
+  /**
+   * Whether the parent invoked this sub-workflow via workflow.execute (sync) or workflow.executeAsync.
+   * Only present for sub-workflow executions when set on the execution context.
+   */
+  parentWorkflowInvocation?: 'sync' | 'async';
 }
 
 /**
@@ -246,30 +251,37 @@ export function extractExecutionMetadata(
   };
 }
 
+/** How the parent started this sub-workflow (persisted on child execution context by execute strategies). */
+type ParentWorkflowInvocationMode = 'sync' | 'async';
+
 /**
  * Extracts composition context for sub-workflow executions (triggered by workflow.execute / workflow.executeAsync).
  * Returns empty object for top-level executions.
  *
  * @param workflowExecution - The workflow execution
- * @returns compositionDepth and optional parentWorkflowId when this is a child execution
+ * @returns compositionDepth and optional parentWorkflowId / parentWorkflowInvocation when this is a child execution
  */
 export function extractCompositionContext(workflowExecution: EsWorkflowExecution): {
   compositionDepth?: number;
   parentWorkflowId?: string;
+  parentWorkflowInvocation?: ParentWorkflowInvocationMode;
 } {
   if (workflowExecution.triggeredBy !== 'workflow-step') {
     return {};
   }
 
-  const context = workflowExecution.context || {};
+  const context = (workflowExecution.context || {}) as Record<string, unknown>;
   const parentDepth = context.parentDepth;
   const compositionDepth = typeof parentDepth === 'number' ? parentDepth + 1 : 1;
   const parentWorkflowId =
     typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined;
+  const parentWorkflowInvocation =
+    (context.parentWorkflowInvocation as ParentWorkflowInvocationMode) || undefined;
 
   return {
     compositionDepth,
     ...(parentWorkflowId && { parentWorkflowId }),
+    ...(parentWorkflowInvocation && { parentWorkflowInvocation }),
   };
 }
 
