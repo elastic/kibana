@@ -152,7 +152,7 @@ export const createModelProvider = ({
       return await getModel(fastToolConnectorId);
     } catch (e) {
       logger.debug(
-        `Fast tool connector "${fastToolConnectorId}" unavailable, falling back to default model`
+        `Fast tool connector "${fastToolConnectorId}" unavailable, falling back to default model: ${e instanceof Error ? e.message : String(e)}`
       );
       return getModel(await getDefaultConnectorId());
     }
