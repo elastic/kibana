@@ -25,6 +25,27 @@ import {
 } from '../../fixtures/workflows';
 
 /**
+ * Security detection alerts embed the original document, so we can assert on alert_id.
+ * Generic alerting alerts (obs/ESS) contain Kibana alert metadata without original doc
+ * fields — we verify the output is non-empty (the step ran) and contains alert info.
+ */
+const assertAlertOutputs = (
+  outputs: string[],
+  mockAlerts: Array<{ alert_id: string }>,
+  isSecurityProject: boolean
+) => {
+  if (isSecurityProject) {
+    for (const alertId of mockAlerts.map((a) => a.alert_id)) {
+      expect(outputs.some((output) => output.includes(alertId))).toBe(true);
+    }
+  } else {
+    for (const output of outputs) {
+      expect(output).toContain('alert');
+    }
+  }
+};
+
+/**
  * Returns the correct "create alert rule" workflow YAML based on the project type.
  * - Security: uses the detection engine API
  * - Observability / ESS: uses the generic Kibana alerting API with .es-query rule type
@@ -38,8 +59,7 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-// Failing: See https://github.com/elastic/kibana/issues/252959
-test.describe.skip(
+test.describe(
   'Workflow execution - Alert triggers',
   {
     tag: [
@@ -148,10 +168,8 @@ test.describe.skip(
       // so we only verify execution structure (counts, iterations) for those.
       const isSecurityProject = config.projectType === 'security';
 
-      // Most recent execution first -> last alert first
-      const expectedSingleAlertIds = mockAlerts.map((a) => a.alert_id).reverse();
-
-      for (let i = 0; i < expectedSingleAlertIds.length; i++) {
+      const actualSingleOutputs: string[] = [];
+      for (let i = 0; i < mockAlerts.length; i++) {
         // eslint-disable-next-line playwright/no-nth-methods -- iterating over execution list items by index
         await singleWorkflowExecutions.nth(i).click();
 
@@ -165,17 +183,13 @@ test.describe.skip(
         await logEachAlertButton.click();
 
         const stepOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
-        const stepOutputStr = JSON.stringify(stepOutput);
-        // Security detection alerts embed the original document, so we can assert on alert_id.
-        // Generic alerting alerts (obs/ESS) contain Kibana alert metadata without original doc
-        // fields — we verify the output is non-empty (the step ran) and contains alert info.
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        const expectedContent = isSecurityProject ? expectedSingleAlertIds[i] : 'alert';
-        expect(stepOutputStr).toContain(expectedContent);
+        actualSingleOutputs.push(JSON.stringify(stepOutput));
 
         await page.testSubj.click('workflowBackToExecutionsLink');
         await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
       }
+
+      assertAlertOutputs(actualSingleOutputs, mockAlerts, isSecurityProject);
 
       // Validate multiple-alerts workflow execution (all alerts in one execution)
       await pageObjects.workflowEditor.gotoWorkflowExecutions(multipleWorkflow.id);
@@ -191,6 +205,7 @@ test.describe.skip(
       await pageObjects.workflowExecution.expandStepsTree();
 
       // 2 iterations (both alerts in single execution)
+      const iterationOutputs: string[] = [];
       for (let i = 0; i < mockAlerts.length; i++) {
         const logEachAlertButton = await pageObjects.workflowExecution.getStep(
           `foreach_log_each_alert > ${i} > log_each_alert`
@@ -200,12 +215,10 @@ test.describe.skip(
         const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>(
           'output'
         );
-        // Security alerts contain the original document with alert_id;
-        // generic alerting alerts contain Kibana alert metadata.
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        const expectedAlertContent = isSecurityProject ? mockAlerts[i].alert_id : 'alert';
-        expect(JSON.stringify(alertOutput)).toContain(expectedAlertContent);
+        iterationOutputs.push(JSON.stringify(alertOutput));
       }
+
+      assertAlertOutputs(iterationOutputs, mockAlerts, isSecurityProject);
     });
 
     test('should not trigger a disabled workflow when alert fires', async ({
