@@ -9,12 +9,7 @@ import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/s
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
 
 const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
-import {
-  createDataView,
-  generateLogsData,
-  generateMetricsData,
-  generateRulesData,
-} from '../fixtures/generators';
+import { generateLogsData, generateMetricsData, generateRulesData } from '../fixtures/generators';
 
 import { GENERATED_METRICS } from '../fixtures/constants';
 
