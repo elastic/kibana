@@ -20,7 +20,7 @@ export interface FavoritesSavedObjectAttributes {
 const schemaV1 = schema.object({
   userId: schema.string(),
   type: schema.string(), // object type, e.g. dashboard
-  favoriteIds: schema.arrayOf(schema.string()),
+  favoriteIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
 });
 
 const schemaV3 = schemaV1.extends({

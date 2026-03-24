@@ -28,7 +28,7 @@ const dataIndexSchema = schema.object({
   fields: schema.recordOf(schema.string(), schema.any()),
 
   // times fields that will be updated relative to now when data is installed
-  timeFields: schema.arrayOf(schema.string()),
+  timeFields: schema.arrayOf(schema.string(), { maxSize: 100 }),
 
   // should index be created as data stream
   isDataStream: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -85,13 +85,14 @@ export const sampleDataSchema = schema.object({
         id: schema.string(),
         type: schema.string(),
         attributes: schema.any(),
-        references: schema.arrayOf(schema.any()),
+        references: schema.arrayOf(schema.any(), { maxSize: 1000 }),
         version: schema.maybe(schema.any()),
       },
       { unknowns: 'allow' }
-    )
+    ),
+    { maxSize: 1000 }
   ),
-  dataIndices: schema.arrayOf(dataIndexSchema),
+  dataIndices: schema.arrayOf(dataIndexSchema, { maxSize: 100 }),
 
   status: schema.maybe(schema.string()),
   statusMsg: schema.maybe(schema.string()),

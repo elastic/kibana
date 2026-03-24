@@ -32,7 +32,7 @@ const artifactsSchema = schema.object({
     })
   ),
   // Kibana dashboards created by this product.
-  dashboards: schema.arrayOf(dashboardSchema),
+  dashboards: schema.arrayOf(dashboardSchema, { maxSize: 100 }),
   application: schema.maybe(
     schema.object({
       path: schema.string(),
@@ -49,7 +49,7 @@ const statusCheckSchema = schema.object({
   success: schema.maybe(schema.string()),
   error: schema.maybe(schema.string()),
   esHitsCheck: schema.object({
-    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
     query: schema.recordOf(schema.string(), schema.any()),
   }),
 });
@@ -58,7 +58,7 @@ export type StatusCheckSchema = TypeOf<typeof statusCheckSchema>;
 const instructionSchema = schema.object({
   title: schema.maybe(schema.string()),
   textPre: schema.maybe(schema.string()),
-  commands: schema.maybe(schema.arrayOf(schema.string())),
+  commands: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   textPost: schema.maybe(schema.string()),
   customComponentName: schema.maybe(schema.string()),
 });
@@ -66,7 +66,7 @@ export type Instruction = TypeOf<typeof instructionSchema>;
 
 const instructionVariantSchema = schema.object({
   id: schema.string(),
-  instructions: schema.arrayOf(instructionSchema),
+  instructions: schema.arrayOf(instructionSchema, { maxSize: 100 }),
   initialSelected: schema.maybe(schema.boolean()),
 });
 
@@ -82,13 +82,13 @@ const instructionSetSchema = schema.object({
     })
   ),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: schema.arrayOf(instructionVariantSchema),
+  instructionVariants: schema.arrayOf(instructionVariantSchema, { maxSize: 100 }),
   statusCheck: schema.maybe(statusCheckSchema),
 });
 export type InstructionSetSchema = TypeOf<typeof instructionSetSchema>;
 
 const instructionsSchema = schema.object({
-  instructionSets: schema.arrayOf(instructionSetSchema),
+  instructionSets: schema.arrayOf(instructionSetSchema, { maxSize: 100 }),
 });
 export type InstructionsSchema = TypeOf<typeof instructionsSchema>;
 
@@ -144,7 +144,7 @@ export const tutorialSchema = schema.object({
   customStatusCheckName: schema.maybe(schema.string()),
 
   // Category assignment for the integration browser
-  integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string())),
+  integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 
   // Name of an equivalent package in EPR. e.g. this needs to be explicitly defined if it cannot be derived from a heuristic.
   eprPackageOverlap: schema.maybe(schema.string()),
