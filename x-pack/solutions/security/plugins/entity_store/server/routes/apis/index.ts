@@ -15,6 +15,7 @@ export { registerUninstall } from './uninstall';
 export { registerCRUDCreate } from './crud/create';
 export { registerCRUDUpdate } from './crud/update';
 export { registerCRUDBulkUpdate } from './crud/bulk_update';
+export { registerCRUDGet } from './crud/get';
 export { registerCRUDDelete } from './crud/delete';
 export { registerStart } from './start';
 export { registerUpdate } from './update';

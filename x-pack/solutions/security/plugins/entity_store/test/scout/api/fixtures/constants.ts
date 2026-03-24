@@ -33,6 +33,7 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_CREATE: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
   CRUD_UPDATE: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
   CRUD_BULK_UPDATE: 'internal/security/entity_store/entities/bulk',
+  CRUD_GET: 'internal/security/entity_store/entities',
   CRUD_DELETE: 'internal/security/entity_store/entities/',
   RESOLUTION_LINK: 'internal/security/entity_store/resolution/link',
   RESOLUTION_UNLINK: 'internal/security/entity_store/resolution/unlink',

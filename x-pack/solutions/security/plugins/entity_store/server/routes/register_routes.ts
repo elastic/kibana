@@ -22,6 +22,7 @@ import {
   registerCRUDCreate,
   registerCRUDUpdate,
   registerCRUDBulkUpdate,
+  registerCRUDGet,
   registerCRUDDelete,
   registerResolutionLink,
   registerResolutionUnlink,
@@ -43,6 +44,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerCRUDCreate(router);
   registerCRUDUpdate(router);
   registerCRUDBulkUpdate(router);
+  registerCRUDGet(router);
   registerCRUDDelete(router);
   registerStart(router);
   registerUpdate(router);
