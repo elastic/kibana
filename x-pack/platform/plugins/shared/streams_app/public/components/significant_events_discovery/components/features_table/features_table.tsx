@@ -63,36 +63,75 @@ export function FeaturesTable() {
     if (selectedFeatures.length === 0) return;
 
     try {
-      await deleteFeaturesInBulk(selectedFeatures);
-      notifications.toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteSuccess.title',
-          {
-            defaultMessage: '{count, plural, one {Feature deleted} other {Features deleted}}',
-            values: { count: selectedFeatures.length },
-          }
-        ),
-        text: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteSuccess.text',
-          {
-            defaultMessage:
-              '{count, plural, one {The feature has} other {# features have}} been successfully deleted.',
-            values: { count: selectedFeatures.length },
-          }
-        ),
-      });
-      setSelectedFeatures([]);
+      const { succeededCount, failedCount } = await deleteFeaturesInBulk(selectedFeatures);
+
       hideBulkDeleteModal();
-      refetch();
+
+      if (failedCount === 0) {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteSuccess.title',
+            {
+              defaultMessage: '{count, plural, one {Feature deleted} other {Features deleted}}',
+              values: { count: succeededCount },
+            }
+          ),
+          text: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteSuccess.text',
+            {
+              defaultMessage:
+                '{count, plural, one {The feature has} other {# features have}} been successfully deleted.',
+              values: { count: succeededCount },
+            }
+          ),
+        });
+        setSelectedFeatures([]);
+      } else if (succeededCount === 0) {
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteError.title',
+            {
+              defaultMessage: 'Failed to delete features',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteError.text',
+            {
+              defaultMessage: 'None of the selected features could be deleted. Please try again.',
+            }
+          ),
+        });
+      } else {
+        notifications.toasts.addWarning({
+          title: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeletePartial.title',
+            {
+              defaultMessage: 'Partially deleted features',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeletePartial.text',
+            {
+              defaultMessage:
+                '{succeeded, plural, one {# feature was} other {# features were}} deleted, but {failed} could not be removed. Please try again for the remaining items.',
+              values: { succeeded: succeededCount, failed: failedCount },
+            }
+          ),
+        });
+        setSelectedFeatures([]);
+      }
     } catch (error) {
+      hideBulkDeleteModal();
       notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
         title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteError.title',
+          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteUnexpectedError.title',
           {
             defaultMessage: 'Failed to delete features',
           }
         ),
       });
+    } finally {
+      refetch();
     }
   }, [selectedFeatures, deleteFeaturesInBulk, refetch, notifications.toasts, hideBulkDeleteModal]);
 

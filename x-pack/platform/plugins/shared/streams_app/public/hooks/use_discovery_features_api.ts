@@ -11,8 +11,13 @@ import type { Feature } from '@kbn/streams-schema';
 import { groupBy } from 'lodash';
 import { useKibana } from './use_kibana';
 
+export interface BulkDeleteResult {
+  succeededCount: number;
+  failedCount: number;
+}
+
 interface DiscoveryFeaturesApi {
-  deleteFeaturesInBulk: (features: Feature[]) => Promise<void>;
+  deleteFeaturesInBulk: (features: Feature[]) => Promise<BulkDeleteResult>;
 }
 
 export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
@@ -30,9 +35,10 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
     () => ({
       deleteFeaturesInBulk: async (features: Feature[]) => {
         const featuresByStream = groupBy(features, 'stream_name');
+        const entries = Object.entries(featuresByStream);
 
-        await Promise.all(
-          Object.entries(featuresByStream).map(([streamName, streamFeatures]) =>
+        const results = await Promise.allSettled(
+          entries.map(([streamName, streamFeatures]) =>
             streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
               signal,
               params: {
@@ -44,6 +50,20 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
             })
           )
         );
+
+        let succeededCount = 0;
+        let failedCount = 0;
+
+        results.forEach((result, index) => {
+          const count = entries[index][1].length;
+          if (result.status === 'fulfilled') {
+            succeededCount += count;
+          } else {
+            failedCount += count;
+          }
+        });
+
+        return { succeededCount, failedCount };
       },
     }),
     [streamsRepositoryClient, signal]
