@@ -61,7 +61,15 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 100 })),
+  filters: schema.maybe(
+    schema.arrayOf(asCodeFilterSchema, {
+      maxSize: 100,
+      meta: {
+        id: 'lensPanelFilters',
+        description: 'Filters applied to the panel',
+      },
+    })
+  ),
 };
 
 export const dslOnlyPanelInfoSchema = {

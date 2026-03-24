@@ -25,7 +25,7 @@ export const lensItemMetaSchema = schema.object(
     origin_id: savedObjectProps.originId,
     managed: savedObjectProps.managed,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'lensItemMeta', title: 'Visualization Meta' } }
 );
 
 /**
@@ -37,5 +37,5 @@ export const lensResponseItemSchema = schema.object(
     data: lensApiStateSchema,
     meta: lensItemMetaSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'lensResponseItem', title: 'Visualization Response' } }
 );
