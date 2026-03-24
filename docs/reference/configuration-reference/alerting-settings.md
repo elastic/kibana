@@ -11,7 +11,7 @@ applies_to:
 # Alerting and action settings in {{kib}} [alert-action-settings-kb]
 
 
-:::{settings} /configuration-reference/alerting-settings.yml
+:::{settings} /reference/configuration-reference/alerting-settings.yml
 :::
 
 
