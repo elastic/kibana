@@ -393,7 +393,7 @@ If you want EDOT to store traces in a specific Elasticsearch cluster, override v
 ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
 ```
 
-If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
+If you want to view traces in the Phoenix UI, add a Phoenix exporter to the `telemetry.tracing.exporters` list in `kibana.dev.yml` (alongside the APM and telemetry flags shown above):
 
 ```yaml
 telemetry.tracing.exporters:
@@ -402,6 +402,8 @@ telemetry.tracing.exporters:
       public_url: 'https://<my-phoenix-host>'
       project_name: '<my-name>'
       api_key: '<my-api-key>'
+  - http:
+      url: 'http://localhost:4318/v1/traces'
 ```
 
 This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
@@ -446,10 +448,14 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
-You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
+To enable trace-based evaluators, configure tracing in `kibana.dev.yml`. You must also disable Elastic APM (it conflicts with OpenTelemetry tracing):
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - phoenix:
       base_url: 'https://<my-phoenix-host>'
@@ -459,6 +465,8 @@ telemetry.tracing.exporters:
   - http:
       url: 'http://localhost:4318/v1/traces'
 ```
+
+The Phoenix exporter is optional - include it if you want traces visible in Phoenix.
 
 #### Start EDOT Collector
 
