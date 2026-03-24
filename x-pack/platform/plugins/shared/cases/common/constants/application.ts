@@ -29,6 +29,11 @@ export const CASE_VIEW_TAB_PATH = `${CASE_VIEW_PATH}/?tabId=:tabId` as const;
 export const CASES_TEMPLATES_PATH = '/templates' as const;
 export const CASES_CREATE_TEMPLATE_PATH = `${CASES_TEMPLATES_PATH}/create` as const;
 export const CASES_EDIT_TEMPLATE_PATH = `${CASES_TEMPLATES_PATH}/:templateId/edit` as const;
+export const CASES_CONFIGURE_TEMPLATES_PATH = `${CASES_CONFIGURE_PATH}/templates` as const;
+export const CASES_CONFIGURE_CREATE_TEMPLATE_PATH =
+  `${CASES_CONFIGURE_TEMPLATES_PATH}/create` as const;
+export const CASES_CONFIGURE_EDIT_TEMPLATE_PATH =
+  `${CASES_CONFIGURE_TEMPLATES_PATH}/:templateId/edit` as const;
 /**
  * The main Cases application is in the stack management under the
  * Alerts and Insights section. To do that, Cases registers to the management

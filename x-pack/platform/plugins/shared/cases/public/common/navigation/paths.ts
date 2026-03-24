@@ -17,6 +17,9 @@ import {
   CASES_TEMPLATES_PATH,
   CASES_CREATE_TEMPLATE_PATH,
   CASES_EDIT_TEMPLATE_PATH,
+  CASES_CONFIGURE_TEMPLATES_PATH,
+  CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
+  CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
@@ -57,6 +60,20 @@ export const generateTemplateEditPath = (params: TemplateViewPathParams): string
     generatePath(
       CASES_EDIT_TEMPLATE_PATH,
       params as ExtractRouteParams<typeof CASES_EDIT_TEMPLATE_PATH>
+    )
+  );
+};
+export const getCasesConfigureTemplatesPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_TEMPLATES_PATH}`);
+export const getCasesConfigureCreateTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_CREATE_TEMPLATE_PATH}`);
+export const getCasesConfigureEditTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_EDIT_TEMPLATE_PATH}`);
+export const generateConfigureTemplateEditPath = (params: TemplateViewPathParams): string => {
+  return normalizePath(
+    generatePath(
+      CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
+      params as ExtractRouteParams<typeof CASES_CONFIGURE_EDIT_TEMPLATE_PATH>
     )
   );
 };
