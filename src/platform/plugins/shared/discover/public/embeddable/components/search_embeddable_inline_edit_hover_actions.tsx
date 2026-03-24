@@ -113,6 +113,9 @@ export const SearchEmbeddableInlineEditHoverActions = ({
       </EuiButtonEmpty>
       <EuiPopover
         anchorPosition="downRight"
+        aria-label={i18n.translate('discover.embeddable.inlineEdit.selectTabPopoverAriaLabel', {
+          defaultMessage: 'Select tab',
+        })}
         button={
           <EuiButton
             aria-label={i18n.translate('discover.embeddable.inlineEdit.selectTabButtonAriaLabel', {

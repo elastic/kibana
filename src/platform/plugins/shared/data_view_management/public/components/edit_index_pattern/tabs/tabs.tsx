@@ -315,6 +315,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   <EuiPopover
                     anchorPosition="downCenter"
                     data-test-subj="indexedFieldTypeFilterDropdown-popover"
+                    aria-label={filterAriaLabel}
                     button={
                       <EuiFilterButton
                         aria-label={filterAriaLabel}
@@ -349,6 +350,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   <EuiPopover
                     anchorPosition="downCenter"
                     data-test-subj="schemaFieldTypeFilterDropdown-popover"
+                    aria-label={schemaAriaLabel}
                     button={
                       <EuiFilterButton
                         aria-label={schemaAriaLabel}
@@ -429,6 +431,7 @@ export const Tabs: React.FC<TabsProps> = ({
                 <EuiPopover
                   anchorPosition="downCenter"
                   data-test-subj="scriptedFieldLanguageFilterDropdown-popover"
+                  aria-label={scriptedFieldAriaLabel}
                   button={
                     <EuiFilterButton
                       aria-label={scriptedFieldAriaLabel}
