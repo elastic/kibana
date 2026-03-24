@@ -23,6 +23,7 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
+import { CaseViewTasks } from '../tasks/case_view_tasks';
 import { CaseViewEvents } from './components/case_view_events';
 import { CaseViewAttachments } from './components/case_view_attachments';
 import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
@@ -185,6 +186,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.TASKS && (
+            <CaseViewTasks caseId={caseData.id} />
           )}
         </EuiFlexGroup>
       </>

@@ -20,6 +20,10 @@ import type { MetricsSubClient } from './metrics/client';
 import { createMetricsSubClient } from './metrics/client';
 import type { TemplatesSubClient } from './templates/client';
 import { createTemplatesSubClient } from './templates/client';
+import type { TasksSubClient } from './tasks/client';
+import { createTasksSubClient } from './tasks/client';
+import type { TaskTemplatesSubClient } from './task_templates/client';
+import { createTaskTemplatesSubClient } from './task_templates/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -32,6 +36,8 @@ export class CasesClient {
   private readonly _configure: ConfigureSubClient;
   private readonly _metrics: MetricsSubClient;
   private readonly _templates: TemplatesSubClient;
+  private readonly _tasks: TasksSubClient;
+  private readonly _taskTemplates: TaskTemplatesSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -41,6 +47,8 @@ export class CasesClient {
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
     this._templates = createTemplatesSubClient(args);
+    this._tasks = createTasksSubClient(args);
+    this._taskTemplates = createTaskTemplatesSubClient(args);
   }
 
   /**
@@ -83,6 +91,20 @@ export class CasesClient {
    */
   public get metrics() {
     return this._metrics;
+  }
+
+  /**
+   * Retrieves an interface for interacting with case tasks.
+   */
+  public get tasks() {
+    return this._tasks;
+  }
+
+  /**
+   * Retrieves an interface for interacting with case task templates.
+   */
+  public get taskTemplates() {
+    return this._taskTemplates;
   }
 }
 

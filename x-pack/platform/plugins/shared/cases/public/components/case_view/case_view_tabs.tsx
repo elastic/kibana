@@ -10,7 +10,7 @@ import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
-import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
+import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB, TASKS_TAB } from './translations';
 import { type CaseUI } from '../../../common';
 import type { CaseViewTab } from './use_case_attachment_tabs';
 import {
@@ -85,6 +85,10 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             count={similarCasesData?.total}
           />
         ),
+      },
+      {
+        id: CASE_VIEW_PAGE_TABS.TASKS,
+        name: TASKS_TAB,
       },
     ],
     [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]

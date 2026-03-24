@@ -73,6 +73,13 @@ import {
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
+import type { CaseTask } from '../../common/types/domain/task/v1';
+import {
+  getCaseTasksUrl,
+  getCaseTaskDetailsUrl,
+  getCaseTasksReorderUrl,
+  getCaseTasksApplyTemplateUrl,
+} from '../../common/api';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -699,4 +706,126 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+
+// ---- Tasks -----------------------------------------------------------------
+
+export interface CreateTaskRequest {
+  title: string;
+  description?: string;
+  status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  assignees?: Array<{ uid: string }>;
+  due_date?: string | null;
+  parent_task_id?: string | null;
+  owner: string;
+}
+
+export interface UpdateTaskRequest {
+  version: string;
+  title?: string;
+  description?: string;
+  status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  assignees?: Array<{ uid: string }>;
+  due_date?: string | null;
+}
+
+export interface FindTasksRequest {
+  status?: string;
+  priority?: string;
+  sort_field?: string;
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  per_page?: number;
+}
+
+export const getCaseTasks = async (
+  caseId: string,
+  params?: FindTasksRequest,
+  signal?: AbortSignal
+): Promise<{ tasks: CaseTask[]; total: number }> => {
+  const query = params
+    ? Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined))
+    : {};
+  const response = await KibanaServices.get().http.fetch<{ tasks: CaseTask[]; total: number }>(
+    getCaseTasksUrl(caseId),
+    {
+      method: 'GET',
+      query,
+      signal,
+    }
+  );
+  return response;
+};
+
+export const createTask = async (
+  caseId: string,
+  request: CreateTaskRequest,
+  signal?: AbortSignal
+): Promise<CaseTask> => {
+  const response = await KibanaServices.get().http.fetch<CaseTask>(getCaseTasksUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(request),
+    signal,
+  });
+  return response;
+};
+
+export const updateTask = async (
+  caseId: string,
+  taskId: string,
+  request: UpdateTaskRequest,
+  signal?: AbortSignal
+): Promise<CaseTask> => {
+  const response = await KibanaServices.get().http.fetch<CaseTask>(
+    getCaseTaskDetailsUrl(caseId, taskId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify(request),
+      signal,
+    }
+  );
+  return response;
+};
+
+export const deleteTask = async (
+  caseId: string,
+  taskId: string,
+  signal?: AbortSignal
+): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseTaskDetailsUrl(caseId, taskId), {
+    method: 'DELETE',
+    signal,
+  });
+};
+
+export const reorderTasks = async (
+  caseId: string,
+  orderedTaskIds: string[],
+  parentTaskId: string | null,
+  signal?: AbortSignal
+): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseTasksReorderUrl(caseId), {
+    method: 'PUT',
+    body: JSON.stringify({ ordered_task_ids: orderedTaskIds, parent_task_id: parentTaskId }),
+    signal,
+  });
+};
+
+export const applyTaskTemplate = async (
+  caseId: string,
+  templateId: string,
+  owner: string,
+  signal?: AbortSignal
+): Promise<{ tasks: CaseTask[] }> => {
+  const response = await KibanaServices.get().http.fetch<{ tasks: CaseTask[] }>(
+    getCaseTasksApplyTemplateUrl(caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ template_id: templateId, owner }),
+      signal,
+    }
+  );
+  return response;
 };
