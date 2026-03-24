@@ -190,10 +190,21 @@ function createFetchWithDispatcher(
     configurationUtilities.ensureUriAllowed(resolvedUrl);
     logger.debug(`MCP connector: following redirect (${response.status}) to ${resolvedUrl}`);
 
+    await response.body?.cancel();
+
     const preserveMethod = response.status === 307 || response.status === 308;
     const redirectInit: RequestInit = preserveMethod
       ? { ...init }
       : { ...init, method: 'GET', body: undefined };
+
+    // Per WHATWG Fetch, strip authorization header on cross-origin redirects
+    const requestOrigin = new URL(url).origin;
+    const redirectOrigin = new URL(resolvedUrl).origin;
+    if (requestOrigin !== redirectOrigin && redirectInit.headers) {
+      const sanitized = new Headers(redirectInit.headers);
+      sanitized.delete('authorization');
+      redirectInit.headers = sanitized;
+    }
 
     return followRedirects(resolvedUrl, redirectInit, redirectCount + 1);
   };
