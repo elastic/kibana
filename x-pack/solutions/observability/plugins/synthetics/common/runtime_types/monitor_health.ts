@@ -9,6 +9,8 @@ export enum LocationHealthStatusValue {
   Healthy = 'healthy',
   MissingPackagePolicy = 'missing_package_policy',
   MissingAgentPolicy = 'missing_agent_policy',
+  MissingAgents = 'missing_agents',
+  UnhealthyAgent = 'unhealthy_agent',
   AgentPolicyMismatch = 'agent_policy_mismatch',
   MissingLocation = 'missing_location',
   PackageNotInstalled = 'package_not_installed',

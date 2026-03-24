@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import * as reactRedux from 'react-redux';
 import { LocationHealthStatusValue } from '../../../../../../common/runtime_types';
-import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
+import { useMonitorIntegrationHealth, isAgentLevelIssue } from './use_monitor_integration_health';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -59,6 +59,50 @@ const unhealthyMonitor = {
       locationLabel: 'Location 2',
       status: LocationHealthStatusValue.Healthy,
       policyId: 'mon-2-loc-2',
+    },
+  ],
+};
+
+const agentOnlyMonitor = {
+  configId: 'mon-3',
+  monitorName: 'Monitor 3',
+  isUnhealthy: true,
+  locations: [
+    {
+      locationId: 'loc-1',
+      locationLabel: 'Location 1',
+      status: LocationHealthStatusValue.MissingAgents,
+      policyId: 'mon-3-loc-1',
+      reason: 'No agents',
+    },
+    {
+      locationId: 'loc-2',
+      locationLabel: 'Location 2',
+      status: LocationHealthStatusValue.UnhealthyAgent,
+      policyId: 'mon-3-loc-2',
+      reason: 'All offline',
+    },
+  ],
+};
+
+const mixedIssueMonitor = {
+  configId: 'mon-4',
+  monitorName: 'Monitor 4',
+  isUnhealthy: true,
+  locations: [
+    {
+      locationId: 'loc-1',
+      locationLabel: 'Location 1',
+      status: LocationHealthStatusValue.MissingAgents,
+      policyId: 'mon-4-loc-1',
+      reason: 'No agents',
+    },
+    {
+      locationId: 'loc-2',
+      locationLabel: 'Location 2',
+      status: LocationHealthStatusValue.MissingPackagePolicy,
+      policyId: 'mon-4-loc-2',
+      reason: 'Missing policy',
     },
   ],
 };
@@ -134,6 +178,82 @@ describe('useMonitorIntegrationHealth', () => {
       );
 
       expect(result.current.getUnhealthyConfigIdsForLocation('loc-1')).toEqual(['mon-2']);
+    });
+  });
+
+  describe('isAgentLevelIssue', () => {
+    it('returns true for MissingAgents', () => {
+      expect(isAgentLevelIssue(LocationHealthStatusValue.MissingAgents)).toBe(true);
+    });
+
+    it('returns true for UnhealthyAgent', () => {
+      expect(isAgentLevelIssue(LocationHealthStatusValue.UnhealthyAgent)).toBe(true);
+    });
+
+    it('returns true for MissingAgentPolicy', () => {
+      expect(isAgentLevelIssue(LocationHealthStatusValue.MissingAgentPolicy)).toBe(true);
+    });
+
+    it('returns false for config-level statuses', () => {
+      expect(isAgentLevelIssue(LocationHealthStatusValue.MissingPackagePolicy)).toBe(false);
+      expect(isAgentLevelIssue(LocationHealthStatusValue.AgentPolicyMismatch)).toBe(false);
+      expect(isAgentLevelIssue(LocationHealthStatusValue.MissingLocation)).toBe(false);
+      expect(isAgentLevelIssue(LocationHealthStatusValue.Healthy)).toBe(false);
+    });
+  });
+
+  describe('canResetFix', () => {
+    it('returns true when at least one unhealthy location has a config-fixable issue', () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      expect(result.current.canResetFix('mon-2')).toBe(true);
+    });
+
+    it('returns false when all unhealthy locations have agent-level issues', () => {
+      setupSelectors({ monitors: [agentOnlyMonitor], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-3'] }));
+
+      expect(result.current.canResetFix('mon-3')).toBe(false);
+    });
+
+    it('returns true when unhealthy locations are mixed (agent + config)', () => {
+      setupSelectors({ monitors: [mixedIssueMonitor], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-4'] }));
+
+      expect(result.current.canResetFix('mon-4')).toBe(true);
+    });
+
+    it('returns false for an unknown configId', () => {
+      setupSelectors({ monitors: [], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: [] }));
+
+      expect(result.current.canResetFix('non-existent')).toBe(false);
+    });
+  });
+
+  describe('getResetFixableUnhealthyStatuses', () => {
+    it('returns only config-fixable unhealthy locations', () => {
+      setupSelectors({ monitors: [mixedIssueMonitor], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-4'] }));
+
+      const fixable = result.current.getResetFixableUnhealthyStatuses('mon-4');
+      expect(fixable).toHaveLength(1);
+      expect(fixable[0].locationId).toBe('loc-2');
+      expect(fixable[0].status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
+    });
+
+    it('returns empty array for agent-only issues', () => {
+      setupSelectors({ monitors: [agentOnlyMonitor], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-3'] }));
+
+      expect(result.current.getResetFixableUnhealthyStatuses('mon-3')).toHaveLength(0);
     });
   });
 

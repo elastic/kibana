@@ -24,6 +24,20 @@ export const STATUS_LABELS: Record<
       defaultMessage: 'The agent policy referenced by this private location no longer exists.',
     }
   ),
+  [LocationHealthStatusValue.MissingAgents]: i18n.translate(
+    'xpack.synthetics.monitorHealth.status.missingAgents',
+    {
+      defaultMessage:
+        'No agents are enrolled in the agent policy for this private location. Check your Fleet agents.',
+    }
+  ),
+  [LocationHealthStatusValue.UnhealthyAgent]: i18n.translate(
+    'xpack.synthetics.monitorHealth.status.unhealthyAgent',
+    {
+      defaultMessage:
+        'All agents for this private location are offline or unhealthy. Check your Fleet agents.',
+    }
+  ),
   [LocationHealthStatusValue.AgentPolicyMismatch]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.agentPolicyMismatch',
     {

@@ -17,19 +17,19 @@ export const ResetLocationMonitors = ({
   locationId: string;
   setMonitorPendingReset: (ids: string[]) => void;
 }) => {
-  const { getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation } =
+  const { getResetFixableMonitorCountForLocation, getResetFixableConfigIdsForLocation } =
     useMonitorIntegrationHealth();
 
-  const unhealthyMonitorCount = getUnhealthyMonitorCountForLocation(locationId);
+  const resetFixableCount = getResetFixableMonitorCountForLocation(locationId);
 
   const handleReset = () => {
-    const ids = getUnhealthyConfigIdsForLocation(locationId);
+    const ids = getResetFixableConfigIdsForLocation(locationId);
     if (ids.length > 0) {
       setMonitorPendingReset(ids);
     }
   };
 
-  if (unhealthyMonitorCount === 0) {
+  if (resetFixableCount === 0) {
     return null;
   }
 

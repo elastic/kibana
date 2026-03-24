@@ -59,7 +59,7 @@ export const PrivateLocationsTable = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<string[]>([]);
-  const { resetMonitors } = useMonitorIntegrationHealth();
+  const { resetMonitors, getResetFixableMonitorCountForLocation } = useMonitorIntegrationHealth();
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -142,6 +142,7 @@ export const PrivateLocationsTable = ({
         {
           name: RESET_MONITORS_LABEL,
           description: RESET_MONITORS_LABEL,
+          available: (item: ListItem) => getResetFixableMonitorCountForLocation(item.id) > 0,
           render: (item: ListItem) => {
             return (
               <ResetLocationMonitors

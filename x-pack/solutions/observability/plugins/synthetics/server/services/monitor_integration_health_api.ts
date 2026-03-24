@@ -31,6 +31,10 @@ const STATUS_REASONS: Record<
     'The Fleet package policy for this monitor/location pair does not exist.',
   [LocationHealthStatusValue.MissingAgentPolicy]:
     'The agent policy referenced by this private location no longer exists.',
+  [LocationHealthStatusValue.MissingAgents]:
+    'No agents are enrolled in the agent policy for this private location.',
+  [LocationHealthStatusValue.UnhealthyAgent]:
+    'All agents enrolled in the agent policy for this private location are offline or unhealthy.',
   [LocationHealthStatusValue.AgentPolicyMismatch]:
     'The package policy exists but is attached to a different agent policy than expected.',
   [LocationHealthStatusValue.MissingLocation]:
@@ -93,6 +97,10 @@ export class MonitorIntegrationHealthApi {
       this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
     ]);
 
+    // Only fetch agent status for policies that actually exist
+    const existingAgentPolicyIds = [...existingAgentPoliciesMap.keys()];
+    const agentStatusesMap = await this.getAgentStatusesMap(existingAgentPolicyIds);
+
     const existingPoliciesArray = [...existingPackagePoliciesMap.values()];
 
     const monitors: MonitorHealthStatus[] = foundMonitors.map(({ so }) => {
@@ -101,11 +109,13 @@ export class MonitorIntegrationHealthApi {
 
       // Status checks are ordered by root-cause severity (most fundamental first).
       // Only the first matching status is returned per location — downstream issues
-      // (e.g. agent_policy_mismatch) are moot when a more fundamental problem exists
-      // (e.g. the agent policy itself is missing).
+      // are moot when a more fundamental problem exists.
       //
-      // Priority: missing_location > missing_agent_policy > missing_package_policy
-      //           > agent_policy_mismatch > healthy
+      // Priority: missing_location > missing_agent_policy > missing_agents
+      //           > unhealthy_agent > missing_package_policy > agent_policy_mismatch > healthy
+      //
+      // Agent-level checks (missing_agents, unhealthy_agent) come before package policy
+      // checks because no package policy fix can help if there are no healthy agents running.
       const locationStatuses: LocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const newFormatPolicyId = privateLocationAPI.getPolicyId(
@@ -129,6 +139,26 @@ export class MonitorIntegrationHealthApi {
             LocationHealthStatusValue.MissingAgentPolicy,
             newFormatPolicyId
           );
+        }
+
+        const agentStatus = agentStatusesMap.get(existingPrivateLocation.agentPolicyId);
+        if (agentStatus !== undefined) {
+          if (agentStatus.all === 0) {
+            return MonitorIntegrationHealthApi.buildLocationStatus(
+              loc.id,
+              existingPrivateLocation.label,
+              LocationHealthStatusValue.MissingAgents,
+              newFormatPolicyId
+            );
+          }
+          if (agentStatus.online === 0) {
+            return MonitorIntegrationHealthApi.buildLocationStatus(
+              loc.id,
+              existingPrivateLocation.label,
+              LocationHealthStatusValue.UnhealthyAgent,
+              newFormatPolicyId
+            );
+          }
         }
 
         const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
@@ -251,6 +281,26 @@ export class MonitorIntegrationHealthApi {
       { ignoreMissing: true }
     );
     return new Map((existingPackagePolicies ?? []).map((policy) => [policy.id, policy]));
+  }
+
+  private async getAgentStatusesMap(
+    agentPolicyIds: string[]
+  ): Promise<Map<string, { online: number; all: number }>> {
+    if (agentPolicyIds.length === 0) {
+      return new Map();
+    }
+
+    const results = await Promise.all(
+      agentPolicyIds.map(async (policyId) => {
+        const status =
+          await this.server.fleet.agentService.asInternalUser.getAgentStatusForAgentPolicy(
+            policyId
+          );
+        return [policyId, { online: status.online, all: status.all }] as const;
+      })
+    );
+
+    return new Map(results);
   }
 
   private async getExistingAgentPoliciesMap(agentPolicyIds: string[]) {

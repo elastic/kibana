@@ -72,6 +72,7 @@ const buildApi = (overrides: {
   fleetGetByIDs?: jest.Mock;
   fleetAgentPolicyGetByIds?: jest.Mock;
   fleetGetInstallation?: jest.Mock;
+  fleetAgentGetStatus?: jest.Mock;
 }): MonitorIntegrationHealthApi => {
   const fleetGetByIDs = overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
 
@@ -84,6 +85,11 @@ const buildApi = (overrides: {
   const fleetGetInstallation =
     overrides.fleetGetInstallation ?? jest.fn().mockResolvedValue({ install_status: 'installed' });
 
+  // Default: one online agent (healthy), so existing tests are unaffected
+  const fleetAgentGetStatus =
+    overrides.fleetAgentGetStatus ??
+    jest.fn().mockResolvedValue({ online: 1, all: 1, offline: 0, error: 0 });
+
   const server = {
     coreStart: {
       savedObjects: {
@@ -93,6 +99,9 @@ const buildApi = (overrides: {
     fleet: {
       packagePolicyService: { getByIDs: fleetGetByIDs },
       agentPolicyService: { getByIds: fleetAgentPolicyGetByIds },
+      agentService: {
+        asInternalUser: { getAgentStatusForAgentPolicy: fleetAgentGetStatus },
+      },
       packageService: {
         asInternalUser: { getInstallation: fleetGetInstallation },
       },
@@ -669,6 +678,191 @@ describe('MonitorIntegrationHealthApi', () => {
         LocationHealthStatusValue.AgentPolicyMismatch
       );
       expect(result.monitors[0].locations[0].policyId).toBe(legacyPolicyId);
+    });
+  });
+
+  describe('missing agents', () => {
+    it('returns MissingAgents when no agents are enrolled in the agent policy', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetAgentGetStatus: jest.fn().mockResolvedValue({ online: 0, all: 0 }),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      const locStatus = result.monitors[0].locations[0];
+      expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgents);
+      expect(locStatus.reason).toBeDefined();
+      expect(result.monitors[0].isUnhealthy).toBe(true);
+    });
+
+    it('reports MissingAgents even when no package policies exist', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      // No package policies returned — agent check still wins because it's higher priority
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs: jest.fn().mockResolvedValue([]),
+        fleetAgentGetStatus: jest.fn().mockResolvedValue({ online: 0, all: 0 }),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.MissingAgents);
+    });
+
+    it('fetches agent statuses only for existing agent policies', async () => {
+      const privateLoc1 = createPrivateLocation('loc-1', 'existing-agent', 'Location 1');
+      const privateLoc2 = createPrivateLocation('loc-2', 'deleted-agent', 'Location 2');
+
+      const so = createMonitorSO('mon-1', {
+        locations: [
+          { id: 'loc-1', label: 'Location 1', isServiceManaged: false },
+          { id: 'loc-2', label: 'Location 2', isServiceManaged: false },
+        ],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
+
+      const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([{ id: 'existing-agent' }]);
+      const fleetAgentGetStatus = jest.fn().mockResolvedValue({ online: 0, all: 0 });
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetAgentPolicyGetByIds,
+        fleetAgentGetStatus,
+      });
+
+      await api.getHealth(['mon-1']);
+
+      // only called for existing-agent, not deleted-agent
+      expect(fleetAgentGetStatus).toHaveBeenCalledTimes(1);
+      expect(fleetAgentGetStatus).toHaveBeenCalledWith('existing-agent');
+    });
+  });
+
+  describe('unhealthy agent', () => {
+    it('returns UnhealthyAgent when agents exist but none are online', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetAgentGetStatus: jest.fn().mockResolvedValue({ online: 0, all: 3 }),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      const locStatus = result.monitors[0].locations[0];
+      expect(locStatus.status).toBe(LocationHealthStatusValue.UnhealthyAgent);
+      expect(locStatus.reason).toBeDefined();
+      expect(result.monitors[0].isUnhealthy).toBe(true);
+    });
+
+    it('returns Healthy when at least one agent is online, even if others are offline', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const expectedPolicyId = 'mon-1-priv-loc-1';
+      const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
+      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+        fleetAgentGetStatus: jest.fn().mockResolvedValue({ online: 1, all: 3 }),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
+    });
+
+    it('MissingAgentPolicy takes priority over UnhealthyAgent', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'deleted-agent-policy');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([]);
+      const fleetAgentGetStatus = jest.fn().mockResolvedValue({ online: 0, all: 3 });
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetAgentPolicyGetByIds,
+        fleetAgentGetStatus,
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].locations[0].status).toBe(
+        LocationHealthStatusValue.MissingAgentPolicy
+      );
+      // agent status should not be fetched for a deleted policy
+      expect(fleetAgentGetStatus).not.toHaveBeenCalled();
+    });
+
+    it('MissingAgents takes priority over UnhealthyAgent', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      // all === 0 should yield MissingAgents, not UnhealthyAgent
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetAgentGetStatus: jest.fn().mockResolvedValue({ online: 0, all: 0 }),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.MissingAgents);
+    });
+
+    it('agent checks take priority over MissingPackagePolicy', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      // No package policies exist, but agents are also all offline
+      const fleetGetByIDs = jest.fn().mockResolvedValue([]);
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+        fleetAgentGetStatus: jest.fn().mockResolvedValue({ online: 0, all: 2 }),
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.UnhealthyAgent);
     });
   });
 

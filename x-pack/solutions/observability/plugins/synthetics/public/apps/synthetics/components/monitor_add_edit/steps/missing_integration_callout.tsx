@@ -8,7 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
+import {
+  useMonitorIntegrationHealth,
+  isAgentLevelIssue,
+} from '../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../common/hooks/status_labels';
 import { kibanaService } from '../../../../../utils/kibana_service';
 
@@ -16,6 +19,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   const {
     isUnhealthy: hasMissingIntegrations,
     getUnhealthyLocationStatuses: getMissingStatuses,
+    canResetFix,
     resetMonitor,
     isResetting,
   } = useMonitorIntegrationHealth({
@@ -24,6 +28,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 
   const isMissing = hasMissingIntegrations(configId);
   const missingStatuses = getMissingStatuses(configId);
+  const resetCanFix = canResetFix(configId);
 
   const handleReset = useCallback(async () => {
     const { error } = await resetMonitor(configId);
@@ -44,10 +49,12 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
     return null;
   }
 
+  const hasAgentIssues = missingStatuses.some((s) => isAgentLevelIssue(s.status));
+
   return (
     <>
       <EuiCallOut
-        title={CALLOUT_TITLE}
+        title={hasAgentIssues && !resetCanFix ? AGENT_CALLOUT_TITLE : CALLOUT_TITLE}
         color="warning"
         iconType="warning"
         data-test-subj="syntheticsMissingIntegrationCallout"
@@ -67,15 +74,19 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
             </ul>
           </EuiText>
         )}
-        <EuiSpacer size="s" />
-        <EuiButton
-          data-test-subj="syntheticsMissingIntegrationResetButton"
-          color="warning"
-          onClick={handleReset}
-          isLoading={isResetting}
-        >
-          {RESET_BUTTON_LABEL}
-        </EuiButton>
+        {resetCanFix && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButton
+              data-test-subj="syntheticsMissingIntegrationResetButton"
+              color="warning"
+              onClick={handleReset}
+              isLoading={isResetting}
+            >
+              {RESET_BUTTON_LABEL}
+            </EuiButton>
+          </>
+        )}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
@@ -85,6 +96,13 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 const CALLOUT_TITLE = i18n.translate('xpack.synthetics.missingIntegration.callout.title', {
   defaultMessage: 'Missing Fleet integration',
 });
+
+const AGENT_CALLOUT_TITLE = i18n.translate(
+  'xpack.synthetics.missingIntegration.callout.agentTitle',
+  {
+    defaultMessage: 'Agent issue detected',
+  }
+);
 
 const RESET_BUTTON_LABEL = i18n.translate('xpack.synthetics.missingIntegration.resetButton', {
   defaultMessage: 'Reset monitor',

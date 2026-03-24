@@ -38,10 +38,19 @@ interface UseMonitorIntegrationHealthReturn {
   resetMonitors: (configIds: string[]) => Promise<{ error?: Error }>;
   isUnhealthy: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
+  getResetFixableUnhealthyStatuses: (configId: string) => MonitorIntegrationStatus[];
+  canResetFix: (configId: string) => boolean;
   getUnhealthyLocationCount: () => number;
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
   getUnhealthyConfigIdsForLocation: (locationId: string) => string[];
+  getResetFixableMonitorCountForLocation: (locationId: string) => number;
+  getResetFixableConfigIdsForLocation: (locationId: string) => string[];
 }
+
+export const isAgentLevelIssue = (status: LocationHealthStatusValue): boolean =>
+  status === LocationHealthStatusValue.MissingAgentPolicy ||
+  status === LocationHealthStatusValue.MissingAgents ||
+  status === LocationHealthStatusValue.UnhealthyAgent;
 
 export const useMonitorIntegrationHealth = (
   options?: UseMonitorIntegrationHealthOptions
@@ -117,6 +126,21 @@ export const useMonitorIntegrationHealth = (
     [statuses]
   );
 
+  const getResetFixableUnhealthyStatuses = useCallback(
+    (configId: string): MonitorIntegrationStatus[] => {
+      const locationStatuses = statuses.get(configId);
+      return locationStatuses?.filter((s) => s.isUnhealthy && !isAgentLevelIssue(s.status)) ?? [];
+    },
+    [statuses]
+  );
+
+  const canResetFix = useCallback(
+    (configId: string): boolean => {
+      return getResetFixableUnhealthyStatuses(configId).length > 0;
+    },
+    [getResetFixableUnhealthyStatuses]
+  );
+
   const getUnhealthyLocationCount = useCallback((): number => {
     let count = 0;
     for (const locationStatuses of statuses.values()) {
@@ -141,6 +165,40 @@ export const useMonitorIntegrationHealth = (
       const ids: string[] = [];
       for (const entries of statuses.values()) {
         if (entries.some((s) => s.locationId === locationId && s.isUnhealthy)) {
+          ids.push(entries[0].configId);
+        }
+      }
+      return ids;
+    },
+    [statuses]
+  );
+
+  const getResetFixableMonitorCountForLocation = useCallback(
+    (locationId: string): number => {
+      let count = 0;
+      for (const entries of statuses.values()) {
+        if (
+          entries.some(
+            (s) => s.locationId === locationId && s.isUnhealthy && !isAgentLevelIssue(s.status)
+          )
+        ) {
+          count++;
+        }
+      }
+      return count;
+    },
+    [statuses]
+  );
+
+  const getResetFixableConfigIdsForLocation = useCallback(
+    (locationId: string): string[] => {
+      const ids: string[] = [];
+      for (const entries of statuses.values()) {
+        if (
+          entries.some(
+            (s) => s.locationId === locationId && s.isUnhealthy && !isAgentLevelIssue(s.status)
+          )
+        ) {
           ids.push(entries[0].configId);
         }
       }
@@ -206,8 +264,12 @@ export const useMonitorIntegrationHealth = (
     resetMonitors,
     isUnhealthy,
     getUnhealthyLocationStatuses,
+    getResetFixableUnhealthyStatuses,
+    canResetFix,
     getUnhealthyLocationCount,
     getUnhealthyMonitorCountForLocation,
     getUnhealthyConfigIdsForLocation,
+    getResetFixableMonitorCountForLocation,
+    getResetFixableConfigIdsForLocation,
   };
 };

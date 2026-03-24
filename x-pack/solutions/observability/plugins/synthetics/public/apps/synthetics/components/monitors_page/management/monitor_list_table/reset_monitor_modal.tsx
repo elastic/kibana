@@ -6,21 +6,31 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 
 export const ResetMonitorModal = ({
   configIds,
+  skippedConfigIds = [],
   onClose,
   resetMonitors,
 }: {
   configIds: string[];
+  skippedConfigIds?: string[];
   onClose: () => void;
   resetMonitors: (ids: string[]) => Promise<{ error?: Error }>;
 }) => {
   const [isResetting, setIsResetting] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
+  const skippedAccordionId = useGeneratedHtmlId();
 
   const handleConfirm = useCallback(async () => {
     setIsResetting(true);
@@ -69,6 +79,45 @@ export const ResetMonitorModal = ({
           })}
         </p>
       </EuiText>
+      {skippedConfigIds.length > 0 && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.title', {
+              defaultMessage:
+                '{count, plural, one {# monitor} other {# monitors}} will not be reset',
+              values: { count: skippedConfigIds.length },
+            })}
+          >
+            <EuiText size="s">
+              <p>
+                {i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.description', {
+                  defaultMessage:
+                    'These monitors have agent-level issues that cannot be fixed by resetting. Check your Fleet agents.',
+                })}
+              </p>
+            </EuiText>
+            <EuiAccordion
+              id={skippedAccordionId}
+              buttonContent={i18n.translate(
+                'xpack.synthetics.resetMonitorModal.skippedWarning.showIds',
+                { defaultMessage: 'Show skipped monitors' }
+              )}
+            >
+              <EuiSpacer size="xs" />
+              <EuiText size="s">
+                <ul>
+                  {skippedConfigIds.map((id) => (
+                    <li key={id}>{id}</li>
+                  ))}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiCallOut>
+        </>
+      )}
     </EuiConfirmModal>
   );
 };
