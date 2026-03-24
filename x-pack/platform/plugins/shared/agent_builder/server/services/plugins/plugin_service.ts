@@ -215,6 +215,7 @@ const toSkillCreateRequest = ({
   return {
     id: `${pluginName}-${skill.dirName}`,
     name: skill.meta.name ?? skill.dirName,
+    base_path: `/skills/${pluginName}`,
     description: skill.meta.description ?? '',
     content: skill.content,
     referenced_content: skill.referencedFiles.map((file) => ({
