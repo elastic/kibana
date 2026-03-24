@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getESQLResults } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useRiskLevelsEsqlQuery } from './use_risk_levels_esql_query';
