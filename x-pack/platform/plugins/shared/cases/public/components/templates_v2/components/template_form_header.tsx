@@ -16,6 +16,7 @@ import {
   EuiPageHeaderSection,
   EuiPageTemplate,
   EuiSkeletonTitle,
+  EuiSwitch,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -30,9 +31,11 @@ interface TemplateFormHeaderProps {
   hasChanges: boolean;
   isEdit: boolean;
   submitError: string | null;
+  isEnabled: boolean;
   onBack: () => void;
   onReset: () => void;
   onSave: () => void;
+  onIsEnabledChange: (isEnabled: boolean) => void;
 }
 
 export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
@@ -42,9 +45,11 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
   hasChanges,
   isEdit,
   submitError,
+  isEnabled,
   onBack,
   onReset,
   onSave,
+  onIsEnabledChange,
 }) => {
   const styles = useMemoCss(componentStyles);
   const saveTooltipContent = submitError ?? undefined;
@@ -90,7 +95,7 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
         </EuiPageHeaderSection>
 
         <EuiPageHeaderSection>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
             {hasChanges && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -109,6 +114,23 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
                 </EuiToolTip>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  isEnabled
+                    ? i18n.TEMPLATE_ENABLED_CAN_CREATE_CASES
+                    : i18n.TEMPLATE_DISABLED_CANNOT_CREATE_CASES
+                }
+              >
+                <EuiSwitch
+                  label={i18n.TEMPLATE_ENABLED}
+                  checked={isEnabled}
+                  onChange={(e) => onIsEnabledChange(e.target.checked)}
+                  disabled={isLoading || isSaving}
+                  data-test-subj="templateEnabledSwitch"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={saveTooltipContent}>
                 <EuiButton
