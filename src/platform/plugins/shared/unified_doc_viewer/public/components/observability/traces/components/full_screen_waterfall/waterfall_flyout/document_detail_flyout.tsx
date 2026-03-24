@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, type EuiFlyoutProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
@@ -53,7 +53,7 @@ export interface DocumentDetailFlyoutProps {
   traceId: string;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
-  onCloseFlyout: EuiFlyoutProps['onClose'];
+  onCloseFlyout: () => void;
   activeSection?: TraceOverviewSections;
 }
 
