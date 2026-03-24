@@ -15,6 +15,8 @@ const defaultSettings = {
   'dateFormat:tz': 'UTC',
 };
 
+const SAMPLE_DASHBOARD = '[Logs] Web Traffic';
+
 let downloadedFilePath: string | null = null;
 
 const createdArtifacts: Array<{ type: string; title?: string }> = [];
@@ -63,139 +65,140 @@ test.describe('Visualize app', { tag: tags.stateful.classic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('should create and save an aggregation-based visualization', async ({ page }) => {
+  test('should create and save an aggregation-based visualization', async ({ pageObjects }) => {
     const visName = 'Test Agg-Based Metric Vis';
     createdArtifacts.push({ type: 'visualization', title: visName });
 
-    await page.gotoApp('visualize');
-    await expect(page.testSubj.locator('visualizationLandingPage')).toBeVisible();
-
-    await test.step('open new visualization wizard', async () => {
-      await page.testSubj.click('newItemButton');
-      await expect(page.testSubj.locator('visNewDialogGroups')).toBeVisible();
-    });
+    await pageObjects.visualize.goto();
 
     await test.step('select aggregation-based metric visualization', async () => {
-      await page.testSubj.click('groupModalLegacyTab');
-      await page.testSubj.click('visType-aggbased');
-      await expect(page.testSubj.locator('visNewDialogTypes')).toBeVisible();
-      await page.testSubj.click('visType-metric');
+      await pageObjects.visualize.openNewVisualizationWizard();
+      await pageObjects.visualize.clickAggBasedType('metric');
     });
 
     await test.step('select data source', async () => {
-      await page.testSubj.click('savedObjectTitlekibana_sample_data_logs');
+      await pageObjects.visualize.selectDataSource('kibana_sample_data_logs');
     });
 
     await test.step('save the visualization to an existing dashboard', async () => {
-      await page.testSubj.click('visualizeSaveButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-      await page.testSubj.locator('savedObjectTitle').fill(visName);
-      await page.locator('label[for="existing-dashboard-option"]').click();
-      await page.testSubj.click('open-dashboard-picker');
-      await page.testSubj.locator('dashboard-picker-option-[Logs]-Web-Traffic').click();
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+      await pageObjects.visualize.saveToExistingDashboard(visName, SAMPLE_DASHBOARD);
     });
   });
 
-  test('should create and save a Lens visualization', async ({ page }) => {
+  test('should create and save a Lens visualization', async ({ page, pageObjects }) => {
     const visName = 'Test Lens Visualization';
     createdArtifacts.push({ type: 'lens', title: visName });
 
-    await page.gotoApp('visualize');
-    await expect(page.testSubj.locator('visualizationLandingPage')).toBeVisible();
+    await pageObjects.visualize.goto();
 
     await test.step('open Lens from new visualization wizard', async () => {
-      await page.testSubj.click('newItemButton');
-      await expect(page.testSubj.locator('visNewDialogGroups')).toBeVisible();
-      await page.testSubj.click('visType-lens');
+      await pageObjects.visualize.openNewVisualizationWizard();
+      await pageObjects.visualize.clickVisType('lens');
       await expect(page.testSubj.locator('lnsApp')).toBeVisible();
     });
 
     await test.step('configure Lens chart', async () => {
-      const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-___records___');
-      const dropTarget = page.testSubj.locator('workspace-drag-drop-prompt');
-      await fieldLocator.dragTo(dropTarget);
-      await page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+      await pageObjects.lens.dragFieldToWorkspace('records');
     });
 
     await test.step('save the Lens visualization to an existing dashboard', async () => {
       await page.testSubj.click('lnsApp_saveButton');
       await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
       await page.testSubj.locator('savedObjectTitle').fill(visName);
-      await page.locator('label[for="existing-dashboard-option"]').click();
-      await page.testSubj.click('open-dashboard-picker');
-      await page.testSubj.locator('dashboard-picker-option-[Logs]-Web-Traffic').click();
+      await pageObjects.visualize.selectExistingDashboard(SAMPLE_DASHBOARD);
       await page.testSubj.click('confirmSaveSavedObjectButton');
       await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
     });
   });
 
-  test('should create and save a custom visualization (Vega)', async ({ page }) => {
+  test('should create and save a custom visualization (Vega)', async ({ pageObjects }) => {
     const visName = 'Test Vega Visualization';
     createdArtifacts.push({ type: 'visualization', title: visName });
 
-    await page.gotoApp('visualize');
-    await expect(page.testSubj.locator('visualizationLandingPage')).toBeVisible();
+    await pageObjects.visualize.goto();
 
     await test.step('open Vega editor from new visualization wizard', async () => {
-      await page.testSubj.click('newItemButton');
-      await expect(page.testSubj.locator('visNewDialogGroups')).toBeVisible();
-      await page.testSubj.click('visType-vega');
+      await pageObjects.visualize.openNewVisualizationWizard();
+      await pageObjects.visualize.clickVisType('vega');
     });
 
     await test.step('wait for Vega editor to load with default spec', async () => {
-      await expect(page.testSubj.locator('visualizationLoader')).toBeVisible({ timeout: 30_000 });
+      await pageObjects.visualize.waitForVisualizationLoaded();
     });
 
     await test.step('save the Vega visualization to an existing dashboard', async () => {
-      await page.testSubj.click('visualizeSaveButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-      await page.testSubj.locator('savedObjectTitle').fill(visName);
-      await page.locator('label[for="existing-dashboard-option"]').click();
-      await page.testSubj.click('open-dashboard-picker');
-      await page.testSubj.locator('dashboard-picker-option-[Logs]-Web-Traffic').click();
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+      await pageObjects.visualize.saveToExistingDashboard(visName, SAMPLE_DASHBOARD);
     });
   });
 
-  test('should create and save a TSVB visualization', async ({ page }) => {
+  test('should create and save a TSVB visualization', async ({ pageObjects }) => {
     const visName = 'Test TSVB Visualization';
     createdArtifacts.push({ type: 'visualization', title: visName });
 
-    await page.gotoApp('visualize');
-    await expect(page.testSubj.locator('visualizationLandingPage')).toBeVisible();
+    await pageObjects.visualize.goto();
 
     await test.step('open TSVB from new visualization wizard', async () => {
-      await page.testSubj.click('newItemButton');
-      await expect(page.testSubj.locator('visNewDialogGroups')).toBeVisible();
-      await page.testSubj.click('groupModalLegacyTab');
-      await page.testSubj.click('visType-metrics');
+      await pageObjects.visualize.openNewVisualizationWizard();
+      await pageObjects.visualize.clickLegacyTab();
+      await pageObjects.visualize.clickVisType('metrics');
     });
 
     await test.step('wait for TSVB editor to load', async () => {
-      await expect(page.testSubj.locator('visualizationLoader')).toBeVisible({ timeout: 30_000 });
+      await pageObjects.visualize.waitForVisualizationLoaded();
     });
 
     await test.step('save the TSVB visualization to an existing dashboard', async () => {
-      await page.testSubj.click('visualizeSaveButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-      await page.testSubj.locator('savedObjectTitle').fill(visName);
-      await page.locator('label[for="existing-dashboard-option"]').click();
-      await page.testSubj.click('open-dashboard-picker');
-      await page.testSubj.locator('dashboard-picker-option-[Logs]-Web-Traffic').click();
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+      await pageObjects.visualize.saveToExistingDashboard(visName, SAMPLE_DASHBOARD);
     });
   });
 
-  test('should export a visualization as PDF and download the report', async ({ page }) => {
+  test('should create a TSVB visualization and save it to a new dashboard', async ({
+    page,
+    pageObjects,
+  }) => {
+    const visName = 'Test TSVB New Dashboard Vis';
+    const dashboardName = 'TSVB New Dashboard';
+    createdArtifacts.push({ type: 'visualization', title: visName });
+    createdArtifacts.push({ type: 'dashboard', title: dashboardName });
+
+    await pageObjects.visualize.goto();
+
+    await test.step('open TSVB from new visualization wizard', async () => {
+      await pageObjects.visualize.openNewVisualizationWizard();
+      await pageObjects.visualize.clickLegacyTab();
+      await pageObjects.visualize.clickVisType('metrics');
+    });
+
+    await test.step('wait for TSVB editor to load', async () => {
+      await pageObjects.visualize.waitForVisualizationLoaded();
+    });
+
+    await test.step('save the TSVB visualization to a new dashboard', async () => {
+      await pageObjects.visualize.saveToNewDashboard(visName);
+    });
+
+    await test.step('verify redirected to new dashboard with the panel', async () => {
+      await pageObjects.dashboard.waitForRenderComplete();
+      await pageObjects.dashboard.expectPanelCount(1);
+    });
+
+    await test.step('save the new dashboard', async () => {
+      await pageObjects.dashboard.saveDashboard(dashboardName);
+    });
+
+    await test.step('verify dashboard is saved', async () => {
+      const heading = page.testSubj.locator('breadcrumb last');
+      await expect(heading).toHaveText('Editing ' + dashboardName);
+    });
+  });
+
+  test('should export a visualization as PDF and download the report', async ({
+    page,
+    pageObjects,
+  }) => {
     await test.step('open a sample data visualization', async () => {
-      await page.gotoApp('visualize');
-      await expect(page.testSubj.locator('visualizationLandingPage')).toBeVisible();
-      await page.testSubj.click('visListingTitleLink-[Logs]-Visitors-Map');
-      await expect(page.testSubj.locator('visualizationLoader')).toBeVisible({ timeout: 30_000 });
+      await pageObjects.visualize.goto();
+      await pageObjects.visualize.openSavedVisualization('[Logs] Visitors Map');
     });
 
     await test.step('trigger PDF export from share menu', async () => {
