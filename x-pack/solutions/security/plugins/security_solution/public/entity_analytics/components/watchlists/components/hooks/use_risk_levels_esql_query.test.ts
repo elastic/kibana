@@ -6,15 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { getESQLResults } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useRiskLevelsEsqlQuery } from './use_risk_levels_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
+jest.mock('@kbn/esql-utils', () => ({  
   prettifyQuery: jest.fn((query) => query),
 }));
 
@@ -43,7 +41,6 @@ describe('useRiskLevelsEsqlQuery', () => {
   const mockUseEsqlGlobalFilterQuery = useEsqlGlobalFilterQuery as jest.Mock;
   const mockUseRiskEngineStatus = useRiskEngineStatus as jest.Mock;
   const mockUseQuery = useQuery as jest.Mock;
-  const mockGetESQLResults = getESQLResults as jest.Mock;
 
   const mockRefetchEngineStatus = jest.fn();
   const mockRefetchQuery = jest.fn();
