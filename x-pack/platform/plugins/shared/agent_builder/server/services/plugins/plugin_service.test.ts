@@ -202,7 +202,7 @@ describe('PluginsService', () => {
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
             tool_ids: [],
-            plugin_id: 'my-plugin',
+            plugin_id: expect.any(String),
           },
           {
             id: 'my-plugin-code-reviewer',
@@ -211,11 +211,14 @@ describe('PluginsService', () => {
             content: 'Review code.',
             referenced_content: [],
             tool_ids: [],
-            plugin_id: 'my-plugin',
+            plugin_id: expect.any(String),
           },
         ]);
 
+        const generatedPluginId = mockSkillClient.bulkCreate.mock.calls[0][0][0].plugin_id;
+
         expect(mockClient.create).toHaveBeenCalledWith({
+          id: generatedPluginId,
           name: 'my-plugin',
           version: '1.0.0',
           description: 'A test plugin',
@@ -374,11 +377,11 @@ describe('PluginsService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               id: 'custom-name-pdf-processor',
-              plugin_id: 'custom-name',
+              plugin_id: expect.any(String),
             }),
             expect.objectContaining({
               id: 'custom-name-code-reviewer',
-              plugin_id: 'custom-name',
+              plugin_id: expect.any(String),
             }),
           ])
         );
@@ -406,7 +409,7 @@ describe('PluginsService', () => {
 
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
-      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('my-plugin');
+      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('plugin-1');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
