@@ -2651,7 +2651,7 @@
         "label": "getSampleDocuments",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n}: { esClient: ",
+          "({\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n  runtime_mappings,\n}: { esClient: ",
           "ElasticsearchClient",
           "; index: string | string[]; start: number; end: number; kql?: string | undefined; size?: number | undefined; filter?: ",
           "QueryDslQueryContainer",
@@ -2659,12 +2659,14 @@
           "QueryDslQueryContainer",
           "[]; fields?: (string | ",
           "QueryDslFieldAndFormat",
-          ")[] | undefined; _source?: boolean | undefined; timeout?: string | undefined; }) => Promise<{ hits: ",
+          ")[] | undefined; _source?: boolean | undefined; timeout?: string | undefined; runtime_mappings?: ",
+          "MappingRuntimeFields",
+          " | undefined; }) => Promise<{ hits: ",
           "SearchHit",
           "<Record<string, any>>[]; total: number; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2674,10 +2676,10 @@
             "id": "def-server.getSampleDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n}",
+            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n  runtime_mappings,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3681,7 +3683,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 34,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3697,7 +3699,7 @@
                   "string | string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 35,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3710,7 +3712,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 36,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3723,7 +3725,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 37,
+                "lineNumber": 39,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3739,7 +3741,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 38,
+                "lineNumber": 40,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3755,7 +3757,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 39,
+                "lineNumber": 41,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3774,7 +3776,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 40,
+                "lineNumber": 42,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3792,7 +3794,7 @@
                   ")[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 41,
+                "lineNumber": 43,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3808,7 +3810,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 42,
+                "lineNumber": 44,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3824,7 +3826,24 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 43,
+                "lineNumber": 45,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.getSampleDocuments.$1.runtime_mappings",
+                "type": "Object",
+                "tags": [],
+                "label": "runtime_mappings",
+                "description": [],
+                "signature": [
+                  "MappingRuntimeFields",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
+                "lineNumber": 46,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
