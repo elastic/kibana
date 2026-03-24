@@ -11,6 +11,7 @@ import {
 } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
+import { validateQuery } from '@kbn/esql-language';
 
 describe('buildLogsExtractionEsqlQuery', () => {
   Object.values(EntityType.enum).forEach((type) => {
@@ -24,6 +25,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
         toDateISO: '2022-01-01T23:59:59.999Z',
       });
       expect(query).toMatchSnapshot();
+      expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
   });
 
@@ -41,6 +43,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
       },
     });
     expect(query).toMatchSnapshot();
+    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
   it(`generates the expected query for host with recoveryId`, () => {
@@ -58,6 +61,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
       },
     });
     expect(query).toMatchSnapshot();
+    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 });
 

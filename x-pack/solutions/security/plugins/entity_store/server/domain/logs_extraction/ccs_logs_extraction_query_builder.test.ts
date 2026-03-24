@@ -7,6 +7,7 @@
 
 import { buildCcsLogsExtractionEsqlQuery } from './ccs_logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { validateQuery } from '@kbn/esql-language';
 
 describe('buildCcsLogsExtractionEsqlQuery', () => {
   it('generates query for generic entity type', () => {
@@ -18,6 +19,7 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
       docsLimit: 10000,
     });
     expect(query).toMatchSnapshot();
+    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
   it('generates expected query for host entity type', () => {
@@ -29,6 +31,7 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
       docsLimit: 5000,
     });
     expect(query).toMatchSnapshot();
+    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
   it('generates expected query with pagination', () => {
@@ -45,5 +48,6 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
     });
     expect(query).toContain('FirstSeenLogInPage > TO_DATETIME("2022-01-01T12:00:00.000Z")');
     expect(query).toMatchSnapshot();
+    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 });
