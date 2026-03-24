@@ -10,10 +10,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DefendInsight,
   SecurityWorkflowInsight,
-  WorkflowInsightType,
 } from '../../../../../common/endpoint/types/workflow_insights';
-import { WorkflowInsightType as WorkflowInsightTypeEnum } from '../../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../../metadata';
+import { WorkflowInsightType } from '../../../../../common/endpoint/types/workflow_insights';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 import { buildCustomWorkflowInsights } from './custom';
 
@@ -33,11 +32,11 @@ export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
   switch (params.options.insightType) {
-    case WorkflowInsightTypeEnum.enum.incompatible_antivirus:
+    case WorkflowInsightType.enum.incompatible_antivirus:
       return buildIncompatibleAntivirusWorkflowInsights(params);
-    case WorkflowInsightTypeEnum.enum.policy_response_failure:
+    case WorkflowInsightType.enum.policy_response_failure:
       return buildCustomWorkflowInsights(params);
-    case WorkflowInsightTypeEnum.enum.custom:
+    case WorkflowInsightType.enum.custom:
       return buildCustomWorkflowInsights(params);
     default:
       throw new Error('Invalid insight type');

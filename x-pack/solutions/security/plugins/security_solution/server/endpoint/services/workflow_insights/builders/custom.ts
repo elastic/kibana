@@ -8,10 +8,7 @@
 import moment from 'moment';
 
 import type { BuildWorkflowInsightParams } from '.';
-import type {
-  SecurityWorkflowInsight,
-  WorkflowInsightType as WorkflowInsightTypeValue,
-} from '../../../../../common/endpoint/types/workflow_insights';
+import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 import {
   WorkflowInsightType,
   WorkflowInsightActionType,
@@ -22,7 +19,7 @@ import {
 
 const groupSeparator = ':::';
 
-function getMessage(insightType: WorkflowInsightTypeValue): string {
+function getMessage(insightType: WorkflowInsightType): string {
   switch (insightType) {
     case WorkflowInsightType.enum.policy_response_failure:
       return 'Policy response failure detected';

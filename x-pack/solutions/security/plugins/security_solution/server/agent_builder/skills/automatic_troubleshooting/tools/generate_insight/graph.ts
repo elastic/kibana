@@ -12,7 +12,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools';
 
 import {
   WorkflowInsightType,
-  type WorkflowInsightType as WorkflowInsightTypeValue,
   type DefendInsights,
 } from '../../../../../../common/endpoint/types/workflow_insights';
 import { securityWorkflowInsightsService } from '../../../../../endpoint/services';
@@ -24,7 +23,7 @@ const GENERATE_INSIGHT_NODE_NAME = 'generateInsights';
 const CREATE_WORKFLOW_INSIGHTS_NODE_NAME = 'createWorkflowInsights';
 
 const StateAnnotation = Annotation.Root({
-  insightType: Annotation<WorkflowInsightTypeValue>(),
+  insightType: Annotation<WorkflowInsightType>(),
   insights: Annotation<DefendInsights>(),
   error: Annotation<string>(),
   results: Annotation<ToolHandlerResult[]>({
@@ -48,7 +47,7 @@ export const createGenerateInsightGraph = ({
   endpointIds: string[];
   data: unknown[];
 }) => {
-  async function categorizeInsightType(): Promise<{ insightType: WorkflowInsightTypeValue }> {
+  async function categorizeInsightType(): Promise<{ insightType: WorkflowInsightType }> {
     const output = await model.chatModel.withStructuredOutput(
       z.object({ insightType: WorkflowInsightType.default(WorkflowInsightType.enum.custom) })
     ).invoke(`

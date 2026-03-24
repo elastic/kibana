@@ -6,9 +6,8 @@
  */
 
 import { WorkflowInsightType } from '../../../../../../common/endpoint/types/workflow_insights';
-import type { WorkflowInsightType as WorkflowInsightTypeValue } from '../../../../../../common/endpoint/types/workflow_insights';
 
-export function getPrompts(insightType: WorkflowInsightTypeValue) {
+export function getPrompts(insightType: WorkflowInsightType) {
   switch (insightType) {
     case WorkflowInsightType.enum.policy_response_failure:
       return PROMPTS.POLICY_RESPONSE_FAILURE;

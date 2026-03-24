@@ -8,10 +8,9 @@
 import { z } from '@kbn/zod/v4';
 
 import { WorkflowInsightType } from '../../../../../../common/endpoint/types/workflow_insights';
-import type { WorkflowInsightType as WorkflowInsightTypeValue } from '../../../../../../common/endpoint/types/workflow_insights';
 import { PROMPTS } from './prompts';
 
-export function getDefendInsightsOutputSchema({ type }: { type: WorkflowInsightTypeValue }) {
+export function getDefendInsightsOutputSchema({ type }: { type: WorkflowInsightType }) {
   switch (type) {
     case WorkflowInsightType.enum.incompatible_antivirus:
       const antivirusPrompts = PROMPTS.INCOMPATIBLE_ANTIVIRUS;

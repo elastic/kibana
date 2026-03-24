@@ -14,7 +14,6 @@ import { useAssistantContext } from '@kbn/elastic-assistant';
 import {
   WorkflowInsightType,
   WorkflowInsightActionType,
-  type WorkflowInsightType as WorkflowInsightTypeValue,
 } from '../../../../../../../../common/endpoint/types/workflow_insights';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
@@ -58,8 +57,8 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     setInsightGenerationFailures(true);
   };
 
-  const insightTypes = useMemo<WorkflowInsightTypeValue[]>(() => {
-    const typesToQuery: WorkflowInsightTypeValue[] = [
+  const insightTypes = useMemo<WorkflowInsightType[]>(() => {
+    const typesToQuery: WorkflowInsightType[] = [
       WorkflowInsightType.enum.incompatible_antivirus,
     ];
     if (
