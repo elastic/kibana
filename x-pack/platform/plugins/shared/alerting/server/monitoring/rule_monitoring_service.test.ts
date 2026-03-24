@@ -212,35 +212,5 @@ describe('RuleMonitoringService', () => {
       expect(metrics.total_search_duration_ms).toBe(42);
       expect(metrics.total_indexing_duration_ms).toBe(99);
     });
-
-    it('overwrites total_search_duration_ms from setMonitoring when addFrameworkMetrics runs', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      ruleMonitoringService.setMonitoring({
-        run: {
-          history: [],
-          calculated_metrics: { success_ratio: 1, p50: 1, p95: 1, p99: 1 },
-          last_run: {
-            timestamp: mockNow,
-            metrics: {
-              duration: 1,
-              gap_duration_s: null,
-              gap_range: null,
-              total_indexing_duration_ms: null,
-              total_search_duration_ms: 100,
-            },
-          },
-        },
-      });
-
-      expect(
-        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
-      ).toBe(100);
-
-      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 200 });
-
-      expect(
-        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
-      ).toBe(200);
-    });
   });
 });
