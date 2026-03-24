@@ -11,43 +11,25 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { WorkflowList } from './workflow_list';
+import { createUseKibanaMockValue } from '../../../mocks';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // --- Mocks ---
 
-const mockNavigateToUrl = jest.fn();
-const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows/wf-1');
+jest.mock('../../../hooks/use_kibana');
 
-const mockApplication = {
-  navigateToUrl: mockNavigateToUrl,
-  getUrlForApp: mockGetUrlForApp,
-  capabilities: {
-    workflowsManagement: {
-      createWorkflow: true,
-      updateWorkflow: true,
-      deleteWorkflow: true,
-      executeWorkflow: true,
-    },
-  },
+const mockKibanaValue = createUseKibanaMockValue();
+const { application: mockApplication } = mockKibanaValue.services;
+
+// Configure capabilities needed by the component
+(mockApplication.capabilities as Record<string, Record<string, boolean>>).workflowsManagement = {
+  createWorkflow: true,
+  updateWorkflow: true,
+  deleteWorkflow: true,
+  executeWorkflow: true,
 };
 
-const mockNotifications = {
-  toasts: {
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
-    addWarning: jest.fn(),
-    addDanger: jest.fn(),
-  },
-};
-
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: mockApplication,
-      notifications: mockNotifications,
-    },
-  }),
-}));
+(mockApplication.getUrlForApp as jest.Mock).mockReturnValue('/app/workflows/wf-1');
 
 jest.mock('../../../hooks/use_telemetry', () => ({
   useTelemetry: () => ({
@@ -182,6 +164,14 @@ describe('WorkflowList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Re-configure auto-mock after clearAllMocks
+    const { useKibana } = jest.requireMock('../../../hooks/use_kibana') as {
+      useKibana: jest.Mock;
+    };
+    useKibana.mockReturnValue(mockKibanaValue);
+    (mockApplication.getUrlForApp as jest.Mock).mockReturnValue('/app/workflows/wf-1');
+
     mockUseWorkflows.mockReturnValue({
       data: createMockWorkflowListDto(),
       isLoading: false,

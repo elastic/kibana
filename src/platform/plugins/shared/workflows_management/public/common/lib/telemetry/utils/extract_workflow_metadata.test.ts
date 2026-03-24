@@ -14,6 +14,20 @@ import {
   extractWorkflowMetadata,
 } from './extract_workflow_metadata';
 
+/**
+ * Wrapper that centralizes the single unavoidable cast.
+ *
+ * `extractWorkflowMetadata` accepts `Partial<WorkflowYaml>`, but `WorkflowYaml`
+ * is a Zod-transformed output type whose nested step/trigger unions make it
+ * impractical to construct minimal test literals without a cast. The function
+ * internally reads properties loosely (checks for `.type`, `.steps`, etc.),
+ * so these simplified objects are valid runtime inputs.
+ *
+ * By casting here once, every call site stays cast-free.
+ */
+const metadata = (workflow: Record<string, unknown>) =>
+  extractWorkflowMetadata(workflow as Partial<WorkflowYaml>);
+
 // Mock parseWorkflowYamlForAutocomplete for extractStepInfoFromWorkflowYaml tests
 jest.mock('../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete', () => ({
   parseWorkflowYamlForAutocomplete: jest.fn(),
@@ -55,74 +69,61 @@ describe('extractWorkflowMetadata', () => {
 
   describe('enabled flag', () => {
     it('returns enabled: true when workflow is enabled', () => {
-      const result = extractWorkflowMetadata({ enabled: true } as Partial<WorkflowYaml>);
+      const result = metadata({ enabled: true });
       expect(result.enabled).toBe(true);
     });
 
     it('returns enabled: false when workflow is disabled', () => {
-      const result = extractWorkflowMetadata({ enabled: false } as Partial<WorkflowYaml>);
+      const result = metadata({ enabled: false });
       expect(result.enabled).toBe(false);
     });
 
     it('returns enabled: false when enabled is not set', () => {
-      const result = extractWorkflowMetadata({} as Partial<WorkflowYaml>);
+      const result = metadata({});
       expect(result.enabled).toBe(false);
     });
   });
 
   describe('steps counting', () => {
     it('counts a single step', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [{ name: 'step-1', type: 'console' }],
-      } as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.stepCount).toBe(1);
       expect(result.stepTypes).toEqual(['console']);
       expect(result.stepTypeCounts).toEqual({ console: 1 });
     });
 
     it('counts multiple steps of different types', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           { name: 'step-1', type: 'console' },
           { name: 'step-2', type: 'if' },
           { name: 'step-3', type: 'console' },
         ],
-      } as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.stepCount).toBe(3);
       expect(result.stepTypes).toEqual(expect.arrayContaining(['console', 'if']));
       expect(result.stepTypeCounts).toEqual({ console: 2, if: 1 });
     });
 
     it('handles empty steps array', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        steps: [],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ steps: [] });
       expect(result.stepCount).toBe(0);
       expect(result.stepTypes).toEqual([]);
     });
 
     it('skips steps without a type field', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        steps: [
-          { name: 'step-1', type: 'console' },
-          { name: 'step-2' } as unknown as WorkflowYaml['steps'][number],
-        ],
-      } as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({
+        steps: [{ name: 'step-1', type: 'console' }, { name: 'step-2' }],
+      });
       expect(result.stepCount).toBe(1);
     });
   });
 
   describe('nested steps (foreach, if, else)', () => {
     it('counts steps nested inside a foreach step', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           {
             name: 'loop',
@@ -133,9 +134,7 @@ describe('extractWorkflowMetadata', () => {
             ],
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       // foreach + inner-1 + inner-2
       expect(result.stepCount).toBe(3);
       expect(result.stepTypes).toEqual(
@@ -149,7 +148,7 @@ describe('extractWorkflowMetadata', () => {
     });
 
     it('counts steps in if/else branches', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           {
             name: 'branch',
@@ -158,16 +157,14 @@ describe('extractWorkflowMetadata', () => {
             else: [{ name: 'else-step', type: 'email.send' }],
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       // if + then-step + else-step
       expect(result.stepCount).toBe(3);
       expect(result.stepTypes).toEqual(expect.arrayContaining(['if', 'console', 'email.send']));
     });
 
     it('counts deeply nested steps', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           {
             name: 'outer-loop',
@@ -181,9 +178,7 @@ describe('extractWorkflowMetadata', () => {
             ],
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       // foreach + if + deep-step
       expect(result.stepCount).toBe(3);
     });
@@ -191,7 +186,7 @@ describe('extractWorkflowMetadata', () => {
 
   describe('on-failure / iteration-on-failure fallback steps', () => {
     it('counts steps in on-failure fallback', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           {
             name: 'risky-step',
@@ -201,16 +196,14 @@ describe('extractWorkflowMetadata', () => {
             },
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       // risky-step + fallback-1
       expect(result.stepCount).toBe(2);
       expect(result.stepTypes).toEqual(expect.arrayContaining(['console', 'email.send']));
     });
 
     it('counts steps in iteration-on-failure fallback', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           {
             name: 'loop',
@@ -221,15 +214,13 @@ describe('extractWorkflowMetadata', () => {
             steps: [],
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       // foreach + iter-fallback
       expect(result.stepCount).toBe(2);
     });
 
     it('ignores on-failure without fallback array', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           {
             name: 'step-1',
@@ -237,98 +228,78 @@ describe('extractWorkflowMetadata', () => {
             'on-failure': { retry: { 'max-attempts': 3 } },
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.stepCount).toBe(1);
     });
   });
 
   describe('connector types', () => {
     it('extracts connector types from steps with connector-id', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           { name: 'step-1', type: 'slack.webhook', 'connector-id': 'conn-1' },
           { name: 'step-2', type: 'slack.postMessage', 'connector-id': 'conn-2' },
           { name: 'step-3', type: 'email.send', 'connector-id': 'conn-3' },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.connectorTypes).toEqual(expect.arrayContaining(['slack', 'email']));
       // Slack should appear only once despite two slack steps
       expect(result.connectorTypes.filter((c) => c === 'slack')).toHaveLength(1);
     });
 
     it('does not include non-connector steps in connectorTypes', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [
           { name: 'step-1', type: 'foreach' },
           { name: 'step-2', type: 'console' },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.connectorTypes).toEqual([]);
     });
 
     it('does not include steps with undefined connector-id', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [{ name: 'step-1', type: 'slack.webhook', 'connector-id': undefined }],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.connectorTypes).toEqual([]);
     });
 
     it('extracts connector name as part before the dot', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         steps: [{ name: 'step-1', type: 'jira.createIssue', 'connector-id': 'conn-1' }],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.connectorTypes).toEqual(['jira']);
     });
   });
 
   describe('triggers', () => {
     it('extracts trigger types from workflow triggers', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         triggers: [{ type: 'scheduled' }, { type: 'alert' }],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.triggerTypes).toEqual(expect.arrayContaining(['scheduled', 'alert']));
       expect(result.triggerCount).toBe(2);
     });
 
     it('deduplicates trigger types', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         triggers: [{ type: 'alert' }, { type: 'alert' }, { type: 'scheduled' }],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.triggerTypes).toEqual(expect.arrayContaining(['alert', 'scheduled']));
       expect(result.triggerTypes).toHaveLength(2);
       expect(result.triggerCount).toBe(3);
     });
 
     it('handles empty triggers array', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        triggers: [],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ triggers: [] });
       expect(result.triggerTypes).toEqual([]);
       expect(result.triggerCount).toBe(0);
     });
 
     it('skips triggers without a type', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        triggers: [{ type: 'scheduled' }, {} as { type: string }],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({
+        triggers: [{ type: 'scheduled' }, {}],
+      });
       expect(result.triggerTypes).toEqual(['scheduled']);
       expect(result.triggerCount).toBe(2);
     });
@@ -336,14 +307,12 @@ describe('extractWorkflowMetadata', () => {
 
   describe('inputs', () => {
     it('counts inputs from array', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         inputs: [
           { name: 'input-1', type: 'string' },
           { name: 'input-2', type: 'number' },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.inputCount).toBe(2);
     });
 
@@ -353,22 +322,18 @@ describe('extractWorkflowMetadata', () => {
     });
 
     it('returns 0 for non-array inputs (e.g., JSON schema object)', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         inputs: { properties: { a: { type: 'string' } } },
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.inputCount).toBe(0);
     });
   });
 
   describe('constants', () => {
     it('counts constants from consts object', () => {
-      const workflow = {
+      const result = metadata({
         consts: { API_KEY: 'abc', BASE_URL: 'https://example.com' },
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.constCount).toBe(2);
     });
 
@@ -378,47 +343,36 @@ describe('extractWorkflowMetadata', () => {
     });
 
     it('returns 0 for empty consts object', () => {
-      const workflow = { consts: {} } as unknown as Partial<WorkflowYaml>;
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ consts: {} });
       expect(result.constCount).toBe(0);
     });
   });
 
   describe('settings', () => {
     it('extracts concurrency settings', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        settings: {
-          concurrency: { max: 5, strategy: 'queue' },
-        },
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({
+        settings: { concurrency: { max: 5, strategy: 'queue' } },
+      });
       expect(result.concurrencyMax).toBe(5);
       expect(result.concurrencyStrategy).toBe('queue');
       expect(result.settingsUsed).toEqual(['concurrency']);
     });
 
     it('does not include concurrencyMax/concurrencyStrategy when not set', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        settings: { timeout: '30s' },
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ settings: { timeout: '30s' } });
       expect(result).not.toHaveProperty('concurrencyMax');
       expect(result).not.toHaveProperty('concurrencyStrategy');
       expect(result.settingsUsed).toEqual(['timeout']);
     });
 
     it('extracts multiple settings keys', () => {
-      const workflow: Partial<WorkflowYaml> = {
+      const result = metadata({
         settings: {
           timeout: '30s',
           concurrency: { max: 3, strategy: 'drop' },
           'on-failure': { retry: { 'max-attempts': 3 } },
         },
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
       expect(result.settingsUsed).toEqual(
         expect.arrayContaining(['timeout', 'concurrency', 'on-failure'])
       );
@@ -431,22 +385,14 @@ describe('extractWorkflowMetadata', () => {
     });
 
     it('returns empty settingsUsed for empty settings object', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        settings: {},
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ settings: {} });
       expect(result.settingsUsed).toEqual([]);
     });
 
     it('handles concurrency with only max (no strategy)', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        settings: {
-          concurrency: { max: 10 },
-        },
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({
+        settings: { concurrency: { max: 10 } },
+      });
       expect(result.concurrencyMax).toBe(10);
       expect(result).not.toHaveProperty('concurrencyStrategy');
     });
@@ -454,29 +400,17 @@ describe('extractWorkflowMetadata', () => {
 
   describe('description', () => {
     it('returns hasDescription: true when description is present', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        description: 'My workflow description',
-      } as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ description: 'My workflow description' });
       expect(result.hasDescription).toBe(true);
     });
 
     it('returns hasDescription: false for empty string', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        description: '',
-      } as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ description: '' });
       expect(result.hasDescription).toBe(false);
     });
 
     it('returns hasDescription: false for whitespace-only string', () => {
-      const workflow: Partial<WorkflowYaml> = {
-        description: '   ',
-      } as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ description: '   ' });
       expect(result.hasDescription).toBe(false);
     });
 
@@ -488,11 +422,7 @@ describe('extractWorkflowMetadata', () => {
 
   describe('tags', () => {
     it('counts tags', () => {
-      const workflow = {
-        tags: ['production', 'security', 'alert'],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ tags: ['production', 'security', 'alert'] });
       expect(result.tagCount).toBe(3);
     });
 
@@ -502,15 +432,14 @@ describe('extractWorkflowMetadata', () => {
     });
 
     it('returns 0 for empty tags array', () => {
-      const workflow = { tags: [] } as unknown as Partial<WorkflowYaml>;
-      const result = extractWorkflowMetadata(workflow);
+      const result = metadata({ tags: [] });
       expect(result.tagCount).toBe(0);
     });
   });
 
   describe('complex workflow', () => {
     it('correctly extracts metadata from a full workflow definition', () => {
-      const workflow = {
+      const result = metadata({
         enabled: true,
         description: 'A complex workflow',
         tags: ['prod', 'alerts'],
@@ -550,9 +479,7 @@ describe('extractWorkflowMetadata', () => {
             },
           },
         ],
-      } as unknown as Partial<WorkflowYaml>;
-
-      const result = extractWorkflowMetadata(workflow);
+      });
 
       expect(result.enabled).toBe(true);
       expect(result.hasDescription).toBe(true);

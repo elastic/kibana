@@ -15,15 +15,7 @@ import { TestWrapper } from '../../../shared/test_utils';
 
 const mockSetSelectedExecution = jest.fn();
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: {
-        get: jest.fn().mockReturnValue(false),
-      },
-    },
-  }),
-}));
+jest.mock('../../../hooks/use_kibana');
 
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => ({

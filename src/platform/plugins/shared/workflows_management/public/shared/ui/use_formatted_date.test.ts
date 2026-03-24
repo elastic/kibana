@@ -13,24 +13,23 @@ import {
   useFormattedDateTime,
   useGetFormattedDateTime,
 } from './use_formatted_date';
+import { createUseKibanaMockValue } from '../../mocks';
 
-const mockGet = jest.fn();
+jest.mock('../../hooks/use_kibana');
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      settings: {
-        client: {
-          get: (...args: unknown[]) => mockGet(...args),
-        },
-      },
-    },
-  })),
-}));
+const mockKibanaValue = createUseKibanaMockValue();
+const mockGet = mockKibanaValue.services.settings.client.get as jest.Mock;
 
 describe('useFormattedDate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Reconfigure after clearAllMocks resets mockGet
+    const { useKibana } = jest.requireMock('../../hooks/use_kibana') as {
+      useKibana: jest.Mock;
+    };
+    useKibana.mockReturnValue(mockKibanaValue);
+
     mockGet.mockImplementation((key: string) => {
       if (key === 'dateFormat') return 'YYYY-MM-DD HH:mm:ss';
       if (key === 'dateFormat:tz') return 'UTC';

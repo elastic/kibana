@@ -10,6 +10,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
+import { createUseKibanaMockValue } from '../../../mocks';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // --- Mocks ---
@@ -17,7 +18,6 @@ import { TestWrapper } from '../../../shared/test_utils';
 const mockDispatch = jest.fn();
 const mockSetSelectedExecution = jest.fn();
 const mockMutateAsync = jest.fn();
-const mockAddError = jest.fn();
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -28,17 +28,10 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        toasts: {
-          addError: mockAddError,
-        },
-      },
-    },
-  }),
-}));
+jest.mock('../../../hooks/use_kibana');
+
+const mockKibanaValue = createUseKibanaMockValue();
+const mockAddError = mockKibanaValue.services.notifications.toasts.addError as jest.Mock;
 
 jest.mock('../../../hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
@@ -118,6 +111,13 @@ const createSelectorMock = (state: ReturnType<typeof buildMockState>) => {
 describe('WorkflowDetailTestStepModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Re-configure auto-mock after clearAllMocks
+    const { useKibana } = jest.requireMock('../../../hooks/use_kibana') as {
+      useKibana: jest.Mock;
+    };
+    useKibana.mockReturnValue(mockKibanaValue);
+
     mockSelectorState = buildMockState();
   });
 

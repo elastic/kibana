@@ -12,9 +12,12 @@ import type { monaco } from '@kbn/monaco';
 /**
  * Creates a mock Monaco editor model backed by a real string value.
  * Implements the subset of `ITextModel` actually used by plugin code,
- * eliminating the need for `as unknown as monaco.editor.ITextModel` casts.
+ * centralizing the single unavoidable `as unknown as ITextModel` cast.
+ *
+ * If Monaco adds a method the plugin starts using, the mock will return
+ * `undefined` at runtime — consider adding it here if a test fails.
  */
-export const createMockMonacoModel = (value: string) => {
+export const createMockMonacoModel = (value: string): monaco.editor.ITextModel => {
   const lines = value.split('\n');
   return {
     getValue: jest.fn(() => value),
@@ -52,6 +55,7 @@ export const createMockMonacoModel = (value: string) => {
 /**
  * Creates a mock Monaco editor instance with a model and decorations collection.
  * Returns the editor, model, and decorations collection for easy assertion access.
+ * The editor cast is centralized here — same rationale as `createMockMonacoModel`.
  */
 export const createMockMonacoEditor = (value: string) => {
   const model = createMockMonacoModel(value);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import {
   ConnectorActionInputSchemas,
   ConnectorActionOutputSchemas,
@@ -30,7 +31,7 @@ describe('ConnectorOutputSchemas', () => {
 
   it.each(expectedConnectorOutputKeys)('maps %s to a valid Zod schema', (key) => {
     const schema = ConnectorOutputSchemas.get(key);
-    expect(schema).toBeDefined();
+    expect(schema).toBeInstanceOf(z.ZodType);
   });
 });
 
@@ -38,10 +39,8 @@ describe('ConnectorActionInputSchemas', () => {
   it.each(expectedConnectorActionInputKeys)('maps %s to a record of Zod schemas', (key) => {
     const actions = ConnectorActionInputSchemas.get(key);
     expect(actions).toBeDefined();
-    expect(typeof actions).toBe('object');
-    for (const [actionName, schema] of Object.entries(actions!)) {
-      expect(typeof actionName).toBe('string');
-      expect(schema).toBeDefined();
+    for (const schema of Object.values(actions!)) {
+      expect(schema).toBeInstanceOf(z.ZodType);
     }
   });
 });
@@ -71,9 +70,8 @@ describe('ConnectorSpecsInputSchemas', () => {
   it('maps each connector to a record of Zod schemas', () => {
     for (const [connectorId, actions] of ConnectorSpecsInputSchemas) {
       expect(typeof connectorId).toBe('string');
-      expect(typeof actions).toBe('object');
       for (const schema of Object.values(actions)) {
-        expect(schema).toBeDefined();
+        expect(schema).toBeInstanceOf(z.ZodType);
       }
     }
   });
