@@ -16,7 +16,6 @@ import {
   getOptionShorthand,
   getOptionInputText,
   formatDateRange,
-  combineDateAndTime,
 } from './utils';
 
 describe('toLocalPreciseString', () => {
@@ -187,48 +186,3 @@ describe('formatDateRange', () => {
   });
 });
 
-describe('combineDateAndTime', () => {
-  it('combines date from first arg with time from second arg', () => {
-    const date = new Date(2026, 1, 10, 0, 0, 0, 0); // Feb 10
-    const time = new Date(2026, 5, 15, 14, 30, 45, 123); // different date, 14:30:45.123
-    const result = combineDateAndTime(date, time);
-
-    expect(result.getFullYear()).toBe(2026);
-    expect(result.getMonth()).toBe(1); // Feb
-    expect(result.getDate()).toBe(10);
-    expect(result.getHours()).toBe(14);
-    expect(result.getMinutes()).toBe(30);
-    expect(result.getSeconds()).toBe(45);
-    expect(result.getMilliseconds()).toBe(123);
-  });
-
-  it('uses defaultTime when timeSource is null', () => {
-    const date = new Date(2026, 1, 10, 12, 0, 0, 0);
-    const result = combineDateAndTime(date, null, '23:59:59.999');
-
-    expect(result.getDate()).toBe(10);
-    expect(result.getHours()).toBe(23);
-    expect(result.getMinutes()).toBe(59);
-    expect(result.getSeconds()).toBe(59);
-    expect(result.getMilliseconds()).toBe(999);
-  });
-
-  it('uses 00:00:00.000 when defaultTime is not specified', () => {
-    const date = new Date(2026, 1, 10, 12, 0, 0, 0);
-    const result = combineDateAndTime(date, null);
-
-    expect(result.getHours()).toBe(0);
-    expect(result.getMinutes()).toBe(0);
-    expect(result.getSeconds()).toBe(0);
-    expect(result.getMilliseconds()).toBe(0);
-  });
-
-  it('preserves seconds and milliseconds from timeSource', () => {
-    const date = new Date(2026, 1, 10, 0, 0, 0, 0);
-    const time = new Date(2026, 1, 10, 10, 15, 59, 999);
-    const result = combineDateAndTime(date, time);
-
-    expect(result.getSeconds()).toBe(59);
-    expect(result.getMilliseconds()).toBe(999);
-  });
-});
