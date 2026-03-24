@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/automatic-import-v2-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/integration-experience'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/automatic-import-v2-plugin'
+  title: '@kbn/automatic-import-v2-plugin'
   description: Moon project for @kbn/automatic-import-v2-plugin
   channel: ''
   owner: '@elastic/integration-experience'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/automatic_import_v2
+  sourceRoot: x-pack/platform/plugins/shared/automatic_import_v2
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -41,14 +40,17 @@ dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/i18n'
   - '@kbn/features-plugin'
+  - '@kbn/fields-metadata-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/logging'
   - '@kbn/i18n-react'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/inference-connectors'
   - '@kbn/management-settings-ids'
   - '@kbn/langchain'
   - '@kbn/core-lifecycle-browser-mocks'
+  - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/shared-ux-router'
   - '@kbn/react-query'
@@ -58,6 +60,8 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
+  - '@kbn/scout'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
@@ -70,17 +74,28 @@ fileGroups:
     - public/**/*
     - server/**/*.ts
     - common/**/*.ts
+    - test/scout_automatic_import_v2/**/*
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

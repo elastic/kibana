@@ -11,6 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { HistoryPage } from './list';
 import { LiveQueryDetailsPage } from '../live_queries/details';
+import { ScheduledExecutionDetailsPage } from './scheduled_execution_details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useKibana } from '../../common/lib/kibana';
 import { MissingPrivileges } from '../components';
@@ -28,6 +29,9 @@ const HistoryComponent = () => {
     <Routes>
       <Route path={`${match.url}/new`}>
         <Redirect to="/new" />
+      </Route>
+      <Route path={`${match.url}/scheduled/:scheduleId/:executionCount`}>
+        <ScheduledExecutionDetailsPage />
       </Route>
       <Route path={`${match.url}/:actionId`}>
         <LiveQueryDetailsPage />

@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -148,13 +147,4 @@ export const Toolbar: FC<Props> = ({
       </div>
     </div>
   );
-};
-
-Toolbar.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  selectedElement: PropTypes.object,
-  selectedPageNumber: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  workpadName: PropTypes.string.isRequired,
 };

@@ -27,31 +27,52 @@ import { parseUnion } from './parse_union';
 export type { JsonSchema } from './types';
 export { extractMeta as extractUiMeta } from './meta_utils';
 
+export interface FromJSONSchemaOptions {
+  /**
+   * Restore non-standard JSON Schema keys as Zod UI metadata.
+   *
+   * This writes to `z.globalRegistry`, so callers should opt in only when they
+   * actually need metadata-driven UI behavior.
+   */
+  preserveMeta?: boolean;
+}
+
 /**
  * Converts a JSON Schema object to a native Zod v4 schema at runtime.
  *
  * This is a temporary polyfill for Zod v4's native fromJSONSchema function.
  */
-export function fromJSONSchema(jsonSchema: Record<string, unknown>): z.ZodType | undefined {
+export function fromJSONSchema(
+  jsonSchema: Record<string, unknown>,
+  options: FromJSONSchemaOptions = {}
+): z.ZodType | undefined {
+  const { preserveMeta = false } = options;
+
   try {
+    const parseJsonSchema = (schema: JsonSchema): z.ZodType => {
+      const zodSchema = parseSchemaByType(schema, parseJsonSchema, preserveMeta);
+
+      if (preserveMeta) {
+        const meta = extractMeta(schema);
+        if (Object.keys(meta).length > 0) {
+          z.globalRegistry.add(zodSchema, meta as Record<string, unknown>);
+        }
+      }
+
+      return zodSchema;
+    };
+
     return parseJsonSchema(jsonSchema as JsonSchema);
   } catch {
     return undefined;
   }
 }
 
-function parseJsonSchema(schema: JsonSchema): z.ZodType {
-  const zodSchema = parseSchemaByType(schema);
-
-  const meta = extractMeta(schema);
-  if (Object.keys(meta).length > 0) {
-    z.globalRegistry.add(zodSchema, meta as Record<string, unknown>);
-  }
-
-  return zodSchema;
-}
-
-function parseSchemaByType(schema: JsonSchema): z.ZodType {
+function parseSchemaByType(
+  schema: JsonSchema,
+  parseJsonSchema: (schema: JsonSchema) => z.ZodType,
+  preserveMeta: boolean
+): z.ZodType {
   let zodSchema: z.ZodType;
 
   if (schema.anyOf || schema.oneOf) {
@@ -73,7 +94,7 @@ function parseSchemaByType(schema: JsonSchema): z.ZodType {
         zodSchema = parseBoolean();
         break;
       case 'object':
-        zodSchema = parseObject(schema, parseJsonSchema);
+        zodSchema = parseObject(schema, parseJsonSchema, preserveMeta);
         break;
       case 'array':
         zodSchema = parseArray(schema, parseJsonSchema);

@@ -34,7 +34,7 @@ const bodySchema = schema.object({
   name: schema.string({ maxLength: 1000 }),
   deprecated: schema.maybe(schema.boolean()),
   phases: schema.object({
-    hot: schema.any(),
+    hot: schema.maybe(schema.any()),
     warm: schema.maybe(schema.any()),
     cold: schema.maybe(schema.any()),
     frozen: schema.maybe(schema.any()),

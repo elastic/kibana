@@ -29,6 +29,7 @@ import {
   getConsoleRequest,
   EisCloudConnectPromoCallout,
   EisUpdateCallout,
+  useCloudConnectStatus,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -80,7 +81,7 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
   } = indexDetails;
   const {
     core,
-    plugins: { cloud, share },
+    plugins: { cloud, cloudConnect, share },
     services: { extensionsService },
   } = useAppContext();
   const state = useMappingsState();
@@ -105,9 +106,16 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
   };
 
   const isLarge = useIsWithinBreakpoints(['xl']);
+  const {
+    isLoading: isCloudConnectStatusLoading,
+    isCloudConnected,
+    isCloudConnectedWithEisEnabled,
+  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
+      (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
+    false;
 
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),
@@ -124,15 +132,17 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      <EisCloudConnectPromoCallout
-        promoId="indexDetailsOverview"
-        isSelfManaged={!cloud?.isCloudEnabled}
-        direction="row"
-        navigateToApp={() =>
-          core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-        }
-        addSpacer="bottom"
-      />
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsOverview"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="bottom"
+        />
+      )}
       {hasElserOnMlNodeSemanticText && (
         <EisUpdateCallout
           ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}

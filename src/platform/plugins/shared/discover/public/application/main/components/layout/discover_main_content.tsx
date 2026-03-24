@@ -9,28 +9,31 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import type { ReactElement } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { BehaviorSubject } from 'rxjs';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../state_management/redux';
-import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import type { SidebarToggleState } from '../../../types';
 import {
   internalStateActions,
   useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  selectTab,
 } from '../../state_management/redux';
 
 const DROP_PROPS = {
@@ -48,7 +51,6 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: (options: {
@@ -57,7 +59,7 @@ export interface DiscoverMainContentProps {
   }) => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
-  panelsToggle: ReactElement<PanelsToggleProps>;
+  sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
 }
 
@@ -67,13 +69,14 @@ export const DiscoverMainContent = ({
   onAddFilter,
   onFieldEdited,
   columns,
-  stateContainer,
   onDropFieldToTable,
-  panelsToggle,
+  sidebarToggleState$,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
+  const getState = useInternalStateGetState();
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const updateAppStateAndReplaceUrl = useCurrentTabAction(
     internalStateActions.updateAppStateAndReplaceUrl
@@ -99,7 +102,7 @@ export const DiscoverMainContent = ({
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
         dispatch(updateAppStateAndReplaceUrl({ appState: { viewMode: mode } })).then(() => {
-          const appState = stateContainer.getCurrentTab().appState;
+          const appState = selectTab(getState(), currentTabId).appState;
 
           if (appState.viewMode === mode) {
             resolve(mode);
@@ -109,11 +112,13 @@ export const DiscoverMainContent = ({
         });
       });
     },
-    [dispatch, updateAppStateAndReplaceUrl, stateContainer, trackUiMetric, updateAppState]
+    [dispatch, updateAppStateAndReplaceUrl, getState, currentTabId, trackUiMetric, updateAppState]
   );
 
   const isEsqlMode = useIsEsqlMode();
   const isDropAllowed = Boolean(onDropFieldToTable);
+  const showChart = useAppStateSelector((state) => !state.hideChart);
+  const showPanelsToggle = !isChartAvailable || !showChart;
 
   const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
@@ -121,14 +126,17 @@ export const DiscoverMainContent = ({
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
-          stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
           dataView={dataView}
           prepend={
-            React.isValidElement(panelsToggle)
-              ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-              : undefined
+            showPanelsToggle ? (
+              <PanelsToggle
+                sidebarToggleState$={sidebarToggleState$}
+                omitChartButton={!isChartAvailable}
+                dataTestSubjSuffix="InPage"
+              />
+            ) : undefined
           }
         />
       );
@@ -136,17 +144,15 @@ export const DiscoverMainContent = ({
     [
       viewMode,
       isEsqlMode,
-      stateContainer,
       setDiscoverViewMode,
       dataView,
-      panelsToggle,
+      showPanelsToggle,
+      sidebarToggleState$,
       isChartAvailable,
     ]
   );
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
-
-  const showChart = useAppStateSelector((state) => !state.hideChart);
 
   return (
     <Droppable
@@ -169,7 +175,6 @@ export const DiscoverMainContent = ({
               viewModeToggle={viewModeToggle}
               dataView={dataView}
               onAddFilter={onAddFilter}
-              stateContainer={stateContainer}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : null}
@@ -179,7 +184,6 @@ export const DiscoverMainContent = ({
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
-                stateContainer={stateContainer}
                 onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
                 isEsqlMode={isEsqlMode}
@@ -189,7 +193,6 @@ export const DiscoverMainContent = ({
           {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
             <PatternAnalysisTab
               dataView={dataView}
-              stateContainer={stateContainer}
               switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
               trackUiMetric={trackUiMetric}
               renderViewModeToggle={renderViewModeToggle}

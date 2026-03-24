@@ -130,6 +130,9 @@ export const syntheticsFeature = {
       alerting: {
         rule: {
           all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
         },
         alert: {
           all: alertingFeatures,

@@ -16,3 +16,5 @@ export type {
   BulkDeleteDataSourceResult,
   BulkDeleteDataSourcesResponse,
 } from './types';
+export { slugify } from './utils/slugify';
+export { getWorkflowPrefix, getToolPrefix } from './utils/data_source_prefixes';

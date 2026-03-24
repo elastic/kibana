@@ -57,7 +57,7 @@ function registerRoute(
         validate: {
           request: {
             body: schema.object({
-              events: schema.arrayOf(schema.any()),
+              events: schema.arrayOf(schema.any(), { maxSize: 10_000 }),
             }),
           },
         },

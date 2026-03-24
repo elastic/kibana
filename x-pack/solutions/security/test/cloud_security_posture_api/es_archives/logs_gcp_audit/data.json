@@ -2050,3 +2050,32 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "entities-partial-host-event",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:00:00.000Z",
+      "host": {
+        "entity": {
+          "id": "partial-host-instance-1"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "partial-data-project-id"
+        },
+        "provider": "gcp"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "id": "entities-partial-host-event-id",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}

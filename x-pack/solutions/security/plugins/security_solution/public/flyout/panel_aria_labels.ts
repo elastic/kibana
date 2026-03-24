@@ -139,6 +139,11 @@ export const ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Attack discovery details' }
 );
 
+export const ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.attackDetailsPreview',
+  { defaultMessage: 'Attack discovery preview' }
+);
+
 export const ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.attackDetailsLeft',
   { defaultMessage: 'Attack details expanded view' }
@@ -157,4 +162,9 @@ export const VULNERABILITY_FINDINGS_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
 export const IOC_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.iocRight',
   { defaultMessage: 'Indicator of compromise details' }
+);
+
+export const WATCHLISTS_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.watchlists',
+  { defaultMessage: 'Watchlists' }
 );

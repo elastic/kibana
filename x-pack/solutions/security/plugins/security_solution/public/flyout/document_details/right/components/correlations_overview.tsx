@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useSelector } from 'react-redux';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
@@ -23,6 +23,8 @@ import { SuppressedAlerts } from './suppressed_alerts';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { RelatedAttacks } from './related_attacks';
+import { useShowRelatedAttacks } from '../../shared/hooks/use_show_related_attacks';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { LeftPanelInsightsTab } from '../../left';
@@ -38,8 +40,15 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
-    useDocumentDetailsContext();
+  const {
+    dataAsNestedObject,
+    eventId,
+    getFieldsData,
+    scopeId,
+    isRulePreview,
+    isPreviewMode,
+    searchHit,
+  } = useDocumentDetailsContext();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -56,7 +65,7 @@ export const CorrelationsOverview: React.FC = () => {
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
-    dataAsNestedObject,
+    searchHit,
     eventId,
     isRulePreview,
   });
@@ -69,13 +78,15 @@ export const CorrelationsOverview: React.FC = () => {
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });
+  const { show: showRelatedAttacks, attackIds } = useShowRelatedAttacks({ getFieldsData });
 
   const canShowAtLeastOneInsight =
     showAlertsByAncestry ||
     showSameSourceAlerts ||
     showAlertsBySession ||
     showCases ||
-    showSuppressedAlerts;
+    showSuppressedAlerts ||
+    showRelatedAttacks;
 
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0] as Type | undefined;
 
@@ -121,6 +132,7 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsByAncestry && (
             <RelatedAlertsByAncestry documentId={documentId} indices={securityDefaultPatterns} />
           )}
+          {showRelatedAttacks && <RelatedAttacks attackIds={attackIds} />}
         </EuiFlexGroup>
       ) : (
         <FormattedMessage

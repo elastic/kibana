@@ -25,8 +25,6 @@ import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpe
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
-const AGGREGATED_OTEL_METRICS_PIPELINE = 'metrics/aggregated-otel-metrics';
-
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
@@ -50,19 +48,28 @@ export function generateOtelcolConfig(
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
         const suffix = (input.id + '-' + stream.id).replaceAll('.', '-');
+        const namespace =
+          'data_stream' in input
+            ? (input as FullAgentPolicyInput).data_stream.namespace
+            : 'default';
+        // Extract signal types from pipeline IDs
+        const signalTypes = stream.service?.pipelines
+          ? extractSignalTypesFromPipelines(stream.service?.pipelines)
+          : [];
+        const hasTracesPipeline = signalTypes.includes('traces');
+
+        const shouldAddAPMConfig =
+          (stream.data_stream.type === dataTypes.Traces || hasTracesPipeline) &&
+          stream[USE_APM_VAR_NAME] === true;
+
         const attributesTransform = generateOTelAttributesTransform(
           stream.data_stream.type ? stream.data_stream.type : 'logs',
           stream.data_stream.dataset,
-          'data_stream' in input
-            ? (input as FullAgentPolicyInput).data_stream.namespace
-            : 'default',
+          namespace,
           suffix,
           packageInfo,
-          stream.service?.pipelines
+          signalTypes
         );
-
-        const shouldAddAPMConfig =
-          stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true;
 
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
@@ -80,28 +87,35 @@ export function generateOtelcolConfig(
                       suffix,
                       addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
                     ).pipelines ?? {},
-                    shouldAddAPMConfig
+                    shouldAddAPMConfig,
+                    namespace
                   ),
                 },
               }
             : {}),
         };
 
+        // Must run before the APM block below so the aggregated metrics pipeline
+        // does not receive the per-stream routing transform.
         otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
 
-        if (stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true) {
-          if (!otelConfig?.connectors) {
-            otelConfig.connectors = {};
-          }
-          if (!otelConfig?.processors) {
-            otelConfig.processors = {};
-          }
-
-          otelConfig.connectors.elasticapm = {};
-          otelConfig.processors.elasticapm = {};
-
-          otelConfig.service!.pipelines![AGGREGATED_OTEL_METRICS_PIPELINE] = {
-            receivers: ['elasticapm'],
+        if (shouldAddAPMConfig) {
+          otelConfig.connectors ??= {};
+          otelConfig.processors ??= {};
+          otelConfig.service ??= { pipelines: {} };
+          otelConfig.connectors[`elasticapm/${namespace}`] = {};
+          otelConfig.processors[`elasticapm/${namespace}`] = {};
+          otelConfig.processors[`transform/${namespace}-apm-namespace-routing`] = {
+            metric_statements: [
+              {
+                context: 'datapoint',
+                statements: [`set(attributes["data_stream.namespace"], "${namespace}")`],
+              },
+            ],
+          };
+          otelConfig.service.pipelines![`metrics/${namespace}-aggregated-apm-metrics`] = {
+            receivers: [`elasticapm/${namespace}`],
+            processors: [`transform/${namespace}-apm-namespace-routing`],
           };
         }
 
@@ -208,17 +222,15 @@ function generateOTelAttributesTransform(
   namespace: string,
   suffix: string,
   packageInfo?: PackageInfo,
-  streamPipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
+  signalTypes?: string[]
 ): Record<OTelCollectorComponentID, any> {
   const dynamicSignalTypes = hasDynamicSignalTypes(packageInfo);
 
   let transformStatements: Record<string, any> = {};
 
-  if (dynamicSignalTypes && streamPipelines) {
-    // When dynamic_signal_types is true, extract signal types from pipeline IDs
-    // and generate transforms for each. This allows the collector to route data
+  if (dynamicSignalTypes && signalTypes) {
+    // When dynamic_signal_types is true, generate transforms for each signal type. This allows the collector to route data
     // to the appropriate datastreams based on the pipelines configured in the policy.
-    const signalTypes = extractSignalTypesFromPipelines(streamPipelines);
     // Generate transforms for each signal type found in pipelines
     signalTypes.forEach((signalType) => {
       const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
@@ -276,29 +288,24 @@ function addSuffixToOtelcolComponentsConfig(
 
 function conditionallyAddApmToPipelines(
   pipelines: Record<OTelCollectorPipelineID, any>,
-  shouldAddAPMConfig: boolean
+  shouldAddAPMConfig: boolean,
+  namespace: string
 ): Record<OTelCollectorPipelineID, any> {
   if (!shouldAddAPMConfig) {
     return pipelines;
   }
-  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'exporters');
-  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'processors');
-  return pipelines;
-}
-
-function addCompomentToPipelines(
-  pipelines: any,
-  componentId: string,
-  type: string
-): Record<OTelCollectorPipelineID, any> {
-  for (const pipelineId in pipelines) {
-    if (pipelines[pipelineId][type]) {
-      pipelines[pipelineId][type] = pipelines[pipelineId][type].concat([componentId]);
-    } else {
-      pipelines[pipelineId][type] = [componentId];
+  const result: Record<OTelCollectorPipelineID, any> = {};
+  Object.entries(pipelines as Record<OTelCollectorPipelineID, Record<string, string[]>>).forEach(
+    ([pipelineID, pipeline]) => {
+      const signalType = getSignalType(pipelineID);
+      if (signalType === 'traces') {
+        pipeline.exporters = [...(pipeline.exporters || []), `elasticapm/${namespace}`];
+        pipeline.processors = [...(pipeline.processors || []), `elasticapm/${namespace}`];
+      }
+      result[pipelineID] = pipeline;
     }
-  }
-  return pipelines;
+  );
+  return result;
 }
 
 function addSuffixToOtelcolPipelinesComponents(

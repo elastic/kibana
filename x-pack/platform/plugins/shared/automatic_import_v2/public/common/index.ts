@@ -10,7 +10,6 @@ export { useFetchIndices } from './hooks/use_fetch_indices';
 export { useGetIntegrationById } from './hooks/use_get_integration_by_id';
 export { useGetAllIntegrations } from './hooks/use_get_all_integrations';
 export { useCreateUpdateIntegration } from './hooks/use_create_update_integration';
-export { useLoadConnectors } from './hooks/use_load_connectors';
 export { useValidateIndex } from './hooks/use_validate_index';
 export { useUploadSamples } from './hooks/use_upload_samples';
 export { useDeleteDataStream } from './hooks/use_delete_data_stream';
@@ -51,4 +50,4 @@ export type {
 export { getLangSmithOptions } from './lib/lang_smith';
 export type { LangSmithOptions } from './lib/lang_smith';
 
-export { generateId } from './lib/helper_functions';
+export { generateId, normalizeTitleName } from './lib/helper_functions';

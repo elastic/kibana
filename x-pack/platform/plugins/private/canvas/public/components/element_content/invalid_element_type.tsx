@@ -11,8 +11,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-
 export interface Props {
   renderableType: string;
   selectElement: () => void;
@@ -21,8 +19,3 @@ export interface Props {
 export const InvalidElementType = ({ renderableType, selectElement }: Props) => (
   <h3 onClick={selectElement}>Element not found: {renderableType}</h3>
 );
-
-InvalidElementType.propTypes = {
-  renderableType: PropTypes.string,
-  selectElement: PropTypes.func,
-};

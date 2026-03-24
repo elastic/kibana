@@ -21,6 +21,7 @@ export const IGNORE_PATTERNS = [
   '**/__fixtures__/**/*',
   '**/__mocks__/**/*',
   '**/.*',
+  '**/.*/**',
   '**/.codeql/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   '**/*.codeql/**/*',

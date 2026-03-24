@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  EVENT_ANNOTATION_GROUP_TYPE,
+  type EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import fastIsEqual from 'fast-deep-equal';
 import type {
   DatasourceStates,
   FormBasedPersistedState,
@@ -16,10 +21,12 @@ import type {
   LensSerializedState,
   StructuredDatasourceStates,
   TextBasedPersistedState,
+  XYState,
+  XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
-import type { SerializedTitles, ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
   apiHasParentApi,
@@ -32,6 +39,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+
+import type { StrippedLensState } from '../../common/transforms/helpers';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
@@ -76,15 +85,15 @@ export async function deserializeState(
   state: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
-  const savedObjectId = 'savedObjectId' in state ? state.savedObjectId : undefined;
+  const refId = 'ref_id' in state ? state.ref_id : undefined;
 
-  if (savedObjectId) {
+  if (refId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(savedObjectId);
+        await attributeService.loadFromLibrary(refId);
       return {
         ...state,
-        savedObjectId,
+        ref_id: refId,
         attributes,
         managed,
         sharingSavedObjectProps,
@@ -95,7 +104,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -172,9 +181,16 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   const builder = getLensBuilder();
 
   if (!builder?.isEnabled) {
-    // builder not enabled, return the state as is
-    return state as LensSerializedState;
+    if (isLensAPIFormat(state.attributes)) {
+      // This mean the dashboard is giving us an in-memory state
+      // This could be either the new or old state so we need to try to convert below
+    } else {
+      // builder not enabled, return the state as is
+      return state as LensSerializedState;
+    }
   }
+
+  if (!builder) return state as LensSerializedState; // no other option
 
   const chartType = builder.getType(state.attributes);
 
@@ -204,11 +220,11 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
  * !Important! call stripInheritedContext before transforming to API config
  */
 export function transformToApiConfig(state: StrippedLensState): LensSerializedAPIConfig {
-  const { savedObjectId, attributes } = state;
+  const { ref_id, attributes } = state;
 
-  if (savedObjectId) {
+  if (ref_id) {
     return {
-      savedObjectId,
+      ref_id,
     };
   }
 
@@ -242,55 +258,143 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
   };
 }
 
+export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: string): boolean {
+  const refs = state.attributes?.references ?? [];
+  return refs.some((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE && ref.id === groupId);
+}
+
 /**
- * Keys that should be persisted at the panel level.
- * All other properties from LensSerializedState are inherited from the
- * dashboard/container or are runtime-only and should not be persisted.
+ * Returns updated state with library annotation group data for all by-reference
+ * annotation layers that reference the given group ID, or undefined if no layers matched.
  *
- * TODO - LensSerializedState should really be paired down to match this list.
- * it is currently used as a runtime state object but it shouldn't be.
+ * Handles both hydrated layers (annotationGroupId on the layer) and persisted layers
+ * (annotationGroupRef resolved via the references array).
  */
-type IncludedPanelStateKeys =
-  | 'savedObjectId'
-  | 'attributes'
-  | 'references'
-  | 'time_range'
-  | keyof SerializedTitles
-  | keyof SerializedDrilldowns;
+export function updateAttributesWithAnnotation(
+  state: LensRuntimeState,
+  groupId: string,
+  libraryGroup: EventAnnotationGroupConfig
+): LensRuntimeState | undefined {
+  const { attributes } = state;
+  if (attributes.visualizationType !== 'lnsXY') return undefined;
 
-export type StrippedLensState = Pick<LensSerializedState, IncludedPanelStateKeys>;
+  const vizState = attributes.state.visualization as XYState | undefined;
+  if (!vizState?.layers) return undefined;
+
+  // In the persisted form, annotation layers use annotationGroupRef (a reference name)
+  // instead of annotationGroupId. Build a lookup to resolve these via the references array.
+  const refNameToGroupId = new Map<string, string>();
+  for (const ref of attributes.references ?? []) {
+    if (ref.type === EVENT_ANNOTATION_GROUP_TYPE) {
+      refNameToGroupId.set(ref.name, ref.id);
+    }
+  }
+
+  let changed = false;
+  const layers = vizState.layers.map((layer) => {
+    // Hydrated form: annotationGroupId is directly on the layer during inline editing
+    // and on saved dashboards after injection.
+    if ('annotationGroupId' in layer && layer.annotationGroupId === groupId) {
+      changed = true;
+      return {
+        ...(layer as XYByReferenceAnnotationLayerConfig),
+        annotations: structuredClone(libraryGroup.annotations),
+        ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+        indexPatternId: libraryGroup.indexPatternId,
+        __lastSaved: libraryGroup,
+      };
+    }
+
+    // Persisted form: duplicated panels on unsaved dashboards store annotationGroupRef
+    // instead of annotationGroupId — resolve it via the references array.
+    if (
+      'annotationGroupRef' in layer &&
+      refNameToGroupId.get((layer as { annotationGroupRef: string }).annotationGroupRef) === groupId
+    ) {
+      changed = true;
+      return {
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        annotationGroupId: groupId,
+        annotations: structuredClone(libraryGroup.annotations),
+        ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+        indexPatternId: libraryGroup.indexPatternId,
+        __lastSaved: libraryGroup,
+      } as XYByReferenceAnnotationLayerConfig;
+    }
+
+    return layer;
+  });
+
+  return changed
+    ? {
+        ...state,
+        attributes: {
+          ...attributes,
+          state: { ...attributes.state, visualization: { ...vizState, layers } },
+        },
+      }
+    : undefined;
+}
 
 /**
- * The serialized state contains many properties that are inherited from the dashboard or other container
- * or are runtime-only (like executionContext) and should not be persisted at the panel
- * level. This function strips those out to ensure only panel-level state is persisted.
+ * Saves all modified linked (by-reference) annotation layers to the library.
+ * Each layer with local changes is committed via `updateAnnotationGroup`, which
+ * also fires `annotationGroupUpdated$` to notify other panels.
+ *
+ * Returns an immutably-updated viz state with `__lastSaved` synced on each
+ * saved layer, so serialization produces clean by-reference layers rather than
+ * "linked with local changes" layers.
  */
-export function stripInheritedContext(state: LensSerializedState): StrippedLensState {
-  const {
-    savedObjectId,
-    attributes,
-    // LensWithReferences
-    references,
-    // LensUnifiedSearchContext (only time_range is panel-level)
-    time_range,
-    // SerializedTitles
-    title,
-    description,
-    hide_title,
-    hide_border,
-    // SerializedDrilldowns
-    drilldowns,
-  } = state;
+export async function saveUpdatedLinkedAnnotationsToLibrary(
+  vizState: unknown,
+  eventAnnotationService: EventAnnotationServiceType
+): Promise<unknown> {
+  const xyState = vizState as XYState | undefined;
+  if (!xyState?.layers) return vizState;
 
-  return {
-    savedObjectId,
-    attributes,
-    references,
-    time_range,
-    title,
-    description,
-    hide_title,
-    hide_border,
-    drilldowns,
-  };
+  let updatedLayers: XYState['layers'] | undefined;
+
+  for (let i = 0; i < xyState.layers.length; i++) {
+    const layer = xyState.layers[i];
+    if (
+      'annotationGroupId' in layer &&
+      '__lastSaved' in layer &&
+      !fastIsEqual(
+        {
+          annotations: layer.annotations,
+          ignoreGlobalFilters: layer.ignoreGlobalFilters,
+          indexPatternId: layer.indexPatternId,
+        },
+        {
+          annotations: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved.annotations,
+          ignoreGlobalFilters: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved
+            .ignoreGlobalFilters,
+          indexPatternId: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved.indexPatternId,
+        }
+      )
+    ) {
+      const refLayer = layer as XYByReferenceAnnotationLayerConfig;
+      const groupConfig: EventAnnotationGroupConfig = {
+        annotations: refLayer.annotations,
+        indexPatternId: refLayer.indexPatternId,
+        ignoreGlobalFilters: refLayer.ignoreGlobalFilters,
+        title: refLayer.__lastSaved.title,
+        description: refLayer.__lastSaved.description,
+        tags: refLayer.__lastSaved.tags,
+        dataViewSpec: refLayer.__lastSaved.dataViewSpec,
+      };
+
+      await eventAnnotationService.updateAnnotationGroup(groupConfig, refLayer.annotationGroupId);
+
+      if (!updatedLayers) {
+        updatedLayers = [...xyState.layers];
+      }
+      updatedLayers[i] = { ...refLayer, __lastSaved: groupConfig };
+    }
+  }
+
+  if (!updatedLayers) return vizState;
+
+  return { ...xyState, layers: updatedLayers };
 }

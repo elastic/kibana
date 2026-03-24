@@ -7,7 +7,6 @@
 
 import {
   buildLogsExtractionEsqlQuery,
-  buildCcsLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
 } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
@@ -60,46 +59,33 @@ describe('buildLogsExtractionEsqlQuery', () => {
     });
     expect(query).toMatchSnapshot();
   });
-});
 
-describe('buildCcsLogsExtractionEsqlQuery', () => {
-  it('generates query without LOOKUP JOIN', () => {
-    const query = buildCcsLogsExtractionEsqlQuery({
-      indexPatterns: ['remote_cluster:logs-*'],
-      entityDefinition: getEntityDefinition('host', 'default'),
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      docsLimit: 10000,
-    });
-    expect(query).not.toContain('LOOKUP JOIN');
-    expect(query).toMatchSnapshot();
-  });
-
-  it('generates expected query for host entity type', () => {
-    const query = buildCcsLogsExtractionEsqlQuery({
-      indexPatterns: ['remote:metrics-*'],
-      entityDefinition: getEntityDefinition('host', 'default'),
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      docsLimit: 5000,
-    });
-    expect(query).toMatchSnapshot();
-  });
-
-  it('generates expected query with pagination', () => {
-    const query = buildCcsLogsExtractionEsqlQuery({
-      indexPatterns: ['remote:logs-*'],
-      entityDefinition: getEntityDefinition('user', 'default'),
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      docsLimit: 10000,
-      pagination: {
-        timestampCursor: '2022-01-01T12:00:00.000Z',
-        idCursor: 'cursor-id',
+  it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        whenConditionTrueSetFieldsAfterStats: [
+          {
+            condition: { field: 'host.name', eq: 'server1' },
+            fields: { 'host.name': { source: 'host.id' } },
+          },
+        ],
       },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
     });
-    expect(query).toContain('FirstSeenLogInPage > TO_DATETIME("2022-01-01T12:00:00.000Z")');
-    expect(query).toMatchSnapshot();
+    const statsIdx = query.indexOf('| STATS');
+    const lookupIdx = query.indexOf('LOOKUP JOIN');
+    const afterStatsEvalIdx = query.indexOf('recent.host.name = CASE(');
+    const mergeCoalesceIdx = query.indexOf('entity.name = COALESCE(');
+    expect(statsIdx).toBeGreaterThan(-1);
+    expect(lookupIdx).toBeGreaterThan(statsIdx);
+    expect(afterStatsEvalIdx).toBeGreaterThan(lookupIdx);
+    expect(mergeCoalesceIdx).toBeGreaterThan(afterStatsEvalIdx);
   });
 });
 

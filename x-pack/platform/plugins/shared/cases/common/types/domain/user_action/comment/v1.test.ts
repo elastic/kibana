@@ -53,6 +53,7 @@ describe('Attachment', () => {
         comment: {
           type: 'comment',
           data: { content: 'unified comment content' },
+          owner: 'cases',
         },
       };
       const query = CommentUserActionPayloadRt.decode(v2UnifiedRequest);
@@ -69,6 +70,7 @@ describe('Attachment', () => {
         comment: {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           metadata: {
             description: 'A test visualization',
           },
@@ -131,6 +133,7 @@ describe('Attachment', () => {
           comment: {
             type: 'comment',
             data: { content: 'v2 unified comment' },
+            owner: 'cases',
           },
         },
       };

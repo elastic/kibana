@@ -9,7 +9,6 @@
 
 import type { ReactNode } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppDeepLinkId } from './project_navigation';
 
 /** @public */
@@ -35,10 +34,6 @@ export interface ChromeBreadcrumbsAppendExtension {
    * The extension content as a React node.
    */
   content?: ReactNode;
-  /**
-   * @deprecated Use {@link ChromeBreadcrumbsAppendExtension.content} instead.
-   */
-  mount?: MountPoint<HTMLDivElement>;
   /** The order in which the extension should be appended to the breadcrumbs. Default is 50 */
   order?: number;
 }

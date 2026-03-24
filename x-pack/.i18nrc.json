@@ -134,7 +134,7 @@
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
     "xpack.searchNotebooks": "solutions/search/plugins/search_notebooks",
     "xpack.searchPlayground": "solutions/search/plugins/search_playground",
-    "xpack.searchInferenceEndpoints": "solutions/search/plugins/search_inference_endpoints",
+    "xpack.searchInferenceEndpoints": "platform/plugins/shared/search_inference_endpoints",
     "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [

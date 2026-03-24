@@ -10,6 +10,8 @@ import { Parser, isSubQuery } from '@elastic/esql';
 import { getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
+const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
+
 function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
   const promqlCommand = commands.find(({ name }) => name === 'promql');
   if (!promqlCommand) {
@@ -21,7 +23,7 @@ function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
 }
 
 function getSourcesFromAst(commands: ESQLCommand[]): string[] {
-  const sourceCommand = commands.find(({ name }) => ['from', 'ts'].includes(name));
+  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
   if (!sourceCommand) {
     return [];
   }
@@ -65,7 +67,10 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   allSources.push(...mainSources, ...promqlSources);
 
   // Get sources from subqueries
-  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+
   if (sourceCommand) {
     const subquerySources = extractSubquerySources(sourceCommand);
     allSources.push(...subquerySources);
@@ -75,4 +80,21 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   const uniqueSources = [...new Set(allSources)];
 
   return uniqueSources.join(',');
+}
+
+/**
+ * @param esql - The ES|QL query string to parse
+ * @returns The source command name, or an empty string if not found
+ */
+export function getSourceCommandFromESQLQuery(esql?: string): string {
+  if (!esql?.trim()) {
+    return '';
+  }
+
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+
+  return sourceCommand?.name.toUpperCase() ?? '';
 }
