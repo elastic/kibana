@@ -126,6 +126,7 @@
     "@kbn/controls-schemas",
     "@kbn/as-code-filters-schema",
     "@kbn/scout",
+    "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
     "@kbn/alerting-v2-rule-form",
     "@kbn/cps-utils",

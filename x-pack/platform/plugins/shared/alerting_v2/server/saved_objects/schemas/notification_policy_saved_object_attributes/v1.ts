@@ -7,12 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const notificationPolicyDestinationSchema = schema.oneOf([
-  schema.object({
-    type: schema.literal('workflow'),
-    id: schema.string(),
-  }),
-]);
+export const notificationPolicyDestinationSchema = schema.object({
+  type: schema.literal('workflow'),
+  id: schema.string(),
+});
 
 export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),

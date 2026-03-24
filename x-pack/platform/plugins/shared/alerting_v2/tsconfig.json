@@ -74,7 +74,8 @@
     "@kbn/core-security-server-mocks",
     "@kbn/scout",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-alerting-v2"
+    "@kbn/deeplinks-alerting-v2",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }

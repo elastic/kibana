@@ -15,6 +15,20 @@ import { NotificationPolicyFormPage } from './notification_policy_form_page';
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
 
+jest.mock('../../components/notification_policy/form/components/matcher_input', () => ({
+  MatcherInput: (props: {
+    value: string;
+    onChange: (v: string) => void;
+    'data-test-subj'?: string;
+  }) => (
+    <input
+      data-test-subj={props['data-test-subj']}
+      value={props.value}
+      onChange={(e) => props.onChange(e.target.value)}
+    />
+  ),
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: jest.fn((token: unknown) => {
     const tokenStr = String(token);

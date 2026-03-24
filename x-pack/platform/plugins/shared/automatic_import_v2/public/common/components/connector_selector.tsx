@@ -27,7 +27,8 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLoadConnectors, useKibana } from '..';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useKibana } from '..';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 
@@ -282,12 +283,21 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   isDisabled = false,
   displayFancy,
 }) => {
-  const { settings, application } = useKibana().services;
+  const { http, notifications, settings, application } = useKibana().services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState(false);
 
-  const { connectors, isLoading, refetch } = useLoadConnectors();
+  const {
+    data: connectors,
+    isLoading,
+    refetch,
+  } = useLoadConnectors({
+    http,
+    toasts: notifications.toasts,
+    featureId: 'automatic_import_v2',
+    settings,
+  });
 
   const settingsDefaultConnectorId = settings?.client.get<string>(
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR

@@ -10,60 +10,7 @@ import { ruleSavedObjectAttributesSchemaV1 } from '../schemas/rule_saved_object_
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          kind: { type: 'keyword' },
-          metadata: {
-            properties: {
-              name: { type: 'text' },
-              description: { type: 'text' },
-              owner: { type: 'keyword' },
-              labels: { type: 'keyword' },
-            },
-          },
-          time_field: { type: 'keyword' },
-          schedule: {
-            properties: {
-              every: { type: 'keyword' },
-              lookback: { type: 'keyword' },
-            },
-          },
-          evaluation: {
-            properties: {
-              query: {
-                properties: {
-                  base: { type: 'text' },
-                  condition: { type: 'text' },
-                },
-              },
-            },
-          },
-          recovery_policy: { type: 'object', enabled: false },
-          state_transition: { type: 'object', enabled: false },
-          grouping: {
-            properties: {
-              fields: { type: 'keyword' },
-            },
-          },
-          no_data: { type: 'object', enabled: false },
-          artifacts: {
-            type: 'nested',
-            properties: {
-              id: { type: 'keyword' },
-              type: { type: 'keyword' },
-              value: { type: 'keyword' },
-            },
-          },
-          enabled: { type: 'boolean' },
-          createdBy: { type: 'keyword' },
-          createdAt: { type: 'date' },
-          updatedBy: { type: 'keyword' },
-          updatedAt: { type: 'date' },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV1,

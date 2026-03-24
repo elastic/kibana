@@ -34,6 +34,7 @@ import { CascadeRowHeaderSlotsRenderer } from './cascade_row_header_slots_render
  * @internal
  */
 export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNode>({
+  isMobile,
   rowInstance,
   rowHeaderTitleSlot: RowTitleSlot,
   rowHeaderMetaSlots,
@@ -206,7 +207,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         </EuiFlexItem>
         <EuiFlexItem css={flexHelper}>
           <EuiFlexGroup
-            gutterSize="m"
+            gutterSize="s"
             justifyContent="spaceBetween"
             direction="row"
             responsive={false}
@@ -221,6 +222,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 alignItems="center"
                 justifyContent="flexEnd"
                 css={styles.rowHeaderSlotContainerInner}
+                responsive={false}
               >
                 <React.Fragment>
                   {Boolean(headerMetaSlots?.length) && (
@@ -240,7 +242,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                         },
                       ]}
                     >
-                      <CascadeRowActions headerRowActions={headerActions!} />
+                      <CascadeRowActions headerRowActions={headerActions!} isMobile={isMobile} />
                     </EuiFlexItem>
                   )}
                 </React.Fragment>

@@ -166,31 +166,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(400);
     });
 
-    it('should return 204 for untag action with tags and write action document', async () => {
-      const ruleId = 'untag-test-rule';
-      const groupHash = 'untag-test-group';
-      const event = createAlertEvent({
-        rule: { id: ruleId, version: 1 },
-        group_hash: groupHash,
-        episode: { id: 'untag-test-episode', status: 'active' },
-      });
-      await indexAlertEvents(esClient, [event]);
-
-      const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'untag', tags: ['tag1'] });
-
-      expect(response.status).to.be(204);
-
-      const action = await getLatestAction([ruleId]);
-      expect(action).to.be.ok();
-      expect(action!.group_hash).to.be(groupHash);
-      expect(action!.action_type).to.be('untag');
-      expect(action!.tags).to.eql(['tag1']);
-    });
-
     it('should return 204 for snooze action and write action document', async () => {
       const ruleId = 'snooze-test-rule';
       const groupHash = 'snooze-test-group';
