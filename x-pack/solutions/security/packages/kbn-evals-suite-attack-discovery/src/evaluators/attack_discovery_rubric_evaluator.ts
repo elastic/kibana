@@ -23,9 +23,27 @@ export const createAttackDiscoveryRubricEvaluator = ({
     name: 'AttackDiscoveryRubric',
     kind: 'LLM',
     evaluate: async ({ output, expected }) => {
+      const errors = (output as AttackDiscoveryTaskOutput | undefined)?.errors;
+      if (errors && errors.length > 0) {
+        return {
+          score: 0,
+          label: 'task_error',
+          explanation: String(errors[0]).slice(0, 1000),
+        };
+      }
+
+      const insights = (output as AttackDiscoveryTaskOutput | undefined)?.insights ?? null;
+      if (!insights) {
+        return {
+          score: 0,
+          label: 'missing_insights',
+          explanation: 'Attack Discovery task did not produce insights.',
+        };
+      }
+
       const submission = JSON.stringify(
         {
-          attackDiscoveries: (output as AttackDiscoveryTaskOutput)?.insights ?? null,
+          attackDiscoveries: insights,
         },
         null,
         2
