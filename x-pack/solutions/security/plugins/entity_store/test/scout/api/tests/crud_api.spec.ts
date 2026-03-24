@@ -66,7 +66,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id!)).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity!.id!)).toBe(1);
     const euid = getEuidFromObject('generic', entityObj) as string;
     const check = await esClient.get({ index: LATEST_INDEX, id: hashEuid(euid) });
     expect(check.found).toBe(true);
@@ -184,7 +184,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: {
         entity: {
-          id: entityObj.entity.id,
+          id: entityObj.entity!.id!,
           name: 'this-is-update',
         },
         host: {
@@ -468,7 +468,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       index: LATEST_INDEX,
       query: {
         match: {
-          'entity.id': entityObj.entity.id,
+          'entity.id': entityObj.entity!.id!,
         },
       },
     });
@@ -502,7 +502,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       headers: defaultHeaders,
       responseType: 'json',
       body: {
-        entityId: entityObj.entity.id,
+        entityId: entityObj.entity!.id!,
       },
     });
     expect(apiNotFound.body.statusCode).toBe(404);
