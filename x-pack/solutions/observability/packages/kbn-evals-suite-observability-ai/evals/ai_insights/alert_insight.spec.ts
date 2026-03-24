@@ -102,7 +102,8 @@ function createScenarioTest(scenario: AlertScenario) {
             ],
           },
         });
-      });
+      }
+    );
 
     evaluate.afterAll(async ({ kbnClient, esClient, log }) => {
       log.debug('Cleaning up indices');
