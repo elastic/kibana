@@ -30,7 +30,7 @@ import {
   transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import { type RuntimeStateManager, selectTabRuntimeState } from '../runtime_state';
+import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import type {
   DiscoverAppState,
   DiscoverInternalState,
@@ -62,15 +62,9 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
-export const getCurrentProfileId = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
-  return selectTabRuntimeState(runtimeStateManager, tabId)
-    .scopedProfilesManager$.getValue()
-    .getContexts().dataSourceContext.profileId;
-};
-
 export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
   function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
-    const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
@@ -78,7 +72,7 @@ export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
   [TabActionPayload<{ appState?: DiscoverAppState }>]
 > = (payload) =>
   function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
-    const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
     dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
   };
 

@@ -23,7 +23,7 @@ import { mockCustomizationContext } from '../../../../customizations/__mocks__/c
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
 import { DiscoverSearchSessionManager } from '../discover_search_session';
-import { getCurrentProfileId } from './actions/tab_state';
+import { selectDataSourceProfileId } from './runtime_state';
 
 describe('InternalStateStore', () => {
   const services = createDiscoverServicesMock();
@@ -114,7 +114,7 @@ describe('InternalStateStore', () => {
   it('should preserve snapshotsByProfileId when updating reset state', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
       internalStateActions.setAppState({
@@ -153,7 +153,7 @@ describe('InternalStateStore', () => {
   it('should only update snapshotsByProfileId', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
       internalStateActions.setProfileStateFieldsToReset({
@@ -185,7 +185,7 @@ describe('InternalStateStore', () => {
   it('should only apply changed app state fields to snapshotsByProfileId', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
       internalStateActions.setAppState({
@@ -221,7 +221,7 @@ describe('InternalStateStore', () => {
   it('should not update snapshotsByProfileId for system-triggered app state changes', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
       internalStateActions.setAppState({

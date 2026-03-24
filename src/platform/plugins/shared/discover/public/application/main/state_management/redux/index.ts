@@ -38,8 +38,6 @@ export {
   createInternalStateStore,
 } from './internal_state';
 
-export { getCurrentProfileId } from './actions/tab_state';
-
 export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
@@ -86,6 +84,7 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectDataSourceProfileId,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,

@@ -20,7 +20,7 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
-import { getCurrentProfileId, internalStateActions, selectTabRuntimeState } from './redux';
+import { internalStateActions, selectDataSourceProfileId, selectTabRuntimeState } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -193,7 +193,7 @@ describe('test getDataStateContainer', () => {
       mockFetchDocuments.mockImplementation(() => fetchDocumentsDeferred.promise);
 
       const { scopedProfilesManager$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
-      const previousProfileId = getCurrentProfileId(toolkit.runtimeStateManager, tabId);
+      const previousProfileId = selectDataSourceProfileId(toolkit.runtimeStateManager, tabId);
 
       jest
         .spyOn(scopedProfilesManager$.getValue(), 'resolveDataSourceProfile')

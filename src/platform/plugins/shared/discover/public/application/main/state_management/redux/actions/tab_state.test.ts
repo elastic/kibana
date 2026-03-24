@@ -17,7 +17,7 @@ import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
-import { getCurrentProfileId } from './tab_state';
+import { selectDataSourceProfileId } from '../runtime_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -54,7 +54,7 @@ describe('tab_state actions', () => {
   describe('setAppState', () => {
     it('should sync snapshotsByProfileId for the current profile', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+      const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -84,7 +84,7 @@ describe('tab_state actions', () => {
   describe('syncProfileStateSnapshot', () => {
     it('should sync snapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+      const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
         .snapshotsByProfileId;
 
@@ -117,7 +117,7 @@ describe('tab_state actions', () => {
   describe('updateAppStateAndReplaceUrl', () => {
     it('should only sync changed app state fields after replacing the URL for the active tab', async () => {
       const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
-      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+      const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -163,7 +163,7 @@ describe('tab_state actions', () => {
 
     it('should not sync snapshotsByProfileId after replacing the URL for system-triggered updates', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+      const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -227,7 +227,7 @@ describe('tab_state actions', () => {
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+      const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataViewId = 'test-data-view-id';
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
@@ -288,7 +288,7 @@ describe('tab_state actions', () => {
   describe('transitionFromDataViewToESQL', () => {
     it('should transition from Data View mode to ES|QL mode', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+      const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
 
       const query = { query: "foo: 'bar'", language: 'kuery' };

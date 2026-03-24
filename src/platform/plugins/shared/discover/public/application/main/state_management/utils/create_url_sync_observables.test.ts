@@ -15,7 +15,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock } from '../redux/__mocks__/internal_state.mocks';
 import { createUrlSyncObservables } from './create_url_sync_observables';
-import { getCurrentProfileId, selectTab, type DiscoverAppState } from '../redux';
+import { selectDataSourceProfileId, selectTab, type DiscoverAppState } from '../redux';
 
 describe('createUrlSyncObservables', () => {
   const setup = async () => {
@@ -90,7 +90,7 @@ describe('createUrlSyncObservables', () => {
     expect(currentAppState).toBeDefined();
     expect(currentAppState.query).toBeDefined();
 
-    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+    const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
     const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
       .snapshotsByProfileId;
 

@@ -22,6 +22,7 @@ import {
 } from '../../../../../__mocks__/data_view_complex';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabStateActions from './tab_state';
+import { selectDataSourceProfileId } from '../runtime_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -145,7 +146,7 @@ describe('tab_state_data_view actions', () => {
 
     it('should reset profile fields without syncing snapshots when switching data view', async () => {
       const params = await setupTestParams(dataViewComplexMock);
-      const profileId = tabStateActions.getCurrentProfileId(
+      const profileId = selectDataSourceProfileId(
         params.runtimeStateManager,
         params.getCurrentTab().id
       );
