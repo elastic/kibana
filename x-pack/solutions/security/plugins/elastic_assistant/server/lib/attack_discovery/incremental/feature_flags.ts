@@ -54,30 +54,12 @@ export interface IncrementalADFeatureFlags {
  * Default feature flags (conservative rollout)
  */
 export const DEFAULT_FEATURE_FLAGS: IncrementalADFeatureFlags = {
-  enabled: true, // Enabled for testing
+  // Disabled by default — enable via xpack.elasticAssistant.attackDiscovery.incremental.enabled
+  enabled: false,
   enableDeltaMode: true,
   enableProgressiveMode: true,
   allowedModels: [], // All models allowed
-  maxAlertsPerRound: 75, // Safety limit (ensures <8K tokens)
-  maxRounds: 20,
-  enableTelemetry: true,
-};
-
-/**
- * Production feature flags (after validation)
- */
-export const PRODUCTION_FEATURE_FLAGS: IncrementalADFeatureFlags = {
-  enabled: true,
-  enableDeltaMode: true,
-  enableProgressiveMode: true,
-  allowedModels: [
-    'qwen-2.5-7b',
-    'llama-3.1-8b',
-    'llama-3.3-70b',
-    'gpt-4o-mini',
-    'claude-haiku',
-  ],
-  maxAlertsPerRound: 75,
+  maxAlertsPerRound: 100, // Safety limit for context budget
   maxRounds: 20,
   enableTelemetry: true,
 };

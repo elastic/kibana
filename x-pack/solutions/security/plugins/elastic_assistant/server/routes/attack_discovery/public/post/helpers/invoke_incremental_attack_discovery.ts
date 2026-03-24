@@ -86,6 +86,8 @@ export const invokeIncrementalAttackDiscovery = async ({
 
   // Step 2: Build Alert objects from the anonymized strings
   // Each alert's content is already the anonymized CSV — this is what the LLM sees
+  // Alerts arrive pre-sorted by risk_score desc from getOpenAndAcknowledgedAlertsQuery,
+  // so highest-risk alerts are processed in the earliest rounds.
   const alerts: Alert[] = anonymizedAlertStrings.map((content, i) => ({
     id: `alert-${i}`,
     content,
@@ -109,7 +111,9 @@ export const invokeIncrementalAttackDiscovery = async ({
       metadata: {},
     }));
 
-    // Invoke the graph with pre-fetched documents — bypasses internal ES fetch
+    // Invoke the graph with pre-fetched documents — bypasses internal ES fetch.
+    // connectorTimeout applies per-round: each invokeAttackDiscoveryGraph call
+    // gets the full timeout, which is correct for incremental multi-round processing.
     const { anonymizedAlerts: returnedDocs, attackDiscoveries } =
       await invokeAttackDiscoveryGraph({
         actionsClient,

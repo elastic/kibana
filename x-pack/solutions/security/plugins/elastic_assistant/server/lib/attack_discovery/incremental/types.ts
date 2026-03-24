@@ -8,7 +8,11 @@
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
 export type IncrementalMode = 'delta' | 'progressive';
-export type MergeStrategy = 'rule-based' | 'semantic' | 'hybrid';
+export type MergeStrategy = 'rule-based';
+
+export const STOP_WORDS = new Set([
+  'the', 'and', 'of', 'in', 'a', 'to', 'is', 'for', 'on', 'with',
+]);
 
 export interface IncrementalADConfig {
   mode: IncrementalMode;
@@ -16,6 +20,7 @@ export interface IncrementalADConfig {
   maxRounds: number;
   mergeStrategy: MergeStrategy;
   similarityThreshold: number;
+  contextBudget?: number;
 }
 
 export interface ProcessedAlertRecord {

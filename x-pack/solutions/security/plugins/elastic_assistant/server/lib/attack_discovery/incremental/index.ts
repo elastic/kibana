@@ -12,6 +12,23 @@ import { computeDelta } from './delta_computer';
 import { processInRounds } from './round_processor';
 import type { IncrementalADConfig, IncrementalADResult, Alert } from './types';
 
+const PROMPT_OVERHEAD_TOKENS = 2000;
+const AVG_TOKENS_PER_ALERT = 200;
+const OUTPUT_RESERVE_TOKENS = 3000;
+const DEFAULT_CONTEXT_BUDGET = 32000;
+const MIN_ALERTS_PER_ROUND = 10;
+const MAX_ALERTS_PER_ROUND = 100;
+
+/**
+ * Computes the optimal alertsPerRound based on a model context budget.
+ * Uses token-based estimates to fill the available context window.
+ */
+export function computeAlertsPerRound(contextBudget: number = DEFAULT_CONTEXT_BUDGET): number {
+  const availableForAlerts = contextBudget - PROMPT_OVERHEAD_TOKENS - OUTPUT_RESERVE_TOKENS;
+  const computed = Math.floor(availableForAlerts / AVG_TOKENS_PER_ALERT);
+  return Math.max(MIN_ALERTS_PER_ROUND, Math.min(MAX_ALERTS_PER_ROUND, computed));
+}
+
 export async function incrementalAttackDiscovery({
   mode,
   alerts,
@@ -33,10 +50,10 @@ export async function incrementalAttackDiscovery({
 
   const fullConfig: IncrementalADConfig = {
     mode,
-    alertsPerRound: config.alertsPerRound ?? 50,
+    alertsPerRound: config.alertsPerRound ?? computeAlertsPerRound(config.contextBudget),
     maxRounds: config.maxRounds ?? 20,
     mergeStrategy: config.mergeStrategy ?? 'rule-based',
-    similarityThreshold: config.similarityThreshold ?? 0.8,
+    similarityThreshold: config.similarityThreshold ?? 0.6,
   };
 
   const stateTracker = new StateTracker(esClient, sessionId);
