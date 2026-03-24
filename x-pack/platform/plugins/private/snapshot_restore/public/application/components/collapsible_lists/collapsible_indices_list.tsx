@@ -57,7 +57,7 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
               />
             )}{' '}
             <EuiIcon
-              type={isShowingFullList ? 'arrowUp' : 'arrowDown'}
+              type={isShowingFullList ? 'chevronSingleUp' : 'chevronSingleDown'}
               data-test-subj="collapsibleIndicesArrow"
             />
           </EuiLink>
