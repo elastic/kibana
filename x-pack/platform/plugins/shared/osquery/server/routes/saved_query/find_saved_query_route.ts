@@ -73,7 +73,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             sortField: request.query.sort || 'id',
             sortOrder: request.query.sortOrder || 'desc',
             ...(request.query.search && {
-              search: `${request.query.search.trim()}*`,
+              search: request.query.search.trim(),
               searchFields: ['id', 'description'],
             }),
             ...(filters.length && { filter: filters.join(' AND ') }),
