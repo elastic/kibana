@@ -92,6 +92,7 @@ export const useInitDataViewManager = () => {
       dataViews: services.dataViews,
       http: services.http,
       uiSettings: services.uiSettings,
+      notifications: services.notifications,
       application: services.application,
       spaces: services.spaces,
       storage: services.storage,
@@ -113,6 +114,7 @@ export const useInitDataViewManager = () => {
       createDataViewSelectedListener({
         scope,
         dataViews: services.dataViews,
+        notifications: services.notifications,
         storage: services.storage,
         logger: createDataViewSelectedListenerLogger,
       })
@@ -141,6 +143,7 @@ export const useInitDataViewManager = () => {
     services.application,
     services.dataViews,
     services.http,
+    services.notifications,
     createInitListenerLogger,
     services.spaces,
     services.storage,

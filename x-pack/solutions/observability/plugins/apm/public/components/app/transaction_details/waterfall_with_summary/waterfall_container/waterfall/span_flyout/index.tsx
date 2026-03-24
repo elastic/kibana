@@ -204,7 +204,7 @@ function SpanFlyoutBody({
 }) {
   const stackframes = span.span.stacktrace;
   const plaintextStacktrace = span.code?.stacktrace;
-  const codeLanguage = parentTransaction?.service.language?.name;
+  const codeLanguage = parentTransaction?.service?.language?.name;
   const spanDb = span.span.db;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode =
@@ -322,7 +322,7 @@ function SpanFlyoutBody({
 
             <FailureBadge outcome={span.event?.outcome} />
 
-            <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
+            <SyncBadge sync={span.span.sync} agentName={span.agent?.name} />
           </ContainerWithMarginRight>,
         ]}
       />
