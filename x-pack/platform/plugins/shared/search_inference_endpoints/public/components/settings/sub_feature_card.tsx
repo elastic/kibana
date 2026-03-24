@@ -192,7 +192,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                           const { icon = 'compute', label = endpointId } =
                             endpointDisplayMap.get(endpointId) ?? {};
                           return (
-                            <>
+                            <div>
                               <EuiSplitPanel.Inner
                                 paddingSize="s"
                                 data-test-subj={`endpoint-row-${endpointId}`}
@@ -262,7 +262,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                               {index !== visibleEndpoints.length - 1 && (
                                 <EuiHorizontalRule margin="none" />
                               )}
-                            </>
+                            </div>
                           );
                         }}
                       </EuiDraggable>
