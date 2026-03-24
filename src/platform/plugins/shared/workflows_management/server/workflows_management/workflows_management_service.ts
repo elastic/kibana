@@ -52,8 +52,12 @@ import type {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import {
+  type ChildWorkflowExecutionItem,
+  getChildWorkflowExecutions,
+} from './lib/get_child_workflow_executions';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
-import { searchStepExecutions } from './lib/search_step_executions';
+import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
@@ -61,10 +65,12 @@ import type {
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
+  SearchStepExecutionsParams,
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
+import { isNotNullable } from '../../common/lib/type_guards';
 
 import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
@@ -92,6 +98,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  omitStepRuns?: boolean;
   page?: number;
   size?: number;
 }
@@ -185,6 +192,67 @@ export class WorkflowsService {
   }
 
   /**
+   * Fetches multiple workflows by their IDs in a single Elasticsearch request.
+   * Returns only the workflows that were found (missing IDs are silently omitted).
+   */
+  public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
+    if (!this.workflowStorage || ids.length === 0) {
+      return [];
+    }
+
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits.map((hit) =>
+      this.transformStorageDocumentToWorkflowDto(hit._id, hit._source)
+    );
+  }
+
+  /**
+   * Checks which of the given workflow IDs already exist in the specified space.
+   * Returns an array of `{ id, name }` for each existing workflow, suitable for
+   * conflict detection during import.
+   */
+  public async checkWorkflowConflicts(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<{ id: string; name: string }>> {
+    if (!this.workflowStorage || ids.length === 0) {
+      return [];
+    }
+
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      _source: ['name'],
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    const entries = response.hits.hits
+      .map((hit) => {
+        const source: WorkflowProperties = hit._source ?? {};
+        const name = typeof source.name === 'string' ? source.name : hit._id;
+        return { id: hit._id, name };
+      })
+      .filter((entry): entry is { id: string; name: string } => isNotNullable(entry.id));
+
+    return entries;
+  }
+
+  /**
    * Parses and validates a workflow YAML, returning the prepared document and metadata.
    * Shared by createWorkflow and bulkCreateWorkflows.
    * When triggerDefinitions is provided, custom trigger on.condition values are validated
@@ -217,10 +285,6 @@ export class WorkflowsService {
     }
 
     const id = workflow.id || this.generateWorkflowId();
-
-    if (workflow.id) {
-      this.validateWorkflowId(workflow.id);
-    }
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -279,6 +343,10 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
 
+    if (workflow.id) {
+      this.validateWorkflowId(workflow.id);
+    }
+
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -317,10 +385,11 @@ export class WorkflowsService {
   public async bulkCreateWorkflows(
     workflows: CreateWorkflowCommand[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
-    failed: Array<{ index: number; error: string }>;
+    failed: Array<{ index: number; id: string; error: string }>;
   }> {
     await this.ensureInitialized();
 
@@ -330,10 +399,8 @@ export class WorkflowsService {
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     const created: WorkflowDetailDto[] = [];
-    const failed: Array<{ index: number; error: string }> = [];
-    const bulkOperations: Array<{
-      index: { _id: string; document: WorkflowProperties };
-    }> = [];
+    const failed: Array<{ index: number; id: string; error: string }> = [];
+    const bulkOperations: Array<{ index: { _id: string; document: WorkflowProperties } }> = [];
     const validWorkflows: Array<{
       idx: number;
       id: string;
@@ -344,6 +411,10 @@ export class WorkflowsService {
     // Phase 1: Validate all workflows and prepare bulk operations
     for (let i = 0; i < workflows.length; i++) {
       try {
+        const customId = workflows[i].id;
+        if (customId) {
+          this.validateWorkflowId(customId);
+        }
         const prepared = this.prepareWorkflowDocument(
           workflows[i],
           zodSchema,
@@ -365,16 +436,17 @@ export class WorkflowsService {
       } catch (error) {
         failed.push({
           index: i,
+          id: workflows[i].id ?? `unknown-${i}`,
           error: error instanceof Error ? error.message : String(error),
         });
       }
     }
 
-    // Phase 2: Bulk index all valid workflows using op_type: create to reject duplicates
+    // Phase 2: Bulk write all valid workflows
     if (bulkOperations.length > 0) {
       const bulkResponse = await this.workflowStorage.getClient().bulk({
         operations: bulkOperations,
-        refresh: true,
+        refresh: 'wait_for',
       });
 
       // Process bulk response
@@ -385,6 +457,7 @@ export class WorkflowsService {
         if (operation?.error) {
           failed.push({
             index: validWorkflow.idx,
+            id: validWorkflow.id,
             error:
               typeof operation.error === 'object' && 'reason' in operation.error
                 ? operation.error.reason ?? JSON.stringify(operation.error)
@@ -399,10 +472,9 @@ export class WorkflowsService {
     }
 
     // Phase 3: Schedule triggers for successfully created workflows (in parallel)
+    const createdIds = new Set(created.map((w) => w.id));
     const workflowsToSchedule = validWorkflows.filter(
-      (vw) =>
-        created.some((w) => w.id === vw.id) &&
-        vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+      (vw) => createdIds.has(vw.id) && vw.definition?.triggers?.some((t) => t.type === 'scheduled')
     );
 
     await Promise.allSettled(
@@ -1143,6 +1215,19 @@ export class WorkflowsService {
     });
   }
 
+  public async getChildWorkflowExecutions(
+    parentExecutionId: string,
+    spaceId: string
+  ): Promise<ChildWorkflowExecutionItem[]> {
+    return getChildWorkflowExecutions({
+      esClient: this.esClient,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      parentExecutionId,
+      spaceId,
+    });
+  }
+
   public async getWorkflowExecutions(
     params: SearchWorkflowExecutionsParams,
     spaceId: string
@@ -1195,6 +1280,14 @@ export class WorkflowsService {
       must.push({
         terms: {
           executedBy: params.executedBy,
+        },
+      });
+    }
+
+    if (params.omitStepRuns) {
+      must.push({
+        bool: {
+          must_not: { exists: { field: 'stepId' } },
         },
       });
     }
@@ -1363,13 +1456,35 @@ export class WorkflowsService {
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
-    return searchStepExecutions({
+    const searchResult = await searchStepExecutions({
       esClient: this.esClient,
       logger: this.logger,
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
+    });
+    return searchResult.results;
+  }
+
+  public async searchStepExecutions(
+    params: SearchStepExecutionsParams,
+    spaceId: string
+  ): Promise<StepExecutionListResult> {
+    const sourceExcludes: string[] = [];
+    if (!params.includeInput) sourceExcludes.push('input');
+    if (!params.includeOutput) sourceExcludes.push('output');
+
+    return searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowId: params.workflowId,
+      stepId: params.stepId,
+      spaceId,
+      sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
+      page: params.page,
+      size: params.size,
     });
   }
 

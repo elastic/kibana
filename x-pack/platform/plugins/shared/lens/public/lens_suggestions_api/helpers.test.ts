@@ -5,19 +5,9 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import {
-  mergeSuggestionWithVisContext,
-  injectESQLQueryIntoLensLayers,
-  switchVisualizationType,
-} from './helpers';
-import { mockAllSuggestions, createMockVisualization } from '../mocks';
-import type {
-  TypedLensByValueInput,
-  TypedLensSerializedState,
-  Suggestion,
-  VisualizationMap,
-  Visualization,
-} from '@kbn/lens-common';
+import { mergeSuggestionWithVisContext, injectESQLQueryIntoLensLayers } from './helpers';
+import { mockAllSuggestions } from '../mocks';
+import type { TypedLensByValueInput, TypedLensSerializedState } from '@kbn/lens-common';
 
 const context = {
   dataViewSpec: {
@@ -380,7 +370,7 @@ describe('lens suggestions api helpers', () => {
         ...mockAllSuggestions[0],
         datasourceState: {
           indexPatternRefs: [
-            { id: 'new-index-id', title: 'index2' },
+            { id: 'new-index-id', title: 'index2', timeField: '@timestamp' },
             { id: 'other-index-id', title: 'index3' },
           ],
         },
@@ -398,6 +388,7 @@ describe('lens suggestions api helpers', () => {
                 layer1: {
                   query: { esql: 'from index2 | limit 15' },
                   index: 'new-index-id',
+                  timeField: '@timestamp',
                 },
               },
             },
@@ -411,6 +402,55 @@ describe('lens suggestions api helpers', () => {
         suggestionWithIndexRefs
       );
       expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+
+    it('should clear timeField when switching to an index without a time field', async () => {
+      const newQuery = {
+        esql: 'from ecommerce_index | limit 15',
+      };
+
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from logs_index | limit 10' },
+                  index: 'old-index-id',
+                  timeField: '@timestamp',
+                },
+              },
+            },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from logs_index | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const suggestionWithNoTimeField = {
+        ...mockAllSuggestions[0],
+        datasourceState: {
+          indexPatternRefs: [{ id: 'ecommerce-id', title: 'ecommerce_index' }],
+        },
+      };
+
+      const newAttributes = injectESQLQueryIntoLensLayers(
+        lensAttributes,
+        newQuery,
+        suggestionWithNoTimeField
+      );
+      const layer = (
+        newAttributes.state.datasourceStates.textBased as {
+          layers: Record<string, { timeField?: string }>;
+        }
+      ).layers.layer1;
+      expect(layer.timeField).toBeUndefined();
     });
 
     it('should keep original index when no matching indexPatternRef is found', async () => {
@@ -602,334 +642,6 @@ describe('lens suggestions api helpers', () => {
         suggestionWithoutIndexRefs
       );
       expect(newAttributes).toStrictEqual(expectedLensAttributes);
-    });
-  });
-
-  describe('switchVisualizationType', () => {
-    const mockVisualizationState = { someState: 'value' };
-    const mockSwitchedState = { someState: 'switchedValue' };
-
-    const createMockSuggestion = (visualizationId: string): Suggestion => ({
-      visualizationId,
-      visualizationState: mockVisualizationState,
-      datasourceState: {},
-      datasourceId: 'formBased',
-      columns: 1,
-      score: 0.5,
-      title: 'Mock Suggestion',
-      changeType: 'initial',
-      keptLayerIds: [],
-      previewIcon: 'empty',
-    });
-
-    describe('supported subtype scenarios', () => {
-      it('should switch visualization type when subtype is supported and different from current', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('bar'),
-          isSubtypeSupported: jest.fn().mockReturnValue(true),
-          switchVisualizationType: jest.fn().mockReturnValue(mockSwitchedState),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toEqual([
-          {
-            ...suggestions[0],
-            visualizationState: mockSwitchedState,
-          },
-        ]);
-        expect(mockVisualization.getVisualizationTypeId).toHaveBeenCalledWith(
-          mockVisualizationState
-        );
-        expect(mockVisualization.isSubtypeSupported).toHaveBeenCalledWith('line');
-        expect(mockVisualization.switchVisualizationType).toHaveBeenCalledWith(
-          'line',
-          mockVisualizationState
-        );
-      });
-
-      it('should force switch even when current type matches target type', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('line'),
-          isSubtypeSupported: jest.fn().mockReturnValue(true),
-          switchVisualizationType: jest.fn().mockReturnValue(mockSwitchedState),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: true,
-        });
-
-        expect(result).toEqual([
-          {
-            ...suggestions[0],
-            visualizationState: mockSwitchedState,
-          },
-        ]);
-        expect(mockVisualization.switchVisualizationType).toHaveBeenCalledWith(
-          'line',
-          mockVisualizationState
-        );
-      });
-    });
-
-    describe('unsupported subtype scenarios', () => {
-      it('should return undefined when subtype is not supported', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('bar'),
-          isSubtypeSupported: jest.fn().mockReturnValue(false),
-          switchVisualizationType: jest.fn(),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'unsupportedType',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-        expect(mockVisualization.isSubtypeSupported).toHaveBeenCalledWith('unsupportedType');
-        expect(mockVisualization.switchVisualizationType).not.toHaveBeenCalled();
-      });
-
-      it('should return undefined when isSubtypeSupported is not implemented', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('bar'),
-          // isSubtypeSupported not defined
-          isSubtypeSupported: undefined,
-          switchVisualizationType: jest.fn(),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-        expect(mockVisualization.switchVisualizationType).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('non-existent family type scenarios', () => {
-      it('should return undefined when family type does not exist in visualization map', () => {
-        const visualizationMap: VisualizationMap = {
-          lnsXY: createMockVisualization(),
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'donut',
-          familyType: 'nonExistentFamily',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should return undefined when suggestion for family type is not found', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          isSubtypeSupported: jest.fn().mockReturnValue(true),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        // Suggestions only contain lnsPie, not lnsXY
-        const suggestions = [createMockSuggestion('lnsPie')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-        expect(mockVisualization.getVisualizationTypeId).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('edge cases', () => {
-      it('should return undefined when targetTypeId is not provided', () => {
-        const mockVisualization: jest.Mocked<Visualization> = createMockVisualization();
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: undefined,
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-        expect(mockVisualization.switchVisualizationType).not.toHaveBeenCalled();
-      });
-
-      it('should return undefined when suggestions array is empty', () => {
-        const mockVisualization: jest.Mocked<Visualization> = createMockVisualization();
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions: [],
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should not switch when current type matches target type without force', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('line'),
-          isSubtypeSupported: jest.fn().mockReturnValue(true),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toBeUndefined();
-        expect(mockVisualization.switchVisualizationType).not.toHaveBeenCalled();
-      });
-
-      it('should handle switchVisualizationType returning undefined', () => {
-        const mockVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('bar'),
-          isSubtypeSupported: jest.fn().mockReturnValue(true),
-          switchVisualizationType: jest.fn().mockReturnValue(undefined),
-        };
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockVisualization,
-        };
-
-        const suggestions = [createMockSuggestion('lnsXY')];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toEqual([
-          {
-            ...suggestions[0],
-            visualizationState: undefined,
-          },
-        ]);
-      });
-
-      it('should handle multiple suggestions and pick the correct one by familyType', () => {
-        const mockXYVisualization: jest.Mocked<Visualization> = {
-          ...createMockVisualization(),
-          getVisualizationTypeId: jest.fn().mockReturnValue('bar'),
-          isSubtypeSupported: jest.fn().mockReturnValue(true),
-          switchVisualizationType: jest.fn().mockReturnValue(mockSwitchedState),
-        };
-
-        const mockPieVisualization: jest.Mocked<Visualization> = createMockVisualization();
-
-        const visualizationMap: VisualizationMap = {
-          lnsXY: mockXYVisualization,
-          lnsPie: mockPieVisualization,
-        };
-
-        const suggestions = [
-          createMockSuggestion('lnsPie'),
-          createMockSuggestion('lnsXY'),
-          createMockSuggestion('lnsMetric'),
-        ];
-
-        const result = switchVisualizationType({
-          visualizationMap,
-          suggestions,
-          targetTypeId: 'line',
-          familyType: 'lnsXY',
-          forceSwitch: false,
-        });
-
-        expect(result).toEqual([
-          {
-            ...suggestions[1], // lnsXY suggestion
-            visualizationState: mockSwitchedState,
-          },
-        ]);
-        expect(mockXYVisualization.switchVisualizationType).toHaveBeenCalled();
-        expect(mockPieVisualization.switchVisualizationType).not.toHaveBeenCalled();
-      });
     });
   });
 });
