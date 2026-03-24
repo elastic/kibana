@@ -9,6 +9,21 @@ import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AnonymizedAlert, AttackDiscoveryTaskOutput, RoundMetrics } from '../types';
 
+interface DeltaRunnerParams {
+  log: ToolingLog;
+  allAlerts: ReadonlyArray<AnonymizedAlert>;
+  previouslyProcessedCount: number;
+  alertsPerRound: number;
+  maxRounds: number;
+  generateRoundInsights: (
+    roundAlerts: string[],
+    previousInsights: AttackDiscovery[]
+  ) => Promise<{
+    insights: AttackDiscovery[];
+    usage?: { inputTokens: number; outputTokens: number };
+  }>;
+}
+
 interface IncrementalRunnerParams {
   log: ToolingLog;
   alerts: ReadonlyArray<AnonymizedAlert>;
@@ -127,4 +142,46 @@ export const runIncrementalProgressive = async ({
       },
     },
   };
+};
+
+/**
+ * Delta mode: simulates processing only NEW alerts since a previous run.
+ * Skips the first `previouslyProcessedCount` alerts and processes the rest.
+ */
+export const runIncrementalDelta = async ({
+  log,
+  allAlerts,
+  previouslyProcessedCount,
+  alertsPerRound,
+  maxRounds,
+  generateRoundInsights,
+}: DeltaRunnerParams): Promise<AttackDiscoveryTaskOutput> => {
+  const alertStrings = allAlerts.map((a) => a.pageContent);
+  const deltaAlerts = alertStrings.slice(previouslyProcessedCount);
+  const deltaSize = deltaAlerts.length;
+
+  log.info(
+    `Incremental delta: ${alertStrings.length} total alerts, ${previouslyProcessedCount} previously processed, ${deltaSize} new (delta)`
+  );
+
+  if (deltaSize === 0) {
+    log.info('No new alerts — returning empty result');
+    return {
+      insights: [],
+      rounds: [],
+      metadata: {
+        latency: { startTime: Date.now(), endTime: Date.now(), durationMs: 0 },
+        tokens: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      },
+    };
+  }
+
+  // Process only the delta alerts using the progressive runner
+  return runIncrementalProgressive({
+    log,
+    alerts: deltaAlerts.map((content) => ({ pageContent: content, metadata: {} })),
+    alertsPerRound,
+    maxRounds,
+    generateRoundInsights,
+  });
 };

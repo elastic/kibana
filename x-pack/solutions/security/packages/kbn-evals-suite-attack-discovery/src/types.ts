@@ -55,11 +55,22 @@ export interface AttackDiscoveryIncrementalProgressiveInput extends Record<strin
   maxRounds: number;
 }
 
+export interface AttackDiscoveryIncrementalDeltaInput extends Record<string, unknown> {
+  mode: 'incrementalDelta';
+  /** All current alerts (old + new) */
+  anonymizedAlerts: ReadonlyArray<AnonymizedAlert>;
+  /** Alerts already processed in a previous run */
+  previouslyProcessedCount: number;
+  alertsPerRound: number;
+  maxRounds: number;
+}
+
 export type AttackDiscoveryTaskInput =
   | AttackDiscoveryBundledAlertsInput
   | AttackDiscoverySearchAlertsInput
   | AttackDiscoveryGraphStateInput
-  | AttackDiscoveryIncrementalProgressiveInput;
+  | AttackDiscoveryIncrementalProgressiveInput
+  | AttackDiscoveryIncrementalDeltaInput;
 
 export interface AttackDiscoveryTaskExpectedOutput {
   attackDiscoveries: AttackDiscovery[];
