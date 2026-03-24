@@ -22,30 +22,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
+import type { Insight } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../info_panel';
-
-const impactBadgeColors: Record<InsightImpactLevel, 'danger' | 'warning' | 'primary' | 'hollow'> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'primary',
-  low: 'hollow',
-};
-
-const impactLabels: Record<InsightImpactLevel, string> = {
-  critical: i18n.translate('xpack.streams.insightFlyout.impact.critical', {
-    defaultMessage: 'Critical',
-  }),
-  high: i18n.translate('xpack.streams.insightFlyout.impact.high', {
-    defaultMessage: 'High',
-  }),
-  medium: i18n.translate('xpack.streams.insightFlyout.impact.medium', {
-    defaultMessage: 'Medium',
-  }),
-  low: i18n.translate('xpack.streams.insightFlyout.impact.low', {
-    defaultMessage: 'Low',
-  }),
-};
+import { impactBadgeColors, impactLabels } from './insight_constants';
 
 interface InsightFlyoutProps {
   insight: Insight;

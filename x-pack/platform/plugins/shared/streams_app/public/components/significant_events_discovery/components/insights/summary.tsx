@@ -31,35 +31,11 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
 import { FeedbackButtons } from './feedback_buttons';
+import { impactBadgeColors, impactLabels } from './insight_constants';
 import { InsightFlyout } from './insight_flyout';
 
-const impactBadgeColors: Record<InsightImpactLevel, 'danger' | 'warning' | 'primary' | 'hollow'> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'primary',
-  low: 'hollow',
-};
-
-const impactLabels: Record<InsightImpactLevel, string> = {
-  critical: i18n.translate('xpack.streams.insights.impact.critical', {
-    defaultMessage: 'Critical',
-  }),
-  high: i18n.translate('xpack.streams.insights.impact.high', {
-    defaultMessage: 'High',
-  }),
-  medium: i18n.translate('xpack.streams.insights.impact.medium', {
-    defaultMessage: 'Medium',
-  }),
-  low: i18n.translate('xpack.streams.insights.impact.low', {
-    defaultMessage: 'Low',
-  }),
-};
-
 const formatGeneratedAt = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
+  const diffMins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
   if (diffMins < 1) {
     return i18n.translate('xpack.streams.insights.justNow', { defaultMessage: 'just now' });
   }
@@ -76,10 +52,9 @@ const formatGeneratedAt = (dateStr: string): string => {
       values: { count: diffHours },
     });
   }
-  const diffDays = Math.floor(diffHours / 24);
   return i18n.translate('xpack.streams.insights.daysAgo', {
     defaultMessage: '{count} {count, plural, one {day} other {days}} ago',
-    values: { count: diffDays },
+    values: { count: Math.floor(diffHours / 24) },
   });
 };
 
@@ -95,6 +70,9 @@ export function Summary({ count }: { count: number }) {
     acknowledgeInsightsDiscoveryTask,
     cancelInsightsDiscoveryTask,
   } = useInsightsDiscoveryApi();
+
+  const [insights, setInsights] = useState<Insight[] | null>(null);
+  const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
   const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
@@ -117,7 +95,6 @@ export function Summary({ count }: { count: number }) {
     previousTaskStatusRef.current = task?.status;
 
     if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InProgress) {
-      // A new task started (possibly triggered by the header "Run a discovery" button)
       setInsights(null);
       return;
     }
@@ -154,23 +131,15 @@ export function Summary({ count }: { count: number }) {
     onCancel: cancelInsightsDiscoveryTask,
   });
 
-  const [insights, setInsights] = useState<Insight[] | null>(null);
-  const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
-
   const handleSelectInsight = useCallback((insight: Insight) => setSelectedInsight(insight), []);
   const handleCloseFlyout = useCallback(() => setSelectedInsight(null), []);
-
-  const onGenerateInsightsClick = async () => {
-    await scheduleTask();
-  };
 
   const onRunDiscoveryClick = async () => {
     await acknowledgeInsightsDiscoveryTask();
     await scheduleTask();
-    setInsights(null);
   };
 
-  const isGenerateButtonPending =
+  const isTaskPending =
     task?.status === TaskStatus.InProgress || isCancellingTask || isSchedulingTask;
 
   const columns = useMemo<Array<EuiBasicTableColumn<Insight>>>(
@@ -216,6 +185,7 @@ export function Summary({ count }: { count: number }) {
                 <EuiLink
                   onClick={() => handleSelectInsight(insight)}
                   data-test-subj="streamsInsightTitleLink"
+                  title={title}
                   css={css`
                     white-space: nowrap;
                     overflow: hidden;
@@ -223,7 +193,6 @@ export function Summary({ count }: { count: number }) {
                     display: block;
                     max-width: 100%;
                   `}
-                  title={title}
                 >
                   {title}
                 </EuiLink>
@@ -294,7 +263,7 @@ export function Summary({ count }: { count: number }) {
                   size="s"
                   iconType="sparkles"
                   onClick={onRunDiscoveryClick}
-                  disabled={isSchedulingTask}
+                  isDisabled={isSchedulingTask}
                   isLoading={isSchedulingTask}
                   data-test-subj="significant_events_run_discovery_button"
                 >
@@ -350,9 +319,7 @@ export function Summary({ count }: { count: number }) {
                     {
                       defaultMessage:
                         '{count} significant {count, plural, one {event} other {events}} detected',
-                      values: {
-                        count,
-                      },
+                      values: { count },
                     }
                   )}
                 </h2>
@@ -370,14 +337,14 @@ export function Summary({ count }: { count: number }) {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiButton
                   fill
                   size="m"
                   iconType="sparkles"
-                  onClick={onGenerateInsightsClick}
-                  isDisabled={isGenerateButtonPending}
-                  isLoading={isGenerateButtonPending}
+                  onClick={() => scheduleTask()}
+                  isDisabled={isTaskPending}
+                  isLoading={isTaskPending}
                   data-test-subj="significant_events_generate_insights_button"
                 >
                   {task?.status === TaskStatus.InProgress
@@ -388,7 +355,6 @@ export function Summary({ count }: { count: number }) {
                         defaultMessage: 'Discover Significant Events',
                       })}
                 </EuiButton>
-
                 {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton
                     onClick={cancelTask}
