@@ -285,8 +285,9 @@ const approveIntegrationRoute = (
         } catch (err) {
           logger.error(`approveIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
+          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
-            statusCode: 500,
+            statusCode,
             body: err,
           });
         }

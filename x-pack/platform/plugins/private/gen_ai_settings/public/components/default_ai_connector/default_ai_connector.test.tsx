@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 function SettingsProbe({ onValue }: { onValue: (v: any) => void }) {
   const value = useSettingsContext();
@@ -27,19 +27,24 @@ const mockConnectors = {
   loading: false,
   reload: jest.fn(),
   connectors: [
-    createMockConnectorFindResult({
-      actionTypeId: 'pre-configured.1',
-      id: 'pre-configured1',
-      isPreconfigured: true,
+    {
+      connectorId: 'pre-configured1',
       name: 'Pre configured Connector',
-      referencedByCount: 0,
-    }),
-    createMockConnectorFindResult({
-      actionTypeId: 'custom.1',
-      id: 'custom1',
+      type: InferenceConnectorType.OpenAI,
+      config: {},
+      capabilities: {},
+      isPreconfigured: true,
+      isInferenceEndpoint: false,
+    },
+    {
+      connectorId: 'custom1',
       name: 'Custom Connector 1',
-      referencedByCount: 0,
-    }),
+      type: InferenceConnectorType.OpenAI,
+      config: {},
+      capabilities: {},
+      isPreconfigured: false,
+      isInferenceEndpoint: false,
+    },
   ],
 };
 
@@ -47,6 +52,8 @@ interface TestWrapperProps {
   children: React.ReactNode;
   canSaveAdvancedSettings?: boolean;
 }
+
+const mockGenAiSettingsApi = jest.fn().mockResolvedValue({});
 
 function TestWrapper({ children, canSaveAdvancedSettings = true }: TestWrapperProps) {
   const queryClient = new QueryClient();
@@ -66,6 +73,7 @@ function TestWrapper({ children, canSaveAdvancedSettings = true }: TestWrapperPr
             addDanger: jest.fn(),
           },
         },
+        genAiSettingsApi: mockGenAiSettingsApi,
       }}
     >
       <I18nProvider>
@@ -270,15 +278,15 @@ describe('DefaultAIConnector', () => {
         loading: false,
         reload: jest.fn(),
         connectors: [
-          createMockConnectorFindResult({
-            actionTypeId: 'custom.1',
-            id: 'custom1',
-            isDeprecated: false,
-            isPreconfigured: false,
-            isSystemAction: false,
+          {
+            connectorId: 'custom1',
             name: 'Custom Connector 1',
-            referencedByCount: 0,
-          }),
+            type: InferenceConnectorType.OpenAI,
+            config: {},
+            capabilities: {},
+            isPreconfigured: false,
+            isInferenceEndpoint: false,
+          },
         ],
       };
 

@@ -15,7 +15,7 @@ import type {
   CreateSkillResponse,
   UpdateSkillResponse,
 } from '../../../common/http_api/skills';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 
 export class SkillsService {
   private readonly http: HttpSetup;
@@ -28,6 +28,14 @@ export class SkillsService {
     const { results } = await this.http.get<ListSkillsResponse>(`${publicApiPath}/skills`, {
       query: { include_plugins: options?.includePlugins ?? false },
     });
+    return results;
+  }
+
+  async listByAgent({ agentId }: { agentId: string }) {
+    const { results } = await this.http.get<ListSkillsResponse>(
+      `${internalApiPath}/agents/${encodeURIComponent(agentId)}/_skills`,
+      {}
+    );
     return results;
   }
 
