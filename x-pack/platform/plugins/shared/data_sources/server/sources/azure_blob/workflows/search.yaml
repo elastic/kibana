@@ -18,7 +18,7 @@ inputs:
 steps:
   - name: list-blobs-in-container
     type: azure-blob.listBlobs
-    if: "${{ inputs.container != null && inputs.container != '' }}"
+    if: "${{ inputs.container != nil and inputs.container != '' }}"
     connector-id: <%= azure-blob-stack-connector-id %>
     with:
       container: "${{ inputs.container }}"
@@ -26,7 +26,7 @@ steps:
       maxresults: ${{ inputs.maxresults }}
   - name: list-containers-only
     type: azure-blob.listContainers
-    if: "${{ inputs.container == null || inputs.container == '' }}"
+    if: "${{ inputs.container == nil or inputs.container == '' }}"
     connector-id: <%= azure-blob-stack-connector-id %>
     with:
       prefix: "${{ inputs.prefix }}"
