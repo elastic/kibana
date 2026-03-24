@@ -19,7 +19,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import type {
+  UnifiedDataTableSettings,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -265,6 +268,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [allResultsData?.edges, ecsMapping]
   );
 
+  const [isCompareActive, setIsCompareActive] = useState(false);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
 
   const externalCustomRenderers = useMemo(
@@ -469,6 +473,15 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [filteredDataView]
   );
 
+  const handleInitialStateChange = useCallback(
+    (state: Partial<UnifiedDataTableRestorableState>) => {
+      if (state.isCompareActive !== undefined) {
+        setIsCompareActive(state.isCompareActive);
+      }
+    },
+    []
+  );
+
   const handleCloseFlyout = useCallback(() => {
     setExpandedDoc(undefined);
   }, []);
@@ -594,6 +607,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   services={unifiedDataTableServices}
                   consumer="osquery"
                   enableComparisonMode
+                  onInitialStateChange={handleInitialStateChange}
                   showColumnTokens
                   controlColumnIds={CONTROL_COLUMN_IDS}
                   onFilter={handleFilterForGrid}
@@ -602,15 +616,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               </CellActionsProvider>
             </div>
 
-            <EuiTablePagination
-              pageCount={totalPages}
-              activePage={pagination.pageIndex}
-              onChangePage={handleServerPageChange}
-              itemsPerPage={pagination.pageSize}
-              onChangeItemsPerPage={handleServerPageSizeChange}
-              itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
-              showPerPageOptions
-            />
+            {!isCompareActive && (
+              <EuiTablePagination
+                pageCount={totalPages}
+                activePage={pagination.pageIndex}
+                onChangePage={handleServerPageChange}
+                itemsPerPage={pagination.pageSize}
+                onChangeItemsPerPage={handleServerPageSizeChange}
+                itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
+                showPerPageOptions
+              />
+            )}
           </>
         ) : (
           <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
