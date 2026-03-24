@@ -172,33 +172,37 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL && showTable ? (
-            <DiscoverDocuments
-              viewModeToggle={viewModeToggle}
-              dataView={dataView}
-              onAddFilter={onAddFilter}
-              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
-            />
-          ) : null}
-          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
+          {showTable ? (
             <>
-              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
-              <FieldStatisticsTab
-                dataView={dataView}
-                columns={columns}
-                onAddFilter={!isEsqlMode ? onAddFilter : undefined}
-                trackUiMetric={trackUiMetric}
-                isEsqlMode={isEsqlMode}
-              />
+              {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+                <DiscoverDocuments
+                  viewModeToggle={viewModeToggle}
+                  dataView={dataView}
+                  onAddFilter={onAddFilter}
+                  onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+                />
+              ) : null}
+              {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
+                <>
+                  <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+                  <FieldStatisticsTab
+                    dataView={dataView}
+                    columns={columns}
+                    onAddFilter={!isEsqlMode ? onAddFilter : undefined}
+                    trackUiMetric={trackUiMetric}
+                    isEsqlMode={isEsqlMode}
+                  />
+                </>
+              ) : null}
+              {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
+                <PatternAnalysisTab
+                  dataView={dataView}
+                  switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
+                  trackUiMetric={trackUiMetric}
+                  renderViewModeToggle={renderViewModeToggle}
+                />
+              ) : null}
             </>
-          ) : null}
-          {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
-            <PatternAnalysisTab
-              dataView={dataView}
-              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
-              trackUiMetric={trackUiMetric}
-              renderViewModeToggle={renderViewModeToggle}
-            />
           ) : null}
         </EuiFlexGroup>
       </DropOverlayWrapper>
