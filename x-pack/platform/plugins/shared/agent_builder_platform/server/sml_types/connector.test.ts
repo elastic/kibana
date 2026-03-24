@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
@@ -52,11 +53,11 @@ const mockLogger = loggingSystemMock.createLogger();
 
 const createContext = () => ({
   logger: loggingSystemMock.createLogger(),
-  request: {} as never,
+  request: httpServerMock.createKibanaRequest(),
 });
 
 const createAttachmentContext = () => ({
-  request: {} as never,
+  request: httpServerMock.createKibanaRequest(),
   spaceId: 'default',
 });
 
