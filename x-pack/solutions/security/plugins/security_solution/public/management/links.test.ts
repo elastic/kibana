@@ -12,11 +12,7 @@ import { SecurityPageName } from '../app/types';
 
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { StartPlugins } from '../types';
-import {
-  getFirstAllowedArtifactPath,
-  getManagementFilteredLinks,
-  links,
-} from './links';
+import { getFirstAllowedArtifactPath, getManagementFilteredLinks, links } from './links';
 import {
   getEndpointExceptionsListPath,
   getEventFiltersListPath,

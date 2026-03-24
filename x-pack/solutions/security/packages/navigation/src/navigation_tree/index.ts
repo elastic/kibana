@@ -15,8 +15,6 @@ import { createEntityAnalyticsNavigationTree } from './entity_analytics_navigati
 import { createMachineLearningNavigationTree } from './ml_navigation_tree';
 import { createAlertDetectionsNavigationTree } from './alert_detections_navigation_tree';
 
-export type { AssetsNavigationTreeOptions } from './assets_navigation_tree';
-
 export const defaultNavigationTree = {
   alertDetections: createAlertDetectionsNavigationTree,
   dashboards: createDashboardsNavigationTree,
