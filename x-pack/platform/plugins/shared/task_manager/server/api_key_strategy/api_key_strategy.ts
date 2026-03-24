@@ -75,7 +75,3 @@ export const markApiKeysForInvalidation = async (
     logger.error(`Failed to bulk mark ${targets.length} API keys for invalidation: ${e.message}`);
   }
 };
-
-export { EsApiKeyStrategy } from './es_api_key_strategy';
-export { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
-export { createApiKeyStrategy } from './create_api_key_strategy';

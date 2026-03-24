@@ -75,7 +75,7 @@ import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
-import { createApiKeyStrategy } from './lib/api_key_strategy';
+import { createApiKeyStrategy } from './api_key_strategy';
 
 export interface TaskManagerSetupContract {
   /**

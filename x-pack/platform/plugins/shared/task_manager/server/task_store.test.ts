@@ -40,7 +40,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
 import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
-import { EsApiKeyStrategy } from './lib/es_api_key_strategy';
+import { EsApiKeyStrategy } from './api_key_strategy';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
@@ -1875,11 +1875,12 @@ describe('TaskStore', () => {
         excludedExtensions: ['security', 'spaces'],
       });
 
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeyIds: ['apiKeyId'],
-        logger,
-        savedObjectsClient,
-      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
@@ -2972,11 +2973,12 @@ describe('TaskStore', () => {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeyIds: ['apiKeyId'],
-        logger,
-        savedObjectsClient,
-      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -3105,11 +3107,16 @@ describe('TaskStore', () => {
       });
       const result = await store.bulkRemove(['task1', 'task2']);
       expect(result).toBeUndefined();
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeyIds: ['apiKeyId1', 'apiKeyId2'],
-        logger,
-        savedObjectsClient,
-      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyId1', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+        {
+          attributes: { apiKeyId: 'apiKeyId2', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
     });
 
     test('pushes error from saved objects client to errors$', async () => {

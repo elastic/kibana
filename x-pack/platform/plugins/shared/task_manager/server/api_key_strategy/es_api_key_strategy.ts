@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import { getApiKeyAndUserScope } from './api_key_utils';
+import { getApiKeyAndUserScope } from '../lib/api_key_utils';
 import type { ApiKeySOFields, ApiKeyStrategy, InvalidationTarget } from './api_key_strategy';
 import { markApiKeysForInvalidation } from './api_key_strategy';
 

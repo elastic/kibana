@@ -17,7 +17,7 @@ import { truncate } from 'lodash';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from './api_key_utils';
+import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
 import type { ApiKeySOFields, ApiKeyStrategy, InvalidationTarget } from './api_key_strategy';
 import { markApiKeysForInvalidation } from './api_key_strategy';
 

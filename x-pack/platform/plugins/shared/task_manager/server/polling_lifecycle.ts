@@ -46,7 +46,7 @@ import { TaskPool } from './task_pool';
 import type { TaskRunner } from './task_running';
 import { TaskManagerRunner } from './task_running';
 import type { TaskStore } from './task_store';
-import type { ApiKeyStrategy } from './lib/api_key_strategy';
+import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';

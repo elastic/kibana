@@ -65,7 +65,7 @@ import { MAX_PARTITIONS } from './lib/task_partitioner';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
-import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './lib/api_key_strategy';
+import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
 

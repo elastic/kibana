@@ -66,7 +66,7 @@ import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
-import type { ApiKeyStrategy } from '../lib/api_key_strategy';
+import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
