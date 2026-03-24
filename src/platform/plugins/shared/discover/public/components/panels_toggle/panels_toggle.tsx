@@ -24,7 +24,7 @@ import {
 const disabledCollapsingTooltip = i18n.translate(
   'discover.panelsToggle.atLeastOnePanelMustRemain',
   {
-    defaultMessage: 'At least one panel must remain open',
+    defaultMessage: 'You must keep at least one area visible',
   }
 );
 
@@ -75,10 +75,10 @@ const getSidebarButton = ({
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showSidebarButton', {
-        defaultMessage: 'Expand field list',
+        defaultMessage: 'Show field list',
       })
     : i18n.translate('discover.panelsToggle.hideSidebarButton', {
-        defaultMessage: 'Collapse field list',
+        defaultMessage: 'Hide field list',
       });
 
   return {
@@ -103,10 +103,10 @@ const getChartButton = ({
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showChartButton', {
-        defaultMessage: 'Expand visualization',
+        defaultMessage: 'Show visualization',
       })
     : i18n.translate('discover.panelsToggle.hideChartButton', {
-        defaultMessage: 'Collapse visualization',
+        defaultMessage: 'Hide visualization',
       });
 
   return {
@@ -132,10 +132,10 @@ const getTableButton = ({
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showTableButton', {
-        defaultMessage: 'Expand data table',
+        defaultMessage: 'Show results table',
       })
     : i18n.translate('discover.panelsToggle.hideTableButton', {
-        defaultMessage: 'Collapse data table',
+        defaultMessage: 'Hide results table',
       });
 
   return {
