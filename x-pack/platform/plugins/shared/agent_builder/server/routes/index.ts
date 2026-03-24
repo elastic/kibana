@@ -11,6 +11,7 @@ import { registerInternalToolsRoutes } from './internal/tools';
 import { registerInternalConversationRoutes } from './internal/conversations';
 import { registerConsumptionRoutes } from './consumption';
 import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
+import { registerInternalSmlRoutes } from './internal/sml';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
@@ -26,6 +27,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalConversationRoutes(dependencies);
   registerConsumptionRoutes(dependencies);
   registerInternalUserPromptsRoutes(dependencies);
+  registerInternalSmlRoutes(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
