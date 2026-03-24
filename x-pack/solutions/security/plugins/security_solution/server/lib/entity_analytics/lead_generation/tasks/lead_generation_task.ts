@@ -17,12 +17,15 @@ import moment from 'moment';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
+import type { StartPlugins } from '../../../../plugin_contract';
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
 import {
   defaultState,
   stateSchemaByVersion,
   type LatestTaskStateSchema as LeadGenerationTaskState,
 } from './state';
+import { runLeadGenerationPipeline } from '../run_pipeline';
+import { fetchAllLeadEntities } from '../entity_conversion';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,12 +109,13 @@ const createLeadGenerationTaskRunnerFactory =
 
     return {
       run: async () => {
-        const [core] = await deps.getStartServices();
+        const [core, startPlugins] = await deps.getStartServices();
         return runLeadGenerationTask({
           isCancelled,
           logger: deps.logger,
           taskInstance,
           core,
+          startPlugins,
         });
       },
       cancel: async () => {
@@ -129,11 +133,13 @@ const runLeadGenerationTask = async ({
   logger,
   taskInstance,
   core,
+  startPlugins,
 }: {
   isCancelled: () => boolean;
   logger: Logger;
   taskInstance: ConcreteTaskInstance;
   core: CoreStart;
+  startPlugins: StartPlugins;
 }): Promise<{ state: LeadGenerationTaskState }> => {
   const state = taskInstance.state as LeadGenerationTaskState;
   const taskStartTime = moment().utc().toISOString();
@@ -151,15 +157,15 @@ const runLeadGenerationTask = async ({
   try {
     logger.info('[LeadGeneration] Running scheduled lead generation task');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
 
-    // TODO(#15824): Construct EntityStoreDataClient using the API key pattern
-    // (see entity_store/tasks/health/health.ts). Requires appClientFactory,
-    // security plugin, and API key manager to be wired through RegisterParams.
-    // Until then, the scheduled task cannot run the pipeline.
-    logger.warn(
-      '[LeadGeneration] Scheduled task does not yet have EntityStoreDataClient wiring — skipping run. Use the ad-hoc generate route instead.'
-    );
-    void esClient;
+    await runLeadGenerationPipeline({
+      listEntities: () => fetchAllLeadEntities(crudClient, logger),
+      esClient,
+      logger,
+      spaceId: state.namespace,
+      sourceType: 'scheduled',
+    });
   } catch (e) {
     logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${e.message}`);
   }

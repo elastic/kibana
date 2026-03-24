@@ -7,8 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityType } from '../../../../common/entity_analytics/types';
-import type { EntityStoreDataClient } from '../entity_store/entity_store_data_client';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
@@ -16,14 +14,14 @@ import { createLeadGenerationEngine } from './engine/lead_generation_engine';
 import { createRiskScoreModule } from './observation_modules/risk_score_module';
 import { createTemporalStateModule } from './observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from './observation_modules/behavioral_analysis_module';
-import { entityRecordToLeadEntity } from './entity_conversion';
 import { createLeadDataClient } from './lead_data_client';
+import type { LeadEntity } from './types';
 
 export interface RunPipelineParams {
+  readonly listEntities: () => Promise<LeadEntity[]>;
   readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
-  readonly entityStoreDataClient: EntityStoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
 }
@@ -37,10 +35,10 @@ export interface RunPipelineResult {
  * scheduled Task Manager task.
  */
 export const runLeadGenerationPipeline = async ({
+  listEntities,
   esClient,
   logger,
   spaceId,
-  entityStoreDataClient,
   executionId: providedExecutionId,
   sourceType,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
@@ -48,15 +46,7 @@ export const runLeadGenerationPipeline = async ({
   const pipelineStart = Date.now();
 
   const fetchStart = Date.now();
-  const entityResponse = await entityStoreDataClient.searchEntities({
-    entityTypes: [EntityType.host, EntityType.user, EntityType.service],
-    filterQuery: '',
-    page: 1,
-    perPage: 10000,
-    sortField: 'entity.name',
-    sortOrder: 'asc',
-  });
-  const leadEntities = entityResponse.records.map(entityRecordToLeadEntity);
+  const leadEntities = await listEntities();
   logger.info(
     `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
