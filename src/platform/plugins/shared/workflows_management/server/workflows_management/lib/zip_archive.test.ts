@@ -10,7 +10,7 @@
 import AdmZip from 'adm-zip';
 import YAML from 'yaml';
 import { generateWorkflowsArchive } from './zip_archive';
-import type { WorkflowExportEntry } from '../../../common/lib/export';
+import type { WorkflowExportEntry } from '../../../common/lib/import';
 
 describe('generateWorkflowsArchive', () => {
   it('should create a flat ZIP with workflow YAML files and a manifest', async () => {

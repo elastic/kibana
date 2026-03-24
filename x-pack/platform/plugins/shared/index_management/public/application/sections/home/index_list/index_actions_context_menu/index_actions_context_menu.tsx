@@ -11,7 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
 import type { EuiPopoverProps, EuiButtonProps } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
@@ -80,7 +88,7 @@ export const IndexActionsContextMenu = ({
   indices,
   isOnListView,
   resetSelection,
-  anchorPosition = 'rightUp',
+  anchorPosition,
   iconSide = 'right',
   iconType = 'chevronSingleDown',
   label,
@@ -108,6 +116,21 @@ export const IndexActionsContextMenu = ({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const modalRef = useRef<ModalHostHandles | null>(null);
+  const { euiTheme } = useEuiTheme();
+  const computedAnchorPosition: EuiPopoverProps['anchorPosition'] =
+    anchorPosition ?? (isOnListView ? 'downLeft' : 'downRight');
+
+  const popoverStyles = css`
+    overflow-x: hidden;
+    max-height: min(60vh, calc(100vh - ${euiTheme.size.xxxl} - ${euiTheme.size.m}));
+    max-width: calc(100vw - ${euiTheme.size.xl});
+    @supports (height: 100dvh) {
+      max-height: min(60dvh, calc(100dvh - ${euiTheme.size.xxxl} - ${euiTheme.size.m}));
+    }
+    @supports (width: 100dvw) {
+      max-width: calc(100dvw - ${euiTheme.size.xl});
+    }
+  `;
 
   const onButtonClick = () => {
     setIsPopoverOpen((prevState) => !prevState);
@@ -447,8 +470,12 @@ export const IndexActionsContextMenu = ({
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        anchorPosition={anchorPosition}
+        anchorPosition={computedAnchorPosition}
         repositionOnScroll
+        repositionToCrossAxis={false}
+        panelProps={{
+          css: popoverStyles,
+        }}
       >
         <EuiContextMenu data-test-subj="indexContextMenu" initialPanelId={0} panels={panels} />
       </EuiPopover>
