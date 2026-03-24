@@ -68,6 +68,7 @@ export interface DocumentDetailFlyoutProps {
   dataTestSubj?: string;
   onCloseFlyout: () => void;
   activeSection?: TraceOverviewSections;
+  skipNextEventReport?: boolean;
 }
 
 export function DocumentDetailFlyout({
@@ -79,6 +80,7 @@ export function DocumentDetailFlyout({
   dataTestSubj,
   onCloseFlyout,
   activeSection,
+  skipNextEventReport,
 }: DocumentDetailFlyoutProps) {
   const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
@@ -93,6 +95,7 @@ export function DocumentDetailFlyout({
       title={data.title}
       dataTestSubj={dataTestSubj}
       flyoutContentId={flyoutConfig.contentId}
+      skipNextEventReport={skipNextEventReport}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {flyoutConfig.render({ data, dataView, activeSection })}

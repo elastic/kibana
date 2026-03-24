@@ -46,6 +46,7 @@ export interface FullScreenWaterfallProps {
   onErrorClick: FullTraceWaterfallOnErrorClick;
   onCloseFlyout: () => void;
   onExitFullScreen: () => void;
+  skipNextEventReport?: boolean;
 }
 
 export const FullScreenWaterfall = ({
@@ -65,6 +66,7 @@ export const FullScreenWaterfall = ({
   onErrorClick,
   onCloseFlyout,
   onExitFullScreen,
+  skipNextEventReport,
 }: FullScreenWaterfallProps) => {
   const { analytics, discoverShared } = getUnifiedDocViewerServices();
   const FullTraceWaterfall = discoverShared.features.registry.getById(
@@ -75,6 +77,7 @@ export const FullScreenWaterfall = ({
   useDocViewerViewedEvent({
     reportEvent: analytics.reportEvent,
     contentId: FlyoutContentId.TRACE_TIMELINE,
+    skipNextReport: skipNextEventReport,
   });
 
   /*
@@ -254,6 +257,7 @@ export const FullScreenWaterfall = ({
             onCloseFlyout();
           }}
           activeSection={activeSection}
+          skipNextEventReport={skipNextEventReport}
         />
       ) : null}
     </EuiFlyout>

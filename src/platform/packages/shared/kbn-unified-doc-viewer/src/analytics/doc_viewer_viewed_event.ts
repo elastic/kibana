@@ -48,6 +48,12 @@ export interface UseDocViewerViewedEventParams
    * Called after the deduplication key changes.
    */
   onEventKeyChange?: (eventKey: string) => void;
+  /**
+   * When true, the next event key change is recorded for deduplication
+   * but not reported. This is useful when a component tree is being restored
+   * and the initial render should not emit a duplicate event.
+   */
+  skipNextReport?: boolean;
 }
 
 /**
@@ -61,8 +67,10 @@ export const useDocViewerViewedEvent = ({
   enabled = true,
   initialEventKey,
   onEventKeyChange,
+  skipNextReport,
 }: UseDocViewerViewedEventParams) => {
   const lastReportedEventRef = useRef(initialEventKey);
+  const skipNextReportRef = useRef(skipNextReport);
 
   useEffect(() => {
     if (!enabled) {
@@ -76,6 +84,11 @@ export const useDocViewerViewedEvent = ({
     }
 
     lastReportedEventRef.current = eventKey;
+
+    if (skipNextReportRef.current) {
+      skipNextReportRef.current = false;
+      return;
+    }
 
     try {
       onEventKeyChange?.(eventKey);
@@ -113,5 +126,32 @@ export const useDocViewerTabViewedEvent = ({
     contentId: DOC_VIEWER_VIEWED_ROOT_CONTENT_ID,
     keys,
     enabled: Boolean(params.tabId),
+  });
+};
+
+/**
+ * Parameters for reporting a viewed event tied to a span/log flyout.
+ */
+export type UseDocViewerFlyoutViewedEventParams = Omit<
+  UseDocViewerViewedEventParams,
+  'keys' | 'enabled'
+> & {
+  hit: DocViewRenderProps['hit'] | null;
+};
+
+/**
+ * Reports a viewed event for a span/log flyout.
+ * Deduplicates by including the span/log document id in the event key.
+ */
+export const useDocViewerFlyoutViewedEvent = ({
+  hit,
+  ...params
+}: UseDocViewerFlyoutViewedEventParams) => {
+  const keys = useMemo(() => (hit ? [hit.id] : undefined), [hit]);
+
+  useDocViewerViewedEvent({
+    ...params,
+    keys,
+    enabled: hit != null,
   });
 };

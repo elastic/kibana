@@ -119,6 +119,34 @@ describe('useDocViewerViewedEvent', () => {
     expect(reportEvent).not.toHaveBeenCalled();
   });
 
+  test('skips the next report when skipNextReport is true', () => {
+    const reportEvent = createReportEvent();
+
+    const { rerender } = renderHook(useDocViewerViewedEvent, {
+      initialProps: {
+        reportEvent,
+        contentId: 'content-1',
+        tabId: 'tab-1',
+        skipNextReport: true,
+      },
+    });
+
+    expect(reportEvent).not.toHaveBeenCalled();
+
+    rerender({
+      reportEvent,
+      contentId: 'content-1',
+      tabId: 'tab-2',
+      skipNextReport: true,
+    });
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      contentId: 'content-1',
+      tabId: 'tab-2',
+    });
+  });
+
   test('logs and swallows report errors', () => {
     const reportEvent = createReportEvent();
     const reportError = new Error('boom');

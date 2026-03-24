@@ -16,8 +16,10 @@ export {
   ElasticRequestState,
   FieldName,
   registerDocViewerAnalyticsEvents,
+  type UseDocViewerFlyoutViewedEventParams,
   type UseDocViewerTabViewedEventParams,
   type UseDocViewerViewedEventParams,
+  useDocViewerFlyoutViewedEvent,
   useDocViewerTabViewedEvent,
   useDocViewerViewedEvent,
 } from './src';
