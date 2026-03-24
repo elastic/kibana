@@ -63,7 +63,6 @@ const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
 
 const idpEventTypeCondition = idpPostAggFilter;
 
-
 const nonIdpDocumentFilter: Condition = {
   and: [
     isNotEmptyCondition('user.name'),
