@@ -217,10 +217,7 @@ export const useMonitorIntegrationHealth = (
     async (configId: string): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
-        const response = await resetMonitorAPI({ id: configId });
-        if ('attributes' in response) {
-          return { error: new Error('Failed to reset monitor') };
-        }
+        await resetMonitorAPI({ id: configId });
         refetchHealth();
         return {};
       } catch (err) {
