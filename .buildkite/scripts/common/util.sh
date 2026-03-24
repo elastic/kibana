@@ -211,3 +211,9 @@ force_clean_ports() {
 
   set -e
 }
+
+
+clean_cached_images() {
+  docker rmi $(docker images -q | grep -v) || true
+  docker image prune -f || true
+}
