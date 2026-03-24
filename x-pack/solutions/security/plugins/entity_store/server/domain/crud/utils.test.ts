@@ -112,6 +112,21 @@ describe('crud_client utils', () => {
       );
     });
 
+    it('uses generatedId over supplied doc id', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
+      const result = validateAndTransformDocForUpsert(
+        'generic',
+        'default',
+        doc,
+        'generated-id',
+        true
+      );
+
+      expect(result.id).toBe('generated-id');
+    });
+
     it('uses generatedId when doc has no entity.id', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
@@ -289,13 +304,7 @@ describe('crud_client utils', () => {
           entity: { id: 'host:flat-host' },
           host: { name: 'flat-host' },
         };
-        const result = validateAndTransformDocForUpsert(
-          'host',
-          'default',
-          doc,
-          undefined,
-          false
-        );
+        const result = validateAndTransformDocForUpsert('host', 'default', doc, undefined, false);
 
         expect(result.id).toBe('host:flat-host');
         expect(result.doc).not.toHaveProperty('entity');

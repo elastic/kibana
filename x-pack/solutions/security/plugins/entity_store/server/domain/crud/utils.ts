@@ -56,7 +56,7 @@ export function validateAndTransformDocForUpsert(
   generatedId: string | undefined,
   force: boolean
 ): ValidatedDoc {
-  if (!doc.entity?.id && generatedId) {
+  if (generatedId) {
     if (!doc.entity) {
       doc.entity = { id: generatedId };
     } else {
