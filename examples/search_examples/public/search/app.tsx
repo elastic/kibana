@@ -577,7 +577,9 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel id="metricFieldLabel">Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
+            <EuiFormLabel id="metricFieldLabel">
+              Numeric Field (using {metricAggType} metrics)
+            </EuiFormLabel>
             <EuiComboBox
               aria-labelledby="metricFieldLabel"
               options={formatFieldsToComboBox(getNumeric(fields))}
