@@ -12,25 +12,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 export function FeedbackButtons() {
   const [hasReacted, setHasReacted] = React.useState(false);
 
-  if (hasReacted) {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.streams.significantEventsSummary.thankYouForYourFeedbackLabel', {
-            defaultMessage: 'Thank you for your feedback!',
-          })}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  if (hasReacted) return null;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.streams.significantEventsSummary.feedbackUsefulLabel', {
-          defaultMessage: 'Was this summary helpful?',
-        })}
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="thumbUp"
