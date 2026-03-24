@@ -64,11 +64,6 @@ describe('FormattedValue', () => {
     expect(container.textContent).toBe('N/A');
   });
 
-  it('renders plain string values as-is', () => {
-    const { container } = renderWithTheme(<FormattedValue value="hello world" keyName="msg" />);
-    expect(container.textContent).toBe('hello world');
-  });
-
   it('formats @timestamp values in UTC', () => {
     const { container } = renderWithTheme(
       <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="@timestamp" />
@@ -83,10 +78,19 @@ describe('FormattedValue', () => {
     expect(container.textContent).toMatch(/Jun 15, 2024 @ \d{2}:\d{2}:45\.123/);
   });
 
-  it('does not format invalid date strings', () => {
-    const { container } = renderWithTheme(
-      <FormattedValue value="not-a-date" keyName="@timestamp" />
-    );
-    expect(container.textContent).toBe('not-a-date');
+  it.each([
+    ['hello world', 'message'],
+    ['hello world', '@timestamp'],
+    ['synth-service-2', 'service.name'],
+    ['synth-service-2', '@timestamp'],
+    ['1.3.4', 'version'],
+    ['1.3.4', '@timestamp'],
+    ['1234567', 'some.field'],
+    ['1234567', '@timestamp'],
+    ['service-1', 'host.name'],
+    ['service-1', '@timestamp'],
+  ])('renders plain string "%s" as-is when keyName is "%s"', (value, keyName) => {
+    const { container } = renderWithTheme(<FormattedValue value={value} keyName={keyName} />);
+    expect(container.textContent).toBe(value);
   });
 });

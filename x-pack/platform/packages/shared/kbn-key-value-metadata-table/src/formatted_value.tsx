@@ -31,9 +31,9 @@ export function FormattedValue({ value, keyName }: { value: any; keyName: string
     return <pre>{JSON.stringify(value, null, 4)}</pre>;
   } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
-  } else if (keyName === '@timestamp' && isString(value) && moment(value).isValid()) {
+  } else if (keyName === '@timestamp' && isString(value) && moment(value, true).isValid()) {
     return <React.Fragment>{moment(value).utc().format(TIMESTAMP_FORMAT)}</React.Fragment>;
-  } else if (isString(value) && moment(value).isValid()) {
+  } else if (isString(value) && moment(value, true).isValid()) {
     return <React.Fragment>{moment(value).format(TIMESTAMP_FORMAT)}</React.Fragment>;
   } else if (!value) {
     return (
