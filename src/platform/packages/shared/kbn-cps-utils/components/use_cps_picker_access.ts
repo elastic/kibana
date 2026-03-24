@@ -9,7 +9,7 @@
 
 import { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
@@ -30,22 +30,23 @@ export const useCpsPickerAccess = (
   access: ProjectRoutingAccess,
   { application, cps }: { application: ApplicationService; cps: CpsService | undefined }
 ) => {
-  const routeMatch = useRouteMatch();
+  const pathname = useHistory().location.pathname;
   const currentAppId = useObservable(application.currentAppId$);
+  const cpsManager = cps?.cpsManager;
 
   useEffect(() => {
-    if (!currentAppId || !cps?.cpsManager) {
+    if (!currentAppId || !cpsManager) {
       return;
     }
-    cps.cpsManager.registerAppAccess(currentAppId, (location) => {
-      if (location.endsWith(routeMatch.url)) {
+    cpsManager.registerAppAccess(currentAppId, (location) => {
+      if (pathname.length > 0 && location.endsWith(pathname)) {
         return access;
       }
       return ProjectRoutingAccess.DISABLED;
     });
 
     return () => {
-      cps?.cpsManager?.registerAppAccess(currentAppId, () => ProjectRoutingAccess.DISABLED);
+      cpsManager.registerAppAccess(currentAppId, () => ProjectRoutingAccess.DISABLED);
     };
-  }, [access, cps, currentAppId, routeMatch]);
+  }, [access, cpsManager, currentAppId, pathname]);
 };

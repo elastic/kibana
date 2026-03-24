@@ -8,16 +8,16 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectRoutingAccess } from '../types';
 import { useCpsPickerAccess } from './use_cps_picker_access';
 
 jest.mock('react-router-dom', () => ({
-  useRouteMatch: jest.fn(),
+  useHistory: jest.fn(),
 }));
 
-const mockUseRouteMatch = jest.mocked(useRouteMatch);
+const mockUseHistory = jest.mocked(useHistory);
 const mockCurrentAppId$ = new BehaviorSubject<string | undefined>('app-id');
 
 describe('useCpsPickerAccess', () => {
@@ -29,7 +29,7 @@ describe('useCpsPickerAccess', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRouteMatch.mockReturnValue({ url: '/app/alerts/rule/123' } as any);
+    mockUseHistory.mockReturnValue({ location: { pathname: '/app/alerts/rule/123' } } as any);
   });
 
   const getRegisteredCallback = () =>
