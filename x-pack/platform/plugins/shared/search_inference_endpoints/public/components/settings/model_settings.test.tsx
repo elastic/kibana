@@ -43,9 +43,11 @@ const defaultFormState = {
   assignments: { child_1: ['ep-1'] },
   sections: [
     {
-      id: 'search',
-      name: 'Search',
-      description: 'Search features',
+      featureId: 'search',
+      featureName: 'Search',
+      featureDescription: 'Search features',
+      taskType: '',
+      recommendedEndpoints: [],
       children: [childFeature],
     },
   ],
