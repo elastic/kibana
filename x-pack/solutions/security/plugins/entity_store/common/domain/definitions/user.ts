@@ -11,32 +11,14 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
-import { ENTITY_CONFIDENCE, USER_ENTITY_NAMESPACE } from './user_entity_constants';
+import {
+  ENTITY_CONFIDENCE,
+  LOCAL_NAMESPACE_EXCLUDED_USER_NAMES,
+  USER_ENTITY_NAMESPACE,
+} from './user_entity_constants';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { recentData } from './esql';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
-
-/** User names excluded from local namespace (system/service accounts). */
-const LOCAL_NAMESPACE_EXCLUDED_USER_NAMES = [
-  'root',
-  'bin',
-  'daemon',
-  'sys',
-  'nobody',
-  'jenkins',
-  'ansible',
-  'deploy',
-  'terraform',
-  'gitlab-runner',
-  'postgres',
-  'mysql',
-  'redis',
-  'elasticsearch',
-  'kafka',
-  'admin',
-  'operator',
-  'service',
-] as const;
 
 /** Shared post-LOOKUP keep: entity already in store. */
 const entityIdExistsAfterLookup = { field: 'entity.id', exists: true } as const;

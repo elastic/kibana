@@ -194,7 +194,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
   }
 
   apiTest(
-    'should omit user entity_id for excluded user.name; runtime matches in-memory euid (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, user.ts)',
+    'should omit user entity_id for excluded user.name; runtime matches in-memory euid (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, user_entity_constants)',
     async ({ esClient }) => {
       await ingestDoc(esClient, {
         '@timestamp': '2026-01-20T12:05:25Z',

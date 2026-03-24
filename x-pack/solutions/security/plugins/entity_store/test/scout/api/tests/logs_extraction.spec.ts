@@ -785,7 +785,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
   );
 
   apiTest(
-    'Should not extract user entities for excluded user names (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES)',
+    'Should not extract user entities for excluded user names (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES in user_entity_constants)',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-18T20:00:00Z';
       const to = '2026-03-18T21:00:00Z';
