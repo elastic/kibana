@@ -50,6 +50,9 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     query?: string;
     agents?: string[];
     id?: string;
+    saved_query_id?: string;
+    timeout?: number;
+    ecs_mapping?: Record<string, unknown>;
   }>;
   const isPack = queries.length > 1 || packId;
   const queryText = isPack ? '' : queries[0]?.query ?? '';
@@ -61,6 +64,10 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
 
   const alertIdsRaw = hitFields.alert_ids ?? source.alert_ids;
   const hasAlertIds = Array.isArray(alertIdsRaw) ? alertIdsRaw.length > 0 : !!alertIdsRaw;
+
+  const agentIdsRaw = hitFields.agent_ids ?? source.agent_ids;
+  const agentPolicyIdsRaw = hitFields.agent_policy_ids ?? source.agent_policy_ids;
+  const agentPlatformsRaw = hitFields.agent_platforms ?? source.agent_platforms;
 
   return {
     id: actionId,
@@ -77,7 +84,17 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     errorCount: undefined,
     totalRows: undefined,
     userId: get('user_id') as string | undefined,
+    userProfileUid: get('user_profile_uid') as string | undefined,
     actionId,
     tags: (source.tags as string[] | undefined) ?? [],
+    savedQueryId: isPack ? undefined : (queries[0]?.saved_query_id as string | undefined),
+    timeout: isPack ? undefined : (queries[0]?.timeout as number | undefined),
+    ecsMapping: isPack
+      ? undefined
+      : (queries[0]?.ecs_mapping as Record<string, unknown> | undefined),
+    agentIds: Array.isArray(agentIdsRaw) ? (agentIdsRaw as string[]) : undefined,
+    agentAll: (get('agent_all') as boolean | undefined) ?? false,
+    agentPlatforms: Array.isArray(agentPlatformsRaw) ? (agentPlatformsRaw as string[]) : undefined,
+    agentPolicyIds: Array.isArray(agentPolicyIdsRaw) ? (agentPolicyIdsRaw as string[]) : undefined,
   };
 };
