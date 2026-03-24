@@ -76,7 +76,7 @@ export const ProcessTreeAlertsFilter = ({
     <EuiButtonEmpty
       data-test-subj="sessionView:sessionViewAlertDetailsEmptyFilterButton"
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >

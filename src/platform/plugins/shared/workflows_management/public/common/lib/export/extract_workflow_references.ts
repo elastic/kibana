@@ -8,13 +8,12 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-
 import {
   isDynamicWorkflowReference,
   WORKFLOW_EXECUTE_TYPES,
   WORKFLOW_REFERENCE_KEY,
-} from './workflow_import_constants';
-import { isRecord } from '../type_guards';
+} from '../../../../common/lib/import';
+import { isRecord } from '../../../../common/lib/type_guards';
 
 function collectFromSteps(steps: unknown, ids: Set<string>): void {
   if (!Array.isArray(steps)) return;
