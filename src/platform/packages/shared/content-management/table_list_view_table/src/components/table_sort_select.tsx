@@ -114,7 +114,12 @@ export function TableSortSelect({
             column: customSortingOptions.field,
             label,
             direction,
-            append: direction === 'asc' ? <EuiIcon type="sortUp" aria-hidden={true} /> : <EuiIcon type="sortDown" aria-hidden={true} />,
+            append:
+              direction === 'asc' ? (
+                <EuiIcon type="sortUp" aria-hidden={true} />
+              ) : (
+                <EuiIcon type="sortDown" aria-hidden={true} />
+              ),
           };
         })
       );
