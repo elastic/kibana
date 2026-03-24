@@ -10,7 +10,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas/src/types';
+import {
+  BY_REF_SCHEMA_META,
+  BY_VALUE_SCHEMA_META,
+} from '@kbn/presentation-publishing-schemas/src/types';
 
 // Markdown by-value state schema (contains content)
 const markdownByValueStateSchema = schema.object({

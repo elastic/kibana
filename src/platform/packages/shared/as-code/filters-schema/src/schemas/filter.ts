@@ -124,25 +124,28 @@ const baseConditionSchema = schema.object({
 const singleConditionSchema = baseConditionSchema.extends(
   {
     operator: schema.literal(ASCODE_FILTER_OPERATOR.IS),
-    value: schema.oneOf([
-      schema.string({
-        meta: {
-          title: 'value'
-        }
-      }),
-      schema.number({
-        meta: {
-          title: 'value'
-        }
-      }), 
-      schema.boolean({
-        meta: {
-          title: 'value'
-        }
-      })
-    ], {
-      meta: { description: 'Single value for comparison' },
-    }),
+    value: schema.oneOf(
+      [
+        schema.string({
+          meta: {
+            title: 'value',
+          },
+        }),
+        schema.number({
+          meta: {
+            title: 'value',
+          },
+        }),
+        schema.boolean({
+          meta: {
+            title: 'value',
+          },
+        }),
+      ],
+      {
+        meta: { description: 'Single value for comparison' },
+      }
+    ),
   },
   {
     meta: {

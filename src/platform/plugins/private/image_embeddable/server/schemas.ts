@@ -13,25 +13,31 @@ import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
-const imageFileSrcSchema = schema.object({
-  type: schema.literal('file'),
-  file_id: schema.string(),
-}, {
-  meta: {
-    title: 'file'
+const imageFileSrcSchema = schema.object(
+  {
+    type: schema.literal('file'),
+    file_id: schema.string(),
+  },
+  {
+    meta: {
+      title: 'file',
+    },
   }
-});
+);
 
-const imageUrlSrcSchema = schema.object({
-  type: schema.literal('url'),
-  url: schema.string({
-    meta: { description: 'URL of the image' },
-  }),
-}, {
-  meta: {
-    title: 'url'
+const imageUrlSrcSchema = schema.object(
+  {
+    type: schema.literal('url'),
+    url: schema.string({
+      meta: { description: 'URL of the image' },
+    }),
+  },
+  {
+    meta: {
+      title: 'url',
+    },
   }
-});
+);
 
 const imageConfigSchema = schema.object({
   src: schema.oneOf([imageFileSrcSchema, imageUrlSrcSchema], {

@@ -120,31 +120,34 @@ const sectionGridSchema = schema.object({
 });
 
 export function getSectionSchema(isDashboardAppRequest: boolean) {
-  return schema.object({
-    title: schema.string({
-      meta: { description: 'The title of the section.' },
-    }),
-    collapsed: schema.boolean({
-      meta: { description: 'The collapsed state of the section.' },
-      defaultValue: false,
-    }),
-    grid: sectionGridSchema,
-    panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
-      meta: { description: 'The panels that belong to the section.' },
-      defaultValue: [],
-      maxSize: MAX_PANELS,
-    }),
-    uid: schema.maybe(
-      schema.string({
-        meta: { description: 'The unique ID of the section.' },
-      })
-    ),
-  }, {
-    meta: {
-      description: 'Collapsable section',
-      title: 'section'
+  return schema.object(
+    {
+      title: schema.string({
+        meta: { description: 'The title of the section.' },
+      }),
+      collapsed: schema.boolean({
+        meta: { description: 'The collapsed state of the section.' },
+        defaultValue: false,
+      }),
+      grid: sectionGridSchema,
+      panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
+        meta: { description: 'The panels that belong to the section.' },
+        defaultValue: [],
+        maxSize: MAX_PANELS,
+      }),
+      uid: schema.maybe(
+        schema.string({
+          meta: { description: 'The unique ID of the section.' },
+        })
+      ),
+    },
+    {
+      meta: {
+        description: 'Collapsable section',
+        title: 'section',
+      },
     }
-  });
+  );
 }
 
 export const optionsSchema = schema.object(
