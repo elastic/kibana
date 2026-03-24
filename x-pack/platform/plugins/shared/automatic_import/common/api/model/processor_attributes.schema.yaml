@@ -18,6 +18,7 @@ components:
       properties:
         on_failure:
           type: array
+          maxItems: 50
           items:
             $ref: "#/components/schemas/ESProcessorItem"
           description: An array of items to execute if the processor fails.
@@ -29,8 +30,10 @@ components:
           description: If true, the processor continues to the next processor if the field is missing.
         if:
           type: string
+          maxLength: 4096
           description: Conditionally execute the processor.
         tag:
           type: string
+          maxLength: 256
           description: A tag to assign to the document after processing.
       additionalProperties: true
