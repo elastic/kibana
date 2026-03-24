@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
-import { fetchDocCount } from '../../../lib/fetch_doc_count';
 
 export function registerPostIndexDocCountRoute({
   router,
@@ -38,7 +37,25 @@ export function registerPostIndexDocCountRoute({
 
       try {
         // use ES since index list is too long for query dsl
-        const values = await fetchDocCount(client, indexNames);
+        const result = await client.esql.query({
+          query: `FROM ${indexNames.join(',')} METADATA _index | STATS count() BY _index`,
+        });
+
+        const indexNameIndex = result.columns.findIndex((col) => col.name === '_index');
+        const countIndex = result.columns.findIndex((col) => col.name === 'count()');
+
+        const values = (result.values || []).reduce((col, vals) => {
+          col[vals[indexNameIndex] as string] = vals[countIndex] as number;
+          return col;
+        }, {} as Record<string, number>);
+
+        // add zeros back in since they won't be present in the results
+        indexNames.forEach((indexName) => {
+          if (!(indexName in values)) {
+            values[indexName] = 0;
+          }
+        });
+
         return response.ok({ body: values });
       } catch (error) {
         return handleEsError({ error, response });

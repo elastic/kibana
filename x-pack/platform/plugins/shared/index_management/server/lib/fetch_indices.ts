@@ -10,7 +10,6 @@ import type { IndexDataEnricher } from '../services';
 import type { Index } from '..';
 import type { RouteDependencies } from '../types';
 import type { MeteringStats } from './types';
-import { fetchDocCount } from './fetch_doc_count';
 
 interface MeteringStatsResponse {
   indices: MeteringStats[];
@@ -47,31 +46,14 @@ async function fetchIndicesCall(
   }
 
   const indicesNames = Object.keys(indices);
-  // System indices are excluded from the ES|QL doc count query because
-  // they may require elevated privileges the current user doesn't have.
-  const nonSystemIndices = indicesNames.filter((name) => !name.startsWith('.'));
-
-  const safeDocCount = async (): Promise<Record<string, number>> => {
-    if (nonSystemIndices.length === 0) {
-      return {};
-    }
-    try {
-      return await fetchDocCount(client.asCurrentUser, nonSystemIndices);
-    } catch {
-      return {};
-    }
-  };
 
   if (config.isIndexStatsEnabled) {
-    const [{ indices: indicesStats }, docCounts] = await Promise.all([
-      client.asCurrentUser.indices.stats({
-        index: indexNamesString,
-        expand_wildcards: ['hidden', 'all'],
-        forbid_closed_indices: false,
-        metric: ['docs', 'store'],
-      }),
-      safeDocCount(),
-    ]);
+    const { indices: indicesStats } = await client.asCurrentUser.indices.stats({
+      index: indexNamesString,
+      expand_wildcards: ['hidden', 'all'],
+      forbid_closed_indices: false,
+      metric: ['docs', 'store'],
+    });
 
     return indicesNames.map((indexName: string) => {
       const indexData = indices[indexName];
@@ -95,31 +77,25 @@ async function fetchIndicesCall(
           health: indexStats?.health,
           status: indexStats?.status,
           uuid: indexStats?.uuid,
-          documents: docCounts[indexName] ?? indexStats?.primaries?.docs?.count ?? 0,
+          documents: indexStats?.primaries?.docs?.count ?? 0,
           documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
           size: indexStats?.total?.store?.size_in_bytes ?? 0,
           primary_size: indexStats?.primaries?.store?.size_in_bytes ?? 0,
         };
       }
 
-      return {
-        ...baseResponse,
-        documents: docCounts[indexName] ?? 0,
-      };
+      return baseResponse;
     });
   }
 
-  // uses the _metering/stats API to get the size of the index
-  // and ES|QL to get accurate document counts
-  // the _metering/stats API is only available in ES3 (serverless)
+  // uses the _metering/stats API to get the number of documents and size of the index
+  // this API is only available in ES3 (serverless)
   if (config.isSizeAndDocCountEnabled) {
-    const [{ indices: indicesStats }, docCounts] = await Promise.all([
-      client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
+    const { indices: indicesStats } =
+      await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
         method: 'GET',
         path: `/_metering/stats/` + indexNamesString,
-      }),
-      safeDocCount(),
-    ]);
+      });
 
     return indicesNames.map((indexName: string) => {
       const indexData = indices[indexName];
@@ -138,15 +114,12 @@ async function fetchIndicesCall(
 
         return {
           ...baseResponse,
-          documents: docCounts[indexName] ?? indexStats?.num_docs ?? 0,
+          documents: indexStats?.num_docs ?? 0,
           size: indexStats?.size_in_bytes ?? 0,
         };
       }
 
-      return {
-        ...baseResponse,
-        documents: docCounts[indexName] ?? 0,
-      };
+      return baseResponse;
     });
   }
 

@@ -21,7 +21,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
   const getIndices = router.getMockESApiFn('indices.get');
   const getIndicesStats = router.getMockESApiFn('indices.stats');
   const getMeteringStats = router.getMockESApiFnAsSecondaryAuthUser('transport.request');
-  const getEsqlQuery = router.getMockESApiFn('esql.query');
   const mockRequest: RequestMock = {
     method: 'get',
     path: addBasePath('/indices'),
@@ -49,13 +48,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           regular_index: createTestIndexStats({ uuid: 'regular_index' }),
         },
       });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [[1, 'regular_index']],
-      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [createTestIndexResponse({ name: 'regular_index', uuid: 'regular_index' })],
@@ -71,13 +63,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
         indices: {
           index_with_aliases: createTestIndexStats({ uuid: 'index_with_aliases' }),
         },
-      });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [[1, 'index_with_aliases']],
       });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -101,13 +86,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           frozen_index: createTestIndexStats({ uuid: 'frozen_index' }),
         },
       });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [[1, 'frozen_index']],
-      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
@@ -129,13 +107,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
         indices: {
           hidden_index: createTestIndexStats({ uuid: 'hidden_index' }),
         },
-      });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [[1, 'hidden_index']],
       });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -159,13 +130,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           data_stream_index: createTestIndexStats({ uuid: 'data_stream_index' }),
         },
       });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [[1, 'data_stream_index']],
-      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
@@ -188,13 +152,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           some_other_index: createTestIndexStats({ uuid: 'some_other_index' }),
         },
       });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [],
-      });
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
           createTestIndexResponse({
@@ -205,63 +162,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
             documents: 0,
             size: 0,
             primary_size: 0,
-          }),
-        ],
-      });
-    });
-
-    test('system index falls back to stats document count', async () => {
-      getIndices.mockResolvedValue({
-        '.internal_index': createTestIndexState(),
-      });
-      getIndicesStats.mockResolvedValue({
-        indices: {
-          '.internal_index': createTestIndexStats({
-            uuid: '.internal_index',
-            primaries: {
-              docs: { count: 7, deleted: 1, total_size_in_bytes: 70 },
-              store: { size_in_bytes: 100, reserved_in_bytes: 0 },
-            },
-          }),
-        },
-      });
-
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({
-        body: [
-          createTestIndexResponse({
-            name: '.internal_index',
-            uuid: '.internal_index',
-            documents: 7,
-            documents_deleted: 1,
-          }),
-        ],
-      });
-    });
-
-    test('falls back to stats document count when ES|QL fails', async () => {
-      getIndices.mockResolvedValue({
-        regular_index: createTestIndexState(),
-      });
-      getIndicesStats.mockResolvedValue({
-        indices: {
-          regular_index: createTestIndexStats({
-            uuid: 'regular_index',
-            primaries: {
-              docs: { count: 9, deleted: 2, total_size_in_bytes: 90 },
-              store: { size_in_bytes: 100, reserved_in_bytes: 0 },
-            },
-          }),
-        },
-      });
-      getEsqlQuery.mockRejectedValue(new Error('ES|QL unavailable'));
-
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({
-        body: [
-          createTestIndexResponse({
-            name: 'regular_index',
-            uuid: 'regular_index',
-            documents: 9,
-            documents_deleted: 2,
           }),
         ],
       });
@@ -288,37 +188,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       getMeteringStats.mockResolvedValue({
         indices: [{ name: 'regular_index', num_docs: 100, size_in_bytes: 1000 }],
       });
-      getEsqlQuery.mockResolvedValue({
-        columns: [
-          { name: 'count()', type: 'long' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [[42, 'regular_index']],
-      });
-
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({
-        body: [
-          {
-            name: 'regular_index',
-            isFrozen: false,
-            aliases: 'none',
-            hidden: false,
-            data_stream: undefined,
-            documents: 42,
-            size: 1000,
-          },
-        ],
-      });
-    });
-
-    test('falls back to metering document count when ES|QL fails', async () => {
-      getIndices.mockResolvedValue({
-        regular_index: createTestIndexState(),
-      });
-      getMeteringStats.mockResolvedValue({
-        indices: [{ name: 'regular_index', num_docs: 100, size_in_bytes: 1000 }],
-      });
-      getEsqlQuery.mockRejectedValue(new Error('ES|QL unavailable'));
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [

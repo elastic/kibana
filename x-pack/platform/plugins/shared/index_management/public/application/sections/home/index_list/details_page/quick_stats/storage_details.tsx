@@ -21,6 +21,7 @@ import {
 import { useAppContext } from '../../../../../app_context';
 import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
+import { storageCardTitle } from './translations';
 
 export const StorageDetails: FunctionComponent<{
   primarySize: string;
@@ -38,9 +39,7 @@ export const StorageDetails: FunctionComponent<{
   return (
     <OverviewCard
       data-test-subj="indexDetailsStorage"
-      title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.cardTitle', {
-        defaultMessage: 'Storage',
-      })}
+      title={storageCardTitle}
       content={{
         left: (
           <EuiFlexGroup gutterSize="xs" alignItems="baseline">
