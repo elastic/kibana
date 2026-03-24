@@ -414,6 +414,35 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
+   * Ensure all foreach steps have their input data loaded.
+   * The foreach expression is stored in input.foreach and is needed
+   * to re-evaluate the items array for foreach.item resolution.
+   */
+  private async enrichForeachStepInput(context: ExecutionContext): Promise<ExecutionContext> {
+    let enrichedSteps = context.steps;
+    let changed = false;
+
+    for (const [sId, stepData] of Object.entries(context.steps)) {
+      if (
+        stepData.state &&
+        typeof stepData.state.index === 'number' &&
+        stepData.input === undefined
+      ) {
+        const fullData = await this.fetchStepDataIfNeeded(stepData, sId);
+        if (fullData && fullData !== stepData) {
+          if (!changed) {
+            enrichedSteps = { ...context.steps };
+            changed = true;
+          }
+          enrichedSteps[sId] = fullData;
+        }
+      }
+    }
+
+    return changed ? { ...context, steps: enrichedSteps } : context;
+  }
+
+  /**
    * Handle hover for template expressions {{ }}
    */
   private async handleTemplateExpressionHover(
@@ -445,6 +474,12 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
             steps: { ...executionContext.steps, [stepId]: enrichedStep },
           };
         }
+      }
+
+      // For foreach.* paths, ensure the foreach step's input is loaded
+      // so findForeachContext can re-evaluate the foreach expression.
+      if (templateInfo.pathSegments[0] === 'foreach') {
+        evalContext = await this.enrichForeachStepInput(evalContext);
       }
 
       // Determine what to evaluate
