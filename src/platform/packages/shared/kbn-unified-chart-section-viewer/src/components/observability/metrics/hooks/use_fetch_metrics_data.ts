@@ -11,6 +11,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { getFieldIconType } from '@kbn/field-utils';
 import type {
   Dimension,
   MetricsESQLResponse,
@@ -65,7 +66,12 @@ export function useFetchMetricsData({
         uiSettings: services.uiSettings,
       });
 
-      const parsed = parseMetricsResponse(result);
+      const getFieldType = (name: string) => {
+        const field = fetchParams.dataView?.getFieldByName(name);
+        return field ? getFieldIconType(field) : undefined;
+      };
+
+      const parsed = parseMetricsResponse(result, getFieldType);
 
       return {
         metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>

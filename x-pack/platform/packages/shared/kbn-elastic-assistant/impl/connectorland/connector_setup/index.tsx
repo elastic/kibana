@@ -9,13 +9,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import type { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import type { Conversation } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useConversation } from '../../assistant/use_conversation';
 import { useAssistantContext } from '../../assistant_context';
-import { useLoadConnectors } from '../use_load_connectors';
 import { getGenAiConfig } from '../helpers';
 
 export interface ConnectorSetupProps {
@@ -35,12 +35,15 @@ export const ConnectorSetup = ({
   );
   const { setApiConfig } = useConversation();
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, assistantAvailability, http, inferenceEnabled, settings } =
-    useAssistantContext();
+  const { actionTypeRegistry, assistantAvailability, http, settings } = useAssistantContext();
 
   const isMissingConnectorPrivileges = !assistantAvailability.hasConnectorsAllPrivilege;
 
-  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled, settings });
+  const { refetch: refetchConnectors } = useLoadConnectors({
+    http,
+    featureId: 'elastic_assistant',
+    settings,
+  });
 
   const { data: actionTypes } = useLoadActionTypes({ http });
 
