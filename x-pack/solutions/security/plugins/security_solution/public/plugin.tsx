@@ -22,6 +22,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
+  SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
@@ -391,6 +392,29 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
     discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
+
+    const LazyAlertFlyoutHeader = React.lazy(async () => {
+      const { AlertFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutHeader };
+    });
+    const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
+      id: 'security-solution-alert-flyout-header-title',
+      renderHeader: (hit) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(headerTitleFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

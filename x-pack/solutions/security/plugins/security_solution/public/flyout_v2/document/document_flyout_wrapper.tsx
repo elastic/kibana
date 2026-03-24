@@ -10,10 +10,10 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../data_view_manager/constants';
-import { OverviewTab } from './overview_tab';
+import type { ResolverCellActionRenderer } from '../../resolver/types';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageScope } from '../../data_view_manager/constants';
+import { DocumentFlyout } from '.';
 
 const DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.analyzer.eventOverviewFlyout.dataViewError',
@@ -36,28 +36,28 @@ const FETCH_ERROR = i18n.translate(
   }
 );
 
-export interface OverviewTabWrapperProps {
+export interface DocumentFlyoutWrapperProps {
   /**
-   * The ID of the document to display in the overview tab. This is required to fetch the document details and render the content of the overview tab.
+   * The ID of the document to display. This is required to fetch the document details.
    */
   documentId: string | undefined;
   /**
-   * The name of the index that contains the document to display in the overview tab. This is required to fetch the document details and render the content of the overview tab.
+   * The name of the index that contains the document. This is required to fetch the document details.
    */
   indexName: string | undefined;
   /**
-   * A function that renders cell actions for the overview tab. This is required to provide interactive actions for fields displayed in the overview tab, such as adding filters or viewing field details.
+   * A function that renders cell actions for the overview tab.
    */
   renderCellActions: ResolverCellActionRenderer;
 }
 
 /**
- * OverviewTabWrapper is a React component that serves as a wrapper for the OverviewTab component.
- * It fetches the document details based on the provided document ID and index name, and manages the loading and error states during the data fetching process.
+ * Wrapper for the DocumentFlyout component that handles fetching the document
+ * based on the provided document ID and index name, and manages loading and error states.
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
-export const OverviewTabWrapper = memo(
-  ({ documentId, indexName, renderCellActions }: OverviewTabWrapperProps) => {
+export const DocumentFlyoutWrapper = memo(
+  ({ documentId, indexName, renderCellActions }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
@@ -99,7 +99,7 @@ export const OverviewTabWrapper = memo(
     }
 
     if (requestState === ElasticRequestState.Found && hit) {
-      return <OverviewTab hit={hit} renderCellActions={renderCellActions} />;
+      return <DocumentFlyout hit={hit} renderCellActions={renderCellActions} />;
     }
 
     if (requestState === ElasticRequestState.NotFound) {
@@ -139,4 +139,4 @@ export const OverviewTabWrapper = memo(
   }
 );
 
-OverviewTabWrapper.displayName = 'EventOverviewFlyoutContent';
+DocumentFlyoutWrapper.displayName = 'DocumentFlyoutWrapper';

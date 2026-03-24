@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import {
   extractAlertRuleId,
+  extractCompositionContext,
   extractExecutionMetadata,
   extractQueueDelayMs,
   extractTimeToFirstStep,
@@ -62,6 +63,14 @@ const createMockStepExecution = (
   stepExecutionIndex: 0,
   ...overrides,
 });
+
+/** Minimal fixture: extractCompositionContext only reads triggeredBy and context. */
+function compositionFixture(
+  triggeredBy: string,
+  context: Record<string, unknown>
+): EsWorkflowExecution {
+  return { triggeredBy, context } as unknown as EsWorkflowExecution;
+}
 
 describe('extractExecutionMetadata', () => {
   it('aggregates step status counts and connector types', () => {
@@ -356,5 +365,71 @@ describe('extractQueueDelayMs', () => {
         })
       )
     ).toBeUndefined();
+  });
+});
+
+describe('extractCompositionContext', () => {
+  it('returns empty object when not triggered by workflow-step', () => {
+    expect(extractCompositionContext(compositionFixture('manual', {}))).toEqual({});
+  });
+
+  it('returns compositionDepth, parentWorkflowId, and parentWorkflowInvocation when set', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('workflow-step', {
+          parentDepth: 0,
+          parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
+        })
+      )
+    ).toEqual({
+      compositionDepth: 1,
+      parentWorkflowId: 'parent-wf-id',
+      parentWorkflowInvocation: 'sync',
+    });
+  });
+
+  it('includes parentWorkflowInvocation async', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('workflow-step', {
+          parentDepth: 0,
+          parentWorkflowInvocation: 'async',
+        })
+      )
+    ).toEqual({ compositionDepth: 1, parentWorkflowInvocation: 'async' });
+  });
+
+  it('uses compositionDepth 1 when parentDepth is not a number', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('workflow-step', {
+          parentDepth: 'invalid',
+          parentWorkflowId: 'parent-wf-id',
+        })
+      )
+    ).toEqual({ compositionDepth: 1, parentWorkflowId: 'parent-wf-id' });
+  });
+
+  it('omits parentWorkflowId when empty string', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('workflow-step', {
+          parentDepth: 0,
+          parentWorkflowId: '',
+        })
+      )
+    ).toEqual({ compositionDepth: 1 });
+  });
+
+  it('omits parentWorkflowId when not a string', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('workflow-step', {
+          parentDepth: 0,
+          parentWorkflowId: 123,
+        })
+      )
+    ).toEqual({ compositionDepth: 1 });
   });
 });
