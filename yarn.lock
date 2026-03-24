@@ -6588,6 +6588,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dev-validation-runner@link:src/platform/packages/shared/kbn-dev-validation-runner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/developer-examples-plugin@link:examples/developer_examples":
   version "0.0.0"
   uid ""
@@ -7325,6 +7329,10 @@
   uid ""
 
 "@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inference-connectors@link:x-pack/platform/packages/shared/kbn-inference-connectors":
   version "0.0.0"
   uid ""
 
@@ -8549,6 +8557,10 @@
   uid ""
 
 "@kbn/scout-security@link:x-pack/solutions/security/packages/kbn-scout-security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/scout-synthtrace@link:src/platform/packages/shared/kbn-scout-synthtrace":
   version "0.0.0"
   uid ""
 

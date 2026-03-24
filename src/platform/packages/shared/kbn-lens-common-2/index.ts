@@ -52,7 +52,7 @@ type LensPersistableState = SerializedTitles & // title, description, hide_title
 export type LensByValueSerializedAPIConfig = LensPersistableState & {
   // Temporarily allow both old and new attributes until all chart types are supported and feature flag removed
   attributes: LensApiSchemaType | LensByValueBase['attributes'];
-  savedObjectId?: string; // really should be never but creates type issues
+  ref_id?: string; // really should be never but creates type issues
 };
 
 export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
