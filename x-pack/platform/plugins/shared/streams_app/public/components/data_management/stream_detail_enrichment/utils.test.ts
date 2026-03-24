@@ -231,6 +231,7 @@ describe('utils', () => {
       effective_settings: {},
       data_stream_exists: true,
       stream: {
+        type: 'wired',
         name: 'wired-stream',
         description: 'A wired stream',
         updated_at: new Date().toISOString(),
@@ -257,6 +258,7 @@ describe('utils', () => {
       effective_lifecycle: { inherit: {} },
       effective_settings: {},
       stream: {
+        type: 'classic',
         name: 'classic-stream',
         description: 'A classic stream',
         updated_at: new Date().toISOString(),

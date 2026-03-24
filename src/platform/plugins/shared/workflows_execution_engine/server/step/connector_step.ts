@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -33,7 +30,7 @@ const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
   'connector-id'?: string;
-  with?: Record<string, any>;
+  with?: Record<string, unknown>;
 }
 
 export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
@@ -53,7 +50,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     );
   }
 
-  public async _run(withInputs?: any): Promise<RunStepResult> {
+  public async _run(withInputs: Record<string, unknown>): Promise<RunStepResult> {
     try {
       const step = this.step;
 
@@ -65,14 +62,16 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console') {
-        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${withInputs.message}`, {
+        const consoleMessage = withInputs?.message ?? '';
+
+        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${consoleMessage}`, {
           workflow: { step_id: step.name },
           event: { action: 'log', outcome: 'success' },
           tags: ['console', 'log'],
         });
         return {
           input: withInputs,
-          output: withInputs.message,
+          output: consoleMessage,
           error: undefined,
         };
       }
@@ -94,7 +93,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           renderedInputs = {
             ...renderedInputs,
             fetcher: {
-              ...(renderedInputs.fetcher || {}),
+              ...(renderedInputs?.fetcher || {}),
               max_content_length: maxBytes,
             },
           };
@@ -119,7 +118,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         output = await this.connectorExecutor.execute({
           connectorType: stepType,
           connectorNameOrId: connectorIdRendered,
-          input: renderedInputs,
+          input: renderedInputs || {},
           abortController: this.stepExecutionRuntime.abortController,
         });
       } else {
@@ -127,7 +126,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         if (systemConnectorActionTypeId) {
           output = await this.connectorExecutor.executeSystemConnector({
             connectorType: systemConnectorActionTypeId,
-            input: renderedInputs,
+            input: renderedInputs || {},
             abortController: this.stepExecutionRuntime.abortController,
           });
         } else {
