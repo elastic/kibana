@@ -10,6 +10,9 @@ applies_to:
 
 # General settings in {{kib}}
 
+:::{settings} /reference/configuration-reference/general-settings.yml
+:::
+
 :::{note}
 If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 :::

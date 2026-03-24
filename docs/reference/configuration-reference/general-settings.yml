@@ -1,5 +1,6 @@
 ---
-# This file is used to generate the "General settings in Kibana" page in the product docs
+# This file is used to generate the "General settings in Kibana" page in the product docs.
+# Refer to yaml-settings-readme.md in this directory for the settings schema.
 
 product: Kibana
 collection: General settings in Kibana
