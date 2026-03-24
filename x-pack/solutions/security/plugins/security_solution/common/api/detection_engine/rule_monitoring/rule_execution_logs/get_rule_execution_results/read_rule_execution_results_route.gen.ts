@@ -29,7 +29,7 @@ export type ReadRuleExecutionResultsRequestParams = z.infer<
 >;
 export const ReadRuleExecutionResultsRequestParams = z.object({
   /**
-   * Saved object ID of the rule to get execution results for
+   * Saved object ID of the rule to get execution results for.
    */
   ruleId: z.string().min(1),
 });
@@ -86,7 +86,7 @@ export const ReadRuleExecutionResultsRequestBody = z.object({
   /**
    * Number of results per page.
    */
-  per_page: z.number().int().min(1).max(1000).optional().default(20),
+  per_page: z.number().int().min(1).max(100).optional().default(20),
 });
 export type ReadRuleExecutionResultsRequestBodyInput = z.input<
   typeof ReadRuleExecutionResultsRequestBody

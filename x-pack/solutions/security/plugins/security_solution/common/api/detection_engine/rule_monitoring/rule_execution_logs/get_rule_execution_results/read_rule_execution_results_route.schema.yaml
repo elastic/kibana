@@ -9,14 +9,14 @@ paths:
       x-internal: true
       x-codegen-enabled: true
       operationId: ReadRuleExecutionResults
-      summary: Returns unified execution results for a given rule from the AF's execute events in the Event Log.
+      summary: Returns unified execution results for a given rule from the Alerting Framework's execute events in the Event Log.
       tags:
         - Rule Execution Log API
       parameters:
         - name: ruleId
           in: path
           required: true
-          description: Saved object ID of the rule to get execution results for
+          description: Saved object ID of the rule to get execution results for.
           schema:
             type: string
             minLength: 1
@@ -78,13 +78,13 @@ paths:
                 per_page:
                   type: integer
                   minimum: 1
-                  maximum: 1000
+                  maximum: 100
                   default: 20
                   description: Number of results per page.
               required: []
       responses:
         200:
-          description: Indicates a successful call
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
