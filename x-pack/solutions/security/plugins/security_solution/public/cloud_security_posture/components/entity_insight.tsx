@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
@@ -25,6 +25,7 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useUiSetting } from '../../common/lib/kibana';
 
 export type CloudPostureEntityIdentifier =
   | Extract<
@@ -46,18 +47,24 @@ export const EntityInsight = <T,>({
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const insightContent: React.ReactElement[] = [];
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi)
+    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi, {
+      entityStoreV2Enabled,
+    })
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi)
+    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi, {
+      entityStoreV2Enabled,
+    })
   );
 
-  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && identityFields !== undefined;
+  const showVulnerabilitiesPreview =
+    hasVulnerabilitiesFindings && Object.keys(identityFields).length > 0;
 
   const { to, from } = useGlobalTime();
 
@@ -80,7 +87,6 @@ export const EntityInsight = <T,>({
       </>
     );
   }
-
   if (showMisconfigurationsPreview)
     insightContent.push(
       <>

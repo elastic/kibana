@@ -58,7 +58,7 @@ export const useNavigateEntityInsight = ({
   const entityType = primaryField === 'host.name' ? 'host' : 'user';
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions(entityType, identityFields, euidApi)
+    buildEuidCspPreviewOptions(entityType, identityFields, euidApi, { entityStoreV2Enabled })
   );
 
   const entityFromStore = useEntityFromStore({
@@ -82,7 +82,7 @@ export const useNavigateEntityInsight = ({
 
   const hasRiskScore = entityStoreV2Enabled ? hasRiskScoreFromStore : hasRiskScoreFromSearch;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions(entityType, identityFields, euidApi)
+    buildEuidCspPreviewOptions(entityType, identityFields, euidApi, { entityStoreV2Enabled })
   );
   const { openLeftPanel } = useExpandableFlyoutApi();
 

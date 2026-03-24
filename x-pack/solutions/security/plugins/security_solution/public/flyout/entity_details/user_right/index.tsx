@@ -157,7 +157,11 @@ export const UserPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi)
+    buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields:
+        userName != null && userName !== '' ? { 'user.name': userName } : undefined,
+    })
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({

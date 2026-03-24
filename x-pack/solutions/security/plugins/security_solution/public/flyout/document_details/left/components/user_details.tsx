@@ -260,7 +260,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
 
   const userCspIdentityDoc = observedUser.details;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
+    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: userIdentityFields,
+    })
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({

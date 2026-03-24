@@ -228,7 +228,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
 
   const userCspIdentityDoc = entityRecord ?? stableEntityIdentifiers;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
+    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: stableEntityIdentifiers,
+    })
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: stableEntityIdentifiers,

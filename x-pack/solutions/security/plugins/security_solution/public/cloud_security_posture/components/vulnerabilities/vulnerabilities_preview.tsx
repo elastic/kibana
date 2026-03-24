@@ -19,7 +19,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
@@ -31,6 +31,7 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
+import { useUiSetting } from '../../../common/lib/kibana';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -79,10 +80,12 @@ export const VulnerabilitiesPreview = ({
   }, []);
 
   const euidApi = useEntityStoreEuidApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const entityType = inferEntityTypeFromIdentityFields(identityFields);
   const cspPreviewOptions = useMemo(
-    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi),
-    [euidApi, entityType, identityFields]
+    () =>
+      buildEuidCspPreviewOptions(entityType, identityFields, euidApi, { entityStoreV2Enabled }),
+    [euidApi, entityStoreV2Enabled, entityType, identityFields]
   );
   const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 

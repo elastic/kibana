@@ -299,10 +299,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   });
   const hostEuidIdentityDoc = observedHost.entityRecord ?? hostInsightsIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi)
+    buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: hostInsightsIdentityFields,
+    })
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi)
+    buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: hostInsightsIdentityFields,
+    })
   );
 
   const openDetailsPanel = useNavigateToHostDetails({

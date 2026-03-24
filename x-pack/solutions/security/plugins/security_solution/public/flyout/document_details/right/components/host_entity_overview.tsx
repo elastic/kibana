@@ -306,10 +306,16 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   });
   const hostCspIdentityDoc = entityRecord ?? identityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi)
+    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: identityFields,
+    })
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi)
+    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: identityFields,
+    })
   );
 
   const openDetailsPanel = useNavigateToHostDetails({

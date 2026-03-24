@@ -148,11 +148,19 @@ export const HostPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi)
+    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields:
+        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
+    })
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi)
+    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields:
+        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
+    })
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
