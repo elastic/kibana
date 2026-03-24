@@ -15,19 +15,6 @@ else
   KIBANA_IMAGE_TAG="pr-$BUILDKITE_PULL_REQUEST-$GIT_ABBREV_COMMIT"
 fi
 
-# CDN readiness file - uploaded at the very end of successful CDN asset validation
-CDN_READINESS_FILE="$GIT_ABBREV_COMMIT/.ready"
-CDN_READINESS_URL="$GCS_SA_CDN_URL/$CDN_READINESS_FILE"
-
-check_cdn_assets_ready() {
-  local url="$1"
-  if curl --output /dev/null --silent --head --fail "$url"; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 echo "--- Clean up cached images"
 clean_cached_images
 
