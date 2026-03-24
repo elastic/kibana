@@ -2769,6 +2769,7 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
 
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts @elastic/security-threat-hunting-investigations
 

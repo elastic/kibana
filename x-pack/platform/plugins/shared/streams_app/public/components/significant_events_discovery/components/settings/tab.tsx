@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiBadge,
+  EuiBottomBar,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +21,8 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
@@ -30,13 +33,11 @@ import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 const NOT_SET_VALUE = '';
 
-function toFormValue(saved: string | undefined): string {
-  return saved ?? NOT_SET_VALUE;
-}
+const toFormValue = (saved: string | undefined): string => saved ?? NOT_SET_VALUE;
 
 const GEN_AI_SETTINGS_PATH = '/ai/genAiSettings';
 
-export function SettingsTab() {
+export const SettingsTab = () => {
   const {
     dependencies: {
       start: { streams },
@@ -80,7 +81,6 @@ export function SettingsTab() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
-  // Initialize form from API (undefined or '' = not set, string = connector id)
   useEffect(() => {
     if (!settingsFetch.value) return;
     const v = settingsFetch.value;
@@ -88,6 +88,27 @@ export function SettingsTab() {
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
+  }, [settingsFetch.value]);
+
+  const hasChanges = useMemo(() => {
+    if (!settingsFetch.value) return false;
+    const v = settingsFetch.value;
+    return (
+      knowledgeIndicatorExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
+      ruleGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
+      discovery !== toFormValue(v.connectorIdDiscovery) ||
+      indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS)
+    );
+  }, [settingsFetch.value, knowledgeIndicatorExtraction, ruleGeneration, discovery, indexPatterns]);
+
+  const handleCancel = useCallback(() => {
+    if (!settingsFetch.value) return;
+    const v = settingsFetch.value;
+    setKnowledgeIndicatorExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
+    setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
+    setDiscovery(toFormValue(v.connectorIdDiscovery));
+    setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
+    setSaveError(null);
   }, [settingsFetch.value]);
 
   const handleSave = useCallback(async () => {
@@ -148,182 +169,268 @@ export function SettingsTab() {
     hasDefaultConnector && anyUsesDefault ? defaultConnectorFetch.value?.name : undefined;
 
   return (
-    <EuiPanel paddingSize="l">
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate('xpack.streams.significantEventsDiscovery.settings.title', {
-            defaultMessage: 'Model selection',
-          })}
-        </h2>
-      </EuiTitle>
-      {defaultConnectorName && (
-        <>
-          <EuiSpacer size="m" />
-          <p>
-            {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.defaultConnectorLabel',
-              {
-                defaultMessage: 'Default connector: {name}',
-                values: { name: defaultConnectorName },
-              }
-            )}
-          </p>
-        </>
-      )}
-      <EuiSpacer size="m" />
-      {showNoDefaultCallout && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.noDefaultConnectorTitle',
-              { defaultMessage: 'No default connector configured' }
-            )}
-            color="warning"
-            iconType="warning"
-            data-test-subj="streams-settings-no-default-connector-callout"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.noDefaultConnectorDescription',
-                {
-                  defaultMessage:
-                    'Processes that use "Use default" require a default connector. Open GenAI Settings to configure one.',
-                }
-              )}{' '}
-              <EuiLink href={genAiSettingsUrl} external>
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.genAiSettingsLink',
-                  { defaultMessage: 'Open GenAI Settings' }
+    <>
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate('xpack.streams.significantEventsDiscovery.settings.llmSectionTitle', {
+                defaultMessage: 'LLM selection',
+              })}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          {showNoDefaultCallout && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                title={i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.noDefaultConnectorTitle',
+                  { defaultMessage: 'No default connector configured' }
                 )}
-              </EuiLink>
-            </p>
-          </EuiCallOut>
+                color="warning"
+                iconType="warning"
+                data-test-subj="streams-settings-no-default-connector-callout"
+              >
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.noDefaultConnectorDescription',
+                    {
+                      defaultMessage:
+                        'Processes that use "Use default" require a default connector. Open GenAI Settings to configure one.',
+                    }
+                  )}{' '}
+                  <EuiLink href={genAiSettingsUrl} external>
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.genAiSettingsLink',
+                      { defaultMessage: 'Open GenAI Settings' }
+                    )}
+                  </EuiLink>
+                </p>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="m">
+                    <h4>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.defaultLlmLabel',
+                        { defaultMessage: 'Default LLM' }
+                      )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.defaultLlmDescription',
+                      {
+                        defaultMessage:
+                          'You can pick one default LLM for all tasks, or specify each per step.',
+                      }
+                    )}
+                    {defaultConnectorName && (
+                      <>
+                        {' '}
+                        {i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.defaultConnectorLabel',
+                          { defaultMessage: 'Default connector:' }
+                        )}{' '}
+                        <EuiBadge color="hollow">{defaultConnectorName}</EuiBadge>
+                      </>
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionLabel',
+                    { defaultMessage: 'Knowledge Indicator Feature extraction' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionHelp',
+                    { defaultMessage: 'Model used to extract knowledge indicators.' }
+                  )}
+                >
+                  <EuiSelect
+                    data-test-subj="streams-settings-connector-knowledge-indicator-extraction"
+                    options={connectorOptions}
+                    value={knowledgeIndicatorExtraction}
+                    onChange={(e) => setKnowledgeIndicatorExtraction(e.target.value)}
+                    isLoading={genAiConnectors.loading}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.ruleGenerationLabel',
+                    { defaultMessage: 'Knowledge Indicator Query generation' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.ruleGenerationHelp',
+                    { defaultMessage: 'Model used for Knowledge Indicator Query generation.' }
+                  )}
+                >
+                  <EuiSelect
+                    data-test-subj="streams-settings-connector-rule-generation"
+                    options={connectorOptions}
+                    value={ruleGeneration}
+                    onChange={(e) => setRuleGeneration(e.target.value)}
+                    isLoading={genAiConnectors.loading}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.discoveryLabel',
+                    { defaultMessage: 'Discovery & Significant Event generation' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.discoveryHelp',
+                    {
+                      defaultMessage:
+                        'Model used during Discovery phase and Significant Event generation',
+                    }
+                  )}
+                >
+                  <EuiSelect
+                    data-test-subj="streams-settings-connector-discovery"
+                    options={connectorOptions}
+                    value={discovery}
+                    onChange={(e) => setDiscovery(e.target.value)}
+                    isLoading={genAiConnectors.loading}
+                  />
+                </EuiFormRow>
+              </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.dataSourcesSectionTitle',
+                { defaultMessage: 'Data sources' }
+              )}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="m">
+                    <h4>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.indexPatternsLabel',
+                        { defaultMessage: 'Index patterns' }
+                      )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.indexPatternsHelp',
+                      {
+                        defaultMessage:
+                          'Comma-separated list of index patterns to use for feature detection and analysis.',
+                      }
+                    )}{' '}
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.indexPatternsDefault',
+                      { defaultMessage: 'Default:' }
+                    )}{' '}
+                    <EuiBadge color="hollow">{DEFAULT_INDEX_PATTERNS}</EuiBadge>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow>
+                  <EuiTextArea
+                    data-test-subj="streams-settings-index-patterns"
+                    value={indexPatterns}
+                    onChange={(e) => setIndexPatterns(e.target.value)}
+                    placeholder={DEFAULT_INDEX_PATTERNS}
+                    rows={2}
+                  />
+                </EuiFormRow>
+              </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      {saveError && (
+        <>
           <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
+              { defaultMessage: 'Failed to save settings' }
+            )}
+            color="danger"
+            iconType="error"
+          >
+            <p>{saveError.message}</p>
+          </EuiCallOut>
         </>
       )}
-      <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem grow={false} style={{ maxWidth: 480 }}>
-          <EuiForm
-            component="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
-          >
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionLabel',
-                { defaultMessage: 'Knowledge Indicator Feature extraction' }
-              )}
-              helpText={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionHelp',
-                {
-                  defaultMessage: 'Model used to extract knowledge indicators.',
-                }
-              )}
-            >
-              <EuiSelect
-                data-test-subj="streams-settings-connector-knowledge-indicator-extraction"
-                options={connectorOptions}
-                value={knowledgeIndicatorExtraction}
-                onChange={(e) => setKnowledgeIndicatorExtraction(e.target.value)}
-                isLoading={genAiConnectors.loading}
-                style={{ minWidth: 280 }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.ruleGenerationLabel',
-                { defaultMessage: 'Knowledge Indicator Query generation' }
-              )}
-              helpText={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.ruleGenerationHelp',
-                {
-                  defaultMessage: 'Model used for Knowledge Indicator Query generation.',
-                }
-              )}
-            >
-              <EuiSelect
-                data-test-subj="streams-settings-connector-rule-generation"
-                options={connectorOptions}
-                value={ruleGeneration}
-                onChange={(e) => setRuleGeneration(e.target.value)}
-                isLoading={genAiConnectors.loading}
-                style={{ minWidth: 280 }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.discoveryLabel',
-                { defaultMessage: 'Discovery & Significant Event generation' }
-              )}
-              helpText={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.discoveryHelp',
-                {
-                  defaultMessage:
-                    'Model used during Discovery phase and Significant Event generation',
-                }
-              )}
-            >
-              <EuiSelect
-                data-test-subj="streams-settings-connector-discovery"
-                options={connectorOptions}
-                value={discovery}
-                onChange={(e) => setDiscovery(e.target.value)}
-                isLoading={genAiConnectors.loading}
-                style={{ minWidth: 280 }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.indexPatternsLabel',
-                { defaultMessage: 'Index patterns' }
-              )}
-              helpText={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.indexPatternsHelp',
-                {
-                  defaultMessage:
-                    'Comma-separated list of index patterns to use for feature detection and analysis. Default: logs*',
-                }
-              )}
-            >
-              <EuiTextArea
-                data-test-subj="streams-settings-index-patterns"
-                value={indexPatterns}
-                onChange={(e) => setIndexPatterns(e.target.value)}
-                placeholder={DEFAULT_INDEX_PATTERNS}
-                rows={2}
-                style={{ minWidth: 280 }}
-              />
-            </EuiFormRow>
-            {saveError && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiFormRow isInvalid error={saveError.message}>
-                  <span />
-                </EuiFormRow>
-              </>
-            )}
-            <EuiSpacer size="l" />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="streams-settings-save-button"
-                  fill
-                  onClick={handleSave}
-                  isLoading={isSaving}
-                  isDisabled={genAiConnectors.loading}
-                >
-                  {i18n.translate('xpack.streams.significantEventsDiscovery.settings.saveButton', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiForm>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+
+      {hasChanges && (
+        <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="streams-settings-cancel-button"
+                    color="text"
+                    size="s"
+                    onClick={handleCancel}
+                    isDisabled={isSaving}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.cancelButton',
+                      { defaultMessage: 'Cancel' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="streams-settings-save-button"
+                    color="primary"
+                    fill
+                    size="s"
+                    onClick={handleSave}
+                    isLoading={isSaving}
+                    isDisabled={genAiConnectors.loading}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
+                      { defaultMessage: 'Save changes' }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      )}
+    </>
   );
-}
+};
