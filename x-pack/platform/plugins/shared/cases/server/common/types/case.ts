@@ -62,6 +62,14 @@ export interface CasePersistedAttributes {
     version: number;
   } | null;
   extended_fields?: Record<string, unknown> | null;
+  task_summary?: {
+    total: number;
+    open: number;
+    in_progress: number;
+    completed: number;
+    cancelled: number;
+    next_due_date: string | null;
+  } | null;
 }
 
 type CasePersistedCustomFields = Array<{
