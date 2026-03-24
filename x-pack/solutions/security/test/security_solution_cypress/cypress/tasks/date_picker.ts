@@ -18,40 +18,72 @@ import {
   GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   GET_LOCAL_SHOW_DATES_BUTTON,
   GLOBAL_FILTERS_CONTAINER,
+  DATE_RANGE_PICKER_CONTROL_BUTTON,
+  DATE_RANGE_PICKER_CUSTOM_RANGE_NAV_ITEM,
+  DATE_RANGE_PICKER_START_DATE_PART,
+  DATE_RANGE_PICKER_END_DATE_PART,
+  DATE_RANGE_PICKER_APPLY_BUTTON,
 } from '../screens/date_picker';
 
+/** Opens the kbn-date-range-picker panel and navigates to the custom range sub-panel. */
+const openGlobalCustomRangePanel = (container: string) => {
+  cy.get(`${container} ${DATE_RANGE_PICKER_CONTROL_BUTTON}`).click();
+  cy.get(DATE_RANGE_PICKER_CUSTOM_RANGE_NAV_ITEM).click();
+};
+
 export const setEndDateNow = (container: string = GLOBAL_FILTERS_CONTAINER) => {
-  cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).click();
-  cy.get(DATE_PICKER_NOW_TAB).first().click();
-  cy.get(DATE_PICKER_NOW_BUTTON).click();
+  if (container === GLOBAL_FILTERS_CONTAINER) {
+    openGlobalCustomRangePanel(container);
+    cy.get(DATE_RANGE_PICKER_END_DATE_PART).contains('button', 'Now').click();
+    cy.get(DATE_RANGE_PICKER_APPLY_BUTTON).click();
+  } else {
+    // Legacy EuiSuperDatePicker (e.g. Timeline local query bar)
+    cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).click();
+    cy.get(DATE_PICKER_NOW_TAB).first().click();
+    cy.get(DATE_PICKER_NOW_BUTTON).click();
+  }
 };
 
 export const setEndDate = (date: string, container: string = GLOBAL_FILTERS_CONTAINER) => {
-  cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).first().click();
-
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
-
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
-    if (Cypress.dom.isAttached($el)) {
-      cy.wrap($el).click();
-    }
-    cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
-  });
+  if (container === GLOBAL_FILTERS_CONTAINER) {
+    openGlobalCustomRangePanel(container);
+    cy.get(DATE_RANGE_PICKER_END_DATE_PART).contains('button', 'Absolute').click();
+    cy.get(DATE_RANGE_PICKER_END_DATE_PART).find('input').clear();
+    cy.get(DATE_RANGE_PICKER_END_DATE_PART).find('input').type(date);
+    cy.get(DATE_RANGE_PICKER_APPLY_BUTTON).click();
+  } else {
+    // Legacy EuiSuperDatePicker (e.g. Timeline local query bar)
+    cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).first().click();
+    cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
+      if (Cypress.dom.isAttached($el)) {
+        cy.wrap($el).click();
+      }
+      cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
+    });
+  }
 };
 
 export const setStartDate = (date: string, container: string = GLOBAL_FILTERS_CONTAINER) => {
-  cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).first().click({});
-
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
-
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
-    if (Cypress.dom.isAttached($el)) {
-      cy.wrap($el).click();
-    }
-    cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
-  });
+  if (container === GLOBAL_FILTERS_CONTAINER) {
+    openGlobalCustomRangePanel(container);
+    cy.get(DATE_RANGE_PICKER_START_DATE_PART).contains('button', 'Absolute').click();
+    cy.get(DATE_RANGE_PICKER_START_DATE_PART).find('input').clear();
+    cy.get(DATE_RANGE_PICKER_START_DATE_PART).find('input').type(date);
+    cy.get(DATE_RANGE_PICKER_APPLY_BUTTON).click();
+  } else {
+    // Legacy EuiSuperDatePicker (e.g. Timeline local query bar)
+    cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).first().click({});
+    cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
+      if (Cypress.dom.isAttached($el)) {
+        cy.wrap($el).click();
+      }
+      cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
+    });
+  }
 };
 
 export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
@@ -94,6 +126,13 @@ export const updateDateRangeInLocalDatePickers = (
 };
 
 export const showStartEndDate = (container: string = GLOBAL_FILTERS_CONTAINER) => {
+  if (container === GLOBAL_FILTERS_CONTAINER) {
+    // New picker: the control button itself opens the panel; callers should use
+    // setStartDate / setEndDate which open the custom-range panel on their own.
+    // This function is kept for API compatibility but is a no-op for the global bar.
+    return;
+  }
+  // Legacy EuiSuperDatePicker (e.g. Timeline local query bar)
   cy.get(GET_LOCAL_SHOW_DATES_BUTTON(container)).click();
   cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).click();
 };

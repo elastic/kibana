@@ -12,6 +12,16 @@ export const GET_LOCAL_DATE_PICKER_APPLY_BUTTON = (container: string) =>
 
 export const GLOBAL_FILTERS_CONTAINER = `[data-test-subj="filters-global-container"]`;
 
+// kbn-date-range-picker selectors (global query bar)
+export const DATE_RANGE_PICKER_CONTROL_BUTTON = '[data-test-subj="dateRangePickerControlButton"]';
+export const DATE_RANGE_PICKER_CUSTOM_RANGE_NAV_ITEM =
+  '[data-test-subj="dateRangePickerCustomRangeNavItem"]';
+export const DATE_RANGE_PICKER_START_DATE_PART =
+  '[data-test-subj="dateRangePickerStartDatePart"]';
+export const DATE_RANGE_PICKER_END_DATE_PART = '[data-test-subj="dateRangePickerEndDatePart"]';
+export const DATE_RANGE_PICKER_APPLY_BUTTON =
+  '[data-test-subj="dateRangePickerCustomRangeApplyButton"]';
+
 export const GET_DATE_PICKER_APPLY_BUTTON = (container: string) =>
   `${container} [data-test-subj="querySubmitButton"]`;
 
