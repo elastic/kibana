@@ -12,7 +12,7 @@ import { apiTest, testData } from '../fixtures';
 
 apiTest.describe(
   'Detection rules with Osquery response actions',
-  { tag: tags.deploymentAgnostic },
+  { tag: [...tags.stateful.all, ...tags.serverless.security.complete] },
   () => {
     let credentials: RoleApiCredentials;
     let packSavedObjectId: string;
