@@ -80,6 +80,7 @@ export interface ArtifactListPageProps {
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
+  callout?: React.ReactNode;
   CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
@@ -90,6 +91,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
     labels: _labels = {},
     secondaryPageInfo,
+    callout,
     onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
@@ -417,6 +419,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           />
         ) : (
           <>
+            {callout}
+            <EuiSpacer size="m" />
+
             <SearchExceptions
               defaultValue={filter}
               onSearch={handleOnSearch}

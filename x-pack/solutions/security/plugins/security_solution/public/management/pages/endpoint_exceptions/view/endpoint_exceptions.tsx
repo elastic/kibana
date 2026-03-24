@@ -36,7 +36,7 @@ export const EndpointExceptions = memo(() => {
         allowCardCreateAction={canWriteEndpointExceptions}
         allowCardEditAction={canWriteEndpointExceptions}
         allowCardDeleteAction={canWriteEndpointExceptions}
-        secondaryPageInfo={perPolicyOptInCallout}
+        callout={perPolicyOptInCallout}
       />
     </>
   );
