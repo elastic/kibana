@@ -73,11 +73,12 @@ export {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getSourceQueryBeforeChangePoint,
-  // TODO: FORK command specific code needs to be updated once CHANGE_POINT BY command is available
-  getSourceQueriesFromForkWithChangePoint,
   getForkWithChangePoint,
   getBranchLabelFromForkBranch,
-  type ForkBranchSourceQuery,
+  getForkBranchLabels,
+  getTemplateSourceQueryFromForkWithChangePoint,
+  replaceEntityValueInSourceQuery,
+  type ForkBranchLabel,
   type ESQLStatsQueryMeta,
 } from './src';
 

@@ -9,7 +9,8 @@
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { getChangePointOutputColumnNames } from '@kbn/esql-utils';
+import { getChangePointEntityFieldName, getChangePointOutputColumnNames } from '@kbn/esql-utils';
+import type { ForkBranchLabel } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
 import type {
@@ -22,29 +23,39 @@ import type {
 import {
   CHANGE_POINT_TOOLTIP_ANNOTATION_LAYER_ID,
   DEFAULT_PVALUE_WHEN_MISSING,
+  FORK_COLUMN_ID,
   MS_PER_HOUR,
   MS_PER_DAY,
   MS_PER_MONTH,
 } from './constants';
 
+/** Advance a moment by one unit of the given interval. */
+function advanceMomentByInterval(
+  current: { add: (amount: number, unit: 'month' | 'day' | 'hour' | 'minute') => unknown },
+  interval: TimeInterval
+): void {
+  const unitMap: Record<TimeInterval, 'month' | 'day' | 'hour' | 'minute'> = {
+    month: 'month',
+    day: 'day',
+    hour: 'hour',
+    minute: 'minute',
+  };
+  current.add(1, unitMap[interval]);
+}
+
 function getTimeBucketKey(ts: string, interval: TimeInterval): string {
   try {
     const d = new Date(ts);
-    const y = d.getFullYear();
-    const m = d.getMonth();
-    const day = d.getDate();
-    const h = d.getHours();
-    const min = d.getMinutes();
-    if (interval === 'month') return `${y}-${String(m + 1).padStart(2, '0')}`;
-    if (interval === 'day')
-      return `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    if (interval === 'hour')
-      return `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}-${String(
-        h
-      ).padStart(2, '0')}`;
-    return `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}-${String(
-      h
-    ).padStart(2, '0')}-${String(min).padStart(2, '0')}`;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const parts = [
+      d.getFullYear(),
+      pad(d.getMonth() + 1),
+      pad(d.getDate()),
+      pad(d.getHours()),
+      pad(d.getMinutes()),
+    ];
+    const len: Record<TimeInterval, number> = { month: 2, day: 3, hour: 4, minute: 5 };
+    return parts.slice(0, len[interval]).join('-');
   } catch {
     return ts.slice(0, 16);
   }
@@ -66,45 +77,19 @@ export function getBestIntervalFromResults(results: ChangePointResult[]): TimeIn
   return 'month';
 }
 
+const TIME_BUCKET_LABEL_OPTIONS: Record<TimeInterval, Intl.DateTimeFormatOptions> = {
+  month: { month: 'short', year: '2-digit' },
+  day: { month: 'short', day: 'numeric' },
+  hour: { month: 'short', day: 'numeric', hour: '2-digit' },
+  minute: { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
+};
+
 /** Get time bucket key and label based on interval. */
 export function getTimeBucket(ts: string, interval: TimeInterval): { key: string; label: string } {
   try {
     const d = new Date(ts);
-    const y = d.getFullYear();
-    const m = d.getMonth();
-    const day = d.getDate();
-    const h = d.getHours();
-    const min = d.getMinutes();
-    if (interval === 'month') {
-      const key = `${y}-${String(m + 1).padStart(2, '0')}`;
-      const label = d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-      return { key, label };
-    }
-    if (interval === 'day') {
-      const key = `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const label = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-      return { key, label };
-    }
-    if (interval === 'hour') {
-      const key = `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}-${String(
-        h
-      ).padStart(2, '0')}`;
-      const label = d.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-      });
-      return { key, label };
-    }
-    const key = `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}-${String(
-      h
-    ).padStart(2, '0')}-${String(min).padStart(2, '0')}`;
-    const label = d.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const key = getTimeBucketKey(ts, interval);
+    const label = d.toLocaleDateString(undefined, TIME_BUCKET_LABEL_OPTIONS[interval]);
     return { key, label };
   } catch {
     return { key: ts, label: ts.slice(0, 16) };
@@ -130,20 +115,7 @@ export function getTimeBucketsForRange(
     if (buckets.length === 0 || buckets[buckets.length - 1].key !== key) {
       buckets.push({ key, label });
     }
-    switch (interval) {
-      case 'month':
-        current.add(1, 'month');
-        break;
-      case 'day':
-        current.add(1, 'day');
-        break;
-      case 'hour':
-        current.add(1, 'hour');
-        break;
-      case 'minute':
-        current.add(1, 'minute');
-        break;
-    }
+    advanceMomentByInterval(current, interval);
   }
 
   return buckets;
@@ -208,20 +180,7 @@ export function getBurstDetectionHistogram(
           bucketToTimestamp.set(key, current.valueOf());
           bucketToEntities.set(key, new Set());
         }
-        switch (interval) {
-          case 'month':
-            current.add(1, 'month');
-            break;
-          case 'day':
-            current.add(1, 'day');
-            break;
-          case 'hour':
-            current.add(1, 'hour');
-            break;
-          case 'minute':
-            current.add(1, 'minute');
-            break;
-        }
+        advanceMomentByInterval(current, interval);
       }
     }
   }
@@ -508,6 +467,36 @@ export function getRowValue(
   return val;
 }
 
+function getColumnId(col: DatatableColumn | undefined): string | undefined {
+  return col?.id ?? col?.name;
+}
+
+/** Known column names for CHANGE_POINT output (defaults and common AS renames). */
+const CHANGE_POINT_TYPE_COLUMN_NAMES = ['type', 'change_type', 'changeType'];
+const CHANGE_POINT_PVALUE_COLUMN_NAMES = ['pvalue', 'p_value', 'pValue'];
+
+/**
+ * Resolves type and pvalue column IDs from table columns by matching known CHANGE_POINT output names.
+ * Uses fetchParams columns; no query parsing needed.
+ */
+export function getChangePointColumnIdsFromColumns(columns: DatatableColumn[]): {
+  typeColumnId?: string;
+  pvalueColumnId?: string;
+} {
+  const typeCol = columns.find((c) => {
+    const id = (c.id ?? c.name ?? '').toLowerCase();
+    return CHANGE_POINT_TYPE_COLUMN_NAMES.some((n) => id === n.toLowerCase());
+  });
+  const pvalueCol = columns.find((c) => {
+    const id = (c.id ?? c.name ?? '').toLowerCase();
+    return CHANGE_POINT_PVALUE_COLUMN_NAMES.some((n) => id === n.toLowerCase());
+  });
+  return {
+    typeColumnId: getColumnId(typeCol),
+    pvalueColumnId: getColumnId(pvalueCol),
+  };
+}
+
 /** ES|QL date columns may use meta.type 'date' or 'date_nanos'; columns may have id or name. */
 export function getTimeColumnId(columns: DatatableColumn[]): string | undefined {
   const dateCol = columns.find(
@@ -516,9 +505,51 @@ export function getTimeColumnId(columns: DatatableColumn[]): string | undefined 
       (typeof c.meta?.type === 'string' && c.meta.type.startsWith('date')) ||
       (c as { type?: string }).type === 'date'
   );
-  if (dateCol) return dateCol.id ?? dateCol.name;
-  if (columns.length > 0) return columns[0].id ?? columns[0].name;
+  if (dateCol) return getColumnId(dateCol);
+  if (columns.length > 0) return getColumnId(columns[0]);
   return undefined;
+}
+
+/**
+ * Derives entities from the ES|QL query and change point result table.
+ * Uses the query to find the entity field name (e.g. the BY field that is not the time dimension),
+ * then extracts unique values from the table for that column.
+ * @param esql - The full ES|QL query string
+ * @param table - The change point result datatable
+ * @returns Array of { branchIndex, branchLabel } for each entity, or undefined when no entity field
+ */
+export function getEntitiesFromChangePointData(
+  esql: string | undefined,
+  table: Datatable
+): ForkBranchLabel[] | undefined {
+  if (!esql || !table?.rows?.length) return undefined;
+
+  const entityFieldName = getChangePointEntityFieldName(esql);
+  if (!entityFieldName) return undefined;
+
+  const entityCol = table.columns.find((c) => (c.id ?? c.name) === entityFieldName);
+  const entityColumnId = getColumnId(entityCol);
+  if (!entityColumnId) return undefined;
+
+  const seen = new Map<string, number>();
+  const order: string[] = [];
+  for (const row of table.rows) {
+    const val = getRowValue(row as Record<string, unknown> | unknown[], entityColumnId, table);
+    if (val != null && val !== '') {
+      const str = String(val);
+      if (!seen.has(str)) {
+        seen.set(str, order.length);
+        order.push(str);
+      }
+    }
+  }
+
+  if (order.length === 0) return undefined;
+
+  return order.map((branchLabel, branchIndex) => ({
+    branchIndex,
+    branchLabel,
+  }));
 }
 
 /** Find a column whose values match fork branch labels (e.g. provider matching entity URLs). */
@@ -530,7 +561,7 @@ function findEntityColumnMatchingBranchLabels(
   let bestColId: string | undefined;
   let bestMatchCount = 0;
   for (const col of table.columns) {
-    const colId = col.id ?? col.name;
+    const colId = getColumnId(col);
     if (!colId) continue;
     let matchCount = 0;
     for (const row of table.rows) {
@@ -543,6 +574,185 @@ function findEntityColumnMatchingBranchLabels(
     }
   }
   return bestColId;
+}
+
+export interface ForkColumnMetaForChangePoint {
+  hasForkColumn: boolean;
+  effectiveForkColumnId: string | undefined;
+  entityColumnByBranchLabel: string | undefined;
+}
+
+export function getForkColumnMetaForChangePointTable(
+  table: Datatable,
+  forkColumnId?: string,
+  forkBranches?: Array<{ branchLabel: string }>
+): ForkColumnMetaForChangePoint {
+  const forkCol = forkColumnId
+    ? table.columns.find(
+        (c) =>
+          c.id === forkColumnId ||
+          c.name === forkColumnId ||
+          c.id === '_fork' ||
+          c.name === '_fork' ||
+          (typeof c.name === 'string' && c.name.toLowerCase().includes('fork'))
+      )
+    : undefined;
+  const hasForkColumn = Boolean(forkCol);
+  const effectiveForkColumnId = forkCol?.id ?? forkCol?.name ?? forkColumnId;
+  const entityColumnByBranchLabel =
+    !hasForkColumn && forkBranches?.length
+      ? findEntityColumnMatchingBranchLabels(table, forkBranches)
+      : undefined;
+  return { hasForkColumn, effectiveForkColumnId, entityColumnByBranchLabel };
+}
+
+export function resolveForkIndexForChangePointRow(
+  rowRecord: Record<string, unknown> | unknown[],
+  table: Datatable,
+  meta: ForkColumnMetaForChangePoint,
+  forkBranches?: Array<{ branchLabel: string }>
+): number | undefined {
+  let forkIndex: number | undefined;
+  if (meta.hasForkColumn && meta.effectiveForkColumnId) {
+    const forkVal = getRowValue(rowRecord, meta.effectiveForkColumnId, table);
+    if (typeof forkVal === 'number' && Number.isInteger(forkVal)) {
+      forkIndex = forkVal > 0 ? forkVal - 1 : forkVal;
+    } else if (typeof forkVal === 'string') {
+      const match = forkVal.match(/^fork(\d+)$/i);
+      if (match) forkIndex = parseInt(match[1], 10) - 1;
+    }
+  } else if (meta.entityColumnByBranchLabel) {
+    const entityVal = getRowValue(rowRecord, meta.entityColumnByBranchLabel, table);
+    const idx =
+      entityVal != null && forkBranches
+        ? forkBranches.findIndex(
+            (b) =>
+              String(entityVal) === b.branchLabel || String(entityVal) === String(b.branchLabel)
+          )
+        : -1;
+    if (idx >= 0) forkIndex = idx;
+  }
+  return forkIndex;
+}
+
+/** Map _fork / entity value to entityAttributesMap key (array index in forkBranchLabels). */
+export function mapForkIndexToEntityChartKey(
+  forkIndex: number | undefined,
+  forkBranchLabels: ForkBranchLabel[]
+): number | undefined {
+  if (forkIndex == null || forkBranchLabels.length === 0) return undefined;
+  if (forkIndex >= 0 && forkIndex < forkBranchLabels.length) {
+    return forkIndex;
+  }
+  const byBranchIndex = forkBranchLabels.findIndex((b) => b.branchIndex === forkIndex);
+  return byBranchIndex >= 0 ? byBranchIndex : undefined;
+}
+
+/**
+ * Document flyout chart only for rows that look like real CHANGE_POINT hits:
+ * valid time, non-null p-value, and non-null type (when those columns exist).
+ */
+export function rowIsQualifyingChangePointForDocChart(
+  rowRecord: Record<string, unknown> | unknown[],
+  table: Datatable,
+  timeColumnId: string | undefined,
+  typeColumnId: string | undefined,
+  pvalueColumnId: string | undefined
+): boolean {
+  if (!timeColumnId) return false;
+  const ts = getRowValue(rowRecord, timeColumnId, table);
+  if (!timestampToIso(ts)) return false;
+  if (!pvalueColumnId) return false;
+  const pval = getRowValue(rowRecord, pvalueColumnId, table);
+  if (pval === null || pval === undefined) return false;
+  if (!typeColumnId) return false;
+  const typeVal = getRowValue(rowRecord, typeColumnId, table);
+  if (typeVal === null || typeVal === undefined) return false;
+  return true;
+}
+
+/**
+ * Maps each ES|QL table row index to the same per-entity Lens attributes used in the
+ * multiple-line chart ({@link DataTableRecord.id} is String(rowIndex) in fetch_esql).
+ * Only rows that pass {@link rowIsQualifyingChangePointForDocChart} get an entry.
+ */
+export function buildChangePointLensAttributesByRecordId(
+  table: Datatable | undefined,
+  colsToUse: DatatableColumn[],
+  changePointColumnIds: { typeColumnId?: string; pvalueColumnId?: string },
+  forkBranchLabels: ForkBranchLabel[] | undefined,
+  entityAttributesMap: Record<number, TypedLensByValueInput['attributes']>,
+  lensAttributes: TypedLensByValueInput['attributes'] | null,
+  multipleEntityMode: boolean
+): Record<string, TypedLensByValueInput['attributes']> {
+  const out: Record<string, TypedLensByValueInput['attributes']> = {};
+  if (!table?.rows?.length || !lensAttributes) {
+    return out;
+  }
+
+  const timeColumnId = getTimeColumnId(colsToUse);
+  const { typeColumnId, pvalueColumnId } = changePointColumnIds;
+
+  if (!multipleEntityMode) {
+    for (let i = 0; i < table.rows.length; i++) {
+      const rowRecord = table.rows[i] as Record<string, unknown> | unknown[];
+      if (
+        rowIsQualifyingChangePointForDocChart(
+          rowRecord,
+          table,
+          timeColumnId,
+          typeColumnId,
+          pvalueColumnId
+        )
+      ) {
+        out[String(i)] = lensAttributes;
+      }
+    }
+    return out;
+  }
+
+  if (!forkBranchLabels?.length) {
+    return out;
+  }
+
+  const valueColumnId = timeColumnId
+    ? getValueColumnId(colsToUse, timeColumnId, typeColumnId, pvalueColumnId)
+    : undefined;
+  if (!timeColumnId || !valueColumnId) {
+    return out;
+  }
+
+  const forkMeta = getForkColumnMetaForChangePointTable(table, FORK_COLUMN_ID, forkBranchLabels);
+
+  table.rows.forEach((row, rowIndex) => {
+    const rowRecord = row as Record<string, unknown> | unknown[];
+    if (
+      !rowIsQualifyingChangePointForDocChart(
+        rowRecord,
+        table,
+        timeColumnId,
+        typeColumnId,
+        pvalueColumnId
+      )
+    ) {
+      return;
+    }
+
+    const forkIndex = resolveForkIndexForChangePointRow(
+      rowRecord,
+      table,
+      forkMeta,
+      forkBranchLabels
+    );
+    const entityKey = mapForkIndexToEntityChartKey(forkIndex, forkBranchLabels);
+    if (entityKey == null) return;
+    const attrs = entityAttributesMap[entityKey];
+    if (attrs) {
+      out[String(rowIndex)] = attrs;
+    }
+  });
+
+  return out;
 }
 
 /**
@@ -564,23 +774,7 @@ export function getChangePointResultsFromTable(
   const hasTimeColumn = table.columns.some((c) => (c.id ?? c.name) === timeColumnId);
   if (!hasTimeColumn) return [];
 
-  const forkCol = forkColumnId
-    ? table.columns.find(
-        (c) =>
-          c.id === forkColumnId ||
-          c.name === forkColumnId ||
-          c.id === '_fork' ||
-          c.name === '_fork' ||
-          (typeof c.name === 'string' && c.name.toLowerCase().includes('fork'))
-      )
-    : undefined;
-  const hasForkColumn = Boolean(forkCol);
-  const effectiveForkColumnId = forkCol?.id ?? forkCol?.name ?? forkColumnId;
-
-  const entityColumnByBranchLabel =
-    !hasForkColumn && forkBranches?.length
-      ? findEntityColumnMatchingBranchLabels(table, forkBranches)
-      : undefined;
+  const forkMeta = getForkColumnMetaForChangePointTable(table, forkColumnId, forkBranches);
 
   const results: ChangePointResult[] = [];
   for (const row of table.rows) {
@@ -596,26 +790,7 @@ export function getChangePointResultsFromTable(
     const typeVal = typeColumnId ? getRowValue(rowRecord, typeColumnId, table) : undefined;
     const pval = pvalueColumnId ? getRowValue(rowRecord, pvalueColumnId, table) : undefined;
     const val = valueColumnId ? getRowValue(rowRecord, valueColumnId, table) : undefined;
-    let forkIndex: number | undefined;
-    if (hasForkColumn && effectiveForkColumnId) {
-      const forkVal = getRowValue(rowRecord, effectiveForkColumnId, table);
-      if (typeof forkVal === 'number' && Number.isInteger(forkVal)) {
-        forkIndex = forkVal > 0 ? forkVal - 1 : forkVal;
-      } else if (typeof forkVal === 'string') {
-        const match = forkVal.match(/^fork(\d+)$/i);
-        if (match) forkIndex = parseInt(match[1], 10) - 1;
-      }
-    } else if (entityColumnByBranchLabel) {
-      const entityVal = getRowValue(rowRecord, entityColumnByBranchLabel, table);
-      const idx =
-        entityVal != null && forkBranches
-          ? forkBranches.findIndex(
-              (b) =>
-                String(entityVal) === b.branchLabel || String(entityVal) === String(b.branchLabel)
-            )
-          : -1;
-      if (idx >= 0) forkIndex = idx;
-    }
+    const forkIndex = resolveForkIndexForChangePointRow(rowRecord, table, forkMeta, forkBranches);
     const pvalueNum = pval != null ? Number(pval) : undefined;
     results.push({
       timestamp,
@@ -636,12 +811,12 @@ export function getValueColumnId(
   pvalueColumnId: string | undefined
 ): string | undefined {
   const col = columns.find((c) => {
-    const id = c.id ?? c.name;
+    const id = getColumnId(c);
     if (!id) return false;
     if (id === timeColumnId || id === typeColumnId || id === pvalueColumnId) return false;
     return c.meta?.type === 'number' || (c as { type?: string }).type === 'double';
   });
-  return col?.id ?? col?.name;
+  return getColumnId(col);
 }
 
 /** Normalize timestamps to ISO strings, while safely handling invalid or unsupported types. */

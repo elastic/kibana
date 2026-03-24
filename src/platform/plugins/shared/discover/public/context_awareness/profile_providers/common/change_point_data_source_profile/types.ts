@@ -11,8 +11,10 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { TimeRange } from '@kbn/es-query';
-import type { ForkBranchSourceQuery } from '@kbn/esql-utils';
+import type { ForkBranchLabel } from '@kbn/esql-utils';
+import type { BehaviorSubject } from 'rxjs';
 import type { ChartSectionConfigurationExtensionParams } from '../../../types';
+import type { ChangePointLensDocContext } from './change_point_context';
 
 export type TimeInterval = 'month' | 'day' | 'hour' | 'minute';
 
@@ -32,11 +34,13 @@ export interface ChangePointBurstHistogramProps {
 export type ChangePointExperienceViewProps = ChartSectionProps &
   RestorableStateProviderProps<object> & {
     actions?: ChartSectionConfigurationExtensionParams['actions'];
+    /** Bridges per-row Lens attributes to the change point document tab (see change_point_context). */
+    changePointLensContext$: BehaviorSubject<ChangePointLensDocContext | undefined>;
   };
 
-export interface ChangePointForkHeatmapProps {
+export interface ChangePointHeatmapProps {
   results: ChangePointResult[];
-  forkBranches: ForkBranchSourceQuery[];
+  forkBranches: ForkBranchLabel[];
   selectedEntityIndices: number[];
   onSelectEntity: (indices: number[]) => void;
   renderEntityDetailChart: (entityIndex: number) => React.ReactNode;
