@@ -154,7 +154,7 @@ export function buildCustomFetch(
 }
 
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
-const MAX_REDIRECTS = 20;
+const MAX_REDIRECTS = 20; // standard per WHATWG Fetch spec
 
 function createFetchWithDispatcher(
   dispatcher: Dispatcher,
