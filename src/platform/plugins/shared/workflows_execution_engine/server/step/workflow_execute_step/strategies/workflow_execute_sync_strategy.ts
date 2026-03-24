@@ -25,7 +25,7 @@ import { toExecutionModel } from '../utils';
 
 export type { StrategyResult } from '../types';
 
-interface SubWorkflowWaitState {
+interface SubWorkflowWaitState extends Record<string, unknown> {
   workflowId: string;
   executionId: string;
   startedAt: string;
@@ -141,6 +141,7 @@ export class WorkflowExecuteSyncStrategy {
         startedAt: new Date().toISOString(),
         pollCount: 0,
       };
+
       this.stepExecutionRuntime.setCurrentStepState(state);
 
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
