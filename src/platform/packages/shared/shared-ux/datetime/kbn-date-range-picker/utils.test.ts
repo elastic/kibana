@@ -98,7 +98,7 @@ describe('getOptionDisplayLabel', () => {
   });
 
   it('generates a label from relative bounds when no label is provided', () => {
-    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' })).toBe('7 days ago → now');
+    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' })).toBe('Last 7 days');
   });
 
   it('generates a label from absolute bounds when no label is provided', () => {
