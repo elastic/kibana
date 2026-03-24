@@ -19,8 +19,8 @@ import type {
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
-import type { WorkflowPreview } from '../../../../common/lib/export';
-import { rewriteWorkflowReferences } from '../../../../common/lib/export';
+import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';

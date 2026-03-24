@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import type { WorkflowExportEntry } from '../../../../common/lib/export';
+import type { WorkflowExportEntry } from '../../../../common/lib/import';
 import { stringifyWorkflowDefinition } from '../../../../common/lib/yaml';
 import { generateWorkflowsArchive } from '../../lib/zip_archive';
 import type { RouteDependencies } from '../types';

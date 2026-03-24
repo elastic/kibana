@@ -123,10 +123,13 @@ export const useExportWithReferences = ({
         exportWithoutReferences(workflowsToExport);
         return;
       }
-
-      const missingWorkflows = missingIds
-        .map((id) => allWorkflowsMap.get(id))
-        .filter((id): id is WorkflowListItemDto => id != null);
+      const missingWorkflows = missingIds.reduce<WorkflowListItemDto[]>((acc, id) => {
+        const workflow = allWorkflowsMap.get(id);
+        if (workflow) {
+          acc.push(workflow);
+        }
+        return acc;
+      }, []);
 
       if (missingWorkflows.length === 0) {
         exportWithoutReferences(workflowsToExport);

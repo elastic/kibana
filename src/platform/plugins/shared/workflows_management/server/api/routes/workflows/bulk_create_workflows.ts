@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import { BulkCreateWorkflowsCommandSchema, WorkflowsManagementApiActions } from '@kbn/workflows';
+import { BulkCreateWorkflowsCommandSchema } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -52,19 +52,6 @@ export function registerBulkCreateWorkflowsRoute({ router, api, spaces }: RouteD
         try {
           const spaceId = spaces.getSpaceId(request);
           const { overwrite } = request.query;
-
-          if (!request.authzResult?.[WorkflowsManagementApiActions.create]) {
-            return response.forbidden({
-              body: { message: 'Creating workflows requires the create privilege' },
-            });
-          }
-
-          if (overwrite && !request.authzResult?.[WorkflowsManagementApiActions.update]) {
-            return response.forbidden({
-              body: { message: 'Overwriting workflows requires the update privilege' },
-            });
-          }
-
           const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
             overwrite,
           });

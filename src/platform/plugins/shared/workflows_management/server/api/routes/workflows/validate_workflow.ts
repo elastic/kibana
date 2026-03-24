@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import { MAX_WORKFLOW_YAML_LENGTH } from '../../../../common/lib/export/workflow_export_types';
+import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { AVAILABILITY, INTERNAL_API_VERSION, OAS_TAG } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';

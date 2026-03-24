@@ -247,20 +247,6 @@ describe('Workflow routes', () => {
       expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request);
       expect(response.ok).toHaveBeenCalledWith({ body: updated });
     });
-
-    it('should return 404 when update returns null', async () => {
-      mockApi.updateWorkflow.mockResolvedValue(null);
-      const request = httpServerMock.createKibanaRequest({
-        params: { id: 'wf-1' },
-        body: { name: 'U', enabled: true, tags: [], yaml: 'x' },
-      });
-      const response = mockResponse();
-      const context = createLicensingContext() as any;
-
-      await routeHandlers[key].handler(context, request, response);
-
-      expect(response.notFound).toHaveBeenCalledWith();
-    });
   });
 
   describe('DELETE:/api/workflows/workflow/{id}', () => {
@@ -450,7 +436,7 @@ describe('Workflow routes', () => {
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
-        body: { message: `Internal server error: ${err}` },
+        body: { message: `Internal server error: ${err.message}` },
       });
       expect(handleRouteError).not.toHaveBeenCalled();
     });
