@@ -88,15 +88,16 @@ Call \`${internalNamespaces.alertingV2}.get_notification_context\`. This single 
   - If no connectors are configured at all, tell the user to set one up in Stack Management > Connectors before proceeding.
 
 **Step 2: Build an inline workflow.**
-Once you know the target connector:
-1. Call \`platform.workflows.get_step_definitions\` with \`stepType\` set to the connector type (e.g. \`"slack"\`, \`"email"\`, \`"pagerduty"\`) to discover the exact \`with\` parameters the step requires. Do NOT guess parameters — they vary per connector type.
-2. Read the alert workflow template via \`filestore.read\` with path \`skills/platform/alerting/alert-rule-creation/alert-workflow-example.md\`. This contains complete examples for Slack, Email, and PagerDuty workflows with the correct inputs schema and connector step patterns.
-3. Build the workflow YAML using the template as a base. The workflow **MUST** include:
+Once you know the target connector, use the data already returned by \`get_notification_context\` — each connector item includes \`withParams\` listing every field for the step's \`with\` block (name, type, required).
+
+1. Read the alert workflow template via \`filestore.read\` with path \`skills/platform/alerting/alert-rule-creation/alert-workflow-example.md\`. This contains complete examples for Slack, Email, and PagerDuty workflows with the correct inputs schema and connector step patterns.
+2. Build the workflow YAML using the template as a base. The workflow **MUST** include:
    - A \`manual\` trigger (NOT \`alert\` or \`scheduled\` — the Dispatcher invokes via manual trigger)
    - The full \`inputs\` schema accepting the notification payload (id, ruleId, policyId, groupKey, episodes) — copy this exactly from the template
-   - Connector steps with the correct \`type\`, \`connector-id\` (from the step 1 context results), and \`with\` parameters from \`get_step_definitions\`
+   - Connector steps with the correct \`type\`, \`connector-id\` (the \`connectorId\` from step 1 context results), and \`with\` fields matching the connector's \`withParams\` (use exactly the field names and types listed there — do NOT guess)
    - A \`foreach\` loop over \`{{ inputs.episodes | json }}\` with \`if\` conditions on \`foreach.item.episode_status\`
-4. Call \`platform.workflows.validate_workflow\` with the complete YAML. If validation returns errors, fix them and re-validate until valid. Pass \`is_valid: true\` to \`propose_notification_policy\` only when validation succeeds.
+
+The \`propose_notification_policy\` tool validates the workflow YAML server-side. If it returns \`workflowValidationErrors\`, fix the YAML and re-propose with the same \`attachment_id\`.
 
 **Step 3: Propose the notification policy (one tool call).**
 Call \`${internalNamespaces.alertingV2}.propose_notification_policy\` with:
@@ -198,8 +199,5 @@ FROM logs-* | STATS doc_count = COUNT(*) | WHERE doc_count == 0
     `${internalNamespaces.alertingV2}.get_notification_context`,
     `${internalNamespaces.alertingV2}.propose_notification_policy`,
     'platform.workflows.validate_workflow',
-    'platform.workflows.get_step_definitions',
-    'platform.workflows.get_trigger_definitions',
-    'platform.workflows.get_examples',
   ],
 });
