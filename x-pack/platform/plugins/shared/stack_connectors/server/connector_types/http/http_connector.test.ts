@@ -1168,6 +1168,37 @@ describe('execute()', () => {
     expect(resultUrl).toContain('&key=value');
   });
 
+  test('execute deduplicates query params already present in URL', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api?address=1',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: { address: 'secret-address', apiKey: 'secret' },
+      },
+      params: {
+        method: 'GET',
+        query: { address: 'override' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    // URL-hardcoded 'address=1' takes precedence (already in URL)
+    expect(resultUrl).toContain('address=1');
+    expect(resultUrl).not.toContain('address=override');
+    expect(resultUrl).not.toContain('address=secret-address');
+    expect(resultUrl).toContain('apiKey=secret');
+  });
+
   test('execute handles null secretQueryParams', async () => {
     const config: ConnectorTypeConfigType = {
       ...emptyConfig,

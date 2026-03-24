@@ -177,12 +177,13 @@ function appendQueryString(baseUrl: string, query?: Record<string, string>): str
   if (!query || Object.keys(query).length === 0) {
     return baseUrl;
   }
-  const params = new URLSearchParams();
+  const url = new URL(baseUrl);
   for (const [key, value] of Object.entries(query)) {
-    params.append(key, value);
+    if (!url.searchParams.has(key)) {
+      url.searchParams.set(key, value);
+    }
   }
-  const separator = baseUrl.includes('?') ? '&' : '?';
-  return `${baseUrl}${separator}${params.toString()}`;
+  return url.toString();
 }
 
 function serializeHttpRequestBody(body: unknown): string {
