@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOW_ID_PATTERN } from '@kbn/workflows';
+import { MAX_WORKFLOW_YAML_LENGTH, WORKFLOW_ID_PATTERN } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 
 export const MAX_IMPORT_WORKFLOWS = 500;
 
@@ -48,3 +49,24 @@ export function detectFileFormat(bytes: Uint8Array): 'zip' | 'yaml' {
   }
   return 'yaml';
 }
+
+export const WORKFLOW_EXPORT_VERSION = '1';
+export { MAX_WORKFLOW_YAML_LENGTH };
+
+export const WorkflowExportEntrySchema = z.object({
+  id: z.string(),
+  yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
+});
+
+const SUPPORTED_EXPORT_VERSIONS = [WORKFLOW_EXPORT_VERSION] as const;
+
+export const WorkflowExportManifestSchema = z
+  .object({
+    exportedCount: z.number(),
+    exportedAt: z.string(),
+    version: z.enum(SUPPORTED_EXPORT_VERSIONS),
+  })
+  .strict();
+
+export type WorkflowExportEntry = z.infer<typeof WorkflowExportEntrySchema>;
+export type WorkflowExportManifest = z.infer<typeof WorkflowExportManifestSchema>;

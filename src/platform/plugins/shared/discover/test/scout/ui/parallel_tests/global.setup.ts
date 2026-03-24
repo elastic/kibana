@@ -10,7 +10,7 @@
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
+import { TRACES, richTrace, traceCorrelatedLogs, deepTrace } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -65,6 +65,9 @@ globalSetupHook(
 
       await apmEsClient.index(apmData);
       log.debug('[setup:traces] Rich APM trace data indexed');
+
+      await apmEsClient.index(deepTrace(timeRange));
+      log.debug('[setup:traces] Deep trace data indexed');
 
       const logData = traceCorrelatedLogs({
         ...timeRange,
