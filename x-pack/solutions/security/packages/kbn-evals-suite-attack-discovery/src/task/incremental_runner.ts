@@ -15,13 +15,26 @@ interface DeltaRunnerParams {
   previouslyProcessedCount: number;
   alertsPerRound: number;
   maxRounds: number;
-  generateRoundInsights: (
-    roundAlerts: string[],
-    previousInsights: AttackDiscovery[]
-  ) => Promise<{
-    insights: AttackDiscovery[];
-    usage?: { inputTokens: number; outputTokens: number };
-  }>;
+  generateRoundInsights: GenerateRoundFn;
+}
+
+type GenerateRoundFn = (
+  roundAlerts: string[],
+  previousInsights: AttackDiscovery[]
+) => Promise<{
+  insights: AttackDiscovery[];
+  usage?: { inputTokens: number; outputTokens: number };
+}>;
+
+export interface QualityOptions {
+  /** #1: Final synthesis pass after all rounds */
+  synthesisPass?: boolean;
+  /** #2: Cluster alerts by host/rule before splitting into rounds */
+  clusterAlerts?: boolean;
+  /** #3: Inject previous round summaries into context */
+  progressiveContext?: boolean;
+  /** #4: Adapt batch size based on insight count */
+  adaptiveBatchSize?: boolean;
 }
 
 interface IncrementalRunnerParams {
@@ -29,14 +42,11 @@ interface IncrementalRunnerParams {
   alerts: ReadonlyArray<AnonymizedAlert>;
   alertsPerRound: number;
   maxRounds: number;
-  generateRoundInsights: (
-    roundAlerts: string[],
-    previousInsights: AttackDiscovery[]
-  ) => Promise<{
-    insights: AttackDiscovery[];
-    usage?: { inputTokens: number; outputTokens: number };
-  }>;
+  generateRoundInsights: GenerateRoundFn;
+  qualityOptions?: QualityOptions;
 }
+
+const STOP_WORDS = new Set(['the', 'and', 'of', 'in', 'a', 'to', 'is', 'for', 'on', 'with']);
 
 const titleSimilarity = (a: string, b: string): number => {
   const wordsA = new Set(a.toLowerCase().split(/\W+/).filter(Boolean));
@@ -45,8 +55,6 @@ const titleSimilarity = (a: string, b: string): number => {
   const union = new Set([...wordsA, ...wordsB]);
   return union.size === 0 ? 0 : intersection.size / union.size;
 };
-
-const STOP_WORDS = new Set(['the', 'and', 'of', 'in', 'a', 'to', 'is', 'for', 'on', 'with']);
 
 const countCommonMeaningfulWords = (a: string, b: string): number => {
   const wordsA = new Set(a.toLowerCase().split(/\W+/).filter((w) => w && !STOP_WORDS.has(w)));
@@ -63,17 +71,15 @@ const mergeInsights = (
 
   for (const insight of newInsights) {
     const matchIdx = merged.findIndex((e) => {
-      // Only merge on significant alert ID overlap (>= 30%)
       const sharedIds = e.alertIds.filter((id) => insight.alertIds.includes(id));
-      const overlapRatio = sharedIds.length / Math.min(e.alertIds.length, insight.alertIds.length || 1);
+      const overlapRatio =
+        sharedIds.length / Math.min(e.alertIds.length, insight.alertIds.length || 1);
       if (overlapRatio >= 0.3) return true;
 
-      // Prevent merging insights with very different alert coverage
       const sizeDiff = Math.abs(e.alertIds.length - insight.alertIds.length);
       const maxSize = Math.max(e.alertIds.length, insight.alertIds.length, 1);
       if (sizeDiff / maxSize > 0.7) return false;
 
-      // Title similarity + meaningful word overlap
       if (titleSimilarity(e.title, insight.title) >= threshold) {
         return countCommonMeaningfulWords(e.title, insight.title) >= 2;
       }
@@ -96,35 +102,88 @@ const mergeInsights = (
   return merged;
 };
 
+/**
+ * #2: Cluster alerts by host/rule name so related alerts stay together in rounds.
+ * Extracts host.name or rule.name from CSV-formatted alert content.
+ */
+function clusterAlertsByKey(alertStrings: string[]): string[] {
+  const groups = new Map<string, string[]>();
+
+  for (const alert of alertStrings) {
+    // Extract host.name or rule.name from CSV content (first match)
+    const hostMatch = alert.match(/host\.name,([^\n,]+)/);
+    const ruleMatch = alert.match(/kibana\.alert\.rule\.name,([^\n,]+)/);
+    const key = hostMatch?.[1] ?? ruleMatch?.[1] ?? 'unknown';
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(alert);
+  }
+
+  // Return alerts grouped by key — related alerts are adjacent
+  return [...groups.values()].flat();
+}
+
+/**
+ * #3: Build a compact context string summarizing previous round insights.
+ */
+function buildProgressiveContext(insights: AttackDiscovery[]): string {
+  if (insights.length === 0) return '';
+
+  const summary = insights
+    .map((i) => `- "${i.title}" (${i.alertIds.length} alerts)`)
+    .join('\n');
+
+  return `\n\nPreviously identified attack patterns:\n${summary}\nIdentify NEW patterns not covered above.`;
+}
+
 export const runIncrementalProgressive = async ({
   log,
   alerts,
   alertsPerRound,
   maxRounds,
   generateRoundInsights,
+  qualityOptions = {},
 }: IncrementalRunnerParams): Promise<AttackDiscoveryTaskOutput> => {
   const startTime = Date.now();
   const rounds: RoundMetrics[] = [];
   let currentInsights: AttackDiscovery[] = [];
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
+  let currentBatchSize = alertsPerRound;
 
-  const alertStrings = alerts.map((a) => a.pageContent);
-  const totalRounds = Math.min(Math.ceil(alertStrings.length / alertsPerRound), maxRounds);
+  // #2: Cluster alerts if enabled
+  let alertStrings = alerts.map((a) => a.pageContent);
+  if (qualityOptions.clusterAlerts) {
+    log.info('Clustering alerts by host/rule name');
+    alertStrings = clusterAlertsByKey(alertStrings);
+  }
 
+  const totalRounds = Math.min(Math.ceil(alertStrings.length / currentBatchSize), maxRounds);
   log.info(
-    `Incremental progressive: ${alertStrings.length} alerts, ${alertsPerRound}/round, ${totalRounds} rounds`
+    `Incremental progressive: ${alertStrings.length} alerts, ${currentBatchSize}/round, ~${totalRounds} rounds`
   );
 
-  for (let i = 0; i < totalRounds; i++) {
-    const roundStart = Date.now();
-    const roundAlerts = alertStrings.slice(i * alertsPerRound, (i + 1) * alertsPerRound);
-    const roundNumber = i + 1;
+  let offset = 0;
+  let roundNumber = 0;
 
-    log.info(`Round ${roundNumber}/${totalRounds}: processing ${roundAlerts.length} alerts`);
+  while (offset < alertStrings.length && roundNumber < maxRounds) {
+    const roundStart = Date.now();
+    const roundAlerts = alertStrings.slice(offset, offset + currentBatchSize);
+    roundNumber++;
+
+    // #3: Inject progressive context if enabled
+    let enrichedAlerts = roundAlerts;
+    if (qualityOptions.progressiveContext && currentInsights.length > 0) {
+      const ctx = buildProgressiveContext(currentInsights);
+      // Append context as the last "alert" — the model will see it as additional input
+      enrichedAlerts = [...roundAlerts, ctx];
+      log.info(`Injecting progressive context: ${currentInsights.length} previous insights`);
+    }
+
+    log.info(`Round ${roundNumber}: processing ${roundAlerts.length} alerts (batch=${currentBatchSize})`);
 
     const { insights: newInsights, usage } = await generateRoundInsights(
-      roundAlerts,
+      enrichedAlerts,
       currentInsights
     );
 
@@ -144,8 +203,59 @@ export const runIncrementalProgressive = async ({
     });
 
     log.info(
-      `Round ${roundNumber} complete: ${newInsights.length} insights, ${usage.inputTokens + usage.outputTokens} tokens, ${roundDuration}ms`
+      `Round ${roundNumber} complete: ${newInsights.length} insights, ${(usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0)} tokens, ${roundDuration}ms`
     );
+
+    offset += currentBatchSize;
+
+    // #4: Adaptive batch sizing
+    if (qualityOptions.adaptiveBatchSize) {
+      if (newInsights.length <= 1 && currentBatchSize > 15) {
+        currentBatchSize = Math.max(15, Math.floor(currentBatchSize * 0.6));
+        log.info(`Adaptive: reducing batch to ${currentBatchSize} (only ${newInsights.length} insight)`);
+      } else if (newInsights.length >= 5 && currentBatchSize < alertsPerRound) {
+        currentBatchSize = Math.min(alertsPerRound, Math.floor(currentBatchSize * 1.3));
+        log.info(`Adaptive: increasing batch to ${currentBatchSize} (${newInsights.length} insights)`);
+      }
+    }
+  }
+
+  // #1: Synthesis pass — consolidate all insights into a coherent set
+  if (qualityOptions.synthesisPass && currentInsights.length > 1) {
+    log.info(`Synthesis pass: consolidating ${currentInsights.length} insights`);
+    const synthStart = Date.now();
+
+    // Build a compact representation of all insights as "alerts" for the synthesis round
+    const insightSummaries = currentInsights.map(
+      (i, idx) =>
+        `Attack #${idx + 1}: "${i.title}"\nAlerts: ${i.alertIds.join(', ')}\nSummary: ${i.summaryMarkdown.slice(0, 200)}`
+    );
+
+    try {
+      const { insights: synthesized, usage: synthUsage } = await generateRoundInsights(
+        insightSummaries,
+        []
+      );
+
+      if (synthesized.length > 0) {
+        log.info(`Synthesis produced ${synthesized.length} consolidated insights`);
+        currentInsights = synthesized;
+
+        totalInputTokens += synthUsage?.inputTokens ?? 0;
+        totalOutputTokens += synthUsage?.outputTokens ?? 0;
+
+        rounds.push({
+          roundNumber: roundNumber + 1,
+          alertCount: 0,
+          insightCount: synthesized.length,
+          durationMs: Date.now() - synthStart,
+          inputTokens: synthUsage?.inputTokens ?? 0,
+          outputTokens: synthUsage?.outputTokens ?? 0,
+        });
+      }
+    } catch (err) {
+      log.warning(`Synthesis pass failed — keeping original insights: ${(err as Error).message}`);
+    }
   }
 
   const endTime = Date.now();
@@ -166,7 +276,6 @@ export const runIncrementalProgressive = async ({
 
 /**
  * Delta mode: simulates processing only NEW alerts since a previous run.
- * Skips the first `previouslyProcessedCount` alerts and processes the rest.
  */
 export const runIncrementalDelta = async ({
   log,
@@ -181,11 +290,10 @@ export const runIncrementalDelta = async ({
   const deltaSize = deltaAlerts.length;
 
   log.info(
-    `Incremental delta: ${alertStrings.length} total alerts, ${previouslyProcessedCount} previously processed, ${deltaSize} new (delta)`
+    `Incremental delta: ${alertStrings.length} total, ${previouslyProcessedCount} processed, ${deltaSize} new`
   );
 
   if (deltaSize === 0) {
-    log.info('No new alerts — returning empty result');
     return {
       insights: [],
       rounds: [],
@@ -196,7 +304,6 @@ export const runIncrementalDelta = async ({
     };
   }
 
-  // Process only the delta alerts using the progressive runner
   return runIncrementalProgressive({
     log,
     alerts: deltaAlerts.map((content) => ({ pageContent: content, metadata: {} })),

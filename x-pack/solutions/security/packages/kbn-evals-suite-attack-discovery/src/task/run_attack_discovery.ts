@@ -352,6 +352,7 @@ export const runAttackDiscovery = async ({
         alerts: input.anonymizedAlerts,
         alertsPerRound: input.alertsPerRound,
         maxRounds: input.maxRounds,
+        qualityOptions: input.qualityOptions,
         generateRoundInsights: async (roundAlerts, previousInsights) => {
           return generateInsights({
             inferenceClient,

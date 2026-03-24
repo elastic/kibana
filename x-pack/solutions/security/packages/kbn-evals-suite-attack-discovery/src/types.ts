@@ -53,6 +53,12 @@ export interface AttackDiscoveryIncrementalProgressiveInput extends Record<strin
   anonymizedAlerts: ReadonlyArray<AnonymizedAlert>;
   alertsPerRound: number;
   maxRounds: number;
+  qualityOptions?: {
+    synthesisPass?: boolean;
+    clusterAlerts?: boolean;
+    progressiveContext?: boolean;
+    adaptiveBatchSize?: boolean;
+  };
 }
 
 export interface AttackDiscoveryIncrementalDeltaInput extends Record<string, unknown> {
