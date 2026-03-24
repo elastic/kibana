@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSuperDatePicker,
   EuiSpacer,
 } from '@elastic/eui';
@@ -22,6 +23,7 @@ import * as logTableI18n from '../execution_log_table/translations';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { RuleDurationFormat } from '../execution_log_table/rule_duration_format';
+import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { ExecutionDetailsFlyout } from './execution_details_flyout';
 import {
   RULE_EXECUTION_TYPE_BACKFILL,
@@ -95,7 +97,12 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
   const columns: Array<EuiBasicTableColumn<UnifiedExecutionResult>> = [
     {
       field: 'outcome.status',
-      name: i18n.COLUMN_STATUS,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.COLUMN_STATUS}
+          tooltipContent={i18n.COLUMN_STATUS_TOOLTIP}
+        />
+      ),
       render: (_value: unknown, record: UnifiedExecutionResult) => (
         <ExecutionStatusIndicator
           status={UNIFIED_TO_RULE_STATUS[record.outcome.status]}
@@ -106,7 +113,12 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
     },
     {
       field: 'backfill',
-      name: i18n.COLUMN_RUN_TYPE,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.COLUMN_RUN_TYPE}
+          tooltipContent={i18n.COLUMN_RUN_TYPE_TOOLTIP}
+        />
+      ),
       render: (_value: unknown, record: UnifiedExecutionResult) => {
         const typeStr = record.backfill
           ? RULE_EXECUTION_TYPE_BACKFILL
@@ -117,26 +129,46 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
     },
     {
       field: 'execution_start',
-      name: i18n.COLUMN_TIMESTAMP,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.COLUMN_TIMESTAMP}
+          tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
+        />
+      ),
       render: (value: string) => <FormattedDate value={value} fieldName="execution_start" />,
       width: '15%',
     },
     {
       field: 'execution_duration_ms',
-      name: i18n.COLUMN_DURATION,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.COLUMN_DURATION}
+          tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
+        />
+      ),
       render: (value: number) => <RuleDurationFormat duration={value} />,
       width: '10%',
     },
     {
       field: 'metrics.alert_counts.new',
-      name: i18n.COLUMN_ALERTS_CREATED,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.COLUMN_ALERTS_CREATED}
+          tooltipContent={i18n.COLUMN_ALERTS_CREATED_TOOLTIP}
+        />
+      ),
       render: (_value: unknown, record: UnifiedExecutionResult) =>
         record.metrics.alert_counts?.new ?? 0,
       width: '10%',
     },
     {
       field: 'outcome.message',
-      name: i18n.COLUMN_MESSAGE,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.COLUMN_MESSAGE}
+          tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+        />
+      ),
       render: (_value: unknown, record: UnifiedExecutionResult) => record.outcome.message ?? '—',
       width: '35%',
     },
@@ -186,7 +218,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
   }, [pageIndex, pageSize]);
 
   return (
-    <>
+    <EuiPanel hasBorder>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
           <HeaderSection title={logTableI18n.TABLE_TITLE} subtitle={logTableI18n.TABLE_SUBTITLE} />
@@ -229,6 +261,6 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
       {selectedItem && (
         <ExecutionDetailsFlyout item={selectedItem} onClose={() => setSelectedItem(null)} />
       )}
-    </>
+    </EuiPanel>
   );
 };
