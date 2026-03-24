@@ -17,6 +17,7 @@ type TimelineControlColumnCellRenderProps = Pick<
   | 'columnValues'
   | 'disablePinAction'
   | 'ecsData'
+  | 'eventData'
   | 'eventId'
   | 'eventIdToNoteIds'
   | 'hit'
@@ -37,6 +38,7 @@ export const TimelineControlColumnCellRender = memo(function TimelineControlColu
       disablePinAction={props.disablePinAction}
       disableTimelineAction={false}
       ecsData={props.ecsData}
+      eventData={props.eventData}
       eventId={props.eventId}
       eventIdToNoteIds={props.eventIdToNoteIds}
       hit={props.hit}
