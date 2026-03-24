@@ -105,7 +105,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
 
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slos).toHaveLength(2);
@@ -141,7 +141,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
 
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slos).toHaveLength(0);
@@ -204,7 +204,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slos).toHaveLength(1);
         expect(createdPanel.config.slos[0].slo_id).toBe(sloId);
