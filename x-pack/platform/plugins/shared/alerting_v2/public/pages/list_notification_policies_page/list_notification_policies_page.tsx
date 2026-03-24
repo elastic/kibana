@@ -13,22 +13,29 @@ import {
   EuiFlexItem,
   EuiPageHeader,
   EuiSpacer,
+  EuiText,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
+  type EuiTableSelectionType,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   CreateNotificationPolicyData,
+  NotificationPolicyBulkAction,
   NotificationPolicyResponse,
 } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import moment from 'moment';
+import React, { useCallback, useState } from 'react';
 import { DeleteNotificationPolicyConfirmModal } from '../../components/notification_policy/delete_confirmation_modal';
-import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
+import { NotificationPolicyDestinationsSummary } from '../../components/notification_policy/notification_policy_destinations_summary';
 import { NotificationPolicySnoozePopover } from '../../components/notification_policy/notification_policy_snooze_popover';
 import { NotificationPolicyStateBadge } from '../../components/notification_policy/notification_policy_state_badge';
 import { paths } from '../../constants';
+import { useBulkActionNotificationPolicies } from '../../hooks/use_bulk_action_notification_policies';
 import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useDeleteNotificationPolicy } from '../../hooks/use_delete_notification_policy';
 import { useDisableNotificationPolicy } from '../../hooks/use_disable_notification_policy';
@@ -36,23 +43,36 @@ import { useEnableNotificationPolicy } from '../../hooks/use_enable_notification
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
 import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
 import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
-import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
+import { NotificationPoliciesBulkActions } from './components/notification_policies_bulk_actions';
 import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
+import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
 
 const DEFAULT_PER_PAGE = 20;
+
+const descriptionTextStyle = css`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
 
 export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
-  const [destinationType, setDestinationType] = useState('');
   const [enabled, setEnabled] = useState('');
-  const [sortField, setSortField] = useState<'name' | 'updatedAt'>('name');
+  const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
+  const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
 
+  const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const settings = useService(CoreStart('settings'));
+  const dateTimeFormat = settings.client.get<string>('dateFormat');
 
   const { mutate: createNotificationPolicy } = useCreateNotificationPolicy();
   const { mutate: deleteNotificationPolicy, isLoading: isDeleting } = useDeleteNotificationPolicy();
@@ -77,6 +97,13 @@ export const ListNotificationPoliciesPage = () => {
     variables: unsnoozeVariables,
   } = useUnsnoozeNotificationPolicy();
 
+  const { mutate: bulkAction, isLoading: isBulkActionInProgress } =
+    useBulkActionNotificationPolicies();
+
+  const clearSelection = useCallback(() => {
+    setSelectedPolicies([]);
+  }, []);
+
   const navigateToCreate = () => {
     navigateToUrl(basePath.prepend(paths.notificationPolicyCreate));
   };
@@ -86,42 +113,36 @@ export const ListNotificationPoliciesPage = () => {
   };
 
   const clonePolicy = (policy: NotificationPolicyResponse) => {
-    const { name, description, destinations, matcher, group_by, throttle } = policy;
+    const { name, description, destinations, matcher, groupBy, throttle } = policy;
     const data: CreateNotificationPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
       ...(matcher != null && { matcher }),
-      ...(group_by != null && { group_by }),
+      ...(groupBy != null && { groupBy }),
       ...(throttle != null && { throttle }),
     };
     createNotificationPolicy(data);
   };
 
-  const { data, isLoading, isError, error, refetch } = useFetchNotificationPolicies({
+  const { data, isError, error, isFetching } = useFetchNotificationPolicies({
     page: page + 1,
     perPage,
     search: search || undefined,
-    destinationType: destinationType || undefined,
     enabled: enabled === 'true' ? true : enabled === 'false' ? false : undefined,
     sortField,
     sortOrder: sortDirection,
   });
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
     setPage(0);
-  };
+  }, []);
 
-  const handleDestinationTypeChange = (value: string) => {
-    setDestinationType(value);
-    setPage(0);
-  };
-
-  const handleEnabledChange = (value: string) => {
+  const handleEnabledChange = useCallback((value: string) => {
     setEnabled(value);
     setPage(0);
-  };
+  }, []);
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -130,10 +151,13 @@ export const ListNotificationPoliciesPage = () => {
     page: tablePage,
     sort,
   }: CriteriaWithPagination<NotificationPolicyResponse>) => {
-    setPage(tablePage.index);
-    setPerPage(tablePage.size);
+    if (tablePage) {
+      setPage(tablePage.index);
+      setPerPage(tablePage.size);
+    }
+
     if (sort) {
-      setSortField(sort.field as 'name' | 'updatedAt');
+      setSortField(sort.field as 'name' | 'updatedAt' | 'updatedByUsername');
       setSortDirection(sort.direction);
     }
   };
@@ -143,6 +167,43 @@ export const ListNotificationPoliciesPage = () => {
     pageSize: perPage,
     totalItemCount: total,
     pageSizeOptions: [10, 20, 50],
+  };
+
+  const hasSelection = selectedPolicies.length > 0;
+
+  const handleBulkAction = (
+    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze',
+    snoozedUntil?: string
+  ) => {
+    const ids = selectedPolicies.map((policy) => policy.id);
+    let actions: NotificationPolicyBulkAction[];
+    if (action === 'snooze' && snoozedUntil) {
+      actions = ids.map((id) => ({ id, action: 'snooze', snoozedUntil }));
+    } else if (action === 'enable') {
+      actions = ids.map((id) => ({ id, action: 'enable' }));
+    } else if (action === 'disable') {
+      actions = ids.map((id) => ({ id, action: 'disable' }));
+    } else if (action === 'unsnooze') {
+      actions = ids.map((id) => ({ id, action: 'unsnooze' }));
+    } else if (action === 'delete') {
+      actions = ids.map((id) => ({ id, action: 'delete' }));
+    } else {
+      throw new Error(`Invalid action: ${action}`);
+    }
+
+    bulkAction({ actions }, { onSuccess: clearSelection });
+  };
+
+  const onSelectionChange = (newSelectedItems: NotificationPolicyResponse[]) => {
+    setSelectedPolicies(newSelectedItems);
+  };
+
+  const selection: EuiTableSelectionType<NotificationPolicyResponse> = {
+    onSelectionChange,
+    selectable: () => {
+      return !isBulkActionInProgress;
+    },
+    selected: selectedPolicies,
   };
 
   const columns: Array<EuiBasicTableColumn<NotificationPolicyResponse>> = [
@@ -155,6 +216,16 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       sortable: true,
+      render: (name: string, policy: NotificationPolicyResponse) => (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{name}</EuiFlexItem>
+          {policy.description && (
+            <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+              {policy.description}
+            </EuiText>
+          )}
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'destinations',
@@ -165,14 +236,29 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       render: (destinations: NotificationPolicyResponse['destinations']) => (
-        <EuiFlexGroup responsive={false} gutterSize="s" wrap>
-          {destinations?.map((destination) => (
-            <EuiFlexItem key={destination.id} grow={false}>
-              <NotificationPolicyDestinationBadge destination={destination} />
-            </EuiFlexItem>
-          ))}
-          {destinations?.length === 0 ? '-' : null}
-        </EuiFlexGroup>
+        <NotificationPolicyDestinationsSummary destinations={destinations} />
+      ),
+    },
+    {
+      field: 'updatedAt',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.updatedAt"
+          defaultMessage="Last update"
+        />
+      ),
+      sortable: true,
+      render: (updatedAt: string) => moment(updatedAt).format(dateTimeFormat),
+    },
+    {
+      field: 'updatedByUsername',
+      sortable: true,
+      width: '200px',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.updatedByUsername"
+          defaultMessage="Updated by"
+        />
       ),
     },
     {
@@ -187,8 +273,6 @@ export const ListNotificationPoliciesPage = () => {
       render: (_enabled: boolean, policy: NotificationPolicyResponse) => (
         <NotificationPolicyStateBadge
           policy={policy}
-          onEnable={(id) => enablePolicy(id)}
-          onDisable={(id) => disablePolicy(id)}
           isLoading={
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
@@ -218,27 +302,10 @@ export const ListNotificationPoliciesPage = () => {
               (isSnoozing && snoozeVariables?.id === policy.id) ||
               (isUnsnoozing && unsnoozeVariables === policy.id)
             }
+            isDisabled={hasSelection}
           />
         );
       },
-    },
-    {
-      field: 'updatedAt',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.updatedAt"
-          defaultMessage="Last update"
-        />
-      ),
-      sortable: true,
-      render: (updatedAt: string) =>
-        new Date(updatedAt).toLocaleString(undefined, {
-          month: 'short',
-          year: 'numeric',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        }),
     },
     {
       name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
@@ -259,6 +326,7 @@ export const ListNotificationPoliciesPage = () => {
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
           }
+          isDisabled={hasSelection}
         />
       ),
     },
@@ -276,7 +344,7 @@ export const ListNotificationPoliciesPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton key="create-policy" onClick={navigateToCreate}>
+          <EuiButton key="create-policy" onClick={navigateToCreate} fill>
             <FormattedMessage
               id="xpack.alertingV2.notificationPoliciesList.createPolicyButton"
               defaultMessage="Create policy"
@@ -284,16 +352,13 @@ export const ListNotificationPoliciesPage = () => {
           </EuiButton>,
         ]}
       />
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
         <EuiSpacer size="m" />
         <EuiFlexItem grow={false}>
           <NotificationPoliciesSearchBar
             onSearchChange={handleSearchChange}
-            destinationType={destinationType}
-            onDestinationTypeChange={handleDestinationTypeChange}
             enabled={enabled}
             onEnabledChange={handleEnabledChange}
-            onRefresh={() => refetch()}
           />
         </EuiFlexItem>
         {errorMessage ? (
@@ -314,23 +379,77 @@ export const ListNotificationPoliciesPage = () => {
             <EuiSpacer />
           </>
         ) : null}
-        <EuiBasicTable
-          items={items}
-          columns={columns}
-          responsiveBreakpoint={false}
-          loading={isLoading}
-          pagination={pagination}
-          sorting={{
-            sort: {
-              field: sortField,
-              direction: sortDirection,
-            },
-          }}
-          onChange={onTableChange}
-          tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
-            defaultMessage: 'Notification Policies',
-          })}
-        />
+        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          {total > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <FormattedMessage
+                      id="xpack.alertingV2.notificationPoliciesList.showingLabel"
+                      defaultMessage="Showing {rangeBold} of {totalBold}"
+                      values={{
+                        rangeBold: (
+                          <strong>
+                            {Math.min(page * perPage + 1, total)}-
+                            {Math.min((page + 1) * perPage, total)}
+                          </strong>
+                        ),
+                        totalBold: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.alertingV2.notificationPoliciesList.showingLabelTotal"
+                              defaultMessage="{total} {total, plural, one {notification policy} other {notification policies}}"
+                              values={{ total }}
+                            />
+                          </strong>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                {hasSelection && (
+                  <EuiFlexItem grow={false}>
+                    <NotificationPoliciesBulkActions
+                      selectedPolicies={selectedPolicies}
+                      onClearSelection={clearSelection}
+                      onBulkAction={handleBulkAction}
+                      isLoading={isBulkActionInProgress}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          <EuiBasicTable
+            items={items}
+            columns={columns}
+            itemId="id"
+            selection={selection}
+            loading={isFetching}
+            pagination={pagination}
+            responsiveBreakpoint={false}
+            css={css`
+              .euiTableHeaderMobile .euiCheckbox {
+                display: none;
+              }
+              .euiTableRowCellCheckbox {
+                vertical-align: top;
+                padding-top: ${euiTheme.size.xs};
+              }
+            `}
+            sorting={{
+              sort: {
+                field: sortField,
+                direction: sortDirection,
+              },
+            }}
+            onChange={onTableChange}
+            tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
+              defaultMessage: 'Notification Policies',
+            })}
+          />
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       {policyToDelete && (

@@ -17,6 +17,8 @@ export interface CreateRuleParams {
 export interface FindRulesParams {
   page?: number;
   perPage?: number;
+  filter?: string;
+  search?: string;
 }
 
 export interface FindRulesResponse {
@@ -24,4 +26,18 @@ export interface FindRulesResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export type BulkRulesParams =
+  | { ids: string[]; filter?: undefined }
+  | { filter: string; ids?: undefined };
+
+export interface BulkOperationError {
+  id: string;
+  error: { message: string; statusCode: number };
+}
+
+export interface BulkOperationResponse {
+  rules: RuleResponse[];
+  errors: BulkOperationError[];
 }

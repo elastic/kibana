@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { INVESTIGATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/investigation_section'; /* Table */
-import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/about_section'; /* Table */
-import {
-  CONTENT_TEST_ID,
-  HEADER_TEST_ID,
-} from '../../../../flyout_v2/shared/components/expandable_section';
 import { PREFIX } from '../../../shared/test_ids';
+
+const HEADER_TEST_ID = 'Header';
+const CONTENT_TEST_ID = 'Content';
 
 /* Table */
 
@@ -64,6 +61,7 @@ export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAd
 
 /* About section */
 
+const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
 
@@ -73,10 +71,6 @@ export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TES
 export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
   `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
 
-const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
-export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
-export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
-
 export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
 
 export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
@@ -85,6 +79,7 @@ export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Detail
 
 /* Investigation section */
 
+const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_ID + HEADER_TEST_ID;
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
@@ -169,14 +164,6 @@ export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
 export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
 
-/* Threat intelligence */
-
-export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
-export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
-  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;
-export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID =
-  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
-
 /* Correlations */
 
 export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;
@@ -192,19 +179,11 @@ export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
 export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
   `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
 
-/* Insights Prevalence */
-
-export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
-
 /* Visualizations section */
 
 export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = VISUALIZATIONS_TEST_ID + HEADER_TEST_ID;
 export const VISUALIZATIONS_SECTION_CONTENT_TEST_ID = VISUALIZATIONS_TEST_ID + CONTENT_TEST_ID;
-
-export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
-export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
-  `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
 
 export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
 export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;

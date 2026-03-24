@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -153,27 +153,24 @@ export const mosaicStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
-      partitionStatePrimaryMetricOptionsSchema,
-      {
-        meta: {
-          description:
-            'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
-        },
-      }
-    ),
+    metric: esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+      meta: {
+        description:
+          'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+      },
+    }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },
       })
     ),
     group_breakdown_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of group breakdown dimensions (minimum 1)' },

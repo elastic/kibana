@@ -62,6 +62,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       });
 
       expect(result).toEqual(
@@ -78,6 +79,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
+          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
         })
       );
     });
@@ -120,6 +122,41 @@ describe('createRuleDataSchema', () => {
     it('rejects an invalid kind', () => {
       const result = createRuleDataSchema.safeParse({ ...validCreateData, kind: 'unknown' });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('metadata.description', () => {
+    it('accepts a valid description', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: 'A useful description' },
+      });
+
+      expect(result.metadata.description).toBe('A useful description');
+    });
+
+    it('accepts metadata without description (optional)', () => {
+      const result = createRuleDataSchema.parse(validCreateData);
+
+      expect(result.metadata.description).toBeUndefined();
+    });
+
+    it('rejects a description exceeding 1024 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: 'a'.repeat(1025) },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a description at the 1024 character limit', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: 'a'.repeat(1024) },
+      });
+
+      expect(result.metadata.description).toHaveLength(1024);
     });
   });
 
@@ -369,6 +406,15 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects recovering_count greater than 1000', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { recovering_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('rejects an invalid pending_operator', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -542,6 +588,25 @@ describe('updateRuleDataSchema', () => {
     expect(result).toEqual({ metadata: { name: 'updated name' } });
   });
 
+  it('accepts a description update', () => {
+    const result = updateRuleDataSchema.parse({
+      metadata: { description: 'updated description' },
+    });
+    expect(result.metadata?.description).toBe('updated description');
+  });
+
+  it('accepts artifacts in update payload and supports null removal', () => {
+    const withArtifacts = updateRuleDataSchema.parse({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+    expect(withArtifacts).toMatchObject({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+
+    const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
+    expect(nullArtifacts).toMatchObject({ artifacts: null });
+  });
+
   it('accepts an enabled field set to true', () => {
     const result = updateRuleDataSchema.parse({ enabled: true });
     expect(result).toEqual({ enabled: true });
@@ -584,6 +649,13 @@ describe('updateRuleDataSchema', () => {
     it('rejects a name exceeding 256 characters', () => {
       const result = updateRuleDataSchema.safeParse({
         metadata: { name: 'a'.repeat(257) },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a description exceeding 1024 characters', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { description: 'a'.repeat(1025) },
       });
       expect(result.success).toBe(false);
     });
@@ -642,6 +714,14 @@ describe('updateRuleDataSchema', () => {
     it('rejects pending_count greater than 1000', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovering_count greater than 1000', () => {
+      const result = updateRuleDataSchema.safeParse({
+        state_transition: { recovering_count: 1001 },
       });
 
       expect(result.success).toBe(false);

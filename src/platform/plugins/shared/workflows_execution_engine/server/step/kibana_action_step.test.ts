@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaActionStep } from './kibana_action_step';
+import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
+
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
@@ -83,6 +84,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       failStep: jest.fn().mockResolvedValue(undefined),
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
+      node: {},
     } as any;
 
     mockWorkflowRuntime = {
@@ -107,19 +109,21 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   describe('fetcher options extraction', () => {
     it('should extract fetcher options and not include them in request body', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test Case',
-          description: 'Test Description',
-          owner: 'securitySolution',
-          fetcher: {
-            skip_ssl_verification: true,
-          },
+      const stepWith = {
+        title: 'Test Case',
+        description: 'Test Description',
+        owner: 'securitySolution',
+        fetcher: {
+          skip_ssl_verification: true,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -128,7 +132,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       // Verify fetch was called
       expect(mockedFetch).toHaveBeenCalled();
@@ -148,21 +152,23 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
 
     it('should handle raw API format and extract fetcher', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.api',
-        spaceId: 'default',
-        with: {
-          request: {
-            method: 'POST',
-            path: '/api/cases',
-            body: { title: 'Test' },
-          },
-          fetcher: {
-            skip_ssl_verification: true,
-          },
+      const stepWith = {
+        request: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test' },
+        },
+        fetcher: {
+          skip_ssl_verification: true,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.api',
+        stepId: 'test_step',
+        stepType: 'kibana.api',
+        configuration: { name: 'test_step', type: 'kibana.api', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -171,7 +177,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       expect(mockedFetch).toHaveBeenCalled();
 
@@ -185,14 +191,16 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
 
     it('should work without fetcher options', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test Case',
-        },
+      const stepWith = {
+        title: 'Test Case',
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -201,7 +209,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       expect(mockedFetch).toHaveBeenCalled();
 
@@ -219,17 +227,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-          fetcher: {
-            skip_ssl_verification: true,
-          },
+      const stepWith = {
+        title: 'Test',
+        fetcher: {
+          skip_ssl_verification: true,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -238,7 +248,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       // Verify Agent was created with correct options
       expect(MockedAgent).toHaveBeenCalledWith(
@@ -255,14 +265,16 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-        },
+      const stepWith = {
+        title: 'Test',
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -271,7 +283,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       // Agent should not be created
       expect(MockedAgent).not.toHaveBeenCalled();
@@ -284,17 +296,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-          fetcher: {
-            keep_alive: true,
-          },
+      const stepWith = {
+        title: 'Test',
+        fetcher: {
+          keep_alive: true,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -303,7 +317,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -318,17 +332,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-          fetcher: {
-            follow_redirects: false,
-          },
+      const stepWith = {
+        title: 'Test',
+        fetcher: {
+          follow_redirects: false,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -337,7 +353,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchOptions = fetchCall[1] as RequestInit;
@@ -350,17 +366,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-          fetcher: {
-            max_redirects: 10,
-          },
+      const stepWith = {
+        title: 'Test',
+        fetcher: {
+          max_redirects: 10,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -369,7 +387,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -383,18 +401,20 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-          fetcher: {
-            connections: 100,
-            pipelining: 10,
-          },
-        },
+      const stepWith = {
+        title: 'Test',
+        fetcher: {
+          connections: 100,
+          pipelining: 10,
+        } as Record<string, unknown>,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -403,7 +423,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -430,16 +450,18 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         },
       } as any);
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'GET',
-          path: '/api/status',
-          use_server_info: true,
-        },
+      const stepWith = {
+        method: 'GET',
+        path: '/api/status',
+        use_server_info: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -448,7 +470,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchedUrl = fetchCall[0] as string;
@@ -459,16 +481,18 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   describe('use_localhost option', () => {
     it('should use localhost URL when use_localhost is true', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'GET',
-          path: '/api/status',
-          use_localhost: true,
-        },
+      const stepWith = {
+        method: 'GET',
+        path: '/api/status',
+        use_localhost: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -477,7 +501,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchedUrl = fetchCall[0] as string;
@@ -487,17 +511,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   describe('use_server_info and use_localhost mutual exclusion', () => {
     it('should throw an error when both use_server_info and use_localhost are true', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'GET',
-          path: '/api/status',
-          use_server_info: true,
-          use_localhost: true,
-        },
+      const stepWith = {
+        method: 'GET',
+        path: '/api/status',
+        use_server_info: true,
+        use_localhost: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -506,7 +532,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await expect((kibanaStep as any)._run(step.with)).rejects.toThrow(
+      await expect((kibanaStep as any)._run(stepWith)).rejects.toThrow(
         'Cannot set both use_server_info and use_localhost'
       );
       expect(mockedFetch).not.toHaveBeenCalled();
@@ -515,17 +541,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   describe('debug option', () => {
     it('should include _debug with fullUrl in output when debug is true', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'POST',
-          path: '/api/cases',
-          body: { title: 'Test' },
-          debug: true,
-        },
+      const stepWith = {
+        method: 'POST',
+        path: '/api/cases',
+        body: { title: 'Test' },
+        debug: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -534,7 +562,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.output._debug).toBeDefined();
       expect(result.output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
@@ -542,15 +570,17 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
 
     it('should not include _debug when debug is false or absent', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'GET',
-          path: '/api/status',
-        },
+      const stepWith = {
+        method: 'GET',
+        path: '/api/status',
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -559,7 +589,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.output._debug).toBeUndefined();
     });
@@ -567,16 +597,18 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     it('should include _debug in error details when debug is true and request fails', async () => {
       mockedFetch.mockResolvedValue(createMockResponse({}, 500));
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'POST',
-          path: '/api/bad-endpoint',
-          debug: true,
-        },
+      const stepWith = {
+        method: 'POST',
+        path: '/api/bad-endpoint',
+        debug: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -585,7 +617,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.details._debug).toBeDefined();
@@ -593,17 +625,19 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
 
     it('should include fullUrl with query params in _debug output', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          method: 'GET',
-          path: '/api/cases',
-          query: { page: '1', perPage: '10' },
-          debug: true,
-        },
+      const stepWith = {
+        method: 'GET',
+        path: '/api/cases',
+        query: { page: '1', perPage: '10' },
+        debug: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.request',
+        stepId: 'test_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -612,7 +646,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.output._debug.fullUrl).toBe(
         'https://localhost:5601/api/cases?page=1&perPage=10'
@@ -622,19 +656,21 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   describe('meta params not forwarded to HTTP request', () => {
     it('should not include use_server_info, use_localhost, or debug in request body', async () => {
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test Case',
-          description: 'Test Description',
-          owner: 'securitySolution',
-          use_server_info: false,
-          use_localhost: false,
-          debug: true,
-        },
+      const stepWith = {
+        title: 'Test Case',
+        description: 'Test Description',
+        owner: 'securitySolution',
+        use_server_info: false,
+        use_localhost: false,
+        debug: true,
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -643,7 +679,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchOptions = fetchCall[1] as RequestInit;
@@ -662,20 +698,22 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const step: KibanaActionStep = {
-        name: 'test_step',
-        type: 'kibana.createCase',
-        spaceId: 'default',
-        with: {
-          title: 'Test',
-          fetcher: {
-            skip_ssl_verification: true,
-            keep_alive: true,
-            max_redirects: 5,
-            follow_redirects: false,
-          },
+      const stepWith = {
+        title: 'Test',
+        fetcher: {
+          skip_ssl_verification: true,
+          keep_alive: true,
+          max_redirects: 5,
+          follow_redirects: false,
         },
       };
+      const step = {
+        id: 'test_step',
+        type: 'kibana.createCase',
+        stepId: 'test_step',
+        stepType: 'kibana.createCase',
+        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -684,7 +722,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(step.with);
+      await (kibanaStep as any)._run(stepWith);
 
       // Verify Agent was created with all options
       expect(MockedAgent).toHaveBeenCalledWith(
@@ -729,15 +767,21 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         },
       } as any);
 
-      const step: KibanaActionStep = {
-        name: 'size_limit_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        'max-step-size': '100b',
-        with: {
-          request: { method: 'GET', path: '/api/status' },
-        },
+      const stepWith = {
+        request: { method: 'GET', path: '/api/status' },
       };
+      const step = {
+        id: 'size_limit_step',
+        type: 'kibana.request',
+        stepId: 'size_limit_step',
+        stepType: 'kibana.request',
+        configuration: {
+          name: 'size_limit_step',
+          type: 'kibana.request',
+          'max-step-size': '100b',
+          with: stepWith,
+        },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -746,7 +790,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.type).toBe('StepSizeLimitExceeded');
@@ -774,14 +818,16 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         },
       } as any);
 
-      const step: KibanaActionStep = {
-        name: 'error_truncation_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          request: { method: 'GET', path: '/api/broken' },
-        },
+      const stepWith = {
+        request: { method: 'GET', path: '/api/broken' },
       };
+      const step = {
+        id: 'error_truncation_step',
+        type: 'kibana.request',
+        stepId: 'error_truncation_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'error_truncation_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -790,7 +836,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
@@ -805,14 +851,16 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         status: 204,
       } as any);
 
-      const step: KibanaActionStep = {
-        name: 'delete_rule',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          request: { method: 'DELETE', path: '/api/alerting/rule/some-rule-id' },
-        },
+      const stepWith = {
+        request: { method: 'DELETE', path: '/api/alerting/rule/some-rule-id' },
       };
+      const step = {
+        id: 'delete_rule',
+        type: 'kibana.request',
+        stepId: 'delete_rule',
+        stepType: 'kibana.request',
+        configuration: { name: 'delete_rule', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -821,7 +869,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.error).toBeUndefined();
       expect(result.output).toEqual({});
@@ -833,18 +881,20 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         status: 204,
       } as any);
 
-      const step: KibanaActionStep = {
-        name: 'delete_rule',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          request: {
-            method: 'DELETE',
-            path: '/api/alerting/rule/some-rule-id',
-          },
-          debug: true,
+      const stepWith = {
+        request: {
+          method: 'DELETE',
+          path: '/api/alerting/rule/some-rule-id',
         },
+        debug: true,
       };
+      const step = {
+        id: 'delete_rule',
+        type: 'kibana.request',
+        stepId: 'delete_rule',
+        stepType: 'kibana.request',
+        configuration: { name: 'delete_rule', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -853,7 +903,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.error).toBeUndefined();
       expect(result.output._debug).toBeDefined();
@@ -881,18 +931,20 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         },
       } as any);
 
-      const step: KibanaActionStep = {
-        name: 'create_case',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          request: {
-            method: 'POST',
-            path: '/api/cases',
-            body: { title: 'Test' },
-          },
+      const stepWith = {
+        request: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test' },
         },
       };
+      const step = {
+        id: 'create_case',
+        type: 'kibana.request',
+        stepId: 'create_case',
+        stepType: 'kibana.request',
+        configuration: { name: 'create_case', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
 
       const kibanaStep = new KibanaActionStepImpl(
         step,
@@ -901,7 +953,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(step.with);
+      const result = await (kibanaStep as any)._run(stepWith);
 
       expect(result.error).toBeUndefined();
       expect(result.output).toEqual({ id: 'case-1', title: 'Test' });

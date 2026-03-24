@@ -13,11 +13,11 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
-    description: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
+    name: { type: 'text' },
+    description: { type: 'text' },
     enabled: { type: 'boolean' },
+    groupBy: { type: 'keyword' },
     destinations: {
-      type: 'object',
       properties: {
         type: { type: 'keyword' },
         id: { type: 'keyword' },
@@ -25,7 +25,6 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
     },
     snoozedUntil: { type: 'date' },
     auth: {
-      type: 'object',
       properties: {
         apiKey: { type: 'binary' },
         owner: { type: 'keyword' },
@@ -33,8 +32,10 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     createdBy: { type: 'keyword' },
+    createdByUsername: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },
+    updatedByUsername: { type: 'keyword' },
     updatedAt: { type: 'date' },
   },
 };

@@ -7,6 +7,12 @@
 
 import type { RuleKind } from './rule_data_schema';
 
+export interface RuleArtifact {
+  id: string;
+  type: string;
+  value: string;
+}
+
 /**
  * API response for a single rule.
  *
@@ -18,6 +24,7 @@ export interface RuleResponse {
   kind: RuleKind;
   metadata: {
     name: string;
+    description?: string;
     owner?: string;
     labels?: string[];
   };
@@ -54,6 +61,7 @@ export interface RuleResponse {
     behavior?: 'no_data' | 'last_status' | 'recover';
     timeframe?: string;
   };
+  artifacts?: RuleArtifact[];
   enabled: boolean;
   createdBy: string | null;
   createdAt: string;

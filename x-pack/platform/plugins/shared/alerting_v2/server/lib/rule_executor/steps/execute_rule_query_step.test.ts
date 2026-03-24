@@ -115,6 +115,20 @@ describe('ExecuteRuleQueryStep', () => {
     ]);
   });
 
+  it('yields continue with empty esqlRowBatch when query returns no rows', async () => {
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results).toHaveLength(1);
+    expect(results[0].type).toBe('continue');
+    expect(results[0].state.esqlRowBatch).toEqual([]);
+    expect(results[0].state.queryPayload).toBeDefined();
+  });
+
   it('halts with state_not_ready when rule is missing from state', async () => {
     const state = createRulePipelineState();
 

@@ -24,7 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const filterBar = getService('filterBar');
 
+  const PINNED_FILTER = {
+    key: 'type.keyword',
+    value: 'farequote',
+  };
   function runTests(testData: TestData) {
     const savedSearchTitle = `Field stats for ${testData.suiteTitle} ${Date.now()}`;
     const dashboardTitle = `Dashboard for ${testData.suiteTitle} ${Date.now()}`;
@@ -88,6 +93,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldRow.exampleContent
           );
         }
+        await filterBar.addFilter({
+          field: PINNED_FILTER.key,
+          operation: 'is not',
+          value: PINNED_FILTER.value,
+        });
+        await ml.dataVisualizerTable.assertNonMetricFieldContents(
+          'text',
+          '@version',
+          '0 (0%)',
+          0,
+          false
+        );
+        await filterBar.removeFilter(PINNED_FILTER.key);
 
         await PageObjects.dashboard.saveDashboard(dashboardTitle);
       });

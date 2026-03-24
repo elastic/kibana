@@ -6,11 +6,18 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
@@ -19,6 +26,7 @@ import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
@@ -32,15 +40,20 @@ export const RuleFormPage = () => {
   const { search } = useLocation();
   const cloneFromId = new URLSearchParams(search).get('cloneFrom');
 
+  let content: React.ReactNode;
   if (ruleId) {
-    return <FetchedRuleFormPage ruleId={ruleId} mode="edit" />;
+    content = <FetchedRuleFormPage ruleId={ruleId} mode="edit" />;
+  } else if (cloneFromId) {
+    content = <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
+  } else {
+    content = <RuleFormPageContent />;
   }
 
-  if (cloneFromId) {
-    return <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
-  }
-
-  return <RuleFormPageContent />;
+  return (
+    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+      {content}
+    </EuiPageTemplate.Section>
+  );
 };
 
 interface FetchedRuleFormPageProps {
@@ -115,7 +128,10 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const lens = useService(PluginStart('lens')) as LensPublicStart;
   const queryClient = useQueryClient();
+
+  useBreadcrumbs(isEditing ? 'edit' : 'create');
 
   const ruleFormServices = useMemo(
     () => ({
@@ -124,8 +140,9 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
       dataViews,
       notifications,
       application,
+      lens,
     }),
-    [http, data, dataViews, notifications, application]
+    [http, data, dataViews, notifications, application, lens]
   );
 
   const onSuccess = useCallback(() => {
