@@ -54,7 +54,7 @@ describe('CaseView actions', () => {
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
   });
 
-  it('clicking copyClipboard icon copies case id', () => {
+  it('clicking copy icon copies case id', () => {
     const originalClipboard = global.window.navigator.clipboard;
 
     Object.defineProperty(navigator, 'clipboard', {
