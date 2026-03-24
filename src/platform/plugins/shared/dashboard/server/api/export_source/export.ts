@@ -18,21 +18,22 @@ import { stripUnmappedKeys } from '../scope_tooling';
 export async function exportSource(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  dashboardState: DashboardState,
-  isDashboardAppRequest: boolean = false
+  dashboardState: DashboardState
 ): Promise<DashboardExportSourceResponseBody> {
   try {
     const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
     const transformedApiDashboardState = transformDashboardOut(
       storedDashboardState ?? {},
-      references ?? [],
-      isDashboardAppRequest
+      references ?? []
     );
     const { data: scopedDashboardState, warnings } = stripUnmappedKeys(
       transformedApiDashboardState as Partial<DashboardState>
     );
     const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
-    return { data: sanitizedDashboardState, warnings };
+    return {
+      data: sanitizedDashboardState,
+      ...(warnings.length ? { warnings } : {}),
+    };
   } catch (exportSourceError) {
     throw Boom.badRequest(`Invalid response. ${exportSourceError.message}`);
   }

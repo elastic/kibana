@@ -108,7 +108,10 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="exportFlyoutCloseButton" onClick={closeFlyout}>
-              <FormattedMessage id="share.export.closeFlyoutButtonLabel" defaultMessage="Close" />
+              <FormattedMessage
+                id="dashboard.exportSource.closeFlyoutButtonLabel"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
