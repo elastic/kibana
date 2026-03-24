@@ -17,6 +17,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { extractTextContent } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { getSearchPrompt } from './prompts';
 import type { SearchTarget } from './types';
 import { progressMessages } from './i18n';
@@ -50,14 +51,22 @@ export const createSearchToolGraph = ({
   esClient,
   logger,
   events,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   const getTools = (state: StateType) => {
-    const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
+    const relevanceTool = createRelevanceSearchTool({
+      model,
+      esClient,
+      events,
+      logger,
+      topSnippetsConfig,
+    });
     const nlSearchTool = createNaturalLanguageSearchTool({
       model,
       esClient,

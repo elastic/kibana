@@ -41,6 +41,7 @@ export {
   naturalLanguageSearch,
   type NaturalLanguageSearchResponse,
   runSearchTool,
+  type TopSnippetsConfig,
 } from './tools';
 export {
   buildVisualizationConfig,

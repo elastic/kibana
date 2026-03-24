@@ -171,6 +171,13 @@ export interface SmlSetup {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+export interface TopSnippetsConfig {
+  /** Maximum number of snippets per document. */
+  numSnippets: number;
+  /** Maximum number of words per snippet. */
+  numWords: number;
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -197,6 +204,11 @@ export interface AgentBuilderPluginSetup {
    * Used to register content types for discovery and search.
    */
   sml: SmlSetup;
+  /**
+   * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
+   * Exposed so that dependent plugins can pass these values to search utilities.
+   */
+  topSnippets: TopSnippetsConfig;
 }
 
 /**

@@ -12,6 +12,7 @@ import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+  AGENT_BUILDER_TOP_SNIPPETS_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -45,6 +46,21 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       technicalPreview: true,
       requiresPageReload: false,
       readonly: false,
+    },
+    [AGENT_BUILDER_TOP_SNIPPETS_ENABLED_SETTING_ID]: {
+      description: i18n.translate('xpack.agentBuilder.uiSettings.topSnippetsEnabled.description', {
+        defaultMessage:
+          'When enabled, uses ES|QL TOP_SNIPPETS to extract relevant snippets from search results instead of Elasticsearch highlighting.',
+      }),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.topSnippetsEnabled.name', {
+        defaultMessage: 'Elastic Agent Builder: Top Snippets',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      technicalPreview: true,
+      requiresPageReload: false,
+      readonly: true,
+      readonlyMode: 'ui',
     },
     [AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID]: {
       description: i18n.translate('xpack.agentBuilder.uiSettings.connectorsEnabled.description', {

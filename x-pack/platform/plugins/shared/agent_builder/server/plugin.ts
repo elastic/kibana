@@ -244,6 +244,7 @@ export class AgentBuilderPlugin
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
+      topSnippets: this.config.topSnippets,
     };
   }
 

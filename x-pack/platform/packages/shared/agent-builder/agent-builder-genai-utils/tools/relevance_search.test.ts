@@ -210,4 +210,44 @@ describe('relevanceSearch', () => {
       ).rejects.toThrow('No searchable text fields found, aborting search.');
     });
   });
+
+  describe('topSnippetsConfig passthrough', () => {
+    it('passes topSnippetsConfig to performMatchSearch when provided', async () => {
+      resolveResourceMock.mockResolvedValue({
+        fields: [{ path: 'content', type: 'text', meta: {} }],
+      });
+
+      const topSnippetsConfig = { numSnippets: 3, numWords: 500 };
+      await relevanceSearch({
+        term: 'test',
+        target: 'my-index',
+        esClient,
+        model,
+        logger,
+        topSnippetsConfig,
+      });
+
+      expect(performMatchSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({ topSnippetsConfig })
+      );
+    });
+
+    it('does not pass topSnippetsConfig when not provided', async () => {
+      resolveResourceMock.mockResolvedValue({
+        fields: [{ path: 'content', type: 'text', meta: {} }],
+      });
+
+      await relevanceSearch({
+        term: 'test',
+        target: 'my-index',
+        esClient,
+        model,
+        logger,
+      });
+
+      expect(performMatchSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({ topSnippetsConfig: undefined })
+      );
+    });
+  });
 });

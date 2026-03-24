@@ -35,7 +35,7 @@ export const registerTools = ({
   const { agentBuilder } = setupDeps;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
-    searchTool(),
+    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),
     generateEsqlTool(),
