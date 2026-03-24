@@ -17,7 +17,7 @@ interface OsquerySchemaLinkProps {
 export const OsquerySchemaLink = React.memo<OsquerySchemaLinkProps>(
   ({ osqueryVersion = FALLBACK_OSQUERY_VERSION }) => (
     <EuiText size="xs">
-      <EuiLink href={`https://osquery.io/schema/${osqueryVersion}`} target="_blank">
+      <EuiLink href={`https://osquery.io/schema/${osqueryVersion}`} target="_blank" rel="noopener nofollow noreferrer">
         <FormattedMessage
           id="xpack.osquery.osquerySchemaLinkLabel"
           defaultMessage="Osquery schema"
