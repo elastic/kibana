@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*.ts",
     "common/**/*.ts",
+    "test/scout_automatic_import_v2/**/*",
     "../../../../typings/**/*"
   ],
   "exclude": [
@@ -57,6 +58,7 @@
     "@kbn/utility-types",
     "@kbn/code-editor",
     "@kbn/monaco",
+    "@kbn/scout",
     "@kbn/core-analytics-browser"
   ]
 }

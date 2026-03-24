@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
+  - '@kbn/scout'
   - '@kbn/core-analytics-browser'
 tags:
   - plugin
@@ -73,6 +74,7 @@ fileGroups:
     - public/**/*
     - server/**/*.ts
     - common/**/*.ts
+    - test/scout_automatic_import_v2/**/*
     - '!target/**/*'
 tasks:
   jest:
