@@ -68,6 +68,7 @@ describe('event reporter', () => {
       reportingFunctions.reportInterceptInteractionTermination({
         interceptRunId: 1,
         interactionType: 'dismissal',
+        interceptId: 'some_configured_trigger_id',
       });
 
       expect(analyticsStart.reportEvent).toHaveBeenCalledWith(
@@ -75,6 +76,7 @@ describe('event reporter', () => {
         {
           interaction_run_id: String(1),
           interaction_type: 'dismissal',
+          intercept_id: 'some_configured_trigger_id',
         }
       );
     });
@@ -95,6 +97,7 @@ describe('event reporter', () => {
 
       reportingFunctions.reportInterceptInteractionProgress({
         interceptRunId: 1,
+        interceptId: 'some_configured_trigger_id',
         metricId: 'satisfaction',
         value: 5,
       });
@@ -103,6 +106,7 @@ describe('event reporter', () => {
         'product_intercept_interaction_progress',
         {
           interaction_run_id: String(1),
+          intercept_id: 'some_configured_trigger_id',
           interaction_metric: 'satisfaction',
           interaction_metric_value: 5,
         }
@@ -124,6 +128,7 @@ describe('event reporter', () => {
       const reportingFunctions = eventReporter.start({ analytics: analyticsStart });
 
       reportingFunctions.reportTriggerFetchError({
+        interceptId: 'some_configured_trigger_id',
         errorMessage: 'Fetch failed',
       });
 
@@ -131,6 +136,7 @@ describe('event reporter', () => {
         'product_intercept_trigger_fetch_error',
         {
           trigger_fetch_error_message: 'Fetch failed',
+          intercept_id: 'some_configured_trigger_id',
         }
       );
     });

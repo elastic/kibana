@@ -24,10 +24,9 @@ import {
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
 } from '../datasets';
 import { collectSampleDocuments } from './collect_sample_documents';
-
-const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
