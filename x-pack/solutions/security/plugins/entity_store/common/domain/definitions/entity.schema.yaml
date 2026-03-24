@@ -168,8 +168,6 @@ components:
     UserEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -209,8 +207,6 @@ components:
             risk:
              $ref: '#/components/schemas/EntityRiskScoreRecord'
              additionalProperties: false
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -225,8 +221,6 @@ components:
     HostEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -271,8 +265,6 @@ components:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -287,8 +279,6 @@ components:
     ServiceEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -305,8 +295,6 @@ components:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -327,8 +315,6 @@ components:
     GenericEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
