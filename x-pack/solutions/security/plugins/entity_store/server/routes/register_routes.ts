@@ -19,6 +19,7 @@ import {
   registerRunMaintainer,
   registerForceCcsExtractToUpdates,
   registerForceHistorySnapshot,
+  registerCRUDGet,
   registerCRUDUpsert,
   registerCRUDUpsertBulk,
   registerCRUDDelete,
@@ -39,6 +40,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerForceCcsExtractToUpdates(router);
   registerForceHistorySnapshot(router);
   registerCheckPrivileges(router);
+  registerCRUDGet(router);
   registerCRUDUpsert(router);
   registerCRUDUpsertBulk(router);
   registerCRUDDelete(router);

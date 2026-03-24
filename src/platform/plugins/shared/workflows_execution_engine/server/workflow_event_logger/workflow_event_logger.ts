@@ -198,8 +198,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     const message = event.message || '';
 
     // Format workflow context metadata
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const meta: Record<string, any> = {
+    const meta: Record<string, unknown> = {
       workflow: {
         name: event.workflow?.name,
         execution_id: event.workflow?.execution_id,

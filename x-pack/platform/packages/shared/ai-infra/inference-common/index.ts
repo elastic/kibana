@@ -150,6 +150,8 @@ export {
   contextWindowFromModelName,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
+  type RawConnector,
+  type RawInferenceConnector,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
