@@ -16,7 +16,7 @@ describe('getLatestAlertEventStateQuery', () => {
 
     const printed = query.print();
 
-    expect(printed).toContain('FROM .alerting-events');
+    expect(printed).toContain('FROM .rule-events');
     expect(printed).toContain('WHERE');
     expect(printed).toContain('rule.id == ?ruleId');
     expect(printed).toContain('group_hash IN ("hash-a", "hash-b")');
@@ -100,7 +100,7 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(request).toHaveProperty('query');
     expect(request).toHaveProperty('params');
     expect(typeof request.query).toBe('string');
-    expect(request.query).toContain('FROM .alerting-events');
+    expect(request.query).toContain('FROM .rule-events');
 
     const params = request.params as Array<{ ruleId?: string }>;
     const ruleIdParam = params.find((p) => 'ruleId' in p);

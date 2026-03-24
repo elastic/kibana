@@ -14,6 +14,7 @@ export async function setupTestServers(settings = {}) {
     settings: {
       es: {
         license: 'trial',
+        esArgs: ['xpack.ml.enabled=false', 'xpack.watcher.enabled=false'],
       },
     },
   });
@@ -25,6 +26,10 @@ export async function setupTestServers(settings = {}) {
       {
         xpack: {
           alerting_v2: { enabled: true },
+          reporting: { enabled: false },
+          canvas: { enabled: false },
+          uptime: { enabled: false },
+          fleet: { enabled: false },
           task_manager: { unsafe: { exclude_task_types: ['alerting_v2:dispatcher'] } },
         },
         ...settings,

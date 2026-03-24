@@ -18,7 +18,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesBulkQuerySchema = schema.object({
-  ids: schema.maybe(schema.arrayOf(schema.string())),
+  ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
 });
 
 @injectable()
