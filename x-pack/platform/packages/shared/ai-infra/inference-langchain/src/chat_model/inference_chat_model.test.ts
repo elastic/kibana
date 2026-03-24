@@ -653,7 +653,9 @@ describe('InferenceChatModel', () => {
       });
 
       expect(concatChunk.usage_metadata).toEqual({
+        input_token_details: {},
         input_tokens: 5,
+        output_token_details: {},
         output_tokens: 20,
         total_tokens: 25,
       });

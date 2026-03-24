@@ -6,7 +6,7 @@
  */
 
 import { RunnableConfig } from '@langchain/core/runnables';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import type { AgentRunnableSequence } from '@langchain/classic/agents';
 import { BaseMessage } from '@langchain/core/messages';
 import {
   ContentReferencesStore,

@@ -8,7 +8,7 @@
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';

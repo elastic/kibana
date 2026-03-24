@@ -6,7 +6,7 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import type { AgentRunnableSequence } from '@langchain/classic/agents';
 import { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 

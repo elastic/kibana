@@ -7,8 +7,8 @@
 
 import { PromptTemplate } from '@langchain/core/prompts';
 import { DynamicTool } from '@langchain/core/tools';
-import { LLMChain } from 'langchain/chains';
-import { OutputFixingParser } from 'langchain/output_parsers';
+import { LLMChain } from '@langchain/classic/chains';
+import { OutputFixingParser } from '@langchain/classic/output_parsers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type {
