@@ -19,10 +19,11 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorIdWithInferenceAllowlist } from '../../../routes/utils/resolve_connector_id_with_inference_allowlist';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -153,10 +154,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 try {
                   const onboardingLogger = taskContext.logger.get('onboarding');
                   const settings = await modelSettingsClient.getSettings();
-                  const connectorIdForError = await resolveConnectorId({
+                  const connectorIdForError = await resolveConnectorIdWithInferenceAllowlist({
                     connectorId: settings.connectorIdRuleGeneration,
                     uiSettingsClient,
                     logger: onboardingLogger,
+                    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                    searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
                   });
                   onboardingLogger.debug(
                     `Using connector ${connectorIdForError} for rule generation (error enrichment)`

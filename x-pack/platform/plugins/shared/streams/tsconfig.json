@@ -83,5 +83,6 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-plugin",
+    "@kbn/search-inference-endpoints",
   ]
 }

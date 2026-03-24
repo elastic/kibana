@@ -12,13 +12,14 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import type { Insight } from '@kbn/streams-schema';
 import { getImpactLevel } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorIdWithInferenceAllowlist } from '../../../routes/utils/resolve_connector_id_with_inference_allowlist';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -61,10 +62,12 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
               const taskLogger = taskContext.logger.get('insights_discovery');
               const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
+              const connectorId = await resolveConnectorIdWithInferenceAllowlist({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
+                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
               });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
