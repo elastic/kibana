@@ -11,12 +11,23 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import type { WorkflowsActionParams } from './types';
 import WorkflowsParamsFields from './workflows_params';
+import {
+  createDefaultWorkflowYaml,
+  createWorkflowListItem,
+  createWorkflowListResponse,
+} from './workflows_params.test_fixtures';
 
 // Mock useKibana hook
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
+}));
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui/src/api/workflows_api', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
 }));
 
 // Suppress known React warnings/errors from UI library components in tests
@@ -29,7 +40,7 @@ beforeAll(() => {
   // eslint-disable-next-line no-console
   console.error = (...args: any[]) => {
     const message = typeof args[0] === 'string' ? args[0] : String(args[0]);
-    if (message.includes('validationResult') || message.includes('Http service is not available')) {
+    if (message.includes('validationResult') || message.includes('HTTP service is not available')) {
       // Suppress these specific known warnings/errors in tests
       return;
     }
@@ -51,7 +62,6 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('WorkflowsParamsFields', () => {
   const mockEditAction = jest.fn();
-  const mockHttpGet = jest.fn();
 
   const defaultProps = {
     actionParams: {
@@ -70,39 +80,26 @@ describe('WorkflowsParamsFields', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    jest.clearAllMocks();
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Test Workflow 1',
           description: 'Description for workflow 1',
-          status: 'active',
-          definition: {
-            enabled: true,
-            triggers: [{ type: 'manual' }],
-            tags: ['test-tag'],
-          },
-        },
-        {
+          definition: createDefaultWorkflowYaml({ tags: ['test-tag'] }),
+        }),
+        createWorkflowListItem({
           id: 'workflow-2',
           name: 'Test Workflow 2',
           description: 'Description for workflow 2',
-          status: 'active',
-          definition: {
-            enabled: true,
-            triggers: [{ type: 'manual' }],
-            tags: [],
-          },
-        },
-      ],
-    });
+          definition: createDefaultWorkflowYaml({ tags: [] }),
+        }),
+      ])
+    );
 
     mockUseKibana.mockReturnValue({
       services: {
-        http: {
-          get: mockHttpGet,
-        },
         application: {
           getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
         },
@@ -150,7 +147,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show loading spinner while fetching workflows', async () => {
-    mockHttpGet.mockReturnValue(new Promise(() => {})); // Never resolves
+    mockWorkflowApi.getWorkflows.mockReturnValue(new Promise(() => {})); // Never resolves
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -165,14 +162,9 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
-        query: expect.objectContaining({
-          size: 1000,
-          page: 1,
-          query: '',
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      });
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1000, page: 1, query: '' })
+      );
     });
 
     // Check that the selectable component is rendered
@@ -189,14 +181,9 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
-        query: expect.objectContaining({
-          size: 1000,
-          page: 1,
-          query: '',
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      });
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1000, page: 1, query: '' })
+      );
     });
 
     await waitFor(() => {
@@ -215,7 +202,7 @@ describe('WorkflowsParamsFields', () => {
 
   test('should show error message when fetch fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    mockHttpGet.mockRejectedValue(new Error('Failed to fetch'));
+    mockWorkflowApi.getWorkflows.mockRejectedValue(new Error('Failed to fetch'));
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -231,7 +218,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show no workflows message when no workflows are returned', async () => {
-    mockHttpGet.mockResolvedValue({ results: [] });
+    mockWorkflowApi.getWorkflows.mockResolvedValue(createWorkflowListResponse([], 1, 10, 0));
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -292,32 +279,24 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle workflows with different statuses', async () => {
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Active Workflow',
           description: 'Active workflow description',
-          status: 'active',
-          definition: {
-            enabled: true,
-            triggers: [{ type: 'manual' }],
-            tags: [],
-          },
-        },
-        {
+          enabled: true,
+          definition: createDefaultWorkflowYaml({ enabled: true, triggers: [{ type: 'manual' }] }),
+        }),
+        createWorkflowListItem({
           id: 'workflow-2',
           name: 'Inactive Workflow',
           description: 'Inactive workflow description',
-          status: 'inactive',
-          definition: {
-            enabled: false,
-            triggers: [{ type: 'manual' }],
-            tags: [],
-          },
-        },
-      ],
-    });
+          enabled: false,
+          definition: createDefaultWorkflowYaml({ enabled: false, triggers: [{ type: 'manual' }] }),
+        }),
+      ])
+    );
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -339,16 +318,17 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show warning icon for selected disabled workflow', async () => {
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Inactive Workflow',
           description: 'Inactive workflow description',
-          status: 'inactive',
-        },
-      ],
-    });
+          enabled: false,
+          definition: createDefaultWorkflowYaml({ enabled: false, triggers: [{ type: 'manual' }] }),
+        }),
+      ])
+    );
 
     const propsWithDisabledSelected = {
       ...defaultProps,
@@ -370,16 +350,16 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle workflow selection correctly', async () => {
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Test Workflow',
           description: 'This is a test workflow',
-          status: 'active',
-        },
-      ],
-    });
+          definition: createDefaultWorkflowYaml(),
+        }),
+      ])
+    );
 
     const propsWithSelected = {
       ...defaultProps,
@@ -427,13 +407,10 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle create new workflow click', async () => {
-    // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
       services: {
-        http: {
-          get: mockHttpGet,
-        },
+        http: {},
         application: {
           getUrlForApp: mockGetUrlForApp,
         },
@@ -463,6 +440,7 @@ describe('WorkflowsParamsFields', () => {
     mockUseKibana.mockReturnValue({
       services: {},
     } as any);
+    mockWorkflowApi.getWorkflows.mockRejectedValue(new Error('HTTP service is not available'));
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -479,9 +457,7 @@ describe('WorkflowsParamsFields', () => {
 
     // Should show no workflows available
     await waitFor(() => {
-      // Check that the empty state is shown
       expect(screen.getAllByText("You don't have any workflows yet").length).toBeGreaterThan(0);
-      // Check that there's at least one "Create your first workflow" button
       const createButtons = screen.getAllByText('Create your first workflow');
       expect(createButtons.length).toBeGreaterThan(0);
     });
@@ -548,14 +524,9 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
-        query: expect.objectContaining({
-          size: 1000,
-          page: 1,
-          query: '',
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      });
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1000, page: 1, query: '' })
+      );
     });
 
     await waitFor(() => {
@@ -579,58 +550,54 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should sort workflows: enabled before disabled, alert-triggered before others', async () => {
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-disabled-alert',
           name: 'Disabled Alert Workflow',
           description: 'Disabled with alert trigger',
-          status: 'inactive',
           enabled: false,
-          definition: {
+          definition: createDefaultWorkflowYaml({
             enabled: false,
             triggers: [{ type: 'alert' }],
             tags: [],
-          },
-        },
-        {
+          }),
+        }),
+        createWorkflowListItem({
           id: 'workflow-enabled-manual',
           name: 'Enabled Manual Workflow',
           description: 'Enabled with manual trigger',
-          status: 'active',
           enabled: true,
-          definition: {
+          definition: createDefaultWorkflowYaml({
             enabled: true,
             triggers: [{ type: 'manual' }],
             tags: [],
-          },
-        },
-        {
+          }),
+        }),
+        createWorkflowListItem({
           id: 'workflow-disabled-manual',
           name: 'Disabled Manual Workflow',
           description: 'Disabled with manual trigger',
-          status: 'inactive',
           enabled: false,
-          definition: {
+          definition: createDefaultWorkflowYaml({
             enabled: false,
             triggers: [{ type: 'manual' }],
             tags: [],
-          },
-        },
-        {
+          }),
+        }),
+        createWorkflowListItem({
           id: 'workflow-enabled-alert',
           name: 'Enabled Alert Workflow',
           description: 'Enabled with alert trigger',
-          status: 'active',
           enabled: true,
-          definition: {
+          definition: createDefaultWorkflowYaml({
             enabled: true,
             triggers: [{ type: 'alert' }],
             tags: [],
-          },
-        },
-      ],
-    });
+          }),
+        }),
+      ])
+    );
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -657,43 +624,39 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle workflows without definition or triggers gracefully', async () => {
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Workflow Without Definition',
           description: 'A workflow without definition',
-          status: 'active',
-          definition: {
+          definition: createDefaultWorkflowYaml({
             enabled: true,
             triggers: [{ type: 'manual' }],
             tags: [],
-          },
-        },
-        {
+          }),
+        }),
+        createWorkflowListItem({
           id: 'workflow-2',
           name: 'Workflow With Empty Triggers',
           description: 'A workflow with empty triggers',
-          status: 'active',
           definition: {
-            enabled: true,
+            ...createDefaultWorkflowYaml(),
             triggers: [],
-            tags: [],
           },
-        },
-        {
+        }),
+        createWorkflowListItem({
           id: 'workflow-3',
           name: 'Alert Workflow',
           description: 'A workflow with alert trigger',
-          status: 'active',
-          definition: {
+          definition: createDefaultWorkflowYaml({
             enabled: true,
             triggers: [{ type: 'alert' }],
             tags: [],
-          },
-        },
-      ],
-    });
+          }),
+        }),
+      ])
+    );
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -701,14 +664,9 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
-        query: expect.objectContaining({
-          size: 1000,
-          page: 1,
-          query: '',
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      });
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1000, page: 1, query: '' })
+      );
     });
 
     await waitFor(() => {
@@ -738,32 +696,26 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should render view all workflows link and handle click to open in new tab', async () => {
-    // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
       services: {
-        http: {
-          get: mockHttpGet,
-        },
+        http: {},
         application: {
           getUrlForApp: mockGetUrlForApp,
         },
       },
     } as any);
 
-    mockHttpGet.mockResolvedValue({
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Test Workflow',
           description: 'A test workflow',
-          status: 'active',
-          definition: {
-            triggers: [{ type: 'manual' }],
-          },
-        },
-      ],
-    });
+          definition: createDefaultWorkflowYaml({ triggers: [{ type: 'manual' }] }),
+        }),
+      ])
+    );
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -771,14 +723,9 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
-        query: expect.objectContaining({
-          size: 1000,
-          page: 1,
-          query: '',
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      });
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1000, page: 1, query: '' })
+      );
     });
 
     // Click on the input to open the popover
@@ -803,26 +750,28 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show disabled badge for disabled workflows', async () => {
-    const mockWorkflows = {
-      results: [
-        {
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
+        createWorkflowListItem({
           id: 'workflow-1',
           name: 'Disabled Workflow',
           description: 'A disabled workflow',
           enabled: false,
-          definition: { triggers: [] },
-        },
-      ],
-    };
-
-    mockHttpGet.mockResolvedValue(mockWorkflows);
+          definition: {
+            ...createDefaultWorkflowYaml(),
+            enabled: false,
+            triggers: [],
+          },
+        }),
+      ])
+    );
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalled();
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalled();
     });
 
     // Click on the input to open the popover
@@ -837,26 +786,29 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show "No description" for workflows with undefined description', async () => {
-    const mockWorkflows = {
-      results: [
+    mockWorkflowApi.getWorkflows.mockResolvedValue(
+      createWorkflowListResponse([
         {
-          id: 'workflow-1',
-          name: 'Workflow without description',
-          description: undefined,
-          enabled: true,
-          definition: { triggers: [] },
+          ...createWorkflowListItem({
+            id: 'workflow-1',
+            name: 'Workflow without description',
+            enabled: true,
+            definition: {
+              ...createDefaultWorkflowYaml(),
+              triggers: [],
+            },
+          }),
+          description: undefined as unknown as string,
         },
-      ],
-    };
-
-    mockHttpGet.mockResolvedValue(mockWorkflows);
+      ])
+    );
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalled();
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalled();
     });
 
     // Click on the input to open the popover

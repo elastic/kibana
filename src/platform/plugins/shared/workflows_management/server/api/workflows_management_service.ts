@@ -1573,15 +1573,15 @@ export class WorkflowsService {
       }),
     ]);
 
-    // Initialize connectorsByType with ALL available action types
-    const connectorsByType: Record<string, ConnectorTypeInfo> = {};
+    // Initialize connectorTypes with ALL available action types
+    const connectorTypes: Record<string, ConnectorTypeInfo> = {};
 
     // First, add all action types (even those without instances), excluding filtered types
     actionTypes.forEach((actionType) => {
       // Get sub-actions from our static mapping
       const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
 
-      connectorsByType[actionType.id] = {
+      connectorTypes[actionType.id] = {
         actionTypeId: actionType.id,
         displayName: actionType.name,
         instances: [],
@@ -1595,8 +1595,8 @@ export class WorkflowsService {
 
     // Then, populate instances for action types that have connectors
     connectors.forEach((connector: FindActionResult) => {
-      if (connectorsByType[connector.actionTypeId]) {
-        connectorsByType[connector.actionTypeId].instances.push({
+      if (connectorTypes[connector.actionTypeId]) {
+        connectorTypes[connector.actionTypeId].instances.push({
           id: connector.id,
           name: connector.name,
           isPreconfigured: connector.isPreconfigured,
@@ -1606,7 +1606,7 @@ export class WorkflowsService {
       }
     });
 
-    return { connectorTypes: connectorsByType, totalConnectors: connectors.length };
+    return { connectorTypes, totalConnectors: connectors.length };
   }
 
   private getConnectorInstanceConfig(

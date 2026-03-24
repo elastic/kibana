@@ -10,7 +10,8 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WorkflowApi } from './workflows_api';
 
-const VERSION_HEADER = { 'elastic-api-version': '2023-10-31' };
+const VERSION = '2023-10-31';
+const INTERNAL_VERSION = '1';
 
 describe('WorkflowApi', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -32,7 +33,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows', {
         query: params,
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
 
@@ -40,8 +41,8 @@ describe('WorkflowApi', () => {
       await api.getWorkflows();
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows', {
-        query: undefined,
-        headers: VERSION_HEADER,
+        query: {},
+        version: VERSION,
       });
     });
   });
@@ -51,7 +52,7 @@ describe('WorkflowApi', () => {
       await api.getWorkflow('wf-1');
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/wf-1', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
 
@@ -59,7 +60,7 @@ describe('WorkflowApi', () => {
       await api.getWorkflow('id/with/slashes');
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/id%2Fwith%2Fslashes', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -71,7 +72,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/workflow', {
         body: JSON.stringify(params),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -83,7 +84,7 @@ describe('WorkflowApi', () => {
 
       expect(http.put).toHaveBeenCalledWith('/api/workflows/workflow/wf-1', {
         body: JSON.stringify(params),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -93,7 +94,7 @@ describe('WorkflowApi', () => {
       await api.deleteWorkflow('wf-1');
 
       expect(http.delete).toHaveBeenCalledWith('/api/workflows/workflow/wf-1', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -110,7 +111,7 @@ describe('WorkflowApi', () => {
       expect(http.post).toHaveBeenCalledWith('/api/workflows', {
         query: { overwrite: true },
         body: JSON.stringify({ workflows }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
 
@@ -121,7 +122,7 @@ describe('WorkflowApi', () => {
       expect(http.post).toHaveBeenCalledWith('/api/workflows', {
         query: { overwrite: false },
         body: JSON.stringify({ workflows }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -132,7 +133,7 @@ describe('WorkflowApi', () => {
 
       expect(http.delete).toHaveBeenCalledWith('/api/workflows', {
         body: JSON.stringify({ ids: ['wf-1', 'wf-2'] }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -143,7 +144,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/mget', {
         body: JSON.stringify({ ids: ['wf-1', 'wf-2'] }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -157,7 +158,7 @@ describe('WorkflowApi', () => {
       await api.cloneWorkflow('wf-1');
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/clone', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -168,7 +169,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/validate', {
         body: JSON.stringify({ yaml: 'name: Test\nsteps: []' }),
-        headers: VERSION_HEADER,
+        version: INTERNAL_VERSION,
       });
     });
   });
@@ -179,7 +180,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/export', {
         body: JSON.stringify({ ids: ['wf-1', 'wf-2'] }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -189,7 +190,7 @@ describe('WorkflowApi', () => {
       await api.getStats();
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/stats', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -200,7 +201,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/aggs', {
         query: { fields: ['tags', 'createdBy'] },
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -210,7 +211,7 @@ describe('WorkflowApi', () => {
       await api.getConnectors();
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/connectors', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -221,7 +222,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/schema', {
         query: { loose: true },
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -248,7 +249,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/run', {
         body: JSON.stringify({ inputs, metadata }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -260,7 +261,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/test', {
         body: JSON.stringify(params),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -276,7 +277,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/step/test', {
         body: JSON.stringify(params),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -288,7 +289,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions', {
         query: params,
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -300,7 +301,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions/steps', {
         query: params,
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -312,7 +313,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1', {
         query: params,
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -322,7 +323,7 @@ describe('WorkflowApi', () => {
       await api.cancelExecution('exec-1');
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/executions/exec-1/cancel', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -332,7 +333,7 @@ describe('WorkflowApi', () => {
       await api.getStepExecution('exec-1', 'step-1');
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/step/step-1', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -344,7 +345,7 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/executions/exec-1/resume', {
         body: JSON.stringify({ input }),
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -356,7 +357,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/logs', {
         query: params,
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
 
@@ -365,7 +366,7 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/logs', {
         query: undefined,
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });
@@ -375,7 +376,7 @@ describe('WorkflowApi', () => {
       await api.getChildrenExecutions('exec-1');
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/children', {
-        headers: VERSION_HEADER,
+        version: VERSION,
       });
     });
   });

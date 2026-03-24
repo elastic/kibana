@@ -8,9 +8,16 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
+
 import { runWorkflowThunk } from './run_workflow_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 describe('runWorkflowThunk', () => {
   let store: MockStore;
@@ -40,19 +47,13 @@ describe('runWorkflowThunk', () => {
     // Set up state with mock workflow
     store.dispatch({ type: 'detail/setWorkflow', payload: mockWorkflow });
 
-    mockServices.http.post.mockResolvedValue(mockResponse);
+    mockWorkflowApi.runWorkflow.mockResolvedValue(mockResponse);
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith(
-      `/api/workflows/workflow/${mockWorkflow.id}/run`,
-      {
-        body: JSON.stringify({
-          inputs: testInputs,
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      }
-    );
+    expect(mockWorkflowApi.runWorkflow).toHaveBeenCalledWith('workflow-1', {
+      inputs: testInputs,
+    });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow execution started',
       { toastLifeTimeMs: 2000 }
@@ -78,7 +79,7 @@ describe('runWorkflowThunk', () => {
     };
 
     store.dispatch({ type: 'detail/setWorkflow', payload: mockWorkflow });
-    mockServices.http.post.mockRejectedValue(error);
+    mockWorkflowApi.runWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: {} }));
 
@@ -98,7 +99,7 @@ describe('runWorkflowThunk', () => {
     };
 
     store.dispatch({ type: 'detail/setWorkflow', payload: mockWorkflow });
-    mockServices.http.post.mockRejectedValue(error);
+    mockWorkflowApi.runWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: {} }));
 
@@ -116,7 +117,7 @@ describe('runWorkflowThunk', () => {
     const error = {};
 
     store.dispatch({ type: 'detail/setWorkflow', payload: mockWorkflow });
-    mockServices.http.post.mockRejectedValue(error);
+    mockWorkflowApi.runWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: {} }));
 
@@ -136,19 +137,11 @@ describe('runWorkflowThunk', () => {
     };
 
     store.dispatch({ type: 'detail/setWorkflow', payload: mockWorkflow });
-    mockServices.http.post.mockResolvedValue(mockResponse);
+    mockWorkflowApi.runWorkflow.mockResolvedValue(mockResponse);
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: {} }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith(
-      `/api/workflows/workflow/${mockWorkflow.id}/run`,
-      {
-        body: JSON.stringify({
-          inputs: {},
-        }),
-        headers: { 'elastic-api-version': '2023-10-31' },
-      }
-    );
+    expect(mockWorkflowApi.runWorkflow).toHaveBeenCalledWith('workflow-1', { inputs: {} });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow execution started',
       { toastLifeTimeMs: 2000 }
