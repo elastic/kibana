@@ -47,12 +47,18 @@ const resolvePanelsFromVisualizationAttachment = (
   }
 
   const { visualization } = parseResult.data;
+  const lensApiState = visualization as LensApiSchemaType & { title?: string };
 
+  // Extract title to config level, keep rest in attributes to align with expected Lens API format for by-value panels.
+  const { title, ...attributes } = lensApiState;
   return [
     {
       type: 'lens',
       uid: uuidv4(),
-      config: visualization as LensApiSchemaType,
+      config: {
+        ...(title ? { title } : {}),
+        attributes,
+      },
       sourceAttachmentId: attachmentId,
     },
   ];
