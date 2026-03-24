@@ -93,15 +93,22 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     useImperativeHandle(ref, () => ({
       isKeyDownEventHandled: (event: React.KeyboardEvent): boolean => {
-        const handledKeys = [keys.ARROW_DOWN, keys.ARROW_UP, keys.ENTER, keys.TAB];
+        const handledKeys = [
+          keys.ARROW_DOWN,
+          keys.ARROW_UP,
+          // Ctrl+n and Ctrl+p
+          ...(event.ctrlKey ? ['n', 'p'] : []),
+          keys.ENTER,
+          keys.TAB,
+        ];
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
-        if (event.key === keys.ARROW_DOWN) {
+        if (event.key === keys.ARROW_DOWN || (event.ctrlKey && event.key === 'n')) {
           const nextIndex = Math.min(activeIndex + 1, options.length - 1);
           setActiveIndex(nextIndex);
           scrollActiveIntoView(nextIndex);
-        } else if (event.key === keys.ARROW_UP) {
+        } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
           const nextIndex = Math.max(activeIndex - 1, 0);
           setActiveIndex(nextIndex);
           scrollActiveIntoView(nextIndex);
