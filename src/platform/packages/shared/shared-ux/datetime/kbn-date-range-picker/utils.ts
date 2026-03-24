@@ -243,6 +243,16 @@ export function getOptionInputText(option: TimeRangeBoundsOption): string {
   return `${startFragment.text} ${DATE_RANGE_INPUT_DELIMITER} ${endFragment.text}`;
 }
 
+/** Returns a new Date set to the start of the given day (00:00:00.000). */
+export function getStartDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+}
+
+/** Returns a new Date set to the end of the given day (23:59:59.999). */
+export function getEndDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+}
+
 /**
  * Formats a date range as a local ISO-8601 string pair with the standard delimiter.
  * e.g. "2026-03-04T10:00:00.000 to 2026-03-05T23:30:00.000"
@@ -251,40 +261,6 @@ export function formatDateRange(start: Date, end: Date): string {
   return `${toLocalPreciseString(start)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(
     end
   )}`;
-}
-
-/**
- * Parses a `HH:mm:ss.SSS` time string into its numeric components.
- */
-function parseTimeString(time: string): [number, number, number, number] {
-  const [hms, ms = '0'] = time.split('.');
-  const [h = '0', m = '0', s = '0'] = hms.split(':');
-  return [Number(h), Number(m), Number(s), Number(ms)];
-}
-
-/**
- * Combines date (year/month/day) from `date` with time from `timeSource`.
- * Falls back to `defaultTime` (`HH:mm:ss.SSS`) when timeSource is null.
- */
-export function combineDateAndTime(
-  date: Date,
-  timeSource: Date | null,
-  defaultTime = '00:00:00.000'
-): Date {
-  if (timeSource) {
-    return new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      timeSource.getHours(),
-      timeSource.getMinutes(),
-      timeSource.getSeconds(),
-      timeSource.getMilliseconds()
-    );
-  }
-
-  const [h, m, s, ms] = parseTimeString(defaultTime);
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m, s, ms);
 }
 
 /**
