@@ -130,6 +130,30 @@ describe('mergeRows', () => {
     expect(result.rows.map((r) => r.id)).toEqual(['l1', 's1', 'l2']);
   });
 
+  test('ascending sort direction reverses merge order', () => {
+    const live = [
+      row('l1', 'live', '2024-01-01T00:00:00Z'),
+      row('l2', 'live', '2024-01-03T00:00:00Z'),
+    ];
+    const scheduled = [
+      row('s1', 'scheduled', '2024-01-02T00:00:00Z'),
+      row('s2', 'scheduled', '2024-01-04T00:00:00Z'),
+    ];
+    const result = mergeRows(live, scheduled, 10, 0, 'asc');
+    expect(result.rows.map((r) => r.id)).toEqual(['l1', 's1', 'l2', 's2']);
+  });
+
+  test('descending sort direction is the default', () => {
+    const live = [
+      row('l1', 'live', '2024-01-03T00:00:00Z'),
+      row('l2', 'live', '2024-01-01T00:00:00Z'),
+    ];
+    const scheduled = [row('s1', 'scheduled', '2024-01-02T00:00:00Z')];
+    const resultDefault = mergeRows(live, scheduled, 10);
+    const resultDesc = mergeRows(live, scheduled, 10, 0, 'desc');
+    expect(resultDefault.rows.map((r) => r.id)).toEqual(resultDesc.rows.map((r) => r.id));
+  });
+
   test('multi-page simulation: all scheduled rows are reachable', () => {
     const scheduled = [
       row('s1', 'scheduled', '2024-01-10T00:00:00Z'),
