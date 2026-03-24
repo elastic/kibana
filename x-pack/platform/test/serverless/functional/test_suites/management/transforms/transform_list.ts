@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
 
-      // Best-effort cleanup. In serverless, other components might create transforms
+      // Best-effort cleanup. Solutions might set up transforms automatically
       // during/after setup, so the UI might render either the empty state or the table.
       await transform.api.cleanTransformIndices();
     });
