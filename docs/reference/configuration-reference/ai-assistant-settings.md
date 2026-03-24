@@ -9,6 +9,12 @@ applies_to:
 
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
 
+`xpack.productDocBase.artifactRepositoryUrl`
+:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co` Supports:
+    
+    * HTTP(S) URLs
+    * {applies_to}`stack: ga 9.1+` Local file paths (`file://`).
+
 `xpack.productDocBase.artifactRepositoryProxyUrl`
 :   {applies_to}`stack: ga 9.4` URL of an HTTP proxy to use when downloading product documentation artifacts. When set, {{kib}} sends repository traffic through this proxy instead of connecting directly to `xpack.productDocBase.artifactRepositoryUrl` (by default `https://kibana-knowledge-base-artifacts.elastic.co`). Supports HTTP and HTTPS URLs. Not set by default. This follows the same pattern as Fleet's [Elastic Package Registry proxy settings](https://www.elastic.co/docs/reference/fleet/epr-proxy-setting): if your organization restricts outbound traffic so {{kib}} cannot reach the public artifact host, you can route traffic to that endpoint through a network gateway, then point {{kib}} at the gateway with this setting.
 
