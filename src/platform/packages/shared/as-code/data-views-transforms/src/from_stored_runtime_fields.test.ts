@@ -57,10 +57,7 @@ describe('fromStoredRuntimeFields', () => {
       });
 
       it('sets format to undefined when fieldFormats entry has no id', () => {
-        const result = fromStoredRuntimeFields(
-          { my_field: { type: 'keyword' } },
-          { my_field: {} as any }
-        );
+        const result = fromStoredRuntimeFields({ my_field: { type: 'keyword' } }, { my_field: {} });
         const field = result[0];
         if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
         expect(field.format).toBeUndefined();
@@ -270,7 +267,7 @@ describe('fromStoredRuntimeFields', () => {
               fields: { sub: { type: 'keyword' } },
             },
           },
-          { 'my_composite.sub': {} as any }
+          { 'my_composite.sub': {} }
         );
         if (result[0].type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
         expect(result[0].fields[0].format).toBeUndefined();

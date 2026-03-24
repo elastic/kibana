@@ -9,7 +9,6 @@
 import {
   type RuntimeFieldSpec,
   type DataViewSpec,
-  type RuntimeType,
   type RuntimePrimitiveTypes,
   RUNTIME_FIELD_COMPOSITE_TYPE,
 } from '@kbn/data-views-plugin/common';
@@ -25,7 +24,7 @@ export function toStoredRuntimeFields(
 
   for (const runtimeField of runtimeFields) {
     const parsedField: RuntimeFieldSpec = {
-      type: runtimeField.type as RuntimeType,
+      type: runtimeField.type,
       ...(runtimeField.script && { script: { source: runtimeField.script } }),
     };
 
@@ -33,7 +32,7 @@ export function toStoredRuntimeFields(
       parsedField.fields = runtimeField.fields.reduce(
         (acc, field) => ({
           ...acc,
-          [field.name]: { type: field.type as RuntimePrimitiveTypes },
+          [field.name]: { type: field.type },
         }),
         {} as Record<string, { type: RuntimePrimitiveTypes }>
       );
