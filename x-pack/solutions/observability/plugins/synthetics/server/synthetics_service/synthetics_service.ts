@@ -506,6 +506,7 @@ export class SyntheticsService {
       finder.close().catch(() => {});
     }
 
+    if (this.locations.every(loc => bucketsByLocation[loc.id].length === 0)) return;
     const output = await this.getOutput();
     if (!output) {
       sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
