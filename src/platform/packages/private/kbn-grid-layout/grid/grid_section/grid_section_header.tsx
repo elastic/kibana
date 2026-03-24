@@ -368,6 +368,7 @@ const styles = {
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
         touchAction: 'none',
+        pointerEvents: 'none',
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
@@ -395,7 +396,7 @@ const styles = {
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
           opacity: 1,
-          pointerEvents: 'auto',
+          pointerEvents: 'none',
         },
       },
       '&.kbnGridSectionHeader--active button, &.kbnGridSectionHeader--active a': {
