@@ -1492,6 +1492,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1534,9 +1537,6 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
-      },
-      "installed_as_dependency": {
-        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -4583,11 +4583,11 @@
       "entityType": {
         "type": "keyword"
       },
-      "status": {
-        "type": "keyword"
-      },
       "message": {
         "type": "text"
+      },
+      "status": {
+        "type": "keyword"
       }
     }
   },
@@ -4703,6 +4703,29 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "vulnerability-posture-view": {
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "filters": {
+        "enabled": false,
+        "type": "object"
+      },
+      "isDefault": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
