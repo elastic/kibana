@@ -23,13 +23,20 @@ export function mergeInsights(
 
   for (const newInsight of newInsights) {
     const matchIndex = merged.findIndex(existingInsight => {
-      // Check 1: Alert ID overlap
-      const hasOverlap = existingInsight.alertIds.some(id =>
+      // Check 1: Alert ID overlap — only merge if significant overlap (>= 30% shared)
+      const sharedIds = existingInsight.alertIds.filter(id =>
         newInsight.alertIds.includes(id)
       );
-      if (hasOverlap) return true;
+      const overlapRatio = sharedIds.length /
+        Math.min(existingInsight.alertIds.length, newInsight.alertIds.length || 1);
+      if (overlapRatio >= 0.3) return true;
 
-      // Check 2: Title similarity (Jaccard) AND at least 2 common meaningful words
+      // Check 2: Title similarity — only for insights that cover similar-sized alert sets
+      // Prevents merging a broad "catch-all" insight with a specific one
+      const sizeDiff = Math.abs(existingInsight.alertIds.length - newInsight.alertIds.length);
+      const maxSize = Math.max(existingInsight.alertIds.length, newInsight.alertIds.length, 1);
+      if (sizeDiff / maxSize > 0.7) return false; // very different coverage — keep separate
+
       const similarity = calculateTitleSimilarity(existingInsight.title, newInsight.title);
       if (similarity >= threshold) {
         const commonMeaningfulWords = countCommonMeaningfulWords(

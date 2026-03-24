@@ -46,18 +46,38 @@ const titleSimilarity = (a: string, b: string): number => {
   return union.size === 0 ? 0 : intersection.size / union.size;
 };
 
+const STOP_WORDS = new Set(['the', 'and', 'of', 'in', 'a', 'to', 'is', 'for', 'on', 'with']);
+
+const countCommonMeaningfulWords = (a: string, b: string): number => {
+  const wordsA = new Set(a.toLowerCase().split(/\W+/).filter((w) => w && !STOP_WORDS.has(w)));
+  const wordsB = new Set(b.toLowerCase().split(/\W+/).filter((w) => w && !STOP_WORDS.has(w)));
+  return [...wordsA].filter((w) => wordsB.has(w)).length;
+};
+
 const mergeInsights = (
   existing: AttackDiscovery[],
   newInsights: AttackDiscovery[],
-  threshold = 0.8
+  threshold = 0.6
 ): AttackDiscovery[] => {
   const merged = [...existing];
 
   for (const insight of newInsights) {
     const matchIdx = merged.findIndex((e) => {
-      const hasOverlap = e.alertIds.some((id) => insight.alertIds.includes(id));
-      if (hasOverlap) return true;
-      return titleSimilarity(e.title, insight.title) >= threshold;
+      // Only merge on significant alert ID overlap (>= 30%)
+      const sharedIds = e.alertIds.filter((id) => insight.alertIds.includes(id));
+      const overlapRatio = sharedIds.length / Math.min(e.alertIds.length, insight.alertIds.length || 1);
+      if (overlapRatio >= 0.3) return true;
+
+      // Prevent merging insights with very different alert coverage
+      const sizeDiff = Math.abs(e.alertIds.length - insight.alertIds.length);
+      const maxSize = Math.max(e.alertIds.length, insight.alertIds.length, 1);
+      if (sizeDiff / maxSize > 0.7) return false;
+
+      // Title similarity + meaningful word overlap
+      if (titleSimilarity(e.title, insight.title) >= threshold) {
+        return countCommonMeaningfulWords(e.title, insight.title) >= 2;
+      }
+      return false;
     });
 
     if (matchIdx >= 0) {

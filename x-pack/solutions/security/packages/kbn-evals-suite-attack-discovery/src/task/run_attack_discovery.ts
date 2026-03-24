@@ -113,32 +113,130 @@ const generateInsights = async ({
   const textContent = (response as any).content ?? (response as any).output ?? '';
   if (textContent) {
     log.warning('No tool call found — attempting to parse insights from text response');
-    try {
-      // Try to extract JSON from the response text
-      const jsonMatch = textContent.match(/\{[\s\S]*"insights"\s*:\s*\[[\s\S]*\]/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0].endsWith('}') ? jsonMatch[0] : jsonMatch[0] + '}');
-        return {
-          insights: parsed.insights as AttackDiscovery[],
-          usage: { inputTokens, outputTokens },
-        };
-      }
-
-      // Try to parse the entire response as JSON array of insights
-      const arrayMatch = textContent.match(/\[[\s\S]*\]/);
-      if (arrayMatch) {
-        const parsed = JSON.parse(arrayMatch[0]);
-        return {
-          insights: parsed as AttackDiscovery[],
-          usage: { inputTokens, outputTokens },
-        };
-      }
-    } catch (parseError) {
-      log.warning(`Failed to parse JSON from text response: ${(parseError as Error).message}`);
+    const insights = parseInsightsFromText(textContent, log);
+    if (insights.length > 0) {
+      return { insights, usage: { inputTokens, outputTokens } };
     }
   }
 
   throw new Error('No tool call found in LLM response and could not parse JSON from text');
+};
+
+/**
+ * Robust JSON extraction from LLM text responses.
+ * Tries multiple strategies to find valid insight arrays, handling:
+ * - JSON wrapped in markdown code blocks
+ * - Partial JSON with missing closing braces
+ * - Multiple JSON objects in response
+ * - Insights nested under various keys
+ */
+function parseInsightsFromText(text: string, log: ToolingLog): AttackDiscovery[] {
+  // Strip markdown code fences if present
+  const stripped = text.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '');
+
+  // Strategy 1: Find all JSON objects that look like insights and collect them
+  const insightObjects: AttackDiscovery[] = [];
+  const objectRegex = /\{[^{}]*"title"\s*:\s*"[^"]*"[^{}]*"alertIds"\s*:\s*\[[^\]]*\][^{}]*\}/g;
+  let match;
+  while ((match = objectRegex.exec(stripped)) !== null) {
+    try {
+      const parsed = JSON.parse(match[0]);
+      if (parsed.title && parsed.alertIds) {
+        insightObjects.push(normalizeInsight(parsed));
+      }
+    } catch {
+      // skip malformed
+    }
+  }
+  if (insightObjects.length > 0) {
+    log.info(`Parsed ${insightObjects.length} insights via individual object extraction`);
+    return insightObjects;
+  }
+
+  // Strategy 2: Find { "insights": [...] } wrapper
+  const insightsKeyRegex = /"insights"\s*:\s*(\[[\s\S]*?\])\s*\}/;
+  const insightsMatch = stripped.match(insightsKeyRegex);
+  if (insightsMatch) {
+    try {
+      const arr = JSON.parse(insightsMatch[1]);
+      if (Array.isArray(arr) && arr.length > 0) {
+        log.info(`Parsed ${arr.length} insights via "insights" key extraction`);
+        return arr.map(normalizeInsight);
+      }
+    } catch {
+      // try fixing common JSON issues
+      try {
+        const fixed = insightsMatch[1].replace(/,\s*\]/, ']'); // trailing comma
+        const arr = JSON.parse(fixed);
+        if (Array.isArray(arr) && arr.length > 0) {
+          log.info(`Parsed ${arr.length} insights via "insights" key (fixed trailing comma)`);
+          return arr.map(normalizeInsight);
+        }
+      } catch {
+        // continue to next strategy
+      }
+    }
+  }
+
+  // Strategy 3: Find any top-level JSON array
+  const arrayRegex = /\[[\s\S]*\]/;
+  const arrayMatch = stripped.match(arrayRegex);
+  if (arrayMatch) {
+    try {
+      const arr = JSON.parse(arrayMatch[0]);
+      if (Array.isArray(arr) && arr.length > 0 && arr[0].title) {
+        log.info(`Parsed ${arr.length} insights via array extraction`);
+        return arr.map(normalizeInsight);
+      }
+    } catch {
+      // continue
+    }
+  }
+
+  // Strategy 4: Try parsing the entire text as JSON
+  try {
+    const parsed = JSON.parse(stripped);
+    if (parsed.insights && Array.isArray(parsed.insights)) {
+      log.info(`Parsed ${parsed.insights.length} insights via full text JSON parse`);
+      return parsed.insights.map(normalizeInsight);
+    }
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      log.info(`Parsed ${parsed.length} insights via full text array parse`);
+      return parsed.map(normalizeInsight);
+    }
+  } catch {
+    // not valid JSON
+  }
+
+  log.warning('Could not extract any insights from text response');
+  return [];
+}
+
+/**
+ * Normalize an insight object — handle variations in field names from OSS models
+ */
+function normalizeInsight(raw: Record<string, unknown>): AttackDiscovery {
+  return {
+    title: (raw.title as string) ?? 'Untitled Attack Discovery',
+    alertIds: Array.isArray(raw.alertIds)
+      ? (raw.alertIds as string[])
+      : Array.isArray(raw.alert_ids)
+        ? (raw.alert_ids as string[])
+        : [],
+    summaryMarkdown: (raw.summaryMarkdown as string) ??
+      (raw.summary_markdown as string) ??
+      (raw.summary as string) ?? '',
+    detailsMarkdown: (raw.detailsMarkdown as string) ??
+      (raw.details_markdown as string) ??
+      (raw.details as string) ?? '',
+    entitySummaryMarkdown: (raw.entitySummaryMarkdown as string) ??
+      (raw.entity_summary_markdown as string),
+    mitreAttackTactics: Array.isArray(raw.mitreAttackTactics)
+      ? (raw.mitreAttackTactics as string[])
+      : Array.isArray(raw.mitre_attack_tactics)
+        ? (raw.mitre_attack_tactics as string[])
+        : undefined,
+  } as AttackDiscovery;
 };
 
 export const runAttackDiscovery = async ({
