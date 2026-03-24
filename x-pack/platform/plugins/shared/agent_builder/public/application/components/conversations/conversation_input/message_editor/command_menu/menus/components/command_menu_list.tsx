@@ -41,11 +41,23 @@ interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
   readonly isLoading: boolean;
   readonly onSelect: (option: CommandMenuListOption) => void;
+  readonly renderExtraContent?: (key: string) => React.ReactNode;
+  readonly width?: number;
   readonly 'data-test-subj'?: string;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
-  ({ options, isLoading, onSelect, 'data-test-subj': dataTestSubj = 'commandMenuList' }, ref) => {
+  (
+    {
+      options,
+      isLoading,
+      onSelect,
+      renderExtraContent,
+      width: menuWidth = MENU_WIDTH,
+      'data-test-subj': dataTestSubj = 'commandMenuList',
+    },
+    ref
+  ) => {
     const { euiTheme } = useEuiTheme();
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -80,8 +92,27 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       },
     }));
 
+    const optionRowStyles = css`
+      display: flex;
+      align-items: baseline;
+      gap: ${euiTheme.size.s};
+      min-width: 0;
+    `;
+
+    const renderOption = renderExtraContent
+      ? (option: EuiSelectableOption) => {
+          const extraContent = renderExtraContent(option.key ?? '');
+          return (
+            <span css={optionRowStyles}>
+              <span>{option.label}</span>
+              {extraContent}
+            </span>
+          );
+        }
+      : undefined;
+
     const containerStyles = css`
-      width: ${MENU_WIDTH}px;
+      width: ${menuWidth}px;
     `;
 
     const activeHighlightStyles = css`
@@ -96,7 +127,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           justifyContent="center"
           alignItems="center"
           css={css`
-            width: ${MENU_WIDTH}px;
+            width: ${menuWidth}px;
             padding: ${euiTheme.size.m};
           `}
           data-test-subj={`${dataTestSubj}-loading`}
@@ -120,6 +151,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
+          renderOption={renderOption}
           listProps={{
             showIcons: false,
             bordered: false,
