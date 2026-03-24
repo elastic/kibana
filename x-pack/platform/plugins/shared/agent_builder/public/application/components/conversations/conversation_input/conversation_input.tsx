@@ -14,11 +14,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type {
-  Attachment,
-  AttachmentInput,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
@@ -27,7 +22,6 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import {
-  useConversation,
   useAgentId,
   useConversationTitle,
   useHasActiveConversation,
@@ -110,6 +104,7 @@ const InputContainer: React.FC<
 
 interface ConversationInputProps {
   onSubmit?: () => void;
+  onEditorFocus?: () => void;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -145,55 +140,22 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
-interface GetVisibleAttachmentsForInputParams {
-  attachments?: AttachmentInput[];
-  shouldHideAttachments: boolean;
-  conversationAttachments?: VersionedAttachment[];
-}
-
-export const getVisibleAttachmentsForInput = ({
-  attachments,
-  shouldHideAttachments,
-  conversationAttachments,
-}: GetVisibleAttachmentsForInputParams): Attachment[] => {
-  if (!attachments || shouldHideAttachments) {
-    return [];
-  }
-
-  const persistedAttachmentIds = new Set(
-    (conversationAttachments ?? []).map((attachment) => attachment.id)
-  );
-
-  return attachments
-    .filter((attachment) => {
-      if (attachment.hidden) {
-        return false;
-      }
-      if (!attachment.id) {
-        return true;
-      }
-      // Hide attachments already in the conversation: input attachments with matching IDs
-      // are treated as updates to existing content, not new pills to display.
-      return !persistedAttachmentIds.has(attachment.id);
-    })
-    .map((attachment, index) => ({
-      ...attachment,
-      id: attachment.id ?? `attachment-${index}`,
-    }));
-};
-
-export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
+export const ConversationInput: React.FC<ConversationInputProps> = ({
+  onSubmit,
+  onEditorFocus,
+}) => {
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
 
-  const { messageEditor, controller: messageEditorController } = useMessageEditor();
+  const { messageEditor, controller: messageEditorController } = useMessageEditor({
+    onEditorFocus,
+  });
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { conversation } = useConversation();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
 
@@ -217,15 +179,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   const shouldCollapseInput = isSendingMessage || hasActiveConversation;
 
-  const visibleAttachments = useMemo(
-    () =>
-      getVisibleAttachmentsForInput({
-        attachments,
-        shouldHideAttachments,
-        conversationAttachments: conversation?.attachments,
-      }),
-    [attachments, shouldHideAttachments, conversation?.attachments]
-  );
+  const visibleAttachments = useMemo(() => {
+    if (!attachments || shouldHideAttachments) return [];
+    return attachments
+      .filter((attachment) => !attachment.hidden)
+      .map((attachment, idx) => ({
+        ...attachment,
+        id: attachment.id ?? `attachment-${idx}`,
+      }));
+  }, [attachments, shouldHideAttachments]);
 
   const isNewConversation = !conversationId;
   const { title: conversationTitle } = useConversationTitle();
