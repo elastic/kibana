@@ -106,7 +106,7 @@ describe('runSkillRefCleanup', () => {
       hits: [
         {
           _id: 'doc-1',
-          sort: ['agent-1', 'doc-1'],
+          sort: ['agent-1', UPDATED_AT],
           _source: createAgentSource({
             id: 'agent-1',
             config: { instructions: '', tools: [] },
@@ -130,7 +130,7 @@ describe('runSkillRefCleanup', () => {
       hits: [
         {
           _id: 'doc-1',
-          sort: ['agent-1', 'doc-1'],
+          sort: ['agent-1', UPDATED_AT],
           _source: createAgentSource({
             id: 'agent-1',
             config: { instructions: '', tools: [], skill_ids: ['skill-from-config'] },
@@ -169,7 +169,7 @@ describe('runSkillRefCleanup', () => {
       },
     });
     const storage = createMockStorageSingleResponse({
-      hits: [{ _id: 'doc-1', sort: ['agent-1', 'doc-1'], _source: source }],
+      hits: [{ _id: 'doc-1', sort: ['agent-1', UPDATED_AT], _source: source }],
     });
     const result = await runSkillRefCleanup({
       storage,
@@ -191,7 +191,7 @@ describe('runSkillRefCleanup', () => {
       const isLast = i === 999;
       return {
         _id: `doc-${i}`,
-        sort: [`agent-${i}`, `doc-${i}`],
+        sort: [`agent-${i}`, UPDATED_AT],
         _source: createAgentSource({
           id: `agent-${i}`,
           config: {
@@ -221,11 +221,11 @@ describe('runSkillRefCleanup', () => {
     expect(search.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         size: 1000,
-        sort: [{ id: 'asc' }, { _id: 'asc' }],
+        sort: [{ id: 'asc' }, { updated_at: 'asc' }],
       })
     );
     expect(search.mock.calls[0][0].search_after).toBeUndefined();
-    expect(search.mock.calls[1][0].search_after).toEqual(['agent-999', 'doc-999']);
+    expect(search.mock.calls[1][0].search_after).toEqual(['agent-999', UPDATED_AT]);
     expect(result.agents).toEqual([{ id: 'agent-999', name: 'Test Agent' }]);
   });
 
@@ -235,7 +235,7 @@ describe('runSkillRefCleanup', () => {
         hits: [
           {
             _id: 'doc-1',
-            sort: ['agent-1', 'doc-1'],
+            sort: ['agent-1', UPDATED_AT],
             _source: createAgentSource({
               id: 'agent-1',
               config: { instructions: '', tools: [], skill_ids: ['skill-a'] },
@@ -278,7 +278,7 @@ describe('runSkillRefCleanup', () => {
     const logger = { warn: jest.fn(), error: jest.fn() };
     const manyHits = Array.from({ length: 1000 }, (_, i) => ({
       _id: `doc-${i}`,
-      sort: [`agent-${i}`, `doc-${i}`],
+      sort: [`agent-${i}`, UPDATED_AT],
       _source: createAgentSource({
         id: `agent-${i}`,
         config: { instructions: '', tools: [], skill_ids: ['skill-x'] },
@@ -315,8 +315,8 @@ describe('runSkillRefCleanup', () => {
       });
       const storage = createMockStorageSingleResponse({
         hits: [
-          { _id: 'doc-1', sort: ['agent-1', 'doc-1'], _source: source1 },
-          { _id: 'doc-2', sort: ['agent-2', 'doc-2'], _source: source2 },
+          { _id: 'doc-1', sort: ['agent-1', UPDATED_AT], _source: source1 },
+          { _id: 'doc-2', sort: ['agent-2', UPDATED_AT], _source: source2 },
         ],
       });
       const result = await runSkillRefCleanup({
@@ -341,7 +341,7 @@ describe('runSkillRefCleanup', () => {
         config: { instructions: '', tools: [], skill_ids: ['skill-a'] },
       });
       const storage = createMockStorageSingleResponse({
-        hits: [{ _id: 'doc-1', sort: ['agent-1', 'doc-1'], _source: source }],
+        hits: [{ _id: 'doc-1', sort: ['agent-1', UPDATED_AT], _source: source }],
       });
       const result = await runSkillRefCleanup({
         storage,
@@ -360,7 +360,7 @@ describe('runSkillRefCleanup', () => {
       hits: [
         {
           _id: '1',
-          sort: ['agent-1', '1'],
+          sort: ['agent-1', UPDATED_AT],
           _source: createAgentSource({
             config: { instructions: '', tools: [], skill_ids: ['skill-a'] },
           }),

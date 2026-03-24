@@ -15,7 +15,7 @@ import { createSpaceDslFilter } from '../../../utils/spaces';
 
 const SEARCH_SIZE = 1000;
 
-const STABLE_AGENT_SORT: Sort = [{ id: 'asc' }, { _id: 'asc' }];
+const STABLE_AGENT_SORT: Sort = [{ id: 'asc' }, { updated_at: 'asc' }];
 
 export interface SkillRefCleanupParams {
   storage: AgentProfileStorage;
