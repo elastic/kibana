@@ -114,7 +114,7 @@ describe('DocumentFlyoutWrapper', () => {
     const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
     expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
-    expect(getByTestId('overviewTabStub')).toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
   });
 
   it('renders DocumentFlyout when document is found', () => {
@@ -155,6 +155,6 @@ describe('DocumentFlyoutWrapper', () => {
     const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
-    expect(queryByTestId('overviewTabStub')).not.toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
   });
 });
