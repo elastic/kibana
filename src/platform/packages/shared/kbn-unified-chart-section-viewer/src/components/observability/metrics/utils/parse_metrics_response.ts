@@ -88,7 +88,7 @@ export const parseMetricsResponse = (
   }
 
   telemetry.total_number_of_dimensions = allDimensionsSet.size;
-  telemetry.total_number_of_metrics = result.length;
+  telemetry.total_number_of_metrics = response.length;
 
   return {
     metricItems: result,

@@ -10,6 +10,7 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MetricsESQLResponse } from '../../../../types';
 import { createInitialMetricsTelemetry, parseMetricsResponse } from './parse_metrics_response';
+import { sum } from 'lodash';
 
 describe('parseMetricsResponse', () => {
   it('returns empty metricItems and allDimensions for empty input', () => {
@@ -140,7 +141,6 @@ describe('parseMetricsResponse', () => {
         },
       },
     });
-    expect(result.telemetry.total_number_of_metrics).toBe(result.metricItems.length);
   });
 
   it('normalises single string metric_type, field_type and dimension_fields to one-element arrays', () => {
@@ -261,9 +261,8 @@ describe('parseMetricsResponse', () => {
     expect(dimensionNames).toContain('pod.name');
     expect(dimensionNames).toContain('container.id');
     expect(result.metricItems).toHaveLength(3);
-    expect(result.telemetry.total_number_of_metrics).toBe(result.metricItems.length);
     expect(result.telemetry).toEqual({
-      total_number_of_metrics: 3,
+      total_number_of_metrics: 4,
       total_number_of_dimensions: 3,
       metrics_by_type: { gauge: 1, counter: 2, summary: 1 },
       units: { percent: 1, bytes: 3 },
@@ -273,6 +272,8 @@ describe('parseMetricsResponse', () => {
         metric_types: 0,
       },
     });
+    const totalNumberOfMetrics = sum(Object.values(result.telemetry.metrics_by_type));
+    expect(result.telemetry.total_number_of_metrics).toBe(totalNumberOfMetrics);
   });
 
   describe('with getFieldType', () => {
