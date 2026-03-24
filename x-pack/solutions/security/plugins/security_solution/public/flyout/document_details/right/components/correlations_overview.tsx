@@ -23,6 +23,8 @@ import { SuppressedAlerts } from './suppressed_alerts';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { RelatedAttacks } from './related_attacks';
+import { useShowRelatedAttacks } from '../../shared/hooks/use_show_related_attacks';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { LeftPanelInsightsTab } from '../../left';
@@ -76,13 +78,15 @@ export const CorrelationsOverview: React.FC = () => {
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });
+  const { show: showRelatedAttacks, attackIds } = useShowRelatedAttacks({ getFieldsData });
 
   const canShowAtLeastOneInsight =
     showAlertsByAncestry ||
     showSameSourceAlerts ||
     showAlertsBySession ||
     showCases ||
-    showSuppressedAlerts;
+    showSuppressedAlerts ||
+    showRelatedAttacks;
 
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0] as Type | undefined;
 
@@ -128,6 +132,7 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsByAncestry && (
             <RelatedAlertsByAncestry documentId={documentId} indices={securityDefaultPatterns} />
           )}
+          {showRelatedAttacks && <RelatedAttacks attackIds={attackIds} />}
         </EuiFlexGroup>
       ) : (
         <FormattedMessage
