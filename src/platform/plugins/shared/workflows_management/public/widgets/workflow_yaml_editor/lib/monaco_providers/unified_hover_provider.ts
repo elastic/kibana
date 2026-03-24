@@ -414,28 +414,33 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
-   * Ensure all foreach steps have their input data loaded.
-   * The foreach expression is stored in input.foreach and is needed
-   * to re-evaluate the items array for foreach.item resolution.
+   * Ensure foreach step input AND referenced step outputs are loaded.
+   * The foreach expression (e.g. "{{ steps.X.output | entries }}") needs
+   * both the foreach step's input (to know the expression) and the
+   * referenced step's output (to evaluate it).
    */
   private async enrichForeachStepInput(context: ExecutionContext): Promise<ExecutionContext> {
     let enrichedSteps = context.steps;
     let changed = false;
 
-    for (const [sId, stepData] of Object.entries(context.steps)) {
-      if (
-        stepData.state &&
-        typeof stepData.state.index === 'number' &&
-        stepData.input === undefined
-      ) {
-        const fullData = await this.fetchStepDataIfNeeded(stepData, sId);
-        if (fullData && fullData !== stepData) {
-          if (!changed) {
-            enrichedSteps = { ...context.steps };
-            changed = true;
-          }
-          enrichedSteps[sId] = fullData;
+    const enrich = async (sId: string, stepData: StepExecutionData) => {
+      const fullData = await this.fetchStepDataIfNeeded(stepData, sId);
+      if (fullData && fullData !== stepData) {
+        if (!changed) {
+          enrichedSteps = { ...context.steps };
+          changed = true;
         }
+        enrichedSteps[sId] = fullData;
+      }
+    };
+
+    for (const [sId, stepData] of Object.entries(context.steps)) {
+      const needsInput =
+        stepData.state && typeof stepData.state.index === 'number' && stepData.input === undefined;
+      const needsOutput = stepData.output === undefined;
+
+      if (needsInput || needsOutput) {
+        await enrich(sId, stepData);
       }
     }
 
