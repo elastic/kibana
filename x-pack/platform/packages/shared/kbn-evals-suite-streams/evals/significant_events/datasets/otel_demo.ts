@@ -378,6 +378,24 @@ export const otelDemoDataset: DatasetConfig = {
       },
     },
   ],
+  kiFeatureExclusion: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 4,
+        follow_up_runs: 3,
+      },
+    },
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 1,
+        follow_up_runs: 3,
+      },
+    },
+  ],
   kiQueryGeneration: [
     {
       input: {
