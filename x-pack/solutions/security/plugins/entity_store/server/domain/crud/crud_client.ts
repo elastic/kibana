@@ -16,7 +16,7 @@ import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
-import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
+import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
 import {
   hashEuid,
   validateAndTransformDocForUpsert,
@@ -242,18 +242,22 @@ export class CRUDClient {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }
     const valid = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, true);
-    const { result } = await this.esClient.create({
-      index: getLatestEntitiesIndexName(this.namespace),
-      id: hashEuid(valid.id),
-      document: valid.doc,
-      refresh: 'wait_for',
-    });
-
-    if (result === 'created') {
-      this.logger.debug(`Created entity ID ${id}`);
+    try {
+      const { result } = await this.esClient.create({
+        index: getLatestEntitiesIndexName(this.namespace),
+        id: hashEuid(valid.id),
+        document: valid.doc,
+        refresh: 'wait_for',
+      });
+      if (result === 'created') {
+        this.logger.debug(`Created entity ID ${id}`);
+      }
+    } catch (error) {
+      if (error.statusCode === 409) {
+        throw new EntityAlreadyExistsError(valid.id);
+      }
+      throw error;
     }
-
-    return;
   }
 
   public async deleteEntity(id: string): Promise<void> {
