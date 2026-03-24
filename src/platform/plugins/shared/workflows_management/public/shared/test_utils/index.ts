@@ -8,3 +8,4 @@
  */
 
 export { TestWrapper } from './test_wrapper';
+export { createStepInfo, createWorkflowLookup } from './step_info_factory';
