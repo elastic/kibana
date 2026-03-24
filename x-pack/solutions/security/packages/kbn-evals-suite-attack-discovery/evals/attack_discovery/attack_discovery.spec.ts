@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// NOTE: When running multiple specs in one suite, set KBN_EVALS_SKIP_CONNECTOR_SETUP=true
+// and pre-create connectors, to avoid UUID mismatch after connector recreation.
+
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import { loadAttackDiscoveryBundledAlertsJsonlDataset } from '../../src/dataset/load_attack_discovery_jsonl';

@@ -42,6 +42,12 @@ export const convertFormDataInBaseSchedule = (
     provider: connector.apiProvider,
     model: genAiConfig?.defaultModel,
   };
+  // TODO: Wire incremental delta mode into schedule params once AttackDiscoveryScheduleParams
+  // schema supports `incrementalMode` and `sessionId`. When adding:
+  //   1. Add `incrementalMode: 'delta'` to the params object below
+  //   2. Derive `sessionId` from the schedule name (e.g., `schedule-${scheduleData.name}`)
+  //   3. Add the schema fields to AttackDiscoveryScheduleParams in schedules.schema.yaml
+  //      and regenerate with `node scripts/generate_openapi`
   return {
     name: scheduleData.name,
     enabled: true,

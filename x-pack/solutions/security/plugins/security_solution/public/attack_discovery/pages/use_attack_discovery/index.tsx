@@ -98,6 +98,27 @@ export const useAttackDiscovery = ({
           traceOptions,
         });
 
+        // Determine the incremental threshold based on connector/model type.
+        // Local/OSS models (`.gen-ai` with apiProvider 'Other') have smaller context
+        // windows, so we enable incremental mode at a lower alert count. Frontier models
+        // (Bedrock, Azure OpenAI, OpenAI) handle larger contexts and use a higher threshold.
+        const actionTypeId = effectiveConnector?.actionTypeId;
+        const apiProvider = effectiveGenAiConfig?.apiProvider;
+        const isLocalModel = actionTypeId === '.gen-ai' && apiProvider === 'Other';
+        const isFrontierModel =
+          actionTypeId === '.bedrock' ||
+          (actionTypeId === '.gen-ai' &&
+            (apiProvider === 'OpenAI' || apiProvider === 'Azure OpenAI'));
+
+        let incrementalThreshold: number;
+        if (isLocalModel) {
+          incrementalThreshold = 50;
+        } else if (isFrontierModel) {
+          incrementalThreshold = 200;
+        } else {
+          incrementalThreshold = 100;
+        }
+
         const bodyWithOverrides = {
           ...effectiveRequestBody,
           connectorName: effectiveConnector?.name ?? connectorName,
@@ -107,7 +128,7 @@ export const useAttackDiscovery = ({
           start: effectiveStart,
           // Enable incremental progressive mode for large alert sets.
           // alertsPerRound is auto-tuned by the backend based on model context budget (default 32K).
-          ...(effectiveSize >= 100
+          ...(effectiveSize >= incrementalThreshold
             ? {
                 incrementalMode: 'progressive' as const,
                 incrementalConfig: {

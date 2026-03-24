@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// NOTE: When running multiple specs in one suite, set KBN_EVALS_SKIP_CONNECTOR_SETUP=true
+// and pre-create connectors, to avoid UUID mismatch after connector recreation.
+
 import { tags } from '@kbn/scout';
 import Fs from 'fs/promises';
 import Path from 'path';
