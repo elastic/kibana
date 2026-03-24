@@ -48,7 +48,10 @@ export const esqlCharts = [
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -95,7 +98,10 @@ export const esqlCharts = [
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -280,13 +286,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -339,14 +348,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -527,13 +539,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -598,14 +613,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -657,7 +675,7 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
@@ -716,7 +734,7 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
     },
     value_display: {
       mode: 'percentage',
@@ -786,13 +804,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -891,13 +912,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -958,13 +982,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -1063,14 +1090,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -1156,7 +1186,7 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
@@ -1247,7 +1277,7 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
     value_display: {
@@ -1325,7 +1355,7 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
     },
     value_display: {
       mode: 'percentage',
@@ -1366,7 +1396,10 @@ export const esqlCharts = [
     value_display: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
   },
   {
     title: 'ESQL treemap',
@@ -1478,7 +1511,7 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
     },
     value_display: {
       mode: 'percentage',

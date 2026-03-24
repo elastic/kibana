@@ -1082,29 +1082,29 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
+      ticks: { visible: true },
+      grid: { visible: true },
       label_orientation: 'horizontal',
     },
     left: {
       title: {
         visible: false,
       },
-      ticks: true,
-      grid: true,
+      ticks: { visible: true },
+      grid: { visible: true },
       label_orientation: 'horizontal',
     },
     right: {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
+      ticks: { visible: true },
+      grid: { visible: true },
       label_orientation: 'horizontal',
     },
   },
   decorations: {
-    show_value_labels: false,
+    values: { visible: false },
   },
   layers: [
     {
@@ -1167,29 +1167,29 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
+      ticks: { visible: true },
+      grid: { visible: true },
       label_orientation: 'horizontal',
     },
     left: {
       title: {
         visible: false,
       },
-      ticks: true,
-      grid: true,
+      ticks: { visible: true },
+      grid: { visible: true },
       label_orientation: 'horizontal',
     },
     right: {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
+      ticks: { visible: true },
+      grid: { visible: true },
       label_orientation: 'horizontal',
     },
   },
   decorations: {
-    show_value_labels: false,
+    values: { visible: false },
   },
   layers: [
     {

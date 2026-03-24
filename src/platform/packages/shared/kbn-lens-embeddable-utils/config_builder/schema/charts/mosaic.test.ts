@@ -155,18 +155,18 @@ describe('Mosaic Schema', () => {
         legend: {
           nested: true,
           truncate_after_lines: 5,
-          visible: 'show',
+          visibility: 'visible',
           size: 'small',
         },
-        value_display: {
-          mode: 'hidden',
+        values: {
+          visible: false,
         },
       };
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.value_display?.mode).toBe('hidden');
+      expect(validated.values?.visible).toBe(false);
     });
 
     it('throws on empty group_by array', () => {

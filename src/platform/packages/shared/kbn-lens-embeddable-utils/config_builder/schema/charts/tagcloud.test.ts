@@ -53,7 +53,7 @@ describe('Tagcloud Schema', () => {
         metric: {
           operation: 'sum',
           field: 'price',
-          show_metric_label: true,
+          label: { visible: true },
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         tag_by: {
@@ -110,7 +110,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
+            label: { visible: false },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           tag_by: {
@@ -134,7 +134,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'sales',
-            show_metric_label: false,
+            label: { visible: false },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           tag_by: {
@@ -158,7 +158,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'sales',
-            show_metric_label: false,
+            label: { visible: false },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           tag_by: {
@@ -184,7 +184,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
+            label: { visible: false },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           font_size: {
@@ -211,7 +211,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
+            label: { visible: false },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           tag_by: {
@@ -265,7 +265,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
+            label: { visible: false },
           },
           tag_by: {
             operation: 'terms',
@@ -283,7 +283,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
+            label: { visible: false },
           },
           tag_by: {
             operation: 'terms',
@@ -304,7 +304,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
+            label: { visible: false },
           },
           tag_by: {
             operation: 'terms',
@@ -345,7 +345,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'revenue',
-            show_metric_label: false,
+            label: { visible: false },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           tag_by: {
@@ -376,7 +376,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'sales',
-            show_metric_label: true,
+            label: { visible: true },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           tag_by: {
@@ -411,7 +411,7 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'value',
             column: 'count',
-            show_metric_label: false,
+            label: { visible: false },
           },
           tag_by: {
             operation: 'value',

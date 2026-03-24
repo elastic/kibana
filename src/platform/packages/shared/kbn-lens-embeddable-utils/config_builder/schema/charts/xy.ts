@@ -662,14 +662,14 @@ const annotationQuery = schema.object(
       schema.object(
         {
           visible: schema.boolean({ meta: { description: 'Show text label on the annotation' } }),
+          field: schema.maybe(
+            schema.string({
+              meta: { description: 'Field name for text label source' },
+            })
+          ),
         },
         { meta: { description: 'Annotation text label configuration' } }
       )
-    ),
-    text_field: schema.maybe(
-      schema.string({
-        meta: { description: 'Field name for text label source (overrides label when set)' },
-      })
     ),
     extra_fields: schema.maybe(
       schema.arrayOf(
