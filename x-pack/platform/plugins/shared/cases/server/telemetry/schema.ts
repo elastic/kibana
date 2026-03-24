@@ -202,4 +202,18 @@ export const casesSchema: CasesTelemetrySchema = {
     totalCasesCreated: long,
     totalRules: long,
   },
+  tasks: {
+    all: {
+      total: long,
+      byStatus: {
+        open: long,
+        inProgress: long,
+        completed: long,
+        cancelled: long,
+      },
+    },
+    templates: {
+      total: long,
+    },
+  },
 };

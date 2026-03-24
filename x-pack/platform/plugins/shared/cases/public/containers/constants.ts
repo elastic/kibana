@@ -14,6 +14,9 @@ export const DEFAULT_TABLE_LIMIT = 10;
 
 export const casesQueriesKeys = {
   all: ['cases'] as const,
+  tasks: ['tasks'] as const,
+  tasksList: (caseId: string, params?: unknown) =>
+    [...casesQueriesKeys.tasks, 'list', caseId, params] as const,
   users: ['users'] as const,
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
@@ -84,6 +87,10 @@ export const casesMutationsKeys = {
   exportTemplate: ['export-template'] as const,
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
+  createTask: ['create-task'] as const,
+  updateTask: ['update-task'] as const,
+  deleteTask: ['delete-task'] as const,
+  reorderTasks: ['reorder-tasks'] as const,
 };
 
 export const inferenceKeys = {

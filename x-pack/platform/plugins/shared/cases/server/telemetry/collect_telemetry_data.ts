@@ -13,6 +13,7 @@ import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
+import { getTasksTelemetryData } from './queries/tasks';
 import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
@@ -29,6 +30,7 @@ export const collectTelemetryData = async ({
       pushes,
       configuration,
       casesSystemAction,
+      tasks,
     ] = await Promise.all([
       getCasesTelemetryData({ savedObjectsClient, logger }),
       getUserActionsTelemetryData({ savedObjectsClient, logger }),
@@ -38,6 +40,7 @@ export const collectTelemetryData = async ({
       getPushedTelemetryData({ savedObjectsClient, logger }),
       getConfigurationTelemetryData({ savedObjectsClient, logger }),
       getCasesSystemActionData({ savedObjectsClient, logger }),
+      getTasksTelemetryData({ savedObjectsClient, logger }),
     ]);
 
     return {
@@ -49,6 +52,7 @@ export const collectTelemetryData = async ({
       pushes,
       configuration,
       casesSystemAction,
+      tasks,
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');
