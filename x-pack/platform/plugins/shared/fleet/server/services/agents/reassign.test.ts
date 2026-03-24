@@ -10,9 +10,14 @@ import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import * as agentNamespaces from '../spaces/agent_namespaces';
 
 import { reassignAgent, reassignAgents } from './reassign';
 import { createClientMock } from './action.mock';
+import * as crud from './crud';
+import * as reassignActionRunner from './reassign_action_runner';
 
 describe('reassignAgent', () => {
   let mocks: ReturnType<typeof createClientMock>;
@@ -149,5 +154,55 @@ describe('reassignAgent', () => {
       });
       expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
+  });
+});
+
+describe('reassignAgents kuery construction', () => {
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
+  let mockReassignBatch: jest.SpyInstance;
+
+  beforeEach(async () => {
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        internal: soClient,
+        withoutSpaceExtensions: soClient,
+      })
+    );
+    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+      agents: [],
+      total: 0,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    mockAgentsKueryNamespaceFilter = jest
+      .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
+      .mockResolvedValue('namespaces:custom_space');
+    mockReassignBatch = jest
+      .spyOn(reassignActionRunner, 'reassignBatch')
+      .mockResolvedValue({ actionId: 'test-action-id' });
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockAgentsKueryNamespaceFilter.mockRestore();
+    mockReassignBatch.mockRestore();
+    appContextService.stop();
+  });
+
+  it('wraps namespace filter and kuery containing OR in parentheses', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const kuery = 'status:online or status:error or status:offline';
+
+    await reassignAgents(soClient, esClient, { kuery }, regularAgentPolicySO2.id);
+
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({
+        kuery: `(namespaces:custom_space) AND (${kuery})`,
+      })
+    );
   });
 });
