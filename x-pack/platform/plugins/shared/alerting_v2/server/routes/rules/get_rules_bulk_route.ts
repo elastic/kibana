@@ -11,7 +11,7 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
@@ -46,7 +46,7 @@ export class BulkGetRulesRoute {
     },
     response: {
       200: {
-        body: (() => findRulesResponseSchema) as unknown as LazyValidator,
+        body: () => findRulesResponseSchema,
         description: 'Indicates a successful call.',
       },
       400: {

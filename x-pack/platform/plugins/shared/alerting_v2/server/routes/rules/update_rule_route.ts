@@ -10,8 +10,8 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
@@ -41,7 +41,7 @@ export class UpdateRuleRoute {
     },
     response: {
       200: {
-        body: (() => ruleResponseSchema) as unknown as LazyValidator,
+        body: () => ruleResponseSchema,
         description: 'Indicates a successful call.',
       },
       400: {

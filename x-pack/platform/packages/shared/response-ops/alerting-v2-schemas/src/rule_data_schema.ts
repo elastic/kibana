@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { validateEsqlQuery } from './validation';
 import { durationSchema } from './common';
 import { MAX_CONSECUTIVE_BREACHES } from './constants';

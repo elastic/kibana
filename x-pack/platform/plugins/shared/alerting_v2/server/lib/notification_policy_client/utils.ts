@@ -11,7 +11,7 @@ import type {
   NotificationPolicyResponse,
   UpdateNotificationPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 
 const isoDateTimeString = z.string().datetime();

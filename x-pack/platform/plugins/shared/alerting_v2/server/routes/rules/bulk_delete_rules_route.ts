@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
@@ -38,7 +38,7 @@ export class BulkDeleteRulesRoute {
     },
     response: {
       200: {
-        body: (() => bulkOperationResponseSchema) as unknown as LazyValidator,
+        body: () => bulkOperationResponseSchema,
         description: 'Indicates a successful call.',
       },
       400: {

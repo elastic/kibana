@@ -14,8 +14,8 @@ import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
@@ -54,7 +54,7 @@ export class CreateRuleRoute implements RouteHandler {
     },
     response: {
       200: {
-        body: (() => ruleResponseSchema) as unknown as LazyValidator,
+        body: () => ruleResponseSchema,
         description: 'Indicates a successful call.',
       },
       400: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 const ackActionSchema = z.object({
   action_type: z.literal('ack').describe('Acknowledges an alert.'),
