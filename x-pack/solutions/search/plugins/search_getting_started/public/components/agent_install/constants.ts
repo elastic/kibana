@@ -68,15 +68,17 @@ export const USE_CASE_OPTIONS: UseCaseOption[] = [
   },
 ];
 
-// TODO @wildemat: These scripts should point to the correct elastic/kibana location before merging
+export const INSTALL_SKILL_CMD =
+  'npx skills add elastic/agent-skills --skill elasticsearch-onboarding';
+
 export const INSTALL_LINES_CURSOR = [
-  'Fetch and run this remote script:',
-  'curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-cursor.sh | sh',
+  'Install the elasticsearch onboarding skill:',
+  '```sh\n' + INSTALL_SKILL_CMD + ' -a cursor' + '\n```',
 ];
 
 export const INSTALL_LINES_CLI = [
-  'Fetch and run this remote script:',
-  'curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-agent.sh | sh',
+  'Install the elasticsearch onboarding plugin:',
+  '```sh\n' + INSTALL_SKILL_CMD + '\n```',
 ];
 
 export const USE_CASE_MESSAGES: Record<UseCaseId, string> = {
