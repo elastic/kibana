@@ -138,8 +138,8 @@ describe('Workflow routes', () => {
         {
           size: 10,
           page: 2,
-          enabled: true,
-          createdBy: 'user-1',
+          enabled: [true],
+          createdBy: ['user-1'],
           tags: ['a'],
           query: 'search',
         },
