@@ -179,6 +179,37 @@ describe('buildLiveActionsQuery', () => {
     });
   });
 
+  describe('sortDirection', () => {
+    test('defaults to desc when not provided', () => {
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
+      const sort = result.body.sort as unknown[];
+
+      expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'asc' } }]);
+    });
+
+    test('sorts ascending when sortDirection is asc', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        sortDirection: 'asc',
+      });
+      const sort = result.body.sort as unknown[];
+
+      expect(sort).toEqual([{ '@timestamp': { order: 'asc' } }, { _shard_doc: { order: 'desc' } }]);
+    });
+
+    test('sorts descending when sortDirection is desc', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        sortDirection: 'desc',
+      });
+      const sort = result.body.sort as unknown[];
+
+      expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'asc' } }]);
+    });
+  });
+
   describe('combined options', () => {
     test('applies searchAfter, kuery, and date range together', () => {
       const result = buildLiveActionsQuery({

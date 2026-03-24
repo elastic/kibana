@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import * as i18n from './translations';
@@ -46,6 +47,10 @@ export const useRuleDetailsTabs = ({
   isExistingRule,
   hasIndexRead,
 }: UseRuleDetailsTabsProps) => {
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
       [RuleDetailTabs.overview]: {
@@ -103,7 +108,7 @@ export const useRuleDetailsTabs = ({
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
-    if (!canReadEndpointExceptions) {
+    if (isEndpointExceptionsMovedFFEnabled || !canReadEndpointExceptions) {
       hiddenTabs.push(RuleDetailTabs.endpointExceptions);
     }
     if (!canReadExceptions) {
@@ -125,6 +130,7 @@ export const useRuleDetailsTabs = ({
     canReadEndpointExceptions,
     canReadExceptions,
     hasIndexRead,
+    isEndpointExceptionsMovedFFEnabled,
     rule,
     ruleDetailTabs,
     ruleExecutionSettings,
