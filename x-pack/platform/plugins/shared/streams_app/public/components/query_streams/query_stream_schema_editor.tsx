@@ -399,7 +399,11 @@ const createQueryStreamCellRenderer =
         return EMPTY_CONTENT;
       }
       return (
-        <div css={css`width: 100%;`}>
+        <div
+          css={css`
+            width: 100%;
+          `}
+        >
           <EuiToolTip content={field.description}>
             <div
               tabIndex={0}
