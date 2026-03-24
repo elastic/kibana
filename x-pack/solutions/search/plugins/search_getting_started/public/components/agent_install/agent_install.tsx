@@ -66,7 +66,7 @@ export const AgentInstallSection = () => {
 
   const handleOpenInAgentBuilder = useCallback(() => {
     closePopover();
-    services.agentBuilder?.openConversationFlyout({
+    services.agentBuilder?.openChat({
       agentId: SEARCH_AGENT_ID,
       initialMessage: buildPrompt(selectedUseCase, 'agent-builder'),
       autoSendInitialMessage: false,
