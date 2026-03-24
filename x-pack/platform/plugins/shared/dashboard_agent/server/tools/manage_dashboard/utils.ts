@@ -8,11 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -37,10 +33,9 @@ export const getErrorMessage = (error: unknown): string => {
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
-  query: z.string().optional(),
 });
 
-type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
+type ResolvedPanelWithoutGrid = Omit<AttachmentPanel, 'grid'>;
 
 const resolvePanelsFromVisualizationAttachment = (
   data: unknown,
@@ -51,19 +46,13 @@ const resolvePanelsFromVisualizationAttachment = (
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
 
-  const { visualization, query } = parseResult.data;
-  const title =
-    typeof visualization.title === 'string'
-      ? visualization.title
-      : query ?? 'Generated visualization';
+  const { visualization } = parseResult.data;
 
   return [
     {
       type: 'lens',
-      panelId: uuidv4(),
-      visualization: visualization as LensApiSchemaType,
-      title,
-      ...(query ? { query } : {}),
+      uid: uuidv4(),
+      config: visualization as LensApiSchemaType,
       sourceAttachmentId: attachmentId,
     },
   ];
@@ -157,7 +146,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.panelId)) {
+    if (removeSet.has(panel.uid)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);
