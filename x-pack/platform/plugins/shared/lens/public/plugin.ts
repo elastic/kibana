@@ -75,7 +75,7 @@ import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
   AGG_BASED_VISUALIZATION_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   VISUALIZE_EDITOR_TRIGGER,
@@ -372,10 +372,12 @@ export class LensPlugin {
             nowProvider: plugins.data.nowProvider,
             forceDSL,
             eventAnnotationService,
+            http: coreStart.http,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
+        eventAnnotationService,
         theme: core.theme,
         uiSettings: core.uiSettings,
       };
@@ -406,7 +408,7 @@ export class LensPlugin {
               const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
               const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-              return getTransformOut(builder, transformDrilldownsOut);
+              return getTransformOut(builder, transformDrilldownsOut, true); // This will always be called from a dashboard app
             }
           );
         })
@@ -419,7 +421,7 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                savedObjectId: savedObject.id,
+                ref_id: savedObject.id,
               } satisfies LensByRefSerializedState,
             },
             {
@@ -427,7 +429,7 @@ export class LensPlugin {
             }
           );
         },
-        savedObjectType: LENS_EMBEDDABLE_TYPE,
+        savedObjectType: LENS_CONTENT_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',
         }),
@@ -735,7 +737,7 @@ export class LensPlugin {
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerActionAsync(
-        CONTEXT_MENU_TRIGGER,
+        ON_OPEN_PANEL_MENU,
         'ACTION_OPEN_IN_DISCOVER',
         async () => {
           const { createOpenInDiscoverAction } = await import('./async_services');
@@ -756,8 +758,8 @@ export class LensPlugin {
         { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
       ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
-        if (input?.timeRange && !openInNewTab) {
-          startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
+        if (input?.time_range && !openInNewTab) {
+          startDependencies.data.query.timefilter.timefilter.setTime(input.time_range);
         }
         const transfer = new EmbeddableStateTransfer(
           core.application.navigateToApp,
@@ -765,7 +767,7 @@ export class LensPlugin {
         );
         transfer.navigateToEditor(APP_ID, {
           openInNewTab,
-          path: getEditPath(undefined, (openInNewTab && input?.timeRange) || undefined),
+          path: getEditPath(undefined, (openInNewTab && input?.time_range) || undefined),
           state: {
             originatingApp,
             originatingPath,

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser } from '@elastic/esql';
+import type { ESQLCommand, ESQLMessage } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../commands/registry/types';
-import { Parser } from '../../parser';
-import type { ESQLCommand, ESQLMessage } from '../../types';
 import { mockContext } from './context_fixtures';
 /**
  * This function is used to assert that a query produces the expected errors.

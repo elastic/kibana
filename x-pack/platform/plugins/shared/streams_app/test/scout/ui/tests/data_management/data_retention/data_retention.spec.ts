@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
+import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -18,6 +19,72 @@ import {
   verifyRetentionDisplay,
 } from '../../../fixtures/retention_helpers';
 
+async function createTsdbIndexTemplate({
+  esClient,
+  templateName,
+  pattern,
+}: {
+  esClient: EsClient;
+  templateName: string;
+  pattern: string;
+}) {
+  await esClient.indices.putIndexTemplate({
+    name: templateName,
+    index_patterns: [pattern],
+    priority: 2000,
+    data_stream: {},
+    template: {
+      settings: { 'index.mode': 'time_series' },
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          'host.name': { type: 'keyword', time_series_dimension: true },
+          'service.name': { type: 'keyword', time_series_dimension: true },
+          cpu_usage: { type: 'float', time_series_metric: 'gauge' },
+          memory_usage: { type: 'float', time_series_metric: 'gauge' },
+        },
+      },
+    },
+  });
+}
+
+async function indexTsdbData({
+  esClient,
+  dataStreamName,
+}: {
+  esClient: EsClient;
+  dataStreamName: string;
+}) {
+  const now = new Date().toISOString();
+  await esClient.bulk({
+    index: dataStreamName,
+    operations: [
+      { create: {} },
+      {
+        '@timestamp': now,
+        'host.name': 'host-1',
+        'service.name': 'service-1',
+        cpu_usage: 1,
+        memory_usage: 1,
+      },
+    ],
+    refresh: true,
+  });
+}
+
+async function cleanupTsdbResources({
+  esClient,
+  templateName,
+  streamName,
+}: {
+  esClient: EsClient;
+  templateName: string;
+  streamName: string;
+}) {
+  await esClient.indices.deleteDataStream({ name: streamName }).catch(() => {});
+  await esClient.indices.deleteIndexTemplate({ name: templateName }).catch(() => {});
+}
+
 test.describe(
   'Stream data retention - custom retention periods',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -25,24 +92,24 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
 
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
     });
 
     test.afterEach(async ({ apiServices, page }) => {
       await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     // Smoke test: Verifies the complete retention UI workflow
@@ -72,7 +139,7 @@ test.describe(
       await verifyRetentionDisplay(page, '30 days');
 
       // Refresh the page
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Verify the value persists
       await verifyRetentionDisplay(page, '30 days');
@@ -126,6 +193,144 @@ test.describe(
 
       // Close the popover by pressing Escape
       await page.keyboard.press('Escape');
+    });
+
+    test('should delete a downsampling step from a DSL lifecycle', async ({
+      page,
+      esClient,
+      apiServices,
+      pageObjects,
+    }) => {
+      // Downsampling UI is only available for TSDB (time_series) streams.
+      const streamName = 'streams-dsl-tsdb-delete-step';
+      const templateName = `${streamName}-template`;
+
+      await cleanupTsdbResources({ esClient, templateName, streamName });
+
+      try {
+        await createTsdbIndexTemplate({
+          esClient,
+          templateName,
+          pattern: `${streamName}*`,
+        });
+        await indexTsdbData({ esClient, dataStreamName: streamName });
+
+        await expect
+          .poll(
+            async () => {
+              try {
+                await apiServices.streams.getStreamDefinition(streamName);
+                return true;
+              } catch {
+                return false;
+              }
+            },
+            { timeout: 15_000, message: `Expected ${streamName} stream definition to exist` }
+          )
+          .toBe(true);
+
+        const streamDefinition = await apiServices.streams.getStreamDefinition(streamName);
+        await apiServices.streams.updateStream(streamName, {
+          ingest: {
+            ...streamDefinition.stream.ingest,
+            processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+            lifecycle: {
+              dsl: {
+                data_retention: '30d',
+                downsample: [{ after: '1d', fixed_interval: '1h' }],
+              },
+            },
+          },
+        });
+
+        await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+        // Verify downsampling is rendered for the DSL lifecycle
+        await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+
+        // Delete the downsampling step
+        await page.getByTestId('downsamplingPhase-1h-label').click();
+        await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+
+        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+      } finally {
+        await cleanupTsdbResources({ esClient, templateName, streamName });
+      }
+    });
+
+    test('should edit a downsampling step in a DSL lifecycle', async ({
+      page,
+      esClient,
+      apiServices,
+      pageObjects,
+    }) => {
+      // Downsampling UI is only available for TSDB (time_series) streams.
+      const streamName = 'streams-dsl-tsdb-edit-step';
+      const templateName = `${streamName}-template`;
+
+      await cleanupTsdbResources({ esClient, templateName, streamName });
+
+      try {
+        await createTsdbIndexTemplate({
+          esClient,
+          templateName,
+          pattern: `${streamName}*`,
+        });
+        await indexTsdbData({ esClient, dataStreamName: streamName });
+
+        await expect
+          .poll(
+            async () => {
+              try {
+                await apiServices.streams.getStreamDefinition(streamName);
+                return true;
+              } catch {
+                return false;
+              }
+            },
+            { timeout: 15_000, message: `Expected ${streamName} stream definition to exist` }
+          )
+          .toBe(true);
+
+        const streamDefinition = await apiServices.streams.getStreamDefinition(streamName);
+        await apiServices.streams.updateStream(streamName, {
+          ingest: {
+            ...streamDefinition.stream.ingest,
+            processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+            lifecycle: {
+              dsl: {
+                data_retention: '30d',
+                downsample: [{ after: '1d', fixed_interval: '1h' }],
+              },
+            },
+          },
+        });
+
+        await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+        // Open the downsampling step popover and edit the step
+        await page.getByTestId('downsamplingPhase-1h-label').click();
+        await page.getByTestId('downsamplingPopover-step1-editButton').click();
+
+        await expect(page.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeVisible();
+        const stepPanel = page.getByTestId('streamsEditDslStepsFlyoutFromSummaryPanel-step-0');
+        await expect(stepPanel).toBeVisible();
+
+        await stepPanel
+          .getByTestId('streamsEditDslStepsFlyoutFromSummaryFixedIntervalValue')
+          .fill('2');
+        await stepPanel
+          .getByTestId('streamsEditDslStepsFlyoutFromSummaryFixedIntervalUnit')
+          .selectOption('h');
+
+        await page.getByTestId('streamsEditDslStepsFlyoutFromSummarySaveButton').click();
+
+        await expect(page.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingPhase-2h-label')).toBeVisible();
+        await expect(page.getByTestId('downsamplingPhase-1h-label')).toHaveCount(0);
+      } finally {
+        await cleanupTsdbResources({ esClient, templateName, streamName });
+      }
     });
   }
 );

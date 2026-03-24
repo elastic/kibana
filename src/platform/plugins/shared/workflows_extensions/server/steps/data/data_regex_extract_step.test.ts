@@ -40,7 +40,7 @@ describe('dataRegexExtractStepDefinition', () => {
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
-    stepType: 'data.regex_extract',
+    stepType: 'data.regexExtract',
   });
 
   describe('named capture groups', () => {

@@ -9,7 +9,7 @@ import type { AxiosError } from 'axios';
 import { omitBy, isNil, isObject } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type {

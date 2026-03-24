@@ -18,9 +18,7 @@ jest.mock('../api/api');
 const apiMock = api as jest.Mocked<typeof api>;
 
 describe('TemplatesBulkActions', () => {
-  // EUI components use CSS animations that set pointer-events: none during transitions
-  // Using pointerEventsCheck: 0 skips this check which is standard for testing EUI components
-  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  let user: ReturnType<typeof userEvent.setup>;
 
   const mockTemplates: Template[] = [
     {
@@ -55,7 +53,16 @@ describe('TemplatesBulkActions', () => {
     },
   ];
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     jest.clearAllMocks();
     apiMock.bulkDeleteTemplates.mockResolvedValue({
       success: true,

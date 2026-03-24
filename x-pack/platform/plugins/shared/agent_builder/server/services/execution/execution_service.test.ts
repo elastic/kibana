@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
+import type { AttachmentServiceStart } from '../attachments';
 
 // Mock persistence module
 const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
@@ -21,6 +22,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   appendEvents: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
+  find: jest.fn().mockResolvedValue([]),
 };
 
 jest.mock('./persistence', () => ({
@@ -67,6 +69,16 @@ describe('AgentExecutionService', () => {
     getScopedClient: mockGetScopedClient,
   } as any;
 
+  const meteringService = {
+    reportExecution: jest.fn(),
+  } as any;
+
+  const attachmentsService: AttachmentServiceStart = {
+    validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
+    getTypeDefinition: jest.fn(),
+    getRegisteredTypeIds: jest.fn().mockReturnValue([]),
+  };
+
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
@@ -74,8 +86,11 @@ describe('AgentExecutionService', () => {
     inference: {} as any,
     conversationService: {} as any,
     agentService: {} as any,
+    runAgent: jest.fn(),
+    attachmentsService,
     uiSettings,
     savedObjects,
+    meteringService,
   });
 
   beforeEach(() => {
@@ -183,6 +198,30 @@ describe('AgentExecutionService', () => {
           }),
         })
       );
+    });
+
+    it('validates attachments and throws on invalid attachment', async () => {
+      (attachmentsService.validate as jest.Mock).mockResolvedValue({
+        valid: false,
+        error: 'boom',
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        service.executeAgent({
+          request,
+          params: {
+            agentId: 'agent-1',
+            nextInput: {
+              message: 'hello',
+              attachments: [{ type: 'some_type', data: { foo: 'bar' } }],
+            },
+          },
+        })
+      ).rejects.toThrow('Attachment validation failed: boom');
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
     it('should return a live observable that emits events from the agent stream', async () => {
@@ -393,6 +432,117 @@ describe('AgentExecutionService', () => {
         },
         complete: () => done.fail('Expected an error, not completion'),
       });
+    });
+  });
+
+  describe('executeAgent with metadata', () => {
+    it('should pass metadata to executionClient.create', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const metadata = { source: 'test', username: 'user1' };
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+        metadata,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata })
+      );
+    });
+
+    it('should pass undefined metadata when not provided (backward compat)', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: undefined })
+      );
+    });
+  });
+
+  describe('findExecutions', () => {
+    it('should delegate to executionClient.find with auto-injected spaceId', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request, {
+        filter: { metadata: { source: 'test' } },
+      });
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          spaceId: 'default',
+          filter: { metadata: { source: 'test' } },
+        })
+      );
+    });
+
+    it('should use explicit spaceId when provided, overriding the default', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request, {
+        spaceId: 'my-space',
+        filter: { status: [ExecutionStatus.running] },
+      });
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'my-space' })
+      );
+    });
+
+    it('should use default spaceId when spaceId is undefined in options', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request, { spaceId: undefined });
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('should use defaults when no options provided', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request);
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('should return results from executionClient.find', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const fakeExecution = {
+        executionId: 'exec-1',
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.running,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { nextInput: { message: 'hello' } },
+        eventCount: 0,
+        events: [],
+        metadata: { source: 'test' },
+      };
+      mockExecutionClient.find.mockResolvedValue([fakeExecution]);
+
+      const results = await service.findExecutions(request);
+      expect(results).toEqual([fakeExecution]);
     });
   });
 });

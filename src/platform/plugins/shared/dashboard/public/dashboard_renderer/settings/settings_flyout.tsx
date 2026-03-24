@@ -225,7 +225,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               helpText={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
-                  defaultMessage="If selected, the Cross-project search scope currently in use will be saved along with this dashboard. When you or other users open the dashboard, it will always load with that CPS scope."
+                  defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
                 />
               }
             >
@@ -271,6 +271,22 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                 updateDashboardSetting({ hide_panel_titles: !event.target.checked })
               }
               data-test-subj="dashboardPanelTitlesCheckbox"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate(
+                'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelBordersSwitchLabel',
+                {
+                  defaultMessage: 'Show panel borders',
+                }
+              )}
+              checked={!localSettings.hide_panel_borders}
+              onChange={(event) =>
+                updateDashboardSetting({ hide_panel_borders: !event.target.checked })
+              }
+              data-test-subj="dashboardPanelBordersCheckbox"
             />
           </EuiFormRow>
 

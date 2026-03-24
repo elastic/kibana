@@ -9,9 +9,8 @@ import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
 
-import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common/tools';
 import { EsqlToolFieldType, ToolType } from '@kbn/agent-builder-common/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import { EsqlParamSource } from '../types/tool_form_types';
 
@@ -92,10 +91,8 @@ export const esqlFormValidationSchema = z
           description: z
             .string()
             .min(1, { message: esqlI18nMessages.params.descriptionRequiredError }),
-          type: z.custom<EsqlToolFieldTypes>((data) =>
-            Object.values(EsqlToolFieldType).includes(data)
-          ),
-          source: z.nativeEnum(EsqlParamSource),
+          type: z.enum(EsqlToolFieldType),
+          source: z.enum(EsqlParamSource),
           optional: z.boolean(),
           defaultValue: z
             .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())])
@@ -139,7 +136,7 @@ export const esqlFormValidationSchema = z
     for (const param of inferredParams) {
       if (!definedParams.has(param)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: esqlI18nMessages.esql.esqlError,
           path: ['esql'],
         });

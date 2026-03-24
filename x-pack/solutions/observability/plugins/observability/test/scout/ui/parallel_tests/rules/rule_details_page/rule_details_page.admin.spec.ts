@@ -11,7 +11,8 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/249094
+test.describe.skip(
   'Rule Details Page - Admin',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

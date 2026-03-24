@@ -95,16 +95,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(
+            'infraOps',
+            '/inventory',
+            undefined,
+            {
+              ensureCurrentUrl: true,
+              shouldLoginIfPrompted: false,
+            }
+          );
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
-          await retry.tryForTime(5000, async () => {
+          await retry.tryForTime(30000, async () => {
+            await testSubjects.existOrFail('waffleDatePicker');
+          });
+
+          expect(await testSubjects.exists('waffleMap')).to.be(false);
+
+          await retry.tryForTime(60000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-            await testSubjects.existOrFail('~waffleMap');
+            await PageObjects.infraHome.getWaffleMap();
           });
         });
 
@@ -202,16 +213,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(
+            'infraOps',
+            '/inventory',
+            undefined,
+            {
+              ensureCurrentUrl: true,
+              shouldLoginIfPrompted: false,
+            }
+          );
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
-          await retry.tryForTime(5000, async () => {
+          await retry.tryForTime(30000, async () => {
+            await testSubjects.existOrFail('waffleDatePicker');
+          });
+
+          expect(await testSubjects.exists('waffleMap')).to.be(false);
+
+          await retry.tryForTime(60000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-            await testSubjects.existOrFail('~waffleMap');
+            await PageObjects.infraHome.getWaffleMap();
           });
         });
 

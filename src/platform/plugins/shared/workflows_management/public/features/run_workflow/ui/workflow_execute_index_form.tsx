@@ -15,11 +15,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
   EuiText,
   EuiToken,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { take } from 'rxjs';
@@ -50,7 +48,6 @@ interface Document {
 }
 
 interface WorkflowExecuteEventFormProps {
-  value: string;
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
@@ -74,18 +71,17 @@ const flattenObject = (obj: Record<string, unknown>, prefix = ''): Record<string
 };
 
 export const WorkflowExecuteIndexForm = ({
-  value,
   setValue,
   errors,
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { unifiedSearch, notifications } = services;
   const { SearchBar } = unifiedSearch.ui;
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
   const [documents, setDocuments] = useState<SearchHit<Document>[]>([]);
-  const [selectedDocuments, setSelectedDocuments] = useState<SearchHit<Document>[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
@@ -240,7 +236,6 @@ export const WorkflowExecuteIndexForm = ({
         }
 
         setSelectedDataView(dataView);
-        setSelectedDocuments([]); // Clear selection when changing data view
       } catch (error) {
         setErrors(
           i18n.translate('workflows.workflowExecuteIndexForm.loadDataViewError', {
@@ -280,8 +275,6 @@ export const WorkflowExecuteIndexForm = ({
 
   // Handle document selection
   const handleDocumentSelection = (selectedItems: SearchHit<Document>[]) => {
-    setSelectedDocuments(selectedItems);
-
     if (selectedItems.length > 0) {
       // Create workflow event from selected documents
       const eventData = {
@@ -341,7 +334,8 @@ export const WorkflowExecuteIndexForm = ({
                   selectedDataView,
                   () => true, // Show all fields
                   10, // Max entries
-                  services.fieldFormats
+                  services.fieldFormats,
+                  undefined
                 )
               : [];
 
@@ -384,11 +378,9 @@ export const WorkflowExecuteIndexForm = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="s">
-        {/* Data View Selector */}
-        <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={false}>
             <DataViewPicker
               trigger={{
                 'data-test-subj': 'workflow-data-view-selector',
@@ -405,32 +397,33 @@ export const WorkflowExecuteIndexForm = ({
               currentDataViewId={selectedDataView?.id}
               onChangeDataView={handleDataViewChange}
             />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SearchBar
-            key={selectedDataView?.id || 'no-dataview'}
-            appName="workflow_management"
-            useDefaultBehaviors={true}
-            onQueryChange={handleQueryChange}
-            onQuerySubmit={handleQuerySubmit}
-            query={query}
-            indexPatterns={selectedDataView ? [selectedDataView] : []}
-            showDatePicker={true}
-            dateRangeFrom={timeRange?.from || 'now-15m'}
-            dateRangeTo={timeRange?.to || 'now'}
-            showFilterBar={false}
-            showSubmitButton={true}
-            placeholder={i18n.translate('workflows.workflowExecuteIndexForm.searchPlaceholder', {
-              defaultMessage: 'Filter your data using KQL syntax',
-            })}
-            data-test-subj="workflow-query-input"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* Error Display */}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SearchBar
+              key={selectedDataView?.id || 'no-dataview'}
+              appName="workflow_management"
+              useDefaultBehaviors={true}
+              onQueryChange={handleQueryChange}
+              onQuerySubmit={handleQuerySubmit}
+              query={query}
+              indexPatterns={selectedDataView ? [selectedDataView] : []}
+              showDatePicker={true}
+              dateRangeFrom={timeRange?.from || 'now-15m'}
+              dateRangeTo={timeRange?.to || 'now'}
+              showFilterBar={false}
+              showSubmitButton={true}
+              placeholder={i18n.translate('workflows.workflowExecuteIndexForm.searchPlaceholder', {
+                defaultMessage: 'Filter your data using KQL syntax',
+              })}
+              data-test-subj="workflow-query-input"
+              displayStyle="inPage"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
       {errors && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
             title={i18n.translate('workflows.workflowExecuteIndexForm.errorTitle', {
@@ -445,64 +438,27 @@ export const WorkflowExecuteIndexForm = ({
         </EuiFlexItem>
       )}
 
-      {/* Documents Table */}
       <EuiFlexItem>
-        {documentsLoading ? (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                {i18n.translate('workflows.workflowExecuteIndexForm.loadingDocuments', {
-                  defaultMessage: 'Loading documents...',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiInMemoryTable
-            items={documents}
-            columns={columns}
-            selection={selection}
-            sorting={{
-              sort: {
-                field: '_source.@timestamp',
-                direction: 'desc',
-              },
-            }}
-            tableLayout="fixed"
-            itemId="_id"
-            tableCaption={i18n.translate('workflows.workflowExecuteIndexForm.tableCaption', {
-              defaultMessage: 'Documents list for workflow execution',
-            })}
-            data-test-subj="workflow-documents-table"
-          />
-        )}
+        <EuiInMemoryTable
+          items={documents}
+          columns={columns}
+          selection={selection}
+          loading={documentsLoading}
+          sorting={{
+            sort: {
+              field: '_source.@timestamp',
+              direction: 'desc',
+            },
+          }}
+          tableLayout="fixed"
+          itemId="_id"
+          tableCaption={i18n.translate('workflows.workflowExecuteIndexForm.tableCaption', {
+            defaultMessage: 'Documents list for workflow execution',
+          })}
+          data-test-subj="workflow-documents-table"
+          css={{ border: euiTheme.border.thin, paddingTop: '1px' }}
+        />
       </EuiFlexItem>
-
-      {/* Selection Summary */}
-      {selectedDocuments.length > 0 && (
-        <EuiFlexItem>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('workflows.workflowExecuteIndexForm.documentsSelectedTitle', {
-              defaultMessage: 'Documents Selected',
-            })}
-            color="success"
-            iconType="check"
-            size="s"
-          >
-            <EuiText size="s">
-              {i18n.translate('workflows.workflowExecuteIndexForm.documentsSelectedCount', {
-                defaultMessage:
-                  '{count, plural, one {# document} other {# documents}} selected for workflow execution',
-                values: { count: selectedDocuments.length },
-              })}
-            </EuiText>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };

@@ -27,6 +27,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflow: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
+      validateWorkflow: jest.fn(),
     } as any;
 
     mockGetWorkflowsExecutionEngine = jest.fn();
@@ -288,9 +289,23 @@ steps:
       lastUpdatedAt: '2023-01-01T00:00:00.000Z',
     };
 
+    const parsedMockWorkflow = {
+      name: 'Test Workflow',
+      enabled: true,
+      steps: [
+        {
+          name: 'step1',
+          action: 'test',
+          config: {},
+        },
+      ],
+    };
+
     beforeEach(() => {
       mockWorkflowsExecutionEngine = jest.mocked<WorkflowsExecutionEnginePluginStart>({} as any);
       mockWorkflowsExecutionEngine.executeWorkflow = jest.fn();
+      mockWorkflowsExecutionEngine.isEventDrivenExecutionEnabled = jest.fn().mockReturnValue(true);
+      mockWorkflowsExecutionEngine.isLogTriggerEventsEnabled = jest.fn().mockReturnValue(true);
 
       mockGetWorkflowsExecutionEngine = jest.fn().mockResolvedValue(mockWorkflowsExecutionEngine);
 
@@ -308,6 +323,12 @@ steps:
       mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
         workflowExecutionId: 'test-execution-id',
       } as any);
+
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: parsedMockWorkflow as any,
+      });
     });
 
     const spaceId = 'default';
@@ -326,38 +347,19 @@ steps:
         });
 
         expect(result).toBe('test-execution-id');
-        expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-          expect.anything(),
+        expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+          mockWorkflowYaml,
           spaceId,
           mockRequest
         );
         expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
-          {
+          expect.objectContaining({
             id: 'test-workflow',
             name: 'Test Workflow',
             enabled: true,
-            definition: {
-              name: 'Test Workflow',
-              enabled: true,
-              steps: [
-                {
-                  name: 'step1',
-                  action: 'test',
-                  config: {},
-                },
-              ],
-            },
-            yaml: `name: Test Workflow
-enabled: true
-trigger:
-  schedule:
-    cron: "0 0 * * *"
-steps:
-  - name: step1
-    action: test
-    config: {}`,
+            yaml: mockWorkflowYaml,
             isTestRun: true,
-          },
+          }),
           {
             event: { type: 'test-event' },
             spaceId,
@@ -367,7 +369,12 @@ steps:
         );
       });
 
-      it('should throw error when YAML parsing fails', async () => {
+      it('should throw error when YAML validation fails', async () => {
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+        });
+
         await expect(
           underTest.testWorkflow({
             workflowYaml: 'invalid: yaml: content',
@@ -458,6 +465,10 @@ steps:
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
           yaml: 'invalid: yaml: content',
+        });
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
         });
 
         await expect(
@@ -550,7 +561,7 @@ steps:
         );
       });
 
-      it('should not use loose schema validation mode', async () => {
+      it('should delegate validation to workflowsService.validateWorkflow', async () => {
         await underTest.testWorkflow({
           workflowYaml: mockWorkflowYaml,
           inputs,
@@ -558,12 +569,91 @@ steps:
           request: mockRequest,
         });
 
-        expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-          { loose: false },
+        expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+          mockWorkflowYaml,
           spaceId,
           mockRequest
         );
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    it('should delegate to workflowsService.validateWorkflow', async () => {
+      const expectedResult = { valid: true, diagnostics: [] };
+      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+
+      const result = await api.validateWorkflow('name: Test', 'default', mockRequest);
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test',
+        'default',
+        mockRequest
+      );
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should pass through diagnostics from service', async () => {
+      const expectedResult = {
+        valid: false,
+        diagnostics: [
+          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+        ],
+      };
+      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+
+      const result = await api.validateWorkflow('invalid: yaml', 'my-space', mockRequest);
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'invalid: yaml',
+        'my-space',
+        mockRequest
+      );
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('scheduleWorkflow', () => {
+    it('should pass event-driven trigger id (TriggerId) through to execution engine context', async () => {
+      const mockWorkflowsExecutionEngine = {
+        scheduleWorkflow: jest
+          .fn()
+          .mockResolvedValue({ workflowExecutionId: 'scheduled-exec-123' }),
+        isEventDrivenExecutionEnabled: jest.fn().mockReturnValue(true),
+        isLogTriggerEventsEnabled: jest.fn().mockReturnValue(true),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const workflow = {
+        id: 'wf-1',
+        name: 'Test Workflow',
+        enabled: true,
+        definition: { triggers: [{ type: 'cases.updated' }], steps: [] },
+        yaml: 'name: Test Workflow\ntriggers: [{ type: "cases.updated" }]\nsteps: []',
+      };
+      const spaceId = 'default';
+      const eventPayload = { caseId: 'case-1', status: 'open' };
+      const inputs = { event: eventPayload };
+      const triggeredBy = 'cases.updated';
+
+      const result = await api.scheduleWorkflow(
+        workflow as any,
+        spaceId,
+        inputs,
+        mockRequest,
+        triggeredBy
+      );
+
+      expect(mockGetWorkflowsExecutionEngine).toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.scheduleWorkflow).toHaveBeenCalledTimes(1);
+      const [passedWorkflow, passedContext, passedRequest] =
+        mockWorkflowsExecutionEngine.scheduleWorkflow.mock.calls[0];
+      expect(passedWorkflow).toEqual(workflow);
+      expect(passedContext.triggeredBy).toBe('cases.updated');
+      expect(passedContext.spaceId).toBe(spaceId);
+      expect(passedContext.event).toEqual(eventPayload);
+      expect(passedRequest).toBe(mockRequest);
+      expect(result).toBe('scheduled-exec-123');
     });
   });
 });

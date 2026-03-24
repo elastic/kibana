@@ -553,7 +553,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const body = await mlClient.getCategories({
             job_id: request.params.jobId,
-            category_id: request.params.categoryId,
+            category_id: Number(request.params.categoryId),
           });
           return response.ok({
             body,

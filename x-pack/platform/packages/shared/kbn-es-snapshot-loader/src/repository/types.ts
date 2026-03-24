@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-export type RepositoryType = 'url' | 'gcs';
+export type RepositoryType = 'url' | 'gcs' | 'fs';
 
 export interface RepositoryStrategy {
   type: RepositoryType;

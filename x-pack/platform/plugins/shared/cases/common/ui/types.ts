@@ -37,7 +37,7 @@ import type {
   CustomFieldTypes,
   EventAttachment,
   UnifiedAttachment,
-  CombinedAttachment,
+  AttachmentV2,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -73,6 +73,9 @@ export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
+  attachments?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -110,7 +113,7 @@ export type CaseViewRefreshPropInterface = null | {
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
 export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
-export type CombinedAttachmentUI = SnakeToCamelCase<CombinedAttachment>;
+export type AttachmentUIV2 = SnakeToCamelCase<AttachmentV2>;
 
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
@@ -122,12 +125,12 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
 export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
-  latestAttachments: AttachmentUI[];
+  latestAttachments: AttachmentUIV2[];
 }
 
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
-  comments: AttachmentUI[];
+  comments: AttachmentUIV2[];
 };
 export type ObservableUI = CaseUI['observables'][0];
 
@@ -263,6 +266,7 @@ export type UpdateKey = keyof Pick<
   | 'assignees'
   | 'category'
   | 'customFields'
+  | 'extended_fields'
 >;
 
 export interface UpdateByKey {

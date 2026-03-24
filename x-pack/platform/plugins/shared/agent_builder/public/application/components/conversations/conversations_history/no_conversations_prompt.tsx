@@ -13,7 +13,7 @@ export const NoConversationsPrompt: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="newChat" size="l" />
+        <EuiIcon type="plusCircle" size="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText

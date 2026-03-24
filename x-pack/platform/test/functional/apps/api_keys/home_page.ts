@@ -572,5 +572,68 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ensureApiKeysExist(['test_user_api_key', 'test_api_key']);
       });
     });
+
+    describe('pagination', function () {
+      const apiKeyPrefix = 'pagination-test-key';
+
+      before(async () => {
+        await clearAllApiKeys(es, log);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+
+        // Create 30 API keys to test pagination (default page size is 25)
+        for (let batch = 0; batch < 3; batch++) {
+          await Promise.all(
+            Array.from({ length: 10 }, (_, i) => {
+              const index = batch * 10 + i;
+              return es.security.createApiKey({
+                name: `${apiKeyPrefix}-${index.toString().padStart(2, '0')}`,
+                role_descriptors: {},
+              });
+            })
+          );
+        }
+
+        await pageObjects.common.navigateToApp('apiKeys');
+      });
+
+      after(async () => {
+        await clearAllApiKeys(es, log);
+      });
+
+      it('should show Previous button disabled on first page', async () => {
+        const isPreviousEnabled = await pageObjects.apiKeys.isPreviousPageButtonEnabled();
+        expect(isPreviousEnabled).to.be(false);
+      });
+
+      it('should show Next button enabled when there are more results', async () => {
+        const isNextEnabled = await pageObjects.apiKeys.isNextPageButtonEnabled();
+        expect(isNextEnabled).to.be(true);
+      });
+
+      it('should navigate to next page and enable Previous button', async () => {
+        await pageObjects.apiKeys.clickNextPageButton();
+
+        await retry.try(async () => {
+          const isPreviousEnabled = await pageObjects.apiKeys.isPreviousPageButtonEnabled();
+          expect(isPreviousEnabled).to.be(true);
+        });
+      });
+
+      it('should disable Next button when there are no more results', async () => {
+        await retry.try(async () => {
+          const isNextEnabled = await pageObjects.apiKeys.isNextPageButtonEnabled();
+          expect(isNextEnabled).to.be(false);
+        });
+      });
+
+      it('should navigate back to first page when clicking Previous', async () => {
+        await pageObjects.apiKeys.clickPreviousPageButton();
+
+        await retry.try(async () => {
+          const isPreviousEnabled = await pageObjects.apiKeys.isPreviousPageButtonEnabled();
+          expect(isPreviousEnabled).to.be(false);
+        });
+      });
+    });
   });
 };

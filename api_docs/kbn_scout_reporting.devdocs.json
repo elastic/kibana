@@ -659,58 +659,6 @@
           },
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.ScoutTestConfigStats.findConfigByPath",
-            "type": "Function",
-            "tags": [],
-            "label": "findConfigByPath",
-            "description": [],
-            "signature": [
-              "(configPath: string) => any"
-            ],
-            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-            "lineNumber": 57,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/scout-reporting",
-                "id": "def-common.ScoutTestConfigStats.findConfigByPath.$1",
-                "type": "string",
-                "tags": [],
-                "label": "configPath",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                "lineNumber": 57,
-                "columnNumber": 20,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.ScoutTestConfigStats.largestConfig",
-            "type": "Any",
-            "tags": [],
-            "label": "largestConfig",
-            "description": [],
-            "signature": [
-              "z.infer<any>"
-            ],
-            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-            "lineNumber": 61,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-reporting",
             "id": "def-common.ScoutTestConfigStats.writeToFile",
             "type": "Function",
             "tags": [],
@@ -720,7 +668,7 @@
               "(outputPath: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-            "lineNumber": 67,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -736,7 +684,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                "lineNumber": 67,
+                "lineNumber": 57,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -763,7 +711,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-            "lineNumber": 72,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -779,7 +727,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                "lineNumber": 72,
+                "lineNumber": 65,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -809,7 +757,7 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-            "lineNumber": 85,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -825,7 +773,7 @@
                   "default"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                "lineNumber": 86,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -839,7 +787,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                "lineNumber": 87,
+                "lineNumber": 81,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -855,7 +803,7 @@
                       "string[]"
                     ],
                     "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                    "lineNumber": 88,
+                    "lineNumber": 82,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -868,7 +816,7 @@
                     "label": "lookbackDays",
                     "description": [],
                     "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                    "lineNumber": 89,
+                    "lineNumber": 83,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -884,7 +832,7 @@
                       "{ branch?: string | undefined; pipelineSlug?: string | undefined; }"
                     ],
                     "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-                    "lineNumber": 90,
+                    "lineNumber": 84,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2217,6 +2165,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfig.server",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "{ configSet: string; }"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2796,7 +2760,7 @@
           "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-        "lineNumber": 23,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2882,7 +2846,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2898,7 +2862,7 @@
                   "\"package\" | \"plugin\""
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
-                "lineNumber": 50,
+                "lineNumber": 51,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2925,7 +2889,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2948,7 +2912,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2964,7 +2928,7 @@
         "label": "testConfig",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-        "lineNumber": 27,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2987,7 +2951,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 28,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3003,7 +2967,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-                "lineNumber": 28,
+                "lineNumber": 31,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3057,7 +3021,7 @@
         "label": "testConfigs",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-        "lineNumber": 111,
+        "lineNumber": 117,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3080,7 +3044,7 @@
               "[] | null"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 112,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3102,7 +3066,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 113,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3118,7 +3082,7 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 115,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3136,7 +3100,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 121,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3154,7 +3118,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 132,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3179,7 +3143,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 136,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3203,7 +3167,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 141,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3219,7 +3183,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-                "lineNumber": 141,
+                "lineNumber": 147,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3236,7 +3200,7 @@
                   "\"package\" | \"plugin\" | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-                "lineNumber": 141,
+                "lineNumber": 147,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3264,7 +3228,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 146,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3280,7 +3244,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-                "lineNumber": 146,
+                "lineNumber": 152,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3308,7 +3272,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-            "lineNumber": 150,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3324,7 +3288,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
-                "lineNumber": 150,
+                "lineNumber": 156,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,

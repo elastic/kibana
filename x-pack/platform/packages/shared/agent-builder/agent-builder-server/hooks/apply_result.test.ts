@@ -16,6 +16,7 @@ import type {
   AfterToolCallHookContext,
 } from './types';
 import type { RunToolReturn } from '../runner/runner';
+import type { ToolHandlerContext } from '../tools/handler';
 
 const createMockRequest = () => ({ headers: {} } as BeforeAgentHookContext['request']);
 
@@ -77,6 +78,7 @@ describe('apply_result', () => {
       toolParams: {},
       source: 'agent',
       toolReturn: { results: [] },
+      toolHandlerContext: {} as ToolHandlerContext,
     };
 
     it('returns context unchanged when result is undefined', () => {

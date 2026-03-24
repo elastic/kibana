@@ -43,6 +43,7 @@ export {
   timeRangeComparators,
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
+export { transformTimeRangeOut } from './interfaces/fetch/bwc/time_range_transforms';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiAppliesFilters,
@@ -171,6 +172,12 @@ export {
   type PublishesWritableTitle,
 } from './interfaces/titles/publishes_title';
 export {
+  apiPublishesHideBorder,
+  apiPublishesWritableHideBorder,
+  type PublishesHideBorder,
+  type PublishesWritableHideBorder,
+} from './interfaces/titles/publishes_hide_border';
+export {
   initializeTitleManager,
   stateHasTitles,
   titleComparators,
@@ -208,6 +215,7 @@ export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
   apiCanPinPanels,
+  apiHasPinnedPanels,
   type CanDuplicatePanels,
   type CanExpandPanels,
   type CanPinPanels,

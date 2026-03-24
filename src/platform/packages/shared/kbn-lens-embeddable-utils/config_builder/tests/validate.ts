@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
 import { unset } from 'lodash';
+
+import type { Type } from '@kbn/config-schema';
+
 import { LensConfigBuilder } from '../config_builder';
 import type { LensAttributes } from '../types';
 import type { LensApiState } from '../schema';

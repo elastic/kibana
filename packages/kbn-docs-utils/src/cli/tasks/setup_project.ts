@@ -36,6 +36,7 @@ function getTsProject(repoPath: string, overridePath?: string): Project {
   });
 
   if (!overridePath) {
+    // Full build: load all source files and resolve dependencies upfront
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/platform/**/*.ts`, '!**/*.d.ts']);
@@ -44,10 +45,17 @@ function getTsProject(repoPath: string, overridePath?: string): Project {
     project.addSourceFilesAtPaths([`${repoPath}/src/platform/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/src/core/packages/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
+    project.resolveSourceFileDependencies();
   } else {
+    // Single-plugin build: only load files from the target plugin directory.
+    // We intentionally skip resolveSourceFileDependencies() here because:
+    // 1. ts-morph resolves dependencies lazily when accessed (e.g., via getType()).
+    // 2. This significantly reduces memory usage and startup time for single-plugin builds.
+    // 3. Cross-package type references still resolve correctly via the tsconfig paths.
+    // Trade-off: First access to external types may be slightly slower, but overall
+    // build time is reduced since we don't load the entire codebase into memory.
     project.addSourceFilesAtPaths([`${overridePath}/**/*.ts`, '!**/*.d.ts']);
   }
-  project.resolveSourceFileDependencies();
   return project;
 }
 
@@ -84,11 +92,14 @@ export async function setupProject(
   spanInitialDocIds?.end();
 
   const spanPlugins = transaction.startSpan('build_api_docs.findPlugins', 'setup');
-  const plugins = hasAnyFilter ? findPlugins({ pluginFilter, packageFilter }) : findPlugins();
+  // Always find all plugins for cross-reference resolution.
+  const allPlugins = findPlugins();
+  // Find filtered plugins if a filter is provided.
+  const filteredPlugins = hasAnyFilter ? findPlugins({ pluginFilter, packageFilter }) : allPlugins;
 
   // Validate that all requested plugins were found.
   if (hasPluginFilter && pluginFilter) {
-    const foundPluginIds = plugins.filter((p) => p.isPlugin).map((p) => p.id);
+    const foundPluginIds = filteredPlugins.filter((p) => p.isPlugin).map((p) => p.id);
     const missingPlugins = pluginFilter.filter((id) => !foundPluginIds.includes(id));
     if (missingPlugins.length > 0) {
       throw createFlagError(`expected --plugin '${missingPlugins.join(', ')}' was not found`);
@@ -97,12 +108,15 @@ export async function setupProject(
 
   // Validate that all requested packages were found.
   if (hasPackageFilter && packageFilter) {
-    const foundPackageIds = plugins.filter((p) => !p.isPlugin).map((p) => p.id);
+    const foundPackageIds = filteredPlugins.filter((p) => !p.isPlugin).map((p) => p.id);
     const missingPackages = packageFilter.filter((id) => !foundPackageIds.includes(id));
     if (missingPackages.length > 0) {
       throw createFlagError(`expected --package '${missingPackages.join(', ')}' was not found`);
     }
   }
+
+  // Use filtered plugins for iteration, all plugins for reference resolution
+  const plugins = hasAnyFilter ? filteredPlugins : allPlugins;
   spanPlugins?.end();
 
   const spanPathsByPackage = transaction.startSpan('build_api_docs.getPathsByPackage', 'setup');
@@ -112,7 +126,7 @@ export async function setupProject(
   const spanProject = transaction.startSpan('build_api_docs.getTsProject', 'setup');
   // Optimize: when building a single plugin/package, scope the TS project to just that directory
   const singlePluginDirectory =
-    hasAnyFilter && plugins.length === 1 ? plugins[0].directory : undefined;
+    hasAnyFilter && filteredPlugins.length === 1 ? filteredPlugins[0].directory : undefined;
   const project = getTsProject(REPO_ROOT, singlePluginDirectory);
   spanProject?.end();
 
@@ -130,6 +144,7 @@ export async function setupProject(
 
   return {
     plugins,
+    allPlugins,
     pathsByPlugin,
     project,
     initialDocIds,

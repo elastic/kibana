@@ -50,8 +50,7 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
   useYamlValidation: () => ({
     error: null,
     isLoading: false,
-    validateVariables: jest.fn(),
-    handleMarkersChanged: jest.fn(),
+    validationResults: [],
   }),
 }));
 
@@ -144,6 +143,7 @@ jest.mock('./decorations', () => ({
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
+  useWorkflowIdDecorations: jest.fn(),
 }));
 
 jest.mock('../styles/use_workflow_editor_styles', () => ({
@@ -290,8 +290,6 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
 steps:
   - name: step1
     type: console.log
@@ -336,9 +334,7 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
-      invalid: [ unclosed array
+    invalid: [ unclosed array
 steps:
   - name: step1
 `.trim();

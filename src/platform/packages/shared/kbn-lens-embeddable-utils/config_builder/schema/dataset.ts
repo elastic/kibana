@@ -25,7 +25,7 @@ export const datasetTypeSchema = schema.oneOf([
         },
       }),
     },
-    { meta: { id: 'dataViewDatasetTypeSchema' } }
+    { meta: { id: 'dataViewDataset', title: 'Data View Dataset' } }
   ),
   // Index dataset type
   schema.object(
@@ -94,7 +94,7 @@ export const datasetTypeSchema = schema.oneOf([
         )
       ),
     },
-    { meta: { id: 'indexDatasetTypeSchema' } }
+    { meta: { id: 'indexDataset', title: 'Index Dataset' } }
   ),
 ]);
 
@@ -125,7 +125,7 @@ export const datasetEsqlTableTypeSchema = schema.oneOf([
         },
       }),
     },
-    { meta: { id: 'esqlDatasetTypeSchema' } }
+    { meta: { id: 'esqlDataset', title: 'ES|QL Dataset' } }
   ),
   // Table dataset type
   schema.object(
@@ -141,7 +141,7 @@ export const datasetEsqlTableTypeSchema = schema.oneOf([
         },
       }),
     },
-    { meta: { id: 'tableESQLDatasetTypeSchema' } }
+    { meta: { id: 'tableESQLDataset', title: 'ES|QL Table Dataset' } }
   ),
 ]);
 
@@ -150,7 +150,7 @@ export const datasetEsqlTableSchema = {
 };
 
 const anyDatasetSchema = schema.oneOf([datasetTypeSchema, datasetEsqlTableTypeSchema], {
-  meta: { id: 'datasetSchema' },
+  meta: { id: 'dataset', title: 'Dataset' },
 });
 
 export type DatasetType = TypeOf<typeof anyDatasetSchema>;

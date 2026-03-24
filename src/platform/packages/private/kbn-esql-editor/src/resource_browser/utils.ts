@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, isSource } from '@kbn/esql-language';
+import { Parser, isSource } from '@elastic/esql';
 import type { monaco } from '@kbn/monaco';
 import type { CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
 import { IndicesBrowserOpenMode } from './types';

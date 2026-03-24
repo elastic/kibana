@@ -13,6 +13,7 @@ export const createMockClassicStreamDefinition = (
   overrides: Partial<Streams.ClassicStream.GetResponse> = {}
 ): Streams.ClassicStream.GetResponse => ({
   stream: {
+    type: 'classic',
     name: 'logs.classic-test',
     description: '',
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -39,6 +40,7 @@ export const createMockClassicStreamDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   data_stream_exists: true,
   effective_lifecycle: { dsl: {} },
@@ -54,6 +56,7 @@ export const createMockWiredStreamDefinition = (
   overrides: Partial<Streams.WiredStream.GetResponse> = {}
 ): Streams.WiredStream.GetResponse => ({
   stream: {
+    type: 'wired',
     name: 'logs.wired-test',
     description: '',
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -81,7 +84,9 @@ export const createMockWiredStreamDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
+  data_stream_exists: true,
   inherited_fields: {
     'attributes.inherited_field': {
       type: 'keyword',

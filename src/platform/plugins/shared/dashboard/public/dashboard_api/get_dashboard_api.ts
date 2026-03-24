@@ -73,7 +73,7 @@ export function getDashboardApi({
     savedObjectId,
     accessControl: {
       accessMode: readResult?.data?.access_control?.access_mode,
-      owner: readResult?.data?.access_control?.owner,
+      owner: readResult?.meta?.owner,
     },
     createdBy: readResult?.meta?.created_by,
     user,
@@ -125,6 +125,18 @@ export function getDashboardApi({
     settingsManager.api.projectRoutingRestore$
   );
 
+  function setState(state: DashboardState) {
+    layoutManager.internalApi.reset(state);
+    unifiedSearchManager.internalApi.reset(state);
+    projectRoutingManager?.internalApi.reset(state);
+    settingsManager.internalApi.reset(state);
+
+    // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
+    if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+      forcePublishOnReset$.next();
+    }
+  }
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -134,7 +146,7 @@ export function getDashboardApi({
     settingsManager,
     unifiedSearchManager,
     projectRoutingManager,
-    forcePublishOnReset$,
+    setState,
   });
 
   function getState() {
@@ -189,6 +201,7 @@ export function getDashboardApi({
     getSerializedState: () => ({
       attributes: getState(),
     }),
+    setState,
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 

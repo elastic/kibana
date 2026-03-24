@@ -24,7 +24,7 @@ const mockedInfra = { getMetricsIndices: () => Promise.resolve(['*.indices']) };
 
 const infraMetricsTestHarness =
   (tiers: DataTier[], input: QueryDslQueryContainer | undefined, expectedBool: any) => async () => {
-    const callWithRequest = jest.fn();
+    const callWithRequest = jest.fn().mockResolvedValue({});
     const mockedCore = withExcludedDataTiers(tiers);
 
     const context = {

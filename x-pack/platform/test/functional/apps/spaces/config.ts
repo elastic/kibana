@@ -16,12 +16,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
     },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--uiSettings.globalOverrides.hideAnnouncements=false',
-      ],
+    uiSettings: {
+      ...functionalConfig.get('uiSettings'),
+      globalDefaults: {
+        ...functionalConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: false,
+      },
     },
   };
 }

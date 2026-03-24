@@ -24,6 +24,8 @@ import {
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { getCriticalPath, type CriticalPathSegment } from './critical_path';
 
+export type TraceWaterfallScrollStrategy = 'parent' | 'window';
+
 export interface TraceWaterfallContextProps {
   duration: number;
   traceState: TraceDataState;
@@ -42,8 +44,8 @@ export interface TraceWaterfallContextProps {
   showCriticalPathControl?: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
-  highlightedTraceId?: string;
-  scrollElement?: Element;
+  highlightedSpanId?: string;
+  scrollToHighlightedOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
   legends: IWaterfallLegend[];
@@ -51,8 +53,11 @@ export interface TraceWaterfallContextProps {
   showLegend: boolean;
   serviceName?: string;
   message?: string;
+  marks: Array<AgentMark | ErrorMark>;
   errorMarks: ErrorMark[];
   agentMarks: AgentMark[];
+  scrollElement?: Element;
+  scrollStrategy: TraceWaterfallScrollStrategy;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -76,11 +81,17 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
+  marks: [],
   errorMarks: [],
   agentMarks: [],
+  scrollElement: undefined,
+  scrollStrategy: 'window',
 });
 
-export type OnNodeClick = (id: string) => void;
+export interface OnNodeClickOptions {
+  flyoutDetailTab?: string;
+}
+export type OnNodeClick = (id: string, options?: OnNodeClickOptions) => void;
 export type OnErrorClick = (params: {
   traceId: string;
   docId: string;
@@ -93,10 +104,10 @@ interface Props {
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
-  highlightedTraceId?: string;
+  highlightedSpanId?: string;
+  scrollStrategy?: TraceWaterfallScrollStrategy;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
-  scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
   showLegend: boolean;
@@ -105,13 +116,22 @@ interface Props {
   errors?: Error[];
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
+  showCriticalPath?: boolean;
+  defaultShowCriticalPath?: boolean;
+  onShowCriticalPathChange?: (value: boolean) => void;
+  entryTransactionId?: string;
+  scrollToHighlightedOnMount?: boolean;
+  scrollElement?: Element;
 }
+
+const MAX_DEPTH_OPEN_LIMIT = 2;
 
 export function TraceWaterfallContextProvider({
   children,
   traceItems,
   showAccordion,
-  highlightedTraceId,
+  highlightedSpanId,
+  scrollStrategy = 'window',
   onClick,
   onErrorClick,
   scrollElement,
@@ -123,34 +143,46 @@ export function TraceWaterfallContextProvider({
   errors,
   agentMarks,
   showCriticalPathControl,
+  showCriticalPath: controlledValue,
+  defaultShowCriticalPath = false,
+  onShowCriticalPathChange,
+  entryTransactionId,
+  scrollToHighlightedOnMount,
 }: Props) {
-  const {
-    duration,
-    traceWaterfall,
-    maxDepth,
-    rootItem,
-    legends,
-    colorBy,
-    traceState,
-    message,
-    errorMarks,
-  } = useTraceWaterfall({
-    traceItems,
-    isFiltered,
-    errors,
-    onErrorClick,
-  });
+  const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
+    useTraceWaterfall({
+      traceItems,
+      isFiltered,
+      errors,
+      onErrorClick,
+      entryTransactionId,
+    });
 
-  const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
+  const isCriticalPathControlled = controlledValue !== undefined;
+  const showCriticalPath = isCriticalPathControlled ? controlledValue : uncontrolledValue;
+
+  const setShowCriticalPath = useCallback(
+    (newValue: boolean) => {
+      onShowCriticalPathChange?.(newValue);
+      if (!isCriticalPathControlled) {
+        setUncontrolledValue(newValue);
+      }
+    },
+    [isCriticalPathControlled, onShowCriticalPathChange]
+  );
+  const maxLevelOpen = traceWaterfall.length > 500 ? MAX_DEPTH_OPEN_LIMIT : traceWaterfall.length;
   const [isAccordionOpen, setAccordionOpen] = useState(true);
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
-  >(() =>
-    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
-      acc[item.id] = 'open';
+  >(() => {
+    const ancestorIds = getAncestorIds(traceWaterfall, highlightedSpanId);
+
+    return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
+      acc[item.id] = item.depth < maxLevelOpen || ancestorIds.has(item.id) ? 'open' : 'closed';
       return acc;
-    }, {})
-  );
+    }, {});
+  });
 
   const toggleAccordionState = useCallback((id: string) => {
     setAccordionStateMap((prevStates) => ({
@@ -173,7 +205,7 @@ export function TraceWaterfallContextProvider({
     setAccordionOpen((prev) => !prev);
   }, [isAccordionOpen]);
 
-  const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
+  const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT;
   const right = 40;
 
   const fullTraceWaterfallMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
@@ -200,6 +232,11 @@ export function TraceWaterfallContextProvider({
     return filterMapByCriticalPath(fullTraceWaterfallMap, criticalPathSegmentsById);
   }, [criticalPathSegmentsById, fullTraceWaterfallMap, showCriticalPath]);
 
+  const marks = useMemo(
+    () => [...getAgentMarks(agentMarks), ...errorMarks],
+    [agentMarks, errorMarks]
+  );
+
   return (
     <TraceWaterfallContext.Provider
       value={{
@@ -207,7 +244,7 @@ export function TraceWaterfallContextProvider({
         duration,
         rootItem,
         traceWaterfall,
-        margin: { left: showAccordion ? Math.max(100, left) : left, right },
+        margin: { left: showAccordion ? Math.max(60, left) : left, right },
         traceWaterfallMap,
         criticalPathSegmentsById,
         showAccordion,
@@ -220,8 +257,8 @@ export function TraceWaterfallContextProvider({
         showCriticalPathControl,
         onClick,
         onErrorClick,
-        highlightedTraceId,
-        scrollElement,
+        highlightedSpanId,
+        scrollToHighlightedOnMount,
         getRelatedErrorsHref,
         isEmbeddable,
         legends,
@@ -229,8 +266,11 @@ export function TraceWaterfallContextProvider({
         showLegend,
         serviceName,
         message,
+        marks,
         errorMarks,
         agentMarks: getAgentMarks(agentMarks),
+        scrollElement,
+        scrollStrategy,
       }}
     >
       {children}
@@ -268,4 +308,25 @@ export function filterMapByCriticalPath(
   }
 
   return result;
+}
+
+/**
+ * Returns the set of ancestor IDs for a given target item.
+ * Used to expand collapsed accordion nodes so the target becomes visible.
+ */
+export function getAncestorIds(items: TraceWaterfallItem[], targetId?: string): Set<string> {
+  if (!targetId) {
+    return new Set();
+  }
+
+  const itemById = new Map(items.map((item) => [item.id, item]));
+  const ancestors = new Set<string>();
+
+  let current = itemById.get(targetId);
+  while (current?.parentId) {
+    ancestors.add(current.parentId);
+    current = itemById.get(current.parentId);
+  }
+
+  return ancestors;
 }

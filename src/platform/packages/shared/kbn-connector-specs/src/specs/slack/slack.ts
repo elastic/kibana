@@ -12,6 +12,8 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
+import searchMessagesWorkflow from './workflows/search_messages.yaml';
+import sendMessageWorkflow from './workflows/send_message.yaml';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
@@ -55,7 +57,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.inChannel.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `in:<channel_name>` to the query.',
+            'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).',
         }
       )
     ),
@@ -67,7 +69,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.fromUser.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `from:<@UserID>` or `from:username` to the query.',
+            'Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query.',
         }
       )
     ),
@@ -79,7 +81,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.after.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `after:<date>` to the query (e.g. 2026-02-10).',
+            'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).',
         }
       )
     ),
@@ -91,7 +93,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.before.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `before:<date>` to the query (e.g. 2026-02-10).',
+            'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).',
         }
       )
     ),
@@ -471,10 +473,11 @@ export const Slack: ConnectorSpec = {
     id: '.slack2',
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
-      defaultMessage: 'List public channels and send messages to Slack channels',
+      defaultMessage: 'Search messages, list public channels, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -815,4 +818,6 @@ export const Slack: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [searchMessagesWorkflow, sendMessageWorkflow],
 };

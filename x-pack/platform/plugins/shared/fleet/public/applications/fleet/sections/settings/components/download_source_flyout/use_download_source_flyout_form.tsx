@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -121,10 +121,16 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     isEditDisabled
   );
 
+  const validateHeadersWithAuthType = useMemo(
+    () => (pairs: Array<{ key: string; value: string }>) =>
+      validateDownloadSourceHeaders(pairs, authTypeInput.value as AuthType),
+    [authTypeInput.value]
+  );
+
   const headersInput = useKeyValueInput(
     'downloadSourceHeadersInput',
     (downloadSource as DownloadSourceBase)?.auth?.headers ?? [{ key: '', value: '' }],
-    validateDownloadSourceHeaders,
+    validateHeadersWithAuthType,
     isEditDisabled
   );
 
@@ -391,7 +397,10 @@ export function validateHost(value: string) {
   }
 }
 
-export function validateDownloadSourceHeaders(pairs: Array<{ key: string; value: string }>) {
+export function validateDownloadSourceHeaders(
+  pairs: Array<{ key: string; value: string }>,
+  authType?: AuthType
+) {
   const errors: Array<{
     message: string;
     index: number;
@@ -449,6 +458,21 @@ export function validateDownloadSourceHeaders(pairs: Array<{ key: string; value:
         });
       } else {
         existingKeys.add(key);
+      }
+
+      if (authType && authType !== 'none' && key.toLowerCase() === 'authorization') {
+        errors.push({
+          message: i18n.translate(
+            'xpack.fleet.settings.dowloadSourceFlyoutForm.headersAuthorizationConflictError',
+            {
+              defaultMessage:
+                'Cannot use "Authorization" header when credentials are configured. The credentials will overwrite this header.',
+            }
+          ),
+          index,
+          hasKeyError: true,
+          hasValueError: false,
+        });
       }
     }
   });

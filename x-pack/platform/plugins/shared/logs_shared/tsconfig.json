@@ -8,8 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*",
-    "emotion.d.ts"
+    "types/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

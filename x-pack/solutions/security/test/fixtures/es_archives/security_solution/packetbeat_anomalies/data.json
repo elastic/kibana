@@ -1,0 +1,103 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-packetbeat",
+    "id": "packetbeat_rare_server_domain_record_1761555600000_3600_0_1",
+    "source": {
+      "job_id": "packetbeat_rare_server_domain",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 87.2,
+      "initial_record_score": 87.2,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "function": "rare",
+      "function_description": "rare",
+      "field_name": "server.domain",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "admin-account-1"
+          ]
+        },
+        {
+          "influencer_field_name": "server.domain",
+          "influencer_field_values": [
+            "suspicious-admin-server.com"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.domain",
+          "influencer_field_values": [
+            "suspicious-admin-server.com"
+          ]
+        }
+      ],
+      "user.name": [
+        "admin-account-1"
+      ],
+      "server.domain": [
+        "suspicious-admin-server.com"
+      ],
+      "destination.domain": [
+        "suspicious-admin-server.com"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-packetbeat",
+    "id": "packetbeat_rare_server_domain_record_1761555600000_3600_0_2",
+    "source": {
+      "job_id": "packetbeat_rare_server_domain",
+      "result_type": "record",
+      "probability": 0.002,
+      "record_score": 85.9,
+      "initial_record_score": 85.9,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "function": "rare",
+      "function_description": "rare",
+      "field_name": "server.domain",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "privileged-user-2"
+          ]
+        },
+        {
+          "influencer_field_name": "server.domain",
+          "influencer_field_values": [
+            "unusual-admin-domain.net"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.domain",
+          "influencer_field_values": [
+            "unusual-admin-domain.net"
+          ]
+        }
+      ],
+      "user.name": [
+        "privileged-user-2"
+      ],
+      "server.domain": [
+        "unusual-admin-domain.net"
+      ],
+      "destination.domain": [
+        "unusual-admin-domain.net"
+      ]
+    },
+    "type": "_doc"
+  }
+}

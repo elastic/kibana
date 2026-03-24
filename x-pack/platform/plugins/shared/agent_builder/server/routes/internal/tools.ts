@@ -9,8 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import {
+  type ActionTypeExecutorResult,
+  AgentBuilderConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -32,8 +35,8 @@ import type {
   McpToolHealthStatus,
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
-import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
+import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
 
@@ -52,14 +55,12 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_bulk_delete`,
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string()),
+          ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 1000 }),
           force: schema.boolean({ defaultValue: true }),
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { ids, force } = request.body;
@@ -142,9 +143,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const {
@@ -191,16 +190,14 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { namespace, connector_id: connectorId } = request.query;
       const { tools: toolService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
 
-      const allTools = await registry.list({});
+      const allTools = await registry.list({ types: [ToolType.mcp] });
 
       const toolsInNamespace = allTools.filter((tool) => {
         const lastDotIndex = tool.id.lastIndexOf('.');
@@ -259,9 +256,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
@@ -300,9 +295,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_types_info`,
       validate: false,
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
@@ -328,9 +321,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       if (!workflowsManagement) {
@@ -370,9 +361,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       if (!workflowsManagement) {
@@ -408,9 +397,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_health`,
       validate: false,
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
@@ -435,9 +422,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
@@ -466,18 +451,21 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-      const allConnectors = await actionsClient.getAll();
+      const [allConnectors, compatibleTypes] = await Promise.all([
+        actionsClient.getAll(),
+        actionsClient.listTypes({ featureId: AgentBuilderConnectorFeatureId }),
+      ]);
 
+      const compatibleTypeIds = new Set(compatibleTypes.map((t) => t.id));
       const { type } = request.query;
 
       const connectors: ConnectorItem[] = allConnectors
+        .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
         .filter((connector) => (type ? connector.actionTypeId === type : true))
         .map(toConnectorItem);
 
@@ -499,9 +487,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
@@ -528,9 +514,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
@@ -580,9 +564,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_mcp_health`,
       validate: false,
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
@@ -592,8 +574,9 @@ export function registerInternalToolsRoutes({
       const registry = await toolService.getRegistry({ request });
       const healthClient = toolService.getHealthClient({ request });
 
-      const allTools = await registry.list({});
-      const mcpTools: McpToolDefinition[] = allTools.filter((tool) => isMcpTool(tool));
+      const mcpTools: McpToolDefinition[] = (await registry.list({ types: [ToolType.mcp] })).filter(
+        (tool) => isMcpTool(tool)
+      );
 
       if (mcpTools.length === 0) {
         return response.ok<ListMcpToolsHealthResponse>({

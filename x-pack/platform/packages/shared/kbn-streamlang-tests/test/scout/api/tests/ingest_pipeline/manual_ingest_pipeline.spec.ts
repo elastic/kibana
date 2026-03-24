@@ -232,5 +232,104 @@ apiTest.describe(
         expect(source?.message).toBe('192.168.1.1 GET /api/users');
       }
     );
+
+    apiTest(
+      'should combine parent where condition with nested processor if condition',
+      async ({ testBed }) => {
+        const indexName = 'stream-e2e-test-manual-combined-conditions';
+
+        // Both conditions should be applied (AND logic)
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'manual_ingest_pipeline',
+              // Parent 'where' condition: only process documents where status is 'active'
+              where: { field: 'status', eq: 'active' },
+              processors: [
+                {
+                  set: {
+                    field: 'processed',
+                    value: 'both_conditions_met',
+                    // Nested 'if' condition: only process if priority is high
+                    if: "ctx.priority == 'high'",
+                  },
+                },
+              ],
+            } as ManualIngestPipelineProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
+          // Should be processed: status=active AND priority=high
+          { message: 'doc1', status: 'active', priority: 'high' },
+          // Should NOT be processed: status=active but priority=low (fails nested if)
+          { message: 'doc2', status: 'active', priority: 'low' },
+          // Should NOT be processed: status=inactive (fails parent where)
+          { message: 'doc3', status: 'inactive', priority: 'high' },
+          // Should NOT be processed: neither condition met
+          { message: 'doc4', status: 'inactive', priority: 'low' },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocsOrdered(indexName);
+        expect(ingestedDocs).toHaveLength(4);
+
+        const doc1 = ingestedDocs.find((doc) => doc.message === 'doc1');
+        const doc2 = ingestedDocs.find((doc) => doc.message === 'doc2');
+        const doc3 = ingestedDocs.find((doc) => doc.message === 'doc3');
+        const doc4 = ingestedDocs.find((doc) => doc.message === 'doc4');
+
+        // Only doc1 should have the 'processed' field set
+        expect(doc1?.processed).toBe('both_conditions_met');
+        expect(doc2?.processed).toBeUndefined();
+        expect(doc3?.processed).toBeUndefined();
+        expect(doc4?.processed).toBeUndefined();
+      }
+    );
+
+    apiTest(
+      'should preserve nested if condition when manual_ingest_pipeline has no where clause',
+      async ({ testBed }) => {
+        const indexName = 'stream-e2e-test-manual-nested-if-only';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'manual_ingest_pipeline',
+              // No parent 'where' condition
+              processors: [
+                {
+                  set: {
+                    field: 'processed',
+                    value: 'nested_if_only',
+                    // Only nested 'if' condition
+                    if: 'ctx.should_process == true',
+                  },
+                },
+              ],
+            } as ManualIngestPipelineProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
+          { message: 'should process', should_process: true },
+          { message: 'should not process', should_process: false },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocsOrdered(indexName);
+        expect(ingestedDocs).toHaveLength(2);
+
+        const processedDoc = ingestedDocs.find((doc) => doc.message === 'should process');
+        const skippedDoc = ingestedDocs.find((doc) => doc.message === 'should not process');
+
+        expect(processedDoc?.processed).toBe('nested_if_only');
+        expect(skippedDoc?.processed).toBeUndefined();
+      }
+    );
   }
 );

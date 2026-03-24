@@ -33,6 +33,7 @@ describe('EditLifecycleModal', () => {
   ): Streams.ingest.all.GetResponse => {
     const definition = {
       stream: {
+        type: isWired ? 'wired' : 'classic',
         name: streamName,
         description: '',
         updated_at: new Date().toISOString(),
@@ -46,6 +47,7 @@ describe('EditLifecycleModal', () => {
       },
       effective_lifecycle: effectiveLifecycle,
       effective_settings: {},
+      data_stream_exists: true,
       inherited_fields: {},
       dashboards: [],
       rules: [],
@@ -59,6 +61,7 @@ describe('EditLifecycleModal', () => {
         read_failure_store: true,
         manage_failure_store: true,
         view_index_metadata: true,
+        create_snapshot_repository: true,
       },
       effective_failure_store: {
         lifecycle: { enabled: { is_default_retention: true } },
@@ -77,7 +80,7 @@ describe('EditLifecycleModal', () => {
       }
     }
 
-    return definition;
+    return definition as Streams.ingest.all.GetResponse;
   };
 
   const defaultProps = {

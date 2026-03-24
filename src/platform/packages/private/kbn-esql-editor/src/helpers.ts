@@ -320,6 +320,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       z-index: ${theme.euiTheme.levels.toast} !important;
     }
 
+    .suggest-widget.message {
+      display: none !important;
+    }
+
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
@@ -386,4 +390,72 @@ export const filterDuplicatedWarnings = (
   return uniqBy(warnings, (warning) => {
     return warning.message;
   });
+};
+
+/**
+ * Computes toggled comment lines for a set of lines, following standard IDE behavior:
+ * comment all lines if any line is uncommented, uncomment all only if every line
+ * is already commented.
+ */
+export const getToggleCommentLines = (lines: string[]): string[] => {
+  const allCommented = lines.every((line) => line.startsWith('//'));
+  const shouldComment = !allCommented;
+
+  return lines.map((line) => {
+    const isCommented = line.startsWith('//');
+    if (shouldComment && !isCommented) {
+      return `//${line}`;
+    }
+    if (!shouldComment && isCommented) {
+      return line.replace('//', '');
+    }
+    return line;
+  });
+};
+
+/**
+ * Keeps suggestions alive when the text before the cursor ends with:
+ * - a token character (`[\w`]`)
+ * - a space
+ * - `::`
+ * - `.`
+ */
+export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  const lastCharacter = lineContentBeforeCursor.at(-1);
+  const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
+  const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');
+  const dotHasBeenTyped = lineContentBeforeCursor.endsWith('.');
+  const currentTokenHasBeenTyped = Boolean(lastCharacter && /[\w`]/.test(lastCharacter));
+
+  return spaceHasBeenTyped || inlineCastHasBeenTyped || dotHasBeenTyped || currentTokenHasBeenTyped;
+};
+
+/**
+ * Tracks the Monaco suggest-widget visibility so the editor can avoid
+ * re-triggering autocomplete while the popup is already open.
+ */
+export const trackSuggestionPopupState = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
+) => {
+  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
+    | (monaco.editor.IEditorContribution & {
+        widget?: {
+          value?: {
+            onDidShow?: (cb: () => void) => void;
+            onDidHide?: (cb: () => void) => void;
+          };
+        };
+      })
+    | undefined;
+  const suggestionWidget = suggestionController?.widget?.value;
+
+  if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
+    suggestionWidget.onDidShow(() => {
+      isSuggestionPopupOpenRef.current = true;
+    });
+    suggestionWidget.onDidHide(() => {
+      isSuggestionPopupOpenRef.current = false;
+    });
+  }
 };

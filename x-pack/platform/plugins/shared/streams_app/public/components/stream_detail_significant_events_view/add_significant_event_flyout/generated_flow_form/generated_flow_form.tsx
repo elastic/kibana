@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import type { StreamQuery, System } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -26,7 +26,6 @@ interface Props {
   isSubmitting: boolean;
   setQueries: (queries: StreamQuery[]) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: Omit<System, 'description'>[];
   dataViews: DataView[];
   taskStatus?: string;
   taskError?: string;
@@ -43,7 +42,6 @@ export function GeneratedFlowForm({
   definition,
   setCanSave,
   isSubmitting,
-  systems,
   dataViews,
   taskStatus,
   taskError,
@@ -111,7 +109,6 @@ export function GeneratedFlowForm({
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        systems={systems}
         dataViews={dataViews}
       />
       {isGenerating && (

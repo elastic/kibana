@@ -262,7 +262,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             }),
           },
           security: {
-            authc: { enabled: 'optional' },
+            authc: { enabled: 'optional', reason: 'Mock IDP plugin for testing' },
             authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
           },
         },
@@ -312,8 +312,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               credential: schema.string(),
             }),
           },
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason: 'Mock IDP plugin for testing UIAM operations',
+            },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
         },
         async (context, request, response) => {
           try {
@@ -350,6 +355,52 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             });
           } catch (err) {
             logger.error(`Failed to invalidate API key via UIAM: ${err}`, err);
+            return response.customError({
+              statusCode: 500,
+              body: { message: err.message },
+            });
+          }
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/uiam/convert_api_keys',
+          validate: {
+            body: schema.object({
+              keys: schema.arrayOf(schema.string(), { minSize: 1 }),
+            }),
+          },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason: 'Mock IDP plugin for testing UIAM operations',
+            },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
+        },
+        async (context, request, response) => {
+          try {
+            const { keys } = request.body;
+            const [
+              {
+                security: { authc },
+              },
+            ] = await core.getStartServices();
+
+            const result = await authc.apiKeys.uiam?.convert(keys);
+
+            if (!result) {
+              return response.badRequest({
+                body: { message: 'Failed to convert API keys' },
+              });
+            }
+
+            return response.ok({
+              body: result,
+            });
+          } catch (err) {
+            logger.error(`Failed to convert API keys via UIAM: ${err}`, err);
             return response.customError({
               statusCode: 500,
               body: { message: err.message },

@@ -26,6 +26,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_esql_columns'));
     loadTestFile(require.resolve('./_esql_view'));
+    loadTestFile(require.resolve('./_esql_formatting'));
     loadTestFile(require.resolve('./_index_editor'));
     loadTestFile(require.resolve('./_esql_controls'));
   });

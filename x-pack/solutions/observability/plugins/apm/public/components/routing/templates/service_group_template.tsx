@@ -15,6 +15,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -48,7 +49,6 @@ export function ServiceGroupTemplate({
     },
     [serviceGroupId]
   );
-
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
   const isAllServices = !serviceGroupId;
@@ -76,7 +76,7 @@ export function ServiceGroupTemplate({
   );
 
   const tabs = useTabs(serviceGroupContextTab);
-  const selectedTab = tabs.find(({ isSelected }) => isSelected);
+  const selectedTab = tabs?.find(({ isSelected }) => isSelected);
 
   // this is only used for building the breadcrumbs for the service group page
   useBreadcrumb(
@@ -120,38 +120,49 @@ export function ServiceGroupTemplate({
     }
   );
 
+  const returnToServiceGroupsBreadcrumbLabel = i18n.translate(
+    'xpack.apm.serviceGroups.breadcrumb.return',
+    {
+      defaultMessage: 'Return to service groups',
+    }
+  );
+
   return (
-    <ApmMainTemplate
-      pageTitle={serviceGroupsPageTitle}
-      pageHeader={{
-        tabs,
-        breadcrumbs: !isAllServices
-          ? [
-              {
-                text: (
-                  <>
-                    <EuiIcon size="s" type="arrowLeft" />{' '}
-                    {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                      defaultMessage: 'Return to service groups',
-                    })}
-                  </>
-                ),
-                color: 'primary',
-                'aria-current': false,
-                href: serviceGroupsLink,
-              },
-            ]
-          : undefined,
-        ...pageHeader,
-      }}
-      environmentFilter={environmentFilter}
-      showServiceGroupSaveButton={!isAllServices}
-      showServiceGroupsNav={isAllServices}
-      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
-      {...pageTemplateProps}
-    >
-      {children}
-    </ApmMainTemplate>
+    <ApmIndexSettingsContextProvider>
+      <ApmMainTemplate
+        pageTitle={serviceGroupsPageTitle}
+        pageHeader={{
+          tabs,
+          breadcrumbs: !isAllServices
+            ? [
+                {
+                  text: (
+                    <>
+                      <EuiIcon
+                        aria-label={returnToServiceGroupsBreadcrumbLabel}
+                        size="s"
+                        type="arrowLeft"
+                      />{' '}
+                      {returnToServiceGroupsBreadcrumbLabel}
+                    </>
+                  ),
+                  color: 'primary',
+                  'aria-current': false,
+                  href: serviceGroupsLink,
+                },
+              ]
+            : undefined,
+          ...pageHeader,
+        }}
+        environmentFilter={environmentFilter}
+        showServiceGroupSaveButton={!isAllServices}
+        showServiceGroupsNav={isAllServices}
+        selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
+        {...pageTemplateProps}
+      >
+        {children}
+      </ApmMainTemplate>
+    </ApmIndexSettingsContextProvider>
   );
 }
 

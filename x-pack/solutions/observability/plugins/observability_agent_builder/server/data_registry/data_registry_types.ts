@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
+import type { Transaction } from '@kbn/apm-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
@@ -165,6 +166,23 @@ export type ApmConnectionStatsEntry =
       metrics: TraceMetrics;
     };
 
+export interface ApmTransactionDetailsResponse {
+  transaction?: Transaction;
+  transactionId?: string;
+  traceId?: string;
+}
+
+export interface SyntheticsMonitorDetailsResponse {
+  id: string;
+  name: string;
+  type: string;
+  enabled: boolean;
+  schedule: { number: string; unit: string };
+  locations: Array<{ id: string; label: string }>;
+  tags?: string[];
+  [key: string]: unknown;
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -255,4 +273,19 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: number;
     filter: QueryDslQueryContainer[];
   }) => Promise<ApmConnectionStatsEntry[]>;
+
+  apmTransactionDetails: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    transactionName: string;
+    transactionId?: string;
+    traceId?: string;
+    start: string;
+    end: string;
+  }) => Promise<ApmTransactionDetailsResponse>;
+
+  syntheticsMonitorDetails: (params: {
+    request: KibanaRequest;
+    configId: string;
+  }) => Promise<SyntheticsMonitorDetailsResponse>;
 }

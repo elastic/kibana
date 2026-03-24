@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  APPLY_FILTER_TRIGGER,
-  IMAGE_CLICK_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER, ON_CLICK_IMAGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export const LANDING_PAGE_PATH = '/list';
 /** The application ID for the Dashboard app. */
@@ -28,4 +25,4 @@ export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS = {
 // Do not change constant value - part of dashboard REST API
 export const DASHBOARD_DRILLDOWN_TYPE = 'dashboard_drilldown';
 
-export const DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS = [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
+export const DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_CLICK_IMAGE];

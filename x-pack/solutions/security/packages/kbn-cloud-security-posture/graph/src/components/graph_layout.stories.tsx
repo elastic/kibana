@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
 import type { Writable } from '@kbn/utility-types';
 import type { EdgeColor } from '@kbn/cloud-security-posture-common/types/graph/latest';
@@ -26,17 +26,15 @@ type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
 const meta = {
   render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <Graph
-          css={css`
-            height: 100%;
-            width: 100%;
-          `}
-          nodes={nodes ?? []}
-          edges={edges ?? []}
-          interactive={interactive ?? false}
-        />
-      </ThemeProvider>
+      <Graph
+        css={css`
+          height: 100%;
+          width: 100%;
+        `}
+        nodes={nodes ?? []}
+        edges={edges ?? []}
+        interactive={interactive ?? false}
+      />
     );
   },
   title: 'Components/Graph Components/Graph Layout',
@@ -1117,14 +1115,14 @@ export const EventsAndEntityRelationships: Story = {
         label: 'prod-ec2-instance-01',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
       },
       {
         id: 'host-prod-2',
         label: 'prod-ec2-instance-02',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
       },
       {
         id: 'iam-role',
@@ -1196,7 +1194,7 @@ export const EventsAndRelationshipsStacked: Story = {
         label: 'prod-ec2-instance-01',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
       },
       // Relationship edges (static/configuration-based) - Ownership and access permissions
       // Nodes with the same id + same source/target will be stacked together
@@ -1251,7 +1249,7 @@ export const EventsAndRelationshipsStacked: Story = {
         label: 'hosts',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
         count: 3,
       },
 

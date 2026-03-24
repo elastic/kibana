@@ -76,6 +76,12 @@ describe('correctQuerySyntax', () => {
     const result = correctQuerySyntax(query);
     expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
   });
+
+  it('does not append marker for inline cast type names ending with operator-like suffixes', () => {
+    const query = 'FROM index | EVAL vec = [0.1, 0.2]::dense_vector ';
+    const result = correctQuerySyntax(query);
+    expect(result).toEqual(query);
+  });
 });
 
 describe('correctPromqlQuerySyntax', () => {

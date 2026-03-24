@@ -45,3 +45,5 @@ export class AgentlessAgentCreateOverProvisionedError extends FleetError<{ limit
     super(`Error creating agentless agent in Fleet, ${message}`, { limit });
   }
 }
+
+export class PackageDependencyError extends FleetError {}

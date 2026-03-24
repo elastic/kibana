@@ -26,6 +26,7 @@ import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
 import { resolveKibanaUrl } from './util/resolve_kibana_url';
+import { buildCustomImages } from './util/build_custom_images';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -42,12 +43,11 @@ const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
 async function down(log: ToolingLog, namespace: string, demoName: string) {
   log.info(`Stopping ${demoName}...`);
   await deleteNamespace(namespace);
-  // Also delete the ClusterRole and ClusterRoleBinding
   await execa
-    .command('kubectl delete clusterrole otel-collector --ignore-not-found')
+    .command(`kubectl delete clusterrole otel-collector-${namespace} --ignore-not-found`)
     .catch(() => {});
   await execa
-    .command('kubectl delete clusterrolebinding otel-collector --ignore-not-found')
+    .command(`kubectl delete clusterrolebinding otel-collector-${namespace} --ignore-not-found`)
     .catch(() => {});
 }
 
@@ -72,63 +72,88 @@ function normalizeElasticsearchHost(host: string): string {
   return `http://${hostStr}`;
 }
 
+export interface DeployResult {
+  namespace: string;
+  kibanaUrl: string;
+  elasticsearchHost: string;
+  logsIndex: string;
+}
+
 /**
- * Ensures a demo environment is running on Kubernetes (minikube) with
- * telemetry data being sent to Elasticsearch.
- *
- * This function:
- * 1. Ensures minikube is running
- * 2. Reads Elasticsearch configuration from kibana.dev.yml
- * 3. Enables the streams feature in Kibana (sets up logs index)
- * 4. Generates OTel Collector configuration with k8sattributes processor
- * 5. Generates Kubernetes manifests for the demo
- * 6. Deploys to minikube using kubectl
+ * Deploys a demo environment on Kubernetes (minikube) with telemetry data
+ * being sent to Elasticsearch. Resolves when pods are ready — does NOT
+ * block on log streaming.
  *
  * @param log - Tooling logger for output
- * @param signal - Abort signal for cleanup
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
- * @param logsIndex - Index name for logs (defaults to "logs")
+ * @param logsIndex - Index name for logs (defaults to "logs.otel")
  * @param version - Demo version (defaults to demo's defaultVersion)
- * @param teardown - If true, stops and removes the deployment
  * @param scenarioIds - Optional list of failure scenario IDs to apply
+ * @param forceRebuildImages - If true, rebuilds the custom images
+ *
+ * @returns A promise that resolves when the demo environment is deployed and the logs are streaming
  */
-export async function ensureOtelDemo({
+export async function deployDemo({
   log,
-  signal,
   demoType = 'otel-demo',
   configPath,
   logsIndex = 'logs',
   version,
-  teardown = false,
   scenarioIds = [],
+  forceRebuildImages = false,
 }: {
   log: ToolingLog;
-  signal: AbortSignal;
   demoType?: DemoType;
   configPath?: string | undefined;
   logsIndex?: string;
   version?: string;
-  teardown?: boolean;
   scenarioIds?: string[];
-}) {
+  forceRebuildImages?: boolean;
+}): Promise<DeployResult> {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
 
-  // Get demo configuration
   const demoConfig = getDemoConfig(demoType);
   const demoVersion = version || demoConfig.defaultVersion;
   const namespace = demoConfig.namespace;
   const manifestsFilePath = Path.join(DATA_DIR, `${demoType}.yaml`);
 
-  if (teardown) {
-    await down(log, namespace, demoConfig.displayName);
-    log.success(`${demoConfig.displayName} stopped and removed from Kubernetes`);
-    return;
-  }
-
   log.info(`Starting ${demoConfig.displayName} on Kubernetes (minikube)...`);
   log.info(`  Version: ${demoVersion}`);
+
+  if (demoConfig.requiresCustomImages) {
+    if (demoConfig.imageBuildConfig) {
+      log.write('');
+      log.info(
+        `${chalk.bold(
+          'Building custom images:'
+        )} This demo requires images to be built from source.`
+      );
+      if (demoConfig.customImageInstructions) {
+        log.write(chalk.dim(`  ${demoConfig.customImageInstructions.split('\n')[0]}`));
+      }
+      log.write('');
+      await buildCustomImages(log, demoConfig.id, demoConfig.imageBuildConfig, forceRebuildImages);
+      log.write('');
+    } else {
+      log.write('');
+      log.warning(
+        `${chalk.bold(
+          'WARNING:'
+        )} This demo requires custom-built container images that are NOT available in public registries.`
+      );
+      log.warning('Pods will fail to start with ImagePullBackOff errors until images are built.');
+      if (demoConfig.customImageInstructions) {
+        log.write('');
+        log.write(chalk.dim('Build instructions:'));
+        for (const line of demoConfig.customImageInstructions.split('\n')) {
+          log.write(chalk.dim(`  ${line}`));
+        }
+      }
+      log.write('');
+    }
+  }
 
   // Ensure minikube is running
   log.info('Ensuring minikube is running...');
@@ -157,8 +182,6 @@ export async function ensureOtelDemo({
   log.info(`Elasticsearch: ${elasticsearchHost}`);
   log.info(`Logs index: ${logsIndex}`);
 
-  // Enable streams in Kibana (sets up the logs index)
-  // Uses Kibana credentials (defaults to elastic superuser) which has required manage_stream privilege
   await enableStreams({
     kibanaUrl,
     username: kibanaCredentials.username,
@@ -166,7 +189,6 @@ export async function ensureOtelDemo({
     log,
   });
 
-  // Create a data view for logs (useful for Discover and dashboards)
   await createDataView({
     kibanaUrl,
     username: kibanaCredentials.username,
@@ -213,8 +235,8 @@ export async function ensureOtelDemo({
   // Generate OTel Collector configuration
   const collectorConfig = getFullOtelCollectorConfig({
     elasticsearchEndpoint: elasticsearchHost,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
     logsIndex,
     namespace: demoConfig.namespace,
   });
@@ -247,7 +269,7 @@ export async function ensureOtelDemo({
 
   const waitAndReport = async () => {
     try {
-      await waitForPodsReady(namespace, 300);
+      await waitForPodsReady(namespace, { timeoutSeconds: 600, log });
 
       const minikubeIp = await getMinikubeIp();
 
@@ -301,7 +323,22 @@ export async function ensureOtelDemo({
 
   await waitAndReport();
 
-  // Keep the process running to show logs (limit to key services)
+  return { namespace, kibanaUrl, elasticsearchHost, logsIndex };
+}
+
+/**
+ * Streams pod logs from a running demo deployment.
+ * Blocks until the signal is aborted or the user presses Ctrl+C.
+ */
+export async function streamDemoLogs({
+  log,
+  namespace,
+  signal,
+}: {
+  log: ToolingLog;
+  namespace: string;
+  signal?: AbortSignal;
+}): Promise<void> {
   log.info('Streaming pod logs (Ctrl+C to stop)...');
   try {
     await execa.command(
@@ -309,12 +346,93 @@ export async function ensureOtelDemo({
       {
         stdio: 'inherit',
         cleanup: true,
+        ...(signal ? { signal } : {}),
       }
     );
   } catch {
-    // User pressed Ctrl+C or signal received
     log.info('Stopped log streaming');
   }
+}
+
+/**
+ * Stops and removes a demo environment from Kubernetes.
+ */
+export async function teardownDemo({
+  log,
+  demoType = 'otel-demo',
+}: {
+  log: ToolingLog;
+  demoType?: DemoType;
+}): Promise<void> {
+  await assertKubectlAvailable();
+  await assertMinikubeAvailable();
+
+  const demoConfig = getDemoConfig(demoType);
+  await down(log, demoConfig.namespace, demoConfig.displayName);
+  log.success(`${demoConfig.displayName} stopped and removed from Kubernetes`);
+}
+
+/**
+ * Ensures a demo environment is running on Kubernetes (minikube) with
+ * telemetry data being sent to Elasticsearch.
+ *
+ * This function:
+ * 1. Ensures minikube is running
+ * 2. Reads Elasticsearch configuration from kibana.dev.yml
+ * 3. Enables the streams feature in Kibana (sets up logs index)
+ * 4. Generates OTel Collector configuration with k8sattributes processor
+ * 5. Generates Kubernetes manifests for the demo
+ * 6. Deploys to minikube using kubectl
+ *
+ * @param log - Tooling logger for output
+ * @param signal - Abort signal for cleanup
+ * @param demoType - Type of demo to deploy (default: 'otel-demo')
+ * @param configPath - Optional path to Kibana config file
+ * @param logsIndex - Index name for logs (defaults to "logs.otel")
+ * @param version - Demo version (defaults to demo's defaultVersion)
+ * @param teardown - If true, stops and removes the deployment
+ * @param scenarioIds - Optional list of failure scenario IDs to apply
+ * @param forceRebuildImages - If true, rebuilds the custom images
+ *
+ * @returns A promise that resolves when the demo environment is deployed and the logs are streaming
+ */
+export async function ensureOtelDemo({
+  log,
+  signal,
+  demoType = 'otel-demo',
+  configPath,
+  logsIndex = 'logs',
+  version,
+  teardown = false,
+  scenarioIds = [],
+  forceRebuildImages = false,
+}: {
+  log: ToolingLog;
+  signal: AbortSignal;
+  demoType?: DemoType;
+  configPath?: string | undefined;
+  logsIndex?: string;
+  version?: string;
+  teardown?: boolean;
+  scenarioIds?: string[];
+  forceRebuildImages?: boolean;
+}) {
+  if (teardown) {
+    await teardownDemo({ log, demoType });
+    return;
+  }
+
+  const { namespace } = await deployDemo({
+    log,
+    demoType,
+    configPath,
+    logsIndex,
+    version,
+    scenarioIds,
+    forceRebuildImages,
+  });
+
+  await streamDemoLogs({ log, namespace, signal });
 }
 
 /**
@@ -323,7 +441,7 @@ export async function ensureOtelDemo({
  *
  * @param log - Tooling logger for output
  * @param demoType - Type of demo to patch (default: 'otel-demo')
- * @param scenarioIds - List of scenario IDs to apply (empty = no changes unless reset)
+ * @param scenarioIds - List of failure scenario IDs to apply (empty = no changes unless reset)
  * @param reset - If true, resets all services to defaults
  */
 export async function patchScenarios({
@@ -355,7 +473,6 @@ export async function patchScenarios({
   if (reset) {
     log.info(`Resetting all scenarios to defaults for ${demoConfig.displayName}...`);
 
-    // Reset all services to their default values
     for (const [service, defaults] of Object.entries(serviceDefaults)) {
       const envArgs = Object.entries(defaults)
         .map(([key, value]) => `${key}=${value}`)
@@ -403,7 +520,7 @@ export async function patchScenarios({
     }
   }
 
-  // Apply changes using kubectl set env
+  // Apply env changes using kubectl set env
   for (const [service, envs] of Object.entries(envChanges)) {
     const envArgs = Object.entries(envs)
       .map(([key, value]) => `${key}=${value}`)
@@ -421,7 +538,7 @@ export async function patchScenarios({
   }
 
   log.write('');
-  log.success(`Applied ${scenarioIds.length} scenario(s). Pods will restart with new config.`);
+  log.success(`Applied ${scenarioIds.length} scenario(s).`);
   log.write('');
   log.write(chalk.dim('  To watch pod restarts:'));
   log.write(chalk.dim(`    kubectl get pods -n ${namespace} -w`));

@@ -16,10 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const find = getService('find');
   const esql = getService('esql');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const browser = getService('browser');
 
   const { dashboard, dashboardControls, discover, common, timePicker } = getPageObjects([
@@ -42,6 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls'
+      );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
@@ -49,41 +50,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
       it('should retain the controls and their state', async () => {
-        // Go to dashboard app
+        // Navigate to a dasbhoard with an ESQL control
         await dashboard.navigateToApp();
-
-        // Create new dashboard
-        await dashboard.clickNewDashboard();
-
-        // Add a variable control
-        await dashboardControls.openControlsMenu();
-        await find.clickByButtonText('Variable control');
-        await esql.waitESQLEditorLoaded('ESQLEditor');
-        await esql.setEsqlEditorQuery('FROM logstash-* | STATS BY geo.dest');
-
-        await find.clickByButtonText('Search');
-        expect(await testSubjects.exists('esqlValuesPreview')).to.be(true);
-        await testSubjects.click('saveEsqlControlsFlyoutButton');
-
-        const createdControlId = (await dashboardControls.getAllControlIds())[0];
-
-        // Add a new ES|QL panel
-        await dashboardAddPanel.clickAddEsqlPanel();
-        await esql.waitESQLEditorLoaded('ESQLEditor');
-        await esql.setEsqlEditorQuery('FROM logstash-* | WHERE geo.dest == ?variable');
-        await find.clickByButtonText('Search');
-        await find.byButtonText('Search');
-        await find.clickByButtonText('Apply and close');
-
-        // Wait for the control to be added
+        await dashboard.loadSavedDashboard('ES|QL controls fixture dashboard');
         await dashboard.waitForRenderComplete();
 
-        await retry.try(async () => {
-          const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-          expect(controlGroupVisible).to.be(true);
-        });
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
 
-        // Hover over the embeddable and explore in discover
+        // Go to discover from the embeddable
         await dashboardPanelActions.clickPanelAction(
           'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
         );
@@ -95,8 +70,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.expectOnDiscover();
 
         // Verify that the control exists in discover
-        const control = await dashboardControls.getControlElementById(createdControlId);
+        const control = await dashboardControls.getControlElementById('esql-control-1');
         expect(control).to.be.ok();
+        await discover.expectDocTableToBeLoaded();
       });
     });
 

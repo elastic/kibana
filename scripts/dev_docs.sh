@@ -75,7 +75,8 @@ module.exports = {
     "sources": [
       {
         "type": "file",
-        "location": "$KIBANA_DIR"
+        "location": "$KIBANA_DIR",
+        "subdirs": ["api_docs", "docs", "dev_docs", "src", "x-pack"]
       },
       {
         "type": "file",

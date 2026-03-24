@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isActionBlock, isConditionBlock, type StreamlangStep } from '../../types/streamlang';
 import type { Condition } from '../../types/conditions';
+import { isAlwaysCondition } from '../../types/conditions';
 
 import type { StreamlangValidationError } from './types';
 import {
@@ -79,6 +80,34 @@ export function validateStepsRecursively(
           processorId,
           field: 'action',
         });
+      }
+
+      // Check for split/convert with conditional execution without a distinct target field.
+      // This covers the case where the processor is nested inside a parent condition block —
+      // the Zod schema refinement only catches the processor's own 'where' property, not tree-level context.
+      if (
+        (step.action === 'split' || step.action === 'convert') &&
+        'from' in step &&
+        (!('to' in step) || !step.to || step.to === step.from)
+      ) {
+        const hasOwnCondition =
+          'where' in step && step.where !== undefined && !isAlwaysCondition(step.where);
+
+        if (isWithinWhereBlock || hasOwnCondition) {
+          errors.push({
+            type: 'invalid_processor_placement',
+            message: i18n.translate(
+              'xpack.streamlang.validation.targetFieldRequiredWithCondition',
+              {
+                defaultMessage:
+                  'The {processorAction} processor requires a distinct target field ("to") when used with a condition. Either set a target field different from the source or remove the condition.',
+                values: { processorAction: step.action },
+              }
+            ),
+            processorId,
+            field: 'to',
+          });
+        }
       }
 
       // Validate field names for illegal characters

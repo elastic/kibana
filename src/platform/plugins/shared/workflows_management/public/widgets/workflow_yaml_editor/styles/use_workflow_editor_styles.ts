@@ -46,8 +46,10 @@ export const useWorkflowEditorStyles = () => {
           backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
           borderRadius: '2px',
         },
-
-        // After text (shadow) decorations
+        '.workflow-name-decoration': {
+          color: euiTheme.colors.textSubdued,
+          fontStyle: 'italic',
+        },
         '.after-text': {
           marginLeft: '10px',
           color: euiTheme.colors.textDisabled,
@@ -61,6 +63,19 @@ export const useWorkflowEditorStyles = () => {
           display: 'inline-block',
           backgroundColor: transparentize(euiTheme.colors.success, 0.1),
           color: euiTheme.colors.successText,
+          padding: '2px 6px',
+          borderRadius: '4px',
+          marginRight: '8px',
+          fontSize: '12px',
+          fontWeight: 500,
+          lineHeight: '1.4',
+        },
+
+        // Workflow name badge (before decoration on workflow-id values)
+        '.workflow-name-badge': {
+          display: 'inline-block',
+          backgroundColor: transparentize(euiTheme.colors.primary, 0.1),
+          color: euiTheme.colors.primaryText,
           padding: '2px 6px',
           borderRadius: '4px',
           marginRight: '8px',

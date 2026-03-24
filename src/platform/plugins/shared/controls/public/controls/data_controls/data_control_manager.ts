@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { BehaviorSubject, combineLatest, merge, switchMap, tap } from 'rxjs';
 
+import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  initializeTitleManager,
-  titleComparators,
-  type StateComparators,
-} from '@kbn/presentation-publishing';
+import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
+import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
-  ...titleComparators,
+  ...defaultControlLabelComparators,
   data_view_id: 'referenceEquality',
   field_name: 'referenceEquality',
   use_global_filters: (a, b) => (a ?? true) === (b ?? true),
@@ -69,11 +67,11 @@ export const initializeDataControlManager = async <EditorState extends object = 
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const titlesManager = initializeTitleManager(state);
-
-  const dataControlStateManager = initializeStateManager<
-    Omit<DataControlState, 'title' | 'description'>
-  >(state, defaultDataControlState, defaultDataControlComparators);
+  const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
+    omit(state, 'title'), // this is handled via the label manager
+    defaultDataControlState,
+    defaultDataControlComparators
+  );
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
@@ -94,7 +92,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataViewReady = reject;
   });
 
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(state.field_name);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
@@ -131,6 +128,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
+  const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name);
   const fieldNameSubscription = combineLatest([dataViews$, dataControlStateManager.api.fieldName$])
     .pipe(
       tap(() => {
@@ -160,27 +158,36 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
 
       field$.next(field);
-      defaultTitle$.next(field ? field.displayName || field.name : nextFieldName);
+      if (field) defaultFieldLabel$.next(field.displayName);
       const spec = field?.toSpec();
       if (spec) {
         fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
       }
     });
 
+  const labelManager = initializeLabelManager(
+    { ...state, defaultFieldLabel: defaultFieldLabel$.getValue() },
+    {
+      ...dataControlStateManager.api,
+      defaultFieldLabel$,
+    },
+    'defaultFieldLabel'
+  );
+
   const onEdit = async () => {
     // open the editor to get the new state
     openDataControlEditor<DataControlState & EditorState>({
       initialState: {
-        ...titlesManager.getLatestState(),
+        ...labelManager.getLatestState(),
         ...dataControlStateManager.getLatestState(),
         ...editorStateManager.getLatestState(),
       },
       controlType,
       controlId,
-      initialDefaultPanelTitle: defaultTitle$.getValue(),
+      initialDefaultPanelTitle: labelManager.api.defaultTitle$.getValue(),
       parentApi,
       onUpdate: (newState) => {
-        titlesManager.reinitializeState(newState);
+        labelManager.reinitializeState(newState);
         dataControlStateManager.reinitializeState(newState);
         editorStateManager.reinitializeState(newState);
       },
@@ -203,8 +210,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
   return {
     api: {
-      ...titlesManager.api,
       ...dataControlStateManager.api,
+      ...labelManager.api,
       dataLoading$,
       blockingError$,
       setBlockingError,
@@ -215,7 +222,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       onEdit,
       appliedFilters$,
       filtersLoading$,
-      defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
       isExpandable: false,
@@ -226,6 +232,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
+      labelManager.cleanup();
     },
     internalApi: {
       onSelectionChange: () => {
@@ -236,14 +243,14 @@ export const initializeDataControlManager = async <EditorState extends object = 
         filtersLoading$.next(false);
       },
     },
-    anyStateChange$: merge(dataControlStateManager.anyStateChange$, titlesManager.anyStateChange$),
+    anyStateChange$: merge(dataControlStateManager.anyStateChange$, labelManager.anyStateChange$),
     getLatestState: () => ({
+      ...labelManager.getLatestState(),
       ...dataControlStateManager.getLatestState(),
-      ...titlesManager.getLatestState(),
     }),
     reinitializeState: (newState) => {
       dataControlStateManager.reinitializeState(newState);
-      titlesManager.reinitializeState(newState);
+      labelManager.reinitializeState(newState);
     },
   };
 };
