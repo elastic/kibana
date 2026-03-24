@@ -23,7 +23,7 @@ exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should ren
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="expand"
+            data-euiicon-type="maximize"
           />
         </button>
       </div>

@@ -2,22 +2,22 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".ml-anomalies-.write-v3_linux_anomalous_network_activity": {
+      ".ml-anomalies-.write-v3_linux_anomalous_network_activity_ea": {
         "is_hidden": true,
         "is_write_index": true
       },
-      ".ml-anomalies-v3_linux_anomalous_network_activity": {
+      ".ml-anomalies-v3_linux_anomalous_network_activity_ea": {
         "filter": {
           "term": {
             "job_id": {
-              "value": "v3_linux_anomalous_network_activity"
+              "value": "v3_linux_anomalous_network_activity_ea"
             }
           }
         },
         "is_hidden": true
       }
     },
-    "index": ".ml-anomalies-custom-v3_linux_anomalous_network_activity",
+    "index": ".ml-anomalies-custom-v3_linux_anomalous_network_activity_ea",
     "mappings": {
       "_meta": {
         "version": "8.0.0"
