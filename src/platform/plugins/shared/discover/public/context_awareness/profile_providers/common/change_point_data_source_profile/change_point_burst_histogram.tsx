@@ -9,17 +9,55 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { ChangePointBurstHistogramProps } from './types';
 
 const CHART_HEIGHT = 300;
+
+const createBurstHistogramTooltip =
+  (theme: { backgroundColor: string; color: string }) =>
+  ({ values }: { values: unknown[] }) => {
+    if (values.length === 0) return null;
+    const count = (values as { value?: number }[]).reduce((s, v) => s + (v.value ?? 0), 0);
+    const label = i18n.translate(
+      'discover.contextAwareness.changePointBurstHistogram.entityCountLabel',
+      {
+        defaultMessage: '{count} {count, plural, one {entity} other {entities}}',
+        values: { count: Math.round(count) },
+      }
+    );
+    return (
+      <div
+        style={{
+          padding: 8,
+          backgroundColor: theme.backgroundColor,
+          color: theme.color,
+          borderRadius: 4,
+        }}
+      >
+        {label}
+      </div>
+    );
+  };
 
 export const ChangePointBurstHistogram: React.FC<ChangePointBurstHistogramProps> = ({
   data,
   charts,
 }) => {
   const baseTheme = charts.theme.useChartsBaseTheme();
+  const { euiTheme } = useEuiTheme();
+
+  const tooltipOptions = useMemo(
+    () => ({
+      customTooltip: createBurstHistogramTooltip({
+        backgroundColor: euiTheme.colors.darkestShade,
+        color: euiTheme.colors.emptyShade,
+      }),
+    }),
+    [euiTheme.colors.darkestShade, euiTheme.colors.emptyShade]
+  );
 
   const xAxisTitle = useMemo(
     () =>
@@ -32,7 +70,7 @@ export const ChangePointBurstHistogram: React.FC<ChangePointBurstHistogramProps>
   const yAxisTitle = useMemo(
     () =>
       i18n.translate('discover.contextAwareness.changePointBurstHistogram.yAxisTitle', {
-        defaultMessage: 'Entities with change point',
+        defaultMessage: 'Count of Entities',
       }),
     []
   );
@@ -47,12 +85,8 @@ export const ChangePointBurstHistogram: React.FC<ChangePointBurstHistogramProps>
       data-test-subj="changePointBurstHistogram"
     >
       <Chart size={{ height: CHART_HEIGHT }}>
-        <Settings
-          baseTheme={baseTheme}
-          showLegend={true}
-          legendPosition={Position.Right}
-          locale={i18n.getLocale()}
-        />
+        <Tooltip {...tooltipOptions} />
+        <Settings baseTheme={baseTheme} showLegend={false} locale={i18n.getLocale()} />
         <Axis
           id="burst-timeline-axis"
           position={Position.Bottom}
@@ -83,10 +117,10 @@ export const ChangePointBurstHistogram: React.FC<ChangePointBurstHistogramProps>
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
           stackAccessors={['g']}
+          color={() => euiTheme.colors.primary}
           data={data}
           timeZone="UTC"
           enableHistogramMode={true}
-          histogramModeAlignment="center"
         />
       </Chart>
     </div>

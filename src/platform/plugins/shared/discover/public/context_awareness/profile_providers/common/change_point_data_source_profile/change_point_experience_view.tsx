@@ -9,36 +9,34 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiPanel,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ChartType, getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import {
   getSourceQueryBeforeChangePoint,
-  getSourceQueriesFromForkWithChangePoint,
-  getChangePointOutputColumnNames,
+  getForkBranchLabels,
+  getTemplateSourceQueryFromForkWithChangePoint,
   getESQLQueryColumns,
+  replaceEntityValueInSourceQuery,
 } from '@kbn/esql-utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { ChangePointBurstHistogram } from './change_point_burst_histogram';
-import { ChangePointForkHeatmap } from './change_point_fork_heatmap';
+import { ChangePointHeatmap } from './change_point_heatmap';
+import {
+  ChangePointLensEmbeddable,
+  changePointLensNestedChartWrapperCss,
+} from './change_point_lens_embeddable';
+import { ChangePointMultipleLineCharts } from './change_point_multiple_line_charts';
+import { ViewModeSelection, type ChangePointViewMode } from './view_mode_selection';
 import {
   applyLineChartStyleToDataLayers,
+  buildChangePointLensAttributesByRecordId,
   deriveEntityAttributes,
   formatChangePointAnnotationLabel,
   getBurstDetectionHistogram,
+  getChangePointColumnIdsFromColumns,
   getChangePointResultsFromTable,
   getTimeColumnId,
   getValueColumnId,
@@ -60,6 +58,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
   services,
   onBrushEnd,
   onFilter,
+  changePointLensContext$,
 }) => {
   const { data, lens } = services;
   const { charts } = useDiscoverServices();
@@ -75,54 +74,59 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
     [fetchParams.columns, fetchParams.columnsMap]
   );
 
-  // The bridge between the ES|QL CHANGE_POINT output and the table columns used for charts and heatmaps
-  const changePointColumnNames = useMemo(() => {
-    const query = fetchParams.query as { esql?: string } | undefined;
-    return query?.esql ? getChangePointOutputColumnNames(query.esql) : undefined;
-  }, [fetchParams.query]);
+  const colsToUse = useMemo(
+    () => (fetchParams.table?.columns?.length ? fetchParams.table.columns : columns),
+    [fetchParams.table?.columns, columns]
+  );
+
+  const changePointColumnIds = useMemo(
+    () => getChangePointColumnIdsFromColumns(colsToUse),
+    [colsToUse]
+  );
 
   const sourceQuery = useMemo(() => {
     const query = fetchParams.query as { esql?: string } | undefined;
     return query?.esql ? getSourceQueryBeforeChangePoint(query.esql) : undefined;
   }, [fetchParams.query]);
 
-  // The array of source queries for each fork branch
-  const forkBranchQueries = useMemo(() => {
+  const forkBranchLabels = useMemo(() => {
     const query = fetchParams.query as { esql?: string } | undefined;
-    return query?.esql ? getSourceQueriesFromForkWithChangePoint(query.esql) : undefined;
+    return query?.esql ? getForkBranchLabels(query.esql) : undefined;
   }, [fetchParams.query]);
 
-  const multipleEntityMode = Boolean(forkBranchQueries?.length);
+  const templateSourceQuery = useMemo(() => {
+    const query = fetchParams.query as { esql?: string } | undefined;
+    return query?.esql ? getTemplateSourceQueryFromForkWithChangePoint(query.esql) : undefined;
+  }, [fetchParams.query]);
 
-  const [viewMode, setViewMode] = useState<
-    'heatmap' | 'line' | 'multiple-line' | 'burst-detection'
-  >('multiple-line');
+  const multipleEntityMode = Boolean(forkBranchLabels?.length);
+
+  const [viewMode, setViewMode] = useState<ChangePointViewMode>('multiple-line');
   const [selectedEntityIndices, setSelectedEntityIndices] = useState<number[]>([]);
 
   useEffect(() => {
-    if (forkBranchQueries && selectedEntityIndices.length > 0) {
-      const valid = selectedEntityIndices.filter((i) => i < forkBranchQueries.length);
+    if (forkBranchLabels && selectedEntityIndices.length > 0) {
+      const valid = selectedEntityIndices.filter((i) => i < forkBranchLabels.length);
       if (valid.length !== selectedEntityIndices.length) {
         setSelectedEntityIndices(valid);
       }
     }
-  }, [selectedEntityIndices, forkBranchQueries]);
+  }, [selectedEntityIndices, forkBranchLabels]);
 
   const sourceColumns = useMemo(() => {
-    if (!changePointColumnNames) return columns;
-    return columns.filter(
-      (c) =>
-        c.id !== changePointColumnNames.typeColumn && c.id !== changePointColumnNames.pvalueColumn
-    );
-  }, [columns, changePointColumnNames]);
+    const { typeColumnId, pvalueColumnId } = changePointColumnIds;
+    if (!typeColumnId && !pvalueColumnId) return columns;
+    return columns.filter((c) => {
+      const id = c.id ?? c.name;
+      return id !== typeColumnId && id !== pvalueColumnId;
+    });
+  }, [columns, changePointColumnIds]);
 
   const heatmapResults = useMemo((): ChangePointResult[] => {
     const table = fetchParams.table;
-    if (!table?.rows?.length || !multipleEntityMode || !forkBranchQueries?.length) return [];
-    const colsToUse = table.columns?.length ? table.columns : columns;
+    if (!table?.rows?.length || !multipleEntityMode || !forkBranchLabels?.length) return [];
     const timeColumnId = getTimeColumnId(colsToUse);
-    const typeColumnId = changePointColumnNames?.typeColumn;
-    const pvalueColumnId = changePointColumnNames?.pvalueColumn;
+    const { typeColumnId, pvalueColumnId } = changePointColumnIds;
     const valueColumnId = timeColumnId
       ? getValueColumnId(colsToUse, timeColumnId, typeColumnId, pvalueColumnId)
       : undefined;
@@ -134,22 +138,22 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
       pvalueColumnId,
       valueColumnId,
       FORK_COLUMN_ID,
-      forkBranchQueries
+      forkBranchLabels
     );
-  }, [fetchParams.table, multipleEntityMode, forkBranchQueries, columns, changePointColumnNames]);
+  }, [fetchParams.table, multipleEntityMode, forkBranchLabels, colsToUse, changePointColumnIds]);
 
   const entityLabels = useMemo(
-    () => forkBranchQueries?.map((b) => b.branchLabel) ?? [],
-    [forkBranchQueries]
+    () => forkBranchLabels?.map((b) => b.branchLabel) ?? [],
+    [forkBranchLabels]
   );
 
   const burstDetectionHistogramData = useMemo(() => {
-    if (!multipleEntityMode || !forkBranchQueries?.length || heatmapResults.length === 0) return [];
+    if (!multipleEntityMode || !forkBranchLabels?.length || heatmapResults.length === 0) return [];
     return getBurstDetectionHistogram(heatmapResults, entityLabels, fetchParams.timeRange);
-  }, [heatmapResults, forkBranchQueries, multipleEntityMode, entityLabels, fetchParams.timeRange]);
+  }, [heatmapResults, forkBranchLabels, multipleEntityMode, entityLabels, fetchParams.timeRange]);
 
   const entityAttributesMap = useMemo(() => {
-    if (!lensAttributes || !multipleEntityMode || !forkBranchQueries) return {};
+    if (!lensAttributes || !multipleEntityMode || !forkBranchLabels) return {};
     const dataViewId = fetchParams.dataView?.id ?? '';
     const forkLineColors = [
       euiTheme.colors.borderBaseProminent,
@@ -159,15 +163,15 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
       euiTheme.colors.warning,
     ];
     const map: Record<number, TypedLensByValueInput['attributes']> = {};
-    for (let i = 0; i < forkBranchQueries.length; i++) {
+    for (let i = 0; i < forkBranchLabels.length; i++) {
       const entityResults = heatmapResults.filter(
-        (r) => r.forkIndex === i || r.forkIndex === forkBranchQueries[i].branchIndex
+        (r) => r.forkIndex === i || r.forkIndex === forkBranchLabels[i].branchIndex
       );
       const attrs = deriveEntityAttributes(
         lensAttributes,
         i,
         entityResults,
-        forkBranchQueries[i].branchLabel,
+        forkBranchLabels[i].branchLabel,
         dataViewId,
         forkLineColors
       );
@@ -177,11 +181,55 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
   }, [
     lensAttributes,
     multipleEntityMode,
-    forkBranchQueries,
+    forkBranchLabels,
     heatmapResults,
     fetchParams.dataView?.id,
     euiTheme.colors,
   ]);
+
+  const changePointDocLensContextValue = useMemo(() => {
+    const lensAttributesByRecordId = buildChangePointLensAttributesByRecordId(
+      fetchParams.table,
+      colsToUse,
+      changePointColumnIds,
+      forkBranchLabels,
+      entityAttributesMap,
+      lensAttributes,
+      multipleEntityMode
+    );
+    return {
+      lensAttributesByRecordId,
+      fetchSlice: {
+        abortController: fetchParams.abortController,
+        lastReloadRequestTime: fetchParams.lastReloadRequestTime,
+        searchSessionId: fetchParams.searchSessionId,
+        timeRange: fetchParams.timeRange,
+      },
+    };
+  }, [
+    fetchParams.table,
+    fetchParams.abortController,
+    fetchParams.lastReloadRequestTime,
+    fetchParams.searchSessionId,
+    fetchParams.timeRange,
+    colsToUse,
+    changePointColumnIds,
+    forkBranchLabels,
+    entityAttributesMap,
+    lensAttributes,
+    multipleEntityMode,
+  ]);
+
+  useEffect(() => {
+    if (!isComponentVisible) {
+      changePointLensContext$.next(undefined);
+      return undefined;
+    }
+    changePointLensContext$.next(changePointDocLensContextValue);
+    return () => {
+      changePointLensContext$.next(undefined);
+    };
+  }, [changePointLensContext$, isComponentVisible, changePointDocLensContextValue]);
 
   useEffect(() => {
     let cancelled = false;
@@ -199,9 +247,8 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
         return;
       }
 
-      const forkBranches = forkBranchQueries;
-      const isForkMode = Boolean(forkBranches?.length);
-      const effectiveSourceQuery = isForkMode ? forkBranches?.[0]?.sourceQuery : sourceQuery;
+      const isForkMode = Boolean(forkBranchLabels?.length);
+      const effectiveSourceQuery = isForkMode ? templateSourceQuery : sourceQuery;
 
       if (!effectiveSourceQuery && !isForkMode) {
         setLensAttributes(null);
@@ -223,38 +270,87 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
 
         let attributes: TypedLensByValueInput['attributes'];
 
-        if (isForkMode && forkBranches) {
-          const branchColumns = await Promise.all(
-            forkBranches.map((branch) =>
-              getESQLQueryColumns({
-                esqlQuery: branch.sourceQuery,
-                search: data.search.search,
-                signal: fetchParams.abortController?.signal,
-                timeRange: timeRange
-                  ? { from: timeRange.from, to: timeRange.to }
-                  : data.query.timefilter.timefilter.getAbsoluteTime(),
-              })
-            )
-          );
+        if (isForkMode && forkBranchLabels) {
+          const forkTable = fetchParams.table;
+          const forkColsToUse = forkTable?.columns?.length ? forkTable.columns : columns;
+          const forkTimeColumnId = getTimeColumnId(forkColsToUse);
+          const forkChangePointIds = getChangePointColumnIdsFromColumns(forkColsToUse);
+          const forkTypeColumnId = forkChangePointIds.typeColumnId;
+          const forkPvalueColumnId = forkChangePointIds.pvalueColumnId;
+          const forkValueColumnId = forkTimeColumnId
+            ? getValueColumnId(
+                forkColsToUse,
+                forkTimeColumnId,
+                forkTypeColumnId,
+                forkPvalueColumnId
+              )
+            : undefined;
+
+          const changePointResults =
+            forkTable?.rows?.length && forkTimeColumnId && forkValueColumnId
+              ? getChangePointResultsFromTable(
+                  forkTable,
+                  forkTimeColumnId,
+                  forkTypeColumnId,
+                  forkPvalueColumnId,
+                  forkValueColumnId,
+                  FORK_COLUMN_ID,
+                  forkBranchLabels
+                )
+              : [];
+
+          const uniqueForkIndices = [
+            ...new Set(
+              changePointResults.map((r) => r.forkIndex).filter((i): i is number => i !== undefined)
+            ),
+          ].sort((a, b) => a - b);
+
+          const entitiesToShow =
+            uniqueForkIndices.length > 0 && templateSourceQuery
+              ? uniqueForkIndices.map((i) => ({
+                  branchIndex: i,
+                  branchLabel: forkBranchLabels[i].branchLabel,
+                  sourceQuery: replaceEntityValueInSourceQuery(
+                    templateSourceQuery,
+                    forkBranchLabels[i].branchLabel
+                  ),
+                }))
+              : forkBranchLabels.map((b) => ({
+                  branchIndex: b.branchIndex,
+                  branchLabel: b.branchLabel,
+                  sourceQuery: replaceEntityValueInSourceQuery(
+                    templateSourceQuery ?? '',
+                    b.branchLabel
+                  ),
+                }));
+
+          const templateColumns = await getESQLQueryColumns({
+            esqlQuery: templateSourceQuery!,
+            search: data.search.search,
+            signal: fetchParams.abortController?.signal,
+            timeRange: timeRange
+              ? { from: timeRange.from, to: timeRange.to }
+              : data.query.timefilter.timefilter.getAbsoluteTime(),
+          });
 
           if (cancelled) return;
 
-          const validBranches = forkBranches
-            .map((branch, i) => ({ branch, cols: branchColumns[i] }))
-            .filter((b) => b.cols?.length);
-          if (!validBranches.length) {
+          const validEntities = templateColumns?.length
+            ? entitiesToShow.map((entity) => ({ entity, cols: templateColumns }))
+            : [];
+          if (!validEntities.length) {
             setLensAttributes(null);
             setError('Could not get columns for fork branches');
             setIsLoading(false);
             return;
           }
 
-          const firstBranch = validBranches[0];
+          const firstEntity = validEntities[0];
           const context = {
             dataViewSpec,
             fieldName: '',
-            textBasedColumns: firstBranch.cols,
-            query: { esql: firstBranch.branch.sourceQuery },
+            textBasedColumns: firstEntity.cols,
+            query: { esql: firstEntity.entity.sourceQuery },
           };
           const suggestions = stateHelper.suggestions(
             context,
@@ -286,8 +382,8 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             euiTheme.colors.warning,
           ];
 
-          validBranches.forEach(({ branch, cols: branchCols }) => {
-            const layerId = `fork-branch-${branch.branchIndex}`;
+          validEntities.forEach(({ entity, cols: branchCols }) => {
+            const layerId = `fork-branch-${entity.branchIndex}`;
             const timeCol = branchCols.find(
               (c) =>
                 c.meta?.type === 'date' ||
@@ -298,7 +394,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
               branchCols.find((c) => c.id !== timeCol?.id);
             if (!timeCol || !valueCol) return;
 
-            const entityLabel = branch.branchLabel;
+            const entityLabel = entity.branchLabel;
             const valueColumnId = `${layerId}-${valueCol.id}`;
             const textBasedColumns = branchCols.map((c) => {
               const isValueCol = c.id === valueCol.id;
@@ -312,11 +408,11 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             });
             datasourceLayers[layerId] = {
               index: fetchParams.dataView.id ?? dataViewSpec.id ?? '',
-              query: { esql: branch.sourceQuery },
+              query: { esql: entity.sourceQuery },
               columns: textBasedColumns,
               timeField: dataViewSpec.timeFieldName,
             };
-            const color = forkLineColors[branch.branchIndex % forkLineColors.length];
+            const color = forkLineColors[entity.branchIndex % forkLineColors.length];
             visDataLayers.push({
               layerId,
               layerType: 'data',
@@ -412,9 +508,8 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
         }
 
         const table = fetchParams.table;
-        const timeColumnId = changePointColumnNames ? getTimeColumnId(columns) : undefined;
-        const typeColumnId = changePointColumnNames?.typeColumn;
-        const pvalueColumnId = changePointColumnNames?.pvalueColumn;
+        const timeColumnId = getTimeColumnId(columns);
+        const { typeColumnId, pvalueColumnId } = changePointColumnIds;
         const valueColumnId = timeColumnId
           ? getValueColumnId(columns, timeColumnId, typeColumnId, pvalueColumnId)
           : undefined;
@@ -431,7 +526,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             pvalueColumnId,
             valueColumnId,
             forkColumnId,
-            forkBranches
+            forkBranchLabels
           );
           // Add change point annotations over the line chart (like AIOps)
           if (results.length > 0) {
@@ -446,8 +541,8 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             let annotationLayers: DataLayerLike[] = [];
 
             const hasForkIndex = results.some((r) => r.forkIndex !== undefined);
-            if (isForkMode && forkBranches && hasForkIndex) {
-              forkBranches.forEach((branch, branchIdx) => {
+            if (isForkMode && forkBranchLabels && hasForkIndex) {
+              forkBranchLabels.forEach((branch, branchIdx) => {
                 const branchResults = results.filter(
                   (r) => r.forkIndex === branch.branchIndex || r.forkIndex === branchIdx
                 );
@@ -552,9 +647,11 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
     fetchParams.abortController,
     sourceQuery,
     sourceColumns,
-    forkBranchQueries,
+    forkBranchLabels,
+    templateSourceQuery,
     columns,
-    changePointColumnNames,
+    colsToUse,
+    changePointColumnIds,
     lens,
     data.search,
     data.query.timefilter.timefilter,
@@ -596,35 +693,29 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
 
   const showHeatmap =
     lensAttributes && !error && !isLoading && multipleEntityMode && viewMode === 'heatmap';
-  const showLineChart =
+  const showLineCharts =
     lensAttributes &&
     !error &&
     !isLoading &&
-    (!multipleEntityMode || (forkBranchQueries?.length === 1 && viewMode === 'line'));
-  const showMultipleLineCharts =
-    lensAttributes &&
-    !error &&
-    !isLoading &&
-    multipleEntityMode &&
     viewMode === 'multiple-line' &&
-    forkBranchQueries &&
-    forkBranchQueries.length > 0;
+    ((!multipleEntityMode && lensAttributes) ||
+      (multipleEntityMode && forkBranchLabels && forkBranchLabels.length > 0));
 
   const showBurstDetectionHistogram =
     !error &&
     !isLoading &&
     multipleEntityMode &&
     viewMode === 'burst-detection' &&
-    forkBranchQueries &&
-    forkBranchQueries.length > 0 &&
+    forkBranchLabels &&
+    forkBranchLabels.length > 0 &&
     burstDetectionHistogramData.length > 0;
 
   const renderChartContent = () => {
     if (showHeatmap) {
       return (
-        <ChangePointForkHeatmap
+        <ChangePointHeatmap
           results={heatmapResults}
-          forkBranches={forkBranchQueries ?? []}
+          forkBranches={forkBranchLabels ?? []}
           selectedEntityIndices={selectedEntityIndices}
           onSelectEntity={setSelectedEntityIndices}
           timeRange={fetchParams.timeRange}
@@ -633,150 +724,44 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             const attrs = entityAttributesMap[entityIndex];
             if (!attrs) return null;
             return (
-              <div
-                css={css({
-                  minHeight: 200,
-                  height: '100%',
-                  position: 'relative',
-                  '& > div': { height: '100%', position: 'absolute', width: '100%' },
-                })}
-                data-test-subj="changePointEntityDetailChart"
-              >
-                <lens.EmbeddableComponent
-                  abortController={fetchParams.abortController}
-                  attributes={attrs}
-                  executionContext={{ description: 'Discover change point entity detail' }}
-                  id={`discover-change-point-entity-${entityIndex}`}
-                  lastReloadRequestTime={fetchParams.lastReloadRequestTime}
-                  noPadding={true}
-                  onBrushEnd={handleBrushEnd}
-                  onFilter={onFilter}
-                  searchSessionId={fetchParams.searchSessionId}
-                  syncCursor={true}
-                  syncTooltips={true}
-                  timeRange={fetchParams.timeRange}
-                  viewMode="view"
-                />
-              </div>
+              <ChangePointLensEmbeddable
+                lens={lens}
+                attributes={attrs}
+                executionContextDescription="Discover change point entity detail"
+                id={`discover-change-point-entity-${entityIndex}`}
+                abortController={fetchParams.abortController}
+                lastReloadRequestTime={fetchParams.lastReloadRequestTime}
+                searchSessionId={fetchParams.searchSessionId}
+                timeRange={fetchParams.timeRange}
+                onBrushEnd={handleBrushEnd}
+                onFilter={onFilter}
+                syncCursor={true}
+                syncTooltips={true}
+                wrapperCss={changePointLensNestedChartWrapperCss()}
+                dataTestSubj="changePointEntityDetailChart"
+              />
             );
           }}
         />
       );
     }
-    if (showLineChart) {
+    if (showLineCharts) {
       return (
-        <EuiFlexGroup direction="column" gutterSize="none" css={css({ flex: 1, minHeight: 0 })}>
-          <EuiFlexItem grow css={css({ minHeight: 0 })}>
-            <div css={chartCss} data-test-subj="changePointExperienceLensLineChart">
-              <lens.EmbeddableComponent
-                abortController={fetchParams.abortController}
-                attributes={lensAttributes}
-                executionContext={{ description: 'Discover change point chart' }}
-                id="discover-change-point-lens"
-                lastReloadRequestTime={fetchParams.lastReloadRequestTime}
-                noPadding={true}
-                onBrushEnd={handleBrushEnd}
-                onFilter={onFilter}
-                searchSessionId={fetchParams.searchSessionId}
-                timeRange={fetchParams.timeRange}
-                viewMode="view"
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-    if (showMultipleLineCharts) {
-      return (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGrid columns={3} css={css({ flex: 1, minHeight: 0 })}>
-            {forkBranchQueries!.map((branch, entityIdx) => {
-              const attrs = entityAttributesMap[entityIdx];
-              if (!attrs) return null;
-              const entityLabel = branch.branchLabel;
-              return (
-                <EuiFlexItem
-                  key={entityLabel}
-                  css={css({
-                    minHeight: 220,
-                    minWidth: 0,
-                  })}
-                >
-                  <EuiPanel
-                    paddingSize="xs"
-                    hasBorder
-                    hasShadow={false}
-                    css={css({
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      overflow: 'hidden',
-                    })}
-                    data-test-subj={`changePointMultipleLineChart-${entityLabel}`}
-                  >
-                    <EuiFlexGroup
-                      direction="column"
-                      gutterSize="xs"
-                      css={css({ flex: 1, minHeight: 0 })}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiText
-                          size="xs"
-                          css={css({
-                            fontWeight: 600,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          })}
-                          title={entityLabel}
-                        >
-                          {entityLabel}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        grow
-                        css={css({
-                          minHeight: 0,
-                          overflow: 'hidden',
-                        })}
-                      >
-                        <div
-                          css={css({
-                            minHeight: 200,
-                            height: '100%',
-                            position: 'relative',
-                            '& > div': {
-                              height: '100%',
-                              position: 'absolute',
-                              width: '100%',
-                            },
-                          })}
-                        >
-                          <lens.EmbeddableComponent
-                            abortController={fetchParams.abortController}
-                            attributes={attrs}
-                            executionContext={{ description: 'Discover change point entity chart' }}
-                            id={`discover-change-point-multiple-entity-${entityLabel}`}
-                            lastReloadRequestTime={fetchParams.lastReloadRequestTime}
-                            noPadding={true}
-                            onBrushEnd={handleBrushEnd}
-                            onFilter={onFilter}
-                            searchSessionId={fetchParams.searchSessionId}
-                            syncCursor={true}
-                            syncTooltips={true}
-                            timeRange={fetchParams.timeRange}
-                            viewMode="view"
-                          />
-                        </div>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGrid>
-        </>
+        <ChangePointMultipleLineCharts
+          lens={lens}
+          multipleEntityMode={multipleEntityMode}
+          forkBranchLabels={forkBranchLabels}
+          entityAttributesMap={entityAttributesMap}
+          lensAttributes={lensAttributes}
+          fetchSlice={{
+            abortController: fetchParams.abortController,
+            lastReloadRequestTime: fetchParams.lastReloadRequestTime,
+            searchSessionId: fetchParams.searchSessionId,
+            timeRange: fetchParams.timeRange,
+          }}
+          onBrushEnd={handleBrushEnd}
+          onFilter={onFilter}
+        />
       );
     }
     if (showBurstDetectionHistogram) {
@@ -827,58 +812,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
         <div css={chartToolbarCss} className="eui-xScroll">
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
             <EuiFlexItem grow={false}>{renderToggleActions?.()}</EuiFlexItem>
-            {multipleEntityMode && (
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  compressed
-                  value={viewMode}
-                  onChange={(e) =>
-                    setViewMode(
-                      e.target.value as 'heatmap' | 'line' | 'multiple-line' | 'burst-detection'
-                    )
-                  }
-                  aria-label={i18n.translate(
-                    'discover.contextAwareness.changePointExperience.viewModeLabel',
-                    { defaultMessage: 'Chart view mode' }
-                  )}
-                  options={[
-                    {
-                      value: 'heatmap',
-                      text: i18n.translate(
-                        'discover.contextAwareness.changePointExperience.viewHeatmap',
-                        { defaultMessage: 'Heatmap' }
-                      ),
-                    },
-                    ...(forkBranchQueries && forkBranchQueries.length === 1
-                      ? [
-                          {
-                            value: 'line' as const,
-                            text: i18n.translate(
-                              'discover.contextAwareness.changePointExperience.viewLineChart',
-                              { defaultMessage: 'Line chart' }
-                            ),
-                          },
-                        ]
-                      : []),
-                    {
-                      value: 'multiple-line',
-                      text: i18n.translate(
-                        'discover.contextAwareness.changePointExperience.viewMultipleLineCharts',
-                        { defaultMessage: 'Multiple line charts' }
-                      ),
-                    },
-                    {
-                      value: 'burst-detection',
-                      text: i18n.translate(
-                        'discover.contextAwareness.changePointExperience.viewBurstDetection',
-                        { defaultMessage: 'Burst Detection Histogram' }
-                      ),
-                    },
-                  ]}
-                  data-test-subj="changePointViewModeSelect"
-                />
-              </EuiFlexItem>
-            )}
+            {multipleEntityMode && <ViewModeSelection value={viewMode} onChange={setViewMode} />}
           </EuiFlexGroup>
         </div>
       ) : null}

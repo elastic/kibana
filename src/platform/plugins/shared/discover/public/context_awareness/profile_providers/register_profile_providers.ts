@@ -35,6 +35,7 @@ import type {
 } from './profile_provider_services';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import { createMetricsDataSourceProfileProvider } from './common/metrics_data_source_profile';
+import { createChangePointDocumentProfileProvider } from './common/change_point_document_profile/profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -135,6 +136,7 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
+  createChangePointDocumentProfileProvider(),
   ...createSecurityDocumentProfileProviders(providerServices),
   ...createObservabilityDocumentProfileProviders(providerServices),
 ];

@@ -15,34 +15,44 @@ import type {
   CustomGridColumnsConfiguration,
   CustomGridColumnProps,
 } from '@kbn/unified-data-table';
+import { BehaviorSubject } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { ChangePointPvalueCell } from './change_point_pvalue_cell';
 import { ChangePointPvalueColumnHeader } from './change_point_pvalue_column_header';
+import {
+  CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
+  type ChangePointLensDataSourceContext,
+  type ChangePointLensDocContext,
+} from './change_point_context';
 import { ChangePointExperienceView } from './change_point_experience_view';
 import type { ChangePointExperienceViewProps } from './types';
 import type { ChangePointPvalueCellContext } from './change_point_pvalue_cell';
 
-const CHANGE_POINT_DATA_SOURCE_PROFILE_ID = 'change-point-data-source-profile';
-
 const CHANGE_POINT_CHART_LOCAL_STORAGE_KEY = 'discover:changePointExperience';
 
+export type ChangePointDataSourceResolvedContext = ChangePointPvalueCellContext &
+  ChangePointLensDataSourceContext;
+
 export const createChangePointDataSourceProfileProvider =
-  (): DataSourceProfileProvider<ChangePointPvalueCellContext> => ({
+  (): DataSourceProfileProvider<ChangePointDataSourceResolvedContext> => ({
     profileId: CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
     profile: {
-      getChartSectionConfiguration: (prev) => (params) => ({
-        ...prev(params),
-        renderChartSection: (props) =>
-          React.createElement(ChangePointExperienceView, {
-            ...props,
-            actions: params.actions,
-          } as ChangePointExperienceViewProps),
-        replaceDefaultChart: true as const,
-        localStorageKeyPrefix: CHANGE_POINT_CHART_LOCAL_STORAGE_KEY,
-        defaultTopPanelHeight: 'max-content',
-      }),
+      getChartSectionConfiguration:
+        (prev, { context }) =>
+        (params) => ({
+          ...prev(params),
+          renderChartSection: (props) =>
+            React.createElement(ChangePointExperienceView, {
+              ...props,
+              actions: params.actions,
+              changePointLensContext$: context.changePointLensContext$,
+            } as ChangePointExperienceViewProps),
+          replaceDefaultChart: true as const,
+          localStorageKeyPrefix: CHANGE_POINT_CHART_LOCAL_STORAGE_KEY,
+          defaultTopPanelHeight: 'max-content',
+        }),
       getColumnsConfiguration:
         (prev, { context }) =>
         (): CustomGridColumnsConfiguration => {
@@ -97,6 +107,9 @@ export const createChangePointDataSourceProfileProvider =
         context: {
           category: DataSourceCategory.Default,
           pvalueColumnId,
+          changePointLensContext$: new BehaviorSubject<ChangePointLensDocContext | undefined>(
+            undefined
+          ),
         },
       };
     },

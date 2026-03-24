@@ -31,13 +31,15 @@ export {
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
   hasChangePointCommand,
+  getChangePointEntityFieldName,
   getChangePointOutputColumnNames,
   getSourceQueryBeforeChangePoint,
-  // TODO: FORK command specific code needs to be updated once CHANGE_POINT BY command is available
   getForkWithChangePoint,
   getBranchLabelFromForkBranch,
-  getSourceQueriesFromForkWithChangePoint,
-  type ForkBranchSourceQuery,
+  getForkBranchLabels,
+  getTemplateSourceQueryFromForkWithChangePoint,
+  replaceEntityValueInSourceQuery,
+  type ForkBranchLabel,
 } from './utils/query_parsing_helpers';
 export {
   getIndexPatternFromESQLQuery,

@@ -20,8 +20,8 @@ import type {
 import { Chart, Heatmap, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import type { ForkBranchSourceQuery } from '@kbn/esql-utils';
-import type { ChangePointResult, ChangePointForkHeatmapProps } from './types';
+import type { ForkBranchLabel } from '@kbn/esql-utils';
+import type { ChangePointResult, ChangePointHeatmapProps } from './types';
 import {
   getBestIntervalFromResults,
   getBucketsFromResults,
@@ -60,7 +60,7 @@ interface HeatmapDatum {
  */
 function buildHeatmapData(
   results: ChangePointResult[],
-  forkBranches: ForkBranchSourceQuery[],
+  forkBranches: ForkBranchLabel[],
   timeRange?: TimeRange
 ): {
   entityIndicesWithChangePoints: number[];
@@ -176,7 +176,7 @@ const createChangePointHeatmapTooltip =
     );
   };
 
-export const ChangePointForkHeatmap: React.FC<ChangePointForkHeatmapProps> = ({
+export const ChangePointHeatmap: React.FC<ChangePointHeatmapProps> = ({
   results,
   forkBranches,
   selectedEntityIndices,

@@ -34,10 +34,13 @@ import {
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
   hasChangePointCommand,
+  getChangePointEntityFieldName,
   getChangePointOutputColumnNames,
   getSourceQueryBeforeChangePoint,
   getForkWithChangePoint,
-  getSourceQueriesFromForkWithChangePoint,
+  getForkBranchLabels,
+  getTemplateSourceQueryFromForkWithChangePoint,
+  replaceEntityValueInSourceQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1200,6 +1203,28 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('getChangePointEntityFieldName', () => {
+    it('should return undefined for undefined or when no CHANGE_POINT', () => {
+      expect(getChangePointEntityFieldName(undefined)).toBeUndefined();
+      expect(getChangePointEntityFieldName('FROM index')).toBeUndefined();
+    });
+
+    it('should return entity field from STATS BY when CHANGE_POINT has ON clause', () => {
+      const esql =
+        'FROM gallery-* | STATS avg_bytes = AVG(bytes) BY provider, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket';
+      expect(getChangePointEntityFieldName(esql)).toBe('provider');
+    });
+
+    it('should return WHERE field when CHANGE_POINT is inside FORK', () => {
+      const forkQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+  ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+| WHERE type IS NOT NULL`;
+      expect(getChangePointEntityFieldName(forkQuery)).toBe('referer');
+    });
+  });
+
   describe('getSourceQueryBeforeChangePoint', () => {
     it('should return undefined for undefined or when no CHANGE_POINT command', () => {
       expect(getSourceQueryBeforeChangePoint(undefined)).toBeUndefined();
@@ -1243,32 +1268,64 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('getSourceQueriesFromForkWithChangePoint', () => {
+  describe('getForkBranchLabels', () => {
     it('should return undefined for undefined or when no FORK with CHANGE_POINT', () => {
-      expect(getSourceQueriesFromForkWithChangePoint(undefined)).toBeUndefined();
-      expect(
-        getSourceQueriesFromForkWithChangePoint('FROM a | CHANGE_POINT value')
-      ).toBeUndefined();
+      expect(getForkBranchLabels(undefined)).toBeUndefined();
+      expect(getForkBranchLabels('FROM a | CHANGE_POINT value')).toBeUndefined();
     });
 
-    it('should return source query per branch when CHANGE_POINT is inside FORK', () => {
+    it('should return branch labels and indices when CHANGE_POINT is inside FORK', () => {
       const forkQuery = `FROM gallery-*
 | FORK
   ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
   ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
 | WHERE type IS NOT NULL`;
-      const result = getSourceQueriesFromForkWithChangePoint(forkQuery);
+      const result = getForkBranchLabels(forkQuery);
       expect(result).toBeDefined();
       expect(result).toHaveLength(2);
       expect(result![0].branchLabel).toBe('http://a.com');
       expect(result![0].branchIndex).toBe(0);
-      expect(result![0].sourceQuery).toContain('FROM gallery-*');
-      expect(result![0].sourceQuery).toContain('WHERE referer == "http://a.com"');
-      expect(result![0].sourceQuery).toContain('STATS avg_bytes');
-      expect(result![0].sourceQuery).not.toContain('CHANGE_POINT');
       expect(result![1].branchLabel).toBe('http://b.com');
       expect(result![1].branchIndex).toBe(1);
-      expect(result![1].sourceQuery).toContain('WHERE referer == "http://b.com"');
+    });
+  });
+
+  describe('getTemplateSourceQueryFromForkWithChangePoint', () => {
+    it('should return undefined for undefined or when no FORK with CHANGE_POINT', () => {
+      expect(getTemplateSourceQueryFromForkWithChangePoint(undefined)).toBeUndefined();
+      expect(
+        getTemplateSourceQueryFromForkWithChangePoint('FROM a | CHANGE_POINT value')
+      ).toBeUndefined();
+    });
+
+    it('should return first branch source query when CHANGE_POINT is inside FORK', () => {
+      const forkQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+  ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+| WHERE type IS NOT NULL`;
+      const result = getTemplateSourceQueryFromForkWithChangePoint(forkQuery);
+      expect(result).toBeDefined();
+      expect(result).toContain('FROM gallery-*');
+      expect(result).toContain('WHERE referer == "http://a.com"');
+      expect(result).toContain('STATS avg_bytes');
+      expect(result).not.toContain('CHANGE_POINT');
+    });
+  });
+
+  describe('replaceEntityValueInSourceQuery', () => {
+    it('should replace entity value in WHERE clause', () => {
+      const sourceQuery =
+        'FROM gallery-* | WHERE provider == "http://a.com" | STATS count = COUNT(*) BY @timestamp';
+      const result = replaceEntityValueInSourceQuery(sourceQuery, 'http://b.com');
+      expect(result).toContain('WHERE provider == "http://b.com"');
+      expect(result).not.toContain('http://a.com');
+    });
+
+    it('should return source query unchanged when no match', () => {
+      const sourceQuery = 'FROM gallery-* | STATS count = COUNT(*) BY @timestamp';
+      const result = replaceEntityValueInSourceQuery(sourceQuery, 'http://b.com');
+      expect(result).toBe(sourceQuery);
     });
   });
 });

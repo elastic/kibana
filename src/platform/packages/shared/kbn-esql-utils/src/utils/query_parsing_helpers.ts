@@ -12,6 +12,8 @@ import {
   Parser,
   isFunctionExpression,
   isColumn,
+  isAssignment,
+  isOptionNode,
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
@@ -687,6 +689,79 @@ export const getChangePointOutputColumnNames = (
 };
 
 /**
+ * Returns the entity/grouping field name from a CHANGE_POINT query.
+ * For non-FORK: STATS ... BY entityField, timeField | CHANGE_POINT value ON timeField -> returns entityField.
+ * For FORK: returns the field from the first WHERE clause (e.g. field == "value" -> field).
+ * @param esql - The full ES|QL query string
+ * @returns The entity field name, or undefined if not determinable
+ */
+export const getChangePointEntityFieldName = (esql?: string): string | undefined => {
+  if (!esql) return undefined;
+  try {
+    const { root } = Parser.parse(esql);
+    const changePointCommands = Walker.findAll(
+      root,
+      (node) => node.type === 'command' && node.name === 'change_point'
+    );
+    const changePointCommand = changePointCommands[0] as ESQLAstCommand | undefined;
+    if (!changePointCommand) return undefined;
+
+    const onOption = changePointCommand.args?.find(
+      (arg) => isOptionNode(arg) && arg.name === 'on'
+    ) as ESQLCommandOption | undefined;
+    const onFieldName = onOption?.args?.[0];
+    const onColumnName = onFieldName && isColumn(onFieldName) ? onFieldName.name : '@timestamp';
+
+    const forkInfo = getForkWithChangePoint(esql);
+    const commandsToSearch = forkInfo
+      ? (() => {
+          const forkArgs = forkInfo.forkCommand.args as ESQLForkParens[];
+          for (let i = 0; i < forkArgs.length; i++) {
+            const branch = forkArgs[i]?.child;
+            if (branch?.type !== 'query' || !branch.commands) continue;
+            const changePointIdx = branch.commands.findIndex(
+              (cmd: ESQLAstCommand) => cmd.name === 'change_point'
+            );
+            if (changePointIdx <= 0) continue;
+            return branch.commands.slice(0, changePointIdx) as ESQLAstCommand[];
+          }
+          return [];
+        })()
+      : root.commands.slice(
+          0,
+          root.commands.findIndex((cmd) => cmd.name === 'change_point')
+        );
+
+    const whereCmd = commandsToSearch.find((c) => c.name === 'where');
+    if (whereCmd?.text) {
+      const eqMatch = whereCmd.text.trim().match(/(\w+)\s*==\s*["']([^"']+)["']/);
+      if (eqMatch) return eqMatch[1];
+    }
+
+    const statsCommand = commandsToSearch.find((c) => c.name === 'stats');
+    if (!statsCommand) return undefined;
+
+    const options: ESQLCommandOption[] = [];
+    walk(statsCommand, { visitCommandOption: (node) => options.push(node) });
+    const byOption = options.find((o) => o.name === 'by');
+    if (!byOption?.args?.length) return undefined;
+
+    const byOutputNames: string[] = [];
+    for (const arg of byOption.args) {
+      if (isColumn(arg)) {
+        byOutputNames.push(arg.name);
+      } else if (isAssignment(arg) && isColumn(arg.args?.[0])) {
+        byOutputNames.push((arg.args[0] as ESQLColumn).name);
+      }
+    }
+
+    return byOutputNames.find((name) => name !== onColumnName);
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Returns the ES|QL query that produces the input to CHANGE_POINT (pipeline before the CHANGE_POINT command).
  * Use this to visualize the underlying time series that was used for change point detection.
  * @param esql - The full ES|QL query string containing CHANGE_POINT
@@ -732,8 +807,8 @@ export const getForkWithChangePoint = (
   }
 };
 
-export interface ForkBranchSourceQuery {
-  sourceQuery: string;
+/** Entity metadata for a FORK branch (label and index). Used when deriving entities from change point results. */
+export interface ForkBranchLabel {
   branchLabel: string;
   branchIndex: number;
 }
@@ -759,14 +834,46 @@ export const getBranchLabelFromForkBranch = (
 };
 
 /**
- * Returns source queries for each FORK branch that contains CHANGE_POINT.
- * Use when CHANGE_POINT is inside FORK to show each branch's source data as a separate line.
+ * Returns entity labels and indices for each FORK branch that contains CHANGE_POINT.
+ * Use with change point results to derive which entities to show; source data is loaded
+ * via getTemplateSourceQueryFromForkWithChangePoint + replaceEntityValueInSourceQuery.
  * @param esql - The full ES|QL query string
- * @returns Array of { sourceQuery, branchLabel, branchIndex } for each branch with CHANGE_POINT, or undefined if not a FORK with CHANGE_POINT
+ * @returns Array of { branchLabel, branchIndex } for each branch with CHANGE_POINT, or undefined if not a FORK with CHANGE_POINT
  */
-export const getSourceQueriesFromForkWithChangePoint = (
+export const getForkBranchLabels = (esql?: string): ForkBranchLabel[] | undefined => {
+  const forkInfo = getForkWithChangePoint(esql);
+  if (!forkInfo) return undefined;
+
+  const { forkCommand } = forkInfo;
+  const forkArgs = forkCommand.args as ESQLForkParens[];
+
+  const results: ForkBranchLabel[] = [];
+  for (let i = 0; i < forkArgs.length; i++) {
+    const parens = forkArgs[i];
+    const branch = parens?.child;
+    if (branch?.type !== 'query' || !branch.commands) continue;
+
+    const changePointIdx = branch.commands.findIndex(
+      (cmd: ESQLAstCommand) => cmd.name === 'change_point'
+    );
+    if (changePointIdx <= 0) continue;
+
+    const branchLabel = getBranchLabelFromForkBranch(branch.commands, i);
+    results.push({ branchLabel, branchIndex: i });
+  }
+
+  return results.length > 0 ? results : undefined;
+};
+
+/**
+ * Returns the source query (everything before CHANGE_POINT) from the first FORK branch.
+ * Use as template for per-entity queries via replaceEntityValueInSourceQuery.
+ * @param esql - The full ES|QL query string
+ * @returns The first branch's source query, or undefined if not a FORK with CHANGE_POINT
+ */
+export const getTemplateSourceQueryFromForkWithChangePoint = (
   esql?: string
-): ForkBranchSourceQuery[] | undefined => {
+): string | undefined => {
   const forkInfo = getForkWithChangePoint(esql);
   if (!forkInfo) return undefined;
 
@@ -775,7 +882,6 @@ export const getSourceQueriesFromForkWithChangePoint = (
   const prefixCommands = root.commands.slice(0, forkIndex);
   const forkArgs = forkCommand.args as ESQLForkParens[];
 
-  const results: ForkBranchSourceQuery[] = [];
   for (let i = 0; i < forkArgs.length; i++) {
     const parens = forkArgs[i];
     const branch = parens?.child;
@@ -792,10 +898,26 @@ export const getSourceQueriesFromForkWithChangePoint = (
     ) as ESQLAstCommand[];
     const fullCommands: ESQLAstCommand[] = [...prefixCommands, ...branchCommandsBeforeChangePoint];
     const newRoot = { ...root, commands: fullCommands };
-    const sourceQuery = BasicPrettyPrinter.print(newRoot);
-    const branchLabel = getBranchLabelFromForkBranch(branch.commands, i);
-    results.push({ sourceQuery, branchLabel, branchIndex: i });
+    return BasicPrettyPrinter.print(newRoot);
   }
 
-  return results.length > 0 ? results : undefined;
+  return undefined;
+};
+
+/**
+ * Replaces the entity value in a source query's first WHERE clause (field == "value" pattern).
+ * Use when deriving per-entity source queries from a single template.
+ * @param sourceQuery - The template source query (e.g. from one FORK branch)
+ * @param newEntityValue - The entity value to substitute (e.g. from change point results)
+ * @returns The query with the entity value replaced
+ */
+export const replaceEntityValueInSourceQuery = (
+  sourceQuery: string,
+  newEntityValue: string
+): string => {
+  const match = sourceQuery.match(/(\w+)\s*==\s*["']([^"']+)["']/);
+  if (!match) return sourceQuery;
+  const [fullMatch, fieldName] = match;
+  const escaped = newEntityValue.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return sourceQuery.replace(fullMatch, `${fieldName} == "${escaped}"`);
 };
