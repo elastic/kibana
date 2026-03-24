@@ -23,6 +23,15 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
 
+function encodePathSegment(segment: string): string {
+  return encodeURIComponent(segment).replace(/%2F/gi, '/');
+}
+
+function extractNextMarker(xml: string): string | undefined {
+  const match = xml.match(/<NextMarker>([^<]*)<\/NextMarker>/);
+  return match?.[1] || undefined;
+}
+
 function getBaseUrl(ctx: ActionContext): string {
   const url = (ctx.config?.accountUrl as string)?.trim() ?? '';
   return url.replace(/\/+$/, '');
@@ -38,10 +47,9 @@ function parseListContainersXml(xml: string): {
   while ((match = nameRegex.exec(xml)) !== null) {
     containers.push({ name: match[1] });
   }
-  const nextMarkerMatch = xml.match(/<NextMarker>([^<]*)<\/NextMarker>/);
   return {
     containers,
-    nextMarker: nextMarkerMatch?.[1] || undefined,
+    nextMarker: extractNextMarker(xml),
   };
 }
 
@@ -62,10 +70,9 @@ function parseListBlobsXml(xml: string): {
       lastModified: lastModMatch?.[1],
     });
   }
-  const nextMarkerMatch = xml.match(/<NextMarker>([^<]*)<\/NextMarker>/);
   return {
     blobs,
-    nextMarker: nextMarkerMatch?.[1] || undefined,
+    nextMarker: extractNextMarker(xml),
   };
 }
 
@@ -144,7 +151,7 @@ export const AzureBlob: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
-        const container = encodeURIComponent(input.container).replace(/\%2F/g, '/');
+        const container = encodePathSegment(input.container);
         const response = await ctx.client.get(`${baseUrl}/${container}`, {
           params: {
             restype: 'container',
@@ -168,8 +175,8 @@ export const AzureBlob: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
-        const container = encodeURIComponent(input.container).replace(/\%2F/g, '/');
-        const blobName = encodeURIComponent(input.blobName).replace(/\%2F/g, '/');
+        const container = encodePathSegment(input.container);
+        const blobName = encodePathSegment(input.blobName);
         const response = await ctx.client.get(`${baseUrl}/${container}/${blobName}`, {
           responseType: 'arraybuffer',
         });
@@ -193,8 +200,8 @@ export const AzureBlob: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
-        const container = encodeURIComponent(input.container).replace(/\%2F/g, '/');
-        const blobName = encodeURIComponent(input.blobName).replace(/\%2F/g, '/');
+        const container = encodePathSegment(input.container);
+        const blobName = encodePathSegment(input.blobName);
         const response = await ctx.client.head(`${baseUrl}/${container}/${blobName}`);
         return {
           contentType: response.headers['content-type'],

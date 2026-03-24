@@ -123,8 +123,7 @@ function getRequestUrl(config: InternalAxiosRequestConfig): {
 } {
   const base = config.baseURL ?? 'http://localhost';
   const urlPath = config.url ?? '/';
-  const fullUrl = urlPath.startsWith('http') ? urlPath : new URL(urlPath, base).href;
-  const parsed = new URL(fullUrl);
+  const parsed = urlPath.startsWith('http') ? new URL(urlPath) : new URL(urlPath, base);
   const searchParams: Record<string, string> = {};
   parsed.searchParams.forEach((value, key) => {
     searchParams[key] = value;

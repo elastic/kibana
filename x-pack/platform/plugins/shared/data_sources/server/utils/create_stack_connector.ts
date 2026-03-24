@@ -32,20 +32,14 @@ function buildSecretsFromConnectorSpec(
     throw new Error(`Stack connector spec not found for type "${connectorType}"`);
   }
 
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
-  });
+  const getAuthTypeId = (authType: string | { type: string }) =>
+    typeof authType === 'string' ? authType : authType.type;
 
-  const hasAzureSharedKeyAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'azure_shared_key';
-  });
-
-  const hasBasicAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'basic';
-  });
+  const hasBearerAuth = connectorSpec.auth?.types.some((t) => getAuthTypeId(t) === 'bearer');
+  const hasAzureSharedKeyAuth = connectorSpec.auth?.types.some(
+    (t) => getAuthTypeId(t) === 'azure_shared_key'
+  );
+  const hasBasicAuth = connectorSpec.auth?.types.some((t) => getAuthTypeId(t) === 'basic');
 
   const secrets: Record<string, string> = {};
   if (hasBearerAuth) {
@@ -74,10 +68,9 @@ function buildSecretsFromConnectorSpec(
     secrets.username = colonIdx !== -1 ? credentials.slice(0, colonIdx) : credentials;
     secrets.password = colonIdx !== -1 ? credentials.slice(colonIdx + 1) : '';
   } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
+    const apiKeyHeaderAuth = connectorSpec.auth?.types.find(
+      (authType) => getAuthTypeId(authType) === 'api_key_header'
+    );
 
     const headerField =
       typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
