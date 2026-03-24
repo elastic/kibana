@@ -109,17 +109,30 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : ['unit', 'integration', 'functional'];
 
-  const limitSolutionsRaw =
-    process.env.LIMIT_SOLUTIONS || bk.getMetadata('limit_test_groups_by_solution');
-  const LIMIT_SOLUTIONS = limitSolutionsRaw
-    ? limitSolutionsRaw
+  const jestLimitSolutionsRaw = process.env.LIMIT_SOLUTIONS;
+  const JEST_LIMIT_SOLUTIONS = jestLimitSolutionsRaw
+    ? jestLimitSolutionsRaw
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
     : undefined;
-  if (LIMIT_SOLUTIONS) {
+  if (JEST_LIMIT_SOLUTIONS) {
     const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
-    const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
+    const invalidSolutions = JEST_LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
+    if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
+  }
+
+  const ftrLimitSolutionsRaw =
+    process.env.LIMIT_SOLUTIONS || bk.getMetadata('limit_test_groups_by_solution');
+  const FTR_LIMIT_SOLUTIONS = ftrLimitSolutionsRaw
+    ? ftrLimitSolutionsRaw
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+  if (FTR_LIMIT_SOLUTIONS) {
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const invalidSolutions = FTR_LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
     if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }
 
@@ -175,7 +188,7 @@ export async function pickTestGroupRunOrder() {
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
     FTR_CONFIG_PATTERNS,
-    LIMIT_SOLUTIONS
+    FTR_LIMIT_SOLUTIONS
   );
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
@@ -183,7 +196,7 @@ export async function pickTestGroupRunOrder() {
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   const getJestConfigGlobs = (patterns: string[]) => {
-    if (!LIMIT_SOLUTIONS) {
+    if (!JEST_LIMIT_SOLUTIONS) {
       return patterns;
     }
 
@@ -192,7 +205,7 @@ export async function pickTestGroupRunOrder() {
     );
 
     return (
-      LIMIT_SOLUTIONS.flatMap((solution: string) =>
+      JEST_LIMIT_SOLUTIONS.flatMap((solution: string) =>
         patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
       )
         // When applying the solution filter, still allow platform tests
