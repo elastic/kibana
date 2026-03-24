@@ -290,8 +290,6 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
 steps:
   - name: step1
     type: console.log
@@ -336,9 +334,7 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
-      invalid: [ unclosed array
+    invalid: [ unclosed array
 steps:
   - name: step1
 `.trim();
