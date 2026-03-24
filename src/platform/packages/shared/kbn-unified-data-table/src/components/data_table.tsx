@@ -136,7 +136,6 @@ export type RenderDocumentViewCallback = (
   hit: DataTableRecord,
   displayedRows: DataTableRecord[],
   displayedColumns: string[],
-  expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
   columnsMeta?: DataTableColumnsMeta
 ) => JSX.Element | undefined;
 
@@ -1492,13 +1491,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           {canSetExpandedDoc &&
             expandedDoc &&
             typeof renderDocumentView === 'function' &&
-            renderDocumentView(
-              expandedDoc,
-              displayedRows,
-              displayedColumns,
-              setExpandedDoc!,
-              columnsMeta
-            )}
+            renderDocumentView(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
         </span>
       </UnifiedDataTableContext.Provider>
     );

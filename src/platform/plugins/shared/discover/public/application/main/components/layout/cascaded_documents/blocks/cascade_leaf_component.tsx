@@ -31,9 +31,11 @@ interface ESQLDataCascadeLeafCellProps
       | 'showTimeCol'
       | 'dataView'
       | 'showKeyboardShortcuts'
-      | 'renderDocumentView'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
+      | 'expandedDoc'
+      | 'setExpandedDoc'
+      | 'setRenderDocumentViewMeta'
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
@@ -196,8 +198,10 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showTimeCol,
     dataView,
     showKeyboardShortcuts,
-    renderDocumentView,
     externalCustomRenderers,
+    expandedDoc,
+    setExpandedDoc,
+    setRenderDocumentViewMeta,
     getScrollElement,
     getScrollMargin,
     getScrollOffset,
@@ -205,7 +209,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
@@ -221,12 +224,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
-
-    const setExpandedDocFn = useCallback(
-      (...args: Parameters<NonNullable<UnifiedDataTableProps['setExpandedDoc']>>) =>
-        setExpandedDoc(args[0]),
-      [setExpandedDoc]
-    );
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -304,10 +301,11 @@ export const ESQLDataCascadeLeafCell = React.memo(
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDoc}
-        setExpandedDoc={setExpandedDocFn}
+        setExpandedDoc={setExpandedDoc}
         dataGridDensityState={cascadeDataGridDensityState}
         onUpdateDataGridDensity={setCascadeDataGridDensityState}
-        renderDocumentView={renderDocumentView}
+        renderDocumentView="external"
+        setRenderDocumentViewMeta={setRenderDocumentViewMeta}
         renderCustomGridBody={renderCustomCascadeGridBodyCallback}
         onFullScreenChange={setIsCellInFullScreenMode}
         externalCustomRenderers={externalCustomRenderers}

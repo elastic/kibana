@@ -86,10 +86,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import {
-  DiscoverGridFlyout,
-  type DiscoverGridFlyoutProps,
-} from '../../../../components/discover_grid_flyout';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 
@@ -365,7 +362,6 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
@@ -381,8 +377,8 @@ function DiscoverDocumentsComponent({
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
-        setExpandedDoc={expandedDocSetter}
-        onClose={expandedDocSetter.bind(null, undefined)}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
@@ -398,6 +394,7 @@ function DiscoverDocumentsComponent({
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
+      setExpandedDoc,
       docViewerExtensionActions,
       onUpdateSelectedTabId,
       docViewerUiState,
@@ -617,7 +614,6 @@ function DiscoverDocumentsComponent({
           expandedDoc,
           renderDocumentViewMeta.displayedRows,
           renderDocumentViewMeta.displayedColumns,
-          setExpandedDoc,
           columnsMeta
         )}
     </EuiFlexItem>

@@ -44,6 +44,9 @@ export interface ESQLDataCascadeProps
     | 'renderDocumentView'
     | 'externalCustomRenderers'
     | 'onUpdateDataGridDensity'
+    | 'expandedDoc'
+    | 'setExpandedDoc'
+    | 'setRenderDocumentViewMeta'
   > {
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
