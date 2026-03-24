@@ -51,6 +51,7 @@ export interface TracesFlyout {
     readonly container: Locator;
     readonly backButton: Locator;
     getWaterfallItem(name: string): {
+      readonly row: Locator;
       readonly content: Locator;
       readonly errorBadge: Locator;
     };
@@ -134,6 +135,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
             .locator('[data-test-subj="traceItemRowWrapper"]')
             .filter({ hasText: name });
           return {
+            row,
             content: row.locator('[data-test-subj="traceItemRowContent"]'),
             errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
           };
