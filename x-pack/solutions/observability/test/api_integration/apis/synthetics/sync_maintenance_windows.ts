@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('adds a monitor in private location', async () => {
-      const newMonitor = browserMonitorJson;
+      const newMonitor = { ...browserMonitorJson, timeout: null };
 
       const pvtLoc = {
         id: loc.id,
@@ -162,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: testFleetPolicyID },
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -186,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: testFleetPolicyID },
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

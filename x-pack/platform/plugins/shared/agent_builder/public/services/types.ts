@@ -6,7 +6,8 @@
  */
 
 import type { AgentBuilderAccessChecker } from './access/access';
-import type { AgentBuilderStartDependencies } from '../types';
+import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
+import type { OpenConversationSidebarOptions } from '../sidebar/types';
 import type { AgentService } from './agents';
 import type { AttachmentsService } from './attachments';
 import type { ChatService } from './chat';
@@ -14,6 +15,7 @@ import type { ConversationsService } from './conversations';
 import type { DocLinksService } from './doc_links';
 import type { ToolsService } from './tools';
 import type { SkillsService } from './skills/skills_service';
+import type { PluginsService } from './plugins/plugins_service';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
 
@@ -26,7 +28,11 @@ export interface AgentBuilderInternalService {
   navigationService: NavigationService;
   toolsService: ToolsService;
   skillsService: SkillsService;
+  pluginsService: PluginsService;
   startDependencies: AgentBuilderStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
+  openSidebarConversation: (
+    options?: OpenConversationSidebarOptions
+  ) => OpenConversationSidebarReturn;
 }

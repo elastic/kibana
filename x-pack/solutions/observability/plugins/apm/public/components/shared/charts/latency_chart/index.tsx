@@ -154,6 +154,7 @@ export function LatencyChart({ height, kuery }: Props) {
                     environment,
                     transactionName: transactionName ?? undefined,
                     transactionType,
+                    sortDirection: 'DESC',
                   }}
                 />
               </EuiFlexItem>

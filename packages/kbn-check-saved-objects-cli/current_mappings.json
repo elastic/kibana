@@ -1442,6 +1442,17 @@
         "index": false,
         "type": "flattened"
       },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "es_index_patterns": {
         "dynamic": false,
         "properties": {}
@@ -1508,6 +1519,10 @@
       "internal": {
         "type": "boolean"
       },
+      "is_dependency_of": {
+        "dynamic": false,
+        "properties": {}
+      },
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
@@ -1519,6 +1534,9 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
+      },
+      "installed_as_dependency": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -2014,6 +2032,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
@@ -2030,6 +2051,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2179,6 +2204,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -2444,6 +2472,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_diagnostics": {
         "index": false,
         "type": "flattened"
@@ -2472,6 +2503,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2803,6 +2838,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -3217,6 +3255,20 @@
       }
     }
   },
+  "oauth_state": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "state": {
+        "type": "keyword"
+      }
+    }
+  },
   "observability-onboarding-state": {
     "properties": {
       "progress": {
@@ -3248,6 +3300,9 @@
         "type": "date"
       },
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "description": {
@@ -3294,6 +3349,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3355,6 +3413,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3382,6 +3443,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
@@ -3612,6 +3676,9 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "deprecated": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -4135,6 +4202,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "streams-significant-events-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
@@ -4504,6 +4575,25 @@
       }
     }
   },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "upgrade-assistant-ml-upgrade-operation": {
     "dynamic": false,
     "properties": {
@@ -4584,6 +4674,20 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user_connector_token": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "credentialType": {
+        "type": "keyword"
+      },
+      "profileUid": {
         "type": "keyword"
       }
     }

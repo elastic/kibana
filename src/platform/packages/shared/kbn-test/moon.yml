@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test'
+  title: '@kbn/test'
   description: Moon project for @kbn/test
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-test
+  sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
+  - '@kbn/kbn-client'
   - '@kbn/dev-utils'
   - '@kbn/std'
   - '@kbn/tooling-log'
@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/stdio-dev-helpers'
   - '@kbn/babel-register'
   - '@kbn/repo-packages'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/mock-idp-utils'
   - '@kbn/code-owners'
   - '@kbn/scout-reporting'
@@ -59,14 +58,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

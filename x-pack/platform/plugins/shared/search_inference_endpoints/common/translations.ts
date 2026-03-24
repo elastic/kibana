@@ -59,9 +59,22 @@ export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.s
   defaultMessage: 'Service',
 });
 
+export const SERVICE_PROVIDER_ARIA_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.serviceProvider.ariaLabel',
+  {
+    defaultMessage: 'Service Provider Options',
+  }
+);
+
 export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {
   defaultMessage: 'Type',
 });
+export const TASK_TYPE_ARIA_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.taskType.ariaLabel',
+  {
+    defaultMessage: 'Task Type Options',
+  }
+);
 
 export const BREADCRUMB_RELEVANCE = i18n.translate(
   'xpack.searchInferenceEndpoints.breadcrumbs.relevance',

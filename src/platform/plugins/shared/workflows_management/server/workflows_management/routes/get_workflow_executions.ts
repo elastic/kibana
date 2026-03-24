@@ -46,7 +46,8 @@ export function registerGetWorkflowExecutionsRoute({
                     ExecutionStatusValues.map((type) => schema.literal(type)) as [
                       Type<ExecutionStatus>
                     ]
-                  )
+                  ),
+                  { maxSize: ExecutionStatusValues.length }
                 ),
               ],
               {
@@ -63,7 +64,8 @@ export function registerGetWorkflowExecutionsRoute({
                 schema.arrayOf(
                   schema.oneOf(
                     ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
-                  )
+                  ),
+                  { maxSize: ExecutionTypeValues.length }
                 ),
               ],
               {
@@ -76,6 +78,7 @@ export function registerGetWorkflowExecutionsRoute({
               defaultValue: [],
             })
           ),
+          omitStepRuns: schema.maybe(schema.boolean()),
           page: schema.maybe(schema.number({ min: 1 })),
           size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
         }),
@@ -96,6 +99,7 @@ export function registerGetWorkflowExecutionsRoute({
             : undefined,
           page: request.query.page,
           size: request.query.size,
+          omitStepRuns: request.query.omitStepRuns,
         };
         return response.ok({
           body: await api.getWorkflowExecutions(params, spaceId),

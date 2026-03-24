@@ -22,8 +22,9 @@ import * as esKuery from '@kbn/es-query';
 import type { File } from '@kbn/files-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
+import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/script_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
@@ -316,7 +317,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   protected async findRulesUsingScripts(
-    scriptIds: string | string[]
+    scriptIds: string | string[],
+    /** List of OS types to check usage for. Defaults to checking all supported OS types */
+    osType?: SupportedHostOsType[]
   ): ReturnType<typeof findRules> {
     if (!this.rulesClient) {
       throw new ScriptLibraryError('Unable to query for rules - no Rules client available!');
@@ -326,9 +329,14 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       .map((id) => `"${id}"`)
       .join(' OR ');
 
-    const kuery = `alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (${SUPPORTED_HOST_OS_TYPE.map(
-      (os) => `alert.attributes.params.responseActions.params.config.${os}.scriptId:(${scriptList})`
-    ).join(' OR ')})`;
+    const kuery = `alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (${(
+      osType ?? SUPPORTED_HOST_OS_TYPE
+    )
+      .map(
+        (os) =>
+          `alert.attributes.params.responseActions.params.config.${os}.scriptId:(${scriptList})`
+      )
+      .join(' OR ')})`;
 
     this.logger.debug(() => `Searching for rules using scripts with KQL: ${kuery}`);
 
@@ -461,6 +469,28 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
         400
       );
+    }
+
+    // if OS types were removed in the update, then check/validate that rules are not using it
+    if (scriptUpdates.platform) {
+      const osTypesToRemove = currentScriptSoItem.attributes.platform.filter(
+        (osType) => !scriptUpdates.platform?.includes(osType as SupportedHostOsType)
+      ) as SupportedHostOsType[];
+
+      if (osTypesToRemove.length > 0) {
+        const rulesResults = await this.findRulesUsingScripts(id, osTypesToRemove);
+
+        if (rulesResults.total > 0) {
+          throw new ScriptLibraryError(
+            `Cannot remove platform(s) [${osTypesToRemove.join(
+              ', '
+            )}] from script. The following detection rules currently have 'runscript' configurations that reference their use:\n${rulesResults.data
+              .map((rule) => `${rule.name} (ID: ${rule.id})`)
+              .join('\n')}`,
+            409
+          );
+        }
+      }
     }
 
     if (file) {
@@ -598,10 +628,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
     if (rulesUsingScript.total > 0) {
       throw new ScriptLibraryError(
-        `Cannot delete script [${scriptId}] because it is referenced by the following rules:\n${rulesUsingScript.data
+        `Cannot delete script [${scriptId}]. The following detection rules have 'runscript' configurations that reference it:\n${rulesUsingScript.data
           .map((rule) => `${rule.name} (ID: ${rule.id})`)
           .join('\n')}`,
-        400
+        409
       );
     }
 

@@ -6,14 +6,14 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ECS_MAPPINGS_COMPONENT_TEMPLATE } from '../constants';
 import {
   ENTITY_UPDATES,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
-  ECS_MAPPINGS_COMPONENT_TEMPLATE,
   getEntityIndexPattern,
   getEntitiesAliasPattern,
-} from '../constants';
+} from '../../../common/domain/entity_index';
 import { getUpdatesComponentTemplateName } from './component_templates';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 

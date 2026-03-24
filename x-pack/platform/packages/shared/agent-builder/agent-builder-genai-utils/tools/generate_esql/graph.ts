@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
@@ -14,7 +15,12 @@ import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
-import { extractEsqlQueries, executeEsql, validateEsqlQuery } from '../utils/esql';
+import {
+  extractEsqlQueries,
+  executeEsql,
+  validateEsqlQuery,
+  buildTimeRangeParams,
+} from '../utils/esql';
 import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -42,6 +48,8 @@ const StateAnnotation = Annotation.Root({
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
+  disableNamedParams: Annotation<boolean | undefined>(),
+  timeRange: Annotation<TimeRange>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -133,6 +141,7 @@ export const createNlToEsqlGraph = ({
         additionalInstructions: state.additionalInstructions,
         additionalContext: state.additionalContext,
         rowLimit: state.rowLimit,
+        disableNamedParams: state.disableNamedParams,
       })
     );
 
@@ -259,7 +268,11 @@ export const createNlToEsqlGraph = ({
 
     let action: ExecuteQueryAction;
     try {
-      const results = await executeEsql({ query, esClient });
+      const results = await executeEsql({
+        query,
+        params: buildTimeRangeParams(state.timeRange),
+        esClient,
+      });
       action = {
         type: 'execute_query',
         success: true,

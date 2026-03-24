@@ -677,7 +677,7 @@
         "label": "UnifiedHistogramLayout",
         "description": [],
         "signature": [
-          "({ unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, defaultTopPanelHeight: originalDefaultTopPanelHeight, onTopPanelHeightChange, children, }: ",
+          "({ unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, defaultTopPanelHeight: originalDefaultTopPanelHeight, isMainPanelHidden, onTopPanelHeightChange, children, }: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -688,7 +688,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
-        "lineNumber": 59,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -698,7 +698,7 @@
             "id": "def-public.UnifiedHistogramLayout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  defaultTopPanelHeight: originalDefaultTopPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
+            "label": "{\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  defaultTopPanelHeight: originalDefaultTopPanelHeight,\n  isMainPanelHidden,\n  onTopPanelHeightChange,\n  children,\n}",
             "description": [],
             "signature": [
               {
@@ -710,7 +710,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
-            "lineNumber": 59,
+            "lineNumber": 64,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -5873,7 +5873,7 @@
           "UnifiedHistogramChartContext",
           " | undefined; isChartAvailable?: boolean | undefined; hits?: ",
           "UnifiedHistogramHitsContext",
-          " | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; isMainPanelHidden?: boolean | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
         "lineNumber": 26,
@@ -5894,7 +5894,7 @@
           "UnifiedHistogramHitsContext",
           " | undefined; chart?: ",
           "UnifiedHistogramChartContext",
-          " | undefined; isChartAvailable?: boolean | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; }"
+          " | undefined; isChartAvailable?: boolean | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; isMainPanelHidden?: boolean | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
         "lineNumber": 80,
