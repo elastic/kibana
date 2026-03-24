@@ -20,13 +20,9 @@ const labels = {
 
 export interface ConversationRightActionsProps {
   onClose?: () => void;
-  onRenameConversation: () => void;
 }
 
-export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({
-  onClose,
-  onRenameConversation,
-}) => {
+export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
   const { isEmbeddedContext } = useConversationContext();
 
   return (
@@ -37,10 +33,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <MoreActionsButton
-        onRenameConversation={onRenameConversation}
-        onCloseSidebar={isEmbeddedContext ? onClose : undefined}
-      />
+      <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>
   );

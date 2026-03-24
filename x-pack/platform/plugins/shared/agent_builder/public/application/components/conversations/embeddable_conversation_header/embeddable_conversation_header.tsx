@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,8 +31,6 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
   onClose,
   ariaLabelledBy,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-
   const { euiTheme } = useEuiTheme();
   const agentId = useAgentId();
   const { agents } = useAgentBuilderAgents();
@@ -58,11 +56,7 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
         `}
       >
         {hasActiveConversation ? (
-          <ConversationTitle
-            ariaLabelledBy={ariaLabelledBy}
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-          />
+          <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
         ) : (
           <h4
             id={ariaLabelledBy}
@@ -92,7 +86,7 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
       </div>
 
       {/* Right: kebab menu + close */}
-      <ConversationRightActions onClose={onClose} onRenameConversation={() => setIsEditing(true)} />
+      <ConversationRightActions onClose={onClose} />
     </div>
   );
 };
