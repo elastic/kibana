@@ -83,8 +83,7 @@ export const VulnerabilitiesPreview = ({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const entityType = inferEntityTypeFromIdentityFields(identityFields);
   const cspPreviewOptions = useMemo(
-    () =>
-      buildEuidCspPreviewOptions(entityType, identityFields, euidApi, { entityStoreV2Enabled }),
+    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi, { entityStoreV2Enabled }),
     [euidApi, entityStoreV2Enabled, entityType, identityFields]
   );
   const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
