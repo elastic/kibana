@@ -220,15 +220,16 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           },
         }}
       />
-      {loadingQueryParams ? (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <>{hasQueryParams && <QueryParamFields readOnly={readOnly} />}</>
-      )}
+      {hasQueryParams &&
+        (loadingQueryParams ? (
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <QueryParamFields readOnly={readOnly} />
+        ))}
       {supportsProxySettings && (
         <>
           <EuiSpacer size="m" />

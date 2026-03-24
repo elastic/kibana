@@ -376,21 +376,6 @@ export const DELETE_QUERY_PARAM_BUTTON = i18n.translate(
   }
 );
 
-export const ENCRYPTED_QUERY_PARAMS_BADGE = i18n.translate(
-  'xpack.stackConnectors.components.auth.encryptedQueryParamsBadge',
-  {
-    defaultMessage: 'Encrypted',
-  }
-);
-
-export const ENCRYPTED_QUERY_PARAMS_TOOLTIP_CONTENT = i18n.translate(
-  'xpack.stackConnectors.components.auth.encryptedQueryParamsTooltipContent',
-  {
-    defaultMessage:
-      'Query parameter values are encrypted. You must re-enter them when editing the connector.',
-  }
-);
-
 export const SAME_QUERY_PARAM_KEY_ERROR = i18n.translate(
   'xpack.stackConnectors.components.auth.sameQueryParamKeyError',
   {
