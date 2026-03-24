@@ -69,7 +69,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
                         })
                   }
                   color={'text'}
-                  iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                  iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
                   onClick={() => {
                     onToggle(!isOpen);
                   }}
