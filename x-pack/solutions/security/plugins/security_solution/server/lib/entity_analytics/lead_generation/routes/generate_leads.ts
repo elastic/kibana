@@ -6,8 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -18,19 +17,14 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import type { StartPlugins } from '../../../../plugin';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
-import { createEntityRetriever } from '../entity_retriever';
+import { entityRecordToLeadEntity } from '../entity_conversion';
 import { createLeadDataClient } from '../lead_data_client';
 
-export const generateLeadsRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  getStartServices: StartServicesAccessor<StartPlugins>
-) => {
+export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
@@ -55,44 +49,27 @@ export const generateLeadsRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const { getSpaceId } = await context.securitySolution;
-          const spaceId = getSpaceId();
+          const secSol = await context.securitySolution;
+          const spaceId = secSol.getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const entityStoreDataClient = secSol.getEntityStoreDataClient();
           const executionUuid = uuidv4();
-
-          const { connectorId } = request.body;
 
           // Fire-and-forget: run the pipeline in the background, return executionUuid immediately
           (async () => {
             const routeStart = Date.now();
 
             try {
-              let chatModel: InferenceChatModel | undefined;
-              if (connectorId) {
-                try {
-                  const [, startPlugins] = await getStartServices();
-                  chatModel = await startPlugins.inference.getChatModel({
-                    request,
-                    connectorId,
-                    chatModelOptions: {
-                      temperature: 0.3,
-                      maxRetries: 1,
-                      disableStreaming: true,
-                    },
-                  });
-                  logger.debug(
-                    `[LeadGeneration] Created LLM chat model with connector "${connectorId}"`
-                  );
-                } catch (chatModelError) {
-                  logger.warn(
-                    `[LeadGeneration] Failed to create chat model for connector "${connectorId}", proceeding with rule-based synthesis: ${chatModelError}`
-                  );
-                }
-              }
-
-              const retriever = createEntityRetriever({ esClient, logger, spaceId });
               const fetchStart = Date.now();
-              const leadEntities = await retriever.fetchAllEntities();
+              const entityResponse = await entityStoreDataClient.searchEntities({
+                entityTypes: ['host', 'user', 'service'],
+                filterQuery: '',
+                page: 1,
+                perPage: 10000,
+                sortField: 'entity.name',
+                sortOrder: 'asc',
+              });
+              const leadEntities = entityResponse.records.map(entityRecordToLeadEntity);
               logger.info(
                 `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
                   leadEntities.length
@@ -118,7 +95,7 @@ export const generateLeadsRoute = (
               );
 
               const generateStart = Date.now();
-              const leads = await engine.generateLeads(leadEntities, { chatModel });
+              const leads = await engine.generateLeads(leadEntities);
               logger.info(
                 `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
                   leads.length
