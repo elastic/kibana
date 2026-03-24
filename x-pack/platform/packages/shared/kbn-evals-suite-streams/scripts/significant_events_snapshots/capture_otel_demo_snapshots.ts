@@ -9,35 +9,48 @@ import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
-import { GCS_BUCKET, BASELINE_WAIT_MS, FAILURE_WAIT_MS, SCENARIOS } from './lib/constants';
+import {
+  patchScenarios,
+  getDemoScenarios,
+  listAvailableDemos,
+  deployDemo,
+  teardownDemo,
+  ensureMinikubeRunning,
+} from '@kbn/otel-demo';
+import type { DemoType, FailureScenario } from '@kbn/otel-demo';
+import {
+  GCS_BUCKET,
+  BASELINE_WAIT_MS,
+  FAILURE_WAIT_MS,
+  HEALTHY_BASELINE_SCENARIO,
+  DEFAULT_LOGS_INDEX,
+  DEFAULT_DEMO_APP,
+} from './lib/constants';
 import { getConnectionConfig, type ConnectionConfig } from './lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './lib/gcs';
 import { sleep } from './lib/sleep';
 import { ensureLogsIndexTemplate } from '../../src/data_generators/logs_index_template';
 import {
-  cleanupSigEventsExtractedFeaturesData,
+  cleanupSigEventsExtractedKIsData,
+  configureModelSelectionSettings,
   disableStreams,
   enableSignificantEvents,
-  logSigEventsExtractedFeatures,
-  persistSigEventsExtractedFeaturesForSnapshot,
-  triggerSigEventsFeatureExtraction,
-  waitForSigEventsFeatureExtraction,
+  logSigEventsExtractedKIFeatures,
+  persistSigEventsExtractedKIsForSnapshot,
+  triggerSigEventsKIFeatureExtraction,
+  waitForSigEventsKIFeatureExtraction,
 } from './lib/significant_events_workflow';
-import {
-  ensureMinikube,
-  deployOtelDemo,
-  patchScenario,
-  teardownOtelDemo,
-  waitForPodsReady,
-} from './lib/otel_demo';
+import type { Scenario } from './lib/types';
 
 run(
-  async ({ log, flags, addCleanupTask }) => {
+  async ({ log, flags }) => {
     const config = await getConnectionConfig(flags, log);
     const esClient = new Client({
       node: config.esUrl,
       auth: { username: config.username, password: config.password },
     });
+
+    const logsIndex = String(flags['logs-index'] || DEFAULT_LOGS_INDEX);
 
     const connectorId = String(flags['connector-id'] || '');
     const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
@@ -57,21 +70,40 @@ run(
       );
     }
 
-    const controller = new AbortController();
-    addCleanupTask(() => controller.abort());
+    // Validate --demo-app
+    const demoType = String(flags['demo-app'] || DEFAULT_DEMO_APP);
+    const availableDemos = listAvailableDemos();
+    if (!availableDemos.includes(demoType as DemoType)) {
+      throw new Error(
+        `Invalid --demo-app "${demoType}". Valid values: ${availableDemos.join(', ')}`
+      );
+    }
+
+    const baselineWaitMs = parseDurationFlag(
+      flags['baseline-wait'],
+      'baseline-wait',
+      BASELINE_WAIT_MS
+    );
+    const failureWaitMs = parseDurationFlag(flags['failure-wait'], 'failure-wait', FAILURE_WAIT_MS);
+
+    const failureScenarios = getDemoScenarios(demoType as DemoType);
+    const allScenarios: Scenario[] = [HEALTHY_BASELINE_SCENARIO, ...failureScenarios];
 
     const selectedScenarios =
       scenariosToRun.length > 0
-        ? SCENARIOS.filter((s) => scenariosToRun.includes(s.id))
-        : [...SCENARIOS];
+        ? allScenarios.filter((s) => scenariosToRun.includes(s.id))
+        : [...allScenarios];
 
     if (selectedScenarios.length === 0) {
-      throw new Error(`No matching scenarios. Available: ${SCENARIOS.map((s) => s.id).join(', ')}`);
+      throw new Error(
+        `No matching scenarios. Available: ${allScenarios.map((s) => s.id).join(', ')}`
+      );
     }
 
-    const basePath = generateGcsBasePath({ runId });
+    const basePath = generateGcsBasePath({ runId, appNamespace: demoType });
     log.info(`Creating ${selectedScenarios.length} snapshot(s) → GCS ${GCS_BUCKET}/${basePath}`);
     log.info(`Run ID: ${runId}`);
+    log.info(`Demo app: ${demoType}`);
     log.info(`LLM connector: ${connectorId}`);
     log.info(`Elasticsearch: ${config.esUrl} | Kibana: ${config.kibanaUrl}`);
 
@@ -86,14 +118,25 @@ run(
 
     log.info('');
     log.info('Checking minikube...');
-    await ensureMinikube(log);
+    await ensureMinikubeRunning(log);
 
     log.info('');
     log.info('Registering GCS snapshot repository...');
-    await registerGcsRepository(esClient, log, runId);
+    await registerGcsRepository(esClient, log, runId, demoType);
 
     for (const scenario of selectedScenarios) {
-      await processScenario(scenario, config, connectorId, runId, esClient, log);
+      await processScenario(
+        scenario,
+        config,
+        connectorId,
+        runId,
+        esClient,
+        log,
+        demoType as DemoType,
+        baselineWaitMs,
+        failureWaitMs,
+        logsIndex
+      );
     }
 
     log.info('');
@@ -117,12 +160,12 @@ run(
   },
   {
     description: `
-      Automates creation of OTel Demo snapshots for Significant Events evaluations.
+      Automates creation of demo app snapshots for Significant Events evaluations.
 
       For each scenario the script:
-        1. Deploys the OTel Demo on minikube
-        2. Waits for pods and baseline traffic (~5 min)
-        3. Optionally patches a failure scenario and waits (~10 min)
+        1. Deploys the demo app on minikube
+        2. Waits for baseline traffic
+        3. Optionally patches a failure scenario and waits
         4. Enables streams and triggers LLM feature extraction
         5. Snapshots logs + extracted features to GCS
         6. Cleans up and tears down the demo
@@ -139,6 +182,7 @@ run(
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --scenario healthy-baseline
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --run-id 2026-02-19
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --dry-run
+        node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --demo-app online-boutique
     `,
     flags: {
       string: [
@@ -149,13 +193,21 @@ run(
         'connector-id',
         'scenario',
         'run-id',
+        'demo-app',
+        'baseline-wait',
+        'failure-wait',
+        'logs-index',
       ],
       boolean: ['dry-run'],
       help: `
+        --logs-index       Logs index to use (default: logs)
         --connector-id     (required) LLM connector ID for feature extraction (e.g.: bedrock-opus-46)
         --run-id           Run identifier used as GCS subfolder (default: today's date in format YYYY-MM-DD)
-        --scenario         Process only specific scenario(s) - can be repeated. Omit for all 7.
+        --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
         --dry-run          Print what would happen without executing
+        --demo-app         Demo app to use (default: otel-demo). Must be a registered demo type.
+        --baseline-wait    Duration to wait for baseline traffic, e.g. 3m, 90s, 1h (default: 3m)
+        --failure-wait     Duration to wait after applying failure scenario, e.g. 15m, 300s (default: 5m)
         --es-url           Elasticsearch URL (default: from kibana.dev.yml)
         --kibana-url       Kibana URL (default: from kibana.dev.yml, with basePath)
         --es-username      ES username (default: from kibana.dev.yml)
@@ -165,80 +217,106 @@ run(
   }
 );
 
+const isFailureScenario = (scenario: Scenario): scenario is FailureScenario =>
+  'category' in scenario;
+
 async function processScenario(
-  scenario: (typeof SCENARIOS)[number],
+  scenario: Scenario,
   config: ConnectionConfig,
   connectorId: string,
   runId: string,
   esClient: Client,
-  log: ToolingLog
+  log: ToolingLog,
+  demoType: DemoType,
+  baselineWaitMs: number,
+  failureWaitMs: number,
+  logsIndex: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
+  const isFailure = isFailureScenario(scenario);
+
   log.info('');
   log.info('='.repeat(70));
-  log.info(`SCENARIO: ${scenario.id}${scenario.isFailure ? ' (failure)' : ' (baseline)'}`);
+  log.info(`SCENARIO: ${scenario.id}${isFailure ? ' (failure)' : ' (baseline)'}`);
   log.info('='.repeat(70));
 
-  // Step 0 — Ensure the `logs` data stream exists so that feature extraction can run.
+  // Step 0 — Ensure the target data stream exists so that feature extraction can run.
   // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
-  await ensureLogsDataStream(esClient, log);
+  await ensureDataStream(esClient, log, logsIndex);
 
-  // Step 1 — Deploy OTel Demo (this will stream logs into `logs`)
-  log.info('[1/7] Deploying OTel Demo...');
-  const { child, deployedPromise } = deployOtelDemo(log);
+  // Step 1+2 — Deploy the demo app. Resolves once pods are ready (no log streaming).
+  log.info('[1/7] Deploying demo app...');
+  await deployDemo({ demoType, log, logsIndex });
+  log.info('[2/7] Deployment complete');
 
   try {
-    // Step 2 — Wait for the Otel Demo to finish deploying, then verify pods
-    log.info('[2/7] Waiting for OTel Demo deployment...');
-    await deployedPromise;
-    log.info('[2/7] Verifying that the pods are ready...');
-    await waitForPodsReady(log);
-
     // Step 3 — Accumulate baseline traffic
     log.info('[3/7] Accumulating baseline traffic...');
-    await sleep(BASELINE_WAIT_MS, log, 'baseline traffic');
+    await sleep(baselineWaitMs, log, 'baseline traffic');
 
     // Step 4 — Apply failure (if applicable)
-    if (scenario.isFailure) {
+    if (isFailure) {
       log.info(`[4/7] Applying failure scenario "${scenario.id}"...`);
-      await patchScenario(log, scenario.id);
+      await patchScenarios({ demoType, scenarioIds: [scenario.id], log });
 
       log.info('[4/7] Accumulating failure data...');
-      await sleep(FAILURE_WAIT_MS, log, 'failure data');
+      await sleep(failureWaitMs, log, 'failure data');
     } else {
       log.info('[4/7] Skipped (healthy baseline)');
     }
 
-    // Step 5 — Run feature extraction (the task generates both inferred and computed features)
-    // Extracted features will be stored as part of the snapshot
+    // Step 5 — Run feature extraction (the task generates both inferred and computed KIs)
+    // Extracted KIs will be stored as part of the snapshot
     log.info('[5/7] Running feature extraction...');
     await enableSignificantEvents(config, log);
-    await triggerSigEventsFeatureExtraction(config, log, connectorId);
-    await waitForSigEventsFeatureExtraction(config, log);
-    await logSigEventsExtractedFeatures(config, log);
-    await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id);
+    await configureModelSelectionSettings(config, log, connectorId);
+    await triggerSigEventsKIFeatureExtraction(config, log, logsIndex);
+    await waitForSigEventsKIFeatureExtraction(config, log, logsIndex);
+    await logSigEventsExtractedKIFeatures(config, log, logsIndex);
+    await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
 
     // Step 6 — Create a snapshot of the logs and extracted features
     log.info('[6/7] Creating GCS snapshot...');
     await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
   } finally {
-    // Kill the Otel Demo background process (log streamer)
-    if (!child.killed) {
-      child.kill('SIGTERM');
-    }
+    log.info('[7/7] Cleaning up...');
+    await disableStreams(config, log).catch((e) => log.error(`disableStreams failed: ${e}`));
+    await cleanupSigEventsExtractedKIsData(esClient, log).catch((e) =>
+      log.error(`cleanupSigEventsExtractedKIsData failed: ${e}`)
+    );
+    await teardownDemo({ demoType, log }).catch((e) => log.error(`teardownDemo failed: ${e}`));
   }
-
-  // Step 7 — Cleanup (this will clean up the ES data and the Otel Demo)
-  log.info('[7/7] Cleaning up...');
-  await disableStreams(config, log);
-  await cleanupSigEventsExtractedFeaturesData(esClient, log);
-  await teardownOtelDemo(log);
 
   log.info(`Scenario "${scenario.id}" — done`);
 }
 
-async function ensureLogsDataStream(esClient: Client, log: ToolingLog): Promise<void> {
+const DURATION_RE = /^(\d+)(s|m|h|d)$/;
+
+const parseDurationFlag = (
+  raw: string | string[] | boolean | undefined,
+  flagName: string,
+  defaultMs: number
+): number => {
+  if (!raw) return defaultMs;
+
+  const value = String(raw);
+
+  const match = value.match(DURATION_RE);
+  if (!match) {
+    throw new Error(`--${flagName} must be a duration like "3m", "90s", "1h". Got: "${value}"`);
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2] as moment.unitOfTime.DurationConstructor;
+  return moment.duration(amount, unit).asMilliseconds();
+};
+
+async function ensureDataStream(
+  esClient: Client,
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
+): Promise<void> {
   try {
-    await esClient.indices.getDataStream({ name: 'logs' });
+    await esClient.indices.getDataStream({ name: streamName });
     return;
   } catch (err) {
     const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
@@ -247,24 +325,25 @@ async function ensureLogsDataStream(esClient: Client, log: ToolingLog): Promise<
     }
   }
 
-  log.info('logs data stream not found — creating it for snapshot capture');
-  await ensureLogsIndexTemplate(esClient, log);
+  log.info(`"${streamName}" data stream not found — creating it for snapshot capture`);
+
+  await ensureLogsIndexTemplate(esClient, log, streamName);
 
   try {
-    await esClient.indices.createDataStream({ name: 'logs' });
+    await esClient.indices.createDataStream({ name: streamName });
   } catch (err) {
-    // If something already exists at "logs" (e.g. a plain index), try to remove it and retry.
+    // If something already exists at this name (e.g. a plain index), try to remove it and retry.
     log.warning(
-      `Failed to create logs data stream (will attempt cleanup and retry): ${
+      `Failed to create "${streamName}" data stream (will attempt cleanup and retry): ${
         err instanceof Error ? err.message : String(err)
       }`
     );
     try {
-      await esClient.indices.deleteDataStream({ name: 'logs' });
+      await esClient.indices.deleteDataStream({ name: streamName });
     } catch {
       // ignore
     }
-    await esClient.indices.delete({ index: 'logs', ignore_unavailable: true });
-    await esClient.indices.createDataStream({ name: 'logs' });
+    await esClient.indices.delete({ index: streamName, ignore_unavailable: true });
+    await esClient.indices.createDataStream({ name: streamName });
   }
 }

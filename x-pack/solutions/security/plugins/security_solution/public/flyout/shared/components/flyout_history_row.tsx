@@ -25,7 +25,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
-import { getAlertTitle, getEventTitle, getField } from '../../document_details/shared/utils';
+import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
@@ -45,7 +46,10 @@ import {
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { VulnerabilityFindingsPanelKey } from '../../csp_details/vulnerabilities_flyout/constants';
 import { MisconfigurationFindingsPanelKey } from '../../csp_details/findings_flyout/constants';
-import { AttackDetailsRightPanelKey } from '../../attack_details/constants/panel_keys';
+import {
+  AttackDetailsPreviewPanelKey,
+  AttackDetailsRightPanelKey,
+} from '../../attack_details/constants/panel_keys';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 
 const MAX_WIDTH = 300; // px
@@ -133,6 +137,7 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         />
       );
     case AttackDetailsRightPanelKey:
+    case AttackDetailsPreviewPanelKey:
       return <AttackDetailsHistoryRow item={item} index={index} />;
     default:
       return null;
@@ -154,8 +159,12 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
   const title = useMemo(
     () =>
       isAlert
-        ? getAlertTitle({ ruleName })
-        : getEventTitle({ eventKind, eventCategory, getFieldsData }),
+        ? getAlertTitle(ruleName)
+        : getEventTitle(
+            eventKind,
+            eventCategory,
+            (field) => getField(getFieldsData(field)) ?? undefined
+          ),
     [isAlert, ruleName, eventKind, eventCategory, getFieldsData]
   );
 

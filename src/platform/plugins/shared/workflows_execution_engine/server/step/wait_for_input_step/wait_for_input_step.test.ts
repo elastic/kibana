@@ -10,6 +10,7 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WaitForInputStep } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
+import { WaitForInputStepSchema } from '@kbn/workflows/spec/schema';
 import { WaitForInputStepImpl } from './wait_for_input_step';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -181,5 +182,60 @@ describe('WaitForInputStepImpl', () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('WaitForInputStepSchema', () => {
+  it('should accept a step without schema', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 'approve',
+      type: 'waitForInput',
+      with: { message: 'Please approve' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept a step with a valid JSON Schema', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 'approve',
+      type: 'waitForInput',
+      with: {
+        message: 'Approve isolation?',
+        schema: {
+          properties: {
+            approved: { type: 'boolean', default: true },
+            reason: { type: 'string' },
+          },
+          required: ['approved'],
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.with?.schema?.properties).toHaveProperty('approved');
+      expect(result.data.with?.schema?.required).toEqual(['approved']);
+    }
+  });
+
+  it('should accept a step with no with block', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 'approve',
+      type: 'waitForInput',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject a step with invalid schema properties', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 'approve',
+      type: 'waitForInput',
+      with: {
+        message: 'Approve?',
+        schema: {
+          properties: 'not-an-object',
+        },
+      },
+    });
+    expect(result.success).toBe(false);
   });
 });

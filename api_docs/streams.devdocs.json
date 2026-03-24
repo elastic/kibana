@@ -808,16 +808,16 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.ClassicIngest",
-              "text": "ClassicIngest"
+              "section": "def-common.WiredIngest",
+              "text": "WiredIngest"
             },
             " | ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.WiredIngest",
-              "text": "WiredIngest"
+              "section": "def-common.ClassicIngest",
+              "text": "ClassicIngest"
             },
             "; }, undefined>; \"GET /internal/streams/_classic_status\": ",
             {
@@ -1339,6 +1339,28 @@
               "section": "def-common.ProcessorSuggestionsResponse",
               "text": "ProcessorSuggestionsResponse"
             },
+            ", undefined>; \"PUT /internal/streams/_significant_events/settings\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"PUT /internal/streams/_significant_events/settings\", any, ",
+            "StreamsRouteHandlerResources",
+            ", { success: true; }, undefined>; \"GET /internal/streams/_significant_events/settings\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/_significant_events/settings\", undefined, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "SignificantEventsSettingsResponse",
             ", undefined>; \"GET /internal/streams/_significant_events\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -2154,16 +2176,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ClassicIngest",
-            "text": "ClassicIngest"
+            "section": "def-common.WiredIngest",
+            "text": "WiredIngest"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredIngest",
-            "text": "WiredIngest"
+            "section": "def-common.ClassicIngest",
+            "text": "ClassicIngest"
           },
           "; }, undefined>; \"GET /internal/streams/_classic_status\": ",
           {
@@ -2685,6 +2707,28 @@
             "section": "def-common.ProcessorSuggestionsResponse",
             "text": "ProcessorSuggestionsResponse"
           },
+          ", undefined>; \"PUT /internal/streams/_significant_events/settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /internal/streams/_significant_events/settings\", any, ",
+          "StreamsRouteHandlerResources",
+          ", { success: true; }, undefined>; \"GET /internal/streams/_significant_events/settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/_significant_events/settings\", undefined, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "SignificantEventsSettingsResponse",
           ", undefined>; \"GET /internal/streams/_significant_events\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -3056,7 +3100,7 @@
           "[]; canReadFailureStore: boolean; }, undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3072,7 +3116,7 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 59,
+      "lineNumber": 61,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3088,7 +3132,7 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 61,
+      "lineNumber": 63,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3741,11 +3785,17 @@
         "label": "Query",
         "description": [],
         "signature": [
-          "QueryLink",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.QueryLink",
+            "text": "QueryLink"
+          },
           " & { title: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
-        "lineNumber": 29,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3762,7 +3812,7 @@
           "\"active\" | \"draft\""
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
-        "lineNumber": 11,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3799,7 +3849,7 @@
           "readonly [\"active\", \"draft\"]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

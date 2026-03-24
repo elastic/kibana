@@ -26,6 +26,7 @@ import {
   addRoundCompleteEvent,
   extractRound,
   prepareConversation,
+  selectSkills,
   selectTools,
   getPendingRound,
   evictInternalEvents,
@@ -52,6 +53,11 @@ export type RunChatAgentFn = (
   params: RunChatAgentParams,
   context: AgentHandlerContext
 ) => Promise<RunAgentResponse>;
+
+/*
+ * Max number of agent cycles allowed before forcing an answer.
+ */
+const CYCLE_LIMIT = 15;
 
 /**
  * Create the handler function for the default agentBuilder agent.
@@ -86,6 +92,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptManager,
     filestore,
     skills,
+    skillsStore,
     toolManager,
     experimentalFeatures,
   } = context;
@@ -103,6 +110,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+
+  const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const filteredSkills = await selectSkills({
+    skills,
+    skillsStore,
+    agentConfiguration,
+    additionalSkillIds: pluginSkillIds,
+  });
+
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const manualEvents$ = new Subject<ChatAgentEvent>();
@@ -130,6 +146,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
     previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+    filteredSkills,
     skills,
     toolProvider,
     agentConfiguration,
@@ -166,11 +183,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   );
 
-  const cycleLimit = 10;
-  const graphRecursionLimit = getRecursionLimit(cycleLimit);
+  const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
+    processedConversation,
     toolRegistry,
     toolManager,
     filestore,
@@ -207,7 +224,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     createInitializerCommand({
       conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
-      cycleLimit,
+      cycleLimit: CYCLE_LIMIT,
     }),
     {
       version: 'v2',

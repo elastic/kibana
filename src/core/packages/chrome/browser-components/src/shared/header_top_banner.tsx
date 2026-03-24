@@ -9,9 +9,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { css } from '@emotion/react';
-import { useChromeComponentsDeps } from '../context';
+import { useHeaderBanner } from './chrome_hooks';
 
 export interface HeaderTopBannerProps {
   position?: 'fixed' | 'static';
@@ -40,8 +39,7 @@ const styles = {
 };
 
 export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ position = 'fixed' }) => {
-  const { headerBanner$ } = useChromeComponentsDeps();
-  const headerBanner = useObservable(headerBanner$, undefined);
+  const headerBanner = useHeaderBanner();
   if (!headerBanner) {
     return null;
   }

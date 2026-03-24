@@ -260,13 +260,14 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
     actions: shouldShowActions
       ? {
           name: i18n.ACTIONS,
+          width: '4.5em',
+          minWidth: '4.5em',
           align: 'right',
           render: (theCase: CaseUI) => {
             return (
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );
           },
-          width: '100px',
         }
       : null,
   };

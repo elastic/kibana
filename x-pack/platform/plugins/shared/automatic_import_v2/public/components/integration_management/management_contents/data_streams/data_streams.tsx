@@ -12,7 +12,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
@@ -20,6 +20,7 @@ import * as i18n from './translations';
 import { useGetIntegrationById } from '../../../../common';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
+import { useTelemetry } from '../../../telemetry_context';
 
 export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const {
@@ -32,8 +33,16 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   } = useUIState();
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration } = useGetIntegrationById(integrationId);
+  const { reportDataStreamFlyoutOpened } = useTelemetry();
 
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+
+  const handleOpenCreateDataStreamFlyout = useCallback(() => {
+    openCreateDataStreamFlyout();
+    reportDataStreamFlyoutOpened({
+      isFirstDataStream: !hasDataStreams,
+    });
+  }, [hasDataStreams, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
 
   return (
     <>
@@ -54,7 +63,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
               {hasDataStreams && (
                 <EuiButton
                   iconType="plusInCircle"
-                  onClick={openCreateDataStreamFlyout}
+                  onClick={handleOpenCreateDataStreamFlyout}
                   data-test-subj="addDataStreamButton"
                 >
                   {i18n.ADD_DATA_STREAM_BUTTON}
@@ -75,7 +84,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="plusInCircle"
-              onClick={openCreateDataStreamFlyout}
+              onClick={handleOpenCreateDataStreamFlyout}
               data-test-subj="addDataStreamButton"
             >
               {i18n.ADD_DATA_STREAM_BUTTON}
@@ -92,7 +101,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
         <CreateDataStreamFlyout onClose={closeCreateDataStreamFlyout} />
       )}
 
-      {isEditPipelineFlyoutOpen && selectedDataStream && integrationId && (
+      {isEditPipelineFlyoutOpen && selectedDataStream && integrationId && integration && (
         <EditPipelineFlyout
           integrationId={integrationId}
           dataStream={selectedDataStream}
