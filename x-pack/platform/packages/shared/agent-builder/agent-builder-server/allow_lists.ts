@@ -44,6 +44,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
+  // Streams
+  `${internalNamespaces.streams}.list_streams`,
+  `${internalNamespaces.streams}.get_stream`,
+  `${internalNamespaces.streams}.get_schema`,
+  `${internalNamespaces.streams}.get_data_quality`,
+  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  `${internalNamespaces.streams}.query_documents`,
+  `${internalNamespaces.streams}.get_failed_documents`,
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -93,6 +102,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Dashboard
   'dashboard-management',
+
+  // Platform – Streams
+  'streams-exploration',
 
   // Platform – Workflows
   'workflow-authoring',
