@@ -55,4 +55,9 @@ export type {
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
+  ChromeProjectHeaderConfig,
+  ChromeProjectHeaderMetadataItem,
+  ChromeProjectHeaderGlobalActions,
+  ChromeProjectHeaderTab,
+  ChromeProjectHeaderCallout,
 } from './src';

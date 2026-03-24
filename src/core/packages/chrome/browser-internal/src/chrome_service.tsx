@@ -167,9 +167,7 @@ export class ChromeService {
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
     });
 
-    const projectHeader = this.projectHeader.start({
-      setAppMenu: state.appMenu.set,
-    });
+    const projectHeader = this.projectHeader.start();
 
     const sidebar = this.sidebar.start();
 
@@ -179,6 +177,7 @@ export class ChromeService {
       stop$: this.stop$,
       state,
       docTitle,
+      projectHeader,
     });
 
     // 6. Return chrome API

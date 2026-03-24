@@ -172,7 +172,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
 
     // Project Header
     projectHeader: {
-      setAppMenu: services.projectHeader.setAppMenu,
+      get$: services.projectHeader.get$,
+      set: services.projectHeader.set,
     },
 
     sidebar,

@@ -9,7 +9,8 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig, AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { ChromeProjectHeaderConfig } from './project_header';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -323,13 +324,19 @@ export interface ChromeStart {
   getActiveSolutionNavId(): SolutionId | null;
 
   /**
-   * APIs for the project header.
+   * APIs for the Chrome-controlled project header (Chrome-Next).
+   * Provides a unified configuration surface for page identity, global
+   * actions, and app menu — all rendered by Chrome rather than by individual apps.
    */
   projectHeader: {
     /**
-     * Set the app menu configuration for the current application.
+     * Set the project header configuration for the current page.
+     * Chrome renders the title, metadata, global actions, and app menu.
+     *
+     * Pass `undefined` to clear (e.g. on unmount or route change).
+     * Automatically cleared on app change.
      */
-    setAppMenu(config?: AppMenuConfigNext): void;
+    set(config?: ChromeProjectHeaderConfig): void;
   };
 
   /**

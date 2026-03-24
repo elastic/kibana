@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
 import { ReplaySubject } from 'rxjs';
-
-interface StartDeps {
-  setAppMenu: (config?: AppMenuConfigNext) => void;
-}
+import type { ChromeProjectHeaderConfig } from '@kbn/core-chrome-browser';
+import { createState } from '../../state/state_helpers';
 
 export class ProjectHeaderService {
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly config = createState<ChromeProjectHeaderConfig | undefined>(undefined);
 
-  public start({ setAppMenu }: StartDeps) {
+  public start() {
     return {
-      setAppMenu: (config?: AppMenuConfigNext) => {
-        setAppMenu(config);
-      },
+      get$: () => this.config.$,
+      set: (value?: ChromeProjectHeaderConfig) => this.config.set(value),
+      /** @internal Reset to initial state (e.g. on app change). */
+      reset: () => this.config.set(undefined),
     };
   }
 

@@ -59,3 +59,11 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
+
+export type {
+  ChromeProjectHeaderConfig,
+  ChromeProjectHeaderMetadataItem,
+  ChromeProjectHeaderGlobalActions,
+  ChromeProjectHeaderTab,
+  ChromeProjectHeaderCallout,
+} from './project_header';

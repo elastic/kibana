@@ -17,6 +17,7 @@ import type {
   ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
+  ChromeProjectHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -278,4 +279,15 @@ export function useHasAppMenu(): boolean {
   const hasLegacyActionMenu = useHasLegacyActionMenu();
   const hasAppMenuConfig = useHasAppMenuConfig();
   return hasLegacyActionMenu || hasAppMenuConfig;
+}
+
+/**
+ * Returns the current project header configuration set via
+ * `chrome.projectHeader.set()`, or `undefined` if not set.
+ * Used by Chrome-Next top bar components.
+ */
+export function useProjectHeader(): ChromeProjectHeaderConfig | undefined {
+  const chrome = useChromeService();
+  const config$ = useMemo(() => chrome.projectHeader.get$(), [chrome]);
+  return useObservable(config$, undefined);
 }
