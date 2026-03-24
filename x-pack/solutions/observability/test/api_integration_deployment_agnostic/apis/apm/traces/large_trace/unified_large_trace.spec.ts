@@ -98,13 +98,7 @@ async function getRootTransaction(es: Client) {
   };
 }
 
-async function getUnifiedTrace({
-  es,
-  apmApiClient,
-}: {
-  es: Client;
-  apmApiClient: ApmApiClient;
-}) {
+async function getUnifiedTrace({ es, apmApiClient }: { es: Client; apmApiClient: ApmApiClient }) {
   const { traceId, transactionId } = await getRootTransaction(es);
 
   const res = await apmApiClient.readUser({
