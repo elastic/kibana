@@ -31,6 +31,8 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   isSidebar: boolean;
   /** Data from the screen context attachment, if present in the conversation */
   screenContext?: ScreenContextAttachmentData;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
+  openSidebarConversation?: () => void;
 }
 
 /**
@@ -64,6 +66,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. */
+  openSidebarConversation?: () => void;
   /**
    * Optional callback for externally-controlled inline preview state.
    * Use to mark an attachment as currently previewed outside canvas.
@@ -83,6 +87,18 @@ export interface ActionButton {
   type: ActionButtonType;
   /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
+}
+
+/**
+ * Parameters passed to attachment lifecycle hooks.
+ */
+export interface AttachmentLifecycleParams<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** Returns the current attachment state */
+  getAttachment: () => TAttachment;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
 }
 
 /**
@@ -112,6 +128,8 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
    *
+   * The `props` object includes `openSidebarConversation` for opening the sidebar with the current conversation.
+   *
    * The `callbacks` object provides:
    * - `registerActionButtons`: dynamically register action buttons in the canvas header
    * - `updateOrigin`: link by-value attachments to persistent storage after saving
@@ -125,6 +143,14 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * Optional lifecycle hook called when an attachment is first rendered in the conversation.
+   * Called once per attachment (not per version). Use for setting up subscriptions or
+   * other side effects that should persist across version renders.
+   *
+   * @returns Optional cleanup function called when the attachment is removed from the conversation.
+   */
+  onAttachmentMount?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
 }
 
 /**

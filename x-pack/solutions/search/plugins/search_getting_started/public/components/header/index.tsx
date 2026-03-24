@@ -15,13 +15,17 @@ import {
   EuiText,
   EuiButtonEmpty,
   useCurrentEuiBreakpoint,
+  EuiSkeletonRectangle,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { SearchHomepageVersionBadge } from '@kbn/search-shared-ui';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_NAME } from '../../../common';
+import { docLinks } from '../../common/doc_links';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { AddDataButton } from './add_data_button';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
@@ -34,9 +38,9 @@ export const SearchGettingStartedHeader: React.FC = () => {
   const assetBasePath = useAssetBasePath();
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const {
-    services: { application },
+    services: { application, cloud, kibanaVersion },
   } = useKibana();
-
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup gutterSize={currentBreakpoint === 'xl' ? 'l' : 'xl'} direction="column">
       <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="rowReverse">
@@ -79,6 +83,27 @@ export const SearchGettingStartedHeader: React.FC = () => {
                 >
                   {skipAndGoHomeLabel}
                 </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiSkeletonRectangle
+                width={euiTheme.size.xxs}
+                height={euiTheme.size.xxl}
+                borderRadius="none"
+              />
+              <EuiFlexItem grow={false}>
+                <SearchHomepageVersionBadge
+                  docLink={
+                    cloud?.isServerlessEnabled
+                      ? docLinks.serverlessReleaseNotes
+                      : docLinks.hostedCloudReleaseNotes
+                  }
+                  kibanaVersion={
+                    !cloud?.isServerlessEnabled
+                      ? `v${kibanaVersion}`
+                      : i18n.translate('xpack.search.gettingStarted.changelog', {
+                          defaultMessage: 'Changelog',
+                        })
+                  }
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
