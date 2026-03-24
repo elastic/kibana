@@ -214,7 +214,7 @@ describe('groupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('\u2013')).toBeInTheDocument();
+      expect(screen.getByText('—')).toBeInTheDocument();
     });
 
     it('risk score stat is present even when resolutionRiskScore is undefined', () => {
@@ -225,7 +225,7 @@ describe('groupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('\u2013')).toBeInTheDocument();
+      expect(screen.getByText('—')).toBeInTheDocument();
     });
   });
 

@@ -26,6 +26,7 @@ import {
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
+import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
@@ -133,7 +134,7 @@ const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefin
   if (riskScore == null) {
     return (
       <EuiBadge css={badgeCss} color="hollow">
-        {'\u2013'}
+        {getEmptyValue()}
       </EuiBadge>
     );
   }
