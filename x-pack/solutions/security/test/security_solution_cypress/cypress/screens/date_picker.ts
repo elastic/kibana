@@ -16,8 +16,7 @@ export const GLOBAL_FILTERS_CONTAINER = `[data-test-subj="filters-global-contain
 export const DATE_RANGE_PICKER_CONTROL_BUTTON = '[data-test-subj="dateRangePickerControlButton"]';
 export const DATE_RANGE_PICKER_CUSTOM_RANGE_NAV_ITEM =
   '[data-test-subj="dateRangePickerCustomRangeNavItem"]';
-export const DATE_RANGE_PICKER_START_DATE_PART =
-  '[data-test-subj="dateRangePickerStartDatePart"]';
+export const DATE_RANGE_PICKER_START_DATE_PART = '[data-test-subj="dateRangePickerStartDatePart"]';
 export const DATE_RANGE_PICKER_END_DATE_PART = '[data-test-subj="dateRangePickerEndDatePart"]';
 export const DATE_RANGE_PICKER_APPLY_BUTTON =
   '[data-test-subj="dateRangePickerCustomRangeApplyButton"]';
