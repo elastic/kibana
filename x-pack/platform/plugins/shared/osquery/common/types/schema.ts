@@ -32,12 +32,21 @@ export interface EcsField {
 
 export type SchemaType = 'osquery' | 'ecs';
 
-export interface OsquerySchemaResponse {
+export interface SchemaMetadata {
+  osquery_version: string;
+  ecs_version: string;
+}
+
+export interface SchemaResponse {
   version: string;
+  pkgVersion?: string;
+  data: OsqueryTable[] | EcsField[];
+}
+
+export interface OsquerySchemaResponse extends SchemaResponse {
   data: OsqueryTable[];
 }
 
-export interface EcsSchemaResponse {
-  version: string;
+export interface EcsSchemaResponse extends SchemaResponse {
   data: EcsField[];
 }

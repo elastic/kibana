@@ -34,7 +34,8 @@ export const API_VERSIONS = {
   },
 };
 
-export const SCHEMAS_ROUTE = '/internal/osquery/schemas/{schemaType}';
+export const OSQUERY_SCHEMA_API_ROUTE = '/internal/osquery/schemas/osquery';
+export const ECS_SCHEMA_API_ROUTE = '/internal/osquery/schemas/ecs';
 
 export const FALLBACK_OSQUERY_VERSION = '5.19.0';
 export const FALLBACK_ECS_VERSION = '9.2.0';

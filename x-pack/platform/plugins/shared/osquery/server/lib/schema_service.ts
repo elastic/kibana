@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-import { readFile } from 'fs/promises';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import {
@@ -15,9 +13,24 @@ import {
   FALLBACK_ECS_VERSION,
   OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
 } from '../../common/constants';
-import type { SchemaType, OsqueryTable, EcsField } from '../../common/types/schema';
+import type {
+  SchemaType,
+  SchemaResponse,
+  OsqueryTable,
+  EcsField,
+  SchemaMetadata,
+} from '../../common/types/schema';
+// Static paths required — must match FALLBACK_*_VERSION in common/constants.ts
+import fallbackOsquerySchemaJson from '../../public/common/schemas/osquery/v5.19.0.json';
+import fallbackEcsSchemaJson from '../../public/common/schemas/ecs/v9.2.0.json';
+
+interface PackageInfo {
+  pkgVersion: string;
+  metadata: SchemaMetadata | undefined;
+}
 
 interface CacheEntry<T> {
+  pkgVersion: string;
   version: string;
   data: T[];
 }
@@ -25,8 +38,8 @@ interface CacheEntry<T> {
 export class SchemaService {
   private osqueryCache: CacheEntry<OsqueryTable> | null = null;
   private ecsCache: CacheEntry<EcsField> | null = null;
-  private installationVersionCache: {
-    version: string | undefined;
+  private packageInfoCache: {
+    info: PackageInfo | undefined;
     expiresAt: number;
   } | null = null;
 
@@ -36,23 +49,29 @@ export class SchemaService {
     schemaType: SchemaType,
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
-  ): Promise<{ version: string; data: OsqueryTable[] | EcsField[] }> {
-    const pkgVersion = await this.getPackageVersion(packageService, savedObjectsClient);
+  ): Promise<SchemaResponse> {
+    const packageInfo = await this.getPackageInfo(packageService, savedObjectsClient);
 
     if (schemaType === 'osquery') {
-      return this.getOsquerySchema(pkgVersion, packageService, savedObjectsClient);
+      return this.getOsquerySchema(packageInfo, packageService, savedObjectsClient);
     }
 
-    return this.getEcsSchema(pkgVersion, packageService, savedObjectsClient);
+    return this.getEcsSchema(packageInfo, packageService, savedObjectsClient);
   }
 
   private async getOsquerySchema(
-    pkgVersion: string | undefined,
+    packageInfo: PackageInfo | undefined,
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
-  ): Promise<{ version: string; data: OsqueryTable[] }> {
-    if (pkgVersion && this.osqueryCache?.version === pkgVersion) {
-      return this.osqueryCache;
+  ): Promise<SchemaResponse> {
+    const pkgVersion = packageInfo?.pkgVersion;
+
+    if (pkgVersion && this.osqueryCache?.pkgVersion === pkgVersion) {
+      return {
+        version: this.osqueryCache.version,
+        pkgVersion,
+        data: this.osqueryCache.data,
+      };
     }
 
     if (pkgVersion && packageService) {
@@ -64,9 +83,10 @@ export class SchemaService {
       );
 
       if (data) {
-        this.osqueryCache = { version: pkgVersion, data };
+        const version = packageInfo?.metadata?.osquery_version ?? pkgVersion;
+        this.osqueryCache = { pkgVersion, version, data };
 
-        return this.osqueryCache;
+        return { version, pkgVersion, data };
       }
     }
 
@@ -74,12 +94,18 @@ export class SchemaService {
   }
 
   private async getEcsSchema(
-    pkgVersion: string | undefined,
+    packageInfo: PackageInfo | undefined,
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
-  ): Promise<{ version: string; data: EcsField[] }> {
-    if (pkgVersion && this.ecsCache?.version === pkgVersion) {
-      return this.ecsCache;
+  ): Promise<SchemaResponse> {
+    const pkgVersion = packageInfo?.pkgVersion;
+
+    if (pkgVersion && this.ecsCache?.pkgVersion === pkgVersion) {
+      return {
+        version: this.ecsCache.version,
+        pkgVersion,
+        data: this.ecsCache.data,
+      };
     }
 
     if (pkgVersion && packageService) {
@@ -91,27 +117,28 @@ export class SchemaService {
       );
 
       if (data) {
-        this.ecsCache = { version: pkgVersion, data };
+        const version = packageInfo?.metadata?.ecs_version ?? pkgVersion;
+        this.ecsCache = { pkgVersion, version, data };
 
-        return this.ecsCache;
+        return { version, pkgVersion, data };
       }
     }
 
     return this.getFallbackSchema('ecs');
   }
 
-  private async getPackageVersion(
+  private async getPackageInfo(
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
-  ): Promise<string | undefined> {
+  ): Promise<PackageInfo | undefined> {
     if (!packageService) {
       return undefined;
     }
 
     const now = Date.now();
 
-    if (this.installationVersionCache !== null && now < this.installationVersionCache.expiresAt) {
-      return this.installationVersionCache.version;
+    if (this.packageInfoCache !== null && now < this.packageInfoCache.expiresAt) {
+      return this.packageInfoCache.info;
     }
 
     try {
@@ -120,20 +147,68 @@ export class SchemaService {
         savedObjectsClient
       );
 
-      const version = installation?.version;
-      this.installationVersionCache = {
-        version,
+      const pkgVersion = installation?.version;
+
+      if (!pkgVersion) {
+        this.packageInfoCache = {
+          info: undefined,
+          expiresAt: now + OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
+        };
+
+        return undefined;
+      }
+
+      const metadata = await this.fetchSchemaMetadata(
+        pkgVersion,
+        packageService,
+        savedObjectsClient
+      );
+
+      const info: PackageInfo = { pkgVersion, metadata };
+      this.packageInfoCache = {
+        info,
         expiresAt: now + OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
       };
 
-      return version;
+      return info;
     } catch (e) {
       this.logger.debug(`Failed to get osquery_manager installation: ${e.message}`);
 
-      this.installationVersionCache = {
-        version: undefined,
+      this.packageInfoCache = {
+        info: undefined,
         expiresAt: now + OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS,
       };
+
+      return undefined;
+    }
+  }
+
+  private async fetchSchemaMetadata(
+    pkgVersion: string,
+    packageService: PackageService,
+    savedObjectsClient: SavedObjectsClientContract
+  ): Promise<SchemaMetadata | undefined> {
+    const assetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/metadata.json`;
+
+    try {
+      const asset = await packageService.asInternalUser.getPackageAsset(
+        assetPath,
+        savedObjectsClient
+      );
+
+      const rawData = asset?.data_utf8;
+
+      if (!rawData) {
+        this.logger.debug(`Metadata asset ${assetPath} not found — using package version`);
+
+        return undefined;
+      }
+
+      return JSON.parse(rawData) as SchemaMetadata;
+    } catch (error) {
+      this.logger.debug(
+        `Failed to fetch metadata from ${assetPath}: ${error.message} — using package version`
+      );
 
       return undefined;
     }
@@ -177,36 +252,13 @@ export class SchemaService {
     }
   }
 
-  private async getFallbackSchema(
-    schemaType: 'osquery'
-  ): Promise<{ version: string; data: OsqueryTable[] }>;
-  private async getFallbackSchema(
-    schemaType: 'ecs'
-  ): Promise<{ version: string; data: EcsField[] }>;
-  private async getFallbackSchema(
-    schemaType: SchemaType
-  ): Promise<{ version: string; data: OsqueryTable[] | EcsField[] }> {
+  private getFallbackSchema(schemaType: SchemaType): SchemaResponse {
     const version = schemaType === 'osquery' ? FALLBACK_OSQUERY_VERSION : FALLBACK_ECS_VERSION;
-    const fileName = `v${version}.json`;
-    const filePath = resolve(
-      __dirname,
-      '..',
-      '..',
-      'public',
-      'common',
-      'schemas',
-      schemaType,
-      fileName
-    );
+    const data =
+      schemaType === 'osquery'
+        ? (fallbackOsquerySchemaJson as OsqueryTable[])
+        : (fallbackEcsSchemaJson as EcsField[]);
 
-    try {
-      const raw = await readFile(filePath, 'utf-8');
-
-      return { version, data: JSON.parse(raw) };
-    } catch (e) {
-      this.logger.error(`Failed to read fallback schema at ${filePath}: ${e.message}`);
-
-      return { version, data: [] };
-    }
+    return { version, data };
   }
 }

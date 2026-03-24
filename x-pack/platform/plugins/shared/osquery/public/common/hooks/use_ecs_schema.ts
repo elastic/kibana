@@ -7,17 +7,16 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, ECS_SCHEMA_API_ROUTE } from '../../../common/constants';
 import type { EcsSchemaResponse, EcsField } from '../../../common/types/schema';
 import { useKibana } from '../lib/kibana';
+// Static path required by webpack — must match FALLBACK_ECS_VERSION in common/constants.ts
+import fallbackEcsSchemaJson from '../schemas/ecs/v9.2.0.json';
 
-// Lazy-loaded fallback — only imported if the API call fails
 let fallbackEcsSchema: EcsField[] | null = null;
 const getFallbackEcsSchema = (): EcsField[] => {
   if (!fallbackEcsSchema) {
-    // Static path required by webpack — must match FALLBACK_ECS_VERSION in common/constants.ts
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    fallbackEcsSchema = require('../schemas/ecs/v9.2.0.json') as EcsField[];
+    fallbackEcsSchema = fallbackEcsSchemaJson as EcsField[];
   }
 
   return fallbackEcsSchema;
@@ -29,7 +28,7 @@ export const useEcsSchema = () => {
   const query = useQuery<EcsSchemaResponse>(
     ['ecsSchema'],
     () =>
-      http.get<EcsSchemaResponse>('/internal/osquery/schemas/ecs', {
+      http.get<EcsSchemaResponse>(ECS_SCHEMA_API_ROUTE, {
         version: API_VERSIONS.internal.v1,
       }),
     {

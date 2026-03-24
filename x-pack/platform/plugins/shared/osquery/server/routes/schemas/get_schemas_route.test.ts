@@ -10,7 +10,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createGetSchemasRoute } from './get_schemas_route';
 import type { SchemaService } from '../../lib/schema_service';
-import { API_VERSIONS, SCHEMAS_ROUTE } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
 
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
-const ROUTE_PATH = SCHEMAS_ROUTE;
+const ROUTE_PATH = '/internal/osquery/schemas/{schemaType}';
 const ROUTE_VERSION = API_VERSIONS.internal.v1;
 
 const createMockRouter = () => {

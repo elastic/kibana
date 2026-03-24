@@ -10,7 +10,7 @@ import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../lib/kibana';
 import { useOsquerySchema } from './use_osquery_schema';
-import { FALLBACK_OSQUERY_VERSION } from '../../../common/constants';
+import { FALLBACK_OSQUERY_VERSION, OSQUERY_SCHEMA_API_ROUTE } from '../../../common/constants';
 
 jest.mock('../lib/kibana');
 
@@ -85,7 +85,7 @@ describe('useOsquerySchema', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(mockHttp.get).toHaveBeenCalledWith('/internal/osquery/schemas/osquery', {
+      expect(mockHttp.get).toHaveBeenCalledWith(OSQUERY_SCHEMA_API_ROUTE, {
         version: '1',
       });
     });

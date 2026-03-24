@@ -16,12 +16,6 @@ import {
 } from '../../common/constants';
 import type { OsqueryTable, EcsField } from '../../common/types/schema';
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-}));
-
-import { readFile } from 'fs/promises';
-
 const mockOsqueryTables: OsqueryTable[] = [
   {
     name: 'users',
@@ -44,6 +38,11 @@ const mockEcsFields: EcsField[] = [
   },
 ];
 
+const mockMetadata = {
+  osquery_version: '5.21.0',
+  ecs_version: '9.3.0',
+};
+
 function createMockAsset(data: unknown) {
   return {
     package_name: OSQUERY_INTEGRATION_NAME,
@@ -54,6 +53,37 @@ function createMockAsset(data: unknown) {
     data_utf8: JSON.stringify(data),
     data_base64: '',
   };
+}
+
+/**
+ * Sets up getPackageAsset to return schema data and optionally metadata.
+ * Routes calls based on the asset path.
+ */
+function mockPackageAssets(
+  packageService: jest.Mocked<PackageService>,
+  options: {
+    osquery?: unknown;
+    ecs?: unknown;
+    metadata?: unknown;
+  }
+) {
+  (packageService.asInternalUser.getPackageAsset as jest.Mock).mockImplementation(
+    (assetPath: string) => {
+      if (assetPath.endsWith('/schemas/osquery.json') && options.osquery !== undefined) {
+        return Promise.resolve(createMockAsset(options.osquery));
+      }
+
+      if (assetPath.endsWith('/schemas/ecs.json') && options.ecs !== undefined) {
+        return Promise.resolve(createMockAsset(options.ecs));
+      }
+
+      if (assetPath.endsWith('/schemas/metadata.json') && options.metadata !== undefined) {
+        return Promise.resolve(createMockAsset(options.metadata));
+      }
+
+      return Promise.resolve(undefined);
+    }
+  );
 }
 
 describe('SchemaService', () => {
@@ -87,71 +117,115 @@ describe('SchemaService', () => {
   });
 
   describe('getSchema', () => {
-    describe('when schemaType is "osquery"', () => {
-      it('should delegate to getOsquerySchema', async () => {
-        const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
-          version: pkgVersion,
-        });
-
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockOsqueryTables)
-        );
-
-        const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
-
-        expect(result).toEqual({ version: pkgVersion, data: mockOsqueryTables });
+    it('should return osquery schema with metadata version and pkgVersion', async () => {
+      const pkgVersion = '1.25.0';
+      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        version: pkgVersion,
       });
 
-      it('should delegate to getEcsSchema', async () => {
-        const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
-          version: pkgVersion,
-        });
-
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockEcsFields)
-        );
-
-        const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
-
-        expect(result).toEqual({ version: pkgVersion, data: mockEcsFields });
+      mockPackageAssets(packageService, {
+        osquery: mockOsqueryTables,
+        metadata: mockMetadata,
       });
+
+      const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+
+      expect(result).toEqual({
+        version: mockMetadata.osquery_version,
+        pkgVersion,
+        data: mockOsqueryTables,
+      });
+    });
+
+    it('should return ecs schema with metadata version and pkgVersion', async () => {
+      const pkgVersion = '1.25.0';
+      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        version: pkgVersion,
+      });
+
+      mockPackageAssets(packageService, {
+        ecs: mockEcsFields,
+        metadata: mockMetadata,
+      });
+
+      const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
+
+      expect(result).toEqual({
+        version: mockMetadata.ecs_version,
+        pkgVersion,
+        data: mockEcsFields,
+      });
+    });
+
+    it('should fall back to package version when metadata is not available', async () => {
+      const pkgVersion = '1.4.0';
+      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        version: pkgVersion,
+      });
+
+      mockPackageAssets(packageService, {
+        osquery: mockOsqueryTables,
+        // no metadata — simulates older package version without metadata.json
+      });
+
+      const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+
+      expect(result).toEqual({
+        version: pkgVersion,
+        pkgVersion,
+        data: mockOsqueryTables,
+      });
+    });
+
+    it('should not include pkgVersion in fallback response', async () => {
+      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
+
+      const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+
+      expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
+      expect(result.pkgVersion).toBeUndefined();
     });
   });
 
   describe('getOsquerySchema', () => {
     describe('cache hit', () => {
       it('should return cached data when package version has not changed', async () => {
-        const pkgVersion = '1.5.0';
+        const pkgVersion = '1.25.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockOsqueryTables)
-        );
+        mockPackageAssets(packageService, {
+          osquery: mockOsqueryTables,
+          metadata: mockMetadata,
+        });
 
         // First call populates the cache
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
         // Second call should use the cache
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
-        expect(result).toEqual({ version: pkgVersion, data: mockOsqueryTables });
-        // getPackageAsset should only be called once — on the first fetch
-        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          version: mockMetadata.osquery_version,
+          pkgVersion,
+          data: mockOsqueryTables,
+        });
+        // metadata.json fetched during getPackageInfo, osquery.json fetched in getOsquerySchema
+        // Second call uses cache for both
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
         expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       });
 
       it('should call getInstallation once when getSchema is invoked repeatedly within the installation cache TTL', async () => {
-        const pkgVersion = '1.5.0';
+        const pkgVersion = '1.25.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockOsqueryTables)
-        );
+        mockPackageAssets(packageService, {
+          osquery: mockOsqueryTables,
+          metadata: mockMetadata,
+        });
 
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
@@ -162,8 +236,8 @@ describe('SchemaService', () => {
 
     describe('cache miss / version change', () => {
       it('should fetch fresh data when package version changes after installation cache TTL expires', async () => {
-        const firstVersion = '1.4.0';
-        const secondVersion = '1.5.0';
+        const firstVersion = '1.24.0';
+        const secondVersion = '1.25.0';
         const now = Date.now();
         const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
 
@@ -171,17 +245,18 @@ describe('SchemaService', () => {
           version: firstVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValueOnce(
-          createMockAsset(mockOsqueryTables)
-        );
+        mockPackageAssets(packageService, {
+          osquery: mockOsqueryTables,
+          metadata: mockMetadata,
+        });
 
-        // First call with version 1.4.0
+        // First call with version 1.24.0
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         // Advance time past the installation TTL (60s)
         dateNowSpy.mockReturnValue(now + 61_000);
 
-        // Version bumps to 1.5.0
+        // Version bumps to 1.25.0
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValueOnce({
           version: secondVersion,
         });
@@ -196,15 +271,20 @@ describe('SchemaService', () => {
           },
         ];
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValueOnce(
-          createMockAsset(updatedTables)
-        );
+        const updatedMetadata = { osquery_version: '5.22.0', ecs_version: '9.3.0' };
 
-        // Second call with version 1.5.0 should bypass the cache
+        mockPackageAssets(packageService, {
+          osquery: updatedTables,
+          metadata: updatedMetadata,
+        });
+
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
-        expect(result).toEqual({ version: secondVersion, data: updatedTables });
-        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
+        expect(result).toEqual({
+          version: updatedMetadata.osquery_version,
+          pkgVersion: secondVersion,
+          data: updatedTables,
+        });
         expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(2);
 
         dateNowSpy.mockRestore();
@@ -212,107 +292,89 @@ describe('SchemaService', () => {
     });
 
     describe('Fleet asset fetch', () => {
-      it('should return data from Fleet package assets on success', async () => {
-        const pkgVersion = '1.5.0';
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
-          version: pkgVersion,
-        });
-
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockOsqueryTables)
-        );
-
-        const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
-
-        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
-          expectedAssetPath,
-          savedObjectsClient
-        );
-        expect(result).toEqual({ version: pkgVersion, data: mockOsqueryTables });
-      });
-
-      it('should construct the correct asset path from the package version', async () => {
+      it('should construct the correct asset paths', async () => {
         const pkgVersion = '2.0.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockOsqueryTables)
-        );
+        mockPackageAssets(packageService, {
+          osquery: mockOsqueryTables,
+          metadata: mockMetadata,
+        });
 
         await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
-        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
         expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
-          expectedAssetPath,
+          `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/metadata.json`,
+          savedObjectsClient
+        );
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
+          `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`,
           savedObjectsClient
         );
       });
     });
 
     describe('Fleet asset not found (fallback)', () => {
-      it('should fall back to local JSON file when Fleet asset is missing', async () => {
+      it('should fall back to bundled JSON when Fleet asset is missing', async () => {
         const pkgVersion = '1.5.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(undefined);
-
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
+        mockPackageAssets(packageService, {
+          metadata: mockMetadata,
+          // no osquery asset
+        });
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
-        expect(result.data).toEqual(mockOsqueryTables);
-        expect(readFile).toHaveBeenCalledWith(
-          expect.stringContaining(`v${FALLBACK_OSQUERY_VERSION}.json`),
-          'utf-8'
-        );
+        expect(result.data).toBeInstanceOf(Array);
       });
 
-      it('should fall back to local JSON file when Fleet asset has no UTF-8 data', async () => {
+      it('should fall back to bundled JSON when Fleet asset has no UTF-8 data', async () => {
         const pkgVersion = '1.5.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue({
-          ...createMockAsset(mockOsqueryTables),
-          data_utf8: '',
-        });
+        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockImplementation(
+          (assetPath: string) => {
+            if (assetPath.endsWith('/schemas/osquery.json')) {
+              return Promise.resolve({
+                ...createMockAsset(mockOsqueryTables),
+                data_utf8: '',
+              });
+            }
 
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
+            return Promise.resolve(undefined);
+          }
+        );
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
-        expect(result.data).toEqual(mockOsqueryTables);
       });
     });
 
     describe('package not installed (fallback)', () => {
-      it('should fall back to local JSON file when getInstallation returns undefined', async () => {
+      it('should fall back to bundled JSON when getInstallation returns undefined', async () => {
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
-
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
-        expect(result.data).toEqual(mockOsqueryTables);
+        expect(result.data).toBeInstanceOf(Array);
         expect(packageService.asInternalUser.getPackageAsset).not.toHaveBeenCalled();
       });
 
-      it('should fall back to local JSON file when packageService is undefined', async () => {
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
-
+      it('should fall back to bundled JSON when packageService is undefined', async () => {
         const result = await schemaService.getSchema('osquery', undefined, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
-        expect(result.data).toEqual(mockOsqueryTables);
+        expect(result.data).toBeInstanceOf(Array);
       });
     });
 
@@ -321,8 +383,6 @@ describe('SchemaService', () => {
         (packageService.asInternalUser.getInstallation as jest.Mock).mockRejectedValue(
           new Error('Fleet is unavailable')
         );
-
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
 
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
@@ -342,26 +402,9 @@ describe('SchemaService', () => {
           new Error('Elasticsearch connection refused')
         );
 
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockOsqueryTables));
-
         const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
-        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to fetch asset'));
-      });
-
-      it('should return empty data array when fallback file read fails', async () => {
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
-
-        (readFile as jest.Mock).mockRejectedValue(new Error('ENOENT: no such file or directory'));
-
-        const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
-
-        expect(result.version).toBe(FALLBACK_OSQUERY_VERSION);
-        expect(result.data).toEqual([]);
-        expect(logger.error).toHaveBeenCalledWith(
-          expect.stringContaining(`Failed to read fallback schema`)
-        );
       });
     });
   });
@@ -369,111 +412,96 @@ describe('SchemaService', () => {
   describe('getEcsSchema', () => {
     describe('cache hit', () => {
       it('should return cached data when package version has not changed', async () => {
-        const pkgVersion = '1.5.0';
+        const pkgVersion = '1.25.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockEcsFields)
-        );
+        mockPackageAssets(packageService, {
+          ecs: mockEcsFields,
+          metadata: mockMetadata,
+        });
 
-        // First call populates the cache
         await schemaService.getSchema('ecs', packageService, savedObjectsClient);
-        // Second call should hit the cache
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
-        expect(result).toEqual({ version: pkgVersion, data: mockEcsFields });
-        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          version: mockMetadata.ecs_version,
+          pkgVersion,
+          data: mockEcsFields,
+        });
+        // metadata + ecs on first call, cache hit on second
+        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
         expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('Fleet asset fetch', () => {
       it('should return data from Fleet package assets on success', async () => {
-        const pkgVersion = '1.5.0';
+        const pkgVersion = '1.25.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(
-          createMockAsset(mockEcsFields)
-        );
+        mockPackageAssets(packageService, {
+          ecs: mockEcsFields,
+          metadata: mockMetadata,
+        });
 
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
-        const expectedAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-        expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledWith(
-          expectedAssetPath,
-          savedObjectsClient
-        );
-        expect(result).toEqual({ version: pkgVersion, data: mockEcsFields });
+        expect(result).toEqual({
+          version: mockMetadata.ecs_version,
+          pkgVersion,
+          data: mockEcsFields,
+        });
       });
     });
 
     describe('Fleet asset not found (fallback)', () => {
-      it('should fall back to local JSON file when Fleet ECS asset is missing', async () => {
+      it('should fall back to bundled JSON when Fleet ECS asset is missing', async () => {
         const pkgVersion = '1.5.0';
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
           version: pkgVersion,
         });
 
-        (packageService.asInternalUser.getPackageAsset as jest.Mock).mockResolvedValue(undefined);
-
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockEcsFields));
+        mockPackageAssets(packageService, {
+          metadata: mockMetadata,
+          // no ecs asset
+        });
 
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_ECS_VERSION);
-        expect(result.data).toEqual(mockEcsFields);
-        expect(readFile).toHaveBeenCalledWith(
-          expect.stringContaining(`v${FALLBACK_ECS_VERSION}.json`),
-          'utf-8'
-        );
+        expect(result.data).toBeInstanceOf(Array);
       });
     });
 
     describe('package not installed (fallback)', () => {
-      it('should fall back to local JSON file when getInstallation returns undefined', async () => {
+      it('should fall back to bundled JSON when getInstallation returns undefined', async () => {
         (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
-
-        (readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockEcsFields));
 
         const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
         expect(result.version).toBe(FALLBACK_ECS_VERSION);
-        expect(result.data).toEqual(mockEcsFields);
+        expect(result.data).toBeInstanceOf(Array);
         expect(packageService.asInternalUser.getPackageAsset).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('error handling', () => {
-      it('should return empty data array when ECS fallback file read fails', async () => {
-        (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue(undefined);
-
-        (readFile as jest.Mock).mockRejectedValue(new Error('ENOENT: no such file or directory'));
-
-        const result = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
-
-        expect(result.version).toBe(FALLBACK_ECS_VERSION);
-        expect(result.data).toEqual([]);
-        expect(logger.error).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to read fallback schema')
-        );
       });
     });
   });
 
-  describe('independent cache per schema type', () => {
-    it('should maintain separate caches for osquery and ecs schema types', async () => {
-      const pkgVersion = '1.5.0';
+  describe('schema metadata', () => {
+    it('should fetch metadata once during getPackageInfo and reuse for both schemas', async () => {
+      const pkgVersion = '1.25.0';
       (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
-      (packageService.asInternalUser.getPackageAsset as jest.Mock)
-        .mockResolvedValueOnce(createMockAsset(mockOsqueryTables))
-        .mockResolvedValueOnce(createMockAsset(mockEcsFields));
+      mockPackageAssets(packageService, {
+        osquery: mockOsqueryTables,
+        ecs: mockEcsFields,
+        metadata: mockMetadata,
+      });
 
       const osqueryResult = await schemaService.getSchema(
         'osquery',
@@ -482,52 +510,112 @@ describe('SchemaService', () => {
       );
       const ecsResult = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
-      expect(osqueryResult).toEqual({ version: pkgVersion, data: mockOsqueryTables });
-      expect(ecsResult).toEqual({ version: pkgVersion, data: mockEcsFields });
+      expect(osqueryResult.version).toBe('5.21.0');
+      expect(ecsResult.version).toBe('9.3.0');
 
-      // Both schemas were fetched separately
-      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
-
-      const osqueryAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/osquery.json`;
-      const ecsAssetPath = `${OSQUERY_INTEGRATION_NAME}-${pkgVersion}/schemas/ecs.json`;
-
-      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenNthCalledWith(
-        1,
-        osqueryAssetPath,
-        savedObjectsClient
-      );
-      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenNthCalledWith(
-        2,
-        ecsAssetPath,
-        savedObjectsClient
-      );
+      // metadata.json (once) + osquery.json + ecs.json = 3 calls total
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(3);
+      // getInstallation only called once (cached within TTL)
       expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
     });
 
-    it('should serve osquery cache hit without affecting ecs schema fetch', async () => {
+    it('should gracefully fall back to pkgVersion when metadata fetch fails', async () => {
       const pkgVersion = '1.5.0';
       (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
         version: pkgVersion,
       });
 
-      (packageService.asInternalUser.getPackageAsset as jest.Mock)
-        .mockResolvedValueOnce(createMockAsset(mockOsqueryTables))
-        .mockResolvedValueOnce(createMockAsset(mockEcsFields));
+      (packageService.asInternalUser.getPackageAsset as jest.Mock).mockImplementation(
+        (assetPath: string) => {
+          if (assetPath.endsWith('/schemas/metadata.json')) {
+            return Promise.reject(new Error('Not found'));
+          }
+
+          if (assetPath.endsWith('/schemas/osquery.json')) {
+            return Promise.resolve(createMockAsset(mockOsqueryTables));
+          }
+
+          return Promise.resolve(undefined);
+        }
+      );
+
+      const result = await schemaService.getSchema('osquery', packageService, savedObjectsClient);
+
+      expect(result.version).toBe(pkgVersion);
+      expect(result.pkgVersion).toBe(pkgVersion);
+      expect(result.data).toEqual(mockOsqueryTables);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to fetch metadata')
+      );
+    });
+  });
+
+  describe('independent cache per schema type', () => {
+    it('should maintain separate caches for osquery and ecs schema types', async () => {
+      const pkgVersion = '1.25.0';
+      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        version: pkgVersion,
+      });
+
+      mockPackageAssets(packageService, {
+        osquery: mockOsqueryTables,
+        ecs: mockEcsFields,
+        metadata: mockMetadata,
+      });
+
+      const osqueryResult = await schemaService.getSchema(
+        'osquery',
+        packageService,
+        savedObjectsClient
+      );
+      const ecsResult = await schemaService.getSchema('ecs', packageService, savedObjectsClient);
+
+      expect(osqueryResult).toEqual({
+        version: mockMetadata.osquery_version,
+        pkgVersion,
+        data: mockOsqueryTables,
+      });
+      expect(ecsResult).toEqual({
+        version: mockMetadata.ecs_version,
+        pkgVersion,
+        data: mockEcsFields,
+      });
+
+      // metadata.json + osquery.json + ecs.json = 3 calls
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(3);
+      expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should serve osquery cache hit without affecting ecs schema fetch', async () => {
+      const pkgVersion = '1.25.0';
+      (packageService.asInternalUser.getInstallation as jest.Mock).mockResolvedValue({
+        version: pkgVersion,
+      });
+
+      mockPackageAssets(packageService, {
+        osquery: mockOsqueryTables,
+        ecs: mockEcsFields,
+        metadata: mockMetadata,
+      });
 
       // Populate both caches
       await schemaService.getSchema('osquery', packageService, savedObjectsClient);
       await schemaService.getSchema('ecs', packageService, savedObjectsClient);
 
-      // Second call for osquery should hit the cache (no new getPackageAsset calls)
+      // Third call for osquery should hit the cache
       const osqueryCacheResult = await schemaService.getSchema(
         'osquery',
         packageService,
         savedObjectsClient
       );
 
-      expect(osqueryCacheResult).toEqual({ version: pkgVersion, data: mockOsqueryTables });
-      // Still only 2 total calls (both from the initial population)
-      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(2);
+      expect(osqueryCacheResult).toEqual({
+        version: mockMetadata.osquery_version,
+        pkgVersion,
+        data: mockOsqueryTables,
+      });
+      // Still only 3 total calls from the initial population
+      expect(packageService.asInternalUser.getPackageAsset).toHaveBeenCalledTimes(3);
       expect(packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
     });
   });

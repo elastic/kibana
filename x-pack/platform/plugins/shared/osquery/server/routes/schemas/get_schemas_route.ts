@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { API_VERSIONS, SCHEMAS_ROUTE } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { SchemaService } from '../../lib/schema_service';
@@ -23,7 +23,7 @@ export const createGetSchemasRoute = (
   router.versioned
     .get({
       access: 'internal',
-      path: SCHEMAS_ROUTE,
+      path: '/internal/osquery/schemas/{schemaType}',
       security: {
         authz: {
           requiredPrivileges: [`${PLUGIN_ID}-read`],

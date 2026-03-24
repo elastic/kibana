@@ -8,7 +8,11 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { sortBy } from 'lodash';
-import { API_VERSIONS, FALLBACK_OSQUERY_VERSION } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  FALLBACK_OSQUERY_VERSION,
+  OSQUERY_SCHEMA_API_ROUTE,
+} from '../../../common/constants';
 import type { OsquerySchemaResponse, OsqueryTable } from '../../../common/types/schema';
 import { useKibana } from '../lib/kibana';
 // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
@@ -29,7 +33,7 @@ export const useOsquerySchema = () => {
   const query = useQuery<OsquerySchemaResponse>(
     ['osquerySchema'],
     () =>
-      http.get<OsquerySchemaResponse>('/internal/osquery/schemas/osquery', {
+      http.get<OsquerySchemaResponse>(OSQUERY_SCHEMA_API_ROUTE, {
         version: API_VERSIONS.internal.v1,
       }),
     {

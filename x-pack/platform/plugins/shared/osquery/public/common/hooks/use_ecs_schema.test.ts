@@ -10,6 +10,7 @@ import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../lib/kibana';
 import { useEcsSchema } from './use_ecs_schema';
+import { ECS_SCHEMA_API_ROUTE } from '../../../common/constants';
 
 jest.mock('../lib/kibana');
 
@@ -103,7 +104,7 @@ describe('useEcsSchema', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(mockHttp.get).toHaveBeenCalledWith('/internal/osquery/schemas/ecs', {
+      expect(mockHttp.get).toHaveBeenCalledWith(ECS_SCHEMA_API_ROUTE, {
         version: '1',
       });
     });
