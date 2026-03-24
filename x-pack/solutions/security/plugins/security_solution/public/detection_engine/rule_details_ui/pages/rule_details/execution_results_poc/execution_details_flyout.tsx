@@ -13,13 +13,14 @@ import {
   EuiTitle,
   EuiText,
   EuiCodeBlock,
-  EuiStat,
-  EuiDescriptionList,
   EuiAccordion,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
+  EuiCopy,
+  EuiButtonIcon,
   useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
@@ -49,6 +50,12 @@ const AccordionButtonContent: React.FC<{ children: React.ReactNode }> = ({ child
   </EuiTitle>
 );
 
+const FieldLabel: React.FC<{ label: string; tooltip: string }> = ({ label, tooltip }) => (
+  <EuiText size="s">
+    <strong>{label}</strong> <EuiIconTip content={tooltip} type="question" color="subdued" />
+  </EuiText>
+);
+
 interface ExecutionDetailsFlyoutProps {
   item: UnifiedExecutionResult;
   onClose: () => void;
@@ -62,6 +69,8 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'flyoutTitle' });
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'executionSummary' });
   const alertsAccordionId = useGeneratedHtmlId({ prefix: 'alerts' });
+  const sourceEventTimeRangeAccordionId = useGeneratedHtmlId({ prefix: 'sourceEventTimeRange' });
+  const indicesAccordionId = useGeneratedHtmlId({ prefix: 'indices' });
   const metricsAccordionId = useGeneratedHtmlId({ prefix: 'executionMetrics' });
   const durationAccordionId = useGeneratedHtmlId({ prefix: 'durationBreakdown' });
 
@@ -76,37 +85,28 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
     item.metrics.total_indexing_duration_ms != null ||
     item.metrics.index_duration_ms != null;
 
-  const additionalMetrics = [
-    ...(item.metrics.frozen_indices_queried_count != null
-      ? [
-          {
-            title: i18n.FLYOUT_FROZEN_INDICES_QUERIED,
-            description: String(item.metrics.frozen_indices_queried_count),
-          },
-        ]
-      : []),
-    ...(item.backfill
-      ? [
-          {
-            title: i18n.FLYOUT_SOURCE_EVENT_TIME_RANGE,
-            description: (
-              <>
-                <FormattedDate value={item.backfill.from} fieldName="from" />
-                {' — '}
-                <FormattedDate value={item.backfill.to} fieldName="to" />
-              </>
-            ),
-          },
-        ]
-      : []),
-  ];
-
   return (
     <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" id={flyoutTitleId}>
-          <h2>{i18n.FLYOUT_TITLE(item.execution_uuid.slice(0, 8))}</h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" id={flyoutTitleId}>
+              <h2>{i18n.FLYOUT_TITLE(item.execution_uuid.slice(0, 8))}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={item.execution_uuid} beforeMessage={i18n.FLYOUT_COPY_EXECUTION_ID}>
+              {(copy) => (
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copy"
+                  color="text"
+                  aria-label={i18n.FLYOUT_COPY_EXECUTION_ID}
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiText color="subdued" size="s">
           <FormattedDate value={item.execution_start} fieldName="execution_start" />
         </EuiText>
@@ -157,6 +157,43 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
           </>
         )}
 
+        {/* --- Source event time range --- */}
+        {item.backfill && (
+          <>
+            <EuiAccordion
+              id={sourceEventTimeRangeAccordionId}
+              buttonContent={
+                <AccordionButtonContent>
+                  {i18n.FLYOUT_ACCORDION_SOURCE_EVENT_TIME_RANGE}
+                </AccordionButtonContent>
+              }
+              initialIsOpen
+            >
+              <EuiSpacer size="s" />
+              <EuiPanel hasBorder paddingSize="m">
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <FieldLabel label={i18n.FLYOUT_FROM} tooltip={i18n.FLYOUT_FROM_TOOLTIP} />
+                    <EuiSpacer size="xs" />
+                    <EuiText size="s">
+                      <FormattedDate value={item.backfill.from} fieldName="from" />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} css={separatorCss} />
+                  <EuiFlexItem>
+                    <FieldLabel label={i18n.FLYOUT_TO} tooltip={i18n.FLYOUT_TO_TOOLTIP} />
+                    <EuiSpacer size="xs" />
+                    <EuiText size="s">
+                      <FormattedDate value={item.backfill.to} fieldName="to" />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiAccordion>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {/* --- Alerts --- */}
         <EuiAccordion
           id={alertsAccordionId}
@@ -167,31 +204,56 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
         >
           <EuiSpacer size="s" />
           <EuiPanel hasBorder paddingSize="m">
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiStat
-                  title={alertCount}
-                  description={i18n.FLYOUT_ALERTS_LABEL}
-                  titleSize="l"
-                  reverse
+                <FieldLabel
+                  label={i18n.COLUMN_ALERTS_CREATED}
+                  tooltip={i18n.COLUMN_ALERTS_CREATED_TOOLTIP}
                 />
+                <EuiSpacer size="xs" />
+                <EuiText size="s">{alertCount}</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} css={{ alignSelf: 'stretch', ...separatorCss }} />
+              <EuiFlexItem grow={false} css={separatorCss} />
               <EuiFlexItem>
-                {item.metrics.matched_indices_count != null && (
-                  <EuiText size="s">
-                    <strong>{item.metrics.matched_indices_count}</strong>{' '}
-                    {i18n.FLYOUT_MATCHED_INDICES}
-                  </EuiText>
-                )}
-                {candidateCount != null && (
-                  <EuiText size="s">
-                    <strong>{candidateCount}</strong> {i18n.FLYOUT_EVENTS_MATCHED}
-                  </EuiText>
-                )}
-                <EuiText size="s">
-                  <strong>{alertCount}</strong> {i18n.FLYOUT_CANDIDATE_ALERTS}
-                </EuiText>
+                <FieldLabel
+                  label={i18n.FLYOUT_CANDIDATE_ALERTS}
+                  tooltip={i18n.FLYOUT_CANDIDATE_ALERTS_TOOLTIP}
+                />
+                <EuiSpacer size="xs" />
+                <EuiText size="s">{candidateCount ?? '—'}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiAccordion>
+        <EuiSpacer size="m" />
+
+        {/* --- Indices --- */}
+        <EuiAccordion
+          id={indicesAccordionId}
+          buttonContent={
+            <AccordionButtonContent>{i18n.FLYOUT_ACCORDION_INDICES}</AccordionButtonContent>
+          }
+          initialIsOpen
+        >
+          <EuiSpacer size="s" />
+          <EuiPanel hasBorder paddingSize="m">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <FieldLabel
+                  label={i18n.FLYOUT_MATCHED_INDICES}
+                  tooltip={i18n.FLYOUT_MATCHED_INDICES_TOOLTIP}
+                />
+                <EuiSpacer size="xs" />
+                <EuiText size="s">{item.metrics.matched_indices_count ?? '—'}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={separatorCss} />
+              <EuiFlexItem>
+                <FieldLabel
+                  label={i18n.FLYOUT_FROZEN_INDICES_QUERIED}
+                  tooltip={i18n.FLYOUT_FROZEN_INDICES_QUERIED_TOOLTIP}
+                />
+                <EuiSpacer size="xs" />
+                <EuiText size="s">{item.metrics.frozen_indices_queried_count ?? '—'}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -212,31 +274,27 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
           <EuiPanel hasBorder paddingSize="m">
             <EuiFlexGroup wrap>
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{i18n.FLYOUT_EXECUTION_TIME}</strong>
-                </EuiText>
+                <FieldLabel
+                  label={i18n.FLYOUT_GAP_DURATION}
+                  tooltip={i18n.FLYOUT_GAP_DURATION_TOOLTIP}
+                />
                 <EuiSpacer size="xs" />
                 <EuiText size="s">
-                  <RuleDurationFormat duration={item.execution_duration_ms} />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={separatorCss} />
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{i18n.FLYOUT_GAP_DETECTED}</strong>
-                </EuiText>
-                <EuiSpacer size="xs" />
-                <EuiText size="s">
-                  {gapSeconds != null && gapSeconds > 0 ? `${gapSeconds}s` : '—'}
+                  {gapSeconds != null && gapSeconds > 0 ? (
+                    <RuleDurationFormat duration={gapSeconds * 1000} />
+                  ) : (
+                    '—'
+                  )}
                 </EuiText>
               </EuiFlexItem>
               {item.schedule_delay_ms != null && (
                 <>
                   <EuiFlexItem grow={false} css={separatorCss} />
                   <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{i18n.FLYOUT_SCHEDULING_DELAY}</strong>
-                    </EuiText>
+                    <FieldLabel
+                      label={i18n.FLYOUT_SCHEDULING_DELAY}
+                      tooltip={i18n.FLYOUT_SCHEDULING_DELAY_TOOLTIP}
+                    />
                     <EuiSpacer size="xs" />
                     <EuiText size="s">
                       <RuleDurationFormat duration={item.schedule_delay_ms} />
@@ -244,15 +302,16 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
                   </EuiFlexItem>
                 </>
               )}
+              <EuiFlexItem grow={false} css={separatorCss} />
+              <EuiFlexItem>
+                <FieldLabel label={i18n.COLUMN_DURATION} tooltip={i18n.COLUMN_DURATION_TOOLTIP} />
+                <EuiSpacer size="xs" />
+                <EuiText size="s">
+                  <RuleDurationFormat duration={item.execution_duration_ms} />
+                </EuiText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-
-          {additionalMetrics.length > 0 && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList listItems={additionalMetrics} type="column" compressed />
-            </>
-          )}
         </EuiAccordion>
 
         {/* --- Duration Breakdown --- */}
@@ -273,9 +332,10 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
                 <EuiFlexGroup>
                   {item.metrics.total_search_duration_ms != null && (
                     <EuiFlexItem>
-                      <EuiText size="s">
-                        <strong>{i18n.FLYOUT_SEARCH_DURATION}</strong>
-                      </EuiText>
+                      <FieldLabel
+                        label={i18n.FLYOUT_SEARCH_DURATION}
+                        tooltip={i18n.FLYOUT_SEARCH_DURATION_TOOLTIP}
+                      />
                       <EuiSpacer size="xs" />
                       <EuiText size="s">
                         <RuleDurationFormat duration={item.metrics.total_search_duration_ms} />
@@ -286,9 +346,10 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
                     <>
                       <EuiFlexItem grow={false} css={separatorCss} />
                       <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong>{i18n.FLYOUT_INDEX_DURATION}</strong>
-                        </EuiText>
+                        <FieldLabel
+                          label={i18n.FLYOUT_INDEX_DURATION}
+                          tooltip={i18n.FLYOUT_INDEX_DURATION_TOOLTIP}
+                        />
                         <EuiSpacer size="xs" />
                         <EuiText size="s">
                           <RuleDurationFormat duration={item.metrics.total_indexing_duration_ms} />
@@ -300,9 +361,10 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
                     <>
                       <EuiFlexItem grow={false} css={separatorCss} />
                       <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong>{i18n.FLYOUT_ALERT_INDEX_DURATION}</strong>
-                        </EuiText>
+                        <FieldLabel
+                          label={i18n.FLYOUT_ALERT_INDEX_DURATION}
+                          tooltip={i18n.FLYOUT_ALERT_INDEX_DURATION_TOOLTIP}
+                        />
                         <EuiSpacer size="xs" />
                         <EuiText size="s">
                           <RuleDurationFormat duration={item.metrics.index_duration_ms} />

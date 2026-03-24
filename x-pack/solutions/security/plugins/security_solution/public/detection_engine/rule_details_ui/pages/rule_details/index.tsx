@@ -347,6 +347,12 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+    const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled(
+      'storeGapsInEventLogEnabled'
+    );
+    const newExecutionResultsTableEnabled = useIsExperimentalFeatureEnabled(
+      'newExecutionResultsTableEnabled'
+    );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
     const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
@@ -929,23 +935,22 @@ export const RuleDetailsPage = connector(
                       path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
                     >
                       <>
-                        <ExecutionLogTable
-                          ruleId={ruleId}
-                          selectAlertsTab={navigateToAlertsTab}
-                          analytics={analytics}
-                          i18n={i18nStart}
-                          theme={theme}
-                        />
+                        {newExecutionResultsTableEnabled ? (
+                          <ExecutionResultsPocTable ruleId={ruleId} />
+                        ) : (
+                          <ExecutionLogTable
+                            ruleId={ruleId}
+                            selectAlertsTab={navigateToAlertsTab}
+                            analytics={analytics}
+                            i18n={i18nStart}
+                            theme={theme}
+                          />
+                        )}
                         <EuiSpacer size="xl" />
                         <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
                         <EuiSpacer size="xl" />
                         <RuleBackfillsInfo ruleId={ruleId} />
                       </>
-                    </Route>
-                    <Route
-                      path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResultsPoc})`}
-                    >
-                      <ExecutionResultsPocTable ruleId={ruleId} />
                     </Route>
                     <Route
                       path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}
