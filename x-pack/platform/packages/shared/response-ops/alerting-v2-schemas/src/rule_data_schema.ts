@@ -277,3 +277,31 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
+
+/** Paginated list response schema. */
+export const findRulesResponseSchema = z
+  .object({
+    items: z.array(ruleResponseSchema).describe('The list of rules.'),
+    total: z.number().describe('The total number of rules matching the query.'),
+    page: z.number().describe('The current page number.'),
+    perPage: z.number().describe('The number of rules per page.'),
+  })
+  .describe('Paginated list of rules.');
+
+/** Bulk operation response schema. */
+export const bulkOperationResponseSchema = z
+  .object({
+    rules: z.array(ruleResponseSchema).describe('The rules that were successfully processed.'),
+    errors: z
+      .array(
+        z.object({
+          id: z.string().describe('The identifier of the rule that failed.'),
+          error: z.object({
+            message: z.string().describe('The error message.'),
+            statusCode: z.number().describe('The HTTP status code.'),
+          }),
+        })
+      )
+      .describe('Errors encountered during the bulk operation.'),
+  })
+  .describe('Result of a bulk rule operation.');

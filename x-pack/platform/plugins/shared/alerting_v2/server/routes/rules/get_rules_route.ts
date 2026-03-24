@@ -11,7 +11,8 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
+import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -54,7 +55,16 @@ export class GetRulesRoute {
     request: {
       query: getRulesQuerySchema,
     },
-  } as const;
+    response: {
+      200: {
+        body: (() => findRulesResponseSchema) as unknown as LazyValidator,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)

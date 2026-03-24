@@ -14,9 +14,9 @@ import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -52,7 +52,16 @@ export class CreateRuleRoute implements RouteHandler {
       body: buildRouteValidationWithZod(createRuleDataSchema),
       params: createRuleParamsSchema,
     },
-  } as const;
+    response: {
+      200: {
+        body: (() => ruleResponseSchema) as unknown as LazyValidator,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   constructor(
     @inject(Logger) private readonly logger: KibanaLogger,

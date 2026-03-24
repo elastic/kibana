@@ -9,9 +9,9 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { bulkOperationParamsSchema } from '@kbn/alerting-v2-schemas';
+import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
@@ -36,7 +36,16 @@ export class BulkEnableRulesRoute {
     request: {
       body: buildRouteValidationWithZod(bulkOperationParamsSchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: (() => bulkOperationResponseSchema) as unknown as LazyValidator,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)

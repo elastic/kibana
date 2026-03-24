@@ -35,7 +35,15 @@ export class DeleteRuleRoute {
     request: {
       params: ruleIdParamsSchema,
     },
-  } as const;
+    response: {
+      204: {
+        description: 'Indicates a successful call.',
+      },
+      404: {
+        description: 'Indicates a rule with the given ID does not exist.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)

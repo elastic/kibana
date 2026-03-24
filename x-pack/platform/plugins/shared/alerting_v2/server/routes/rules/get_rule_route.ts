@@ -10,7 +10,8 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
+import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -35,7 +36,16 @@ export class GetRuleRoute {
     request: {
       params: ruleIdParamsSchema,
     },
-  } as const;
+    response: {
+      200: {
+        body: (() => ruleResponseSchema) as unknown as LazyValidator,
+        description: 'Indicates a successful call.',
+      },
+      404: {
+        description: 'Indicates a rule with the given ID does not exist.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)

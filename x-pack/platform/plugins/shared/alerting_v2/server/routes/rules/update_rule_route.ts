@@ -10,8 +10,9 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { LazyValidator, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
 import { RulesClient } from '../../lib/rules_client/rules_client';
@@ -38,7 +39,19 @@ export class UpdateRuleRoute {
       body: buildRouteValidationWithZod(updateRuleDataSchema),
       params: ruleIdParamsSchema,
     },
-  } as const;
+    response: {
+      200: {
+        body: (() => ruleResponseSchema) as unknown as LazyValidator,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+      404: {
+        description: 'Indicates a rule with the given ID does not exist.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)
