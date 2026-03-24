@@ -303,7 +303,7 @@ groups:
 
       - setting: elasticsearch.customHeaders
         description: |
-          Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration.
+          Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestheaderswhitelist) configuration.
         datatype: string
         default: "{}"
         applies_to:
@@ -337,7 +337,7 @@ groups:
       - setting: elasticsearch.pingTimeout
         id: elasticsearch-pingtimeout
         description: |
-          Time in milliseconds to wait for {{es}} to respond to pings. Defaults to the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requestTimeout) setting.
+          Time in milliseconds to wait for {{es}} to respond to pings. Defaults to the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requesttimeout) setting.
         datatype: int
         applies_to:
           stack: ga
@@ -505,7 +505,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
-        warning: "When {{es}} uses certificates to authenticate end users with a PKI realm and [`elasticsearch.ssl.alwaysPresentCertificate`](#elasticsearch-ssl-alwaysPresentCertificate) is `true`, proxied requests may be executed as the identity that is tied to the {{kib}} server."
+        warning: "When {{es}} uses certificates to authenticate end users with a PKI realm and [`elasticsearch.ssl.alwaysPresentCertificate`](#elasticsearch-ssl-alwayspresentcertificate) is `true`, proxied requests may be executed as the identity that is tied to the {{kib}} server."
 
       - setting: elasticsearch.ssl.certificate
         id: elasticsearch-ssl-cert-key
@@ -554,7 +554,7 @@ groups:
         description: |
           Path to a PKCS#12 keystore that contains an X.509 client certificate and it's corresponding private key. These are used by {{kib}} to authenticate itself when making outbound SSL/TLS connections to {{es}}. For this setting, you must also set the `xpack.security.http.ssl.client_authentication` setting in {{es}} to `"required"` or `"optional"` to request a client certificate from {{kib}}.
 
-          If the keystore contains any additional certificates, they are used as a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}. In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateAuthorities) and/or [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path).
+          If the keystore contains any additional certificates, they are used as a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}. In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateauthorities) and/or [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -576,7 +576,7 @@ groups:
         description: |
           Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates, which make up a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}.
 
-          In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateAuthorities) and/or [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path).
+          In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateauthorities) and/or [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path).
         datatype: string
         applies_to:
           stack: ga

@@ -9,14 +9,14 @@ Following is a schema for all available properties in the docs settings source f
 ```
 product: REQUIRED e.g. Elasticsearch, Kibana, Enterprise Search
 collection: REQUIRED e.g. Alerting and action settings in Kibana
-id: REQUIRED The ID used for links to this page, e.g., general-alert-action-settings
+id: REQUIRED The ID used for links to this page, e.g., general-alert-action-settings (must be all lowercase)
 page_description: |
   OPTIONAL
   Multiline string. Can include tables, lists, code examples, etc.
 
 groups:
   - group: REQUIRED e.g. Preconfigured connector settings
-    id: REQUIRED The ID used for documentation links, e.g., general-alert-action-settings
+    id: REQUIRED The ID used for documentation links, e.g., general-alert-action-settings (must be all lowercase)
     # description: |
       OPTIONAL
       Multiline string. Can include tables, lists, code examples, etc.
@@ -27,7 +27,7 @@ groups:
 
     settings:
       - setting: REQUIRED e.g. xpack.encryptedSavedObjects.encryptionKey
-        # id: OPTIONAL ID used for documentation links, e.g., xpack-encryptedsavedobjects-encryptionkey
+        # id: OPTIONAL ID used for documentation links, e.g., xpack-encryptedsavedobjects-encryptionkey (must be all lowercase)
         description: |
           REQUIRED
           Multiline string. Can include tables, lists, code examples, etc.

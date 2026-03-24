@@ -123,7 +123,7 @@ groups:
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
         id: action-config-custom-host-verification-mode
         description: |
-          Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode). Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
+          Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationmode). Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
         datatype: enum
         default: full
         options:
@@ -356,7 +356,7 @@ groups:
 
           Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 
-          [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode)
+          [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationmode)
         datatype: enum
         default: full
         options:
@@ -373,7 +373,7 @@ groups:
         description: |
           Controls the verification for the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 
-          [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode)
+          [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationmode)
 
           This setting can be overridden for specific URLs by using the setting `xpack.actions.customHostSettings[n].ssl.verificationMode` (described above) to a different value.
         datatype: enum
