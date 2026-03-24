@@ -7,7 +7,7 @@
 
 import { cli, DEFAULTS } from '@kbn/data-forge';
 import { test } from '@kbn/scout';
-import type { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/kbn-client';
 
 export interface SloDataFixture {
   generateSloData: () => Promise<void>;
