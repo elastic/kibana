@@ -315,7 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
         ] as unknown as EventAnnotationGroupSavedObjectAttributes[]; // (coerce the types because these are intentionally malformed)
 
         const expectedMessages = [
-          'Invalid data. [extraProp]: definition for this key is missing',
+          "Invalid data. [extraProp]: Additional properties are not allowed ('extraProp' was unexpected)",
           'Invalid data. [title]: expected value of type [string] but got [undefined]',
           'Invalid data. [ignoreGlobalFilters]: expected value of type [boolean] but got [string]',
         ];
@@ -423,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
         ] as unknown as EventAnnotationGroupSavedObjectAttributes[]; // (coerce the types because these are intentionally malformed)
 
         const expectedMessages = [
-          'Invalid data. [extraProp]: definition for this key is missing',
+          "Invalid data. [extraProp]: Additional properties are not allowed ('extraProp' was unexpected)",
           'Invalid data. [title]: expected value of type [string] but got [undefined]',
           'Invalid data. [ignoreGlobalFilters]: expected value of type [boolean] but got [string]',
         ];
