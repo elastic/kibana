@@ -28,6 +28,7 @@ import { ListNotificationPoliciesRoute } from '../routes/notification_policies/l
 import { SnoozeNotificationPolicyRoute } from '../routes/notification_policies/snooze_notification_policy_route';
 import { UnsnoozeNotificationPolicyRoute } from '../routes/notification_policies/unsnooze_notification_policy_route';
 import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
+import { UpdateNotificationPolicyApiKeyRoute } from '../routes/notification_policies/update_notification_policy_api_key_route';
 import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
@@ -46,6 +47,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateNotificationPolicyRoute);
   bind(Route).toConstantValue(GetNotificationPolicyRoute);
   bind(Route).toConstantValue(UpdateNotificationPolicyRoute);
+  bind(Route).toConstantValue(UpdateNotificationPolicyApiKeyRoute);
   bind(Route).toConstantValue(DeleteNotificationPolicyRoute);
   bind(Route).toConstantValue(ListNotificationPoliciesRoute);
   bind(Route).toConstantValue(EnableNotificationPolicyRoute);

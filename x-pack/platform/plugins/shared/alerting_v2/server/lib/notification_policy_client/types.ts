@@ -27,6 +27,10 @@ export interface SnoozeNotificationPolicyParams {
   snoozedUntil: string;
 }
 
+export interface UpdateNotificationPolicyApiKeyParams {
+  id: string;
+}
+
 export interface BulkActionNotificationPoliciesParams {
   actions: NotificationPolicyBulkAction[];
 }

@@ -46,6 +46,9 @@ describe('NotificationPolicyClient', () => {
     apiKeyService = createMockApiKeyService();
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
+      if (id === 'policy-id-update-key-1') return { apiKey: 'old-api-key', createdByUser: false };
+      if (id === 'policy-id-update-key-user')
+        return { apiKey: 'user-created-key', createdByUser: true };
       if (id === 'policy-id-del-1') return { apiKey: 'some-key', createdByUser: false };
       return null;
     });
@@ -1129,6 +1132,145 @@ describe('NotificationPolicyClient', () => {
           data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
           options: { id: 'policy-id-conflict', version: 'WzEsMV0=' },
         })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
+    });
+  });
+
+  describe('updateNotificationPolicyApiKey', () => {
+    const existingAttributes: NotificationPolicySavedObjectAttributes = {
+      name: 'existing-policy',
+      description: 'existing-policy description',
+      enabled: true,
+      destinations: [{ type: 'workflow', id: 'existing-workflow' }],
+      auth: {
+        apiKey: 'old-api-key',
+        owner: 'old-user',
+        createdByUser: false,
+      },
+      createdBy: 'creator_profile_uid',
+      createdByUsername: 'creator',
+      createdAt: '2024-12-01T00:00:00.000Z',
+      updatedBy: 'updater_profile_uid',
+      updatedByUsername: 'updater',
+      updatedAt: '2024-12-01T00:00:00.000Z',
+    };
+
+    it('creates a new API key, updates only auth and updatedBy fields, and invalidates the old key', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-key-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+
+      await client.updateNotificationPolicyApiKey({ id: 'policy-id-update-key-1' });
+
+      expect(apiKeyService.create).toHaveBeenCalledWith('Notification Policy: existing-policy');
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-key-1',
+        expect.objectContaining({
+          auth: {
+            apiKey: 'encoded-es-api-key',
+            owner: 'test-user',
+            createdByUser: false,
+          },
+          updatedBy: 'elastic_profile_uid',
+          updatedByUsername: 'elastic',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        undefined
+      );
+
+      // Should not include non-auth attributes in the update
+      const updateCallAttrs = mockSavedObjectsClient.update.mock.calls[0][2];
+      expect(updateCallAttrs).not.toHaveProperty('name');
+      expect(updateCallAttrs).not.toHaveProperty('description');
+      expect(updateCallAttrs).not.toHaveProperty('destinations');
+      expect(updateCallAttrs).not.toHaveProperty('enabled');
+
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
+    });
+
+    it('does not invalidate old API key when createdByUser is true', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-key-user',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          ...existingAttributes,
+          auth: {
+            apiKey: 'user-created-key',
+            owner: 'old-user',
+            createdByUser: true,
+          },
+        },
+      });
+
+      await client.updateNotificationPolicyApiKey({ id: 'policy-id-update-key-user' });
+
+      expect(apiKeyService.create).toHaveBeenCalled();
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 when notification policy is not found', async () => {
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-not-found'
+        )
+      );
+
+      await expect(
+        client.updateNotificationPolicyApiKey({ id: 'policy-id-not-found' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      expect(apiKeyService.create).not.toHaveBeenCalled();
+    });
+
+    it('invalidates new API key and throws when update fails', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-key-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('storage error'));
+
+      await expect(
+        client.updateNotificationPolicyApiKey({ id: 'policy-id-update-key-1' })
+      ).rejects.toThrow('storage error');
+
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
+    });
+
+    it('throws 409 conflict when saved object version conflict occurs', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-key-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-update-key-1'
+        )
+      );
+
+      await expect(
+        client.updateNotificationPolicyApiKey({ id: 'policy-id-update-key-1' })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
       });

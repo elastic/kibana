@@ -51,12 +51,18 @@ const bulkDeleteActionSchema = z.object({
   action: z.literal('delete'),
 });
 
+const bulkUpdateApiKeyActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('update_api_key'),
+});
+
 export const notificationPolicyBulkActionSchema = z.discriminatedUnion('action', [
   bulkEnableActionSchema,
   bulkDisableActionSchema,
   bulkSnoozeActionSchema,
   bulkUnsnoozeActionSchema,
   bulkDeleteActionSchema,
+  bulkUpdateApiKeyActionSchema,
 ]);
 
 export type NotificationPolicyBulkAction = z.infer<typeof notificationPolicyBulkActionSchema>;

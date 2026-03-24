@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 import { BulkDeleteConfirmationModal } from './bulk_delete_confirmation_modal';
 import { BulkSnoozeModal } from './bulk_snooze_modal';
 
-type BulkAction = 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze';
+type BulkAction = 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key';
 
 interface NotificationPoliciesBulkActionsProps {
   selectedPolicies: NotificationPolicyResponse[];
@@ -84,6 +84,14 @@ export const NotificationPoliciesBulkActions = ({
           }),
           icon: 'bell',
           onClick: () => handleAction('unsnooze'),
+          disabled: isLoading,
+        },
+        {
+          name: i18n.translate('xpack.alertingV2.notificationPolicy.bulkAction.updateApiKey', {
+            defaultMessage: 'Update API keys',
+          }),
+          icon: 'lock',
+          onClick: () => handleAction('update_api_key'),
           disabled: isLoading,
         },
         {

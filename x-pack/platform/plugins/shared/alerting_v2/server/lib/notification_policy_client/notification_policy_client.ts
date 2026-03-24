@@ -40,6 +40,7 @@ import type {
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
   SnoozeNotificationPolicyParams,
+  UpdateNotificationPolicyApiKeyParams,
   UpdateNotificationPolicyParams,
 } from './types';
 import {
@@ -50,7 +51,7 @@ import {
 } from './utils';
 
 const resolveActionAttrs = (
-  action: Exclude<NotificationPolicyBulkAction, { action: 'delete' }>
+  action: Exclude<NotificationPolicyBulkAction, { action: 'delete' } | { action: 'update_api_key' }>
 ): Partial<NotificationPolicySavedObjectAttributes> => {
   switch (action.action) {
     case 'enable':
@@ -297,10 +298,58 @@ export class NotificationPolicyClient {
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
+  public async updateNotificationPolicyApiKey({
+    id,
+  }: UpdateNotificationPolicyApiKeyParams): Promise<void> {
+    let existingPolicy: NotificationPolicySavedObjectAttributes;
+    try {
+      const doc = await this.notificationPolicySavedObjectService.get(id);
+      existingPolicy = doc.attributes;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Notification policy with id "${id}" not found`);
+      }
+      throw e;
+    }
+
+    const oldAuth = await this.getDecryptedAuth(id);
+    const userProfile = await this.getUserProfile();
+    const now = new Date().toISOString();
+    const apiKeyAttrs = await this.apiKeyService.create(
+      `Notification Policy: ${existingPolicy.name}`
+    );
+
+    try {
+      await this.notificationPolicySavedObjectService.update({
+        id,
+        attrs: {
+          auth: apiKeyAttrs,
+          updatedBy: userProfile.uid,
+          updatedByUsername: userProfile.username,
+          updatedAt: now,
+        },
+      });
+    } catch (e) {
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(
+          `Notification policy with id "${id}" has already been updated by another user`
+        );
+      }
+      throw e;
+    }
+
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+  }
+
   public async bulkActionNotificationPolicies({
     actions,
   }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
-    const [deleteActions, updateActions] = partition(actions, (a) => a.action === 'delete');
+    const [deleteActions, remainingActions] = partition(actions, (a) => a.action === 'delete');
+    const [updateApiKeyActions, updateActions] = partition(
+      remainingActions,
+      (a) => a.action === 'update_api_key'
+    );
 
     const errors: Array<{ id: string; message: string }> = [];
     let processed = 0;
@@ -329,6 +378,15 @@ export class NotificationPolicyClient {
         } else {
           processed++;
         }
+      }
+    }
+
+    for (const action of updateApiKeyActions) {
+      try {
+        await this.updateNotificationPolicyApiKey({ id: action.id });
+        processed++;
+      } catch (e) {
+        errors.push({ id: action.id, message: e.message });
       }
     }
 

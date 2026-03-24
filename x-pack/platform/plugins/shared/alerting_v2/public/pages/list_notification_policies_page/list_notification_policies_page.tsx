@@ -43,6 +43,7 @@ import { useEnableNotificationPolicy } from '../../hooks/use_enable_notification
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
 import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
 import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
+import { useUpdateNotificationPolicyApiKey } from '../../hooks/use_update_notification_policy_api_key';
 import { NotificationPoliciesBulkActions } from './components/notification_policies_bulk_actions';
 import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
 import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
@@ -96,6 +97,8 @@ export const ListNotificationPoliciesPage = () => {
     isLoading: isUnsnoozing,
     variables: unsnoozeVariables,
   } = useUnsnoozeNotificationPolicy();
+
+  const { mutate: updateApiKey } = useUpdateNotificationPolicyApiKey();
 
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } =
     useBulkActionNotificationPolicies();
@@ -172,7 +175,7 @@ export const ListNotificationPoliciesPage = () => {
   const hasSelection = selectedPolicies.length > 0;
 
   const handleBulkAction = (
-    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze',
+    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key',
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((policy) => policy.id);
@@ -187,6 +190,8 @@ export const ListNotificationPoliciesPage = () => {
       actions = ids.map((id) => ({ id, action: 'unsnooze' }));
     } else if (action === 'delete') {
       actions = ids.map((id) => ({ id, action: 'delete' }));
+    } else if (action === 'update_api_key') {
+      actions = ids.map((id) => ({ id, action: 'update_api_key' }));
     } else {
       throw new Error(`Invalid action: ${action}`);
     }
@@ -322,6 +327,7 @@ export const ListNotificationPoliciesPage = () => {
           onDisable={(id) => disablePolicy(id)}
           onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
           onCancelSnooze={(id) => unsnoozePolicy(id)}
+          onUpdateApiKey={(id) => updateApiKey(id)}
           isStateLoading={
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
