@@ -84,7 +84,6 @@ export function convertLegacyFieldsToJsonSchema(
   return {
     properties,
     ...(required.length > 0 ? { required } : {}),
-    additionalProperties: false,
   };
 }
 

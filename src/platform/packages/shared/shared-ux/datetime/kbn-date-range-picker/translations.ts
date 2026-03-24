@@ -73,6 +73,10 @@ export const calendarTexts = {
   todayButton: i18n.translate('sharedUXPackages.dateRangePicker.calendar.todayButton', {
     defaultMessage: 'Today',
   }),
+  scrollerAriaLabel: i18n.translate('sharedUXPackages.dateRangePicker.calendar.scrollerAriaLabel', {
+    defaultMessage:
+      'Calendar, use arrow keys to navigate days. Press Page Up/Down to navigate months.',
+  }),
 };
 
 export const calendarPanelTexts = {
@@ -85,6 +89,47 @@ export const calendarPanelTexts = {
   selectEndDateTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip',
     { defaultMessage: 'Select an end date to apply' }
+  ),
+};
+
+export const documentationPanelTexts = {
+  heading: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.heading', {
+    defaultMessage: 'Documentation',
+  }),
+  intro: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.intro', {
+    defaultMessage:
+      'Type `to` to split start and end dates, otherwise the input will consider it just a one day range.',
+  }),
+  absoluteHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.documentationPanel.absoluteHeading',
+    { defaultMessage: 'Absolute time formats' }
+  ),
+  absoluteBody: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.absoluteBody', {
+    defaultMessage:
+      'Use formats like `Dec 1, 2025, 00:00` (default), `2025-12-01` (ISO 8601), `Fri, 1 Dec 2025 00:00:00 GMT` (RFC 2822), `1760665383890` (unix timestamp), `1st of January, 2025` or just `Jan 1st, 2025`.',
+  }),
+  relativeHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.documentationPanel.relativeHeading',
+    { defaultMessage: 'Relative time' }
+  ),
+  relativeBody: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.relativeBody', {
+    defaultMessage:
+      'Type `-5m`, `past 5 min`, `last 5 minutes` or any combination with words `last`, `next`, `ago`, `from now` etc.',
+  }),
+  combinationsHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.documentationPanel.combinationsHeading',
+    { defaultMessage: 'Custom combinations' }
+  ),
+  combinationsBody: i18n.translate(
+    'sharedUXPackages.dateRangePicker.documentationPanel.combinationsBody',
+    {
+      defaultMessage:
+        'Custom time ranges are combinations of the aforementioned formats, e.g. `now to Fri, 1 Dec 2025 00:00:00 GMT` or `-12d to now`.',
+    }
+  ),
+  detailedDocumentationLink: i18n.translate(
+    'sharedUXPackages.dateRangePicker.documentationPanel.detailedDocumentationLink',
+    { defaultMessage: 'Detailed documentation' }
   ),
 };
 
@@ -179,6 +224,85 @@ export const customTimeRangePanelTexts = {
     }),
 };
 
+export const settingsPanelTexts = {
+  heading: i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.heading', {
+    defaultMessage: 'Settings',
+  }),
+  autoRefreshLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshLabel',
+    { defaultMessage: 'Refresh every' }
+  ),
+  autoRefreshIntervalCountAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalCountAriaLabel',
+    { defaultMessage: 'Refresh interval count' }
+  ),
+  autoRefreshIntervalUnitAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalUnitAriaLabel',
+    { defaultMessage: 'Refresh interval unit' }
+  ),
+  autoRefreshUnitSeconds: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitSeconds',
+    { defaultMessage: 'seconds' }
+  ),
+  autoRefreshUnitMinutes: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitMinutes',
+    { defaultMessage: 'minutes' }
+  ),
+  autoRefreshUnitHours: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitHours',
+    { defaultMessage: 'hours' }
+  ),
+  roundRelativeTimeLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
+    { defaultMessage: 'Round relative time ranges' }
+  ),
+  roundRelativeTimeDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeDescription',
+    { defaultMessage: 'Relative ranges round to the nearest full unit (minute, hour, etc.)' }
+  ),
+  timeFormatHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading',
+    { defaultMessage: 'Time format and zone' }
+  ),
+  timeFormatDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription',
+    {
+      defaultMessage:
+        'Time zone and format can be set by the space administrator in Advanced settings and affect all the users of this space.',
+    }
+  ),
+  advancedSettingsLink: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.advancedSettingsLink',
+    { defaultMessage: 'Advanced settings' }
+  ),
+  newTimePickerHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerHeading',
+    { defaultMessage: 'New time picker' }
+  ),
+  newTimePickerDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerDescription',
+    {
+      defaultMessage:
+        'Don\'t like new time picker UX? Opt out from it in advanced settings under "".',
+    }
+  ),
+};
+
+export const autoRefreshButtonTexts = {
+  pauseAriaLabel: (timeRemainingLabel: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshButton.pauseAriaLabel', {
+      defaultMessage:
+        'Auto-refresh active, next refresh in {timeRemainingLabel}. Activate to pause.',
+      values: { timeRemainingLabel },
+    }),
+  resumeAriaLabel: (intervalCountdownLabel: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshButton.resumeAriaLabel', {
+      defaultMessage:
+        'Auto-refresh paused, refresh interval is {intervalCountdownLabel}. Activate to resume.',
+      values: { intervalCountdownLabel },
+    }),
+};
+
 export const mainPanelTexts = {
   presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
     defaultMessage: 'Presets',
@@ -201,5 +325,9 @@ export const mainPanelTexts = {
   deletePresetAriaLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.deletePresetAriaLabel',
     { defaultMessage: 'Delete preset' }
+  ),
+  settingsAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.settingsAriaLabel',
+    { defaultMessage: 'Settings' }
   ),
 };
