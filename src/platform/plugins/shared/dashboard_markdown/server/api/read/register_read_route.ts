@@ -65,10 +65,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: e });
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest({ body: e });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );
