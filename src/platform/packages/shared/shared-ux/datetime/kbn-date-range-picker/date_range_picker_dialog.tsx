@@ -76,6 +76,8 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
             const firstCalIdx = tabbables.indexOf(calendarTabbables[0]);
             const lastCalIdx = tabbables.indexOf(calendarTabbables[calendarTabbables.length - 1]);
 
+            if (firstCalIdx < 0 || lastCalIdx < 0) return;
+
             // Tab OUT: save the focused day so re-entry can restore it, then jump
             // to the element before/after the calendar.
             if (calendarScroller.contains(document.activeElement)) {

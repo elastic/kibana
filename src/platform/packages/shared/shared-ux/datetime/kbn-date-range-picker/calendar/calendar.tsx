@@ -223,14 +223,14 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
       const focused = document.activeElement;
       if (!(focused instanceof HTMLElement) || !event.currentTarget.contains(focused)) return;
 
-      event.preventDefault();
-      event.stopPropagation();
-
       const monthItem = focused.closest<HTMLElement>('[data-month-index]');
       if (!monthItem) return;
 
       const currentIndex = Number(monthItem.dataset.monthIndex);
       if (Number.isNaN(currentIndex)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
 
       const targetIndex = currentIndex + (event.key === keys.PAGE_DOWN ? 1 : -1);
 
