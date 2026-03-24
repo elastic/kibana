@@ -9,6 +9,7 @@ import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
@@ -182,18 +183,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }));
   }, []);
 
+  const setAgentId = useCallback((id: string) => {
+    setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
+  }, []);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
-      agentId: currentProps.agentId,
+      agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
+      setAgentId,
       attachments: currentProps.attachments,
       resetAttachments,
       removeAttachment,
@@ -209,6 +215,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.attachments,
       resetInitialMessage,
       setConversationId,
+      setAgentId,
       resetAttachments,
       removeAttachment,
       conversationActions,

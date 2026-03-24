@@ -15,10 +15,12 @@ import {
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
+import {
+  createConversationListItemStyles,
+  createActiveConversationListItemStyles,
+} from '../../../../conversations/conversation_list_item_styles';
 
 interface ConversationListProps {
   agentId: string;
@@ -36,24 +38,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
 
-  const linkStyles = css`
-    text-decoration: none;
-    padding: 6px ${euiTheme.size.s};
-    border-radius: ${euiTheme.border.radius.small};
-    color: ${euiTheme.colors.textParagraph};
-    font-size: ${euiTheme.font.scale.s}${euiTheme.font.defaultUnits};
-    &:hover {
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
-      color: ${euiTheme.colors.textPrimary};
-      text-decoration: none;
-    }
-  `;
-
-  const activeLinkStyles = css`
-    ${linkStyles}
-    background-color: ${euiTheme.colors.backgroundLightPrimary};
-    color: ${euiTheme.colors.textPrimary};
-  `;
+  const linkStyles = createConversationListItemStyles(euiTheme);
+  const activeLinkStyles = createActiveConversationListItemStyles(euiTheme);
 
   if (isLoading) {
     return (
