@@ -10,7 +10,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
-import { CloseDockedViewButton } from './close_docked_view_button';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -34,7 +33,6 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       responsive={false}
     >
       <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
-      {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>
   );
 };

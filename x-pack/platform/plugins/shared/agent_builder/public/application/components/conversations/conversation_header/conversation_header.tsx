@@ -7,13 +7,18 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConversationRightActions } from './conversation_actions_right';
-import { ConversationLeftActions } from './conversation_actions_left';
 import { ConversationTitle } from './conversation_title';
 
-const centerSectionStyles = css`
+const headerGridStyles = css`
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  width: 100%;
+`;
+
+const rightActionsStyles = css`
+  justify-self: end;
 `;
 
 interface ConversationHeaderProps {
@@ -25,16 +30,17 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   ariaLabelledBy,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <ConversationLeftActions />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true} css={centerSectionStyles}>
-        <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+    <div css={headerGridStyles}>
+      {/* Left column — intentionally empty, reserved for future actions */}
+      <div />
+
+      {/* Center column — always exactly centered */}
+      <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+
+      {/* Right column — right-aligned within its 1fr column */}
+      <div css={rightActionsStyles}>
         <ConversationRightActions onClose={onClose} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </div>
   );
 };
