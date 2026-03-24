@@ -13,7 +13,7 @@ import {
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
   PROCESS_ENTITY_ID,
-} from '../constants/field_names';
+} from '../../document/constants/field_names';
 import type { SessionViewConfig } from '../../../../common/types/session_view';
 
 /**
