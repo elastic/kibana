@@ -27291,6 +27291,11 @@ paths:
                                               type: array
                                             type:
                                               type: string
+                                            var_group_selections:
+                                              additionalProperties:
+                                                type: string
+                                              description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                              type: object
                                             vars:
                                               additionalProperties:
                                                 additionalProperties: false
@@ -28390,6 +28395,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -29271,6 +29281,11 @@ paths:
                                               type: array
                                             type:
                                               type: string
+                                            var_group_selections:
+                                              additionalProperties:
+                                                type: string
+                                              description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                              type: object
                                             vars:
                                               additionalProperties:
                                                 additionalProperties: false
@@ -30131,6 +30146,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -31229,6 +31249,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -32202,6 +32227,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -34534,6 +34564,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -51100,6 +51135,11 @@ paths:
                                     type: array
                                   type:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     additionalProperties:
                                       additionalProperties: false
@@ -51646,6 +51686,11 @@ paths:
                             type: array
                           type:
                             type: string
+                          var_group_selections:
+                            additionalProperties:
+                              type: string
+                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                            type: object
                           vars:
                             additionalProperties:
                               additionalProperties: false
@@ -52214,6 +52259,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -52811,6 +52861,11 @@ paths:
                                     type: array
                                   type:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     additionalProperties:
                                       additionalProperties: false
@@ -53457,6 +53512,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -54007,6 +54067,11 @@ paths:
                             type: array
                           type:
                             type: string
+                          var_group_selections:
+                            additionalProperties:
+                              type: string
+                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                            type: object
                           vars:
                             additionalProperties:
                               additionalProperties: false
@@ -54571,6 +54636,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -55512,6 +55582,11 @@ paths:
                                           type: array
                                         type:
                                           type: string
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             additionalProperties: false
@@ -56016,6 +56091,11 @@ paths:
                                       type: array
                                     type:
                                       type: string
+                                    var_group_selections:
+                                      additionalProperties:
+                                        type: string
+                                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                      type: object
                                     vars:
                                       additionalProperties:
                                         additionalProperties: false
