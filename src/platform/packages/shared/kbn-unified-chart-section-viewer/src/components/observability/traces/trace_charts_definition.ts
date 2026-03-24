@@ -43,10 +43,6 @@ function getWhereClauses(filters: string[]): string[] {
   ];
 }
 
-function getMetadataDirective(metadataFields: string[]) {
-  return metadataFields.length ? `METADATA ${metadataFields}` : undefined;
-}
-
 export function getErrorRateChart({
   indexes,
   filters,
@@ -58,9 +54,9 @@ export function getErrorRateChart({
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(filters);
-    const metadataDirective = getMetadataDirective(metadataFields);
-    const source = metadataDirective ? `${indexes} ${metadataDirective}` : indexes;
-    const query = esql(`FROM ${source}`);
+    const query = metadataFields.length
+      ? esql.from([indexes], metadataFields)
+      : esql.from(indexes);
     for (const clause of whereClauses) {
       query.pipe(`WHERE ${clause}`);
     }
@@ -97,9 +93,9 @@ export function getLatencyChart({
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(filters);
-    const metadataDirective = getMetadataDirective(metadataFields);
-    const source = metadataDirective ? `${indexes} ${metadataDirective}` : indexes;
-    const query = esql(`FROM ${source}`);
+    const query = metadataFields.length
+      ? esql.from([indexes], metadataFields)
+      : esql.from(indexes);
     for (const clause of whereClauses) {
       query.pipe(`WHERE ${clause}`);
     }
@@ -139,9 +135,9 @@ export function getThroughputChart({
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(filters);
-    const metadataDirective = getMetadataDirective(metadataFields);
-    const source = metadataDirective ? `${indexes} ${metadataDirective}` : indexes;
-    const query = esql(`FROM ${source}`);
+    const query = metadataFields.length
+      ? esql.from([indexes], metadataFields)
+      : esql.from(indexes);
     for (const clause of whereClauses) {
       query.pipe(`WHERE ${clause}`);
     }
