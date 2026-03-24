@@ -15,11 +15,11 @@ import React, {
   useLayoutEffect,
   type KeyboardEvent,
 } from 'react';
-import { EuiButtonEmpty, keys, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, keys } from '@elastic/eui';
 import type { DateRange } from 'react-day-picker';
 
 import { CalendarView } from './calendar_view';
-import { calendarStyles } from './calendar.styles';
+import { useCalendarStyles } from './calendar.styles';
 import { calendarTexts } from '../translations';
 import {
   getScrollDirection,
@@ -55,8 +55,7 @@ interface ScrollAnchor {
 
 /** Infinite-like month calendar using a fixed window with chunked prepend/append. */
 export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps) {
-  const euiThemeContext = useEuiTheme();
-  const styles = calendarStyles(euiThemeContext);
+  const styles = useCalendarStyles();
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pendingCenterIndexRef = useRef<number | null>(null);

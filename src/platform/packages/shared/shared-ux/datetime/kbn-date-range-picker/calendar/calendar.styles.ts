@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
+import { useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
 import { CALENDAR_MONTH_ESTIMATED_HEIGHT } from './calendar.constants';
 
 /**
@@ -17,8 +17,8 @@ import { CALENDAR_MONTH_ESTIMATED_HEIGHT } from './calendar.constants';
  */
 const CALENDAR_HEIGHT = 394;
 
-export const calendarStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
+export const useCalendarStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
   const container = css`
     position: relative;
@@ -28,10 +28,9 @@ export const calendarStyles = (euiThemeContext: UseEuiTheme) => {
 
   const scroller = css`
     height: 100%;
-    overflow-y: auto;
     padding-left: ${euiTheme.size.base};
     padding-right: ${euiTheme.size.base};
-    ${euiScrollBarStyles(euiThemeContext)}
+    ${useEuiOverflowScroll('y', true)}
   `;
 
   const monthItem = css`
