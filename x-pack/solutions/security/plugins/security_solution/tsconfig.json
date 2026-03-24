@@ -285,6 +285,7 @@
     "@kbn/deeplinks-workflows",
     "@kbn/core-rendering-browser",
     "@kbn/anonymization-plugin",
-    "@kbn/anonymization-common"
+    "@kbn/anonymization-common",
+    "@kbn/workflows-extensions"
   ]
 }
