@@ -9,18 +9,28 @@ applies_to:
 
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
 
-`xpack.productDocBase.artifactRepositoryUrl`
-:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co` Supports:
-    
-    * HTTP(S) URLs
-    * {applies_to}`stack: ga 9.1+` Local file paths (`file://`).
+`xpack.productDocBase.artifactRepositoryProxyUrl`
+:   {applies_to}`stack: ga 9.4` URL of an HTTP proxy to use when downloading product documentation artifacts. When set, {{kib}} sends repository traffic through this proxy instead of connecting directly to `xpack.productDocBase.artifactRepositoryUrl` (by default `https://kibana-knowledge-base-artifacts.elastic.co`). Supports HTTP and HTTPS URLs. Not set by default. This follows the same pattern as Fleet's [Elastic Package Registry proxy settings](https://www.elastic.co/docs/reference/fleet/epr-proxy-setting): if your organization restricts outbound traffic so {{kib}} cannot reach the public artifact host, you can route traffic to that endpoint through a network gateway, then point {{kib}} at the gateway with this setting.
+
+Add the proxy URL to your `kibana.yml` configuration file:
+
+```yaml
+xpack.productDocBase.artifactRepositoryProxyUrl: "https://my-proxy-host:port"
+```
+
+After restarting {{kib}}, you can install the AI Assistant knowledge base content (Elastic documentation and Security Labs) from the **GenAI Settings** page. Open the page from the navigation menu or using the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+
+For air-gapped deployments, you can use either of these approaches: 
+
+- Manually download the artifacts from `kibana-knowledge-base-artifacts.elastic.co`, then set `xpack.productDocBase.artifactRepositoryUrl` to a `file://` path to the local files.
+- Deploy a proxy that forwards requests to `kibana-knowledge-base-artifacts.elastic.co` and set `xpack.productDocBase.artifactRepositoryProxyUrl` to that proxy URL. If {{kib}} cannot use the public repository or a proxy at all, deploy a local artifact repository instead; see [Configuring product documentation for air-gapped environments](#configuring-product-doc-for-airgap).
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
-Installing product documentation requires network access to its artifact repository. 
+{applies_to}`stack: ga 9.0+` When you cannot use the public artifact repository or a proxy, use a local copy of the product documentation artifacts. This is a two-step process:
 
-* {applies_to}`stack: ga 9.0+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
-* {applies_to}`stack: ga 9.0+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
+1. Download the zipped artifact files for your {{kib}} version (from `kibana-knowledge-base-artifacts.elastic.co` on a machine that can reach it) and copy them to a location your {{kib}} deployment can read—for example, a shared volume or host path mounted into the deployment.
+2. In `kibana.yml`, set `xpack.productDocBase.artifactRepositoryUrl` to a `file://` URI that points to the artifact zip path {{kib}} should use.
 
 Deploying a custom product documentation repository can be done in 2 ways: using a S3 bucket, or using a CDN.
 
