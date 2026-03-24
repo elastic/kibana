@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let response: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'>;
 
         before(async () => {
-          response = await getUnifiedTrace({ es, apmApiClient, maxTraceItems: 5000 });
+          response = await getUnifiedTrace({ es, apmApiClient });
         });
 
         it('returns traceDocsTotal greater than the limit', () => {
@@ -67,31 +67,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('returns maxTraceItems correctly', () => {
           expect(response.maxTraceItems).to.be(5000);
-        });
-
-        it('does not include exceedMax in the response', () => {
-          expect(response).not.to.have.property('exceedMax');
-        });
-      });
-
-      describe('when maxTraceItems is 20000', () => {
-        let response: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'>;
-
-        before(async () => {
-          response = await getUnifiedTrace({ es, apmApiClient, maxTraceItems: 20000 });
-        });
-
-        it('returns traceDocsTotal within expected range', () => {
-          expect(response.traceDocsTotal).to.be.greaterThan(15000);
-          expect(response.traceDocsTotal).to.be.lessThan(16000);
-        });
-
-        it('returns all trace items when limit is high enough', () => {
-          expect(response.traceItems.length).to.be(response.traceDocsTotal);
-        });
-
-        it('returns maxTraceItems correctly', () => {
-          expect(response.maxTraceItems).to.be(20000);
         });
 
         it('does not include exceedMax in the response', () => {
@@ -126,11 +101,9 @@ async function getRootTransaction(es: Client) {
 async function getUnifiedTrace({
   es,
   apmApiClient,
-  maxTraceItems,
 }: {
   es: Client;
   apmApiClient: ApmApiClient;
-  maxTraceItems?: number;
 }) {
   const { traceId, transactionId } = await getRootTransaction(es);
 
@@ -142,7 +115,6 @@ async function getUnifiedTrace({
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         entryTransactionId: transactionId,
-        maxTraceItems,
       },
     },
   });
