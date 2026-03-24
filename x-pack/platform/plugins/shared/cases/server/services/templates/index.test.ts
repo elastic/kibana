@@ -453,7 +453,7 @@ describe('TemplatesService', () => {
 
         const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
         const query = searchCall?.query as { bool: { filter?: unknown[] } };
-        // Only the isLatest filter remains (deletedAt is omitted when isDeleted is true)
+        // Only isLatest filter remains (deletedAt is omitted when isDeleted is true)
         expect(query.bool.filter).toHaveLength(1);
         expect(query.bool.filter).toEqual(
           expect.arrayContaining([
@@ -470,6 +470,74 @@ describe('TemplatesService', () => {
             }),
           ])
         );
+      });
+
+      it('adds isEnabled:true filter when isEnabled is true', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({
+          ...defaultFindParams,
+          isEnabled: true,
+        });
+
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        expect(query.bool.filter).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              bool: expect.objectContaining({
+                should: expect.arrayContaining([
+                  expect.objectContaining({
+                    match: expect.objectContaining({
+                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: true,
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          ])
+        );
+      });
+
+      it('adds isEnabled:false filter when isEnabled is false', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({
+          ...defaultFindParams,
+          isEnabled: false,
+        });
+
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        expect(query.bool.filter).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              bool: expect.objectContaining({
+                should: expect.arrayContaining([
+                  expect.objectContaining({
+                    match: expect.objectContaining({
+                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: false,
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          ])
+        );
+      });
+
+      it('omits isEnabled filter when isEnabled is undefined', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({ ...defaultFindParams });
+
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        const filterStr = JSON.stringify(query.bool.filter);
+        expect(filterStr).not.toContain('isEnabled');
       });
     });
 
@@ -669,6 +737,80 @@ describe('TemplatesService', () => {
         description: 'Description from YAML',
         tags: ['yaml-tag-1', 'yaml-tag-2'],
       }),
+      expect.any(Object)
+    );
+  });
+
+  it('persists isEnabled: false when explicitly set to false on create', async () => {
+    const definition = buildDefinition('Disabled Template');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        owner: 'securitySolution',
+        definition,
+        isEnabled: false,
+      },
+      'alice'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ isEnabled: false }),
+      expect.any(Object)
+    );
+  });
+
+  it('persists isEnabled: true when explicitly set to true on create', async () => {
+    const definition = buildDefinition('Enabled Template');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        owner: 'securitySolution',
+        definition,
+        isEnabled: true,
+      },
+      'alice'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ isEnabled: true }),
+      expect.any(Object)
+    );
+  });
+
+  it('defaults isEnabled to true when not provided on create', async () => {
+    const definition = buildDefinition('Default Enabled Template');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        owner: 'securitySolution',
+        definition,
+      },
+      'alice'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ isEnabled: true }),
       expect.any(Object)
     );
   });

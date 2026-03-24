@@ -82,6 +82,7 @@ type OmitClassicStreamUpsertProps<
 
 export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {
+    type: 'classic';
     ingest: ClassicIngest;
   }
 
@@ -107,24 +108,32 @@ export namespace ClassicStream {
   }
 }
 
-const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema.extend({
-  ingest: classicIngestSchemaObject,
-});
+const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
+  .extend({
+    type: z.literal('classic'),
+    ingest: classicIngestSchemaObject,
+  })
+  .meta({ id: 'ClassicStreamDefinition' });
 
-const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend({
-  stream: classicStreamDefinitionSchema,
-  elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
-  data_stream_exists: z.boolean(),
-  effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
-  effective_settings: ingestStreamSettingsSchema,
-  effective_failure_store: effectiveFailureStoreSchema,
-});
+const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema
+  .extend({
+    stream: classicStreamDefinitionSchema,
+    elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
+    data_stream_exists: z.boolean(),
+    effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
+    effective_settings: ingestStreamSettingsSchema,
+    effective_failure_store: effectiveFailureStoreSchema,
+  })
+  .meta({ id: 'ClassicStreamGetResponse' });
 
-const classicStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema.extend({
-  stream: ingestBaseStreamUpsertDefinitionSchema.extend({
-    ingest: classicIngestUpsertSchemaObject,
-  }),
-});
+const classicStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema
+  .extend({
+    stream: ingestBaseStreamUpsertDefinitionSchema.extend({
+      type: z.literal('classic'),
+      ingest: classicIngestUpsertSchemaObject,
+    }),
+  })
+  .meta({ id: 'ClassicStreamUpsertRequest' });
 
 export const ClassicStream: {
   Definition: Validation<BaseStream.Model['Definition'], ClassicStream.Definition>;
