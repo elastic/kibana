@@ -116,13 +116,10 @@ export const editStreamRoute = createServerRoute({
   }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    // Replicated data streams are managed by the source cluster via CCR and cannot be modified locally
-    const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
-    if (dataStream?.replicated) {
-      throw badData(
-        'Cannot modify a replicated stream. It is managed by the source cluster via cross-cluster replication.'
-      );
-    }
+    // Replicated data streams are managed by the source cluster via CCR.
+    // We still allow the PUT to go through so that Kibana-side data (description,
+    // dashboards, queries, rules) can be updated. If only those fields change,
+    // attemptChanges will detect no ES-level diff and only update .kibana_streams.
 
     if (
       Streams.WiredStream.UpsertRequest.is(params.body) &&

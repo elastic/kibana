@@ -95,7 +95,7 @@ export function ClassicStreamDetailManagement({
 
   const tabs: ManagementTabs = {};
 
-  if (definition.data_stream_exists) {
+  if (definition.data_stream_exists && !definition.replicated) {
     tabs.retention = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
@@ -161,7 +161,7 @@ export function ClassicStreamDetailManagement({
     tabs.significantEvents = otherTabs.significantEvents;
   }
 
-  if (definition.privileges.manage) {
+  if (definition.privileges.manage || definition.replicated) {
     tabs.advanced = {
       content: (
         <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />

@@ -130,34 +130,45 @@ export function WiredStreamDetailManagement({
   }
 
   const tabs = {
-    retention: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-          })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    },
-    partitioning: {
-      content: (
-        <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
-        defaultMessage: 'Partitioning',
-      }),
-    },
+    ...(!definition.replicated
+      ? {
+          retention: {
+            content: (
+              <StreamDetailLifecycle
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+                  defaultMessage:
+                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+                })}
+              >
+                <span data-test-subj="retentionTab" tabIndex={0}>
+                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+                    defaultMessage: 'Retention',
+                  })}
+                </span>
+              </EuiToolTip>
+            ),
+          },
+        }
+      : {}),
+    ...(!definition.replicated
+      ? {
+          partitioning: {
+            content: (
+              <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
+              defaultMessage: 'Partitioning',
+            }),
+          },
+        }
+      : {}),
     ...(processing ? { processing } : {}),
     schema: {
       content: (
@@ -196,7 +207,7 @@ export function WiredStreamDetailManagement({
         }
       : {}),
     ...otherTabs,
-    ...(definition.privileges.manage
+    ...(definition.privileges.manage || definition.replicated
       ? {
           advanced: {
             content: (
@@ -228,7 +239,6 @@ export function WiredStreamDetailManagement({
     return null;
   }
 
-  return (
-    <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
-  );
+  const defaultTab = definition.replicated ? 'schema' : 'partitioning';
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
 }

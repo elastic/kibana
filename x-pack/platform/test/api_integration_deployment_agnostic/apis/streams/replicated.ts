@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { deleteStream, getStream, putStream } from './helpers/requests';
+import { deleteStream, getStream, putStream, putIngest } from './helpers/requests';
 
 const REMOTE_CLUSTER_NAME = 'ftr-remote';
 const LEADER_STREAM = 'logs-ccr-leader-test';
@@ -79,24 +79,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.stream.name).to.be(LEADER_STREAM);
     });
 
-    it('PUT returns 400 for a replicated data stream', async () => {
-      const body = await putStream(
+    it('PUT allows updating description on a replicated data stream', async () => {
+      // Description-only changes should succeed — attemptChanges detects no ES-level
+      // diff and only writes to .kibana_streams.
+      await putStream(apiClient, LEADER_STREAM, {
+        dashboards: [],
+        queries: [],
+        rules: [],
+        stream: {
+          type: 'classic',
+          description: 'updated description on replicated stream',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      });
+
+      // Verify the description was persisted
+      const updated = await getStream(apiClient, LEADER_STREAM);
+      expect(updated.stream.description).to.be('updated description on replicated stream');
+    });
+
+    it('PUT _ingest returns 422 for a replicated data stream', async () => {
+      const body = await putIngest(
         apiClient,
         LEADER_STREAM,
         {
-          dashboards: [],
-          queries: [],
-          rules: [],
-          stream: {
-            type: 'classic',
-            description: 'should not work',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              settings: {},
-              classic: {},
-              failure_store: { inherit: {} },
-            },
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
           },
         },
         422

@@ -124,6 +124,28 @@ export async function getStream(
     .then((response) => response.body);
 }
 
+export async function putIngest(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: ClientRequestParamsOf<
+    StreamsRouteRepository,
+    'PUT /api/streams/{name}/_ingest 2023-10-31'
+  >['params']['body'],
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+      params: {
+        path: {
+          name,
+        },
+        body,
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function deleteStream(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,

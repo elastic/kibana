@@ -196,6 +196,7 @@ export class StreamsPlugin
         uiSettingsClient,
         taskClient,
         modelSettingsClient,
+        isSecurityEnabled,
       };
     };
 
@@ -286,7 +287,11 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(core, this.logger)
+        createStreamsGlobalSearchResultProvider(core, this.logger, async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          const license = await pluginsStart.licensing.getLicense();
+          return license.getFeature('security').isEnabled;
+        })
       );
     }
 

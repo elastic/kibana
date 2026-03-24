@@ -62,13 +62,15 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
-      request,
-    });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -232,10 +234,16 @@ export const processingDateSuggestionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
     const { name } = params.path;
 
-    const { read } = await checkAccess({ name, esClient: scopedClusterClient.asCurrentUser });
+    const { read } = await checkAccess({
+      name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
@@ -274,13 +282,15 @@ export const failureStoreSamplesRoute = createServerRoute({
   },
   params: failureStoreSamplesParamsSchema,
   handler: async ({ params, request, getScopedClients }): Promise<FailureStoreSamplesResponse> => {
-    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
-      request,
-    });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
