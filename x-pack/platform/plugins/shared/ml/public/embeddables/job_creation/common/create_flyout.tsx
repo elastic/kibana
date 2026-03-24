@@ -27,11 +27,7 @@ export function createFlyout(
   dashboardService: DashboardStart,
   lens?: LensPublicStart
 ): Promise<void> {
-  const {
-    http,
-    overlays,
-    ...startServices
-  } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -69,7 +65,6 @@ export function createFlyout(
           size: '35vw',
         }
       );
-
     } catch (error) {
       reject(error);
     }

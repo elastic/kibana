@@ -17,11 +17,7 @@ import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { isPlaceholderColumn } from '../utils';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
-  const {
-    http,
-    overlays,
-    ...startServices
-  } = deps.coreStart;
+  const { http, overlays, ...startServices } = deps.coreStart;
 
   const indexUpdateService = deps.indexUpdateService;
 
@@ -84,7 +80,6 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     });
     flyoutSession.close();
   });
-
 }
 
 const LoadingContents: FC = () => (

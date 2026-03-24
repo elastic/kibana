@@ -19,11 +19,7 @@ export function createFlyout(
   plugins: FileUploadStartDependencies,
   props: OpenFileUploadLiteContext
 ) {
-  const {
-    http,
-    overlays,
-    ...startServices
-  } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
 
   const LazyFlyoutContents = lazy(async () => {
     const { FileDataVisualizerLite } = await import('../file_upload_lite');
@@ -66,7 +62,6 @@ export function createFlyout(
       size: '500px',
     }
   );
-
 }
 
 const LoadingContents: FC = () => (

@@ -94,7 +94,6 @@ export async function showCategorizeFlyout(
           focusTrapProps,
         }
       );
-
     } catch (error) {
       reject(error);
     }
