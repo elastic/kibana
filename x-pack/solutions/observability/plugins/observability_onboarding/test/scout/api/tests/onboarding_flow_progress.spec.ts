@@ -26,7 +26,7 @@ const NO_ACCESS_USER_ROLE = {
 
 apiTest.describe(
   'Observability onboarding GET flow progress',
-  { tag: tags.deploymentAgnostic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const datasetName = 'api-tests';
     const namespace = 'default';

@@ -13,7 +13,7 @@ import { apiTest } from '../fixtures';
 
 apiTest.describe(
   'Observability onboarding POST flow step — missing session',
-  { tag: tags.deploymentAgnostic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let adminCredentials: RoleApiCredentials;
 

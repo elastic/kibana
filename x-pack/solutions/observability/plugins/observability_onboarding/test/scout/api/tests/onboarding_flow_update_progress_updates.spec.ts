@@ -28,7 +28,7 @@ async function deleteOnboardingStateIfExists(kbnClient: KbnClient, id: string): 
 
 apiTest.describe(
   'Observability onboarding POST flow step — updates saved state',
-  { tag: tags.deploymentAgnostic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'updates step progress (status only, then status with decoded message)',
