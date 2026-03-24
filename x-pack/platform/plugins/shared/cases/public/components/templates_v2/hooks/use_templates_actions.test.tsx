@@ -12,8 +12,8 @@ import { TestProviders } from '../../../common/mock';
 import { useTemplatesActions } from './use_templates_actions';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
-import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
+import { useUpdateTemplate } from './use_update_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
@@ -23,15 +23,15 @@ jest.mock('../../../common/navigation/hooks', () => ({
 }));
 
 jest.mock('./use_bulk_delete_templates');
-jest.mock('./use_update_template');
 jest.mock('./use_create_template');
+jest.mock('./use_update_template');
 jest.mock('./use_bulk_export_templates');
 jest.mock('../../../common/use_cases_toast');
 
 const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
 const useBulkDeleteTemplatesMock = useBulkDeleteTemplates as jest.Mock;
-const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
 const useCreateTemplateMock = useCreateTemplate as jest.Mock;
+const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
 const useBulkExportTemplatesMock = useBulkExportTemplates as jest.Mock;
 const useCasesToastMock = useCasesToast as jest.Mock;
 
@@ -60,8 +60,8 @@ describe('useTemplatesActions', () => {
   let consoleSpy: jest.SpyInstance;
   const navigateToCasesEditTemplateMock = jest.fn();
   const bulkDeleteTemplatesMock = jest.fn();
-  const setDefaultTemplateMock = jest.fn();
   const cloneTemplateMock = jest.fn();
+  const updateTemplateMock = jest.fn();
   const bulkExportTemplatesMock = jest.fn();
   const showSuccessToastMock = jest.fn();
 
@@ -75,12 +75,12 @@ describe('useTemplatesActions', () => {
       mutate: bulkDeleteTemplatesMock,
       isLoading: false,
     });
-    useUpdateTemplateMock.mockReturnValue({
-      mutate: setDefaultTemplateMock,
-      isLoading: false,
-    });
     useCreateTemplateMock.mockReturnValue({
       mutate: cloneTemplateMock,
+      isLoading: false,
+    });
+    useUpdateTemplateMock.mockReturnValue({
+      mutate: updateTemplateMock,
       isLoading: false,
     });
     useBulkExportTemplatesMock.mockReturnValue({
@@ -103,16 +103,16 @@ describe('useTemplatesActions', () => {
 
     expect(result.current).toHaveProperty('handleEdit');
     expect(result.current).toHaveProperty('handleClone');
-    expect(result.current).toHaveProperty('handleSetAsDefault');
     expect(result.current).toHaveProperty('handleExport');
     expect(result.current).toHaveProperty('handleDelete');
     expect(result.current).toHaveProperty('confirmDelete');
     expect(result.current).toHaveProperty('cancelDelete');
     expect(result.current).toHaveProperty('templateToDelete');
     expect(result.current).toHaveProperty('isDeleting');
-    expect(result.current).toHaveProperty('isSettingDefault');
     expect(result.current).toHaveProperty('isCloning');
     expect(result.current).toHaveProperty('isExporting');
+    expect(result.current).toHaveProperty('isUpdating');
+    expect(result.current).toHaveProperty('handleIsEnabledChange');
   });
 
   it('handleEdit navigates to edit template page', () => {
@@ -162,6 +162,41 @@ describe('useTemplatesActions', () => {
     expect(template).not.toHaveProperty('isDefault');
   });
 
+  it('handleClone passes isEnabled from template when isEnabled is true', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+    const enabledTemplate = { ...mockTemplate, isEnabled: true };
+
+    act(() => {
+      result.current.handleClone(enabledTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.isEnabled).toBe(true);
+  });
+
+  it('handleClone passes isEnabled from template when isEnabled is false', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+    const disabledTemplate = { ...mockTemplate, isEnabled: false };
+
+    act(() => {
+      result.current.handleClone(disabledTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.isEnabled).toBe(false);
+  });
+
+  it('handleClone passes isEnabled as undefined when template has no isEnabled property', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleClone(mockTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template.isEnabled).toBeUndefined();
+  });
+
   it('handleClone handles definition that is already a parsed object', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
@@ -192,6 +227,14 @@ describe('useTemplatesActions', () => {
     });
   });
 
+  it('configures useUpdateTemplate with disabled default toast for isEnabled toggle', () => {
+    renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(useUpdateTemplateMock).toHaveBeenCalledWith({
+      disableDefaultSuccessToast: true,
+    });
+  });
+
   it('shows custom success toast with original template name when clone succeeds', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
@@ -208,44 +251,6 @@ describe('useTemplatesActions', () => {
     });
 
     expect(showSuccessToastMock).toHaveBeenCalledWith('Template 1 was cloned successfully');
-  });
-
-  it('handleSetAsDefault calls setDefaultTemplate mutation with isDefault: true', () => {
-    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
-
-    expect(typeof result.current.handleSetAsDefault).toBe('function');
-
-    act(() => {
-      result.current.handleSetAsDefault(mockTemplate);
-    });
-
-    expect(setDefaultTemplateMock).toHaveBeenCalledWith({
-      templateId: mockTemplate.templateId,
-      template: { isDefault: true },
-    });
-  });
-
-  it('configures useUpdateTemplate with custom success toast for set as default', () => {
-    renderHook(() => useTemplatesActions(), { wrapper });
-
-    expect(useUpdateTemplateMock).toHaveBeenCalledWith({
-      disableDefaultSuccessToast: true,
-      onSuccess: expect.any(Function),
-    });
-  });
-
-  it('shows custom success toast when template is set as default', () => {
-    renderHook(() => useTemplatesActions(), { wrapper });
-
-    // Get the onSuccess callback passed to useUpdateTemplate
-    const { onSuccess } = useUpdateTemplateMock.mock.calls[0][0];
-
-    // Simulate successful update with template data
-    act(() => {
-      onSuccess({ ...mockTemplate, isDefault: true });
-    });
-
-    expect(showSuccessToastMock).toHaveBeenCalledWith('Template Template 1 was set as default');
   });
 
   it('handleExport calls bulk export mutation with template id', () => {
@@ -322,6 +327,64 @@ describe('useTemplatesActions', () => {
     expect(result.current.templateToDelete).toBeNull();
   });
 
+  it('handleIsEnabledChange calls updateTemplate mutation with toggled isEnabled', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    const templateWithEnabled = { ...mockTemplate, isEnabled: true };
+    act(() => {
+      result.current.handleIsEnabledChange(templateWithEnabled);
+    });
+
+    expect(updateTemplateMock).toHaveBeenCalledWith(
+      {
+        templateId: templateWithEnabled.templateId,
+        template: { isEnabled: false },
+      },
+      { onSuccess: expect.any(Function) }
+    );
+
+    const onSuccessCallback = updateTemplateMock.mock.calls[0][1].onSuccess;
+    act(() => {
+      onSuccessCallback();
+    });
+    expect(showSuccessToastMock).toHaveBeenCalledWith('Template updated successfully');
+  });
+
+  it('handleIsEnabledChange sends isEnabled: false when template.isEnabled is undefined (treated as enabled)', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    // isEnabled is undefined — treated as enabled per column logic (isEnabled !== false)
+    const templateWithUndefined = { ...mockTemplate };
+    act(() => {
+      result.current.handleIsEnabledChange(templateWithUndefined);
+    });
+
+    expect(updateTemplateMock).toHaveBeenCalledWith(
+      {
+        templateId: mockTemplate.templateId,
+        template: { isEnabled: false },
+      },
+      { onSuccess: expect.any(Function) }
+    );
+  });
+
+  it('handleIsEnabledChange sends isEnabled: true when template.isEnabled is false', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    const disabledTemplate = { ...mockTemplate, isEnabled: false };
+    act(() => {
+      result.current.handleIsEnabledChange(disabledTemplate);
+    });
+
+    expect(updateTemplateMock).toHaveBeenCalledWith(
+      {
+        templateId: mockTemplate.templateId,
+        template: { isEnabled: true },
+      },
+      { onSuccess: expect.any(Function) }
+    );
+  });
+
   it('handlers are stable between renders', () => {
     const { result, rerender } = renderHook(() => useTemplatesActions(), { wrapper });
 
@@ -331,9 +394,9 @@ describe('useTemplatesActions', () => {
 
     expect(result.current.handleEdit).toBe(firstRenderHandlers.handleEdit);
     expect(result.current.handleClone).toBe(firstRenderHandlers.handleClone);
-    expect(result.current.handleSetAsDefault).toBe(firstRenderHandlers.handleSetAsDefault);
     expect(result.current.handleExport).toBe(firstRenderHandlers.handleExport);
     expect(result.current.handleDelete).toBe(firstRenderHandlers.handleDelete);
     expect(result.current.cancelDelete).toBe(firstRenderHandlers.cancelDelete);
+    expect(result.current.handleIsEnabledChange).toBe(firstRenderHandlers.handleIsEnabledChange);
   });
 });

@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import type { ChromeBadge, ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { createBreadcrumbsState } from './breadcrumbs_state';
 
 const createExtension = (): ChromeBreadcrumbsAppendExtension => ({
   content: null,
+});
+
+const createLegacyBadge = (text = 'Read only'): ChromeBadge => ({
+  text,
+  tooltip: `${text} tooltip`,
+  iconType: 'glasses',
 });
 
 const getBadgesContent = (extensions: ChromeBreadcrumbsAppendExtension[]) => {
@@ -87,5 +93,92 @@ describe('createBreadcrumbsState', () => {
     } finally {
       subscription.unsubscribe();
     }
+  });
+
+  describe('legacyBadge (setBadge)', () => {
+    it('adds legacy badge to the extensions output and removes it when cleared', () => {
+      const state = createBreadcrumbsState();
+      const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
+      const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
+        emissions.push(extensions);
+      });
+
+      try {
+        // Initially no extensions
+        expect(emissions[emissions.length - 1]).toEqual([]);
+
+        // Setting legacy badge adds a badge extension
+        state.legacyBadge.set(createLegacyBadge());
+        expect(emissions[emissions.length - 1]).toHaveLength(1);
+        expect(emissions[emissions.length - 1][0].content).toBeDefined();
+
+        // Clearing legacy badge removes it
+        state.legacyBadge.set(undefined);
+        expect(emissions[emissions.length - 1]).toEqual([]);
+      } finally {
+        subscription.unsubscribe();
+      }
+    });
+
+    it('combines legacy badge with breadcrumbs badges', () => {
+      const state = createBreadcrumbsState();
+      const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
+      const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
+        emissions.push(extensions);
+      });
+
+      try {
+        state.legacyBadge.set(createLegacyBadge());
+        state.breadcrumbsBadges.set([{ badgeText: 'Managed' }]);
+
+        // Both badges rendered in one extension
+        const latest = emissions[emissions.length - 1];
+        expect(latest).toHaveLength(1);
+        expect(latest[0].content).toBeDefined();
+      } finally {
+        subscription.unsubscribe();
+      }
+    });
+
+    it('keeps badge content stable when only extensions change', () => {
+      const state = createBreadcrumbsState();
+      const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
+      const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
+        emissions.push(extensions);
+      });
+
+      try {
+        state.breadcrumbsAppendExtensions.set([createExtension()]);
+        state.legacyBadge.set(createLegacyBadge());
+        const initialContent = getBadgesContent(emissions[emissions.length - 1]);
+
+        state.breadcrumbsAppendExtensions.set([createExtension(), createExtension()]);
+        const updatedContent = getBadgesContent(emissions[emissions.length - 1]);
+
+        expect(updatedContent).toBe(initialContent);
+      } finally {
+        subscription.unsubscribe();
+      }
+    });
+
+    it('recreates badge content when legacy badge changes', () => {
+      const state = createBreadcrumbsState();
+      const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
+      const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
+        emissions.push(extensions);
+      });
+
+      try {
+        state.legacyBadge.set(createLegacyBadge('Read only'));
+        const initialContent = getBadgesContent(emissions[emissions.length - 1]);
+
+        state.legacyBadge.set(createLegacyBadge('Beta'));
+        const updatedContent = getBadgesContent(emissions[emissions.length - 1]);
+
+        expect(updatedContent).not.toBe(initialContent);
+      } finally {
+        subscription.unsubscribe();
+      }
+    });
   });
 });

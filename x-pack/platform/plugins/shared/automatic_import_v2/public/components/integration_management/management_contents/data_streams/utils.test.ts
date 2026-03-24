@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getIconFromType, getFieldType, flattenPipelineObject, isValidIp } from './utils';
+import {
+  getIconFromType,
+  getFieldType,
+  flattenPipelineObject,
+  isValidIp,
+  diffPipelineLines,
+} from './utils';
 
 describe('data stream utils', () => {
   describe('getIconFromType', () => {
@@ -310,6 +316,80 @@ describe('data stream utils', () => {
       const result = flattenPipelineObject(input);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('diffPipelineLines', () => {
+    it('should return zeros for identical strings', () => {
+      const text = 'line1\nline2\nline3';
+      expect(diffPipelineLines(text, text)).toEqual({
+        linesAdded: 0,
+        linesRemoved: 0,
+        netLineChange: 0,
+      });
+    });
+
+    it('should detect added lines', () => {
+      const original = 'line1\nline2';
+      const updated = 'line1\nline2\nline3';
+      expect(diffPipelineLines(original, updated)).toEqual({
+        linesAdded: 1,
+        linesRemoved: 0,
+        netLineChange: 1,
+      });
+    });
+
+    it('should detect removed lines', () => {
+      const original = 'line1\nline2\nline3';
+      const updated = 'line1\nline3';
+      expect(diffPipelineLines(original, updated)).toEqual({
+        linesAdded: 0,
+        linesRemoved: 1,
+        netLineChange: -1,
+      });
+    });
+
+    it('should detect replaced lines (one removed, one added)', () => {
+      const original = 'line1\nold\nline3';
+      const updated = 'line1\nnew\nline3';
+      expect(diffPipelineLines(original, updated)).toEqual({
+        linesAdded: 1,
+        linesRemoved: 1,
+        netLineChange: 0,
+      });
+    });
+
+    it('should handle going from empty string to content', () => {
+      expect(diffPipelineLines('', 'line1\nline2')).toEqual({
+        linesAdded: 2,
+        linesRemoved: 1,
+        netLineChange: 1,
+      });
+    });
+
+    it('should handle going from content to empty string', () => {
+      expect(diffPipelineLines('line1\nline2', '')).toEqual({
+        linesAdded: 1,
+        linesRemoved: 2,
+        netLineChange: -1,
+      });
+    });
+
+    it('should handle both empty strings', () => {
+      expect(diffPipelineLines('', '')).toEqual({
+        linesAdded: 0,
+        linesRemoved: 0,
+        netLineChange: 0,
+      });
+    });
+
+    it('should count duplicate lines correctly using LCS', () => {
+      const original = 'a\nb\nc';
+      const updated = 'b\na\nc';
+      const result = diffPipelineLines(original, updated);
+      expect(result.linesAdded).toBe(1);
+      expect(result.linesRemoved).toBe(1);
+      expect(result.netLineChange).toBe(0);
     });
   });
 });

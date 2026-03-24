@@ -111,7 +111,9 @@ enabled:
   - src/platform/test/functional/apps/visualize/group4/config.ts
   - src/platform/test/functional/apps/visualize/group5/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group1/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group2/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group3/config.ts
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts

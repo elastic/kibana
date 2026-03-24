@@ -58,6 +58,10 @@ jest.mock('./analyzer_preview', () => ({
   AnalyzerPreview: () => <div data-test-subj="analyzerPreviewMock" />,
 }));
 
+jest.mock('./session_preview_container', () => ({
+  SessionPreviewContainer: () => <div data-test-subj="sessionPreviewContainerMock" />,
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -77,6 +81,7 @@ describe('VisualizationsSection', () => {
   const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
   const openSystemFlyout = jest.fn();
+  const renderCellActions = jest.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -85,7 +90,7 @@ describe('VisualizationsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <VisualizationsSection hit={mockHit} />
+            <VisualizationsSection hit={mockHit} renderCellActions={renderCellActions} />
           </Router>
         </Provider>
       </IntlProvider>
@@ -137,6 +142,7 @@ describe('VisualizationsSection', () => {
       expect(getByTestId(`${VISUALIZATION_SECTION_TEST_ID}Content`)).toBeVisible();
     });
 
+    expect(getByTestId('sessionPreviewContainerMock')).toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
     ).toBeInTheDocument();

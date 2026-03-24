@@ -19,7 +19,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -66,26 +66,22 @@ async function mountComponent({
     );
   }
 
-  const stateContainer = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
-  ).stateContainer$.getValue()!;
-
   const testDocuments = {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   };
 
-  stateContainer.dataState.data$.documents$.next(testDocuments);
+  const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+
+  dataStateContainer.data$.documents$.next(testDocuments);
 
   // Prevent any further updates to documents$ from clearing test data
-  stateContainer.dataState.data$.documents$.next = jest.fn();
+  dataStateContainer.data$.documents$.next = jest.fn();
 
   const props = {
     viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
-    stateContainer,
     onFieldEdited: jest.fn(),
   };
 

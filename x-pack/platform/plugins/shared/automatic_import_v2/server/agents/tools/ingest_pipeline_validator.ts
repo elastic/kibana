@@ -9,7 +9,7 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { estypes } from '@elastic/elasticsearch';

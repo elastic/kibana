@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/discover-plugin'
+  title: '@kbn/discover-plugin'
   description: Moon project for @kbn/discover-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/discover
+  sourceRoot: src/platform/plugins/shared/discover
 dependsOn:
   - '@kbn/core'
   - '@kbn/charts-plugin'
@@ -117,7 +116,6 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/timerange'
   - '@kbn/unified-chart-section-viewer'
-  - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
@@ -133,9 +131,10 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/as-code-filters-schema'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
   - '@kbn/cps-utils'
-  - '@kbn/es-types'
+  - '@kbn/as-code-data-views-schema'
 tags:
   - plugin
   - prod
@@ -152,14 +151,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
