@@ -81,6 +81,50 @@ describe('utils', () => {
       expect(result.metadata.name).toBe('renamed');
       expect(result.metadata.description).toBe('Existing desc');
     });
+
+    it('clears state_transition when update sends null (immediate mode)', () => {
+      const existing = createRuleSoAttributes({
+        state_transition: { pending_count: 3 },
+      });
+      const updateData: UpdateRuleData = {
+        state_transition: null,
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.state_transition).toBeNull();
+    });
+
+    it('preserves existing state_transition when update omits it', () => {
+      const existing = createRuleSoAttributes({
+        state_transition: { pending_count: 3 },
+      });
+      const updateData: UpdateRuleData = {};
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.state_transition).toEqual({ pending_count: 3 });
+    });
+
+    it('sets state_transition when update provides a value', () => {
+      const existing = createRuleSoAttributes({});
+      const updateData: UpdateRuleData = {
+        state_transition: { pending_count: 5 },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.state_transition).toEqual({ pending_count: 5 });
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {

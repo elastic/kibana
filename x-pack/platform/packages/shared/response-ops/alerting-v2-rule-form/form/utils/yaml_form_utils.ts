@@ -158,6 +158,8 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     },
     error: null,
   };

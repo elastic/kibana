@@ -76,6 +76,8 @@ export const defaultTestFormValues: FormValues = {
   recoveryPolicy: {
     type: 'no_breach',
   },
+  stateTransitionAlertDelayMode: 'immediate',
+  stateTransitionRecoveryDelayMode: 'immediate',
 };
 
 /**

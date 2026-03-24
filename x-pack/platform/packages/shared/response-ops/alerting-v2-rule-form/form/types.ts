@@ -8,6 +8,9 @@
 // Import and re-export RuleKind and RecoveryPolicyType from schema
 import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 
+/** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
+export type StateTransitionDelayMode = 'immediate' | 'breaches' | 'duration';
+
 /**
  * Rule metadata containing identification and categorization info.
  */
@@ -50,12 +53,16 @@ export interface RuleArtifact {
 
 /**
  * State transition configuration for alert-type rules.
+ *
+ * Fields are nullable (not just optional) so that explicit "cleared" values
+ * survive JSON serialisation — JSON.stringify drops `undefined` but preserves
+ * `null`, which matters for partial-update (PATCH) payloads.
  */
 export interface StateTransition {
-  pendingCount?: number;
-  pendingTimeframe?: string;
-  recoveringCount?: number;
-  recoveringTimeframe?: string;
+  pendingCount?: number | null;
+  pendingTimeframe?: string | null;
+  recoveringCount?: number | null;
+  recoveringTimeframe?: string | null;
 }
 
 /**
@@ -72,5 +79,15 @@ export interface FormValues {
   grouping?: RuleGrouping;
   recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
+  /**
+   * Source of truth for which pending (alert) delay segment is active.
+   * The mapper uses this so stale `stateTransition.pending*` values left in
+   * react-hook-form state cannot override Immediate after save.
+   */
+  stateTransitionAlertDelayMode: StateTransitionDelayMode;
+  /**
+   * Source of truth for which recovering (recovery) delay segment is active.
+   */
+  stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
 }

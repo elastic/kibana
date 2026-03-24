@@ -29,6 +29,8 @@ export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
 
 // Mappers
 export {
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
   mapFormValuesToRuleRequest,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
@@ -38,6 +40,7 @@ export {
 // Types
 export type {
   FormValues,
+  StateTransitionDelayMode,
   DynamicRuleFormProps,
   StandaloneRuleFormProps,
   RuleFormServices,

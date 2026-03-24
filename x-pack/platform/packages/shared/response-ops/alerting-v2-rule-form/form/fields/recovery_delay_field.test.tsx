@@ -36,10 +36,11 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByText('No delay - Recovers on first non-breach')).toBeInTheDocument();
   });
 
-  it('derives breaches mode from form state with recoveringCount', () => {
+  it('shows breaches controls when recovery delay mode is breaches', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionRecoveryDelayMode: 'breaches',
         stateTransition: { recoveringCount: 4 },
       }),
     });
@@ -47,10 +48,11 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
   });
 
-  it('derives duration mode from form state with recoveringTimeframe', () => {
+  it('shows duration controls when recovery delay mode is duration', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: { recoveringTimeframe: '20m' },
       }),
     });
@@ -84,6 +86,7 @@ describe('RecoveryDelayField', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionRecoveryDelayMode: 'breaches',
         stateTransition: { recoveringCount: 4 },
       }),
     });

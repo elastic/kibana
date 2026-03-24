@@ -50,6 +50,8 @@ describe('yaml_form_utils', () => {
           fields: ['host.name', 'service.name'],
         },
         artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       };
 
       const result = formValuesToYamlObject(formValues);
@@ -97,6 +99,8 @@ describe('yaml_form_utils', () => {
             base: 'FROM logs-*',
           },
         },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       };
 
       const result = formValuesToYamlObject(formValues);
@@ -193,6 +197,8 @@ describe('yaml_form_utils', () => {
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'artifact-2', type: 'service', value: 'service-a' },
         ],
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       });
     });
 
@@ -358,6 +364,8 @@ describe('yaml_form_utils', () => {
         timeField: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         evaluation: { query: { base: 'FROM logs-*' } },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       };
 
       const yaml = serializeFormToYaml(formValues);
