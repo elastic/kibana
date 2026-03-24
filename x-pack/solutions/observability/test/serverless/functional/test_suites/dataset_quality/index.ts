@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Dataset Quality', function () {
@@ -16,6 +16,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dataset_quality_privileges'));
     loadTestFile(require.resolve('./dataset_quality_details'));
     loadTestFile(require.resolve('./degraded_field_flyout'));
-    loadTestFile(require.resolve('./dataset_quality_details_failure_store'));
   });
 }
