@@ -8,6 +8,7 @@
  */
 
 import type {
+  Dimension,
   MetricsESQLResponse,
   MetricsTelemetry,
   ParsedMetricItem,
@@ -18,6 +19,7 @@ import type {
 export type ParseMetricsResponseResult = ParsedMetricsResult & {
   telemetry: MetricsTelemetry;
 };
+
 import { toArray } from './to_array';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
 import { accumulateMetricsRowTelemetry } from './accumulate_metrics_row_telemetry';
@@ -33,12 +35,18 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
 });
 
 export const parseMetricsResponse = (
-  response: MetricsESQLResponse[]
-): ParseMetricsResponseResult => {
+  response: MetricsESQLResponse[],
+  getFieldType?: (name: string) => string | undefined
+): ParsedMetricsResult => {
   const result: ParsedMetricItem[] = [];
   const telemetry = createInitialMetricsTelemetry();
 
   const allDimensionsSet = new Set<string>();
+
+  const toDimension = (name: string): Dimension => {
+    const type = getFieldType?.(name);
+    return { name, type };
+  };
 
   for (const metric of response) {
     const metricTypes = toArray(metric.metric_type);
@@ -64,7 +72,7 @@ export const parseMetricsResponse = (
 
     const dimensionFields = dimensions.map((name) => {
       allDimensionsSet.add(name);
-      return { name };
+      return toDimension(name);
     });
 
     for (const stream of dataStreams) {
@@ -84,7 +92,6 @@ export const parseMetricsResponse = (
 
   return {
     metricItems: result,
-    allDimensions: Array.from(allDimensionsSet).map((name) => ({ name })),
-    telemetry,
+    allDimensions: Array.from(allDimensionsSet).map(toDimension),
   };
 };

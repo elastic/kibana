@@ -10,7 +10,8 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo, useRef } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { getFieldIconType } from '@kbn/field-utils';
 import type {
   Dimension,
   MetricsESQLResponse,
@@ -18,7 +19,6 @@ import type {
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
-import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
@@ -72,7 +72,12 @@ export function useFetchMetricsData({
         uiSettings: services.uiSettings,
       });
 
-      const parsed = parseMetricsResponse(result);
+      const getFieldType = (name: string) => {
+        const field = fetchParams.dataView?.getFieldByName(name);
+        return field ? getFieldIconType(field) : undefined;
+      };
+
+      const parsed = parseMetricsResponse(result, getFieldType);
 
       onMetricsTelemetryReportedRef.current?.(parsed.telemetry);
 

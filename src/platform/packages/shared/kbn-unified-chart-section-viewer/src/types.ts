@@ -38,6 +38,7 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
 
 export interface Dimension {
   name: string;
+  type?: string;
 }
 
 export type MetricUnit =

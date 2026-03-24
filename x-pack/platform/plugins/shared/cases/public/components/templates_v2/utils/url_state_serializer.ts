@@ -19,8 +19,8 @@ export const templatesUrlStateSerializer = (
 
   // Filter out empty values
   return Object.entries(urlState).reduce((acc, [key, value]) => {
-    // isEmpty returns true for numbers, so we need to handle them separately
-    if (isEmpty(value) && !isNumber(value)) {
+    // isEmpty returns true for numbers and booleans, so we need to handle them separately
+    if (isEmpty(value) && !isNumber(value) && typeof value !== 'boolean') {
       return acc;
     }
 
