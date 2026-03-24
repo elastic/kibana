@@ -18,7 +18,7 @@ import {
   SPAN_ID,
   SPAN_DURATION,
 } from '@kbn/apm-types';
-import { esql } from '@elastic/esql';
+import { esql, type ComposerQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
@@ -43,23 +43,30 @@ function getWhereClauses(filters: string[]): string[] {
   ];
 }
 
+interface TraceQueryParams {
+  indexes: string;
+  filters: string[];
+  metadataFields: string[];
+}
+
+function createBaseTraceQuery({ indexes, filters, metadataFields }: TraceQueryParams): ComposerQuery {
+  const whereClauses = getWhereClauses(filters);
+  const query = metadataFields.length
+    ? esql.from([indexes], metadataFields)
+    : esql.from(indexes);
+  for (const clause of whereClauses) {
+    query.pipe(`WHERE ${clause}`);
+  }
+  return query;
+}
+
 export function getErrorRateChart({
   indexes,
   filters,
   metadataFields,
-}: {
-  indexes: string;
-  filters: string[];
-  metadataFields: string[];
-}): TraceChart | null {
+}: TraceQueryParams): TraceChart | null {
   try {
-    const whereClauses = getWhereClauses(filters);
-    const query = metadataFields.length
-      ? esql.from([indexes], metadataFields)
-      : esql.from(indexes);
-    for (const clause of whereClauses) {
-      query.pipe(`WHERE ${clause}`);
-    }
+    const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(
       `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
     );
@@ -86,19 +93,9 @@ export function getLatencyChart({
   indexes,
   filters,
   metadataFields,
-}: {
-  indexes: string;
-  filters: string[];
-  metadataFields: string[];
-}): TraceChart | null {
+}: TraceQueryParams): TraceChart | null {
   try {
-    const whereClauses = getWhereClauses(filters);
-    const query = metadataFields.length
-      ? esql.from([indexes], metadataFields)
-      : esql.from(indexes);
-    for (const clause of whereClauses) {
-      query.pipe(`WHERE ${clause}`);
-    }
+    const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     // apm duration is in us
     query.pipe(
       `EVAL duration_ms_ecs = CASE(${TRANSACTION_DURATION} IS NOT NULL, TO_DOUBLE(${TRANSACTION_DURATION})/1000, ${SPAN_DURATION} IS NOT NULL, TO_DOUBLE(${SPAN_DURATION})/1000, null)`
@@ -128,19 +125,9 @@ export function getThroughputChart({
   indexes,
   filters,
   metadataFields,
-}: {
-  indexes: string;
-  filters: string[];
-  metadataFields: string[];
-}): TraceChart | null {
+}: TraceQueryParams): TraceChart | null {
   try {
-    const whereClauses = getWhereClauses(filters);
-    const query = metadataFields.length
-      ? esql.from([indexes], metadataFields)
-      : esql.from(indexes);
-    for (const clause of whereClauses) {
-      query.pipe(`WHERE ${clause}`);
-    }
+    const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(`EVAL id = COALESCE(${TRANSACTION_ID}, ${SPAN_ID})`);
     query.pipe(`STATS COUNT(id) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`);
 
