@@ -25,6 +25,27 @@ import {
 } from '../../fixtures/workflows';
 
 /**
+ * Security detection alerts embed the original document, so we can assert on alert_id.
+ * Generic alerting alerts (obs/ESS) contain Kibana alert metadata without original doc
+ * fields — we verify the output is non-empty (the step ran) and contains alert info.
+ */
+const assertAlertOutputs = (
+  outputs: string[],
+  mockAlerts: Array<{ alert_id: string }>,
+  isSecurityProject: boolean
+) => {
+  if (isSecurityProject) {
+    for (const alertId of mockAlerts.map((a) => a.alert_id)) {
+      expect(outputs.some((output) => output.includes(alertId))).toBe(true);
+    }
+  } else {
+    for (const output of outputs) {
+      expect(output).toContain('alert');
+    }
+  }
+};
+
+/**
  * Returns the correct "create alert rule" workflow YAML based on the project type.
  * - Security: uses the detection engine API
  * - Observability / ESS: uses the generic Kibana alerting API with .es-query rule type
@@ -168,20 +189,7 @@ test.describe(
         await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
       }
 
-      // Security detection alerts embed the original document, so we can assert on alert_id.
-      // Generic alerting alerts (obs/ESS) contain Kibana alert metadata without original doc
-      // fields — we verify the output is non-empty (the step ran) and contains alert info.
-      /* eslint-disable playwright/no-conditional-in-test, playwright/no-conditional-expect */
-      if (isSecurityProject) {
-        for (const alertId of mockAlerts.map((a) => a.alert_id)) {
-          expect(actualSingleOutputs.some((output) => output.includes(alertId))).toBe(true);
-        }
-      } else {
-        for (const output of actualSingleOutputs) {
-          expect(output).toContain('alert');
-        }
-      }
-      /* eslint-enable playwright/no-conditional-in-test, playwright/no-conditional-expect */
+      assertAlertOutputs(actualSingleOutputs, mockAlerts, isSecurityProject);
 
       // Validate multiple-alerts workflow execution (all alerts in one execution)
       await pageObjects.workflowEditor.gotoWorkflowExecutions(multipleWorkflow.id);
@@ -210,19 +218,7 @@ test.describe(
         iterationOutputs.push(JSON.stringify(alertOutput));
       }
 
-      // Security alerts contain the original document with alert_id;
-      // generic alerting alerts contain Kibana alert metadata.
-      /* eslint-disable playwright/no-conditional-in-test, playwright/no-conditional-expect */
-      if (isSecurityProject) {
-        for (const alertId of mockAlerts.map((a) => a.alert_id)) {
-          expect(iterationOutputs.some((output) => output.includes(alertId))).toBe(true);
-        }
-      } else {
-        for (const output of iterationOutputs) {
-          expect(output).toContain('alert');
-        }
-      }
-      /* eslint-enable playwright/no-conditional-in-test, playwright/no-conditional-expect */
+      assertAlertOutputs(iterationOutputs, mockAlerts, isSecurityProject);
     });
 
     test('should not trigger a disabled workflow when alert fires', async ({
