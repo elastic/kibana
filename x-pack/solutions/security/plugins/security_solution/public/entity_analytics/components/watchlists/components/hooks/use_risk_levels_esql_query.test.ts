@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 
-jest.mock('@kbn/esql-utils', () => ({  
+jest.mock('@kbn/esql-utils', () => ({
   prettifyQuery: jest.fn((query) => query),
 }));
 
