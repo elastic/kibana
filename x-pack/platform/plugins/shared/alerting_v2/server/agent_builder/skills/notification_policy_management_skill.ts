@@ -62,6 +62,7 @@ A notification policy connects alert episodes to action connectors. When an \`ki
 `,
   getRegistryTools: () => [
     `${internalNamespaces.alertingV2}.list_notification_policies`,
+    `${internalNamespaces.alertingV2}.propose_notification_policy`,
     `${internalNamespaces.alertingV2}.get_rule`,
     `${internalNamespaces.alertingV2}.query_alert_events`,
   ],

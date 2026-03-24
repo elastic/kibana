@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { Subject } from 'rxjs';
 import {
   type AppDeepLinkLocations,
@@ -100,7 +101,7 @@ export class WorkflowsPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
     // Initialize singletons with workflowsExtensions
@@ -116,7 +117,14 @@ export class WorkflowsPlugin
       }
     });
 
-    return {};
+    return {
+      getWorkflowEditor: () =>
+        React.lazy(() =>
+          import('./widgets/standalone_workflow_editor').then((m) => ({
+            default: m.StandaloneWorkflowEditor,
+          }))
+        ),
+    };
   }
 
   public stop() {}

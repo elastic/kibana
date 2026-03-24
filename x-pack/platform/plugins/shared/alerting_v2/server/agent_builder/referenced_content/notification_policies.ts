@@ -5,87 +5,47 @@
  * 2.0.
  */
 
-export const notificationPoliciesReference = `# Notification Policies Reference
+export const notificationPoliciesReference = `# Notification Policies — Background Knowledge
 
-## How Notifications Work
+This is reference material only. For action steps on setting up notifications, follow the "Set Up Notifications (Phase 3)" section in the main skill content.
 
-Notification policies connect alert episodes to action connectors. When a rule with \`kind: "alert"\` produces an episode that transitions to the "active" state, the Dispatcher evaluates all notification policies and dispatches actions for any that match.
+## Two Components
 
-Rules with \`kind: "signal"\` never trigger notifications — they produce point-in-time observations with no episode fields, making them invisible to the notification dispatcher.
+Notifications require two components:
 
-## Key Concepts
+1. **Workflow** — the destination. A YAML definition with an \`alert\` trigger and connector steps (Slack, email, PagerDuty, etc.) that perform the actual notification. Must exist before a policy can route to it.
+2. **Notification policy** — the routing. Matches alert episodes by labels/metadata and dispatches them to a workflow.
 
-### Notification Policy
-A policy defines: which episodes to match, what action to take, and how to throttle repeat notifications. Each policy has:
-- **Matchers** — rules that determine which episodes this policy applies to (by label, rule kind, rule ID, or other metadata)
-- **Action Connector** — the integration target (email, Slack, PagerDuty, webhook, Microsoft Teams, etc.)
-- **Throttling** — minimum interval between repeated notifications for the same episode (prevents notification storms)
-- **Suppression** — time windows or conditions during which notifications are silenced
-- **Snooze** — manual temporary silencing of a policy
+The chain is: **rule → episode → notification policy matches → workflow executes**.
 
-### Episode → Notification Flow
+Signal rules (\`kind: "signal"\`) never trigger notifications.
 
-1. Rule executes and produces events with \`kind: "alert"\`
-2. The Director tracks episode lifecycle: inactive → pending → **active** → recovering → inactive
-3. When an episode transitions to **active**, the Dispatcher evaluates notification policies
-4. Policies whose matchers match the episode's labels/metadata fire their action connectors
-5. Throttling prevents the same episode from triggering the same policy again within the configured interval
+## What a Notification Policy Contains
 
-### What Triggers a Notification
-- Episode reaching **active** status (the pending threshold has been met)
-- Only \`kind: "alert"\` rules — never \`kind: "signal"\`
+- **Matchers** — which episodes to match (by label, rule ID, or rule kind)
+- **Workflow destination** — which workflow to dispatch to
+- **Throttling** — minimum interval between repeated notifications for the same episode
+- **Suppression** — time windows when notifications are silenced
+- **Snooze** — manual temporary silencing
 
-### What Does NOT Trigger a Notification
-- Episodes stuck in **pending** (haven't met the pending threshold yet)
-- Episodes in **recovering** or **inactive** state
-- Signal rule events (no episode fields, invisible to dispatcher)
-- Episodes matching a policy that is snoozed or in a suppression window
-- Repeat notifications within the throttle interval
+## How Matching Works
 
-## Matching
+Policies match based on rule \`metadata.labels\`. A policy with matcher \`environment: production\` only fires for rules whose labels include that value. When setting up notifications for a new rule, the rule's labels must align with the policy's matchers.
 
-Policies match episodes based on:
-- **Labels** — rule \`metadata.labels\` are compared against policy matchers (e.g. a policy matching \`environment: production\` only fires for rules with that label)
-- **Rule ID** — a policy can target a specific rule by ID
-- **Rule kind** — always \`"alert"\` (signal rules are excluded by design)
+## Episode Lifecycle
 
-When proposing a rule, choosing meaningful labels helps the user connect it to notification policies later.
+1. Rule produces events with \`kind: "alert"\`
+2. Director tracks: inactive → pending → **active** → recovering → inactive
+3. On **active**, Dispatcher evaluates policies → dispatches to workflow
+4. Throttling prevents repeats within the configured interval
 
-## Notification Policies and Workflows
+## Troubleshooting
 
-Notification policies and workflows are two sides of the same dispatch pipeline:
-
-- A **notification policy** defines the matching rules and the destination. When an episode matches a policy, the Dispatcher writes a \`fire\` record per episode and a \`notified\` record per notification group to the \`.alerting-actions\` data stream.
-- A **workflow** is what gets triggered as the destination of a notification policy. Workflows can be simple (send an email, post to Slack) or complex (multi-step automation via webhook, PagerDuty incident creation, etc.).
-
-The relationship is: **notification policy → matches episodes → triggers workflow**.
-
-### Action Records
-
-Every Dispatcher decision is recorded in the \`$.alerting-actions\` ES|QL view (backed by the \`.alerting-actions\` data stream):
-
-| action_type | Meaning |
-|-------------|---------|
-| \`fire\` | Episode was dispatched to a workflow (one record per episode) |
-| \`notified\` | Notification group was notified (one record per group, used for throttle tracking) |
-| \`suppress\` | Episode was suppressed — check the \`reason\` field (acknowledged, snoozed, deactivated, or throttled) |
-| \`unmatched\` | Episode was dispatchable but no notification policy matched it |
-
-User actions (\`ack\`, \`unack\`, \`snooze\`, \`unsnooze\`, \`activate\`, \`deactivate\`) are also recorded here and create suppression state that affects future Dispatcher decisions.
-
-### Investigating Whether a Workflow Was Triggered
-
-To confirm a specific episode triggered a workflow, query for \`fire\` records by \`episode_id\` in \`$.alerting-actions\`. If you find \`suppress\` or \`unmatched\` records instead, the \`reason\` field explains why the workflow was not triggered.
-
-## Common Questions
-
-**"Why didn't I get notified?"**
-1. Is the rule \`kind: "alert"\`? Signal rules never trigger notifications.
-2. Did the episode reach "active" status? Check with \`query_alert_events\`.
-3. Does a matching notification policy exist? Check with \`list_notification_policies\`.
-4. Is the policy snoozed or in a suppression window?
-5. Is throttling preventing a repeat notification?
-
-**"How do I set up notifications for my rule?"**
-Notification policies are configured in the Notification Policies management page. The agent can check existing policies with \`list_notification_policies\` but cannot create new policies programmatically. Guide the user to the management UI.
+**Not getting notified?** Check in order:
+1. Rule is \`kind: "alert"\`? (signal rules are excluded)
+2. Episode reached "active"? (pending = threshold not met yet)
+3. Matching notification policy exists?
+4. Policy not snoozed or suppressed?
+5. Not within throttle interval?
+6. Workflow destination exists and is valid?
 `;

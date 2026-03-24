@@ -9,9 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { alertInvestigationSkill } from './alert_investigation_skill';
 import { alertRuleCreationSkill } from './alert_rule_creation_skill';
 import { alertRuleTuningSkill } from './alert_rule_tuning_skill';
-import { notificationPolicyManagementSkill } from './notification_policy_management_skill';
 import { alertingRulesOverviewSkill } from './alerting_rules_overview_skill';
-import { workflowTriggerInvestigationSkill } from './workflow_trigger_investigation_skill';
 import { alertEpisodesSkill } from './alert_episodes_skill';
 import { dataDiscoverySkill } from './data_discovery_skill';
 
@@ -27,8 +25,11 @@ export const registerSkills = (agentBuilder: AgentBuilderPluginSetup) => {
   // P2 — tuning
   agentBuilder.skills.register(alertRuleTuningSkill);
 
-  // P3 — notification policies, overview & workflow investigation
-  agentBuilder.skills.register(notificationPolicyManagementSkill);
+  // P3 — overview & workflow investigation
+  // notificationPolicyManagementSkill disabled — notification flow is handled
+  // by the rule creation skill's Phase 3 to avoid conflicting guidance
   agentBuilder.skills.register(alertingRulesOverviewSkill);
-  agentBuilder.skills.register(workflowTriggerInvestigationSkill);
+  // workflowTriggerInvestigationSkill disabled — workflow investigation may
+  // conflict with the rule creation skill's notification flow during testing
+  // agentBuilder.skills.register(workflowTriggerInvestigationSkill);
 };

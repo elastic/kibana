@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -38,6 +39,8 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const initialYaml = (location.state as { initialYaml?: string } | undefined)?.initialYaml;
   const [loadConnectors, { isLoading: isLoadingConnectors }] =
     useAsyncThunkState(loadConnectorsThunk);
   const [loadWorkflows] = useAsyncThunkState(loadWorkflowsThunk);
@@ -77,9 +80,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     if (id) {
       loadWorkflow({ id }); // sets loaded yaml string
     } else {
-      dispatch(setYamlString(workflowDefaultYaml));
+      dispatch(setYamlString(initialYaml || workflowDefaultYaml));
     }
-  }, [loadWorkflow, id, dispatch]);
+  }, [loadWorkflow, id, dispatch, initialYaml]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {

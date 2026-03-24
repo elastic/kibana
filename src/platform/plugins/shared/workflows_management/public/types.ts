@@ -32,8 +32,17 @@ export interface WorkflowsPublicPluginSetupDependencies {
 
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPublicPluginStart {}
+import type { ComponentType } from 'react';
+
+export interface StandaloneWorkflowEditorProps {
+  initialYaml: string;
+  onYamlChange?: (yaml: string) => void;
+  height?: string;
+}
+
+export interface WorkflowsPublicPluginStart {
+  getWorkflowEditor: () => ComponentType<StandaloneWorkflowEditorProps>;
+}
 
 export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;

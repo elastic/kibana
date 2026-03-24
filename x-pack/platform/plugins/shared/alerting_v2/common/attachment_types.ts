@@ -102,3 +102,42 @@ export const ruleAttachmentDataSchema = z.object({
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
 export type RuleAttachment = Attachment<typeof RULE_TYPE, RuleAttachmentData>;
+
+export const NOTIFICATION_POLICY_TYPE = 'platform.alerting_v2.notification_policy';
+
+const notificationPolicyWorkflowSchema = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('existing'),
+    id: z.string(),
+    name: z.string(),
+    yaml: z.string().optional(),
+  }),
+  z.object({
+    source: z.literal('inline'),
+    name: z.string(),
+    description: z.string().optional(),
+    yaml: z.string(),
+    connectorTypes: z.array(z.string()).optional(),
+    isValid: z.boolean().optional(),
+  }),
+]);
+
+export type NotificationPolicyWorkflow = z.infer<typeof notificationPolicyWorkflowSchema>;
+
+export const notificationPolicyAttachmentDataSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  matcher: z.string().optional(),
+  groupBy: z.array(z.string()).optional(),
+  throttle: z.object({ interval: z.string() }).optional(),
+  workflow: notificationPolicyWorkflowSchema,
+});
+
+export type NotificationPolicyAttachmentData = z.infer<
+  typeof notificationPolicyAttachmentDataSchema
+>;
+
+export type NotificationPolicyAttachment = Attachment<
+  typeof NOTIFICATION_POLICY_TYPE,
+  NotificationPolicyAttachmentData
+>;
