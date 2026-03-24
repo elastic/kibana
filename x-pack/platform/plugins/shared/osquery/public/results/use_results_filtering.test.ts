@@ -181,6 +181,20 @@ describe('useResultsFiltering', () => {
     expect(filter.query).toEqual({ match_phrase: { 'osquery.description': 'Apple, Inc.' } });
   });
 
+  it('handleFilter with negative operation sets meta.negate to true', () => {
+    const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
+
+    act(() => {
+      result.current.handleFilter({ name: 'agent.name' } as DataViewField, 'test-host', '-');
+    });
+
+    const filter = result.current.filters[0];
+    expect(filter.meta.negate).toBe(true);
+    expect(filter.meta.key).toBe('agent.name');
+    expect(filter.meta.value).toBe('test-host');
+    expect(filter.query).toEqual({ match_phrase: { 'agent.name': 'test-host' } });
+  });
+
   it('provides filtersForSuggestions for scheduled queries', () => {
     const { result } = renderHook(() =>
       useResultsFiltering(
