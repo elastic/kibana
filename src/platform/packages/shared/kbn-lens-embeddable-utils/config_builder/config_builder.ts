@@ -62,7 +62,7 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
-  lnsHeatmap: 'heat_map',
+  lnsHeatmap: 'heatmap',
   lnsTagcloud: 'tag_cloud',
   lnsChoropleth: 'region_map',
   lnsPie: 'pie',
@@ -115,7 +115,7 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
-  heat_map: {
+  heatmap: {
     fromAPItoLensState: fromHeatmapAPItoLensState,
     fromLensStateToAPI: fromHeatmapLensStateToAPI,
   },
