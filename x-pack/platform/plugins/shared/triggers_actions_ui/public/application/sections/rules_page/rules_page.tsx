@@ -173,7 +173,7 @@ const RulesPage = () => {
     <>
       <RulesPageTemplate
         pageHeader={{
-          paddingSize: 'xl',
+          paddingSize: 'm',
           bottomBorder: true,
           pageTitle: (
             <span data-test-subj="appTitle">
