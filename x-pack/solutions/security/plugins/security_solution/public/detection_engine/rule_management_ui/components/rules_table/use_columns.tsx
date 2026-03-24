@@ -32,7 +32,6 @@ import {
 } from '../../../../../common/constants';
 import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
@@ -389,7 +388,7 @@ export const useRulesColumns = ({
         name: i18n.COLUMN_LAST_UPDATE,
         render: (value: Rule['updated_at']) => {
           return value == null ? (
-            getEmptyTagValue()
+            <EmptyCellValue />
           ) : (
             <FormattedRelativePreferenceDate
               tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
@@ -428,7 +427,7 @@ export const INDEXING_DURATION_COLUMN = {
   ),
   render: (value: number | undefined) => (
     <EuiText data-test-subj="total_indexing_duration_ms" size="s">
-      {value != null ? value.toFixed() : getEmptyTagValue()}
+      {value != null ? value.toFixed() : <EmptyCellValue />}
     </EuiText>
   ),
   sortable: true,
@@ -446,7 +445,7 @@ export const SEARCH_DURATION_COLUMN = {
   ),
   render: (value: number | undefined) => (
     <EuiText data-test-subj="total_search_duration_ms" size="s">
-      {value != null ? value.toFixed() : getEmptyTagValue()}
+      {value != null ? value.toFixed() : <EmptyCellValue />}
     </EuiText>
   ),
   sortable: true,
@@ -485,7 +484,7 @@ export const useGapDurationColumn = () => {
     ),
     render: (value: number | undefined) => (
       <EuiText data-test-subj="gap" size="s">
-        {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
+        {value != null ? moment.duration(value, 'seconds').humanize() : <EmptyCellValue />}
       </EuiText>
     ),
     sortable: true,
@@ -530,7 +529,7 @@ export const useGapStatusColumn = (): TableColumn => {
       name: GAP_STATUS_HEADER,
       render: (gapInfo: GapSummaryEntry | undefined) => {
         const status = (gapInfo?.gap_fill_status ?? undefined) as GapFillStatus | undefined;
-        if (!gapInfo || !status) return getEmptyTagValue();
+        if (!gapInfo || !status) return <EmptyCellValue />;
 
         const totalInProgressDurationMs = gapInfo.total_in_progress_duration_ms;
         const totalUnfilledDurationMs = gapInfo.total_unfilled_duration_ms;
@@ -593,7 +592,7 @@ export const TOTAL_UNFILLED_DURATION_COLUMN = {
   ),
   render: (value: number | undefined) => (
     <EuiText data-test-subj="gap_info" size="s">
-      {value != null && value > 0 ? moment.duration(value, 'ms').humanize() : getEmptyTagValue()}
+      {value != null && value > 0 ? moment.duration(value, 'ms').humanize() : <EmptyCellValue />}
     </EuiText>
   ),
   sortable: false,
