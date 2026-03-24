@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/langchain'
   - '@kbn/core-lifecycle-browser-mocks'
+  - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/shared-ux-router'
   - '@kbn/react-query'
@@ -59,6 +60,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/monaco'
   - '@kbn/scout'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
