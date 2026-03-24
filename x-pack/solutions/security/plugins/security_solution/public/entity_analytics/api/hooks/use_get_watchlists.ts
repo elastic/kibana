@@ -12,7 +12,7 @@ export const useGetWatchlists = () => {
   const { fetchWatchlists } = useEntityAnalyticsRoutes();
 
   return useQuery({
-    queryKey: ['watchlists'],
+    queryKey: ['GET', 'WATCHLISTS'],
     queryFn: ({ signal }) => fetchWatchlists({ signal }),
   });
 };
