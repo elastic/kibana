@@ -163,7 +163,7 @@ describe('Incremental Attack Discovery - Integration Tests', () => {
   });
 
   describe('Context Budget', () => {
-    it('should keep context under 8K tokens per round', async () => {
+    it('should keep context under 32K tokens per round', async () => {
       const alerts = generateMockAlerts(75); // Max safe amount
 
       const result = await incrementalAttackDiscovery({
@@ -177,7 +177,7 @@ describe('Incremental Attack Discovery - Integration Tests', () => {
 
       // Estimate tokens (conservative: 100 tokens per alert + 500 overhead)
       const estimatedTokens = 75 * 100 + 500;
-      expect(estimatedTokens).toBeLessThanOrEqual(8000); // Boundary test: exactly at limit is OK
+      expect(estimatedTokens).toBeLessThanOrEqual(32000); // Boundary test: exactly at limit is OK
 
       // Verify completed successfully
       expect(result.stats.totalAlertsProcessed).toBe(75);

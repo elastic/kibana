@@ -11,7 +11,7 @@
  * These scenarios validate that:
  * 1. Delta mode processes only NEW alerts
  * 2. Progressive mode handles large datasets in bounded context
- * 3. Context stays <8K tokens per round
+ * 3. Context stays within model context budget (32K default)
  * 4. Insights are coherent and properly merged
  */
 
@@ -53,7 +53,7 @@ export function generateMockAlerts(count: number, startId: number = 0): Alert[] 
  * Expected:
  * - All 100 alerts processed (deltaSize = 100)
  * - 2 rounds (50 alerts each)
- * - Context <8K tokens per round
+ * - Context within 32K budget per round
  */
 export const deltaModeDayOne = {
   name: 'Delta Mode - Day 1 (Initial Run)',
@@ -68,7 +68,7 @@ export const deltaModeDayOne = {
     totalRounds: 2,
     totalAlertsProcessed: 100,
     deltaSize: 100,
-    maxContextTokens: 8000,
+    maxContextTokens: 32000,
   },
   validate: (result: any) => {
     const { stats, rounds } = result;
@@ -81,7 +81,7 @@ export const deltaModeDayOne = {
     // Verify context budget per round
     rounds.forEach((round: any, i: number) => {
       const estimatedTokens = round.alertsProcessed.length * 100 + 500;
-      expect(estimatedTokens).toBeLessThan(8000);
+      expect(estimatedTokens).toBeLessThan(32000);
     });
   },
 };
@@ -108,7 +108,7 @@ export const deltaModeDayTwo = {
     totalRounds: 1,
     totalAlertsProcessed: 15,
     deltaSize: 15,
-    maxContextTokens: 8000,
+    maxContextTokens: 32000,
   },
   validate: (result: any) => {
     const { stats } = result;
@@ -145,7 +145,7 @@ export const progressiveModeLargeDataset = {
   expectedStats: {
     totalRounds: 4,
     totalAlertsProcessed: 200,
-    maxContextTokens: 8000,
+    maxContextTokens: 32000,
   },
   validate: (result: any) => {
     const { stats, rounds } = result;
@@ -157,7 +157,7 @@ export const progressiveModeLargeDataset = {
     // Verify context grows progressively but stays bounded
     rounds.forEach((round: any, i: number) => {
       const estimatedTokens = round.alertsProcessed.length * 100 + i * 500; // Progressive growth
-      expect(estimatedTokens).toBeLessThan(8000);
+      expect(estimatedTokens).toBeLessThan(32000);
     });
 
     // Verify insights were merged (some deduplication)
@@ -170,9 +170,9 @@ export const progressiveModeLargeDataset = {
 /**
  * Validation Scenario 4: Context Boundary Test
  *
- * Tests maximum alerts per round while staying under 8K tokens
+ * Tests maximum alerts per round while staying within 32K context budget
  * Expected:
- * - 75 alerts per round should stay <8K tokens
+ * - 75 alerts per round should stay within 32K context budget
  * - 100 alerts per round might exceed (fail gracefully)
  */
 export const contextBoundaryTest = {
@@ -187,18 +187,18 @@ export const contextBoundaryTest = {
   expectedStats: {
     totalRounds: 1,
     totalAlertsProcessed: 75,
-    maxContextTokens: 8000,
+    maxContextTokens: 32000,
   },
   validate: (result: any) => {
     const { rounds } = result;
 
     // Verify context stayed under limit
     const estimatedTokens = rounds[0].alertsProcessed.length * 100 + 500;
-    expect(estimatedTokens).toBeLessThan(8000);
+    expect(estimatedTokens).toBeLessThan(32000);
 
     // Log warning if close to limit
     if (estimatedTokens > 7000) {
-      console.warn(`Context budget high: ${estimatedTokens} tokens (limit: 8000)`);
+      console.warn(`Context budget high: ${estimatedTokens} tokens (limit: 32000)`);
     }
   },
 };

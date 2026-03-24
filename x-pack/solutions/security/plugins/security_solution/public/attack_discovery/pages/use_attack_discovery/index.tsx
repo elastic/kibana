@@ -105,12 +105,12 @@ export const useAttackDiscovery = ({
           filter: effectiveFilter,
           size: effectiveSize,
           start: effectiveStart,
-          // Enable incremental progressive mode for large alert sets
-          ...(effectiveSize >= 50
+          // Enable incremental progressive mode for large alert sets.
+          // alertsPerRound is auto-tuned by the backend based on model context budget (default 32K).
+          ...(effectiveSize >= 100
             ? {
                 incrementalMode: 'progressive' as const,
                 incrementalConfig: {
-                  alertsPerRound: 50,
                   maxRounds: 10,
                 },
               }

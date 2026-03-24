@@ -9,7 +9,7 @@
  * Validation Runner for Incremental Attack Discovery
  *
  * Runs validation scenarios against real or mock LLMs to verify:
- * 1. Context budget stays <8K tokens
+ * 1. Context budget stays within 32K model context
  * 2. Delta mode processes only NEW alerts
  * 3. Progressive mode handles large datasets
  * 4. Insights are coherent and properly merged
@@ -201,8 +201,8 @@ export async function runAllValidations(config: ValidationConfig) {
   console.log(`  Total rounds: ${totalRounds}`);
   console.log(`  Total alerts: ${totalAlerts}`);
   console.log(`  Avg max context: ${avgMaxContext.toFixed(0)} tokens`);
-  console.log(`  Context limit: 8000 tokens`);
-  console.log(`  Within budget: ${avgMaxContext < 8000 ? '✅' : '❌'}`);
+  console.log(`  Context limit: 32000 tokens`);
+  console.log(`  Within budget: ${avgMaxContext < 32000 ? '✅' : '❌'}`);
 
   // Failed scenarios detail
   if (failed > 0) {
