@@ -72,6 +72,28 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(check.found).toBe(true);
   });
 
+  apiTest('Should receive a conflict (409) if an entity already exists', async ({ apiClient }) => {
+    const entityObj: Entity = {
+      entity: {
+        id: 'conflict-create',
+      },
+    };
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toStrictEqual({ ok: true });
+
+    const secondCreate = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(secondCreate.statusCode).toBe(409);
+  });
+
   apiTest(
     'Should use generated EUID on create when entity.id is not supplied',
     async ({ apiClient, esClient }) => {
