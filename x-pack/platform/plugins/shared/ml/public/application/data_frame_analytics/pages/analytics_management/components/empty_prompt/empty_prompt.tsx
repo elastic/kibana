@@ -96,7 +96,7 @@ export const AnalyticsEmptyPrompt: FC<{
                 target="_blank"
                 href={docLinks.links.ml.dataFrameAnalytics}
                 data-test-subj="mlAnalyticsReadDocumentationButton"
-                iconType="popout"
+                iconType="external"
                 iconSide="left"
               >
                 <FormattedMessage
