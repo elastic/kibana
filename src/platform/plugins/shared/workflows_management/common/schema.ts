@@ -17,7 +17,6 @@ import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
-  isBuiltInStepType,
   SystemConnectorsMap,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -88,38 +87,33 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
 function getRegisteredStepDefinitions(): BaseConnectorContract[] {
-  return (
-    stepSchemas
-      .getAllRegisteredStepDefinitions()
-      // Skip built-in step types (e.g. waitForInput): they are already present in the
-      // getBuiltInStepTypesFromSchema() autocomplete list and must not appear twice.
-      .filter((stepDefinition) => !isBuiltInStepType(stepDefinition.id))
-      .map((stepDefinition): BaseConnectorContract => {
-        const definition = {
-          type: stepDefinition.id,
-          paramsSchema: stepDefinition.inputSchema,
-          outputSchema: stepDefinition.outputSchema,
-          configSchema: stepDefinition.configSchema,
-          summary: null,
-          description: null,
-        };
+  return stepSchemas
+    .getAllRegisteredStepDefinitions()
+    .map((stepDefinition): BaseConnectorContract => {
+      const definition = {
+        type: stepDefinition.id,
+        paramsSchema: stepDefinition.inputSchema,
+        outputSchema: stepDefinition.outputSchema,
+        configSchema: stepDefinition.configSchema,
+        summary: null,
+        description: null,
+      };
 
-        if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-          // Only public step definitions have documentation and examples
-          return {
-            ...definition,
-            description: stepDefinition.label, // Short title-like text
-            summary: stepDefinition.description ?? null, // Explanation of the step behavior
-            documentation: stepDefinition.documentation?.url,
-            examples: stepDefinition.documentation?.examples
-              ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-              : undefined,
-            editorHandlers: stepDefinition.editorHandlers,
-          };
-        }
-        return definition;
-      })
-  );
+      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
+        // Only public step definitions have documentation and examples
+        return {
+          ...definition,
+          description: stepDefinition.label, // Short title-like text
+          summary: stepDefinition.description ?? null, // Explanation of the step behavior
+          documentation: stepDefinition.documentation?.url,
+          examples: stepDefinition.documentation?.examples
+            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
+            : undefined,
+          editorHandlers: stepDefinition.editorHandlers,
+        };
+      }
+      return definition;
+    });
 }
 
 /**

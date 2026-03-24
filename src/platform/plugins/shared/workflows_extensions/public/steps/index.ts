@@ -10,9 +10,6 @@
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
-  stepRegistry.register(() =>
-    import('./flow_control/wait_for_input_step').then((m) => m.WaitForInputStepDefinition)
-  );
   stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
     import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
