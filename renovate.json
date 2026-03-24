@@ -2278,6 +2278,7 @@
       "matchDepNames": [
         "langchain",
         "@langchain/aws",
+        "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
         "@langchain/google-genai",

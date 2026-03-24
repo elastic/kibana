@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .send({
             connector_id: 'connectorId',
+            field_name: 'message',
             sample_messages: [],
             review_fields: {},
           })

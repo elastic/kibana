@@ -61,6 +61,7 @@ toc:
           - file: scout/run-tests.md
           - file: scout/debugging.md
           - file: scout/best-practices.md
+          - file: scout/training.md
       - file: scout/core-concepts.md
         children:
           - file: scout/fixtures.md
