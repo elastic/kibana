@@ -268,7 +268,6 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        // width: '10%',
       },
       status: {
         width: '6.5em',
