@@ -245,7 +245,9 @@ describe('DashboardCanvasContent', () => {
 
     it('should run interactive save and update origin for new dashboard', async () => {
       const updateOrigin = jest.fn().mockResolvedValue(undefined);
-      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({ updateOrigin });
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
+        updateOrigin,
+      });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
       const saveButton = buttons.find((b) => b.label === 'Save');
