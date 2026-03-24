@@ -21,7 +21,6 @@ import {
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -65,7 +64,6 @@ export const GraphVisualization: React.FC = memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
-  const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
@@ -98,7 +96,7 @@ export const GraphVisualization: React.FC = memo(() => {
   );
 
   const onOpenEventPreview = useCallback(
-    (node: NodeViewModel) => {
+    (node: NodeViewModel, timeRange: TimeRange) => {
       const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
@@ -152,18 +150,12 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            entityItems: (node.documentsData as NodeDocumentDataModel[])
+            type: 'entities' as const,
+            documentIds: (node.documentsData as NodeDocumentDataModel[])
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => ({
-                itemType: DOCUMENT_TYPE_ENTITY,
-                id: doc.id,
-                type: doc.entity?.type,
-                subType: doc.entity?.sub_type,
-                icon: node.icon,
-                availableInEntityStore: !!doc.entity?.availableInEntityStore,
-                ecsParentField: doc.entity?.ecsParentField,
-              })),
+              .map((doc) => doc.id),
+            start: timeRange.from,
+            end: timeRange.to,
           },
         });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
@@ -174,11 +166,12 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            dataViewId: dataViewIndexPattern,
+            type: 'events' as const,
             documentIds: (node.documentsData as NodeDocumentDataModel[])
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => doc.event?.id),
+              .map((doc) => doc.id),
+            start: timeRange.from,
+            end: timeRange.to,
           },
         });
       } else {
@@ -192,7 +185,7 @@ export const GraphVisualization: React.FC = memo(() => {
         });
       }
     },
-    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
+    [toasts, openPreviewPanel, scopeId]
   );
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));

@@ -7,30 +7,26 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import { isEntityItem, isEventOrAlertItem } from '../../../utils';
 import { Skeleton } from './parts/skeleton';
 import { Panel } from './parts/panel';
 import { HeaderRow } from './parts/header_row';
 import { TimestampRow } from './parts/timestamp_row';
 import { ActorsRow } from './parts/actors_row';
 import { MetadataRow } from './parts/metadata_row';
-import type { EntityOrEventItem } from './types';
 
 export type GroupedItemProps =
   | {
       isLoading: true;
-      item?: EntityOrEventItem;
+      item?: EntityItem | EventOrAlertItem;
       scopeId?: string;
     }
   | {
       isLoading?: false;
-      item: EntityOrEventItem;
-      /**
-       * Unique identifier for the graph instance, used to scope filter state.
-       */
+      item: EntityItem | EventOrAlertItem;
+      /** Unique identifier for the graph instance, used to scope filter state. */
       scopeId: string;
     };
 
@@ -43,8 +39,11 @@ export const GroupedItem = memo(({ item, isLoading, scopeId }: GroupedItemProps)
     );
   }
 
+  const isAlert = isEventOrAlertItem(item) && item.isAlert;
+  const isEntity = isEntityItem(item);
+
   return (
-    <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
+    <Panel isAlert={isAlert}>
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <HeaderRow item={item} scopeId={scopeId} />
@@ -56,7 +55,7 @@ export const GroupedItem = memo(({ item, isLoading, scopeId }: GroupedItemProps)
           </EuiFlexItem>
         )}
 
-        {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
+        {!isEntity && isEventOrAlertItem(item) && item.actor && item.target && (
           <EuiFlexItem>
             <ActorsRow actor={item.actor} target={item.target} />
           </EuiFlexItem>

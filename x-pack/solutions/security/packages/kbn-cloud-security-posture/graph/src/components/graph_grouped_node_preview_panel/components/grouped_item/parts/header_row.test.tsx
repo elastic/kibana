@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
 import { HeaderRow } from './header_row';
-import type { EntityItem } from '../types';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
 
 const mockOpenPreviewPanel = jest.fn();
@@ -45,9 +44,8 @@ describe('<HeaderRow />', () => {
   describe('enriched entities', () => {
     it('renders EuiLink (button) for enriched entity', () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
-        label: 'Entity One',
+        name: 'Entity One',
         availableInEntityStore: true,
       };
 
@@ -58,9 +56,8 @@ describe('<HeaderRow />', () => {
 
     it('calls openPreviewPanel for a single click on enriched entity', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
-        label: 'Entity One',
+        name: 'Entity One',
         availableInEntityStore: true,
       };
 
@@ -79,9 +76,8 @@ describe('<HeaderRow />', () => {
 
     it('calls openPreviewPanel for each click on enriched entity', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
-        label: 'Dup',
+        name: 'Dup',
         availableInEntityStore: true,
       };
 
@@ -98,9 +94,8 @@ describe('<HeaderRow />', () => {
   describe('non-enriched entities', () => {
     it('renders EuiText for non-enriched entity and shows tooltip on hover', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
-        label: 'Entity Two',
+        name: 'Entity Two',
         availableInEntityStore: false,
       };
 
@@ -123,9 +118,8 @@ describe('<HeaderRow />', () => {
 
     it('does not call openPreviewPanel for non-enriched entity', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
-        label: 'Entity Two',
+        name: 'Entity Two',
         availableInEntityStore: false,
       };
 
@@ -139,9 +133,8 @@ describe('<HeaderRow />', () => {
 
     it('renders EuiText when availableInEntityStore is undefined', () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-3',
-        label: 'Entity Three',
+        name: 'Entity Three',
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);

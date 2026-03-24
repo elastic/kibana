@@ -9,9 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { getCountryName, getCountryFlag } from '../../../../node/country_flags/country_codes';
 import { GROUPED_ITEM_IP_TEST_ID, GROUPED_ITEM_GEO_TEST_ID } from '../../../test_ids';
-import type { EntityOrEventItem } from '../types';
 import { i18nNamespaceKey } from '../../../constants';
 
 const geoLabel = i18n.translate(`${i18nNamespaceKey}.groupedItem.geoLabel`, {
@@ -98,7 +99,7 @@ const CountryFlag = ({ countryCode }: { countryCode?: string }) => {
 /* Main implementation */
 
 export interface MetadataRowProps {
-  item: EntityOrEventItem;
+  item: EntityItem | EventOrAlertItem;
 }
 
 export const MetadataRow = ({ item }: MetadataRowProps) => {

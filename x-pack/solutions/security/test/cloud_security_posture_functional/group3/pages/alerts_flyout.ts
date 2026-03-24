@@ -41,6 +41,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
+      // Delete any pre-existing alert indices to avoid "alias has more than one write index" errors.
+      // Kibana may create its own alerts index on startup, and esArchiver.load creates another one,
+      // both with is_write_index: true on the same alias.
+      // Wildcard deletion is not allowed on system indices, so we resolve and delete individually.
+      const alertIndices = await es.indices.resolveIndex({
+        name: '.internal.alerts-security.alerts-default-*',
+      });
+      for (const idx of alertIndices.indices) {
+        await es.indices.delete({ index: idx.name, ignore_unavailable: true });
+      }
+
       // security_alerts_modified_mappings - contains mappings for actor and target
       // security_alerts - does not contain mappings for actor and target
       await esArchiver.load(
@@ -214,11 +225,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
-      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
 
       // assert the grouped items are rendered correctly
-      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
-      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
       await expandedFlyoutGraph.assertGroupedItemActorAndTargetValues(
         2,
         'admin@example.com',
@@ -453,6 +464,35 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           // Execute enrich policy to pick up entity data
           await waitForEnrichPolicyCreated({ es, retry, logger });
           await executeEnrichPolicy({ es, retry, logger });
+
+          // Also load v2 entity data for LOOKUP JOIN enrichment used by the
+          // grouped node preview panel (fetchEntities only supports LOOKUP JOIN).
+          try {
+            await es.indices.delete({
+              index: getEntitiesLatestIndexName(),
+              ignore_unavailable: true,
+            });
+          } catch (e) {
+            // Ignore if index doesn't exist
+          }
+
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+          );
+
+          await waitForEntityDataIndexed({
+            es,
+            logger,
+            retry,
+            entitiesIndex: '.entities.v2.latest.security_*',
+            expectedCount: 36,
+          });
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+          );
         });
 
         runEnrichmentTests();

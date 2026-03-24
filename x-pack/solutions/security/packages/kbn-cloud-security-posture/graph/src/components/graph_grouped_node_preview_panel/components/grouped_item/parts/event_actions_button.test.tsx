@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EventActionsButton } from './event_actions_button';
-import type { EventItem, AlertItem } from '../types';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 
 // Mock useExpandableFlyoutApi
@@ -20,19 +20,19 @@ jest.mock('@kbn/expandable-flyout', () => ({
 }));
 
 describe('EventActionsButton', () => {
-  const mockEventItem: EventItem = {
+  const mockEventItem: EventOrAlertItem = {
     id: 'event-123',
-    itemType: 'event',
+    isAlert: false,
     action: 'file_created',
-    docId: 'event-doc-123',
+    index: 'logs-endpoint.events-default',
     timestamp: '2025-01-19T00:00:00.000Z',
   };
 
-  const mockAlertItem: AlertItem = {
+  const mockAlertItem: EventOrAlertItem = {
     id: 'alert-123',
-    itemType: 'alert',
+    isAlert: true,
     action: 'malware_detected',
-    docId: 'alert-doc-123',
+    index: '.alerts-security.alerts-default',
     timestamp: '2025-01-19T00:00:00.000Z',
   };
 
@@ -86,7 +86,7 @@ describe('EventActionsButton', () => {
       expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            id: mockEventItem.docId,
+            id: mockEventItem.id,
           }),
         })
       );
@@ -115,7 +115,7 @@ describe('EventActionsButton', () => {
       expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            id: mockAlertItem.docId,
+            id: mockAlertItem.id,
           }),
         })
       );

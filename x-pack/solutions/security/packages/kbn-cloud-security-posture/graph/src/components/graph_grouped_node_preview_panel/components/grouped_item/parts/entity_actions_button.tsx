@@ -8,13 +8,13 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
-import type { EntityItem } from '../types';
 import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
 import {
   emitFilterToggle,
