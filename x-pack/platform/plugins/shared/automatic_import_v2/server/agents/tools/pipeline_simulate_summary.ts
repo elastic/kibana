@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 
 import {
+  flattenDoc,
   formatSimulateDoc,
   groupErrors,
   stripBoilerplateFields,
@@ -63,14 +64,10 @@ export async function runLightweightIngestSimulateSummary(
     return `${title}\nSimulation failed: ${(simulateError as Error).message}`;
   }
 
-  const { failedSamples, successfulCount } = processSimulationResults(response, samples);
-
-  const successfulOutputs: Array<Record<string, unknown>> = [];
-  response.docs.forEach((doc) => {
-    if (doc?.doc?._source && !doc.doc._source.error && successfulOutputs.length < maxSuccessOutputs) {
-      successfulOutputs.push(stripBoilerplateFields(doc.doc._source as Record<string, unknown>));
-    }
-  });
+  const { failedSamples, successfulDocuments, successfulCount } = processSimulationResults(
+    response,
+    samples
+  );
 
   const totalSamples = samples.length;
   const failedCount = failedSamples.length;
@@ -82,20 +79,44 @@ export async function runLightweightIngestSimulateSummary(
     lines.push(`ALL ${totalSamples} samples succeeded (100%).`);
   } else {
     lines.push(
-      `${successfulCount}/${totalSamples} succeeded (${successRate.toFixed(
-        1
-      )}%), ${failedCount} failed.`
+      `${successfulCount}/${totalSamples} succeeded (${successRate.toFixed(1)}%), ${failedCount} failed.`
     );
   }
 
-  if (successfulOutputs.length > 0) {
-    lines.push(
-      '',
-      `Example successful outputs (${successfulOutputs.length} of ${successfulCount}):`
-    );
-    for (const output of successfulOutputs) {
-      lines.push(JSON.stringify(output, null, 2));
+  // 1-2 concrete sample outputs for immediate debugging context
+  const sampleOutputs = successfulDocuments
+    .slice(0, maxSuccessOutputs)
+    .map((doc) => stripBoilerplateFields(doc as Record<string, unknown>));
+
+  if (sampleOutputs.length > 0) {
+    lines.push('', `Sample outputs (${sampleOutputs.length} of ${successfulCount}):`);
+    for (const output of sampleOutputs) {
+      lines.push(JSON.stringify(output));
     }
+  }
+
+  // Merged unique-fields map: iterate all successful docs, collect every flat key
+  // and keep up to 2 distinct non-null example values per key.
+  const mergedFields: Record<string, unknown[]> = {};
+  for (const doc of successfulDocuments) {
+    const flat = flattenDoc(stripBoilerplateFields(doc as Record<string, unknown>));
+    for (const [key, value] of Object.entries(flat)) {
+      if (value == null || value === '') continue;
+      const existing = mergedFields[key];
+      if (!existing) {
+        mergedFields[key] = [value];
+      } else if (existing.length < 2 && !existing.some((v) => v === value)) {
+        existing.push(value);
+      }
+    }
+  }
+
+  if (Object.keys(mergedFields).length > 0) {
+    // Unwrap single-item arrays to scalar for compactness
+    const display = Object.fromEntries(
+      Object.entries(mergedFields).map(([k, vs]) => [k, vs.length === 1 ? vs[0] : vs])
+    );
+    lines.push('', 'All fields seen across samples (with example values):', JSON.stringify(display));
   }
 
   if (failedCount > 0) {
@@ -111,10 +132,7 @@ export async function runLightweightIngestSimulateSummary(
     }
   }
 
-  lines.push(
-    '',
-    'Note: This is ingest simulation only — ECS/category checks are in validate_pipeline.'
-  );
+  lines.push('', 'Note: This is ingest simulation only — ECS/category checks are in validate_pipeline.');
 
   return lines.join('\n');
 }

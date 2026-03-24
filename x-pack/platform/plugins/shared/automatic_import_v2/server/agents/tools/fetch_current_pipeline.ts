@@ -20,9 +20,7 @@ export function fetchCurrentPipelineTool(): DynamicStructuredTool {
     start_index: z
       .number()
       .optional()
-      .describe(
-        'Start processor index (0-based, inclusive). Omit to return all processors.'
-      ),
+      .describe('Start processor index (0-based, inclusive). Omit to return all processors.'),
     end_index: z
       .number()
       .optional()
@@ -49,8 +47,7 @@ export function fetchCurrentPipelineTool(): DynamicStructuredTool {
       const state = getCurrentTaskInput<AutomaticImportAgentStateType>();
       const currentPipeline = state.current_pipeline ?? {};
       const processors = (currentPipeline as Record<string, unknown>).processors;
-      const hasPipeline =
-        Array.isArray(processors) && processors.length > 0;
+      const hasPipeline = Array.isArray(processors) && processors.length > 0;
 
       if (!hasPipeline) {
         return new Command({

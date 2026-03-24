@@ -16,6 +16,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import type { AutomaticImportAgentStateType } from '../state';
 import {
+  flattenDoc,
   formatSimulateDoc,
   groupErrors,
   stripBoilerplateFields,
@@ -40,19 +41,6 @@ const asArray = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.filter((v): v is string => typeof v === 'string');
   if (typeof value === 'string') return [value];
   return [];
-};
-
-const flattenKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
-  const keys: string[] = [];
-  for (const [key, value] of Object.entries(obj)) {
-    const path = prefix ? `${prefix}.${key}` : key;
-    if (value != null && typeof value === 'object' && !Array.isArray(value)) {
-      keys.push(...flattenKeys(value as Record<string, unknown>, path));
-    } else {
-      keys.push(path);
-    }
-  }
-  return keys;
 };
 
 export interface ValidatorToolOptions {
@@ -194,7 +182,7 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       // Collect unique field paths from sample outputs
       const allFieldPaths = new Set<string>();
       for (const doc of successfulDocuments.slice(0, 20)) {
-        for (const fp of flattenKeys(doc as Record<string, unknown>)) {
+        for (const fp of Object.keys(flattenDoc(doc as Record<string, unknown>))) {
           allFieldPaths.add(fp);
         }
       }
@@ -203,7 +191,9 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       const [ecsHitDict, ecsFieldsets, eventKindField] = await Promise.all([
         fieldsMetadataClient.find({ fieldNames: [...allFieldPaths], source: ['ecs'] }),
         fieldsMetadataClient.getECSFieldsets(),
-        fieldsMetadataClient.getByName('event.kind', { source: ['ecs'] }),
+        fieldsMetadataClient
+          .getByName('event.kind', { source: ['ecs'] })
+          .then((field) => field?.pick(['allowed_values'])),
       ]);
 
       const ecsFieldSet = new Set(Object.keys(ecsHitDict.getFields()));

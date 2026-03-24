@@ -94,6 +94,26 @@ export interface SimulationResults {
   successfulCount: number;
 }
 
+/**
+ * Flattens a nested document into dot-notation key → primitive-value pairs.
+ * Arrays are kept as-is (not recursed into) so array values are preserved.
+ */
+export const flattenDoc = (
+  obj: Record<string, unknown>,
+  prefix = ''
+): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenDoc(value as Record<string, unknown>, path));
+    } else {
+      result[path] = value;
+    }
+  }
+  return result;
+};
+
 export const processSimulationResults = (
   response: estypes.IngestSimulateResponse,
   samples: string[]
