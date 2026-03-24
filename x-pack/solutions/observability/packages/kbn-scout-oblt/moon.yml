@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/data-forge'
-  - '@kbn/test'
 tags:
   - test-helper
   - package
