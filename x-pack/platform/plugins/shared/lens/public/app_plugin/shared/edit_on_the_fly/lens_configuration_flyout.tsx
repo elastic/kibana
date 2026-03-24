@@ -222,9 +222,7 @@ export function LensEditConfigurationFlyout({
     // Remove the user's preferred chart type from localStorage
     deleteUserChartTypeFromSessionStorage();
     onCancelCallback?.();
-    // Defer close to allow the revert to propagate to the parent (e.g. dashboard) before
-    // the flyout unmounts. Without this, reopening immediately can show stale ES|QL state.
-    setTimeout(() => closeFlyout?.(), 0);
+    closeFlyout?.();
   }, [
     attributes,
     attributesChanged,
