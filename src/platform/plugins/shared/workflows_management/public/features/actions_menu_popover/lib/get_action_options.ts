@@ -66,6 +66,7 @@ export function getActionOptions(
       description: t.description ?? t.id,
       iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
       iconColor: euiTheme.colors.vis.euiColorVis6,
+      stability: 'tech_preview',
     }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',

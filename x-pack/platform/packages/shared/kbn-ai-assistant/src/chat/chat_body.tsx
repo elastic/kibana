@@ -34,7 +34,6 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
-  getElasticManagedLlmConnector,
   InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -413,13 +412,13 @@ export function ChatBody({
     conversation.refresh();
   };
 
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
   const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
-    !!elasticManagedLlm &&
-    connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed;
+    (connectors.connectors || []).some(
+      (connector) =>
+        connector.connectorId === connectors.selectedConnector && connector.isPreconfigured
+    ) && !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
