@@ -7,7 +7,7 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField } from './entity_schema';
-import { collectValues, newestValue } from './field_retention_operations';
+import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
 export const ENTITY_ID_FIELD = 'entity.id';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
@@ -84,9 +84,14 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // LIFECYCLE ------------------------------------------------------------
-    newestValue({
-      source: `${prefix}.lifecycle.first_seen`,
+    oldestValue({
+      source: '@timestamp',
       destination: 'entity.lifecycle.first_seen',
+      mapping: { type: 'date' },
+    }),
+    newestValue({
+      source: '@timestamp',
+      destination: 'entity.lifecycle.last_seen',
       mapping: { type: 'date' },
     }),
     newestValue({

@@ -36,6 +36,7 @@ interface CasesConnectorParams {
       request: KibanaRequest,
       savedObjectTypes: string[]
     ) => Promise<SavedObjectsClientContract>;
+    isCasesAttachmentsEnabled: boolean;
   };
 }
 
@@ -125,6 +126,7 @@ export class CasesConnector extends SubActionConnector<
         casesService: this.casesService,
         casesClient,
         spaceId,
+        isCasesAttachmentsEnabled: this.casesParams.isCasesAttachmentsEnabled,
       });
 
       this.logDebugCurrentState('start', '[CasesConnector][_run] Executing case connector', params);

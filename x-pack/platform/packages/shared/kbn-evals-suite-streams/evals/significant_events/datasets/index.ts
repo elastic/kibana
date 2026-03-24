@@ -78,6 +78,8 @@ export const resolveScenarioSnapshotSource = ({
   };
 };
 
+export const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
+
 export const snapshotSourceKey = ({
   gcs,
   snapshotName,
@@ -90,7 +92,8 @@ export const snapshotSourceKey = ({
 
 export type {
   DatasetConfig,
-  RuleGenerationScenario,
-  KIExtractionScenario,
+  KIQueryGenerationScenario,
+  KIFeatureExtractionScenario,
+  KIFeatureExclusionScenario,
   SnapshotSourceOverride,
 } from './types';

@@ -3,20 +3,20 @@
 This folder contains a small CLI + helper modules for producing **repeatable Elasticsearch snapshots** that can be used as datasets for **Streams Significant Events** evaluation and experimentation.
 
 The snapshots are written to **GCS** (bucket: `significant-events-datasets`) under a run-specific base path, and each scenario snapshot contains:
-- `logs*` - OTel demo log data generated during the run
+- `logs*` - Demo app log data generated during the run
 - `sigevents-streams-features-<scenario>` - extracted features produced by Streams feature extraction (copied out of system indices so it can be snapshotted)
 
 ## What this does
 
 For each selected scenario, the [capture_otel_demo_snapshots](capture_otel_demo_snapshots.ts) script:
 
-1. Deploys the OTel Demo on minikube (runs `node scripts/otel_demo.js` in the background)
+1. Deploys the selected demo app on minikube
 2. Waits for pods to become ready
-3. Accumulates baseline traffic for a fixed window
-4. Optionally patches a failure scenario and accumulates failure traffic
+3. Accumulates baseline traffic for a configurable window (`--baseline-wait`)
+4. Optionally patches a failure scenario and accumulates failure traffic (`--failure-wait`)
 5. Enables Significant Events + runs feature extraction for the `logs` stream
 6. Creates an Elasticsearch snapshot to GCS
-7. Cleans up logs + extracted features, disables streams, and tears down the OTel demo
+7. Cleans up logs + extracted features, disables streams, and tears down the demo
 
 The per-scenario deploy/teardown + data cleanup is intentional as each snapshot should be isolated and not contaminated by previous scenarios.
 
@@ -33,20 +33,31 @@ The per-scenario deploy/teardown + data cleanup is intentional as each snapshot 
 | Flag | Description | Default |
 | --- | --- | --- |
 | `--connector-id` | **Required.** LLM connector ID used for feature extraction. | none |
-| `--run-id` | Run identifier used for the snapshot repo name and GCS base path. | Today’s date `YYYY-MM-DD` (local time) |
-| `--scenario` | Limit to specific scenario(s). Can be repeated. Omit to run all scenarios in `lib/constants.ts`. | All scenarios |
+| `--run-id` | Run identifier used for the snapshot repo name and GCS base path. | Today's date `YYYY-MM-DD` (local time) |
+| `--scenario` | Limit to specific scenario(s). Can be repeated. Omit to run all scenarios for the selected demo app. | All scenarios |
+| `--demo-app` | Demo app to use. Must be a registered demo type (see `listAvailableDemos()`). | `otel-demo` |
+| `--baseline-wait` | Duration to wait for baseline traffic. Accepts `s`, `m`, `h`, `d` suffixes (e.g. `3m`, `90s`, `1h`). | `3m` |
+| `--failure-wait` | Duration to wait after applying a failure scenario. Same format as `--baseline-wait`. | `5m` |
 | `--dry-run` | Print what would happen without deploying, extracting, or snapshotting. | `false` |
 | `--es-url` | Elasticsearch URL | from `config/kibana.dev.yml` |
 | `--es-username` | Elasticsearch username | from `config/kibana.dev.yml` |
 | `--es-password` | Elasticsearch password | from `config/kibana.dev.yml` |
-| `--kibana-url` | Kibana base URL (If omitted, the script builds it from Kibana config and resolves dev basePath redirects) | from `config/kibana.dev.yml` (with basePath resolution) |
+| `--kibana-url` | Kibana base URL (if omitted, built from Kibana config with basePath resolution) | from `config/kibana.dev.yml` |
 
 ## How to run
 
-### Create snapshots for all [available scenarios](./lib/constants.ts)
+### Create snapshots for all available scenarios
 
 ```
 node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id <connectorId>
+```
+
+### Create snapshots for a specific demo app
+
+```
+node scripts/capture_sigevents_otel_demo_snapshots.js \
+  --connector-id <connectorId> \
+  --demo-app online-boutique
 ```
 
 ### Create snapshots for specific scenarios
@@ -61,10 +72,10 @@ node scripts/capture_sigevents_otel_demo_snapshots.js \
 ### Create snapshots with a specific run ID
 
 **What `--run-id` does:** It namespaces where snapshots are stored in GCS and what the ES snapshot repository is called.
-- GCS base path: `gs://significant-events-datasets/<run-id>/<dataset>/`
+- GCS base path: `gs://significant-events-datasets/<run-id>/<demo-app>/`
 - Snapshot repository name: `sigevents-<run-id>`
 
-**Default:** If omitted, `--run-id` defaults to today’s date in `YYYY-MM-DD` format (local time).
+**Default:** If omitted, `--run-id` defaults to today's date in `YYYY-MM-DD` format (local time).
 
 Note: Use a unique run ID (e.g.: `test-run-...`) to keep multiple runs side-by-side without colliding with previous snapshots.
 
@@ -72,6 +83,15 @@ Note: Use a unique run ID (e.g.: `test-run-...`) to keep multiple runs side-by-s
 node scripts/capture_sigevents_otel_demo_snapshots.js \
   --connector-id <connectorId> \
   --run-id test-run-2026-02-23
+```
+
+### Customize wait durations
+
+```
+node scripts/capture_sigevents_otel_demo_snapshots.js \
+  --connector-id <connectorId> \
+  --baseline-wait 5m \
+  --failure-wait 15m
 ```
 
 ## Output

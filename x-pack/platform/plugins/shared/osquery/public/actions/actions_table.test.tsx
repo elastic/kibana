@@ -228,7 +228,7 @@ describe('ActionsTable', () => {
 
     renderWithProviders(<ActionsTable />);
 
-    expect(screen.queryByTestId('history-search-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('history-toolbar-search')).not.toBeInTheDocument();
   });
 
   it('passes hardcoded kuery to useAllLiveQueries', () => {
