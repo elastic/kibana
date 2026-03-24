@@ -23,6 +23,7 @@ describe('createInferenceExecutor', () => {
     config: {},
     capabilities: {},
     isInferenceEndpoint: false,
+    isPreconfigured: false,
   };
 
   beforeEach(() => {

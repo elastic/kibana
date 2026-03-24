@@ -2778,7 +2778,9 @@
             "signature": [
               "{ getIsCollapsed$(): ",
               "Observable",
-              "<boolean>; getIsCollapsed(): boolean; setIsCollapsed(isCollapsed: boolean): void; }"
+              "<boolean>; getIsCollapsed(): boolean; setIsCollapsed(isCollapsed: boolean): void; getWidth$(): ",
+              "Observable",
+              "<number>; getWidth(): number; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "lineNumber": 282,
@@ -2799,7 +2801,7 @@
               "SidebarStart"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 300,
+            "lineNumber": 310,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2819,7 +2821,7 @@
               "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 305,
+            "lineNumber": 315,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2839,7 +2841,7 @@
               "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 310,
+            "lineNumber": 320,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2859,7 +2861,7 @@
               "(component: React.ReactNode) => React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 315,
+            "lineNumber": 325,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2875,7 +2877,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 318,
+                "lineNumber": 328,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
