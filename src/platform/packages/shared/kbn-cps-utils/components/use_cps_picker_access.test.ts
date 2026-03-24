@@ -29,6 +29,7 @@ describe('useCpsPickerAccess', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCurrentAppId$.next('app-id');
     mockUseHistory.mockReturnValue({ location: { pathname: '/app/alerts/rule/123' } } as any);
   });
 
