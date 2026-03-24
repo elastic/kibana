@@ -28,6 +28,21 @@ import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
 const ARCHIVE_NAME = 'entity_store_v2_home';
 
+/**
+ * Sets localStorage to disable grouping (flat table view) before navigating.
+ * @kbn/grouping reads from `localStorage.groups` keyed by groupingId.
+ * Setting activeGroups to ['none'] makes EntitiesTableSection render the
+ * flat EntitiesDataTable instead of the GroupWrapper.
+ */
+const setFlatTableGrouping = () => {
+  cy.window().then((win) =>
+    win.localStorage.setItem(
+      'groups',
+      JSON.stringify({ 'entityAnalytics:grouping': { activeGroups: ['none'] } })
+    )
+  );
+};
+
 const waitForTableToLoad = () => {
   cy.get(PAGE_TITLE).should('exist');
   cy.get(ENTITIES_TABLE_GRID).should('exist');
@@ -55,6 +70,7 @@ describe(
 
     beforeEach(() => {
       login();
+      setFlatTableGrouping();
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       waitForTableToLoad();
     });
@@ -70,7 +86,7 @@ describe(
       });
 
       it('displays the correct entity count', () => {
-        cy.contains('6 entities').should('be.visible');
+        cy.contains('8 entities').should('be.visible');
       });
 
       it('shows all default column headers', () => {
@@ -187,6 +203,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
+      setFlatTableGrouping();
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.get(PAGE_TITLE).should('exist');
     });
