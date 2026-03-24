@@ -23,7 +23,14 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const createRuleParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'An optional identifier for the rule. If omitted, an ID is generated automatically.',
+      },
+    })
+  ),
 });
 
 @injectable()
@@ -35,7 +42,11 @@ export class CreateRuleRoute implements RouteHandler {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Create a rule',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(createRuleDataSchema),

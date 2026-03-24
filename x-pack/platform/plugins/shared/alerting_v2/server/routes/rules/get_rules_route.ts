@@ -18,10 +18,22 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesQuerySchema = schema.object({
-  page: schema.maybe(schema.number({ min: 1 })),
-  perPage: schema.maybe(schema.number({ min: 1, max: 1000 })),
-  filter: schema.maybe(schema.string()),
-  search: schema.maybe(schema.string()),
+  page: schema.maybe(
+    schema.number({ min: 1, meta: { description: 'The page number to return.' } })
+  ),
+  perPage: schema.maybe(
+    schema.number({
+      min: 1,
+      max: 1000,
+      meta: { description: 'The number of rules to return per page.' },
+    })
+  ),
+  filter: schema.maybe(
+    schema.string({ meta: { description: 'A KQL string to filter the rules.' } })
+  ),
+  search: schema.maybe(
+    schema.string({ meta: { description: 'A text string to search across rule fields.' } })
+  ),
 });
 
 @injectable()
@@ -33,7 +45,11 @@ export class GetRulesRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'List rules',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       query: getRulesQuerySchema,

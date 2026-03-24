@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
@@ -16,10 +15,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const deleteRuleParamsSchema = schema.object({
-  id: schema.string(),
-});
+import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class DeleteRuleRoute {
@@ -30,17 +26,21 @@ export class DeleteRuleRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Delete a rule',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
-      params: deleteRuleParamsSchema,
+      params: ruleIdParamsSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof deleteRuleParamsSchema>,
+      TypeOf<typeof ruleIdParamsSchema>,
       unknown,
       unknown,
       'delete'

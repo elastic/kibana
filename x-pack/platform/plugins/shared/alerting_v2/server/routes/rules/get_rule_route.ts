@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
@@ -16,10 +15,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const getRuleParamsSchema = schema.object({
-  id: schema.string(),
-});
+import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class GetRuleRoute {
@@ -30,16 +26,20 @@ export class GetRuleRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Get a rule',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
-      params: getRuleParamsSchema,
+      params: ruleIdParamsSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<TypeOf<typeof getRuleParamsSchema>, unknown, unknown>,
+    private readonly request: KibanaRequest<TypeOf<typeof ruleIdParamsSchema>, unknown, unknown>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}

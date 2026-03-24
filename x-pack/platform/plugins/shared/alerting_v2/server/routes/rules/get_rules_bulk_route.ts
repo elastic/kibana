@@ -18,7 +18,11 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesBulkQuerySchema = schema.object({
-  ids: schema.maybe(schema.arrayOf(schema.string())),
+  ids: schema.maybe(
+    schema.arrayOf(schema.string({ meta: { description: 'A rule identifier.' } }), {
+      meta: { description: 'A list of rule identifiers to retrieve.' },
+    })
+  ),
 });
 
 @injectable()
@@ -30,7 +34,11 @@ export class BulkGetRulesRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Get rules in bulk',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       query: getRulesBulkQuerySchema,

@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
@@ -18,10 +17,7 @@ import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_clien
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const updateRuleParamsSchema = schema.object({
-  id: schema.string(),
-});
+import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class UpdateRuleRoute {
@@ -32,18 +28,22 @@ export class UpdateRuleRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Update a rule',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(updateRuleDataSchema),
-      params: updateRuleParamsSchema,
+      params: ruleIdParamsSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof updateRuleParamsSchema>,
+      TypeOf<typeof ruleIdParamsSchema>,
       unknown,
       UpdateRuleData
     >,

@@ -27,7 +27,11 @@ export class BulkDeleteRulesRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Delete rules in bulk',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(bulkOperationParamsSchema),

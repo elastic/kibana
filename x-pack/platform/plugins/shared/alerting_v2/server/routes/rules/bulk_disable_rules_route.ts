@@ -27,7 +27,11 @@ export class BulkDisableRulesRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Disable rules in bulk',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(bulkOperationParamsSchema),
