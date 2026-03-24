@@ -215,6 +215,7 @@ export const getHttpInput = ({
               meta: { space_id: spaceId ?? 'default' },
               'monitor.project.name': projectId,
               'monitor.project.id': projectId,
+              'monitor.interval': 300,
             },
             target: '',
           },
@@ -321,6 +322,7 @@ export const getHttpInput = ({
             ...(projectId
               ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
               : {}),
+            'monitor.interval': 300,
           },
           target: '',
         },
