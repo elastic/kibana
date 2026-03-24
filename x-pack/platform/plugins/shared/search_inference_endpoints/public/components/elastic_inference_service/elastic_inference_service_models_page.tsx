@@ -95,7 +95,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label={i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.searchbar', {
-                defaultMessage: 'Find Elastic Inference Service models by typing',
+                defaultMessage: 'Find Elastic Inference Service models',
               })}
             />
           </EuiFlexItem>
