@@ -20,8 +20,7 @@ import {
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
-// Failing: See https://github.com/elastic/kibana/issues/256319
-apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
