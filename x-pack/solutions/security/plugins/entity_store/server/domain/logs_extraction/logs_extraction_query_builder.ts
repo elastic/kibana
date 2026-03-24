@@ -34,6 +34,7 @@ import {
   extractPaginationParams,
   buildPaginationSection,
   hasFieldEvaluations,
+  mapPostAggFilterFieldsToRecentForEsql,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -152,7 +153,11 @@ export function buildLogsExtractionEsqlQuery({
 
   if (entityDefinition.postAggFilter) {
     // If it has post aggregation filter, we filter it right after lookup join
-    parts.push(buildPostAggFilter(entityDefinition.postAggFilter));
+    parts.push(
+      buildPostAggFilter(
+        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
+      )
+    );
     // then we can paginate after the post aggregation filter
     parts.push(
       ...buildPaginationSection(

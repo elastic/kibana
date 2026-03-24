@@ -6,6 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import type {
@@ -32,6 +33,8 @@ import {
   extractPaginationParams,
   fieldsToKeep,
   hasFieldEvaluations,
+  mapPostAggFilterFieldsToRecentForEsql,
+  statsFieldDestinations,
   type PaginationFields,
 } from './query_builder_commons';
 
@@ -410,6 +413,37 @@ describe('buildPaginationSection', () => {
     );
     expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-01-10T00:00:00.000Z")');
     expect(parts[1]).toContain('recent.id > "recovery-entity-id"');
+  });
+});
+
+describe('statsFieldDestinations', () => {
+  it('should collect all field destinations for user definition', () => {
+    const { fields } = getEntityDefinition('user', 'default');
+    const dest = statsFieldDestinations(fields);
+    expect(dest.has('event.kind')).toBe(true);
+    expect(dest.has('user.name')).toBe(true);
+    expect(dest.has('entity.name')).toBe(true);
+  });
+});
+
+describe('mapPostAggFilterFieldsToRecentForEsql', () => {
+  it('should prefix STATS destinations with recent. and leave entity.id plain', () => {
+    const userDef = getEntityDefinition('user', 'default');
+    expect(userDef.postAggFilter).toBeDefined();
+    const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
+    const esql = conditionToESQL(mapped);
+    expect(esql).toContain(recentData('event.kind'));
+    expect(esql).toContain(recentData('user.name'));
+    expect(esql).toContain(recentData('host.id'));
+    expect(esql).toContain('entity.id');
+    expect(esql).not.toContain(recentData('entity.id'));
+  });
+
+  it('should be idempotent when fields are already recent.*', () => {
+    const userDef = getEntityDefinition('user', 'default');
+    const once = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
+    const twice = mapPostAggFilterFieldsToRecentForEsql(once, userDef);
+    expect(twice).toEqual(once);
   });
 });
 

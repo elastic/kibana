@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { conditionToQueryDsl, type Condition } from '@kbn/streamlang';
+import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
@@ -20,7 +20,7 @@ import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
-  normalizeConditionForSingleDoc,
+  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -55,14 +55,9 @@ export function getEuidDslDocumentsContainsIdFilter(
       isNotEmptyCondition(identityField.singleField)
     ) as QueryDslQueryContainer;
   }
-  let condition: Condition = identityField.documentsFilter;
-  if (entityDefinition.postAggFilter) {
-    const normalizedPostAgg = normalizeConditionForSingleDoc(
-      entityDefinition.postAggFilter
-    ) as Condition;
-    condition = { and: [condition, normalizedPostAgg] };
-  }
-  return conditionToQueryDsl(condition) as QueryDslQueryContainer;
+  return conditionToQueryDsl(
+    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
+  ) as QueryDslQueryContainer;
 }
 
 /**

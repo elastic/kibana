@@ -258,6 +258,55 @@ export function buildPostStatsLogicalToColumnMap(
   return m;
 }
 
+const RECENT_ESQL_COLUMN_PREFIX = 'recent.';
+
+/** Destinations aggregated under `recent.<destination>` in main logs extraction STATS. */
+export function statsFieldDestinations(fields: EntityField[]): Set<string> {
+  return new Set(fields.map((f) => f.destination));
+}
+
+/**
+ * Rewrites `postAggFilter` leaf `field` names for the ESQL row after STATS and LOOKUP JOIN.
+ *
+ * Columns from `aggregationStats` use `recent.<destination>`; any leaf whose `field` is a
+ * `fields[].destination` is prefixed with `recentData(...)` unless already `recent.*`.
+ * `entity.id` is left plain: it refers to the lookup (latest index) side for already-stored entities.
+ */
+export function mapPostAggFilterFieldsToRecentForEsql(
+  postAggFilter: Condition,
+  entityDefinition: Pick<EntityDefinition, 'fields'>
+): Condition {
+  const destinations = statsFieldDestinations(entityDefinition.fields);
+
+  const mapNode = (node: Condition): Condition => {
+    if (isAlwaysCondition(node) || isNeverCondition(node)) {
+      return node;
+    }
+    if (isAndCondition(node)) {
+      return { ...node, and: node.and.map(mapNode) };
+    }
+    if (isOrCondition(node)) {
+      return { ...node, or: node.or.map(mapNode) };
+    }
+    if (isNotCondition(node)) {
+      return { ...node, not: mapNode(node.not) };
+    }
+    if (isFilterCondition(node)) {
+      const { field } = node;
+      if (field.startsWith(RECENT_ESQL_COLUMN_PREFIX) || field === MAIN_ENTITY_ID_FIELD) {
+        return node;
+      }
+      if (destinations.has(field)) {
+        return { ...node, field: recentData(field) };
+      }
+      return node;
+    }
+    return node;
+  };
+
+  return mapNode(postAggFilter);
+}
+
 function mapConditionFieldsForPostStats(
   condition: Condition,
   resolveColumn: (logicalField: string) => string

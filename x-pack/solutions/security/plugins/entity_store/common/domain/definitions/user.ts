@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import {
   fieldNotOneOfCondition,
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
+import type { EntityDefinitionWithoutId } from './entity_schema';
 import {
   ENTITY_CONFIDENCE,
   LOCAL_NAMESPACE_EXCLUDED_USER_NAMES,
   USER_ENTITY_NAMESPACE,
 } from './user_entity_constants';
-import type { EntityDefinitionWithoutId } from './entity_schema';
-import { recentData } from './esql';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 /** Shared post-LOOKUP keep: entity already in store. */
@@ -42,8 +42,7 @@ const idpDocumentFilter = {
   ],
 };
 
-/** IDP: event type on source (asset kind or iam user/creation/deletion/group). Used for pre-agg NOT and for idpPostAggFilter. */
-const idpEventTypeCondition = {
+const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
   or: [
     { field: 'event.kind', includes: 'asset' },
     {
@@ -62,43 +61,17 @@ const idpEventTypeCondition = {
   ],
 };
 
-/** IDP: post-LOOKUP keep (asset kind or iam, uses recentData). Shared entity.id is in postAggFilter separately. */
-const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
-  or: [
-    { field: recentData('event.kind'), includes: 'asset' },
-    {
-      and: [
-        { field: recentData('event.category'), includes: 'iam' },
-        {
-          or: [
-            { field: recentData('event.type'), includes: 'user' },
-            { field: recentData('event.type'), includes: 'creation' },
-            { field: recentData('event.type'), includes: 'deletion' },
-            { field: recentData('event.type'), includes: 'group' },
-          ],
-        },
-      ],
-    },
-  ],
-};
+const idpEventTypeCondition = idpPostAggFilter;
 
-/** Non-IDP: document filter (user.name + host.id present, user.name not in system list). Reused in documentsFilter and whenConditionTrueSetFieldsPreAgg. */
-const nonIdpDocumentFilter = {
+
+const nonIdpDocumentFilter: Condition = {
   and: [
     isNotEmptyCondition('user.name'),
     isNotEmptyCondition('host.id'),
     fieldNotOneOfCondition('user.name', [...LOCAL_NAMESPACE_EXCLUDED_USER_NAMES]),
   ],
 };
-
-/** Non-IDP: post-LOOKUP keep (user.name + host.id, user.name not in list, uses recentData). */
-const nonIdpPostAggFilter = {
-  and: [
-    isNotEmptyCondition(recentData('user.name')),
-    isNotEmptyCondition(recentData('host.id')),
-    fieldNotOneOfCondition(recentData('user.name'), [...LOCAL_NAMESPACE_EXCLUDED_USER_NAMES]),
-  ],
-};
+const nonIdpPostAggFilter = nonIdpDocumentFilter;
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
@@ -168,7 +141,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   },
   entityTypeFallback: 'Identity',
   indexPatterns: [],
-  /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. */
+  /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. Logical field names; main logs ESQL maps STATS destinations to `recent.*`. */
   postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
   /** Pre-agg: non-IDP local path sets entity.namespace + Medium confidence (before STATS / EU ID). */
   whenConditionTrueSetFieldsPreAgg: [

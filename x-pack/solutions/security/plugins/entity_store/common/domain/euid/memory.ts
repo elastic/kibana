@@ -10,12 +10,11 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import {
   applyWhenConditionTrueSetFields,
-  evaluateStreamlangCondition,
+  documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
   getFieldValue,
   isEuidField,
-  normalizeConditionForSingleDoc,
 } from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
 
@@ -69,19 +68,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
   }
 
-  if (
-    identityField.documentsFilter &&
-    !evaluateStreamlangCondition(doc, identityField.documentsFilter)
-  ) {
-    return undefined;
-  }
-  if (
-    entityDefinition.postAggFilter &&
-    !evaluateStreamlangCondition(
-      doc,
-      normalizeConditionForSingleDoc(entityDefinition.postAggFilter)
-    )
-  ) {
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;
   }
 

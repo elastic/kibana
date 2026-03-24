@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conditionToESQL, type Condition } from '@kbn/streamlang';
+import { conditionToESQL } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
   FieldEvaluation,
@@ -26,7 +26,7 @@ import {
   getSourceFieldNames,
   isEuidField,
   isEuidSeparator,
-  normalizeConditionForSingleDoc,
+  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -252,14 +252,9 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
     return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
   }
 
-  let condition: Condition = identityField.documentsFilter;
-  if (entityDefinition.postAggFilter) {
-    const normalizedPostAgg = normalizeConditionForSingleDoc(
-      entityDefinition.postAggFilter
-    ) as Condition;
-    condition = { and: [condition, normalizedPostAgg] };
-  }
-  return conditionToESQL(condition);
+  return conditionToESQL(
+    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
+  );
 }
 
 /**

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
   EntityType,
@@ -14,7 +15,6 @@ import type {
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
-import { normalizeConditionForSingleDoc } from './commons';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -118,16 +118,10 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   }
 
   const filterChecks: string[] = [];
-  if (identityField.documentsFilter) {
-    filterChecks.push(
-      `if (!(${streamlangConditionToPainlessDoc(identityField.documentsFilter)})) { return null; }`
-    );
-  }
-  if (entityDefinition.postAggFilter) {
-    const normalizedPostAgg = normalizeConditionForSingleDoc(entityDefinition.postAggFilter);
-    filterChecks.push(
-      `if (!(${streamlangConditionToPainlessDoc(normalizedPostAgg)})) { return null; }`
-    );
+  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
+    (c): c is Condition => Boolean(c)
+  )) {
+    filterChecks.push(`if (!(${streamlangConditionToPainlessDoc(filterCond)})) { return null; }`);
   }
   const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
 

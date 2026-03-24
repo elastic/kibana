@@ -69,27 +69,17 @@ export function getCompositionFields(composition: EuidAttribute[]): string[] {
   return composition.filter(isEuidField).map((attr) => attr.field);
 }
 
-const RECENT_DATA_PREFIX = 'recent.';
-
 /**
- * Normalizes a streamlang condition for single-document evaluation by replacing
- * `recent.X` field references with `X`. Used when evaluating postAggFilter
- * (which uses recentData() for ESQL aggregation context) against a single doc.
+ * Builds `documentsFilter` ∧ `postAggFilter` for DSL, ESQL, and single-doc gate evaluation.
+ * Missing `documentsFilter` is treated as always true so a definition with only `postAggFilter` still applies.
  */
-export function normalizeConditionForSingleDoc(condition: unknown): unknown {
-  if (!condition || typeof condition !== 'object') return condition;
-  const c = condition as Record<string, unknown>;
-  if ('and' in c && Array.isArray(c.and)) {
-    return { ...c, and: (c.and as unknown[]).map(normalizeConditionForSingleDoc) };
-  }
-  if ('or' in c && Array.isArray(c.or)) {
-    return { ...c, or: (c.or as unknown[]).map(normalizeConditionForSingleDoc) };
-  }
-  if ('not' in c) {
-    return { ...c, not: normalizeConditionForSingleDoc(c.not) };
-  }
-  if ('field' in c && typeof c.field === 'string' && c.field.startsWith(RECENT_DATA_PREFIX)) {
-    return { ...c, field: c.field.slice(RECENT_DATA_PREFIX.length) };
+export function mergeDocumentsFilterAndPostAgg(
+  documentsFilter?: Condition,
+  postAggFilter?: Condition
+): Condition {
+  let condition: Condition = documentsFilter ?? { always: true };
+  if (postAggFilter) {
+    condition = { and: [condition, postAggFilter] };
   }
   return condition;
 }
@@ -130,8 +120,8 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
 
 /**
  * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
- * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` is
- * normalized with `normalizeConditionForSingleDoc` before evaluation.
+ * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` uses
+ * logical field names; main extraction ESQL applies `recent.` only when building the post-join WHERE.
  *
  * For single-field identity definitions, returns true (callers only use this on the
  * calculated-identity path after field evaluations).
@@ -144,13 +134,10 @@ export function documentPassesCalculatedIdentityPipelineGate(
   if (isSingleFieldIdentity(identityField)) {
     return true;
   }
-  let condition: Condition = identityField.documentsFilter;
-  if (postAggFilter) {
-    condition = {
-      and: [condition, normalizeConditionForSingleDoc(postAggFilter) as Condition],
-    };
-  }
-  return evaluateStreamlangCondition(doc, condition);
+  return evaluateStreamlangCondition(
+    doc,
+    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, postAggFilter)
+  );
 }
 
 /**
