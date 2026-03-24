@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PREBUILT_WATCHLIST_NAMES } from '../../../../common/entity_analytics/watchlists/constants';
+import { getWatchlistName } from '../../../../common/entity_analytics/watchlists/constants';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
@@ -19,13 +19,9 @@ import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
-  skip?: boolean;
 }
 
-export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
-  watchlistId,
-  skip = false,
-}) => {
+export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({ watchlistId }) => {
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
   const { uiSettings } = useKibana().services;
@@ -33,11 +29,10 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 
   const useLegacy = !isEntityStoreV2Enabled;
 
-  // Always call both hooks, but use `skip` to prevent unnecessary network requests
-  const combinedRiskStats = useCombinedRiskScoreKpi(skip || !useLegacy);
+  const combinedRiskStats = useCombinedRiskScoreKpi(!useLegacy);
   const riskLevelsStats = useRiskLevelsEsqlQuery({
     watchlistId: watchlistId ?? '',
-    skip: skip || useLegacy,
+    skip: useLegacy,
     spaceId: spaceId ?? '',
   });
 
@@ -79,7 +74,7 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
                 id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
                 defaultMessage="{watchlistName} risk levels"
                 values={{
-                  watchlistName: PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId,
+                  watchlistName: getWatchlistName(watchlistId),
                 }}
               />
             ) : (

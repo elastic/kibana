@@ -12,12 +12,13 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { PREBUILT_WATCHLIST_NAMES } from '../../../../../../common/entity_analytics/watchlists/constants';
+import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { getWatchlistRiskLevelsQueryBodyV2 } from '../queries/watchlist_risk_level_query';
 import type { WatchlistRiskLevelsQueryResult } from './types';
+import { getLatestEntitiesIndexName } from '../../../home/constants';
 
 export const useRiskLevelsEsqlQuery = ({
   watchlistId,
@@ -30,14 +31,12 @@ export const useRiskLevelsEsqlQuery = ({
 }) => {
   const { data } = useKibana().services;
 
-  const index = `.entities.v2.latest.security_${spaceId}`;
+  const index = getLatestEntitiesIndexName(spaceId);
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
-  const watchlistName = watchlistId
-    ? PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId
-    : undefined; // This is using a map due to name formatting adhering to indexPattern naming conventions
-  const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistName)}`;
+  const name = watchlistId ? getWatchlistName(watchlistId) : undefined; // This is using a map due to name formatting adhering to indexPattern naming conventions
+  const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(name)}`;
 
   const {
     data: riskEngineStatus,

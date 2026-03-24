@@ -20,3 +20,6 @@ export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
     }
   ),
 };
+
+export const getWatchlistName = (watchlistId: string): string =>
+  PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId;

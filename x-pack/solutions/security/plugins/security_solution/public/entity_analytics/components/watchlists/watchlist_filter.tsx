@@ -9,7 +9,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { PREBUILT_WATCHLIST_NAMES } from '../../../../common/entity_analytics/watchlists/constants';
+import { getWatchlistName } from '../../../../common/entity_analytics/watchlists/constants';
 import {
   WATCHLIST_FILTER_LABEL,
   WATCHLIST_FILTER_PLACEHOLDER,
@@ -71,7 +71,7 @@ export const WatchlistFilter = ({
     watchlists.forEach((watchlist) => {
       const option: WatchlistItem = {
         id: watchlist.name, // Changed to match by name
-        label: PREBUILT_WATCHLIST_NAMES[watchlist.name] ?? watchlist.name,
+        label: getWatchlistName(watchlist.name),
       };
 
       if (watchlist.managed) {

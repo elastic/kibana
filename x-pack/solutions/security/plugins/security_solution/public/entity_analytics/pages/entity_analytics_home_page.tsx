@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,7 +45,7 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { PREBUILT_WATCHLIST_NAMES } from '../../../common/entity_analytics/watchlists/constants';
+import { getWatchlistName } from '../../../common/entity_analytics/watchlists/constants';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -67,7 +68,26 @@ export const EntityAnalyticsHomePage = () => {
     [newDataViewPickerEnabled, oldIsSourcererLoading, status]
   );
 
-  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string | undefined>();
+  const location = useLocation();
+  const history = useHistory();
+
+  const selectedWatchlistId = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('watchlistId') || undefined;
+  }, [location.search]);
+
+  const setSelectedWatchlistId = useCallback(
+    (id?: string) => {
+      const params = new URLSearchParams(location.search);
+      if (id) {
+        params.set('watchlistId', id);
+      } else {
+        params.delete('watchlistId');
+      }
+      history.replace({ ...location, search: params.toString() });
+    },
+    [location, history]
+  );
 
   const indicesExist = useMemo(
     () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
@@ -103,7 +123,12 @@ export const EntityAnalyticsHomePage = () => {
               defaultMessage="Entity Analytics"
             />
           }
-          rightSideItems={[<WatchlistFilter onChangeSelectedId={setSelectedWatchlistId} />]}
+          rightSideItems={[
+            <WatchlistFilter
+              selectedId={selectedWatchlistId ?? ''}
+              onChangeSelectedId={setSelectedWatchlistId}
+            />,
+          ]}
         />
 
         {isSourcererLoading ? (
@@ -165,7 +190,7 @@ const EntityAnalyticsEntitiesTable = ({ watchlistId }: { watchlistId?: string })
                 id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
                 defaultMessage="{watchlistName} entities"
                 values={{
-                  watchlistName: PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId,
+                  watchlistName: getWatchlistName(watchlistId),
                 }}
               />
             ) : (
@@ -192,7 +217,7 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
   const state = useMemo(() => {
     if (!watchlistId) return urlState;
 
-    const watchlistName = PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId;
+    const watchlistName = getWatchlistName(watchlistId);
 
     return {
       ...urlState,
