@@ -37,7 +37,7 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
 export const parseMetricsResponse = (
   response: MetricsESQLResponse[],
   getFieldType?: (name: string) => string | undefined
-): ParsedMetricsResult => {
+): ParseMetricsResponseResult => {
   const result: ParsedMetricItem[] = [];
   const telemetry = createInitialMetricsTelemetry();
 
@@ -93,5 +93,6 @@ export const parseMetricsResponse = (
   return {
     metricItems: result,
     allDimensions: Array.from(allDimensionsSet).map(toDimension),
+    telemetry,
   };
 };

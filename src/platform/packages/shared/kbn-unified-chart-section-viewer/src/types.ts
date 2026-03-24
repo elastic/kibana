@@ -30,10 +30,6 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Optional callback used to push toolbar breakdown selections back to Discover app state.
    */
   onBreakdownFieldChange?: (fieldName?: string) => void;
-  /**
-   * Called once after each successful METRICS_INFO fetch
-   */
-  onMetricsTelemetryReported?: (telemetry: MetricsTelemetry) => void;
 }
 
 export interface Dimension {

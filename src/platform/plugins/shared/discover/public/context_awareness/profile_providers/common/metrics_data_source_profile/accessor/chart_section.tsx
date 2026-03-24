@@ -19,7 +19,6 @@ import {
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
@@ -27,7 +26,6 @@ import { useScopedServices } from '../../../../../components/scoped_services_pro
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
 ) => {
-  const { scopedEBTManager } = useScopedServices();
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -45,9 +43,6 @@ const MetricsExperienceGridWrapper = (
       actions={props.actions}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
-      onMetricsTelemetryReported={(telemetry) =>
-        scopedEBTManager.trackMetricsInfoTelemetry(telemetry)
-      }
     />
   );
 };

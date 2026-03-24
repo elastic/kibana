@@ -170,8 +170,6 @@ describe('MetricsExperienceGridWrapper', () => {
       },
     };
 
-    unifiedGridProps?.onMetricsTelemetryReported?.(telemetry);
-
     expect(trackMetricsInfoTelemetryMock).toHaveBeenCalledTimes(1);
     expect(trackMetricsInfoTelemetryMock).toHaveBeenCalledWith(telemetry);
   });

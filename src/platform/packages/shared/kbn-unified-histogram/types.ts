@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
+import type { AnalyticsServiceStart, IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -63,6 +63,8 @@ export interface UnifiedHistogramServices {
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
+  /** When set (e.g. in Discover), chart sections can wire EventBasedTelemetryProvider for METRICS_INFO-style EBT. */
+  analytics?: AnalyticsServiceStart;
 }
 
 /**
