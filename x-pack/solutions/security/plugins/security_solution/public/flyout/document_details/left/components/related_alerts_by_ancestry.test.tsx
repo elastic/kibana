@@ -15,7 +15,7 @@ import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
 } from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
-import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -23,7 +23,7 @@ import {
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 
-jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../hooks/use_paginated_alerts');
 
 const documentId = 'documentId';
