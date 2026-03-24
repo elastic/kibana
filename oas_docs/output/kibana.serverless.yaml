@@ -65680,9 +65680,9 @@ paths:
               bulkDeleteWorkflowsRequestExample:
                 description: Example request for deleting multiple workflows
                 value:
-                  deleted: 2
-                  failures: []
-                  total: 2
+                  ids:
+                    - workflow-c3d4e5f6-a7b8-9012-cdef-234567890123
+                    - workflow-d4e5f6a7-b8c9-0123-defa-345678901234
             schema:
               additionalProperties: false
               type: object
@@ -65696,7 +65696,18 @@ paths:
                   type: array
               required:
                 - ids
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkDeleteWorkflowsResponseExample:
+                  description: Example response after deleting multiple workflows
+                  value:
+                    deleted: 2
+                    failures: []
+                    total: 2
+          description: Indicates a successful response
       summary: Bulk delete workflows
       tags:
         - workflows
@@ -65920,7 +65931,22 @@ paths:
                   type: array
               required:
                 - workflows
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateWorkflowsResponseExample:
+                  description: Example response after creating multiple workflows
+                  value:
+                    created:
+                      - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        name: Example definition
+                      - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                        name: Second workflow
+                    failures: []
+                    total: 2
+          description: Indicates a successful response
       summary: Bulk create workflows
       tags:
         - workflows
@@ -66569,7 +66595,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Export one or more workflows as a ZIP archive.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Export one or more workflows YAML files as a ZIP archive.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
       operationId: post-workflows-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -66607,7 +66633,11 @@ paths:
       responses:
         '200':
           content:
-            application/zip: {}
+            application/zip:
+              examples:
+                exportWorkflowsResponseExample:
+                  description: A ZIP archive containing the exported workflow YAML files
+                  value: '{binary ZIP content}'
           description: A ZIP archive containing the exported workflow YAML files
       summary: Export workflows
       tags:
@@ -66755,7 +66785,39 @@ paths:
           required: true
           schema:
             type: boolean
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSchemaResponseExample:
+                  description: Example response returning the workflow JSON schema (truncated)
+                  value:
+                    $schema: http://json-schema.org/draft-07/schema#
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                      enabled:
+                        default: true
+                        type: boolean
+                      name:
+                        minLength: 1
+                        type: string
+                      tags:
+                        items:
+                          type: string
+                        type: array
+                      version:
+                        const: '1'
+                        default: '1'
+                        description: The version of the workflow schema
+                        type: string
+                    required:
+                      - name
+                      - triggers
+                      - steps
+          description: Indicates a successful response
       summary: Get workflow JSON schema
       tags:
         - workflows
@@ -67779,13 +67841,15 @@ paths:
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: Page number for pagination.
+          in: query
           name: page
           required: false
           schema:
             minimum: 1
             type: number
-        - in: query
+        - description: Number of results per page.
+          in: query
           name: size
           required: false
           schema:
