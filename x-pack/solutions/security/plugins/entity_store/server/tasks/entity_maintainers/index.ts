@@ -20,7 +20,7 @@ import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
-import { CRUDClient } from '../../domain/crud';
+import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -185,7 +185,7 @@ async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
-  crudClient: CRUDClient;
+  crudClient: EntityUpdateClient;
   id: string;
   analytics: TelemetryReporter;
 }): Promise<{ state: EntityMaintainerStatus }> {
