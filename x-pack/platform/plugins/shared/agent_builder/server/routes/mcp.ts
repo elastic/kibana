@@ -16,6 +16,7 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { MCP_SERVER_PATH } from '../../common/mcp';
+import { registerHelloMcpApp } from './mcp_apps/hello_mcp_app';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -139,6 +140,9 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
               }
             );
           }
+
+          // Register MCP App tools (tools with interactive UI)
+          registerHelloMcpApp(server);
 
           request.events.aborted$.subscribe(async () => {
             await transport?.close().catch((error) => {
