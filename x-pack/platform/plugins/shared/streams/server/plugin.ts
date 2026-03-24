@@ -53,6 +53,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { ModelSettingsConfigService } from './lib/saved_objects/significant_events/model_settings_config_service';
 import { TaskService } from './lib/tasks/task_service';
+import { seedDefaultSettings } from './lib/significant_events/seed_default_settings';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
@@ -83,12 +84,14 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private modelSettingsConfigService: ModelSettingsConfigService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.processorSuggestionsService = new ProcessorSuggestionsService();
+    this.modelSettingsConfigService = new ModelSettingsConfigService(this.logger);
   }
 
   public setup(
@@ -122,7 +125,6 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
-    const modelSettingsConfigService = new ModelSettingsConfigService(this.logger);
 
     const getScopedClients = async ({
       request,
@@ -173,7 +175,7 @@ export class StreamsPlugin
         uiSettingsClient,
       });
 
-      const modelSettingsClient = modelSettingsConfigService.getClient({
+      const modelSettingsClient = this.modelSettingsConfigService.getClient({
         soClient,
       });
 
@@ -386,6 +388,17 @@ export class StreamsPlugin
           error: err,
         });
       });
+
+    seedDefaultSettings({
+      soClient,
+      esClient: core.elasticsearch.client.asInternalUser,
+      modelSettingsConfigService: this.modelSettingsConfigService,
+      logger: this.logger,
+    }).catch((err: Error) => {
+      this.logger.error(`Failed to seed default sigevents settings: ${err?.message}`, {
+        error: err,
+      });
+    });
 
     return {};
   }
