@@ -61,6 +61,7 @@ export const osqueryResponseAction = (
       .create(
         {
           ...rest,
+          pack_id: packId,
           queries: requiredOptional(queries),
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,
@@ -82,6 +83,7 @@ export const osqueryResponseAction = (
       .create(
         {
           ...rest,
+          pack_id: packId,
           queries: requiredOptional(queries),
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,
