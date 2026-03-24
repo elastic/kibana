@@ -164,6 +164,9 @@ export class StreamsPlugin
           }),
         ]);
 
+      const license = await licensing.getLicense();
+      const isSecurityEnabled = license.getFeature('security').isEnabled;
+
       const streamsClient = await streamsService.getClient({
         attachmentClient,
         queryClient,
@@ -171,6 +174,7 @@ export class StreamsPlugin
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
+        isSecurityEnabled,
       });
 
       const modelSettingsClient = modelSettingsConfigService.getClient({
@@ -320,6 +324,7 @@ export class StreamsPlugin
             esClient,
             esClientAsInternalUser: esClient,
             uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+            isSecurityEnabled: false,
           });
 
           await streamsClient.enableStreams();
