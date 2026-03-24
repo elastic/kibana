@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { BulkDeleteConfirmationModal } from './bulk_delete_confirmation_modal';
 import { BulkSnoozeModal } from './bulk_snooze_modal';
+import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 
 type BulkAction = 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key';
 
@@ -35,7 +36,9 @@ export const NotificationPoliciesBulkActions = ({
   isLoading,
 }: NotificationPoliciesBulkActionsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState<'delete' | 'snooze' | null>(null);
+  const [activeModal, setActiveModal] = useState<'delete' | 'snooze' | 'update_api_key' | null>(
+    null
+  );
 
   const count = selectedPolicies.length;
 
@@ -45,6 +48,8 @@ export const NotificationPoliciesBulkActions = ({
       setActiveModal('delete');
     } else if (action === 'snooze') {
       setActiveModal('snooze');
+    } else if (action === 'update_api_key') {
+      setActiveModal('update_api_key');
     } else {
       onBulkAction(action);
     }
@@ -168,6 +173,18 @@ export const NotificationPoliciesBulkActions = ({
             setActiveModal(null);
           }}
           onCancel={() => setActiveModal(null)}
+        />
+      )}
+
+      {activeModal === 'update_api_key' && (
+        <UpdateApiKeyConfirmationModal
+          count={count}
+          onCancel={() => setActiveModal(null)}
+          onConfirm={() => {
+            onBulkAction('update_api_key');
+            setActiveModal(null);
+          }}
+          isLoading={isLoading}
         />
       )}
     </>

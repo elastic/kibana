@@ -47,6 +47,7 @@ import { useUpdateNotificationPolicyApiKey } from '../../hooks/use_update_notifi
 import { NotificationPoliciesBulkActions } from './components/notification_policies_bulk_actions';
 import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
 import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
+import { UpdateApiKeyConfirmationModal } from './components/update_api_key_confirmation_modal';
 
 const DEFAULT_PER_PAGE = 20;
 
@@ -67,6 +68,7 @@ export const ListNotificationPoliciesPage = () => {
   const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
+  const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
   const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
 
   const { euiTheme } = useEuiTheme();
@@ -327,7 +329,7 @@ export const ListNotificationPoliciesPage = () => {
           onDisable={(id) => disablePolicy(id)}
           onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
           onCancelSnooze={(id) => unsnoozePolicy(id)}
-          onUpdateApiKey={(id) => updateApiKey(id)}
+          onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
           isStateLoading={
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
@@ -468,6 +470,18 @@ export const ListNotificationPoliciesPage = () => {
             });
           }}
           isLoading={isDeleting}
+        />
+      )}
+
+      {policyToUpdateApiKey && (
+        <UpdateApiKeyConfirmationModal
+          count={1}
+          onCancel={() => setPolicyToUpdateApiKey(null)}
+          onConfirm={() => {
+            updateApiKey(policyToUpdateApiKey, {
+              onSuccess: () => setPolicyToUpdateApiKey(null),
+            });
+          }}
         />
       )}
     </>
