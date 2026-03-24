@@ -349,16 +349,6 @@ describe('data stream schemas', () => {
       expectParseError(result);
     });
 
-    it('rejects a sample line longer than 262144 characters', () => {
-      const payload = {
-        samples: ['x'.repeat(262145)],
-        originalSource: validOriginalSource,
-      };
-
-      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-    });
-
     it('accepts file source type', () => {
       const payload = {
         samples: ['Sample 1'],

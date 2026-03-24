@@ -186,9 +186,9 @@ export type UploadSamplesToDataStreamRequestBody = z.infer<
 export const UploadSamplesToDataStreamRequestBody = z
   .object({
     /**
-     * Log lines to upload when the source is a file (omit when using sourceIndex). Each line is limited to 262144 characters (256 Ki).
+     * Log lines to upload when the source is a file (omit when using sourceIndex).
      */
-    samples: z.array(z.string().max(262144)).max(1000).optional(),
+    samples: z.array(z.string()).max(1000).optional(),
     /**
      * Index name to pick samples from.
      */

@@ -144,11 +144,9 @@ paths:
                   type: array
                   maxItems: 1000
                   description: >-
-                    Log lines to upload when the source is a file (omit when using sourceIndex). Each line is
-                    limited to 262144 characters (256 Ki).
+                    Log lines to upload when the source is a file (omit when using sourceIndex).
                   items:
                     type: string
-                    maxLength: 262144
                 sourceIndex:
                   type: string
                   minLength: 1

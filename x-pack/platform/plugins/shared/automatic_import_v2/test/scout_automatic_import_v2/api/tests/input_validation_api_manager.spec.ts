@@ -19,7 +19,7 @@
  *   path-like names); uploads are not gated on file extension.
  *
  * Payload size / abuse guards (see OpenAPI + Zod in `common/model/`): e.g. upload `samples` max
- * 1000 lines and 262144 chars per line; create `dataStreams` max 50; approve `categories` max 50;
+ * 1000 lines; create `dataStreams` max 50; approve `categories` max 50;
  * PATCH pipeline string max 10MB and object `processors` max 10000 (validated in `data_stream_routes`).
  */
 
@@ -271,22 +271,6 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
       expectZodBadRequest(response.body);
     });
-
-    apiTest(
-      'POST .../upload: rejects a single sample line over max length (262144 chars)',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: {
-            samples: ['x'.repeat(262145)],
-            originalSource: { sourceType: 'file', sourceValue: 'oversize-line.log' },
-          },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(400);
-        expectZodBadRequest(response.body);
-      }
-    );
 
     apiTest('PUT /integrations: rejects more than 50 data streams', async ({ apiClient }) => {
       const integrationId = 'scout-oversized-ds-list';
