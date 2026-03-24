@@ -53,7 +53,6 @@ export async function search(
           ...(time_range && { time_range }),
           ...(so?.accessControl && {
             access_control: {
-              owner: so.accessControl.owner,
               access_mode: so.accessControl.accessMode,
             },
           }),

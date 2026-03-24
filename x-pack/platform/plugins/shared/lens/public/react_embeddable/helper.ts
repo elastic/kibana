@@ -181,9 +181,16 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   const builder = getLensBuilder();
 
   if (!builder?.isEnabled) {
-    // builder not enabled, return the state as is
-    return state as LensSerializedState;
+    if (isLensAPIFormat(state.attributes)) {
+      // This mean the dashboard is giving us an in-memory state
+      // This could be either the new or old state so we need to try to convert below
+    } else {
+      // builder not enabled, return the state as is
+      return state as LensSerializedState;
+    }
   }
+
+  if (!builder) return state as LensSerializedState; // no other option
 
   const chartType = builder.getType(state.attributes);
 
