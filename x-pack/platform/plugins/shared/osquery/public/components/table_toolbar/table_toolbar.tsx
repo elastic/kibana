@@ -26,10 +26,10 @@ interface TableToolbarProps {
   searchValue: string;
   onSearchSubmit: (value: string) => void;
 
-  users: string[];
-  selectedUsers: string[];
-  onSelectedUsersChange: (users: string[]) => void;
-  profilesMap: Map<string, UserProfileWithAvatar>;
+  users?: string[];
+  selectedUsers?: string[];
+  onSelectedUsersChange?: (users: string[]) => void;
+  profilesMap?: Map<string, UserProfileWithAvatar>;
 
   enabledFilter?: EnabledFilter;
   onEnabledFilterChange?: (value: EnabledFilter) => void;
@@ -116,7 +116,7 @@ const TableToolbarComponent: React.FC<TableToolbarProps> = ({
           <EuiFlexItem grow={false}>{additionalFilters}</EuiFlexItem>
         ) : (
           <>
-            {creators && selectedCreators && onSelectedCreatorsChange && profilesMap && (
+            {users && selectedUsers && onSelectedUsersChange && profilesMap && (
               <EuiFlexItem grow={false}>
                 <EuiFilterGroup>
                   <CreatedByFilterPopover
