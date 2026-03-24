@@ -17,7 +17,7 @@ import {
 import { tool as toTool } from '@langchain/core/tools';
 import type { BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { ResourceTypes } from '@kbn/product-doc-common';
@@ -31,7 +31,6 @@ import {
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { getElasticsearchPrompt, getRefineSearchTermPrompt } from './prompts';
 import { progressMessages } from './i18n';
