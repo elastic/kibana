@@ -32,12 +32,9 @@ jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () =
 const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseImportFile>;
 
 // var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
-let mockMgetWorkflows: jest.Mock;
-let mockBulkCreateWorkflows: jest.Mock;
-
+const mockMgetWorkflows = jest.fn();
+const mockBulkCreateWorkflows = jest.fn();
 jest.mock('@kbn/workflows-ui', () => {
-  mockMgetWorkflows = jest.fn();
-  mockBulkCreateWorkflows = jest.fn();
   return {
     useRunWorkflow: () => ({
       mutate: jest.fn(),
@@ -224,7 +221,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -233,7 +230,7 @@ describe('ImportWorkflowsFlyout', () => {
 
       await waitFor(() => {
         expect(mockParseImportFile).toHaveBeenCalled();
-        expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['test'] });
+        expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['test'], source: ['name'] });
       });
     });
 
@@ -256,9 +253,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValue({
-        conflicts: [{ id: 'w-1', existingName: 'Existing Workflow' }],
-      });
+      mockMgetWorkflows.mockResolvedValue([{ id: 'w-1', name: 'Existing Workflow' }]);
 
       renderFlyout();
 
@@ -281,7 +276,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -332,7 +327,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -367,7 +362,7 @@ describe('ImportWorkflowsFlyout', () => {
       });
       clientResult.workflows[0].name = null;
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -383,7 +378,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should not render preview when workflows array is empty', async () => {
       const clientResult = createPreflightResult();
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -403,7 +398,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce([]);
       mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1', name: 'Test' }],
         failed: [],
@@ -438,7 +433,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce([]);
       mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [{ index: 1, error: 'invalid yaml' }],
@@ -471,7 +466,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce([]);
       mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [],
         failed: [{ index: 0, error: 'bad yaml' }],
@@ -503,7 +498,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValueOnce([]);
       mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [],
@@ -535,9 +530,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValueOnce({
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
-      });
+      mockMgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
 
       renderFlyout();
 
@@ -574,9 +567,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockMgetWorkflows.mockResolvedValueOnce({
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
-      });
+      mockMgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
 
       renderFlyout();
 
@@ -626,7 +617,8 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }, { id: 'w-2' }],
         failed: [],
         parseErrors: [],
@@ -668,9 +660,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Test', stepCount: 2, triggers: [] })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost
-        .mockResolvedValueOnce({ conflicts: [] })
-        .mockRejectedValueOnce(new Error('Server error'));
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockRejectedValueOnce(new Error('Server error'));
 
       renderFlyout();
 
@@ -713,9 +704,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
-      });
+      mockMgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
 
       renderFlyout();
 
@@ -731,7 +720,7 @@ describe('ImportWorkflowsFlyout', () => {
       const select = screen.getByTestId('import-workflows-conflict-resolution');
       fireEvent.change(select, { target: { value: 'overwrite' } });
 
-      mockHttpPost.mockResolvedValueOnce({
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [],
         parseErrors: [],
@@ -756,7 +745,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
