@@ -19,7 +19,6 @@ export {
   attachmentPanelSchema,
   dashboardSectionSchema,
   dashboardAttachmentDataSchema,
-  dashboardAttachmentOriginSchema,
   isLensAttachmentPanel,
   isGenericAttachmentPanel,
 } from './types';

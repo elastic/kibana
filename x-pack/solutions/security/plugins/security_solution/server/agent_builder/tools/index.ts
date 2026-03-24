@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entity_risk_score_tool';
+export {
+  entityRiskScoreTool,
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  getEntityTool,
+  SECURITY_GET_ENTITY_TOOL_ID,
+  searchEntitiesTool,
+  SECURITY_SEARCH_ENTITIES_TOOL_ID,
+} from './entity_analytics';
 export {
   attackDiscoverySearchTool,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
@@ -16,5 +23,3 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
-export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
-export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';

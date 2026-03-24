@@ -1,0 +1,57 @@
+version: '1'
+name: 'sources.microsoft-teams.search'
+description: 'Search messages across Microsoft Teams using KQL syntax. Actions and inputs: searchMessages (query, optional from, optional size, optional enable_top_results). Note that this requires *delegated* authentication (bearer token), as it is not supported with app-only (client credentials) auth; Microsoft does not allow application permissions for chatMessage search, see known limitations: https://learn.microsoft.com/en-us/graph/search-concept-chat-messages?tabs=http#known-limitations'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: "Search query with KQL syntax support (e.g., \"from:bob sent>2024-01-01\")"
+  - name: from
+    type: number
+    required: false
+    description: "Zero-based offset for pagination (default: 0). Combine with size to page through results."
+  - name: size
+    type: number
+    required: false
+    description: "Number of results to return (max 25; default: 25 when omitted)"
+  - name: enable_top_results
+    type: boolean
+    required: false
+    description: "Sort results by relevance (default: false)"
+steps:
+  - name: search-messages
+    type: microsoft-teams.searchMessages
+    connector-id: <%= microsoft-teams-stack-connector-id %>
+    with:
+      query: "${{ inputs.query }}"
+      from: ${{ inputs.from }}
+      size: ${{ inputs.size }}
+      enableTopResults: ${{ inputs.enable_top_results }}
+  - name: map-results
+    type: data.map
+    items: ${{ steps['search-messages'].output }}
+    with:
+      fields:
+        value:
+          $map: { items: "${{ item.value }}", item: "container" }
+          hitsContainers:
+            $map: { items: "${{ container.hitsContainers }}", item: "hc" }
+            total: "${{ hc.total }}"
+            moreResultsAvailable: "${{ hc.moreResultsAvailable }}"
+            hits:
+              $map: { items: "${{ hc.hits }}", item: "hit" }
+              hitId: "${{ hit.hitId }}"
+              rank: "${{ hit.rank }}"
+              summary: "${{ hit.summary }}"
+              id: "${{ hit.resource.id }}"
+              createdDateTime: "${{ hit.resource.createdDateTime }}"
+              sender: "${{ hit.resource.from.user.displayName }}"
+              bodyContent: "${{ hit.resource.body.content }}"
+              webUrl: "${{ hit.resource.webUrl }}"
+              # bodyContentType: "${{ hit.resource.body.contentType }}"
+              # chatId: "${{ hit.resource.chatId }}"
+              # channelIdentity: "${{ hit.resource.channelIdentity }}"
