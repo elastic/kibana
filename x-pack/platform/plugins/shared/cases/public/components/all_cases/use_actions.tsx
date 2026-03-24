@@ -13,6 +13,7 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -260,13 +261,14 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
     actions: shouldShowActions
       ? {
           name: i18n.ACTIONS,
+          width: '4.5em',
+          minWidth: '4.5em',
           align: 'right',
           render: (theCase: CaseUI) => {
             return (
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );
           },
-          width: '100px',
         }
       : null,
   };
