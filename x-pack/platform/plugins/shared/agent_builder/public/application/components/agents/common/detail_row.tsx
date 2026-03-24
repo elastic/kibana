@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface DetailRowProps {
@@ -15,32 +15,26 @@ export interface DetailRowProps {
   isLast?: boolean;
 }
 
-const FLEX_ITEM_WIDTH = '180px';
-
 export const DetailRow: React.FC<DetailRowProps> = ({ label, children, isLast = false }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      responsive={false}
+    <div
       css={css`
         padding: ${euiTheme.size.m};
         border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
       `}
     >
-      <EuiFlexItem
-        grow={false}
+      <EuiText size="s">
+        <strong>{label}</strong>
+      </EuiText>
+      <div
         css={css`
-          width: ${FLEX_ITEM_WIDTH};
-          padding-right: ${euiTheme.size.m};
+          padding-top: ${euiTheme.size.s};
         `}
       >
-        <EuiText size="s">
-          <strong>{label}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow>{children}</EuiFlexItem>
-    </EuiFlexGroup>
+        {children}
+      </div>
+    </div>
   );
 };

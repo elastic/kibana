@@ -7,8 +7,11 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -23,10 +26,10 @@ export interface LibraryToggleRowProps {
   isActive: boolean;
   onToggle: (isActive: boolean) => void;
   isMutating: boolean;
-  /** When true the toggle is locked on and non-interactive. */
   isDisabled?: boolean;
-  /** Tooltip shown when the toggle is disabled. */
-  disabledTooltip?: string;
+  disabledBadgeLabel?: string;
+  disabledTooltipTitle?: string;
+  disabledTooltipBody?: string;
 }
 
 const EUI_TEXT_STYLES = css`
@@ -43,41 +46,66 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
   onToggle,
   isMutating,
   isDisabled = false,
-  disabledTooltip,
+  disabledBadgeLabel,
+  disabledTooltipTitle,
+  disabledTooltipBody,
 }) => {
   const { euiTheme } = useEuiTheme();
-
-  const toggle = (
-    <EuiSwitch
-      label={name}
-      showLabel={false}
-      checked={isDisabled ? true : isActive}
-      onChange={(e) => onToggle(e.target.checked)}
-      disabled={isDisabled || isMutating}
-      compressed
-    />
-  );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
-        <EuiText
-          size="s"
-          css={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-          `}
-        >
-          {name}
-        </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="s"
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+            >
+              {name}
+            </EuiText>
+          </EuiFlexItem>
+          {isDisabled && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="logoElastic" size="m" aria-hidden={true} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiText size="xs" color="subdued" css={EUI_TEXT_STYLES}>
           {description}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isDisabled && disabledTooltip ? (
-          <EuiToolTip content={disabledTooltip}>{toggle}</EuiToolTip>
+        {isDisabled ? (
+          <EuiToolTip
+            content={
+              disabledTooltipTitle || disabledTooltipBody ? (
+                <>
+                  {disabledTooltipTitle && (
+                    <p>
+                      <strong>{disabledTooltipTitle}</strong>
+                    </p>
+                  )}
+                  {disabledTooltipTitle && disabledTooltipBody && <EuiHorizontalRule margin="xs" />}
+                  {disabledTooltipBody && <p>{disabledTooltipBody}</p>}
+                </>
+              ) : undefined
+            }
+          >
+            <EuiBadge tabIndex={0} color="hollow">
+              {disabledBadgeLabel ?? 'Auto-included'}
+            </EuiBadge>
+          </EuiToolTip>
         ) : (
-          toggle
+          <EuiSwitch
+            label={name}
+            showLabel={false}
+            checked={isActive}
+            onChange={(e) => onToggle(e.target.checked)}
+            disabled={isMutating}
+            compressed
+          />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

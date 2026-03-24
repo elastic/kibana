@@ -736,7 +736,8 @@ export const labels = {
       defaultMessage: 'View skill library',
     }),
     sharedSkillWarning: i18n.translate('xpack.agentBuilder.agentSkills.sharedSkillWarning', {
-      defaultMessage: 'This is a shared skill. Changes will affect all users using this skill.',
+      defaultMessage:
+        'You are editing a shared skill. Changes will affect all users using this skill.',
     }),
     newSkillLibraryInfo: i18n.translate('xpack.agentBuilder.agentSkills.newSkillLibraryInfo', {
       defaultMessage:
@@ -801,7 +802,25 @@ export const labels = {
     elasticCapabilitiesReadOnlyBadge: i18n.translate(
       'xpack.agentBuilder.agentSkills.elasticCapabilitiesReadOnlyBadge',
       {
-        defaultMessage: 'Managed',
+        defaultMessage: 'Auto',
+      }
+    ),
+    autoIncludedBadgeLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.autoIncludedBadgeLabel',
+      {
+        defaultMessage: 'Auto-included',
+      }
+    ),
+    autoIncludedTooltipTitle: i18n.translate(
+      'xpack.agentBuilder.agentSkills.autoIncludedTooltipTitle',
+      {
+        defaultMessage: 'Added automatically from agent settings',
+      }
+    ),
+    autoIncludedTooltipBody: i18n.translate(
+      'xpack.agentBuilder.agentSkills.autoIncludedTooltipBody',
+      {
+        defaultMessage: 'Turn off auto-include built-in skills to manage it yourself',
       }
     ),
     elasticCapabilitiesCallout: i18n.translate(
@@ -811,6 +830,9 @@ export const labels = {
           'Built-in skills are automatically included while Elastic Capabilities is enabled.',
       }
     ),
+    manageAllSkills: i18n.translate('xpack.agentBuilder.agentSkills.manageAllSkillsLink', {
+      defaultMessage: 'Manage all skills',
+    }),
   },
   agentPlugins: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentPlugins.pageDescription', {
@@ -939,6 +961,11 @@ export const labels = {
         defaultMessage: 'All plugins have been added to this agent.',
       }
     ),
+    skillDetailInstalledVia: (source: string) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.skillDetailInstalledVia', {
+        defaultMessage: 'Installed via {source}',
+        values: { source },
+      }),
     pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
       defaultMessage: 'ID',
     }),
@@ -994,6 +1021,27 @@ export const labels = {
           'This plugin is automatically included while Elastic Capabilities is enabled.',
       }
     ),
+    autoIncludedBadgeLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoIncludedBadgeLabel',
+      {
+        defaultMessage: 'Auto-included',
+      }
+    ),
+    autoIncludedTooltipTitle: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoIncludedTooltipTitle',
+      {
+        defaultMessage: 'Added automatically from agent settings',
+      }
+    ),
+    autoIncludedTooltipBody: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoIncludedTooltipBody',
+      {
+        defaultMessage: 'Turn off auto-include built-in plugins to manage it yourself',
+      }
+    ),
+    manageAllPlugins: i18n.translate('xpack.agentBuilder.agentPlugins.manageAllSkillsLink', {
+      defaultMessage: 'Manage all plugins',
+    }),
   },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
@@ -1076,6 +1124,9 @@ export const labels = {
     manageToolLibraryLink: i18n.translate('xpack.agentBuilder.agentTools.manageToolLibraryLink', {
       defaultMessage: 'Manage tool library',
     }),
+    editInLibraryLink: i18n.translate('xpack.agentBuilder.agentTools.editInLibraryLink', {
+      defaultMessage: 'Edit in library',
+    }),
     searchAvailableToolsPlaceholder: i18n.translate(
       'xpack.agentBuilder.agentTools.searchAvailableToolsPlaceholder',
       {
@@ -1120,6 +1171,21 @@ export const labels = {
     autoIncludedTooltip: i18n.translate('xpack.agentBuilder.agentTools.autoIncludedTooltip', {
       defaultMessage: 'This tool is automatically included and cannot be removed.',
     }),
+    autoIncludedBadgeLabel: i18n.translate('xpack.agentBuilder.agentTools.autoIncludedBadgeLabel', {
+      defaultMessage: 'Auto-included',
+    }),
+    autoIncludedTooltipTitle: i18n.translate(
+      'xpack.agentBuilder.agentTools.autoIncludedTooltipTitle',
+      {
+        defaultMessage: 'Added automatically from agent settings',
+      }
+    ),
+    autoIncludedTooltipBody: i18n.translate(
+      'xpack.agentBuilder.agentTools.autoIncludedTooltipBody',
+      {
+        defaultMessage: 'Turn off auto-include built-in tools to manage it yourself',
+      }
+    ),
     elasticCapabilitiesManagedTooltip: i18n.translate(
       'xpack.agentBuilder.agentTools.elasticCapabilitiesManagedTooltip',
       {
@@ -1130,7 +1196,7 @@ export const labels = {
     elasticCapabilitiesReadOnlyBadge: i18n.translate(
       'xpack.agentBuilder.agentTools.elasticCapabilitiesReadOnlyBadge',
       {
-        defaultMessage: 'Managed',
+        defaultMessage: 'Auto',
       }
     ),
     elasticCapabilitiesCallout: i18n.translate(
@@ -1140,6 +1206,9 @@ export const labels = {
           'Built-in tools are automatically included while Elastic Capabilities is enabled.',
       }
     ),
+    manageAllTools: i18n.translate('xpack.agentBuilder.agentTools.manageAllToolsLink', {
+      defaultMessage: 'Manage all tools',
+    }),
   },
   plugins: {
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),

@@ -25,6 +25,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import {
@@ -104,26 +105,29 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
           <h2 id="installPluginFlyoutTitle">{labels.agentPlugins.installPluginFlyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiTabs
-        css={{
-          marginLeft: `${euiTheme.size.l}`,
-        }}
+      <div
+        css={css`
+          padding-left: ${euiTheme.size.l};
+          border-bottom: ${euiTheme.border.thin};
+        `}
       >
-        <EuiTab
-          isSelected={activeTab === 'url'}
-          onClick={() => setActiveTab('url')}
-          disabled={isLoading}
-        >
-          {labels.agentPlugins.installPluginUrlTab}
-        </EuiTab>
-        <EuiTab
-          isSelected={activeTab === 'upload'}
-          onClick={() => setActiveTab('upload')}
-          disabled={isLoading}
-        >
-          {labels.agentPlugins.installPluginUploadTab}
-        </EuiTab>
-      </EuiTabs>
+        <EuiTabs bottomBorder={false}>
+          <EuiTab
+            isSelected={activeTab === 'url'}
+            onClick={() => setActiveTab('url')}
+            disabled={isLoading}
+          >
+            {labels.agentPlugins.installPluginUrlTab}
+          </EuiTab>
+          <EuiTab
+            isSelected={activeTab === 'upload'}
+            onClick={() => setActiveTab('upload')}
+            disabled={isLoading}
+          >
+            {labels.agentPlugins.installPluginUploadTab}
+          </EuiTab>
+        </EuiTabs>
+      </div>
 
       <EuiFlyoutBody>
         {activeTab === 'url' ? (

@@ -21,7 +21,9 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
 import { labels } from '../../../utils/i18n';
 import { useEditSkill } from '../../../hooks/skills/use_edit_skill';
@@ -29,6 +31,7 @@ import { useSkillForm } from '../../../hooks/skills/use_skill_form';
 import { useTools } from '../../../hooks/tools/use_tools';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
+import { FLYOUT_WIDTH } from '../common/constants';
 import { SkillForm } from './skill_form';
 
 interface SkillEditFlyoutProps {
@@ -41,7 +44,7 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   const { createAgentBuilderUrl } = useNavigation();
   const skillLibraryUrl = createAgentBuilderUrl(appPaths.manage.skills);
   const { tools } = useTools();
-
+  const { euiTheme } = useEuiTheme();
   const form = useSkillForm();
   const {
     control,
@@ -90,22 +93,24 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   const hasErrors = Object.keys(errors).length > 0;
 
   return (
-    <EuiFlyout onClose={onClose} size="960px" aria-labelledby="skillEditFlyoutTitle">
+    <EuiFlyout onClose={onClose} size={FLYOUT_WIDTH} aria-labelledby="skillEditFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2 id="skillEditFlyoutTitle">{labels.agentSkills.editSkillFlyoutTitle}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href={skillLibraryUrl} external>
-              {labels.agentSkills.viewSkillLibraryLink}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="s">
+          <h2 id="skillEditFlyoutTitle">{labels.agentSkills.editSkillFlyoutTitle}</h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiLink href={skillLibraryUrl} external>
+          {labels.agentSkills.viewSkillLibraryLink}
+        </EuiLink>
       </EuiFlyoutHeader>
-
+      <EuiCallOut
+        color="warning"
+        title={labels.agentSkills.sharedSkillWarning}
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      />
+      <EuiSpacer size="m" />
       <EuiFlyoutBody>
         {isLoading ? (
           <EuiFlexGroup justifyContent="center" alignItems="center">

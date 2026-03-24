@@ -20,7 +20,9 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
@@ -29,6 +31,7 @@ import { useSkillForm } from '../../../hooks/skills/use_skill_form';
 import { useTools } from '../../../hooks/tools/use_tools';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
+import { FLYOUT_WIDTH } from '../common/constants';
 import { SkillForm } from './skill_form';
 
 interface SkillCreateFlyoutProps {
@@ -43,6 +46,7 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
   const { createAgentBuilderUrl } = useNavigation();
   const skillLibraryUrl = createAgentBuilderUrl(appPaths.manage.skills);
   const { tools } = useTools();
+  const { euiTheme } = useEuiTheme();
 
   const form = useSkillForm();
   const {
@@ -85,7 +89,7 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
   const hasErrors = Object.keys(errors).length > 0;
 
   return (
-    <EuiFlyout onClose={onClose} size="960px" aria-labelledby="skillCreateFlyoutTitle">
+    <EuiFlyout onClose={onClose} size={FLYOUT_WIDTH} aria-labelledby="skillCreateFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -100,17 +104,16 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-
+      <EuiCallOut
+        color="primary"
+        title={labels.agentSkills.newSkillLibraryInfo}
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      />
+      <EuiSpacer size="m" />
       <EuiFlyoutBody>
         <FormProvider {...form}>
-          <EuiCallOut
-            color="primary"
-            iconType="info"
-            title={labels.agentSkills.newSkillLibraryInfo}
-          />
-
-          <EuiSpacer size="m" />
-
           <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
             <SkillForm control={control} toolOptions={toolOptions} />
           </EuiForm>

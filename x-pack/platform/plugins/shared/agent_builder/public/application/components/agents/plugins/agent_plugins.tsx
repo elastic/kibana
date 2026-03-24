@@ -9,22 +9,24 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from 'react-router-dom';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { labels } from '../../../utils/i18n';
+import { appPaths } from '../../../utils/app_paths';
+import { useNavigation } from '../../../hooks/use_navigation';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -35,12 +37,14 @@ import { ActiveItemRow } from '../common/active_item_row';
 import { PluginLibraryPanel } from './plugin_library_panel';
 import { PluginDetailPanel } from './plugin_detail_panel';
 import { InstallPluginFlyout } from './install_plugin_flyout';
-
-const FLEX_ITEM_WIDTH = '280px';
+import { PageWrapper } from '../common/page_wrapper';
+import { ICON_DIMENSIONS } from '../common/constants';
+import { useListDetailPageStyles } from '../common/styles';
 
 export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
-  const { euiTheme } = useEuiTheme();
+  const styles = useListDetailPageStyles();
+  const { createAgentBuilderUrl } = useNavigation();
   const { agentService } = useAgentBuilderServices();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
@@ -192,76 +196,74 @@ export const AgentPlugins: React.FC = () => {
 
   if (isLoading) {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="center"
-        css={css`
-          padding: ${euiTheme.size.xxl};
-        `}
-      >
+      <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
     );
   }
 
   return (
-    <div
-      css={css`
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      `}
-    >
-      <div
-        css={css`
-          padding: ${euiTheme.size.l};
-          flex-shrink: 0;
-        `}
-      >
+    <PageWrapper>
+      <div css={styles.header}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>{labels.plugins.title}</h1>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="package" aria-hidden={true} css={ICON_DIMENSIONS} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>{labels.plugins.title}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              aria-label={labels.agentPlugins.installPluginButton}
-              button={
-                <EuiButton
-                  fill
-                  iconType="plusInCircle"
-                  iconSide="left"
-                  onClick={() => setIsAddMenuOpen((prev) => !prev)}
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
+                  {labels.agentPlugins.manageAllPlugins}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  aria-label={labels.agentPlugins.installPluginButton}
+                  button={
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      iconSide="left"
+                      onClick={() => setIsAddMenuOpen((prev) => !prev)}
+                    >
+                      {labels.agentPlugins.installPluginButton}
+                    </EuiButton>
+                  }
+                  isOpen={isAddMenuOpen}
+                  closePopover={() => setIsAddMenuOpen(false)}
+                  anchorPosition="downLeft"
+                  panelPaddingSize="none"
                 >
-                  {labels.agentPlugins.installPluginButton}
-                </EuiButton>
-              }
-              isOpen={isAddMenuOpen}
-              closePopover={() => setIsAddMenuOpen(false)}
-              anchorPosition="downLeft"
-              panelPaddingSize="none"
-            >
-              <EuiContextMenuPanel
-                items={[
-                  <EuiContextMenuItem
-                    key="fromUrlOrZip"
-                    icon="link"
-                    onClick={handleOpenInstallFlyout}
-                  >
-                    {labels.agentPlugins.fromUrlOrZipMenuItem}
-                  </EuiContextMenuItem>,
-                  <EuiContextMenuItem
-                    key="fromLibrary"
-                    icon="importAction"
-                    onClick={handleOpenLibrary}
-                  >
-                    {labels.agentPlugins.fromLibraryMenuItem}
-                  </EuiContextMenuItem>,
-                ]}
-              />
-            </EuiPopover>
+                  <EuiContextMenuPanel
+                    items={[
+                      <EuiContextMenuItem
+                        key="fromUrlOrZip"
+                        icon="link"
+                        onClick={handleOpenInstallFlyout}
+                      >
+                        {labels.agentPlugins.fromUrlOrZipMenuItem}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="fromLibrary"
+                        icon="importAction"
+                        onClick={handleOpenLibrary}
+                      >
+                        {labels.agentPlugins.fromLibraryMenuItem}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -271,30 +273,9 @@ export const AgentPlugins: React.FC = () => {
         </EuiText>
       </div>
 
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        css={css`
-          flex: 1;
-          overflow: hidden;
-          padding: 0px ${euiTheme.size.l};
-        `}
-      >
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            width: ${FLEX_ITEM_WIDTH};
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-          `}
-        >
-          <div
-            css={css`
-              padding: 0px ${euiTheme.size.m} ${euiTheme.size.s} 0px;
-              flex-shrink: 0;
-            `}
-          >
+      <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+        <EuiFlexItem grow={false} css={styles.searchColumn}>
+          <div css={styles.searchInputWrapper}>
             <EuiFieldSearch
               placeholder={labels.agentPlugins.searchActivePluginsPlaceholder}
               value={searchQuery}
@@ -304,13 +285,7 @@ export const AgentPlugins: React.FC = () => {
             />
           </div>
 
-          <div
-            css={css`
-              flex: 1;
-              overflow-y: auto;
-              padding: 0px ${euiTheme.size.m} ${euiTheme.size.s} 0px;
-            `}
-          >
+          <div css={styles.scrollableList}>
             {filteredActivePlugins.length === 0 ? (
               <EuiText size="s" color="subdued" textAlign="center">
                 <p>
@@ -336,20 +311,14 @@ export const AgentPlugins: React.FC = () => {
           </div>
         </EuiFlexItem>
 
-        <EuiFlexItem
-          css={css`
-            overflow: hidden;
-          `}
-        >
+        <EuiFlexItem css={styles.detailPanelWrapper}>
           {selectedPluginId ? (
             <PluginDetailPanel pluginId={selectedPluginId} onRemove={handleRemoveSelectedPlugin} />
           ) : (
             <EuiFlexGroup
               justifyContent="center"
               alignItems="center"
-              css={css`
-                height: 100%;
-              `}
+              css={styles.noSelectionPlaceholder}
             >
               <EuiText size="s" color="subdued">
                 {labels.agentPlugins.noPluginSelectedMessage}
@@ -372,6 +341,6 @@ export const AgentPlugins: React.FC = () => {
       {isInstallFlyoutOpen && (
         <InstallPluginFlyout onClose={closeInstallFlyout} onPluginInstalled={handleAddPlugin} />
       )}
-    </div>
+    </PageWrapper>
   );
 };

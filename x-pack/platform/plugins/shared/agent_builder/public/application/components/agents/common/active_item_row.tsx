@@ -49,13 +49,20 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
         }
       `}
     >
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          min-width: 0;
+        `}
+      >
         <EuiText
           size="s"
           css={css`
             font-weight: ${isSelected
               ? euiTheme.font.weight.semiBold
               : euiTheme.font.weight.regular};
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           `}
         >
           {name}

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiLink,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -20,142 +19,114 @@ import {
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
-import { DetailRow } from '../common/detail_row';
+import { appPaths } from '../../../utils/app_paths';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { DetailPanelLayout } from '../common/detail_panel_layout';
 
 interface ToolDetailPanelProps {
   toolId: string;
   onRemove: () => void;
-  /** When true the tool is auto-included and cannot be removed. */
-  isReadOnly?: boolean;
+  isAutoIncluded?: boolean;
 }
 
-/**
- * Right-side detail panel for the selected tool in the agent tools page.
- * Displays tool metadata (ID, type, description, tags) and a remove action
- * with confirmation modal.
- */
 export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
   toolId,
   onRemove,
-  isReadOnly = false,
+  isAutoIncluded = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { tool, isLoading } = useToolService(toolId);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
-  if (isLoading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        css={css`
-          padding: ${euiTheme.size.xxl};
-        `}
-      >
-        <EuiLoadingSpinner size="l" />
-      </EuiFlexGroup>
-    );
-  }
-
-  if (!tool) return null;
+  const { createAgentBuilderUrl } = useNavigation();
+  const isReadOnly = tool?.readonly;
+  const editInLibraryUrl = createAgentBuilderUrl(appPaths.manage.toolDetails({ toolId }));
 
   return (
-    <div
-      css={css`
-        height: 100%;
-        overflow-y: auto;
-        padding: 0;
-      `}
-    >
-      <div
-        css={css`
-          border: ${euiTheme.border.thin};
-          overflow: hidden;
-        `}
-      >
-        {/* Header with tool name, badges, and remove button */}
-        <div
+    <DetailPanelLayout
+      isLoading={isLoading}
+      isEmpty={!tool}
+      title={tool?.id ?? toolId}
+      showAutoIcon={isAutoIncluded}
+      headerContent={
+        <EuiText
+          size="xs"
+          color="subdued"
           css={css`
-            padding: ${euiTheme.size.m};
-            border-bottom: ${euiTheme.border.thin};
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            margin-top: ${euiTheme.size.xs};
           `}
         >
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          {tool?.id}
+        </EuiText>
+      }
+      headerActions={(openConfirmRemove) => (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          {isAutoIncluded ? (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h2>{tool.id}</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {tool.readonly && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{labels.agentTools.readOnlyBadge}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <EuiBadge color="hollow">{labels.agentTools.autoIncludedBadgeLabel}</EuiBadge>
             </EuiFlexItem>
-            {!isReadOnly && (
+          ) : isReadOnly ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" iconType="lock">
+                  {labels.agentTools.readOnlyBadge}
+                </EuiBadge>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="cross"
                   size="xs"
                   color="danger"
-                  onClick={() => setIsConfirmOpen(true)}
+                  onClick={openConfirmRemove}
                 >
                   {labels.agentTools.removeToolButtonLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </div>
-
-        {/* Detail rows: tags, description, type, ID */}
-        <div
+            </>
+          ) : (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiLink href={editInLibraryUrl} target="_blank" external>
+                  {labels.agentTools.editInLibraryLink}
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  size="xs"
+                  color="danger"
+                  onClick={openConfirmRemove}
+                >
+                  {labels.agentTools.removeToolButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
+      )}
+      confirmRemove={{
+        title: labels.agentTools.removeToolConfirmTitle(tool?.id ?? toolId),
+        body: labels.agentTools.removeToolConfirmBody,
+        confirmButtonText: labels.agentTools.removeToolConfirmButton,
+        cancelButtonText: labels.agentTools.removeToolCancelButton,
+        onConfirm: onRemove,
+      }}
+    >
+      <div
+        css={css`
+          padding: ${euiTheme.size.l};
+        `}
+      >
+        <EuiTitle size="xxxs">
+          <h4>{labels.agentTools.toolDetailDescriptionLabel}</h4>
+        </EuiTitle>
+        <EuiText
+          size="s"
           css={css`
-            padding: ${euiTheme.size.m};
+            margin-top: ${euiTheme.size.s};
           `}
         >
-          {tool.tags.length > 0 && (
-            <DetailRow label={labels.agentTools.toolDetailTagsLabel}>
-              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                {tool.tags.map((tag) => (
-                  <EuiFlexItem key={tag} grow={false}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </DetailRow>
-          )}
-          <DetailRow label={labels.agentTools.toolDetailDescriptionLabel}>
-            <EuiText size="s">{tool.description || '\u2014'}</EuiText>
-          </DetailRow>
-          <DetailRow label={labels.agentTools.toolDetailTypeLabel}>
-            <EuiText size="s">{tool.type}</EuiText>
-          </DetailRow>
-          <DetailRow label={labels.agentTools.toolDetailIdLabel} isLast>
-            <EuiText size="s">{tool.id}</EuiText>
-          </DetailRow>
-        </div>
+          {tool?.description || '\u2014'}
+        </EuiText>
       </div>
-
-      {isConfirmOpen && (
-        <EuiConfirmModal
-          title={labels.agentTools.removeToolConfirmTitle(tool.id)}
-          aria-label={labels.agentTools.removeToolConfirmTitle(tool.id)}
-          onCancel={() => setIsConfirmOpen(false)}
-          onConfirm={() => {
-            setIsConfirmOpen(false);
-            onRemove();
-          }}
-          cancelButtonText={labels.agentTools.removeToolCancelButton}
-          confirmButtonText={labels.agentTools.removeToolConfirmButton}
-          buttonColor="danger"
-        >
-          <p>{labels.agentTools.removeToolConfirmBody}</p>
-        </EuiConfirmModal>
-      )}
-    </div>
+    </DetailPanelLayout>
   );
 };

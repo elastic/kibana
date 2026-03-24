@@ -6,3 +6,9 @@
  */
 
 export const FLYOUT_WIDTH = '960px';
+
+export const CONTAINER_WIDTH = '1200px';
+
+export const ICON_DIMENSIONS = { width: 24, height: 28 } as const;
+
+export const SEARCH_LIST_WIDTH = '340px';

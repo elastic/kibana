@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
-import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { LibraryToggleRow } from '../common/library_toggle_row';
-import { FLYOUT_WIDTH } from '../common/constants';
+import { LibraryPanel } from '../common/library_panel';
+import type { LibraryPanelLabels } from '../common/library_panel';
+
+const libraryLabels: LibraryPanelLabels = {
+  title: labels.agentSkills.addSkillFromLibraryTitle,
+  manageLibraryLink: labels.agentSkills.manageSkillLibraryLink,
+  searchPlaceholder: labels.agentSkills.searchAvailableSkillsPlaceholder,
+  availableSummary: labels.agentSkills.availableSkillsSummary,
+  noMatchMessage: labels.agentSkills.noAvailableSkillsMatchMessage,
+  noItemsMessage: labels.agentSkills.noAvailableSkillsMessage,
+  disabledBadgeLabel: labels.agentSkills.autoIncludedBadgeLabel,
+  disabledTooltipTitle: labels.agentSkills.autoIncludedTooltipTitle,
+  disabledTooltipBody: labels.agentSkills.autoIncludedTooltipBody,
+};
+
+const getSkillName = (skill: PublicSkillSummary): string => skill.name;
 
 interface SkillLibraryPanelProps {
   onClose: () => void;
@@ -45,104 +45,23 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
   enableElasticCapabilities = false,
   builtinSkillIdSet,
 }) => {
-  const { createAgentBuilderUrl } = useNavigation();
-  const manageLibraryUrl = createAgentBuilderUrl(appPaths.manage.skills);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredSkills = useMemo(() => {
-    if (!searchQuery.trim()) return allSkills;
-    const lower = searchQuery.toLowerCase();
-    return allSkills.filter(
-      (s) => s.name.toLowerCase().includes(lower) || s.description.toLowerCase().includes(lower)
-    );
-  }, [allSkills, searchQuery]);
+  const disabledItemIdSet = useMemo(() => {
+    if (!enableElasticCapabilities || !builtinSkillIdSet) return undefined;
+    return builtinSkillIdSet;
+  }, [enableElasticCapabilities, builtinSkillIdSet]);
 
   return (
-    <EuiFlyout
-      side="right"
-      size={FLYOUT_WIDTH}
+    <LibraryPanel<PublicSkillSummary>
       onClose={onClose}
-      aria-labelledby="skillLibraryFlyoutTitle"
-      pushMinBreakpoint="xs"
-      hideCloseButton={false}
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2 id="skillLibraryFlyoutTitle">{labels.agentSkills.addSkillFromLibraryTitle}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href={manageLibraryUrl} external>
-              {labels.agentSkills.manageSkillLibraryLink}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFieldSearch
-          placeholder={labels.agentSkills.searchAvailableSkillsPlaceholder}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          incremental
-          fullWidth
-        />
-
-        <EuiSpacer size="m" />
-
-        <EuiText size="xs" color="subdued">
-          {labels.agentSkills.availableSkillsSummary(filteredSkills.length, allSkills.length)}
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        {enableElasticCapabilities && (
-          <>
-            <EuiCallOut
-              size="s"
-              iconType="iInCircle"
-              title={labels.agentSkills.elasticCapabilitiesCallout}
-              announceOnMount={false}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-
-        {filteredSkills.length === 0 ? (
-          <EuiText size="s" color="subdued" textAlign="center">
-            {searchQuery.trim()
-              ? labels.agentSkills.noAvailableSkillsMatchMessage
-              : labels.agentSkills.noAvailableSkillsMessage}
-          </EuiText>
-        ) : (
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {filteredSkills.map((skill) => {
-              const isBuiltinManaged =
-                enableElasticCapabilities && (builtinSkillIdSet?.has(skill.id) ?? false);
-
-              return (
-                <EuiFlexItem key={skill.id} grow={false}>
-                  <LibraryToggleRow
-                    id={skill.id}
-                    name={skill.name}
-                    description={skill.description}
-                    isActive={activeSkillIdSet.has(skill.id)}
-                    onToggle={(checked) => onToggleSkill(skill, checked)}
-                    isMutating={mutatingSkillId === skill.id}
-                    isDisabled={isBuiltinManaged}
-                    disabledTooltip={
-                      isBuiltinManaged
-                        ? labels.agentSkills.elasticCapabilitiesManagedTooltip
-                        : undefined
-                    }
-                  />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        )}
-      </EuiFlyoutBody>
-    </EuiFlyout>
+      allItems={allSkills}
+      activeItemIdSet={activeSkillIdSet}
+      onToggleItem={onToggleSkill}
+      mutatingItemId={mutatingSkillId}
+      flyoutTitleId="skillLibraryFlyoutTitle"
+      libraryLabels={libraryLabels}
+      manageLibraryPath={appPaths.manage.skills}
+      getItemName={getSkillName}
+      disabledItemIdSet={disabledItemIdSet}
+    />
   );
 };
