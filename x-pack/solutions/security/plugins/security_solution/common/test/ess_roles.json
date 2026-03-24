@@ -49,7 +49,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["read", "endpoint_exceptions_read"],
-          "securitySolutionRulesV2": ["read"],
+          "securitySolutionRulesV3": ["read"],
+          "securitySolutionAlertsV1": ["read"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCasesV2": ["read"],
@@ -101,7 +102,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV3": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -153,7 +155,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV3": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -177,7 +180,8 @@
       {
         "feature": {
           "siemV5": ["read", "endpoint_exceptions_read"],
-          "securitySolutionRulesV2": ["read"]
+          "securitySolutionRulesV3": ["read"],
+          "securitySolutionAlertsV1": ["read"]
         },
         "spaces": ["*"],
         "base": []
@@ -228,7 +232,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV3": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -285,7 +290,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV3": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -351,7 +357,8 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionRulesV2": ["read", "security_solution_exceptions_all"],
+          "securitySolutionRulesV3": ["read", "security_solution_exceptions_all"],
+          "securitySolutionAlertsV1": ["read"],
           "securitySolutionTimeline": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
@@ -414,7 +421,8 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionRulesV2": ["read", "securitySolutionExceptionsRead"],
+          "securitySolutionRulesV3": ["read"],
+          "securitySolutionAlertsV1": ["read"],
           "securitySolutionTimeline": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]

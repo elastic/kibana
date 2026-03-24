@@ -211,7 +211,8 @@ export const rulesAll: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV2: ['all', 'security_solution_exceptions_all'],
+          securitySolutionRulesV3: ['all', 'security_solution_exceptions_all'],
+          securitySolutionAlertsV1: ['all'],
           actions: ['all'],
           indexPatterns: ['all'],
           savedObjectManagement: ['all'],
@@ -236,7 +237,8 @@ export const rulesAllWithCases: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV2: ['all', 'security_solution_exceptions_all'],
+          securitySolutionRulesV3: ['all', 'security_solution_exceptions_all'],
+          securitySolutionAlertsV1: ['all'],
           actions: ['all'],
           indexPatterns: ['all'],
           savedObjectManagement: ['all'],
@@ -262,7 +264,8 @@ export const rulesRead: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV2: ['read'],
+          securitySolutionRulesV3: ['read'],
+          securitySolutionAlertsV1: ['read'],
           savedObjectManagement: ['all'],
           indexPatterns: ['all'],
         },

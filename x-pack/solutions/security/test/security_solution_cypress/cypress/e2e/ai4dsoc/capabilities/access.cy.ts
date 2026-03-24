@@ -130,7 +130,12 @@ describe('Capabilities', { tags: '@serverless' }, () => {
             },
             kibana: [
               {
-                feature: { siemV5: ['all'], securitySolutionRulesV2: ['all'], fleet: ['all'] },
+                feature: {
+                  siemV5: ['all'],
+                  securitySolutionRulesV3: ['all'],
+                  securitySolutionAlertsV1: ['all'],
+                  fleet: ['all'],
+                },
                 spaces: ['*'],
               },
             ],

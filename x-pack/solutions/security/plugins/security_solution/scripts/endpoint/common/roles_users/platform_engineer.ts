@@ -34,7 +34,8 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
 
             'workflow_insights_all',
           ],
-          securitySolutionRulesV2: ['all'],
+          securitySolutionRulesV3: ['all'],
+          securitySolutionAlertsV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
