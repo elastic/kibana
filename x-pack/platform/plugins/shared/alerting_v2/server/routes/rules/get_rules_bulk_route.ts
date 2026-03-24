@@ -6,14 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
 import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
-
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
@@ -21,6 +19,8 @@ import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 const getRulesBulkQuerySchema = schema.object({
   ids: schema.maybe(
     schema.arrayOf(schema.string({ meta: { description: 'A rule identifier.' } }), {
+      minSize: 1,
+      maxSize: 1000,
       meta: { description: 'A list of rule identifiers to retrieve.' },
     })
   ),
