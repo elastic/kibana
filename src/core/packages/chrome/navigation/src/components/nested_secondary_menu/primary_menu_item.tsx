@@ -70,7 +70,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
       >
         {children}
         {hasSubmenu && (
-          <EuiIcon color="textDisabled" css={arrowStyle} type="chevronSingleRight" size="m" />
+          <EuiIcon color="textDisabled" css={arrowStyle} type="chevronSingleRight" size="m" aria-hidden={true} />
         )}
       </SecondaryMenu.Item>
     </div>

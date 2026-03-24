@@ -77,7 +77,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
   const items = sortedItems.map(({ path, label, icon, ...rest }) => {
     return {
       name: label,
-      icon: <EuiIcon type={icon} size="m" />,
+      icon: <EuiIcon type={icon} size="m" aria-hidden={true} />,
       href: addBasePath(path),
       onClick: getAppNavigationHandler(path),
       ...(rest['data-test-subj'] ? { 'data-test-subj': rest['data-test-subj'] } : {}),
