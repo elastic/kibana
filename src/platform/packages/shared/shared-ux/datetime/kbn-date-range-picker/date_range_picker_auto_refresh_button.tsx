@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { autoRefreshButtonTexts } from './translations';
-import { autoRefreshTotalSecondsFromMs, formatAutoRefreshCountdown } from './utils';
+import { msToSeconds, formatAutoRefreshCountdown } from './utils';
 
 /*
  * Tabular numerals give every digit the same advance width so the countdown string
@@ -43,7 +43,7 @@ export function DateRangePickerAutoRefreshButton({
   onClick,
   secondsRemaining,
 }: DateRangePickerAutoRefreshButtonProps) {
-  const intervalSeconds = autoRefreshTotalSecondsFromMs(interval);
+  const intervalSeconds = msToSeconds(interval);
   const countdownLabel =
     secondsRemaining !== null
       ? formatAutoRefreshCountdown(secondsRemaining)

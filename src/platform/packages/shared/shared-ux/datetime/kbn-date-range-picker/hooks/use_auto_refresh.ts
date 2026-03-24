@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { autoRefreshTotalSecondsFromMs } from '../utils';
+import { msToSeconds } from '../utils';
 
 /**
  * Manages an auto-refresh interval timer.
@@ -42,7 +42,7 @@ export function useAutoRefresh({
   onRefreshRef.current = onRefresh;
 
   useEffect(() => {
-    const totalSeconds = autoRefreshTotalSecondsFromMs(intervalMs);
+    const totalSeconds = msToSeconds(intervalMs);
 
     if (isPaused || totalSeconds <= 0) {
       setSecondsRemaining(null);

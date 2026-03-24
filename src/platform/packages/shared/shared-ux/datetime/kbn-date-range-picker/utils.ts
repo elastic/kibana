@@ -42,7 +42,7 @@ const pad = (n: number, width: number): string =>
  *
  * @returns The count and unit for the display.
  */
-export function autoRefreshIntervalFromMs(
+export function msToAutoRefreshInterval(
   intervalMs: number,
   unit?: AutoRefreshIntervalUnit
 ): { count: number; unit: AutoRefreshIntervalUnit } {
@@ -124,7 +124,7 @@ export function formatAutoRefreshCountdown(totalSeconds: number): string {
  *
  * @returns The total seconds.
  */
-export function autoRefreshTotalSecondsFromMs(intervalMs: number): number {
+export function msToSeconds(intervalMs: number): number {
   if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
     return 0;
   }

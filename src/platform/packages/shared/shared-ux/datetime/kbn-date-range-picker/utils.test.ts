@@ -17,10 +17,10 @@ import {
   getOptionInputText,
   formatDateRange,
   combineDateAndTime,
-  autoRefreshIntervalFromMs,
+  msToAutoRefreshInterval,
   autoRefreshIntervalToMs,
   formatAutoRefreshCountdown,
-  autoRefreshTotalSecondsFromMs,
+  msToSeconds,
 } from './utils';
 
 describe('toLocalPreciseString', () => {
@@ -237,41 +237,41 @@ describe('combineDateAndTime', () => {
   });
 });
 
-describe('autoRefreshIntervalFromMs (auto unit)', () => {
+describe('msToAutoRefreshInterval (auto unit)', () => {
   it('prefers hours when divisible by 1h', () => {
-    expect(autoRefreshIntervalFromMs(3_600_000)).toEqual({ count: 1, unit: 'h' });
-    expect(autoRefreshIntervalFromMs(7_200_000)).toEqual({ count: 2, unit: 'h' });
+    expect(msToAutoRefreshInterval(3_600_000)).toEqual({ count: 1, unit: 'h' });
+    expect(msToAutoRefreshInterval(7_200_000)).toEqual({ count: 2, unit: 'h' });
   });
 
   it('prefers minutes when not whole hours but divisible by 1m', () => {
-    expect(autoRefreshIntervalFromMs(120_000)).toEqual({ count: 2, unit: 'm' });
-    expect(autoRefreshIntervalFromMs(180_000)).toEqual({ count: 3, unit: 'm' });
+    expect(msToAutoRefreshInterval(120_000)).toEqual({ count: 2, unit: 'm' });
+    expect(msToAutoRefreshInterval(180_000)).toEqual({ count: 3, unit: 'm' });
   });
 
   it('uses seconds when not divisible by 1m (e.g. 90s)', () => {
-    expect(autoRefreshIntervalFromMs(90_000)).toEqual({ count: 90, unit: 's' });
+    expect(msToAutoRefreshInterval(90_000)).toEqual({ count: 90, unit: 's' });
   });
 
   it('round-trips through autoRefreshIntervalToMs for whole-second intervals', () => {
     const ms = 90_000;
-    const { count, unit } = autoRefreshIntervalFromMs(ms);
+    const { count, unit } = msToAutoRefreshInterval(ms);
     expect(autoRefreshIntervalToMs(count, unit)).toBe(ms);
   });
 });
 
-describe('autoRefreshIntervalFromMs (explicit unit)', () => {
+describe('msToAutoRefreshInterval (explicit unit)', () => {
   it('rounds count to the chosen unit', () => {
-    expect(autoRefreshIntervalFromMs(90_000, 'm')).toEqual({ count: 2, unit: 'm' });
+    expect(msToAutoRefreshInterval(90_000, 'm')).toEqual({ count: 2, unit: 'm' });
   });
 });
 
-describe('autoRefreshTotalSecondsFromMs', () => {
+describe('msToSeconds', () => {
   it('ceil(seconds) and guards invalid input', () => {
-    expect(autoRefreshTotalSecondsFromMs(4000)).toBe(4);
-    expect(autoRefreshTotalSecondsFromMs(1500)).toBe(2);
-    expect(autoRefreshTotalSecondsFromMs(0)).toBe(0);
-    expect(autoRefreshTotalSecondsFromMs(-100)).toBe(0);
-    expect(autoRefreshTotalSecondsFromMs(Number.NaN)).toBe(0);
+    expect(msToSeconds(4000)).toBe(4);
+    expect(msToSeconds(1500)).toBe(2);
+    expect(msToSeconds(0)).toBe(0);
+    expect(msToSeconds(-100)).toBe(0);
+    expect(msToSeconds(Number.NaN)).toBe(0);
   });
 });
 

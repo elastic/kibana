@@ -15,7 +15,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch } from 
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { settingsPanelTexts } from '../translations';
 import type { AutoRefreshIntervalUnit, AutoRefreshSettings } from '../types';
-import { autoRefreshIntervalFromMs, autoRefreshIntervalToMs } from '../utils';
+import { msToAutoRefreshInterval, autoRefreshIntervalToMs } from '../utils';
 
 const countFieldFlexItemCss = css`
   min-inline-size: 60px;
@@ -37,7 +37,7 @@ const AUTO_REFRESH_UNIT_OPTIONS: Array<{ value: AutoRefreshIntervalUnit; text: s
 export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) {
   const { settings, onSettingsChange } = useDateRangePickerContext();
 
-  const derived = autoRefreshIntervalFromMs(autoRefresh.interval, autoRefresh.intervalUnit);
+  const derived = msToAutoRefreshInterval(autoRefresh.interval, autoRefresh.intervalUnit);
 
   const [countInput, setCountInput] = useState<number | ''>(derived.count);
 
@@ -49,9 +49,7 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
   useEffect(() => {
     const key = `${autoRefresh.interval}\0${autoRefresh.intervalUnit ?? ''}`;
     if (key !== prevAutoRefreshDisplayKeyRef.current) {
-      setCountInput(
-        autoRefreshIntervalFromMs(autoRefresh.interval, autoRefresh.intervalUnit).count
-      );
+      setCountInput(msToAutoRefreshInterval(autoRefresh.interval, autoRefresh.intervalUnit).count);
       prevAutoRefreshDisplayKeyRef.current = key;
     }
   }, [autoRefresh.interval, autoRefresh.intervalUnit]);
