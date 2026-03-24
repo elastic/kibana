@@ -59,8 +59,8 @@ export function AttacksGroupTakeActionItems({
   );
 
   const baseAttackProps = useMemo(() => {
-    return { attackId: attack.id, relatedAlertIds: originalAlertIds };
-  }, [attack.id, originalAlertIds]);
+    return { attackId: attack.id, attackIndex: attack.index, relatedAlertIds: originalAlertIds };
+  }, [attack.id, attack.index, originalAlertIds]);
 
   const attacksWithAssignees = useMemo(() => {
     return [{ ...baseAttackProps, assignees: attack.assignees }];

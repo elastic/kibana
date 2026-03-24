@@ -5,71 +5,54 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
-import type { WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 
-import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
-import { useAttacksPrivileges } from '../use_attacks_privileges';
+import { useBulkAttackRunWorkflowItems } from '../bulk_action_items/use_bulk_attack_run_workflow_items';
 import { useAttackRunWorkflowContextMenuItems } from './use_attack_run_workflow_context_menu_items';
 
-const createCapabilities = (
-  overrides: Partial<WorkflowsManagementCapabilities> = {}
-): WorkflowsManagementCapabilities => ({
-  canCreateWorkflow: true,
-  canReadWorkflow: true,
-  canUpdateWorkflow: true,
-  canDeleteWorkflow: true,
-  canExecuteWorkflow: true,
-  canReadWorkflowExecution: true,
-  canCancelWorkflowExecution: true,
-  ...overrides,
-});
+jest.mock('../bulk_action_items/use_bulk_attack_run_workflow_items');
 
-jest.mock('@kbn/workflows-ui');
-jest.mock('../../../../../common/hooks/use_space_id');
-jest.mock('../use_attacks_privileges');
-jest.mock(
-  '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
-  () => ({
-    ...jest.requireActual(
-      '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
-    ),
-    AlertWorkflowsPanel: () => null,
-  })
-);
-
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
-  typeof useWorkflowsCapabilities
->;
-const mockUseWorkflowsUIEnabledSetting = useWorkflowsUIEnabledSetting as jest.MockedFunction<
-  typeof useWorkflowsUIEnabledSetting
->;
-const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
-  typeof useAttacksPrivileges
+const mockUseBulkAttackRunWorkflowItems = useBulkAttackRunWorkflowItems as jest.MockedFunction<
+  typeof useBulkAttackRunWorkflowItems
 >;
 
 const defaultAttacks = [{ attackId: 'attack-1', relatedAlertIds: ['alert-1', 'alert-2'] }];
+const spaceId = 'default';
+const expectedIndex = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`;
+
+const mockRenderContent = jest.fn((props) => React.createElement('div', null, 'Workflow Panel'));
+
+const defaultBulkActionItems = {
+  items: [
+    {
+      key: 'run-attack-workflow-action',
+      label: 'Run workflow',
+      name: 'Run workflow',
+      panel: RUN_WORKFLOW_BULK_PANEL_ID,
+      'data-test-subj': 'run-attack-workflow-action',
+      disableOnQuery: true as const,
+    },
+  ],
+  panels: [
+    {
+      id: RUN_WORKFLOW_BULK_PANEL_ID,
+      title: 'Select workflow',
+      'data-test-subj': 'attack-workflow-context-menu-panel',
+      renderContent: mockRenderContent,
+    },
+  ],
+};
 
 describe('useAttackRunWorkflowContextMenuItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockUseSpaceId.mockReturnValue('default');
-    mockUseAttacksPrivileges.mockReturnValue({
-      hasIndexWrite: true,
-      hasAttackIndexWrite: true,
-      loading: false,
-    });
-    mockUseWorkflowsCapabilities.mockReturnValue(createCapabilities());
-    mockUseWorkflowsUIEnabledSetting.mockReturnValue(true);
+    mockUseBulkAttackRunWorkflowItems.mockReturnValue(defaultBulkActionItems);
   });
 
-  describe('when all permissions are granted', () => {
+  describe('when bulk action items are available', () => {
     it('should return one item with the correct key and panel', () => {
       const { result } = renderHook(() =>
         useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
@@ -83,7 +66,7 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
       });
     });
 
-    it('should return one panel with the correct id and data-test-subj', () => {
+    it('should return one panel with the correct id', () => {
       const { result } = renderHook(() =>
         useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
       );
@@ -91,143 +74,88 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
       expect(result.current.panels).toHaveLength(1);
       expect(result.current.panels[0]).toMatchObject({
         id: RUN_WORKFLOW_BULK_PANEL_ID,
-        'data-test-subj': 'attack-workflow-context-menu-panel',
       });
     });
 
-    it('should pass alert ids with the correct index name to the panel', () => {
-      const spaceId = 'my-space';
-      mockUseSpaceId.mockReturnValue(spaceId);
-
-      const { result } = renderHook(() =>
+    it('should pass alert ids with the correct index name to the panel renderContent', () => {
+      renderHook(() =>
         useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
       );
 
-      const expectedIndex = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`;
-      // Panel content is a React element — inspect props via the rendered panel content
-      const panelContent = result.current.panels[0].content as ReactElement;
-      expect(panelContent.props.alertIds).toEqual([{ _id: 'attack-1', _index: expectedIndex }]);
-    });
-
-    it('should fall back to "default" space when useSpaceId returns undefined', () => {
-      mockUseSpaceId.mockReturnValue(undefined);
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
-      );
-
-      const expectedIndex = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
-      const panelContent = result.current.panels[0].content as ReactElement;
-      expect(panelContent.props.alertIds).toEqual([{ _id: 'attack-1', _index: expectedIndex }]);
-    });
-
-    it('should map multiple attacks to alert ids', () => {
-      const attacks = [
-        { attackId: 'attack-1', relatedAlertIds: ['alert-1'] },
-        { attackId: 'attack-2', relatedAlertIds: ['alert-2'] },
-      ];
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: attacks })
-      );
-
-      const expectedIndex = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
-      const panelContent = result.current.panels[0].content as ReactElement;
-      expect(panelContent.props.alertIds).toEqual([
-        { _id: 'attack-1', _index: expectedIndex },
-        { _id: 'attack-2', _index: expectedIndex },
+      expect(mockRenderContent).toHaveBeenCalled();
+      const callArgs = mockRenderContent.mock.calls[0][0];
+      expect(callArgs.alertItems).toEqual([
+        { _id: 'attack-1', data: [], ecs: { _id: 'attack-1', _index: '' } },
       ]);
     });
 
-    it('should pass closePopover to the panel onClose', () => {
+    it('should pass attackIndex as ecs._index when provided', () => {
+      const attacksWithIndex = [
+        {
+          attackId: 'attack-1',
+          relatedAlertIds: ['alert-1'],
+          attackIndex: '.alerts-security.attack.discovery.alerts-default-000001',
+        },
+      ];
+
+      renderHook(() =>
+        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: attacksWithIndex })
+      );
+
+      const callArgs = mockRenderContent.mock.calls[0][0];
+      expect(callArgs.alertItems[0].ecs._index).toBe(
+        '.alerts-security.attack.discovery.alerts-default-000001'
+      );
+    });
+
+    it('should call closePopoverMenu via closePopover when provided', () => {
       const closePopover = jest.fn();
 
-      const { result } = renderHook(() =>
+      renderHook(() =>
         useAttackRunWorkflowContextMenuItems({
           attacksForWorkflowRun: defaultAttacks,
           closePopover,
         })
       );
 
-      const panelContent = result.current.panels[0].content as ReactElement;
-      panelContent.props.onClose();
+      const callArgs = mockRenderContent.mock.calls[0][0];
+      callArgs.closePopoverMenu();
       expect(closePopover).toHaveBeenCalledTimes(1);
+    });
+
+    it('should map multiple attacks to alert items', () => {
+      const attacks = [
+        { attackId: 'attack-1', relatedAlertIds: ['alert-1'] },
+        { attackId: 'attack-2', relatedAlertIds: ['alert-2'] },
+      ];
+
+      renderHook(() => useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: attacks }));
+
+      const callArgs = mockRenderContent.mock.calls[0][0];
+      expect(callArgs.alertItems).toEqual([
+        { _id: 'attack-1', data: [], ecs: { _id: 'attack-1', _index: '' } },
+        { _id: 'attack-2', data: [], ecs: { _id: 'attack-2', _index: '' } },
+      ]);
     });
   });
 
-  describe('when canRunWorkflow is false', () => {
-    it('should return empty items and panels when still loading', () => {
-      mockUseAttacksPrivileges.mockReturnValue({
-        hasIndexWrite: true,
-        hasAttackIndexWrite: true,
-        loading: true,
-      });
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
-      );
-
-      expect(result.current.items).toHaveLength(0);
-      expect(result.current.panels).toHaveLength(0);
-    });
-
-    it('should return empty items and panels when hasIndexWrite is false', () => {
-      mockUseAttacksPrivileges.mockReturnValue({
-        hasIndexWrite: false,
-        hasAttackIndexWrite: true,
-        loading: false,
-      });
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
-      );
-
-      expect(result.current.items).toHaveLength(0);
-      expect(result.current.panels).toHaveLength(0);
-    });
-
-    it('should return empty items and panels when hasAttackIndexWrite is false', () => {
-      mockUseAttacksPrivileges.mockReturnValue({
-        hasIndexWrite: true,
-        hasAttackIndexWrite: false,
-        loading: false,
-      });
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
-      );
-
-      expect(result.current.items).toHaveLength(0);
-      expect(result.current.panels).toHaveLength(0);
-    });
-
-    it('should return empty items and panels when workflowUIEnabled is false', () => {
-      mockUseWorkflowsUIEnabledSetting.mockReturnValue(false);
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
-      );
-
-      expect(result.current.items).toHaveLength(0);
-      expect(result.current.panels).toHaveLength(0);
-    });
-
-    it('should return empty items and panels when canExecuteWorkflow is false', () => {
-      mockUseWorkflowsCapabilities.mockReturnValue(
-        createCapabilities({ canExecuteWorkflow: false })
-      );
-
-      const { result } = renderHook(() =>
-        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
-      );
-
-      expect(result.current.items).toHaveLength(0);
-      expect(result.current.panels).toHaveLength(0);
-    });
-
-    it('should return empty items and panels when attacksForWorkflowRun is empty', () => {
+  describe('when attacksForWorkflowRun is empty', () => {
+    it('should return empty items and panels', () => {
       const { result } = renderHook(() =>
         useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: [] })
+      );
+
+      expect(result.current.items).toHaveLength(0);
+      expect(result.current.panels).toHaveLength(0);
+    });
+  });
+
+  describe('when bulk action items are empty', () => {
+    it('should return empty items and panels', () => {
+      mockUseBulkAttackRunWorkflowItems.mockReturnValue({ items: [], panels: [] });
+
+      const { result } = renderHook(() =>
+        useAttackRunWorkflowContextMenuItems({ attacksForWorkflowRun: defaultAttacks })
       );
 
       expect(result.current.items).toHaveLength(0);
