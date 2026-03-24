@@ -21,7 +21,7 @@ const getRulesQuerySchema = schema.object({
   page: schema.maybe(schema.number({ min: 1 })),
   perPage: schema.maybe(schema.number({ min: 1, max: 1000 })),
   filter: schema.maybe(schema.string()),
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ minLength: 1 })),
 });
 
 @injectable()

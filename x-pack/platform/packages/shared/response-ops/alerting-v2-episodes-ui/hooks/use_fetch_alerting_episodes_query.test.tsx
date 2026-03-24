@@ -11,7 +11,7 @@ import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { ALERTING_EPISODES_COUNT_QUERY } from '../constants';
+import { buildEpisodesCountQuery } from '../utils/build_episodes_esql_query';
 import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_query';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
@@ -88,7 +88,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     expect(executeEsqlQueryMock).toHaveBeenCalledWith({
       expressions: mockExpressions,
-      query: ALERTING_EPISODES_COUNT_QUERY,
+      query: buildEpisodesCountQuery(),
       input: null,
       abortSignal: expect.any(AbortSignal),
     });

@@ -12,7 +12,7 @@ import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/pub
 import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { ALERTING_EPISODES_PAGINATED_QUERY } from '../constants';
+import { buildEpisodesBaseQuery } from '../utils/build_episodes_esql_query';
 
 export interface UseAlertingEpisodesDataViewOptions {
   query?: string;
@@ -59,12 +59,14 @@ const computedFields: Record<string, RuntimeField> = {
   },
 };
 
+const defaultQuery = buildEpisodesBaseQuery().print('basic');
+
 /**
  * Creates an ad-hoc data view for the alerting episodes query, enriching
  * known fields with display names and value formats.
  */
 export const useAlertingEpisodesDataView = ({
-  query = ALERTING_EPISODES_PAGINATED_QUERY,
+  query = defaultQuery,
   services,
 }: UseAlertingEpisodesDataViewOptions) => {
   const dataViewAsync = useAsync(

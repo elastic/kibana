@@ -342,6 +342,7 @@ export class RulesClient {
       page,
       perPage,
       filter: soFilter,
+      search: params.search,
     });
 
     return {

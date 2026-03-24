@@ -229,6 +229,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortOrder: 'desc',
       ...(search ? { search, searchFields: ['metadata.name'] } : {}),
       ...(filter ? { filter } : {}),
+      ...(search && search.trim()
+        ? {
+            search: search.trim(),
+            searchFields: ['metadata.name'],
+          }
+        : {}),
     });
   }
 }
