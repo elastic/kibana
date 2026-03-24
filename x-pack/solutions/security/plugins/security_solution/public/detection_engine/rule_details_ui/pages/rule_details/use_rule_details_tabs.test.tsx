@@ -178,7 +178,7 @@ describe('useRuleDetailsTabs', () => {
       },
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
