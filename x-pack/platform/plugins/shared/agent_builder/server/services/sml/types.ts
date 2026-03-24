@@ -95,7 +95,7 @@ export interface SmlTypeDefinition {
   toAttachment: (
     item: SmlDocument,
     context: SmlToAttachmentContext
-  ) => Promise<AttachmentInput | undefined>;
+  ) => Promise<AttachmentInput<string, unknown> | undefined>;
 
   /**
    * Optional: custom crawl interval for the crawler.
