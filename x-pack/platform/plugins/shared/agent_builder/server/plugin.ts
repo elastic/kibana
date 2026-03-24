@@ -85,7 +85,7 @@ export class AgentBuilderPlugin
     if (setupDeps.searchInferenceEndpoints) {
       setupDeps.searchInferenceEndpoints.features.register({
         featureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder Parent',
+        featureName: 'Agent Builder',
         featureDescription: 'Parent feature for Agent Builder',
         taskType: 'chat_completion',
         recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
