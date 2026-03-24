@@ -19,7 +19,7 @@ import type { StartServices } from '../../types';
 const mockDocumentHeader = jest.fn((_props: unknown) => <div>{'MockDocumentHeader'}</div>);
 
 jest.mock('../../flyout_v2/document/header', () => ({
-  DocumentHeader: (props: unknown) => mockDocumentHeader(props),
+  Header: (props: unknown) => mockDocumentHeader(props),
 }));
 
 describe('AlertFlyoutHeader', () => {
@@ -37,6 +37,7 @@ describe('AlertFlyoutHeader', () => {
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
+    const storePromise = Promise.resolve(store as never);
 
     let resolveServices: (services: StartServices) => void;
     const servicesPromise = new Promise<StartServices>((resolve) => {
@@ -44,12 +45,12 @@ describe('AlertFlyoutHeader', () => {
     });
 
     let tree!: TestRenderer.ReactTestRenderer;
-    act(() => {
+    await act(async () => {
       tree = TestRenderer.create(
         <AlertFlyoutHeader
           hit={hit}
           servicesPromise={servicesPromise}
-          storePromise={Promise.resolve(store as never)}
+          storePromise={storePromise}
         />
       );
     });
@@ -57,11 +58,10 @@ describe('AlertFlyoutHeader', () => {
     await act(async () => {
       resolveServices(servicesMock);
       await servicesPromise;
-      await Promise.resolve();
+      await storePromise;
     });
 
-    const providers = tree.root.findAllByType(KibanaContextProvider);
-    expect(providers).toHaveLength(1);
+    expect(tree.root.findAllByType(KibanaContextProvider)).toHaveLength(1);
 
     const reactQueryProviders = tree.root.findAll((node) => {
       const nodeType = node.type as React.ComponentType;
