@@ -34,7 +34,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
       const errorMessage =
         error instanceof Error ? error.stack ?? error.message : String(error ?? 'Unknown error');
       logger.debug(
-        `search_knowledge_indicators: failed to fetch features for ${streamName}: ${errorMessage}`
+        `search_kis: failed to fetch features for ${streamName}: ${errorMessage}`
       );
     },
     getStreamNames: async () => {
