@@ -304,6 +304,8 @@ steps:
     beforeEach(() => {
       mockWorkflowsExecutionEngine = jest.mocked<WorkflowsExecutionEnginePluginStart>({} as any);
       mockWorkflowsExecutionEngine.executeWorkflow = jest.fn();
+      mockWorkflowsExecutionEngine.isEventDrivenExecutionEnabled = jest.fn().mockReturnValue(true);
+      mockWorkflowsExecutionEngine.isLogTriggerEventsEnabled = jest.fn().mockReturnValue(true);
 
       mockGetWorkflowsExecutionEngine = jest.fn().mockResolvedValue(mockWorkflowsExecutionEngine);
 
@@ -617,6 +619,8 @@ steps:
         scheduleWorkflow: jest
           .fn()
           .mockResolvedValue({ workflowExecutionId: 'scheduled-exec-123' }),
+        isEventDrivenExecutionEnabled: jest.fn().mockReturnValue(true),
+        isLogTriggerEventsEnabled: jest.fn().mockReturnValue(true),
       };
       mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
 

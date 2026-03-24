@@ -14,7 +14,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorSelector } from './connector_selector';
 import { ConnectorSetup } from './connector_setup';
-import { useLoadConnectors } from '..';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 
 const mockConnectors = [
   {
@@ -49,9 +49,9 @@ const mockActionTypes = [
 
 // Mock the useLoadConnectors hook
 const mockRefetch = jest.fn();
-jest.mock('../hooks/use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
-    connectors: [],
+    data: [],
     isLoading: false,
     refetch: jest.fn(),
   })),
@@ -136,7 +136,7 @@ describe('ConnectorSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseLoadConnectors.mockReturnValue({
-      connectors: mockConnectors,
+      data: mockConnectors,
       isLoading: false,
       refetch: mockRefetch,
     });
@@ -150,7 +150,7 @@ describe('ConnectorSelector', () => {
 
     it('should show loading spinner when connectors are loading', async () => {
       mockUseLoadConnectors.mockReturnValue({
-        connectors: mockConnectors,
+        data: mockConnectors,
         isLoading: true,
         refetch: mockRefetch,
       });
@@ -161,7 +161,7 @@ describe('ConnectorSelector', () => {
 
     it('should show "Add connector" button when no connectors exist', async () => {
       mockUseLoadConnectors.mockReturnValue({
-        connectors: [],
+        data: [],
         isLoading: false,
         refetch: mockRefetch,
       });
@@ -200,7 +200,7 @@ describe('ConnectorSelector', () => {
 
     it('should select first available connector when no default is set and no Elastic LLM', async () => {
       mockUseLoadConnectors.mockReturnValue({
-        connectors: [mockConnectors[0], mockConnectors[1]], // No Elastic Managed LLM
+        data: [mockConnectors[0], mockConnectors[1]], // No Elastic Managed LLM
         isLoading: false,
         refetch: mockRefetch,
       });
@@ -230,7 +230,7 @@ describe('ConnectorSelector', () => {
   describe('connector creation', () => {
     it('should open connector setup when "Add connector" is clicked with no connectors', async () => {
       mockUseLoadConnectors.mockReturnValue({
-        connectors: [],
+        data: [],
         isLoading: false,
         refetch: mockRefetch,
       });

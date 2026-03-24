@@ -19,9 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
 
-import type { CreatedIntegrationRow } from './manage_integrations_table';
+import { useStartServices } from '../../../../../hooks';
+
+import type {
+  AIV2Telemetry,
+  CreatedIntegrationRow,
+  DataStreamResultsFlyoutComponent,
+} from './manage_integrations_table';
 import type { ReviewIntegrationDetails } from './review_approve_modal';
 import { ReviewApproveModal } from './review_approve_modal';
 
@@ -34,13 +39,13 @@ export const ManageIntegrationActions: React.FC<{
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
   onDelete: (integrationId: string) => Promise<void>;
-  DataStreamResultsFlyoutComponent?: React.ComponentType<{
-    integrationId: string;
-    dataStream: DataStreamResponse;
-    onClose: () => void;
-  }>;
+  DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (integrationId: string, version: string) => Promise<void>;
+  onApproveAndDeploy: (
+    integrationId: string,
+    version: string,
+    categories: string[]
+  ) => Promise<void>;
   onDownloadZip?: (integrationId: string) => Promise<void>;
   onInstallToCluster?: (integrationId: string) => Promise<void>;
 }> = ({
@@ -57,6 +62,7 @@ export const ManageIntegrationActions: React.FC<{
   onInstallToCluster,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { automaticImportVTwo } = useStartServices();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -98,18 +104,26 @@ export const ManageIntegrationActions: React.FC<{
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_integration_delete_confirmed',
+      {}
+    );
     try {
       await onDelete(integration.integrationId);
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
-  }, [onDelete, integration.integrationId]);
+  }, [onDelete, integration.integrationId, automaticImportVTwo]);
 
   const openReviewModal = useCallback(() => {
     setIsPopoverOpen(false);
     setShowReviewModal(true);
-  }, []);
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_review_approve_menu_clicked',
+      {}
+    );
+  }, [automaticImportVTwo]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
@@ -132,19 +146,27 @@ export const ManageIntegrationActions: React.FC<{
       {inlineActionType === 'reviewApprove' && (
         <EuiButtonEmpty
           size="xs"
+          color="primary"
           iconType="checkInCircleFilled"
           iconSide="left"
           onClick={openReviewModal}
           style={{
             backgroundColor: euiTheme.colors.backgroundLightPrimary,
-            paddingLeft: euiTheme.size.xs,
-            paddingRight: euiTheme.size.xs,
+            borderRadius: euiTheme.border.radius.small,
+            paddingLeft: euiTheme.size.s,
+            paddingRight: euiTheme.size.s,
+            gap: '4px',
+            fontFamily: euiTheme.font.family,
+            fontWeight: euiTheme.font.weight.medium,
+            fontSize: '12px',
+            lineHeight: euiTheme.size.l,
+            letterSpacing: '0px',
             whiteSpace: 'nowrap',
           }}
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewApproveInline"
-            defaultMessage="Review and Approve"
+            defaultMessage="Review & approve"
           />
         </EuiButtonEmpty>
       )}
@@ -158,11 +180,17 @@ export const ManageIntegrationActions: React.FC<{
       )}
       {showMenuButton && (
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+            { defaultMessage: 'Open actions menu' }
+          )}
           anchorPosition="downRight"
           panelPaddingSize="none"
           button={
             <EuiButtonIcon
               iconType="boxesVertical"
+              color="text"
+              style={{ color: euiTheme.colors.textSubdued }}
               aria-label={i18n.translate(
                 'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
                 { defaultMessage: 'Open actions menu' }

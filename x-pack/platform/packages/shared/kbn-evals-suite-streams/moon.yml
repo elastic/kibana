@@ -34,8 +34,11 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/dissect-heuristics'
   - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/zod'
   - '@kbn/es-snapshot-loader'
   - '@kbn/es-errors'
+  - '@kbn/otel-demo'
 tags:
   - functional-tests
   - package
