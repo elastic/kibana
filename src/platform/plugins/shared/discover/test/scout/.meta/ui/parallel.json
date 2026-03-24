@@ -1,5 +1,5 @@
 {
-  "sha1": "d659b6cf466f5dba85449f58f58f76ba460e5092",
+  "sha1": "61df940c69f918db6888e8a992ebcf8771c2fcc6",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -8,7 +8,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 14,
+        "line": 15,
         "column": 16
       }
     },
