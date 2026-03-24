@@ -33,8 +33,8 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
-import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
-import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
+import type { TriggerType } from '../spec/schema/triggers';
+import { TriggerTypes } from '../spec/schema/triggers';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml

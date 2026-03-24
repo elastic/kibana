@@ -15,6 +15,7 @@ import {
   TRACES,
   RICH_TRACE,
   PRODUCER_TRACE,
+  DEEP_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
 } from '../../fixtures/traces_experience';
@@ -184,6 +185,33 @@ spaceTest.describe(
             await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
+      }
+    );
+
+    spaceTest(
+      'Selected span is scrolled into view when opening the full-screen waterfall',
+      async ({ browserAuth, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open the scroll target span document', async () => {
+          await browserAuth.loginAsViewer();
+          await pageObjects.discover.goto();
+          await pageObjects.discover.writeAndSubmitEsqlQuery(
+            `${TRACES.ESQL_QUERY} | WHERE span.name == "${DEEP_TRACE.SCROLL_TARGET_SPAN_NAME}"`
+          );
+          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+        });
+
+        await spaceTest.step('Open the full-screen waterfall', async () => {
+          await flyout.traceSummary.fullScreenButton.click();
+          await expect(flyout.waterfallFlyout.container).toBeVisible();
+        });
+
+        await spaceTest.step('Scroll target span is visible in the viewport', async () => {
+          await expect(
+            flyout.waterfallFlyout.getWaterfallItem(DEEP_TRACE.SCROLL_TARGET_SPAN_NAME).row
+          ).toBeInViewport();
+        });
       }
     );
 
