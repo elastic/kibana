@@ -217,4 +217,3 @@ clean_cached_images() {
   docker images -q | sort -u | xargs -r docker rmi -f || true
   docker image prune -af || true
 }
-}
