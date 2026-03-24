@@ -46,7 +46,7 @@ export function createESQLQuery({
   const index = dataStream;
   const type = firstNonNullable(fieldTypes);
   const instrument = firstNonNullable(metricTypes);
-  const query = esql(`TS ${index}`);
+  const query = esql.ts(index);
   const metricAggregation = createMetricAggregation({
     type,
     instrument,
