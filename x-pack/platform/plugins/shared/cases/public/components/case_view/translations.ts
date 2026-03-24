@@ -210,6 +210,10 @@ export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.simil
   defaultMessage: 'Similar cases',
 });
 
+export const TASKS_TAB = i18n.translate('xpack.cases.caseView.tabs.tasks', {
+  defaultMessage: 'Tasks',
+});
+
 export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
   'xpack.cases.caseView.tabs.alerts.emptyDescription',
   {

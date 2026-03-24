@@ -803,6 +803,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     attachments: {
       enabled: true,
     },
+    tasks: {
+      enabled: false,
+    },
   },
 });
 

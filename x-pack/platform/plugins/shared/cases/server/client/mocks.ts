@@ -36,6 +36,8 @@ import type { ConfigureSubClient, InternalConfigureSubClient } from './configure
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { TemplatesSubClient } from './templates/client';
+import type { TasksSubClient } from './tasks/client';
+import type { TaskTemplatesSubClient } from './task_templates/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
@@ -56,6 +58,8 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
   createTemplatesServiceMock,
+  createCaseTaskServiceMock,
+  createCaseTaskTemplateServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 
@@ -152,6 +156,33 @@ const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
   });
 };
 
+type TasksSubClientMock = jest.Mocked<TasksSubClient>;
+
+const createTasksSubClientMock = (): TasksSubClientMock => {
+  return lazyObject({
+    create: jest.fn(),
+    get: jest.fn(),
+    find: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    reorder: jest.fn(),
+    getMyTasks: jest.fn(),
+    applyTemplate: jest.fn(),
+  });
+};
+
+type TaskTemplatesSubClientMock = jest.Mocked<TaskTemplatesSubClient>;
+
+const createTaskTemplatesSubClientMock = (): TaskTemplatesSubClientMock => {
+  return lazyObject({
+    create: jest.fn(),
+    get: jest.fn(),
+    find: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  });
+};
+
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
@@ -167,6 +198,8 @@ export interface CasesClientMock extends CasesClient {
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
   templates: TemplatesSubClientMock;
+  tasks: TasksSubClientMock;
+  taskTemplates: TaskTemplatesSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -177,6 +210,8 @@ export const createCasesClientMock = (): CasesClientMock => {
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
     templates: createTemplatesSubClientMock(),
+    tasks: createTasksSubClientMock(),
+    taskTemplates: createTaskTemplatesSubClientMock(),
   });
   return client as unknown as CasesClientMock;
 };
@@ -228,6 +263,8 @@ export const createCasesClientMockArgs = () => {
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
       templatesService: createTemplatesServiceMock(),
+      taskService: createCaseTaskServiceMock(),
+      taskTemplateService: createCaseTaskTemplateServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
