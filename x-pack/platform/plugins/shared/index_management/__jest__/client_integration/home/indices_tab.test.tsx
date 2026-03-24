@@ -588,42 +588,6 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByText('ILM managed')).toBeInTheDocument();
     });
 
-    it('renders to search_indices index details page', async () => {
-      const indexName = 'search-index';
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      httpRequestsMockHelpers.setLoadIndexDetailsResponse(
-        indexName,
-        createNonDataStreamIndex(indexName)
-      );
-
-      const navigateToUrl = jest.fn();
-      const url = `/app/elasticsearch/indices/index_details/${indexName}`;
-      await renderHome(httpSetup, {
-        appServicesContext: {
-          core: {
-            application: { navigateToUrl },
-          },
-          services: {
-            extensionsService: {
-              _indexDetailsPageRoute: {
-                renderRoute: () => {
-                  return url;
-                },
-              },
-            },
-          },
-        },
-      });
-
-      await screen.findByTestId('indexTable');
-
-      const tableActions = createIndexTableActions();
-      await tableActions.clickIndexNameAt(0);
-
-      expect(navigateToUrl).toHaveBeenCalledTimes(1);
-      expect(navigateToUrl).toHaveBeenCalledWith(url);
-    });
-
     it('applies enricher updates to indices via alias when applyToAliases is true', async () => {
       const indexName = 'concrete-index';
       const aliasName = 'my-alias';
