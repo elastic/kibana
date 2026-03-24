@@ -222,11 +222,7 @@ describe('filterByAgent', () => {
 
     it('opentelemetry/python/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/python/elastic')).toEqual(
-        expect.arrayContaining([
-          'deactivate_instrumentations',
-          'logging_level',
-          'sampling_rate'
-	])
+        expect.arrayContaining(['deactivate_instrumentations', 'logging_level', 'sampling_rate'])
       );
     });
 
