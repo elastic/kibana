@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';

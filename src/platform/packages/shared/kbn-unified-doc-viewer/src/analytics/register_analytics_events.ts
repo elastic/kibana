@@ -8,16 +8,16 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { FLYOUT_VIEWED_EVENT_TYPE, FLYOUT_ROOT_CONTENT_ID } from './constants';
+import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
 
 export const registerDocViewerAnalyticsEvents = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
-    eventType: FLYOUT_VIEWED_EVENT_TYPE,
+    eventType: DOC_VIEWER_VIEWED_EVENT_TYPE,
     schema: {
       contentId: {
         type: 'keyword',
         _meta: {
-          description: `Flyout content viewed (root content ID is '${FLYOUT_ROOT_CONTENT_ID}').`,
+          description: `Doc viewer content viewed (root content ID is '${DOC_VIEWER_VIEWED_ROOT_CONTENT_ID}').`,
           optional: false,
         },
       },

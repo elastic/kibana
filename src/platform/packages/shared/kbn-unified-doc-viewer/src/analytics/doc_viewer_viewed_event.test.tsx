@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { FLYOUT_VIEWED_EVENT_TYPE, FLYOUT_ROOT_CONTENT_ID } from './constants';
+import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
 import { useDocViewerTabViewedEvent, useDocViewerViewedEvent } from './doc_viewer_viewed_event';
 
 const createReportEvent = () => analyticsServiceMock.createAnalyticsServiceStart().reportEvent;
@@ -45,7 +45,7 @@ describe('useDocViewerViewedEvent', () => {
     });
 
     expect(onEventKeyChange).toHaveBeenCalledWith('content-1|tab-1|doc-1');
-    expect(reportEvent).toHaveBeenCalledWith(FLYOUT_VIEWED_EVENT_TYPE, {
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
       contentId: 'content-1',
       tabId: 'tab-1',
     });
@@ -69,7 +69,7 @@ describe('useDocViewerViewedEvent', () => {
     });
 
     expect(onEventKeyChange).toHaveBeenNthCalledWith(2, 'content-1|tab-2|doc-1');
-    expect(reportEvent).toHaveBeenNthCalledWith(2, FLYOUT_VIEWED_EVENT_TYPE, {
+    expect(reportEvent).toHaveBeenNthCalledWith(2, DOC_VIEWER_VIEWED_EVENT_TYPE, {
       contentId: 'content-1',
       tabId: 'tab-2',
     });
@@ -96,7 +96,7 @@ describe('useDocViewerViewedEvent', () => {
       enabled: true,
     });
 
-    expect(reportEvent).toHaveBeenCalledWith(FLYOUT_VIEWED_EVENT_TYPE, {
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
       contentId: 'content-1',
       tabId: 'tab-1',
     });
@@ -137,7 +137,7 @@ describe('useDocViewerViewedEvent', () => {
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      `Error reporting event ${FLYOUT_VIEWED_EVENT_TYPE}:`,
+      `Error reporting event ${DOC_VIEWER_VIEWED_EVENT_TYPE}:`,
       reportError
     );
   });
@@ -155,8 +155,8 @@ describe('useDocViewerTabViewedEvent', () => {
       },
     });
 
-    expect(reportEvent).toHaveBeenCalledWith(FLYOUT_VIEWED_EVENT_TYPE, {
-      contentId: FLYOUT_ROOT_CONTENT_ID,
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      contentId: DOC_VIEWER_VIEWED_ROOT_CONTENT_ID,
       tabId: 'table',
     });
   });
