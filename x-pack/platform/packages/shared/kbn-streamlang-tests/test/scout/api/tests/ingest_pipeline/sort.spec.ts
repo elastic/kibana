@@ -12,8 +12,7 @@ import { tags } from '@kbn/scout';
 import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
-// Fails after new Scout tags applied, needs a fix
-apiTest.describe.skip(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Sort Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -255,7 +254,10 @@ apiTest.describe.skip(
         (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
       );
       expect(doc1).toStrictEqual(
-        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'], 'event.kind': 'test' })
+        expect.objectContaining({
+          tags: ['alpha', 'bravo', 'charlie'],
+          event: expect.objectContaining({ kind: 'test' }),
+        })
       );
 
       // Second doc: where condition not matched, processor doesn't sort
@@ -264,7 +266,9 @@ apiTest.describe.skip(
       );
       expect(asDoc(doc2)?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
       expect(asDoc(doc2)?.tags).toHaveLength(3);
-      expect(doc2).toStrictEqual(expect.objectContaining({ 'event.kind': 'production' }));
+      expect(doc2).toStrictEqual(
+        expect.objectContaining({ event: expect.objectContaining({ kind: 'production' }) })
+      );
     });
 
     apiTest(
@@ -306,7 +310,7 @@ apiTest.describe.skip(
           expect.objectContaining({
             tags: ['charlie', 'alpha', 'bravo'], // Original preserved
             sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
-            'event.kind': 'test',
+            event: expect.objectContaining({ kind: 'test' }),
           })
         );
 
@@ -317,7 +321,9 @@ apiTest.describe.skip(
         );
         expect(asDoc(doc2)?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
         expect(asDoc(doc2)?.tags).toHaveLength(3);
-        expect(doc2).toStrictEqual(expect.objectContaining({ 'event.kind': 'production' }));
+        expect(doc2).toStrictEqual(
+          expect.objectContaining({ event: expect.objectContaining({ kind: 'production' }) })
+        );
         expect(asDoc(doc2)?.sorted_tags).toBeUndefined();
       }
     );
