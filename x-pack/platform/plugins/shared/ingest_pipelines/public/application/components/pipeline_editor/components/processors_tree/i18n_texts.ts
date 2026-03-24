@@ -38,8 +38,11 @@ export const processorsTreeI18nTexts = {
   getSectionLabelForSelector: (selector: ProcessorSelector) => {
     const hasOnFailure = selector.includes('onFailure');
     if (!hasOnFailure) return processorsSectionLabel;
-    if (selector[0] === 'onFailure') return failureProcessorsSectionLabel;
-    return failureHandlersSectionLabel;
+    const firstOnFailure = selector.indexOf('onFailure');
+    const isNestedOnFailure = selector.indexOf('onFailure', firstOnFailure + 1) !== -1;
+    return firstOnFailure === 0 && !isNestedOnFailure
+      ? failureProcessorsSectionLabel
+      : failureHandlersSectionLabel;
   },
   moveToEmptyTreeLabel: ({
     movingProcessor,

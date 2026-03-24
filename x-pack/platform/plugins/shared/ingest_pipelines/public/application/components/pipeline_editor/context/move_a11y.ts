@@ -14,9 +14,11 @@ import { pipelineEditorContextI18nTexts } from './i18n_texts';
 const getScopeLabel = (selector: ProcessorSelector) => {
   const hasOnFailure = selector.includes('onFailure');
   if (!hasOnFailure) return pipelineEditorContextI18nTexts.destinationScope.processors;
-  if (selector[0] === 'onFailure')
-    return pipelineEditorContextI18nTexts.destinationScope.failureProcessors;
-  return pipelineEditorContextI18nTexts.destinationScope.failureHandlers;
+  const firstOnFailure = selector.indexOf('onFailure');
+  const isNestedOnFailure = selector.indexOf('onFailure', firstOnFailure + 1) !== -1;
+  return firstOnFailure === 0 && !isNestedOnFailure
+    ? pipelineEditorContextI18nTexts.destinationScope.failureProcessors
+    : pipelineEditorContextI18nTexts.destinationScope.failureHandlers;
 };
 
 const getProcessorTypeLabel = (processor: ProcessorInternal): string =>
