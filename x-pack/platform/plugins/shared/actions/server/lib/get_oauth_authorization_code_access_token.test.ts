@@ -479,31 +479,4 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       );
     });
   });
-
-  describe('concurrency lock', () => {
-    it('queues concurrent calls for the same connector so only one refresh runs', async () => {
-      const lockedConnectorId = 'connector-lock-test';
-      // First call inside the lock sees an expired token and refreshes it.
-      // Second call (queued behind the first) re-fetches and sees the valid token.
-      connectorTokenClient.get
-        .mockResolvedValueOnce({
-          hasErrors: false,
-          connectorToken: { ...expiredToken, connectorId: lockedConnectorId },
-        })
-        .mockResolvedValueOnce({
-          hasErrors: false,
-          connectorToken: { ...validToken, connectorId: lockedConnectorId },
-        });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
-
-      const [result1, result2] = await Promise.all([
-        getOAuthAuthorizationCodeAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),
-        getOAuthAuthorizationCodeAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),
-      ]);
-
-      expect(requestOAuthRefreshToken).toHaveBeenCalledTimes(1);
-      expect(result1).toBe('Bearer new-access-token');
-      expect(result2).toBe('stored-access-token');
-    });
-  });
 });

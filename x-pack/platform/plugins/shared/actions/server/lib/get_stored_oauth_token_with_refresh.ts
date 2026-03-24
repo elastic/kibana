@@ -11,14 +11,14 @@ import type { Logger } from '@kbn/core/server';
 import type { OAuthTokenResponse } from './request_oauth_token';
 import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
 
-// Per-connector locks to prevent concurrent token refreshes for the same connector
+// Per-connector (or per-connector-per-user) locks to prevent concurrent token refreshes
 const tokenRefreshLocks = new Map<string, ReturnType<typeof pLimit>>();
 
-function getOrCreateLock(connectorId: string): ReturnType<typeof pLimit> {
-  if (!tokenRefreshLocks.has(connectorId)) {
-    tokenRefreshLocks.set(connectorId, pLimit(1));
+function getOrCreateLock(lockKey: string): ReturnType<typeof pLimit> {
+  if (!tokenRefreshLocks.has(lockKey)) {
+    tokenRefreshLocks.set(lockKey, pLimit(1));
   }
-  return tokenRefreshLocks.get(connectorId)!;
+  return tokenRefreshLocks.get(lockKey)!;
 }
 
 export interface GetStoredTokenWithRefreshOpts {
@@ -94,8 +94,10 @@ export const getStoredTokenWithRefresh = async ({
   authMode,
   refreshFn,
 }: GetStoredTokenWithRefreshOpts): Promise<string | null> => {
-  // Acquire lock for this connector to prevent concurrent token refreshes
-  const lock = getOrCreateLock(connectorId);
+  // Acquire lock scoped to the connector (shared mode) or to the connector + user (per-user mode),
+  // so concurrent requests for different users don't block each other unnecessarily.
+  const lockKey = isPerUser ? `${connectorId}:${profileUid}` : connectorId;
+  const lock = getOrCreateLock(lockKey);
 
   const result = await lock(async () => {
     // Re-fetch token inside lock - another request may have already refreshed it

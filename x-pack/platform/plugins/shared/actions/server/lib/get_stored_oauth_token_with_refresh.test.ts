@@ -34,6 +34,27 @@ const expiredToken = {
   expiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
 };
 
+// Per-user token: access/refresh stored under credentials.accessToken / credentials.refreshToken
+const validPerUserToken = {
+  id: 'token-1',
+  profileUid: 'profile-1',
+  connectorId: 'connector-1',
+  credentialType: 'oauth',
+  credentials: {
+    accessToken: 'stored-per-user-access-token',
+    refreshToken: 'stored-per-user-refresh-token',
+  },
+  createdAt: new Date('2024-01-15T10:00:00.000Z').toISOString(),
+  updatedAt: new Date('2024-01-15T10:00:00.000Z').toISOString(),
+  expiresAt: new Date('2024-01-15T13:00:00.000Z').toISOString(),
+  refreshTokenExpiresAt: new Date('2024-01-22T12:00:00.000Z').toISOString(),
+};
+
+const expiredPerUserToken = {
+  ...validPerUserToken,
+  expiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
+};
+
 const refreshResponse = {
   tokenType: 'Bearer',
   accessToken: 'new-access-token',
@@ -250,6 +271,103 @@ describe('getStoredTokenWithRefresh', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: DB write failed'
       );
+    });
+  });
+
+  describe('concurrency lock', () => {
+    it('queues concurrent calls for the same connector so only one refresh runs', async () => {
+      const lockedConnectorId = 'connector-lock-shared';
+      // First call inside the lock sees an expired token and refreshes it.
+      // Second call (queued behind the first) re-fetches and sees the valid token.
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...expiredToken, connectorId: lockedConnectorId },
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...validToken, connectorId: lockedConnectorId },
+        });
+      refreshFn.mockResolvedValueOnce(refreshResponse);
+
+      const [result1, result2] = await Promise.all([
+        getStoredTokenWithRefresh({ ...baseOpts, connectorId: lockedConnectorId }),
+        getStoredTokenWithRefresh({ ...baseOpts, connectorId: lockedConnectorId }),
+      ]);
+
+      expect(refreshFn).toHaveBeenCalledTimes(1);
+      expect(result1).toBe('Bearer new-access-token');
+      expect(result2).toBe('stored-access-token');
+    });
+
+    it('queues concurrent per-user calls for the same connector+user so only one refresh runs', async () => {
+      const lockedConnectorId = 'connector-lock-per-user-same';
+      // Same profileUid => same lock key => serialized.
+      // First call refreshes, second call re-fetches and sees the valid token.
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...expiredPerUserToken, connectorId: lockedConnectorId },
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...validPerUserToken, connectorId: lockedConnectorId },
+        });
+      refreshFn.mockResolvedValueOnce(refreshResponse);
+
+      const opts = {
+        ...baseOpts,
+        connectorId: lockedConnectorId,
+        isPerUser: true as const,
+        profileUid: 'profile-1',
+      };
+      const [result1, result2] = await Promise.all([
+        getStoredTokenWithRefresh(opts),
+        getStoredTokenWithRefresh(opts),
+      ]);
+
+      expect(refreshFn).toHaveBeenCalledTimes(1);
+      expect(result1).toBe('Bearer new-access-token');
+      expect(result2).toBe('stored-per-user-access-token');
+    });
+
+    it('allows concurrent per-user calls for different users on the same connector to refresh independently', async () => {
+      const lockedConnectorId = 'connector-lock-per-user-diff';
+      // Different profileUids => different lock keys => independent execution.
+      // Both users see an expired token and each triggers its own refresh.
+      const expiredUser1Token = { ...expiredPerUserToken, connectorId: lockedConnectorId };
+      const expiredUser2Token = {
+        ...expiredPerUserToken,
+        id: 'token-2',
+        profileUid: 'profile-2',
+        connectorId: lockedConnectorId,
+      };
+      connectorTokenClient.get
+        .mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredUser1Token })
+        .mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredUser2Token });
+      refreshFn
+        .mockResolvedValueOnce(refreshResponse)
+        .mockResolvedValueOnce({ ...refreshResponse, accessToken: 'new-access-token-user2' });
+
+      const [result1, result2] = await Promise.all([
+        getStoredTokenWithRefresh({
+          ...baseOpts,
+          connectorId: lockedConnectorId,
+          isPerUser: true,
+          profileUid: 'profile-1',
+        }),
+        getStoredTokenWithRefresh({
+          ...baseOpts,
+          connectorId: lockedConnectorId,
+          isPerUser: true,
+          profileUid: 'profile-2',
+        }),
+      ]);
+
+      // Each user refreshed independently — no sharing of the lock
+      expect(refreshFn).toHaveBeenCalledTimes(2);
+      expect(result1).toBe('Bearer new-access-token');
+      expect(result2).toBe('Bearer new-access-token-user2');
     });
   });
 });
