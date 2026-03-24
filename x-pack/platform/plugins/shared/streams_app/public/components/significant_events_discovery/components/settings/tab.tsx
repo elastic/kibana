@@ -54,6 +54,17 @@ export function SettingsTab() {
     uiSettings: core.uiSettings,
   });
 
+  const defaultConnectorFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (!genAiConnectors.defaultConnector) return undefined;
+      return streams.streamsRepositoryClient.fetch(
+        'GET /internal/streams/connectors/{connectorId}',
+        { signal, params: { path: { connectorId: genAiConnectors.defaultConnector } } }
+      );
+    },
+    [streams.streamsRepositoryClient, genAiConnectors.defaultConnector]
+  );
+
   const settingsFetch = useStreamsAppFetch(
     async ({ signal }) =>
       streams.streamsRepositoryClient.fetch('GET /internal/streams/_significant_events/settings', {
@@ -120,7 +131,7 @@ export function SettingsTab() {
         defaultMessage: 'Use default (genAiSettings:defaultAIConnector)',
       }),
     },
-    ...(genAiConnectors.connectors ?? []).map((c) => ({ value: c.id, text: c.name })),
+    ...(genAiConnectors.connectors ?? []).map((c) => ({ value: c.connectorId, text: c.name })),
   ];
 
   if (settingsFetch.loading && !settingsFetch.value) {
@@ -134,9 +145,7 @@ export function SettingsTab() {
     discovery === NOT_SET_VALUE;
   const showNoDefaultCallout = !genAiConnectors.loading && !hasDefaultConnector && anyUsesDefault;
   const defaultConnectorName =
-    hasDefaultConnector && anyUsesDefault
-      ? genAiConnectors.connectors?.find((c) => c.id === genAiConnectors.defaultConnector)?.name
-      : undefined;
+    hasDefaultConnector && anyUsesDefault ? defaultConnectorFetch.value?.name : undefined;
 
   return (
     <EuiPanel paddingSize="l">
