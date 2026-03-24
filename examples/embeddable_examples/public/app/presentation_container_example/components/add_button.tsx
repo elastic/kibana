@@ -80,7 +80,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
       }}
       panelPaddingSize="none"
       anchorPosition="downLeft"
-      aria-label={i18n.translate('examples.embeddableExamples.addPanelPopover.ariaLabel', {
+      aria-label={i18n.translate('embeddableExamples.addPanelPopover.ariaLabel', {
         defaultMessage: 'Add panel',
       })}
     >
