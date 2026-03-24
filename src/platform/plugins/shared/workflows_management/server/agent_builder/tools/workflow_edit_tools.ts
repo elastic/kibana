@@ -27,6 +27,7 @@ import {
   workflowTools,
 } from '../../../common/agent_builder/constants';
 import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
+import type { WorkflowsAiTelemetryClient } from '../../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
@@ -164,6 +165,11 @@ const runCompactValidation = async (
   }
 };
 
+const extractConversationId = (context: ToolHandlerContext): string | undefined => {
+  const agentEntry = context.runContext.stack.find((entry) => entry.type === 'agent');
+  return agentEntry && 'conversationId' in agentEntry ? agentEntry.conversationId : undefined;
+};
+
 const handleEditResult = async (
   result: EditResult,
   context: ToolHandlerContext,
@@ -173,9 +179,16 @@ const handleEditResult = async (
   workflowId: string | undefined,
   workflowName: string | undefined,
   toolId: string,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  telemetryClient?: WorkflowsAiTelemetryClient | null
 ) => {
   if (!result.success) {
+    telemetryClient?.reportEditResult({
+      toolId,
+      conversationId: extractConversationId(context),
+      editSuccess: false,
+      isCreation: false,
+    });
     return {
       results: [
         {
@@ -201,6 +214,14 @@ const handleEditResult = async (
 
   const validation = await runCompactValidation(result.yaml, api, context);
 
+  telemetryClient?.reportEditResult({
+    toolId,
+    conversationId: extractConversationId(context),
+    editSuccess: true,
+    isCreation: false,
+    validation: validation ?? undefined,
+  });
+
   return {
     results: [
       {
@@ -222,7 +243,8 @@ const handleEditResult = async (
 
 export function registerWorkflowEditTools(
   agentBuilder: AgentBuilderPluginSetupContract,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getAiTelemetryClient?: () => WorkflowsAiTelemetryClient | null
 ): void {
   agentBuilder.tools.register({
     id: workflowTools.insertStep,
@@ -258,7 +280,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.insertStep,
-        api
+        api,
+        getAiTelemetryClient?.()
       );
     },
   });
@@ -292,7 +315,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.modifyStep,
-        api
+        api,
+        getAiTelemetryClient?.()
       );
     },
   });
@@ -327,7 +351,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.modifyStepProperty,
-        api
+        api,
+        getAiTelemetryClient?.()
       );
     },
   });
@@ -363,7 +388,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.modifyProperty,
-        api
+        api,
+        getAiTelemetryClient?.()
       );
     },
   });
@@ -393,7 +419,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.deleteStep,
-        api
+        api,
+        getAiTelemetryClient?.()
       );
     },
   });
@@ -427,6 +454,14 @@ export function registerWorkflowEditTools(
 
         const validation = await runCompactValidation(yaml, api, context);
 
+        getAiTelemetryClient?.()?.reportEditResult({
+          toolId: workflowTools.replaceYaml,
+          conversationId: extractConversationId(context),
+          editSuccess: true,
+          isCreation: true,
+          validation: validation ?? undefined,
+        });
+
         return {
           results: [
             {
@@ -457,6 +492,14 @@ export function registerWorkflowEditTools(
       );
 
       const validation = await runCompactValidation(yaml, api, context);
+
+      getAiTelemetryClient?.()?.reportEditResult({
+        toolId: workflowTools.replaceYaml,
+        conversationId: extractConversationId(context),
+        editSuccess: true,
+        isCreation: false,
+        validation: validation ?? undefined,
+      });
 
       return {
         results: [

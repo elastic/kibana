@@ -15,10 +15,16 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder/constants';
+import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
 
 export const registerWorkflowAttachmentRenderers = (
   attachments: AttachmentServiceStartContract,
-  services: { http: HttpSetup; notifications: NotificationsStart; application: ApplicationStart }
+  services: {
+    http: HttpSetup;
+    notifications: NotificationsStart;
+    application: ApplicationStart;
+    telemetry?: TelemetryServiceClient;
+  }
 ): void => {
   attachments.addAttachmentType(
     WORKFLOW_YAML_ATTACHMENT_TYPE,

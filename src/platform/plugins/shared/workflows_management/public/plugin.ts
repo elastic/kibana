@@ -101,6 +101,7 @@ export class WorkflowsPlugin
               http: coreStart.http,
               notifications: coreStart.notifications,
               application: coreStart.application,
+              telemetry: this.telemetryService.getClient(),
             });
             return agentBuilder.contract;
           }

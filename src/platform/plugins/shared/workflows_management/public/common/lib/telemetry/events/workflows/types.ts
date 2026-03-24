@@ -9,6 +9,12 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowAiChatOpenedParams,
+  ReportWorkflowAiProposalResolvedParams,
+  ReportWorkflowAiSessionCompletedParams,
+  WorkflowAiChatEventTypes,
+} from './ai_chat/types';
+import type {
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
@@ -103,6 +109,9 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
   [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
   [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
+  [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: ReportWorkflowAiChatOpenedParams;
+  [WorkflowAiChatEventTypes.WorkflowAiProposalResolved]: ReportWorkflowAiProposalResolvedParams;
+  [WorkflowAiChatEventTypes.WorkflowAiSessionCompleted]: ReportWorkflowAiSessionCompletedParams;
 }
 
 export type AllWorkflowEventTypes =
@@ -110,7 +119,8 @@ export type AllWorkflowEventTypes =
   | WorkflowValidationEventTypes
   | WorkflowExecutionEventTypes
   | WorkflowUIEventTypes
-  | WorkflowImportExportEventTypes;
+  | WorkflowImportExportEventTypes
+  | WorkflowAiChatEventTypes;
 
 export interface WorkflowsTelemetryEvent {
   eventType: AllWorkflowEventTypes;

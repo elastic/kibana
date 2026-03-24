@@ -17,6 +17,7 @@ import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import {
+  selectAiAssisted,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -53,6 +54,7 @@ export const saveYamlThunk = createAsyncThunk<
       const yamlString = selectYamlString(state);
       const workflowDefinition = selectWorkflowDefinition(state);
       const id = selectWorkflowId(state);
+      const isAiAssisted = selectAiAssisted(state);
 
       if (!yamlString) {
         return rejectWithValue('No YAML content to save');
@@ -67,8 +69,6 @@ export const saveYamlThunk = createAsyncThunk<
         // Get original workflow state for comparison
         const originalWorkflow = selectWorkflow(state);
 
-        // Report telemetry for workflow update
-        // The telemetry service automatically determines editorType ('yaml' when yaml is in update)
         telemetry.reportWorkflowUpdated({
           workflowId: id,
           workflowUpdate: { yaml: yamlString },
@@ -79,6 +79,7 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: undefined,
           origin: 'workflow_detail',
+          ...(isAiAssisted && { aiAssisted: true }),
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
@@ -89,14 +90,13 @@ export const saveYamlThunk = createAsyncThunk<
           body: JSON.stringify({ yaml: yamlString }),
         });
 
-        // Report telemetry for workflow creation
-        // Use workflow.definition from the created workflow if available, otherwise fall back to workflowDefinition from state
         telemetry.reportWorkflowCreated({
           workflowId: workflow.id,
           workflowDefinition: workflow.definition || workflowDefinition || undefined,
           error: undefined,
-          editorType: 'yaml', // Saving YAML always comes from YAML editor
+          editorType: 'yaml',
           origin: 'workflow_detail',
+          ...(isAiAssisted && { aiAssisted: true }),
         });
 
         // Update the workflow in the store

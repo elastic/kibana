@@ -21,6 +21,8 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../../common';
+import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
+import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
 import { queryClient } from '../../../shared/lib/query_client';
 import { createWorkflow, updateWorkflow } from '../../../shared/lib/workflows_api';
 import {
@@ -51,6 +53,7 @@ interface SaveWorkflowParams {
   yaml: string;
   workflowId?: string;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
+  telemetry?: WorkflowsBaseTelemetry;
 }
 
 const saveWorkflow = async ({
@@ -59,16 +62,28 @@ const saveWorkflow = async ({
   yaml,
   workflowId,
   updateOrigin,
+  telemetry,
 }: SaveWorkflowParams): Promise<string | undefined> => {
   try {
     let savedId = workflowId;
     if (workflowId) {
       await updateWorkflow(http, workflowId, yaml);
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
+      telemetry?.reportWorkflowUpdated({
+        workflowId,
+        workflowUpdate: { yaml },
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        aiAssisted: true,
+      });
     } else {
       const result = await createWorkflow(http, yaml);
       savedId = result.id;
       await updateOrigin(result.id);
+      telemetry?.reportWorkflowCreated({
+        workflowId: result.id,
+        aiAssisted: true,
+      });
     }
     queryClient.invalidateQueries({ queryKey: ['workflows'] });
     notifications.toasts.addSuccess(
@@ -117,6 +132,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   notifications: NotificationsStart;
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
+  telemetry?: WorkflowsBaseTelemetry;
 }> = ({
   attachment,
   isSidebar,
@@ -126,6 +142,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   notifications,
   application,
   isOnWorkflowPage,
+  telemetry,
 }) => {
   useWorkflowsMonacoTheme();
 
@@ -150,16 +167,21 @@ const WorkflowYamlCanvasContent: React.FC<{
       yaml: attachment.data.yaml,
       workflowId,
       updateOrigin,
+      telemetry,
     });
     if (id && !workflowId) {
       setSavedWorkflowId(id);
     }
-  }, [http, notifications, attachment.data.yaml, workflowId, updateOrigin]);
+  }, [http, notifications, attachment.data.yaml, workflowId, updateOrigin, telemetry]);
 
   const handleSaveAsNew = useCallback(async () => {
     try {
       const result = await createWorkflow(http, attachment.data.yaml);
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      telemetry?.reportWorkflowCreated({
+        workflowId: result.id,
+        aiAssisted: true,
+      });
       notifications.toasts.addSuccess(
         i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewSuccess', {
           defaultMessage: 'Workflow saved as new',
@@ -176,7 +198,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         text: extractErrorMessage(error),
       });
     }
-  }, [http, notifications, application, attachment.data.yaml]);
+  }, [http, notifications, application, attachment.data.yaml, telemetry]);
 
   useEffect(() => {
     if (!ready) {
@@ -259,11 +281,14 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   http,
   notifications,
   application,
+  telemetry: telemetryClient,
 }: {
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  telemetry?: TelemetryServiceClient;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
+  const telemetry = telemetryClient ? new WorkflowsBaseTelemetry(telemetryClient) : undefined;
   let currentAppId: string | undefined;
   let currentLocation = '';
   let appContextSub: Subscription | undefined;
@@ -332,6 +357,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         notifications={notifications}
         application={application}
         isOnWorkflowPage={isOnWorkflowPage}
+        telemetry={telemetry}
       />
     ),
   };

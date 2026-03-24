@@ -8,13 +8,16 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { v4 } from 'uuid';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
+import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import { AttachmentBridge, ProposalManager } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useTelemetry } from '../../../../hooks/use_telemetry';
 
 interface UseAgentBuilderIntegrationParams {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
@@ -46,9 +49,12 @@ export const useAgentBuilderIntegration = ({
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
+  const telemetry = useTelemetry();
+  const dispatch = useDispatch();
   const proposalManagerRef = useRef<ProposalManager | null>(null);
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
   const trackerRef = useRef<ProposalTracker | null>(null);
+  const chatOpenedReportedRef = useRef(false);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
@@ -67,20 +73,39 @@ export const useAgentBuilderIntegration = ({
     const tracker = new ProposalTracker();
     trackerRef.current = tracker;
 
+    const sessionType = workflowId ? 'edit' : 'create';
+
     const manager = new ProposalManager();
     manager.initialize(editor, {
       onAccept: () => {
-        for (const record of tracker.getAllRecords()) {
-          if (record.status === 'pending') {
-            tracker.updateStatus(record.proposalId, 'accepted');
-          }
+        const pendingRecords = tracker.getAllRecords().filter((r) => r.status === 'pending');
+
+        for (const record of pendingRecords) {
+          tracker.updateStatus(record.proposalId, 'accepted');
+          dispatch(setAiAssisted(true));
+
+          telemetry.reportAiProposalResolved({
+            workflowId,
+            proposalId: record.proposalId,
+            resolution: 'accepted',
+            toolId: record.toolId,
+            isBulkAction: pendingRecords.length > 1,
+          });
         }
       },
       onReject: () => {
-        for (const record of tracker.getAllRecords()) {
-          if (record.status === 'pending') {
-            tracker.cascadeDecline(record.proposalId);
-          }
+        const pendingRecords = tracker.getAllRecords().filter((r) => r.status === 'pending');
+
+        for (const record of pendingRecords) {
+          tracker.cascadeDecline(record.proposalId);
+
+          telemetry.reportAiProposalResolved({
+            workflowId,
+            proposalId: record.proposalId,
+            resolution: 'rejected',
+            toolId: record.toolId,
+            isBulkAction: pendingRecords.length > 1,
+          });
         }
       },
     });
@@ -129,6 +154,15 @@ export const useAgentBuilderIntegration = ({
         attachments: [attachment],
       });
       agentBuilder.addAttachment(attachment);
+
+      if (!chatOpenedReportedRef.current) {
+        chatOpenedReportedRef.current = true;
+        telemetry.reportWorkflowAiChatOpened({
+          entryPoint: 'header_on_editor_page',
+          sessionType,
+          workflowId,
+        });
+      }
     };
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -146,6 +180,18 @@ export const useAgentBuilderIntegration = ({
     }
 
     return () => {
+      if (chatOpenedReportedRef.current) {
+        const records = tracker.getAllRecords();
+        telemetry.reportWorkflowAiSessionCompleted({
+          sessionType,
+          workflowId,
+          proposalsAccepted: records.filter((r) => r.status === 'accepted').length,
+          proposalsDeclined: records.filter((r) => r.status === 'declined').length,
+          proposalsPending: records.filter((r) => r.status === 'pending').length,
+        });
+      }
+      chatOpenedReportedRef.current = false;
+
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
@@ -162,7 +208,7 @@ export const useAgentBuilderIntegration = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__wfTestBridge;
     };
-  }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId]);
+  }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId, telemetry, dispatch]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
@@ -187,8 +233,15 @@ export const useAgentBuilderIntegration = ({
         ],
       });
       chatRefHandle.current = chatRef;
+
+      telemetry.reportWorkflowAiChatOpened({
+        entryPoint: 'workflow_editor',
+        sessionType: workflowId ? 'edit' : 'create',
+        workflowId,
+      });
+      chatOpenedReportedRef.current = true;
     },
-    [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors]
+    [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors, telemetry]
   );
 
   return {
