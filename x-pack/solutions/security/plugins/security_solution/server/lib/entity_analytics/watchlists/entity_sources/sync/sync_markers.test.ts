@@ -5,10 +5,27 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
+import { WatchlistEntitySourceClient } from '../infra/entity_source_client';
 import { createWatchlistSyncMarkersService } from './sync_markers';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+
+jest.mock('../infra/entity_source_client');
+
+const { mockGetLastProcessedMarker, mockUpdateLastProcessedMarker } = jest.requireMock(
+  '../infra/entity_source_client'
+) as {
+  mockGetLastProcessedMarker: jest.Mock;
+  mockUpdateLastProcessedMarker: jest.Mock;
+};
 
 describe('Watchlist sync markers service', () => {
+  const createDescriptorClient = () =>
+    new WatchlistEntitySourceClient({
+      soClient: savedObjectsClientMock.create(),
+      namespace: 'default',
+    });
+
   const mockSource: MonitoringEntitySource = {
     id: 'source-1',
     type: 'entity_analytics_integration',
@@ -18,51 +35,46 @@ describe('Watchlist sync markers service', () => {
     enabled: true,
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('getLastProcessedMarker', () => {
     it('returns the last processed marker from descriptor client when defined', async () => {
       const lastProcessedMarker = '2024-01-15T12:00:00Z';
-      const descriptorClient = {
-        getLastProcessedMarker: jest.fn().mockResolvedValue(lastProcessedMarker),
-        updateLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-      };
+      const descriptorClient = createDescriptorClient();
+      mockGetLastProcessedMarker.mockResolvedValue(lastProcessedMarker);
 
       const service = createWatchlistSyncMarkersService(descriptorClient);
       const result = await service.getLastProcessedMarker(mockSource);
 
       expect(result).toBe(lastProcessedMarker);
-      expect(descriptorClient.getLastProcessedMarker).toHaveBeenCalledWith(mockSource);
+      expect(mockGetLastProcessedMarker).toHaveBeenCalledWith(mockSource);
     });
 
     it('returns a date math expression (now-1M) when descriptor client returns undefined', async () => {
-      const descriptorClient = {
-        getLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-        updateLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-      };
+      const descriptorClient = createDescriptorClient();
+      mockGetLastProcessedMarker.mockResolvedValue(undefined);
 
       const service = createWatchlistSyncMarkersService(descriptorClient);
       const result = await service.getLastProcessedMarker(mockSource);
 
       expect(typeof result).toBe('string');
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-      expect(descriptorClient.getLastProcessedMarker).toHaveBeenCalledWith(mockSource);
+      expect(mockGetLastProcessedMarker).toHaveBeenCalledWith(mockSource);
     });
   });
 
   describe('updateLastProcessedMarker', () => {
     it('delegates to descriptor client', async () => {
-      const descriptorClient = {
-        getLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-        updateLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-      };
+      const descriptorClient = createDescriptorClient();
+      mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
       const service = createWatchlistSyncMarkersService(descriptorClient);
       const timestamp = '2024-02-01T00:00:00Z';
       await service.updateLastProcessedMarker(mockSource, timestamp);
 
-      expect(descriptorClient.updateLastProcessedMarker).toHaveBeenCalledWith(
-        mockSource,
-        timestamp
-      );
+      expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(mockSource, timestamp);
     });
   });
 });

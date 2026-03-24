@@ -5,35 +5,49 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createWatchlistEntitiesService } from './service';
 
 describe('Watchlist entities service', () => {
   it('groups entity store ids by entity type and removes duplicates', async () => {
-    const esClient = {
-      search: jest.fn().mockResolvedValue({
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search
+      .mockResolvedValueOnce({
         hits: {
           hits: [
-            { _source: { entity: { id: 'user:jdoe', type: 'user' } } },
-            { _source: { entity: { id: 'host:server-1', type: 'host' } } },
-            { _source: { entity: { id: 'service:api', EngineMetadata: { Type: 'service' } } } },
-            { _source: { entity: { id: 'user:jdoe', type: 'user' } } },
+            { _source: { entity: { id: 'user:jdoe', type: 'user' } }, _index: '1' },
+            { _source: { entity: { id: 'host:server-1', type: 'host' } }, _index: '2' },
+            {
+              _source: { entity: { id: 'service:api', EngineMetadata: { Type: 'service' } } },
+              _index: '3',
+            },
+            { _source: { entity: { id: 'user:jdoe', type: 'user' } }, _index: '4' },
           ],
         },
-      }),
-    };
+      } as never)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      } as never);
 
     const service = createWatchlistEntitiesService({
-      esClient: esClient as never,
+      esClient,
       namespace: 'default',
     });
 
-    await expect(service.listEntityStoreEntities()).resolves.toEqual({
+    await expect(
+      service.listEntityStoreEntities({
+        type: 'index',
+        field: 'user.id',
+      })
+    ).resolves.toEqual({
       user: ['user:jdoe'],
       host: ['host:server-1'],
       service: ['service:api'],
       generic: [],
     });
 
-    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search).toHaveBeenCalledTimes(2);
   });
 });

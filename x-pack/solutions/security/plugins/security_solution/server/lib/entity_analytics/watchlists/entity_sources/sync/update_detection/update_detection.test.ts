@@ -5,15 +5,39 @@
  * 2.0.
  */
 
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { createUpdateDetectionService } from './update_detection';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
+import { WatchlistEntitySourceClient } from '../../infra/entity_source_client';
 
-const mockLogger = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
+jest.mock('../../infra/entity_source_client');
+
+const { mockGetLastProcessedMarker, mockUpdateLastProcessedMarker } = jest.requireMock(
+  '../../infra/entity_source_client'
+) as {
+  mockGetLastProcessedMarker: jest.Mock;
+  mockUpdateLastProcessedMarker: jest.Mock;
+};
+
+type CapturedSearchRequest = SearchRequest & {
+  aggs?: {
+    entities?: {
+      aggs?: {
+        latest_doc?: unknown;
+      };
+    };
+  };
+  query?: {
+    bool?: {
+      must?: unknown[];
+    };
+  };
 };
 
 const indexSource: MonitoringEntitySource = {
@@ -44,35 +68,46 @@ const createEntityStoreEntityIdsByType = (
 });
 
 describe('Watchlist update detection service', () => {
+  const createDescriptorClient = () =>
+    new WatchlistEntitySourceClient({
+      soClient: savedObjectsClientMock.create(),
+      namespace: 'default',
+    });
+
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    logger = loggingSystemMock.createLogger();
   });
 
   describe('index source (plain sync)', () => {
     it('uses buildEntitiesSearchBody without syncMarker and applies bulk upsert', async () => {
-      const searchCalls: Array<Record<string, unknown>> = [];
+      const searchCalls: CapturedSearchRequest[] = [];
       const targetIndex = '.watchlist-entities-default';
-      const esClient = {
-        search: jest.fn().mockImplementation((params: Record<string, unknown>) => {
-          searchCalls.push(params);
-          if (params.index === targetIndex) {
-            return Promise.resolve({ hits: { hits: [] } });
-          }
-          return Promise.resolve({
-            aggregations: {
-              entities: {
-                buckets: [{ key: { euid: 'user:jdoe' }, doc_count: 1 }],
-                after_key: undefined,
-              },
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation((params?: SearchRequest) => {
+        if (!params) {
+          throw new Error('Expected search params');
+        }
+        searchCalls.push(params as CapturedSearchRequest);
+        if (params.index === targetIndex) {
+          return Promise.resolve({ hits: { hits: [] } } as never);
+        }
+        return Promise.resolve({
+          aggregations: {
+            entities: {
+              buckets: [{ key: { euid: 'user:jdoe' }, doc_count: 1 }],
+              after_key: undefined,
             },
-          });
-        }),
-        bulk: jest.fn().mockResolvedValue({ errors: false }),
-      };
+          },
+        } as never);
+      });
+      esClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const service = createUpdateDetectionService({
-        esClient: esClient as never,
-        logger: mockLogger as never,
+        esClient,
+        logger,
         targetIndex,
       });
 
@@ -92,14 +127,11 @@ describe('Watchlist update detection service', () => {
     });
 
     it('skips source searching when the allowlist is empty for all entity types', async () => {
-      const esClient = {
-        search: jest.fn(),
-        bulk: jest.fn(),
-      };
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const service = createUpdateDetectionService({
-        esClient: esClient as never,
-        logger: mockLogger as never,
+        esClient,
+        logger,
         targetIndex: '.watchlist-entities-default',
       });
 
@@ -113,14 +145,11 @@ describe('Watchlist update detection service', () => {
 
   describe('integration source without descriptorClient', () => {
     it('logs warning and returns empty array without calling search or bulk', async () => {
-      const esClient = {
-        search: jest.fn(),
-        bulk: jest.fn(),
-      };
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const service = createUpdateDetectionService({
-        esClient: esClient as never,
-        logger: mockLogger as never,
+        esClient,
+        logger,
         targetIndex: '.watchlist-entities-default',
       });
 
@@ -130,7 +159,7 @@ describe('Watchlist update detection service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('descriptorClient not available')
       );
       expect(esClient.search).not.toHaveBeenCalled();
@@ -141,32 +170,33 @@ describe('Watchlist update detection service', () => {
   describe('integration source with descriptorClient', () => {
     it('fetches sync marker, uses it in search, and updates marker after processing', async () => {
       const syncMarker = '2024-01-01T00:00:00Z';
-      const descriptorClient = {
-        getLastProcessedMarker: jest.fn().mockResolvedValue(syncMarker),
-        updateLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-      };
+      const descriptorClient = createDescriptorClient();
+      mockGetLastProcessedMarker.mockResolvedValue(syncMarker);
+      mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
-      const searchCalls: Array<Record<string, unknown>> = [];
-      const esClient = {
-        search: jest.fn().mockImplementation((params: Record<string, unknown>) => {
-          searchCalls.push(params);
-          return Promise.resolve({
-            aggregations: {
-              entities: {
-                buckets: [],
-                after_key: undefined,
-              },
+      const searchCalls: CapturedSearchRequest[] = [];
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation((params?: SearchRequest) => {
+        if (!params) {
+          throw new Error('Expected search params');
+        }
+        searchCalls.push(params as CapturedSearchRequest);
+        return Promise.resolve({
+          aggregations: {
+            entities: {
+              buckets: [],
+              after_key: undefined,
             },
-          });
-        }),
-        bulk: jest.fn().mockResolvedValue({ errors: false }),
-      };
+          },
+        } as never);
+      });
+      esClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const service = createUpdateDetectionService({
-        esClient: esClient as never,
-        logger: mockLogger as never,
+        esClient,
+        logger,
         targetIndex: '.watchlist-entities-default',
-        descriptorClient: descriptorClient as never,
+        descriptorClient,
       });
 
       await service.updateDetection(
@@ -174,7 +204,7 @@ describe('Watchlist update detection service', () => {
         createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
       );
 
-      expect(descriptorClient.getLastProcessedMarker).toHaveBeenCalledWith(integrationSource);
+      expect(mockGetLastProcessedMarker).toHaveBeenCalledWith(integrationSource);
       expect(searchCalls.length).toBeGreaterThan(0);
       const firstSearchParams = searchCalls[0];
       expect(firstSearchParams.query?.bool?.must).toContainEqual({
@@ -184,49 +214,50 @@ describe('Watchlist update detection service', () => {
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
       expect(firstSearchParams.aggs?.entities?.aggs?.latest_doc).toBeDefined();
-      expect(descriptorClient.updateLastProcessedMarker).not.toHaveBeenCalled();
+      expect(mockUpdateLastProcessedMarker).not.toHaveBeenCalled();
     });
 
     it('updates sync marker when maxTimestamp is extracted from buckets', async () => {
       const syncMarker = '2024-01-01T00:00:00Z';
       const maxTimestamp = '2024-01-15T12:00:00Z';
-      const descriptorClient = {
-        getLastProcessedMarker: jest.fn().mockResolvedValue(syncMarker),
-        updateLastProcessedMarker: jest.fn().mockResolvedValue(undefined),
-      };
+      const descriptorClient = createDescriptorClient();
+      mockGetLastProcessedMarker.mockResolvedValue(syncMarker);
+      mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
       const targetIndex = '.watchlist-entities-default';
-      const esClient = {
-        search: jest.fn().mockImplementation((params: { index: string }) => {
-          if (params.index === targetIndex) {
-            return Promise.resolve({ hits: { hits: [] } });
-          }
-          return Promise.resolve({
-            aggregations: {
-              entities: {
-                buckets: [
-                  {
-                    key: { euid: 'user:jdoe' },
-                    latest_doc: {
-                      hits: {
-                        hits: [{ _source: { '@timestamp': maxTimestamp, 'user.name': 'jdoe' } }],
-                      },
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation((params?: SearchRequest) => {
+        if (!params) {
+          throw new Error('Expected search params');
+        }
+        if (params.index === targetIndex) {
+          return Promise.resolve({ hits: { hits: [] } } as never);
+        }
+        return Promise.resolve({
+          aggregations: {
+            entities: {
+              buckets: [
+                {
+                  key: { euid: 'user:jdoe' },
+                  latest_doc: {
+                    hits: {
+                      hits: [{ _source: { '@timestamp': maxTimestamp, 'user.name': 'jdoe' } }],
                     },
                   },
-                ],
-                after_key: undefined,
-              },
+                },
+              ],
+              after_key: undefined,
             },
-          });
-        }),
-        bulk: jest.fn().mockResolvedValue({ errors: false }),
-      };
+          },
+        } as never);
+      });
+      esClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const service = createUpdateDetectionService({
-        esClient: esClient as never,
-        logger: mockLogger as never,
+        esClient,
+        logger,
         targetIndex: '.watchlist-entities-default',
-        descriptorClient: descriptorClient as never,
+        descriptorClient,
       });
 
       await service.updateDetection(
@@ -234,10 +265,7 @@ describe('Watchlist update detection service', () => {
         createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
       );
 
-      expect(descriptorClient.updateLastProcessedMarker).toHaveBeenCalledWith(
-        integrationSource,
-        maxTimestamp
-      );
+      expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(integrationSource, maxTimestamp);
     });
   });
 });

@@ -12,17 +12,8 @@ import {
 } from '@kbn/core/server/mocks';
 import { createEntitySourcesService } from './entity_sources_service';
 
-const mockDescriptorList = jest.fn();
-
 jest.mock('../management/watchlist_config');
-jest.mock('../../privilege_monitoring/saved_objects', () => {
-  return {
-    // TODO: Replace this inline mock with a colocated watchlists mock when saved_objects moves from privilege_monitoring into watchlists.
-    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-      list: mockDescriptorList,
-    })),
-  };
-});
+jest.mock('./infra/entity_source_client');
 jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
@@ -32,6 +23,10 @@ const { mockWatchlistGet, mockGetEntitySourceIds } = jest.requireMock(
 ) as {
   mockWatchlistGet: jest.Mock;
   mockGetEntitySourceIds: jest.Mock;
+};
+
+const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
+  mockListEntitySources: jest.Mock;
 };
 
 const { mockListEntityStoreEntities } = jest.requireMock('../entities/service') as {
@@ -57,7 +52,7 @@ describe('createEntitySourcesService', () => {
 
     mockWatchlistGet.mockResolvedValue({ name: 'VIP Users' });
     mockGetEntitySourceIds.mockResolvedValue(['source-a', 'source-c']);
-    mockDescriptorList.mockResolvedValue({
+    mockListEntitySources.mockResolvedValue({
       sources: [
         {
           id: 'source-a',
@@ -105,7 +100,7 @@ describe('createEntitySourcesService', () => {
 
     expect(mockWatchlistGet).toHaveBeenCalledWith('watchlist-1');
     expect(mockGetEntitySourceIds).toHaveBeenCalledWith('watchlist-1');
-    expect(mockDescriptorList).toHaveBeenCalledWith({});
+    expect(mockListEntitySources).toHaveBeenCalledWith({});
     expect(mockGetIndexForWatchlist).toHaveBeenCalledWith('VIP Users', namespace);
 
     expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
