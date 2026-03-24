@@ -64,12 +64,7 @@ export class AgentService {
     const fetchPipelineToolInstance = fetchCurrentPipelineTool();
     const ecsInfoTool = getEcsInfoTool(fieldsMetadataClient);
 
-    const [ecsDict, ecsFieldsets] = await Promise.all([
-      fieldsMetadataClient.find({ source: ['ecs'] }),
-      fieldsMetadataClient.getECSFieldsets(),
-    ]);
-    const ecsFieldSet = new Set(Object.keys(ecsDict.toPlain()));
-    const ecsRootSet = new Set(ecsFieldsets);
+    const ecsFieldsets = await fieldsMetadataClient.getECSFieldsets();
     const ecsRootFieldsSummary = ecsFieldsets.map((fieldset) => `- **${fieldset}**`).join('\n');
 
     const validatorTool = ingestPipelineValidatorTool({
@@ -78,7 +73,6 @@ export class AgentService {
       packageName: integrationId,
       dataStreamName: dataStreamId,
       fieldsMetadataClient,
-      ecsFieldSets: { ecsFieldSet, ecsRootSet },
     });
 
     const logAndEcsAnalyzerSubAgent = createLogAndEcsAnalyzerAgent({

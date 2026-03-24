@@ -55,18 +55,12 @@ const flattenKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
   return keys;
 };
 
-export interface EcsFieldSets {
-  ecsFieldSet: Set<string>;
-  ecsRootSet: Set<string>;
-}
-
 export interface ValidatorToolOptions {
   esClient: ElasticsearchClient;
   samples: string[];
   packageName: string;
   dataStreamName: string;
   fieldsMetadataClient: IFieldsMetadataClient;
-  ecsFieldSets?: EcsFieldSets;
 }
 
 const pickRandomSamples = <T>(items: T[], count: number): T[] => {
@@ -102,14 +96,7 @@ function makeErrorCommand(message: string, totalSamples: number, toolCallId: str
 }
 
 export function ingestPipelineValidatorTool(options: ValidatorToolOptions): DynamicStructuredTool {
-  const {
-    esClient,
-    samples,
-    packageName,
-    dataStreamName,
-    fieldsMetadataClient,
-    ecsFieldSets: precomputedEcsFieldSets,
-  } = options;
+  const { esClient, samples, packageName, dataStreamName, fieldsMetadataClient } = options;
 
   const customFieldPrefix = `${packageName}.${dataStreamName}.`;
 
@@ -204,58 +191,48 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
 
       const errorGroups = groupErrors(failedSamples, MAX_UNIQUE_ERROR_TYPES);
 
-      // Fetch event field metadata once for the whole validation pass
-      const eventFieldsDict = await fieldsMetadataClient.find({
-        fieldNames: ['event.category', 'event.kind'],
-        source: ['ecs'],
-      });
-      const eventFieldsMeta = eventFieldsDict.pick(['allowed_values']);
-
-      const validCategoryTypes = new Map<string, string[]>();
-      for (const av of eventFieldsMeta['event.category']?.allowed_values ?? []) {
-        validCategoryTypes.set(av.name, av.expected_event_types ?? []);
+      // Collect unique field paths from sample outputs
+      const allFieldPaths = new Set<string>();
+      for (const doc of successfulDocuments.slice(0, 20)) {
+        for (const fp of flattenKeys(doc as Record<string, unknown>)) {
+          allFieldPaths.add(fp);
+        }
       }
-      const validEventKinds = new Set(
-        (eventFieldsMeta['event.kind']?.allowed_values ?? []).map((av) => av.name)
-      );
 
-      // Collect unique category→types combos across sampled docs
-      const uniqueCombos = new Map<string, Set<string>>();
-      const uniqueEventKinds = new Set<string>();
+      // Batch-resolve only the fields present in outputs against ECS, plus root fieldsets and event.kind metadata
+      const [ecsHitDict, ecsFieldsets, eventKindField] = await Promise.all([
+        fieldsMetadataClient.find({ fieldNames: [...allFieldPaths], source: ['ecs'] }),
+        fieldsMetadataClient.getECSFieldsets(),
+        fieldsMetadataClient.getByName('event.kind', { source: ['ecs'] }),
+      ]);
+
+      const ecsFieldSet = new Set(Object.keys(ecsHitDict.getFields()));
+      const ecsRootSet = new Set(ecsFieldsets);
+      const validEventKinds = new Set((eventKindField?.allowed_values ?? []).map((av) => av.name));
+
+      const ecsWarnings: string[] = [];
+
       for (const doc of successfulDocuments.slice(0, 20)) {
         const source = doc as Record<string, unknown>;
         const categories = asArray(getNestedValue(source, 'event.category'));
         const types = asArray(getNestedValue(source, 'event.type'));
-        for (const cat of categories) {
-          const catSet = uniqueCombos.get(cat) ?? new Set<string>();
-          uniqueCombos.set(cat, catSet);
-          for (const t of types) catSet.add(t);
-        }
         const eventKind = getNestedValue(source, 'event.kind');
-        if (typeof eventKind === 'string') uniqueEventKinds.add(eventKind);
-      }
 
-      const ecsWarnings: string[] = [];
-
-      for (const [category, types] of uniqueCombos) {
-        const allowedTypes = validCategoryTypes.get(category);
-        if (allowedTypes === undefined) {
-          ecsWarnings.push(`Invalid event.category: "${category}"`);
-        } else {
-          for (const type of types) {
-            if (!allowedTypes.includes(type)) {
-              ecsWarnings.push(
-                `event.type "${type}" is not valid for event.category "${category}". Allowed: ${allowedTypes.join(
-                  ', '
-                )}`
-              );
-            }
+        if (categories.length > 0 && types.length > 0) {
+          const valid = await fieldsMetadataClient.matchesAnyTypeForEventCategory(
+            categories,
+            types
+          );
+          if (!valid) {
+            ecsWarnings.push(
+              `Invalid event.category/type combination: categories=${JSON.stringify(
+                categories
+              )}, types=${JSON.stringify(types)}`
+            );
           }
         }
-      }
 
-      for (const eventKind of uniqueEventKinds) {
-        if (!validEventKinds.has(eventKind)) {
+        if (typeof eventKind === 'string' && !validEventKinds.has(eventKind)) {
           ecsWarnings.push(
             `Invalid event.kind: "${eventKind}". Valid values: ${[...validEventKinds].join(', ')}`
           );
@@ -270,27 +247,6 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       }
 
       const uniqueEcsWarnings = [...new Set(ecsWarnings)];
-
-      // Collect all unique field paths from sampled docs, then batch-lookup against ECS
-      const allFieldPaths = new Set<string>();
-      for (const doc of successfulDocuments.slice(0, 20)) {
-        for (const fp of flattenKeys(doc as Record<string, unknown>)) {
-          allFieldPaths.add(fp);
-        }
-      }
-
-      let ecsFieldSet: Set<string>;
-      let ecsRootSet: Set<string>;
-      if (precomputedEcsFieldSets) {
-        ({ ecsFieldSet, ecsRootSet } = precomputedEcsFieldSets);
-      } else {
-        const [ecsDict, ecsFieldsets] = await Promise.all([
-          fieldsMetadataClient.find({ source: ['ecs'] }),
-          fieldsMetadataClient.getECSFieldsets(),
-        ]);
-        ecsFieldSet = new Set(Object.keys(ecsDict.toPlain()));
-        ecsRootSet = new Set(ecsFieldsets);
-      }
 
       const fieldNamingErrors: string[] = [];
       for (const fieldPath of allFieldPaths) {
