@@ -32,9 +32,7 @@ function createAgentSource(overrides: Partial<AgentProperties> = {}): AgentPrope
   };
 }
 
-function createMockStorage(
-  searchImplementation: jest.Mock
-): jest.Mocked<AgentProfileStorage> {
+function createMockStorage(searchImplementation: jest.Mock): jest.Mocked<AgentProfileStorage> {
   const bulk = jest.fn().mockResolvedValue(undefined);
 
   return {
