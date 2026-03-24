@@ -36,7 +36,7 @@ export function NewJobButton({ size = 's' }) {
       size={size}
       disabled={buttonEnabled === false}
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
     >
       <FormattedMessage
         id="xpack.ml.jobsList.createNewJobButtonLabel"

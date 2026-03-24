@@ -217,7 +217,7 @@ describe('schema_runtime_fields', () => {
 
         // When/Then
         expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
-          /definition for this key is missing/
+          /Additional properties are not allowed \('[^']+' was unexpected\)/
         );
       });
     });
@@ -233,7 +233,7 @@ describe('schema_runtime_fields', () => {
 
           // When/Then
           expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
-            /definition for this key is missing/
+            /Additional properties are not allowed \('[^']+' was unexpected\)/
           );
         });
       }
