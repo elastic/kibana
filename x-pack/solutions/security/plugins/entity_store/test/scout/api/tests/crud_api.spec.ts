@@ -538,7 +538,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       },
     };
 
-    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
@@ -567,7 +567,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const noMatchEntity: Entity = { entity: { id: 'list-filter-nomatch' } };
 
     for (const ent of [matchEntity, noMatchEntity]) {
-      const resp = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: ent,
@@ -597,7 +597,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
   apiTest('Should list entities with size param', async ({ apiClient }) => {
     for (let i = 0; i < 3; i++) {
-      const resp = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entity: { id: `list-size-${i}` } },
@@ -616,7 +616,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
   apiTest('Should paginate with searchAfter', async ({ apiClient }) => {
     for (let i = 0; i < 2; i++) {
-      const resp = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entity: { id: `list-page-${i}` } },
