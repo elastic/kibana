@@ -172,6 +172,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+      fastToolConnectorId: this.config.fastToolConnectorId,
     });
     runner = runnerFactory.getRunner();
 

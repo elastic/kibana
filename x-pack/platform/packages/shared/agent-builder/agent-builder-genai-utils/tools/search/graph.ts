@@ -47,11 +47,13 @@ export type StateType = typeof StateAnnotation.State;
 
 export const createSearchToolGraph = ({
   model,
+  fastModel,
   esClient,
   logger,
   events,
 }: {
   model: ScopedModel;
+  fastModel?: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
@@ -59,7 +61,7 @@ export const createSearchToolGraph = ({
   const getTools = (state: StateType) => {
     const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
     const nlSearchTool = createNaturalLanguageSearchTool({
-      model,
+      model: fastModel ?? model,
       esClient,
       events,
       logger,

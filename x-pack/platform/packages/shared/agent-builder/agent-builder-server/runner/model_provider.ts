@@ -41,6 +41,12 @@ export interface ModelProvider {
    */
   getDefaultModel: () => Promise<ScopedModel>;
   /**
+   * Returns a faster/lighter model for latency-sensitive tool operations
+   * (e.g. ESQL generation). Falls back to the default model if no fast
+   * connector is configured or the configured one is unavailable.
+   */
+  getFastModel: () => Promise<ScopedModel>;
+  /**
    * Returns a model using the given connectorId.
    *
    * Will throw if connector doesn't exist, user has no access, or connector

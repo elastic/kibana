@@ -29,6 +29,8 @@ export class RunnerFactoryImpl implements RunnerFactory {
       uiSettings,
       hooks,
       savedObjects,
+      fastToolConnectorId,
+      logger,
       ...otherDeps
     } = this.deps;
     return {
@@ -38,8 +40,11 @@ export class RunnerFactoryImpl implements RunnerFactory {
       trackingService,
       analyticsService,
       hooks,
+      logger,
       modelProviderFactory: createModelProviderFactory({
         inference,
+        fastToolConnectorId,
+        logger,
         trackingService,
         uiSettings,
         savedObjects,
