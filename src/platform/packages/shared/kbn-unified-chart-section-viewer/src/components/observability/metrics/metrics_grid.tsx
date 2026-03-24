@@ -16,7 +16,7 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
-import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
+import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
