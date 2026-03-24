@@ -61,6 +61,9 @@ const mappings = {
     isLatest: {
       type: 'boolean',
     },
+    isEnabled: {
+      type: 'boolean',
+    },
   },
 } as const;
 

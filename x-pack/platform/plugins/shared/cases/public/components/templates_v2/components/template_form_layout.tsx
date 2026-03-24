@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -22,17 +22,20 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
 import { TemplateEditorLayout } from './template_editor_layout';
+import { updateYamlFieldDefault } from '../utils/update_yaml_field_default';
+import { FieldType } from '../field_types/constants';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
   title: string;
   isLoading?: boolean;
   isSaving?: boolean;
-  onCreate: (data: YamlEditorFormValues) => Promise<void>;
+  onCreate: (data: YamlEditorFormValues, isEnabled: boolean) => Promise<void>;
   isEdit?: boolean;
   storageKey: string;
   initialValue: string;
   templateId?: string;
+  initialIsEnabled?: boolean;
 }
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
@@ -45,6 +48,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   storageKey,
   initialValue,
   templateId,
+  initialIsEnabled = true,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
@@ -58,10 +62,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [savedValue, setSavedValue] = useState(initialValue);
-
-  useEffect(() => {
-    setSavedValue(initialValue);
-  }, [initialValue]);
+  const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
   const {
     value: yamlValue,
@@ -77,6 +78,21 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   );
 
   const hasChanges = yamlValue !== savedValue;
+
+  const yamlValueRef = useRef(yamlValue);
+  yamlValueRef.current = yamlValue;
+
+  const handleFieldDefaultChange = useCallback(
+    (fieldName: string, value: string, control: string) => {
+      const isNumericControl = control === FieldType.INPUT_NUMBER;
+      const parsedValue = isNumericControl && value !== '' ? Number(value) : value;
+      const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
+      if (updatedYaml !== yamlValueRef.current) {
+        onYamlChange(updatedYaml);
+      }
+    },
+    [onYamlChange]
+  );
 
   const handleResetClick = useCallback(() => {
     setIsResetModalVisible(true);
@@ -96,7 +112,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     form.handleSubmit(
       async (data) => {
         try {
-          await onCreate(data);
+          await onCreate(data, isEnabled);
           setSavedValue(data.definition);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
@@ -106,7 +122,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate]);
+  }, [form, onCreate, isEnabled]);
+
+  const handleIsEnabledChange = useCallback((enabled: boolean) => {
+    setIsEnabled(enabled);
+  }, []);
 
   return (
     <FormProvider {...form}>
@@ -123,9 +143,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             hasChanges={hasChanges}
             isEdit={isEdit}
             submitError={submitError}
+            isEnabled={isEnabled}
             onBack={navigateToCasesTemplates}
             onReset={handleResetClick}
             onSave={handleSave}
+            onIsEnabledChange={handleIsEnabledChange}
           />
         </EuiFlexItem>
 
@@ -134,6 +156,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             isLoading={isLoading}
             yamlValue={yamlValue}
             onYamlChange={onYamlChange}
+            onFieldDefaultChange={handleFieldDefaultChange}
             isYamlSaving={isYamlSaving}
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}

@@ -66,7 +66,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
                 >
                   <span
                     color="inherit"
-                    data-euiicon-type="copyClipboard"
+                    data-euiicon-type="copy"
                   />
                   <span
                     class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
