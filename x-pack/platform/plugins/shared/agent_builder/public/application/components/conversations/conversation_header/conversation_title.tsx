@@ -21,6 +21,8 @@ import {
   useHasActiveConversation,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
+import { DeleteConversationModal } from '../delete_conversation_modal';
+import { RenameConversationModal } from '../rename_conversation_modal';
 
 const labels = {
   rename: i18n.translate('xpack.agentBuilder.conversationTitle.rename', {
@@ -48,6 +50,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [previousTitle, setPreviousTitle] = useState('');
   const [currentText, setCurrentText] = useState('');
 
@@ -82,7 +86,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     return null;
   }
 
-  // Fallback to 'New Conversation' as the title
+  // No popover for unsaved conversations — just show the title
   if (!hasPersistedConversation) {
     return (
       <h4
@@ -101,7 +105,10 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     <EuiContextMenuItem
       key="rename"
       icon="pencil"
-      onClick={() => setIsPopoverOpen(false)}
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setIsRenameModalOpen(true);
+      }}
       data-test-subj="agentBuilderConversationRenameButton"
     >
       {labels.rename}
@@ -109,7 +116,10 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     <EuiContextMenuItem
       key="delete"
       icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-      onClick={() => setIsPopoverOpen(false)}
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setIsDeleteModalOpen(true);
+      }}
       css={css`
         color: ${euiTheme.colors.danger};
       `}
@@ -146,15 +156,27 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   );
 
   return (
-    <EuiPopover
-      button={titleButton}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downCenter"
-      aria-label={labels.openTitleMenu}
-    >
-      <EuiContextMenuPanel items={menuItems} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        button={titleButton}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downCenter"
+        aria-label={labels.openTitleMenu}
+      >
+        <EuiContextMenuPanel items={menuItems} />
+      </EuiPopover>
+
+      <RenameConversationModal
+        isOpen={isRenameModalOpen}
+        onClose={() => setIsRenameModalOpen(false)}
+      />
+
+      <DeleteConversationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
+    </>
   );
 };
