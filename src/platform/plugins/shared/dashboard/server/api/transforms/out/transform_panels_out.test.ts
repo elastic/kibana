@@ -33,7 +33,7 @@ describe('transformPanelsOut', () => {
     expect(panels).toHaveLength(1);
     expect(panels![0]).toMatchObject({
       type: 'markdown',
-      uid: 'panel-1',
+      id: 'panel-1',
     });
   });
 
@@ -65,7 +65,7 @@ describe('transformPanelsOut', () => {
             "y": 0,
           },
           "type": "markdown",
-          "uid": "2e814ac0-33c2-4676-9d29-e1f868cddebd",
+          "id": "2e814ac0-33c2-4676-9d29-e1f868cddebd",
         },
         Object {
           "collapsed": true,
@@ -84,11 +84,11 @@ describe('transformPanelsOut', () => {
                 "y": 0,
               },
               "type": "markdown",
-              "uid": "d724d87b-2256-4c8b-8aa3-55bc0b8881c6",
+              "id": "d724d87b-2256-4c8b-8aa3-55bc0b8881c6",
             },
           ],
           "title": "Section 1",
-          "uid": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
+          "id": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
         },
       ]
     `);

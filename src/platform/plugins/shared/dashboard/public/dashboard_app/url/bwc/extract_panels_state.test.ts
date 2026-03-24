@@ -44,7 +44,7 @@ describe('extractPanelsState', () => {
               "y": 0,
             },
             "type": "lens",
-            "uid": "panel1",
+            "id": "panel1",
           },
           Object {
             "grid": Object {
@@ -60,11 +60,11 @@ describe('extractPanelsState', () => {
                   "y": 2,
                 },
                 "type": "lens",
-                "uid": "panelInSection",
+                "id": "panelInSection",
               },
             ],
             "title": "Section 1",
-            "uid": "section1",
+            "id": "section1",
           },
         ]
       `);
@@ -91,7 +91,7 @@ describe('extractPanelsState', () => {
       ]);
     });
 
-    test('should move panelIndex to uid', () => {
+    test('should move panelIndex to id', () => {
       const { panels } = extractPanelsState({
         panels: [
           {
@@ -107,7 +107,7 @@ describe('extractPanelsState', () => {
           config: {},
           grid: { x: 0, y: 0, w: 24, h: 15 },
           type: 'lens',
-          uid: 'fizz',
+          id: 'fizz',
         },
       ]);
     });
@@ -238,7 +238,7 @@ describe('extractPanelsState', () => {
           },
           grid: {},
           type: 'map',
-          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+          id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
       ]);
     });
@@ -271,7 +271,7 @@ describe('extractPanelsState', () => {
           },
           grid: {},
           type: 'map',
-          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+          id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
       ]);
     });

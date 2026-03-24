@@ -36,7 +36,7 @@ export const controlWidthSchema = schema.oneOf(
 );
 
 export const pinnedControlSchema = schema.object({
-  uid: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
+  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: schema.maybe(controlWidthSchema),
   grow: schema.maybe(
     schema.boolean({

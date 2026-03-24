@@ -65,7 +65,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
         if ('explicitInput' in control) {
           const { explicitInput, order, ...restOfControlState } = control;
           return {
-            uid: controlId,
+            id: controlId,
             ...restOfControlState,
             config: explicitInput,
           };
@@ -73,7 +73,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
           // >=8.16 to <=8.18 controls were exported as flat objects for all configs
           const { grow, order, type, width, ...config } = control;
           return {
-            uid: controlId,
+            id: controlId,
             type,
             ...(grow !== undefined && { grow }),
             ...(width !== undefined && { width }),

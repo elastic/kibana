@@ -48,12 +48,12 @@ describe('layout manager', () => {
     grid: { w: 1, h: 1, x: 0, y: 0 },
     type: 'testPanelType',
     config: { title: 'Panel One' },
-    uid: PANEL_ONE_ID,
+    id: PANEL_ONE_ID,
   };
 
   const pinnedControls: DashboardState['pinned_panels'] = [
     {
-      uid: 'control1',
+      id: 'control1',
       type: 'options_list_control',
       config: {
         data_view_id: '',
@@ -61,7 +61,7 @@ describe('layout manager', () => {
       },
     },
     {
-      uid: 'control2',
+      id: 'control2',
       grow: true,
       width: 'small',
       type: 'options_list_control',
@@ -84,7 +84,7 @@ describe('layout manager', () => {
   const section1 = {
     title: 'Section one',
     collapsed: false,
-    uid: 'section1',
+    id: 'section1',
     grid: {
       y: 1,
     },
@@ -342,7 +342,7 @@ describe('layout manager', () => {
         [
           panel1,
           {
-            uid: 'control3',
+            id: 'control3',
             type: 'options_list_control',
             config: {},
             grid: { x: 0, y: 2, h: 1, w: 1 },
@@ -373,7 +373,7 @@ describe('layout manager', () => {
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: pick(panel1, ['grid', 'type']),
+        [panel1.id]: pick(panel1, ['grid', 'type']),
         // control3 gets removed as a panel
       });
     });
@@ -408,7 +408,7 @@ describe('layout manager', () => {
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: {
+        [panel1.id]: {
           type: 'testPanelType',
           grid: { ...panel1.grid, y: 2 }, // push panel 1 down,
         },
@@ -427,7 +427,7 @@ describe('layout manager', () => {
           panel1,
           {
             ...pinnedControls[1],
-            uid: 'control2',
+            id: 'control2',
             grid: { x: 0, y: 0, w: 12, h: 12 },
             config: { title: 'Control' },
           },

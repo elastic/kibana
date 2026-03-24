@@ -105,7 +105,7 @@ describe('transformDashboardOut', () => {
     expect(transformDashboardOut(input, references)).toEqual({
       pinned_panels: [
         {
-          uid: 'foo',
+          id: 'foo',
           grow: false,
           width: 'small',
           config: {
@@ -136,7 +136,7 @@ describe('transformDashboardOut', () => {
             w: 10,
             h: 10,
           },
-          uid: '1',
+          id: '1',
           type: 'type1',
         },
       ],
@@ -191,7 +191,7 @@ describe('transformDashboardOut', () => {
     expect(transformDashboardOut(input, references)).toEqual({
       pinned_panels: [
         {
-          uid: 'foo',
+          id: 'foo',
           grow: false,
           width: 'small',
           config: {
@@ -222,7 +222,7 @@ describe('transformDashboardOut', () => {
             w: 10,
             h: 10,
           },
-          uid: '1',
+          id: '1',
           type: 'type1',
         },
       ],

@@ -34,8 +34,8 @@ export function transformPanelsIn(
 
   widgets.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
-      const idx = uid ?? uuidv4();
+      const { panels: sectionPanels, grid, id, ...restOfSection } = widget as DashboardSection;
+      const idx = id ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel, isDashboardAppRequest);
@@ -62,8 +62,8 @@ function transformPanelIn(
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
-  const { uid, grid, config, ...restPanel } = panel;
-  const idx = uid ?? uuidv4();
+  const { id, grid, config, ...restPanel } = panel;
+  const idx = id ?? uuidv4();
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
@@ -79,7 +79,7 @@ function transformPanelIn(
       panelSchema.validate(config);
     } catch (error) {
       throw Boom.badRequest(
-        `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
+        `Panel config validation failed. Panel id: ${id}, type: ${restPanel.type}, validation error: ${error.message}`
       );
     }
   }
