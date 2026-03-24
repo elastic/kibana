@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
   { getService }: FtrProviderContext,
@@ -116,7 +116,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
 
     async assertMlSectionExists(expectExist = true) {
       await retry.tryForTime(60 * 1000, async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('ml', expectExist);
       });
     },
@@ -130,7 +130,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
         ml_anomaly_charts: 'Anomaly chart',
       };
       await retry.tryForTime(60 * 1000, async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await testSubjects.existOrFail('dashboardPanelSelectionFlyout', { timeout: 2000 });
 
         await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('ml');

@@ -17,6 +17,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
 import type { AuthenticationInfo } from '../../elasticsearch';
+import type { SessionValue } from '../../session_management';
+import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
 import type { Tokens } from '../tokens';
@@ -35,6 +37,7 @@ export interface AuthenticationProviderOptions {
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  uiam?: UiamServicePublic;
   urls: {
     loggedOut: (request: KibanaRequest) => string;
   };
@@ -52,9 +55,20 @@ export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
 export const ELASTIC_CLOUD_SSO_REALM_NAME = 'cloud-saml-kibana';
 
 /**
+ * Names of the user properties that aren't available in the "minimal" authentication mode, and should throw an error
+ * when accessed.
+ */
+const USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE = new Set([
+  'elastic_cloud_user',
+  'authentication_realm',
+  'lookup_realm',
+  'authentication_type',
+]);
+
+/**
  * Base class that all authentication providers should extend.
  */
-export abstract class BaseAuthenticationProvider {
+export abstract class BaseAuthenticationProvider<TState = unknown> {
   /**
    * Type of the provider.
    */
@@ -80,16 +94,28 @@ export abstract class BaseAuthenticationProvider {
   }
 
   /**
+   * Determines whether intermediate session should be invalidated after a successful login.
+   * Some providers need to have their state checked to make sure all pending login attempts have
+   * completed before invalidating the session. This is particularly important for the SAML Provider,
+   * which may have pending login requests pending
+   * @param [state] Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated, `false` otherwise.
+   */
+  shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    return true;
+  }
+
+  /**
    * Performs initial login request and creates user session. Provider isn't required to implement
    * this method if it doesn't support initial login request.
    * @param request Request instance.
    * @param loginAttempt Login attempt associated with the provider.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
   async login(
     request: KibanaRequest,
     loginAttempt: unknown,
-    state?: unknown
+    session?: SessionValue<TState> | null
   ): Promise<AuthenticationResult> {
     return AuthenticationResult.notHandled();
   }
@@ -98,16 +124,22 @@ export abstract class BaseAuthenticationProvider {
    * Performs request authentication based on the session created during login or other information
    * associated with the request (e.g. `Authorization` HTTP header).
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  abstract authenticate(request: KibanaRequest, state?: unknown): Promise<AuthenticationResult>;
+  abstract authenticate(
+    request: KibanaRequest,
+    session: SessionValue<TState> | null
+  ): Promise<AuthenticationResult>;
 
   /**
    * Invalidates user session associated with the request.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider that needs to be invalidated.
+   * @param [session] Optional session object associated with the provider.
    */
-  abstract logout(request: KibanaRequest, state?: unknown): Promise<DeauthenticationResult>;
+  abstract logout(
+    request: KibanaRequest,
+    session?: SessionValue<TState> | null
+  ): Promise<DeauthenticationResult>;
 
   /**
    * Returns HTTP authentication scheme that provider uses within `Authorization` HTTP header that
@@ -121,12 +153,31 @@ export abstract class BaseAuthenticationProvider {
    * information of authenticated user.
    * @param request Request instance.
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
+   * @param [session] Optional session object associated with the provider.
    */
-  protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+  protected async getUser(
+    request: KibanaRequest,
+    authHeaders?: Headers,
+    session?: SessionValue<TState>
+  ) {
+    // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
+    // return a static user proxy. The caveat here is that we don't validate credentials, but it
+    // will be done by the Elasticsearch itself.
+    if (
+      session &&
+      session.username &&
+      request.route.options.security?.authc?.enabled === 'minimal'
+    ) {
+      this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
+      return this.getMinAuthenticationUserProxy(session);
+    }
+
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
       await this.options.client
-        .asScoped({ headers: { ...request.headers, ...authHeaders } })
+        // Use original request if no additional auth headers are provided, otherwise fall back to
+        // the "fake" request with combined headers.
+        .asScoped(authHeaders ? { headers: { ...request.headers, ...authHeaders } } : request)
         .asCurrentUser.security.authenticate()
     );
   }
@@ -144,5 +195,37 @@ export abstract class BaseAuthenticationProvider {
         authenticationInfo.authentication_realm.type === 'saml' &&
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
     } as AuthenticatedUser);
+  }
+
+  private getMinAuthenticationUserProxy(session: SessionValue) {
+    // We can retrieve only a portion of user properties from the session, and these are relatively safe to use without
+    // re-validation. However, `elastic_cloud_user`, `authentication_realm`, `lookup_realm`, `authentication_type`,
+    // and `roles` are not available in this mode, accessing them should throw an error. Currently, audit logs rely on
+    // `roles` property being present on the user object. We should probably refactor audit logs to avoid using `roles`
+    // property for minimally authenticated users and then remove this property altogether and throw for its access.
+    const minUserStub: Partial<AuthenticatedUser> = {
+      enabled: true,
+      username: session.username,
+      authentication_provider: session.provider,
+      profile_uid: session.userProfileId,
+      // TODO: Currently audit logs rely on `roles` property being present on the user object.
+      // We should probably refactor audit logs to avoid using `roles` property for minimally
+      // authenticated users and then remove this property altogether and throw for its access.
+      roles: [],
+    };
+
+    return deepFreeze(
+      new Proxy(minUserStub as AuthenticatedUser, {
+        get: (target, prop, receiver) => {
+          const value = Reflect.get(target, prop, receiver);
+          if (USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE.has(prop.toString())) {
+            throw new Error(
+              `Property "${String(prop)}" is not available for minimally authenticated users.`
+            );
+          }
+          return value;
+        },
+      })
+    );
   }
 }

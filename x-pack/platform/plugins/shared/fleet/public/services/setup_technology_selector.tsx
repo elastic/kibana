@@ -10,41 +10,48 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBetaBadge,
+  EuiCheckableCard,
   EuiText,
   EuiRadioGroup,
   EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   EuiBadge,
   EuiTitle,
-  EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
 
 import { useStartServices } from '../hooks';
+import type { PackageInfo } from '../../common/types';
 import { SetupTechnology } from '../../common/types';
 
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 interface SetupTechnologySelectorProps {
   disabled: boolean;
+  packageInfo: PackageInfo;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
   allowedSetupTechnologies?: SetupTechnology[];
   setupTechnology?: SetupTechnology;
+
   isAgentlessDefault?: boolean;
   showBetaBadge?: boolean;
-  showLimitationsMessage?: boolean;
   useDescribedFormGroup?: boolean;
+  useCheckableCards?: boolean;
+  hideTitle?: boolean;
 }
 
 export const SetupTechnologySelector = ({
   disabled,
+  packageInfo,
   allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],
   setupTechnology,
   onSetupTechnologyChange,
   isAgentlessDefault = false,
   showBetaBadge = true,
-  showLimitationsMessage = false,
   useDescribedFormGroup = true,
+  useCheckableCards = false,
+  hideTitle = false,
 }: SetupTechnologySelectorProps) => {
   const { docLinks } = useStartServices();
 
@@ -148,36 +155,99 @@ export const SetupTechnologySelector = ({
     />
   );
 
-  const limitationsMessage = showLimitationsMessage && (
-    <>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        color="warning"
-        iconType="alert"
-        size="s"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.setupTechnology.comingSoon"
-            defaultMessage="Agentless deployment is not supported if you are using {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-traffic-filtering-deployment-configuration.html"
-                  target="_blank"
-                >
+  const checkableCards = (
+    <EuiFlexGroup
+      gutterSize="m"
+      data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
+      direction="column"
+    >
+      <EuiFlexItem>
+        <EuiCheckableCard
+          id={agentlessRadioId}
+          label={
+            <>
+              <strong>
+                <FormattedMessage
+                  id="xpack.fleet.setupTechnology.radioCardAgentlessInputDisplay"
+                  defaultMessage="Agentless"
+                />{' '}
+                {isAgentlessDefault ? (
+                  <EuiBadge>
+                    <FormattedMessage
+                      id="xpack.fleet.setupTechnology.agentlessDeployment.recommendedBadge"
+                      defaultMessage="Recommended"
+                    />
+                  </EuiBadge>
+                ) : (
+                  showBetaBadge && (
+                    <EuiBetaBadge
+                      href={docLinks.links.fleet.agentlessIntegrations}
+                      target="_blank"
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.setupTechnology.agentlessDeployment.betaBadge"
+                          defaultMessage="Beta"
+                        />
+                      }
+                      size="s"
+                      tooltipContent={
+                        <FormattedMessage
+                          id="xpack.fleet.setupTechnology.radioCardAgentlessDeployment.betaTooltip"
+                          defaultMessage="This module is not yet GA. Please help us by reporting any bugs."
+                        />
+                      }
+                      alignment="middle"
+                    />
+                  )
+                )}
+              </strong>
+              <EuiText size="s">
+                <p>
                   <FormattedMessage
-                    id="xpack.fleet.setupTechnology.comingSoon.trafficFilteringLinkText"
-                    defaultMessage="Traffic filtering"
+                    id="xpack.fleet.setupTechnology.radioCardAgentlessInputDescription"
+                    defaultMessage="Collect the selected {integrationName} directly without deploying any infrastructure. Best for simple setup and faster onboarding."
+                    values={{ integrationName: packageInfo.title }}
                   />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-      />
-      <EuiSpacer size="s" />
-    </>
+                </p>
+              </EuiText>
+            </>
+          }
+          checked={currentSetupTechnology === SetupTechnology.AGENTLESS}
+          disabled={disabled || !allowedSetupTechnologies.includes(SetupTechnology.AGENTLESS)}
+          onChange={() => onSetupTechnologyChange(SetupTechnology.AGENTLESS)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCheckableCard
+          id={agentBasedRadioId}
+          label={
+            <>
+              <strong>
+                <FormattedMessage
+                  id="xpack.fleet.setupTechnology.agentbasedInputDisplay"
+                  defaultMessage="Agent-based"
+                />
+              </strong>
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription"
+                    defaultMessage="Deploy Elastic Agent to collect the selected {integrationName} from your environment. Best if you already run agents or need more control."
+                    values={{ integrationName: packageInfo.title }}
+                  />
+                </p>
+              </EuiText>
+            </>
+          }
+          checked={currentSetupTechnology === SetupTechnology.AGENT_BASED}
+          disabled={disabled || !allowedSetupTechnologies.includes(SetupTechnology.AGENT_BASED)}
+          onChange={() => onSetupTechnologyChange(SetupTechnology.AGENT_BASED)}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
+
+  const selector = useCheckableCards ? checkableCards : radioGroup;
 
   if (useDescribedFormGroup) {
     return (
@@ -191,16 +261,13 @@ export const SetupTechnologySelector = ({
           </h3>
         }
         description={
-          <>
-            <FormattedMessage
-              id="xpack.fleet.setupTechnology.setupTechnologyDescription"
-              defaultMessage="Select a deployment mode for this integration."
-            />
-            {limitationsMessage}
-          </>
+          <FormattedMessage
+            id="xpack.fleet.setupTechnology.setupTechnologyDescription"
+            defaultMessage="Select a deployment mode for this integration."
+          />
         }
       >
-        {radioGroup}
+        {selector}
       </EuiDescribedFormGroup>
     );
   }
@@ -208,16 +275,29 @@ export const SetupTechnologySelector = ({
   // Used for security integrations (no form group wrapping)
   return (
     <>
-      <EuiTitle size="xs">
-        <h2>
+      {!hideTitle && (
+        <>
+          <EuiTitle size="xs">
+            <h2>
+              <FormattedMessage
+                id="xpack.fleet.setupTechnology.setupTechnologyLabel"
+                defaultMessage="Deployment options"
+              />
+            </h2>
+          </EuiTitle>
+        </>
+      )}
+      <EuiText size="s" color="subdued">
+        <p>
           <FormattedMessage
-            id="xpack.fleet.setupTechnology.setupTechnologyLabel"
-            defaultMessage="Deployment options"
+            id="xpack.fleet.setupTechnology.integrationSubtitle"
+            defaultMessage="How to connect {integrationName} to Elastic."
+            values={{ integrationName: packageInfo.title }}
           />
-        </h2>
-      </EuiTitle>
-      {limitationsMessage || <EuiSpacer size="s" />}
-      {radioGroup}
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      {selector}
     </>
   );
 };

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, isCombinedFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
 import { mapFilter } from '../map_filter';
 
 export const mapCombined = (filter: Filter) => {

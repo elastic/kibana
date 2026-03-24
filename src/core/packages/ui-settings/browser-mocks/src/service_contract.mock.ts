@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { lazyObject } from '@kbn/lazy-object';
+
 export const serviceContractMock = (): jest.Mocked<any> => {
-  return {
+  return lazyObject({
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-  };
+  });
 };

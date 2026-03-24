@@ -45,4 +45,11 @@ describe('applyConfigOverrides', () => {
     expect(config.server.uuid).toEqual('from-argv');
     expect(config.path.data).toEqual('/data-path');
   });
+
+  it('overrides the `telemetry.metrics.enabled` when provided as a command line argument', () => {
+    const config: Record<string, any> = {};
+    const argv = ['--telemetry.metrics.enabled'];
+    applyConfigOverrides(config, argv);
+    expect(config.telemetry.metrics.enabled).toEqual('true');
+  });
 });

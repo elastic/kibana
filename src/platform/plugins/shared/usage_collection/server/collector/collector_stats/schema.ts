@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '../types';
+import type { MakeSchemaFrom } from '../types';
 import type { CollectorsStats } from './usage_collector_stats_collector';
 
 export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {

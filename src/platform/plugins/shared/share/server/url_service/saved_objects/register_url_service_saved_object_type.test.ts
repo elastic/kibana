@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   SavedObjectMigrationMap,
   SavedObjectsType,
@@ -15,10 +15,11 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ServerShortUrlClientFactory } from '..';
-import { UrlService, LocatorDefinition } from '../../../common/url_service';
+import type { LocatorDefinition } from '../../../common/url_service';
+import { UrlService } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { MemoryShortUrlStorage } from '../short_urls/storage/memory_short_url_storage';
-import { ShortUrlSavedObjectAttributes } from '../short_urls/storage/saved_object_short_url_storage';
+import type { ShortUrlSavedObjectAttributes } from '../short_urls/storage/saved_object_short_url_storage';
 import { registerUrlServiceSavedObjectType } from './register_url_service_saved_object_type';
 
 const setup = () => {

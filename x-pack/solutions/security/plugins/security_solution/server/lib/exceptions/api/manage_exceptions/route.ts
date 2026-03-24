@@ -7,12 +7,13 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { ExceptionList } from '@kbn/securitysolution-exceptions-common/api';
 import {
   CreateSharedExceptionListRequestBody,
   CreateSharedExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -25,7 +26,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })
@@ -59,6 +60,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
             name,
             namespaceType: 'single',
             tags: [],
+            osTypes: [],
             type: 'detection',
             version: 1,
           });

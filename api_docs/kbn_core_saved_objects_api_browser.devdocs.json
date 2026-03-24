@@ -70,22 +70,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           }
         ],
         "children": [
@@ -1145,10 +1129,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
               },
               {
                 "plugin": "@kbn/core",
@@ -2590,14 +2570,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
           },
           {
             "plugin": "@kbn/core",

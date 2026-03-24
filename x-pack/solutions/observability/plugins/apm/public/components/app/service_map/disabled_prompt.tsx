@@ -17,7 +17,7 @@ export function DisabledPrompt() {
       title={
         <h2>
           {i18n.translate('xpack.apm.serviceMap.disabledTitle', {
-            defaultMessage: 'Service Map is disabled',
+            defaultMessage: 'Service map is disabled',
           })}
         </h2>
       }

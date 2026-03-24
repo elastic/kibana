@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Agent as SuperTestAgent } from 'supertest';
-import { LlmProxy } from '../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import type { Agent as SuperTestAgent } from 'supertest';
+import type { LlmProxy } from '../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 
 export async function createConnector(proxy: LlmProxy, supertest: SuperTestAgent) {
   await supertest

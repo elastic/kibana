@@ -10,6 +10,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiIcon,
   EuiSuperSelect,
   EuiText,
@@ -75,9 +76,15 @@ export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
       fullWidth={fullWidth}
       valueOfSelected={valueOfSelected}
       onChange={onChange}
+      aria-label={i18n.translate(
+        'xpack.contentConnectors.content.searchIndex.documents.selector.indexType.ariaLabel',
+        {
+          defaultMessage: 'Index type',
+        }
+      )}
       prepend={
         indexSelectorOptions.some((option) => option.error) ? (
-          <EuiIcon type={'warning'} />
+          <EuiFormPrepend iconLeft="warning" />
         ) : undefined
       }
       options={indexSelectorOptions.map((option) => {

@@ -6,7 +6,7 @@
  */
 
 import { wrapWithSimulatedFunctionCalling } from '../../simulated_function_calling';
-import { OpenAIRequest } from '../openai/types';
+import type { OpenAIRequest } from '../openai/types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
@@ -37,12 +37,19 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
   } else {
+    const openAiTools = toolsToOpenAI(tools);
+    const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system, messages }),
-      tool_choice: toolChoiceToOpenAI(toolChoice),
-      tools: toolsToOpenAI(tools),
+      ...(hasTools
+        ? {
+            tool_choice: toolChoiceToOpenAI(toolChoice),
+            tools: openAiTools,
+          }
+        : {}),
     };
   }
 

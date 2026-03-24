@@ -17,7 +17,7 @@ import { SignalsByCategory } from '../../../overview/components/signals_by_categ
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import type { TopNOption } from './helpers';
-import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
+import { getPageScope, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
@@ -60,7 +60,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
+  onFilterAdded?: () => void;
   applyGlobalQueriesAndFilters?: boolean;
 }
 
@@ -88,7 +88,7 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
+  const sourcererScopeId = getPageScope({ scopeId, view });
 
   useEffect(() => {
     setView(defaultView);

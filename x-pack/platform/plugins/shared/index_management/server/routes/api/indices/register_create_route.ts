@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
 const bodySchema = schema.object({
-  indexName: schema.string(),
-  indexMode: schema.string(),
+  indexName: schema.string({ maxLength: 1000 }),
+  indexMode: schema.string({ maxLength: 1000 }),
 });
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {

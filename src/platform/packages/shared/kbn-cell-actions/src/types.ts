@@ -8,24 +8,20 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import type {
-  Action,
-  ActionExecutionContext,
-  UiActionsService,
-} from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { Serializable } from '@kbn/utility-types';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import type { CellActionsMode } from './constants';
 
-export * from './actions/types';
+export type * from './actions/types';
 
 export type CellActionsProviderProps = PropsWithChildren<{
   /**
    * Please assign `uiActions.getTriggerCompatibleActions` function.
    * This function should return a list of actions for a triggerId that are compatible with the provided context.
    */
-  getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
+  getTriggerCompatibleActions: UiActionsStart['getTriggerCompatibleActions'];
 }>;
 
 type Metadata = Record<string, unknown>;

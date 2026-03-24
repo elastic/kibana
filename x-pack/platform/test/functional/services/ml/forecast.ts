@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningForecastProvider({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

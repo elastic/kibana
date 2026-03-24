@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
-import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
+import type { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
+import type { RangeValues } from '@kbn/vis-default-editor-plugin/public';
 import { gaugeVisType } from '@kbn/vis-type-gauge-plugin/public';
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
-import { Alignment, GaugeType } from './types';
+import type { Alignment, GaugeType } from './types';
 import { toExpressionAst } from './to_ast';
 
 export interface Gauge extends ColorSchemaParams {

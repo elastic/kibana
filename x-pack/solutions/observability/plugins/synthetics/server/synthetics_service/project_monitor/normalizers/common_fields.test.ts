@@ -6,6 +6,7 @@
  */
 
 import { ScheduleUnit } from '../../../../common/runtime_types';
+import type { NormalizedProjectProps } from './common_fields';
 import {
   flattenAndFormatObject,
   getMonitorSchedule,
@@ -13,7 +14,6 @@ import {
   getUrlsField,
   InvalidScheduleError,
   isValidURL,
-  NormalizedProjectProps,
 } from './common_fields';
 
 describe('isValidUrl', () => {
@@ -133,6 +133,7 @@ describe('getNormalizeCommonFields', () => {
               enabled: statusEnabled,
             },
           },
+          maintenanceWindows: ['mw-1', 'mw-2'],
         },
         namespace: 'test-namespace',
         version: '8.7.0',
@@ -175,7 +176,7 @@ describe('getNormalizeCommonFields', () => {
           params: '',
           max_attempts: 2,
           labels: {},
-          maintenance_windows: [],
+          maintenance_windows: ['mw-1', 'mw-2'],
           spaces: [],
         },
       });
@@ -201,6 +202,7 @@ describe('getNormalizeCommonFields', () => {
         urls: 'https://elastic.co',
         locations: ['us_central'],
         schedule: 3,
+        maintenanceWindows: ['mw-3'],
       },
       namespace: 'test-namespace',
       version: '8.7.0',
@@ -243,7 +245,7 @@ describe('getNormalizeCommonFields', () => {
         params: '',
         max_attempts: 2,
         labels: {},
-        maintenance_windows: [],
+        maintenance_windows: ['mw-3'],
         spaces: [],
       },
     });

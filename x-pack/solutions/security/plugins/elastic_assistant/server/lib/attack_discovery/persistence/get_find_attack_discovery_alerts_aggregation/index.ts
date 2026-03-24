@@ -6,16 +6,14 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
-import { ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME } from '../../schedules/fields';
+import { ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME } from '@kbn/elastic-assistant-common';
 
 /**
  * Counts the unique alert IDs in attack discovery alerts
  */
-export const getFindAttackDiscoveryAlertsAggregation = (): Record<
-  string,
-  estypes.AggregationsAggregationContainer
-> => ({
+export const getFindAttackDiscoveryAlertsAggregation = (
+  includeUniqueAlertIds: boolean = false
+): Record<string, estypes.AggregationsAggregationContainer> => ({
   api_config_name: {
     terms: {
       field: ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME, // kibana.alert.attack_discovery.api_config.name
@@ -27,4 +25,14 @@ export const getFindAttackDiscoveryAlertsAggregation = (): Record<
       field: 'kibana.alert.attack_discovery.alert_ids',
     },
   },
+  ...(includeUniqueAlertIds
+    ? {
+        all_attack_alert_ids: {
+          terms: {
+            field: 'kibana.alert.attack_discovery.alert_ids',
+            size: 10000, // up to 10,000 unique alert IDs
+          },
+        },
+      }
+    : {}),
 });

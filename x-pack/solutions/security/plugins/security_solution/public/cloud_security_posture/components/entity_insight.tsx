@@ -6,7 +6,6 @@
  */
 
 import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-
 import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,13 +33,11 @@ export const EntityInsight = <T,>({
   value,
   field,
   isPreviewMode,
-  isLinkEnabled,
   openDetailsPanel,
 }: {
   value: string;
   field: CloudPostureEntityIdentifier;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -71,7 +68,6 @@ export const EntityInsight = <T,>({
         <AlertsPreview
           alertsData={filteredAlertsData}
           isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -86,7 +82,6 @@ export const EntityInsight = <T,>({
           value={value}
           field={field}
           isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -99,7 +94,6 @@ export const EntityInsight = <T,>({
           value={value}
           field={field}
           isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />

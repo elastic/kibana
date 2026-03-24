@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

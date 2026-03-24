@@ -7,4 +7,4 @@
 
 export { loadHuggingFaceDatasets } from './src/hf_dataset_loader/load_hugging_face_datasets';
 export type { HuggingFaceDatasetSpec } from './src/hf_dataset_loader/types';
-export { ALL_HUGGING_FACE_DATASETS } from './src/hf_dataset_loader/config';
+export { PREDEFINED_HUGGING_FACE_DATASETS } from './src/hf_dataset_loader/datasets/config';

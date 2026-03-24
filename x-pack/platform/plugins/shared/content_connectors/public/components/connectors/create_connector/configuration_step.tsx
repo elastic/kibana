@@ -88,6 +88,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
       <EuiFlexGroup gutterSize="m" direction="column">
         {isWaitingOnAgentlessDeployment && (
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={
               <EuiFlexGroup alignItems="center">

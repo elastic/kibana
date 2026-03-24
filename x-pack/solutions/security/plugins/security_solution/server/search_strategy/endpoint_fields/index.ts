@@ -6,11 +6,8 @@
  */
 
 import { from } from 'rxjs';
-import type {
-  DataViewsServerPluginStart,
-  ISearchStrategy,
-  SearchStrategyDependencies,
-} from '@kbn/data-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
 import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
@@ -26,7 +23,7 @@ import { parseRequest } from './parse_request';
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
 /**
- * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts
+ * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts
  * but it uses ES internalUser instead to avoid adding extra index privileges for users with event filters permissions.
  * It is used to retrieve index patterns for event filters form.
  */
@@ -53,6 +50,7 @@ export const requestEndpointFieldsSearch = async (
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
+  const isTAAdvancedModeFeatureFlagEnabled = context.experimentalFeatures.trustedAppsAdvancedMode;
   let parsedRequest = parseRequest(request);
 
   if (
@@ -63,10 +61,7 @@ export const requestEndpointFieldsSearch = async (
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
 
-  if (
-    parsedRequest.indices[0] === eventsIndexPattern &&
-    context.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-  ) {
+  if (parsedRequest.indices[0] === eventsIndexPattern) {
     const { id: spaceId } = await context.getActiveSpace(deps.request);
     const integrationNamespaces = await context
       .getInternalFleetServices(spaceId)
@@ -84,12 +79,14 @@ export const requestEndpointFieldsSearch = async (
     }
   }
 
-  const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
-    deps.request
-  );
+  const { canWriteEventFilters, canReadEndpointList, canWriteTrustedApplications } =
+    await context.getEndpointAuthz(deps.request);
 
   if (
     (!canWriteEventFilters && parsedRequest.indices[0] === eventsIndexPattern) ||
+    (isTAAdvancedModeFeatureFlagEnabled &&
+      !canWriteTrustedApplications &&
+      parsedRequest.indices[0] === eventsIndexPattern) ||
     (!canReadEndpointList && parsedRequest.indices[0] === METADATA_UNITED_INDEX)
   ) {
     throw new EndpointAuthorizationError();

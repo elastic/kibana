@@ -14,7 +14,7 @@ import type { ServerlessProjectType } from '../../common/constants/types';
 import type { CasesClient } from '../client';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
-export * from './types';
+export type * from './types';
 export { casesConnectors } from './factory';
 
 export function registerConnectorTypes({
@@ -25,6 +25,7 @@ export function registerConnectorTypes({
   getCasesClient,
   getSpaceId,
   serverlessProjectType,
+  isCasesAttachmentsEnabled,
 }: {
   actions: ActionsPluginSetupContract;
   alerting: AlertingServerSetup;
@@ -33,6 +34,7 @@ export function registerConnectorTypes({
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: ServerlessProjectType;
+  isCasesAttachmentsEnabled: boolean;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,
@@ -63,6 +65,7 @@ export function registerConnectorTypes({
       getSpaceId,
       getUnsecuredSavedObjectsClient,
       serverlessProjectType,
+      isCasesAttachmentsEnabled,
     })
   );
 

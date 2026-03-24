@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi } from '../../dashboard_api/types';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../services/kibana_services';
 

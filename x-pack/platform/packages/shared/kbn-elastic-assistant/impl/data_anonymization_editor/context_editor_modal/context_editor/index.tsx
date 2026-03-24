@@ -8,10 +8,12 @@
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useMemo, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
-import { BatchUpdateListItem, ContextEditorRow, FIELDS } from '../../context_editor/types';
+import type { BatchUpdateListItem, ContextEditorRow } from '../../context_editor/types';
+import { FIELDS } from '../../context_editor/types';
 import { useAssistantContext } from '../../../assistant_context';
 import { getColumns } from '../../context_editor/get_columns';
 import { ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
@@ -145,6 +147,12 @@ const ContextEditorComponent: React.FC<Props> = ({
         search={search}
         selection={selectionValue}
         sorting={sorting}
+        tableCaption={i18n.translate(
+          'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.contextEditorTableCaption',
+          {
+            defaultMessage: 'Context editor',
+          }
+        )}
         onTableChange={onTableChange}
       />
     </Wrapper>

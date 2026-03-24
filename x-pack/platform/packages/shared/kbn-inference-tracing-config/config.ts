@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Type, schema } from '@kbn/config-schema';
-import {
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   InferenceTracingExportConfig,
   InferenceTracingLangfuseExportConfig,
   InferenceTracingPhoenixExportConfig,

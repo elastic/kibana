@@ -9,15 +9,33 @@
 
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import {
+  getKqlFieldNamesFromExpression,
+  isOfAggregateQueryType,
+  getIsKqlFreeTextExpression,
+} from '@kbn/es-query';
+import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
+import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
+import { LRUCache } from 'lru-cache';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
+  QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
+  TABS_EVENT_TYPE,
+  QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
+import {
+  analyzeMultiMatchTypesRequest,
+  mergeMultiMatchAnalyses,
+  type MultiMatchAnalysis,
+} from './query_analysis_utils';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
   ReportEvent,
@@ -26,6 +44,9 @@ import type {
   UpdateProfilesContextWith,
 } from './types';
 
+export const NON_ECS_FIELD = '<non-ecs>';
+export const FREE_TEXT = '__FREE_TEXT__';
+
 type FilterOperation = '+' | '-' | '_exists_';
 
 enum FieldUsageEventName {
@@ -33,10 +54,25 @@ enum FieldUsageEventName {
   dataTableRemoval = 'dataTableRemoval',
   filterAddition = 'filterAddition',
 }
+
+enum QueryFieldsUsageEventName {
+  kqlQuery = 'kqlQuery',
+  esqlQuery = 'esqlQuery',
+}
+
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
+}
+
+interface QueryFieldsUsageEventData {
+  [FIELD_USAGE_EVENT_NAME]: QueryFieldsUsageEventName;
+  [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
+}
+
+interface TabsEventData {
+  [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName;
 }
 
 interface ContextualProfileResolvedEventData {
@@ -54,6 +90,15 @@ export class ScopedDiscoverEBTManager {
     [ContextualProfileLevel.dataSourceLevel]: undefined,
     [ContextualProfileLevel.documentLevel]: undefined,
   };
+  private queryAnalysisCache = new LRUCache<
+    string, // cache analysis per request id
+    MultiMatchAnalysis,
+    { request: InspectedRequest } // pass full request via context
+  >({
+    max: 10,
+    memoMethod: (requestId, _previousValue, { context: { request } }) =>
+      analyzeMultiMatchTypesRequest(request),
+  });
 
   constructor(
     private readonly reportEvent: ReportEvent | undefined,
@@ -61,6 +106,22 @@ export class ScopedDiscoverEBTManager {
     public readonly updateProfilesContextWith: UpdateProfilesContextWith,
     public readonly setAsActiveManager: SetAsActiveManager
   ) {}
+
+  private async getFieldsFromMetadata({
+    fieldsMetadata,
+    fieldNames,
+  }: {
+    fieldsMetadata: FieldsMetadataPublicStart;
+    fieldNames: string[];
+  }) {
+    const client = await fieldsMetadata.getClient();
+    const { fields } = await client.find({
+      attributes: ['short'],
+      fieldNames,
+    });
+
+    return fields;
+  }
 
   private async trackFieldUsageEvent({
     eventName,
@@ -82,15 +143,16 @@ export class ScopedDiscoverEBTManager {
     };
 
     if (fieldsMetadata) {
-      const client = await fieldsMetadata.getClient();
-      const { fields } = await client.find({
-        attributes: ['short'],
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
         fieldNames: [fieldName],
       });
 
-      // excludes non ECS fields
+      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
       if (fields[fieldName]?.short) {
         eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
+      } else {
+        eventData[FIELD_USAGE_FIELD_NAME] = NON_ECS_FIELD;
       }
     }
 
@@ -146,6 +208,107 @@ export class ScopedDiscoverEBTManager {
     });
   }
 
+  private async trackQueryFieldsUsageEvent({
+    eventName,
+    fieldNames,
+    fieldsMetadata,
+  }: {
+    eventName: QueryFieldsUsageEventName;
+    fieldNames: string[];
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!this.reportEvent) {
+      return;
+    }
+    const eventData: QueryFieldsUsageEventData = {
+      [FIELD_USAGE_EVENT_NAME]: eventName,
+    };
+
+    if (fieldsMetadata) {
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
+        fieldNames,
+      });
+
+      // tracks ECS compliant fields with a field name, non-ECS compliant fields with a "<non-ecs>" label
+      // and free text searches with a "__FREE_TEXT__" label
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short || fieldName === FREE_TEXT ? fieldName : NON_ECS_FIELD
+      );
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
+    }
+
+    this.reportEvent(QUERY_FIELDS_USAGE_EVENT_TYPE, eventData);
+  }
+
+  public async trackSubmittingQuery({
+    query,
+    fieldsMetadata,
+  }: {
+    query: Query | AggregateQuery | undefined;
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!query) {
+      return;
+    }
+
+    if (isOfAggregateQueryType(query)) {
+      // ES|QL query
+
+      if (query.esql.trim() === '') {
+        return;
+      }
+
+      const esqlColumns = getQueryColumnsFromESQLQuery(query.esql);
+      const embeddedQueries = getKqlSearchQueries(query.esql); // KQL embedded within ES|QL query
+
+      const embeddedQueryColumns = embeddedQueries
+        ? embeddedQueries
+            .map((embeddedQuery) => {
+              const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
+              if (getIsKqlFreeTextExpression(embeddedQuery)) {
+                embeddedKQLFieldNames.push(FREE_TEXT);
+              }
+              return embeddedKQLFieldNames;
+            })
+            .flat()
+        : [];
+
+      const fieldNames = [...esqlColumns, ...embeddedQueryColumns];
+
+      if (fieldNames.length === 0) {
+        return;
+      }
+
+      await this.trackQueryFieldsUsageEvent({
+        eventName: QueryFieldsUsageEventName.esqlQuery,
+        fieldNames,
+        fieldsMetadata,
+      });
+    } else {
+      // KQL query
+
+      if (
+        query.language !== 'kuery' || // TODO for Lucene support in issue #234590
+        typeof query.query !== 'string' ||
+        query.query.trim() === ''
+      ) {
+        return;
+      }
+
+      const fieldNames = getKqlFieldNamesFromExpression(query.query);
+      if (getIsKqlFreeTextExpression(query.query)) {
+        fieldNames.push(FREE_TEXT);
+      }
+
+      await this.trackQueryFieldsUsageEvent({
+        eventName: QueryFieldsUsageEventName.kqlQuery,
+        fieldNames,
+        fieldsMetadata,
+      });
+    }
+  }
+
   public trackContextualProfileResolvedEvent({
     contextLevel,
     profileId,
@@ -192,5 +355,62 @@ export class ScopedDiscoverEBTManager {
         });
       },
     };
+  }
+
+  public trackQueryPerformanceEvent(eventName: string) {
+    const startTime = window.performance.now();
+    let reported = false;
+
+    return {
+      startTime,
+      reportEvent: (
+        {
+          queryRangeSeconds,
+          requests = [],
+        }: {
+          queryRangeSeconds: number;
+          requests?: InspectedRequest[];
+        },
+        otherEventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>
+      ) => {
+        if (reported || !this.reportPerformanceEvent) {
+          return;
+        }
+
+        reported = true;
+        const duration = window.performance.now() - startTime;
+
+        const queryAnalyses = requests.map((request) =>
+          this.queryAnalysisCache.memo(request.id, { context: { request } })
+        );
+        const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
+
+        this.reportPerformanceEvent({
+          key1: 'query_range_secs',
+          value1: queryRangeSeconds,
+          key2: 'phrase_query_count',
+          value2: mergedAnalysis.typeCounts.get('match_phrase') ?? 0,
+          ...otherEventData,
+          meta: {
+            multi_match_types: mergedAnalysis.rawTypes,
+            ...otherEventData?.meta,
+          },
+          eventName,
+          duration,
+        });
+      },
+    };
+  }
+
+  public trackTabsEvent({ eventName, ...payload }: TabsEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    const eventData: TabsEventData = {
+      [TabsEventDataKeys.TABS_EVENT_NAME]: eventName,
+      ...payload,
+    };
+
+    this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 }

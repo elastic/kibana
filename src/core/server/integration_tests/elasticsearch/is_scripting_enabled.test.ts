@@ -19,12 +19,8 @@ describe('isInlineScriptingEnabled', () => {
   let kibanaServer: TestKibanaUtils;
 
   afterEach(async () => {
-    if (kibanaServer) {
-      await kibanaServer.stop();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await kibanaServer?.stop();
+    await esServer?.stop();
   });
 
   const startServers = async ({ esArgs = [] }: { esArgs?: string[] } = {}) => {

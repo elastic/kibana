@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockDatasource } from '../../../mocks';
-import { OperationDescriptor, DatasourcePublicAPI } from '../../../types';
+import type { OperationDescriptor, DatasourcePublicAPI } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
   validateAxisDomain,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { clamp } from 'lodash/fp';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
@@ -17,8 +18,13 @@ import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
-import { DEFAULT_MAX_OPEN_CASES } from './constants';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
+import {
+  CASES_CONNECTOR_ID,
+  CASES_CONNECTOR_TITLE,
+  OWNER_INFO,
+  DEFAULT_MAX_OPEN_CASES,
+  MAX_OPEN_CASES,
+} from '../../../common/constants';
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 
 import type {
@@ -45,6 +51,7 @@ interface GetCasesConnectorTypeArgs {
   ) => Promise<SavedObjectsClientContract>;
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: string;
+  isCasesAttachmentsEnabled: boolean;
 }
 
 export const getCasesConnectorType = ({
@@ -52,6 +59,7 @@ export const getCasesConnectorType = ({
   getSpaceId,
   getUnsecuredSavedObjectsClient,
   serverlessProjectType,
+  isCasesAttachmentsEnabled,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -60,7 +68,12 @@ export const getCasesConnectorType = ({
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
     new CasesConnector({
-      casesParams: { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient },
+      casesParams: {
+        getCasesClient,
+        getSpaceId,
+        getUnsecuredSavedObjectsClient,
+        isCasesAttachmentsEnabled,
+      },
       connectorParams: params,
     }),
   schema: {
@@ -114,7 +127,11 @@ export const getCasesConnectorAdapter = ({
        */
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
-      let maximumCasesToOpen = DEFAULT_MAX_OPEN_CASES;
+      let maximumCasesToOpen = clamp(
+        1,
+        params.subActionParams.maximumCasesToOpen || DEFAULT_MAX_OPEN_CASES,
+        MAX_OPEN_CASES
+      );
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
@@ -135,6 +152,7 @@ export const getCasesConnectorAdapter = ({
 
       const subActionParams = {
         alerts: caseAlerts,
+        autoPushCase: params.subActionParams.autoPushCase,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
         groupingBy: params.subActionParams.groupingBy,
         groupedAlerts,

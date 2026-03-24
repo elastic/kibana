@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TelemetryEvent, TelemetryEventTypes } from './types';
+import type { TelemetryEvent } from './types';
+import { TelemetryEventTypes } from './types';
 
 const relatedAlertsLoaded: TelemetryEvent = {
   eventType: TelemetryEventTypes.RELATED_ALERTS_LOADED,
@@ -33,4 +34,47 @@ const alertDetailsPageView: TelemetryEvent = {
   },
 };
 
-export const events: TelemetryEvent[] = [relatedAlertsLoaded, alertDetailsPageView];
+const alertAddedToCase: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ALERT_ADDED_TO_CASE,
+  schema: {
+    new_case_created: {
+      type: 'boolean' as const,
+      _meta: {
+        description: 'Whether a case was created when adding an alert to a case',
+      },
+    },
+    from: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'From which the alert was added',
+        optional: false,
+      },
+    },
+    rule_type_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'Rule type id',
+        optional: false,
+      },
+    },
+  },
+};
+const linkedDashboardView: TelemetryEvent = {
+  eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW,
+  schema: {
+    rule_type_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'Rule type id',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const events: TelemetryEvent[] = [
+  relatedAlertsLoaded,
+  alertDetailsPageView,
+  alertAddedToCase,
+  linkedDashboardView,
+];

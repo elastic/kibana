@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useGetRuleTypesPermissions } from './use_get_rule_types_permissions';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 
 const http = httpServiceMock.createStartContract();

@@ -10,7 +10,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { TelemetryService } from './services';
-import { TelemetryConstants } from './plugin';
+import type { TelemetryConstants } from './plugin';
 
 export function renderWelcomeTelemetryNotice(
   telemetryService: TelemetryService,

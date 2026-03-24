@@ -23,8 +23,7 @@ import { StorageMock } from '../../services/storage.mock';
 import { AutocompleteInfoMock } from '../../services/autocomplete.mock';
 import { createApi, createEsHostService } from '../lib';
 
-import { ContextValue } from './services_context';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { ContextValue } from './services_context';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
@@ -51,7 +50,6 @@ export const serviceContextMock = {
         http,
         autocompleteInfo: new AutocompleteInfoMock(),
         application: applicationServiceMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
         data: dataPluginMock.createStartContract(),
         licensing: licensingMock.createStart(),
       },

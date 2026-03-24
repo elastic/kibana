@@ -20,7 +20,7 @@ import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
@@ -53,7 +53,7 @@ export const GraphPreviewContainer: React.FC = () => {
   const {
     eventIds,
     timestamp = new Date().toISOString(),
-    hasGraphRepresentation,
+    shouldShowGraph,
     isAlert,
   } = useGraphPreview({
     getFieldsData,
@@ -71,16 +71,16 @@ export const GraphPreviewContainer: React.FC = () => {
       },
     },
     options: {
-      enabled: hasGraphRepresentation,
+      enabled: shouldShowGraph,
       refetchOnWindowFocus: false,
     },
   });
 
   useEffect(() => {
-    if (hasGraphRepresentation) {
+    if (shouldShowGraph) {
       uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, GRAPH_PREVIEW);
     }
-  }, [hasGraphRepresentation, renderingId]);
+  }, [shouldShowGraph, renderingId]);
 
   return (
     <ExpandablePanel

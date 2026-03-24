@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
-import {
+import type {
   ConversationTableItem,
   HandlePageChecked,
   HandlePageUnchecked,

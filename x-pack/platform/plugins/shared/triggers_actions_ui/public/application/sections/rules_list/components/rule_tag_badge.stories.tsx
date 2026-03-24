@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleTagBadge } from './rule_tag_badge';

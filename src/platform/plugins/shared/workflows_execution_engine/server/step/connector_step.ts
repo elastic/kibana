@@ -7,96 +7,164 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { RunStepResult, StepBase, BaseStep } from './step_base';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
+import { ExecutionError } from '@kbn/workflows/server';
+import { ResponseSizeLimitError } from './errors';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
+import type { ConnectorExecutor } from '../connector_executor';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
+
+/**
+ * Connector step types that support Layer 1 (mid-stream) response size enforcement
+ * via fetcher.max_content_length. All other connector types get Layer 2 only
+ * (output size check in base class after the response is in memory).
+ * When adding Layer 1 for a new connector type (e.g. one that can return large payloads),
+ * add it here and implement the limit in that connector's Actions executor.
+ */
+const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
   'connector-id'?: string;
-  with?: Record<string, any>;
+  with?: Record<string, unknown>;
 }
 
-export class ConnectorStepImpl extends StepBase<ConnectorStep> {
+export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
   constructor(
     step: ConnectorStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
-    templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
+    workflowState: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {
-    super(step, contextManager, connectorExecutor, templatingEngineType);
+    super(step, stepExecutionRuntime, connectorExecutor, workflowState);
   }
 
-  public async _run(): Promise<RunStepResult> {
-    const step = this.step;
-
-    // this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
-    //   event: { action: 'connector-step-start' },
-    //   tags: ['connector', step.type],
-    // });
-
-    // Evaluate optional 'if' condition
-    const shouldRun = await this.evaluateCondition(step.if);
-    if (!shouldRun) {
-      // this.contextManager.logInfo('Step skipped due to condition evaluation', {
-      //   event: { action: 'step-skipped', outcome: 'success' },
-      // });
-      return { output: undefined, error: undefined };
-    }
-
-    // Get current context for templating
-    const context = this.contextManager.getContext();
-
-    // Render inputs from 'with'
-    // this.contextManager.logDebug('Rendering step inputs');
-    const renderedInputs = Object.entries(step.with ?? {}).reduce(
-      (acc: Record<string, any>, [key, value]) => {
-        if (typeof value === 'string') {
-          acc[key] = this.templatingEngine.render(value, context);
-        } else {
-          acc[key] = value;
-        }
-        return acc;
-      },
-      {}
+  public getInput() {
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+      this.step.with || {}
     );
+  }
 
-    // Execute the connector
+  public async _run(withInputs: Record<string, unknown>): Promise<RunStepResult> {
     try {
-      // this.contextManager.logInfo(`Executing connector: ${step.type}`, {
-      //   event: { action: 'connector-execution' },
-      //   tags: ['connector', 'execution'],
-      // });
+      const step = this.step;
+
+      // Parse step type and determine if it's a sub-action
+      const [stepType, subActionName] = step.type.includes('.')
+        ? step.type.split('.', 2)
+        : [step.type, null];
+      const isSubAction = subActionName !== null;
 
       // TODO: remove this once we have a proper connector executor/step for console
-      if (step.type === 'console.log' || step.type === 'console') {
-        // this.contextManager.logDebug(`Console output: ${step.with?.message}`);
-        return { output: step.with?.message, error: undefined };
-      } else if (step.type === 'console.sleep') {
-        const sleepTime = step.with?.sleepTime ?? 1000;
-        // this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
-        await new Promise((resolve) => setTimeout(resolve, sleepTime));
-        return { output: step.with?.message, error: undefined };
+      if (step.type === 'console') {
+        const consoleMessage = withInputs?.message ?? '';
+
+        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${consoleMessage}`, {
+          workflow: { step_id: step.name },
+          event: { action: 'log', outcome: 'success' },
+          tags: ['console', 'log'],
+        });
+        return {
+          input: withInputs,
+          output: consoleMessage,
+          error: undefined,
+        };
       }
 
-      const output = await this.connectorExecutor.execute(
-        step.type, // e.g., 'slack.sendMessage'
-        step['connector-id']!,
-        renderedInputs
-      );
+      // Build final rendered inputs
+      let renderedInputs = isSubAction
+        ? {
+            subActionParams: withInputs,
+            subAction: subActionName,
+          }
+        : withInputs;
 
-      // this.contextManager.logInfo(`Connector execution completed successfully`, {
-      //   event: { action: 'connector-success', outcome: 'success' },
-      //   tags: ['connector', 'success'],
-      // });
+      // For connector types with Layer 1 support, inject max_content_length into the fetcher config
+      // so axios can abort mid-stream (Layer 1 OOM prevention).
+      const rawType = step.type;
+      if (CONNECTOR_TYPES_WITH_LAYER_1.has(rawType)) {
+        const maxBytes = this.getMaxResponseBytes();
+        if (maxBytes > 0) {
+          renderedInputs = {
+            ...renderedInputs,
+            fetcher: {
+              ...(renderedInputs?.fetcher || {}),
+              max_content_length: maxBytes,
+            },
+          };
+        }
+      }
 
-      return { output, error: undefined };
+      const connectorIdRendered =
+        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+          step['connector-id']
+        );
+
+      if (!this.connectorExecutor) {
+        throw new ExecutionError({
+          type: 'ConnectorExecutionError',
+          message: 'Connector executor is not set',
+        });
+      }
+
+      let output: ActionTypeExecutorResult<unknown>;
+      if (connectorIdRendered) {
+        // Use regular connector with saved object
+        output = await this.connectorExecutor.execute({
+          connectorType: stepType,
+          connectorNameOrId: connectorIdRendered,
+          input: renderedInputs || {},
+          abortController: this.stepExecutionRuntime.abortController,
+        });
+      } else {
+        const systemConnectorActionTypeId = SystemConnectorsMap.get(`.${stepType}`);
+        if (systemConnectorActionTypeId) {
+          output = await this.connectorExecutor.executeSystemConnector({
+            connectorType: systemConnectorActionTypeId,
+            input: renderedInputs || {},
+            abortController: this.stepExecutionRuntime.abortController,
+          });
+        } else {
+          throw new Error(`Connector ID is required for connector type ${stepType}`);
+        }
+      }
+
+      const { data, status, message, serviceMessage } = output;
+
+      if (status === 'ok') {
+        return {
+          input: withInputs,
+          output: data,
+          error: undefined,
+        };
+      } else {
+        const errorMsg = serviceMessage ?? message ?? 'Unknown error';
+
+        if (errorMsg.includes('maxContentLength')) {
+          const limitBytes = this.getMaxResponseBytes();
+          return {
+            input: withInputs,
+            output: undefined,
+            error: new ResponseSizeLimitError(limitBytes, step.name),
+          };
+        }
+
+        return {
+          input: withInputs,
+          output: undefined,
+          error: new ExecutionError({
+            type: 'ConnectorExecutionError',
+            message: errorMsg,
+          }),
+        };
+      }
     } catch (error) {
-      // this.contextManager.logError(`Connector execution failed: ${step.type}`, error as Error, {
-      //   event: { action: 'connector-failed', outcome: 'failure' },
-      //   tags: ['connector', 'error'],
-      // });
-      return await this.handleFailure(error);
+      return this.handleFailure(withInputs, error);
     }
   }
 }

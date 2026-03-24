@@ -7,14 +7,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import {
-  EuiButton,
-  PropsOf,
-  EuiButtonProps,
-  type UseEuiTheme,
-  euiFontSize,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { PropsOf, EuiButtonProps } from '@elastic/eui';
+import { EuiButton, type UseEuiTheme, euiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const groupPositionToClassMap = {

@@ -6,12 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { SearchHit } from '@kbn/es-types';
+import type { SearchHit } from '@kbn/es-types';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
-import { Mappings } from '../../types';
+import type { Mappings } from '../../types';
 import { AddDocumentsCodeExample } from './add_documents_code_example';
 import { DocumentList } from './document_list';
 

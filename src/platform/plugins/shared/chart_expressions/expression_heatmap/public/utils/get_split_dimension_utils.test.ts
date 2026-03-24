@@ -9,7 +9,7 @@
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getSplitDimensionAccessor, createSplitPoint } from './get_split_dimension_utils';
 
 const data: Datatable = {

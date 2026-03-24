@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -34,7 +34,8 @@ export default function (providerContext: FtrProviderContext) {
       await fleetAndAgents.setup();
     });
 
-    describe('installs all assets when installing a package for the first time', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/247176
+    describe.skip('installs all assets when installing a package for the first time', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);

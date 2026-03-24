@@ -17,10 +17,11 @@ import {
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { css } from '@emotion/react';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
@@ -75,6 +76,7 @@ export interface TypeSelectionProps {
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  originatingPath?: string;
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
 }
@@ -223,6 +225,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         path: params,
         state: {
           originatingApp: this.props.originatingApp,
+          originatingPath: this.props.originatingPath,
         },
       });
     } else {

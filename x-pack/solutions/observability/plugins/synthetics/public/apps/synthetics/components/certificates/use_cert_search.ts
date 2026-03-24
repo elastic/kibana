@@ -14,7 +14,7 @@ import {
   DEFAULT_SIZE,
   DEFAULT_SORT,
 } from '../../../../../common/requests/get_certs_request_body';
-import { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
+import type { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { SyntheticsRefreshContext } from '../../contexts';
 
 export const useCertSearch = ({

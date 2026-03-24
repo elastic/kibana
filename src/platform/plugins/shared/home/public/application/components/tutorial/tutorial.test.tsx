@@ -11,7 +11,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { Tutorial } from './tutorial';
-import { TutorialType } from '../../../services/tutorials/types';
+import type { TutorialType } from '../../../services/tutorials/types';
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({

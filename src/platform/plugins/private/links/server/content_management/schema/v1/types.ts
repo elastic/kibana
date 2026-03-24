@@ -7,17 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  linksAttributesSchema,
+import type { TypeOf } from '@kbn/config-schema';
+import type {
+  dashboardLinkSchema,
+  externalLinkSchema,
+  linksSchema,
   linksCreateOptionsSchema,
   linksCreateResultSchema,
   linksGetResultSchema,
   linksSearchOptionsSchema,
   linksUpdateOptionsSchema,
+  externalLinkOptionsSchema,
 } from './cm_services';
 
-export type LinksSavedObjectAttributes = TypeOf<typeof linksAttributesSchema>;
+export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
+export type ExternalLink = TypeOf<typeof externalLinkSchema>;
+export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
+export type Link = DashboardLink | ExternalLink;
+export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
+
+export type LinksState = TypeOf<typeof linksSchema>;
+
+export type StoredLink = StoredDashboardLink | StoredExternalLink;
+export type StoredLinksState = Omit<LinksState, 'links'> & {
+  links?: StoredLink[];
+};
+export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &
+  DeprecatedLinkProperties & {
+    destinationRefName: string;
+  };
+type StoredExternalLink = ExternalLink & DeprecatedLinkProperties;
 
 export type LinksCreateOptions = TypeOf<typeof linksCreateOptionsSchema>;
 export type LinksUpdateOptions = TypeOf<typeof linksUpdateOptionsSchema>;
@@ -26,3 +45,9 @@ export type LinksSearchOptions = TypeOf<typeof linksSearchOptionsSchema>;
 export type LinksGetOut = TypeOf<typeof linksGetResultSchema>;
 export type LinksCreateOut = TypeOf<typeof linksCreateResultSchema>;
 export type LinksUpdateOut = TypeOf<typeof linksCreateResultSchema>;
+
+// For BWC, optionally include deprecated props in StoredLink states so they can be transformed away
+interface DeprecatedLinkProperties {
+  order?: number;
+  id?: string;
+}

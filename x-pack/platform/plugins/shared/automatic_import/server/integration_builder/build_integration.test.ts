@@ -7,7 +7,7 @@
 
 import yaml from 'js-yaml';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
-import { DataStream, Docs, InputType, Integration, Pipeline } from '../../common';
+import type { DataStream, Docs, InputType, Integration, Pipeline } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId } from '../util';
 import { createAgentInput } from './agent';
 import {

@@ -6,8 +6,8 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
   ProjectMonitorMetaData,
@@ -15,7 +15,7 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
@@ -23,6 +23,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('GetProjectMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
+    const retry = getService('retry');
 
     let projectMonitors: LegacyProjectMonitorsRequest;
     let httpProjectMonitors: LegacyProjectMonitorsRequest;
@@ -587,39 +588,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-              '{projectName}',
-              encodeURI(projectName)
+        await retry.try(async () => {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(0, 250) })
-          .expect(200);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-              '{projectName}',
-              encodeURI(projectName)
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(0, 250) })
+            .expect(200);
+        });
+        await retry.try(async () => {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(250, 500) })
-          .expect(200);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-              '{projectName}',
-              encodeURI(projectName)
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(250, 500) })
+            .expect(200);
+        });
+        await retry.try(async () => {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(500, 600) })
-          .expect(200);
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(500, 600) })
+            .expect(200);
+        });
       }
     });
 
@@ -702,30 +709,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(0, 250) })
-          .expect(200);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(250, 500) })
-          .expect(200);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(500, 600) })
-          .expect(200);
+        await retry.try(async () => {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(0, 250) })
+            .expect(200);
+        });
+        await retry.try(async () => {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(250, 500) })
+            .expect(200);
+        });
+        await retry.try(async () => {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(500, 600) })
+            .expect(200);
+        });
       }
     });
   });

@@ -5,37 +5,53 @@
  * 2.0.
  */
 
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type {
+  GetStateType,
+  LensInternalApi,
+  LensPublicCallbacks,
+  SharingSavedObjectProps,
+  UserMessagesDisplayLocationId,
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
-  BehaviorSubject,
-  type Subscription,
-  distinctUntilChanged,
-  debounceTime,
-  skip,
-  pipe,
-  merge,
-  tap,
-  map,
-} from 'rxjs';
+  apiPublishesProjectRouting,
+  apiPublishesUnifiedSearch,
+  fetch$,
+  type FetchContext,
+} from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  pipe,
+  skip,
+  tap,
+  type Subscription,
+} from 'rxjs';
 import { getEditPath } from '../../common/constants';
-import type { GetStateType, LensApi, LensInternalApi, LensPublicCallbacks } from './types';
-import { getExpressionRendererParams } from './expressions/expression_params';
-import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
-import { buildUserMessagesHelpers } from './user_messages/api';
-import { getLogError } from './expressions/telemetry';
-import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
-import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext } from './helper';
-import { addLog } from './logger';
-import { getUsedDataViews } from './expressions/update_data_views';
+import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
-import { getEmbeddableVariables } from './initializers/utils';
+import { getLogError } from './expressions/telemetry';
+import { getUsedDataViews } from './expressions/update_data_views';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
+import { addLog } from './logger';
+import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
+import type { LensEmbeddableStartServices } from './types';
+import { buildUserMessagesHelpers } from './user_messages/api';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -45,13 +61,13 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
   | 'searchContext';
 
-function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
+function getSearchContext(parentApi: unknown) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
     ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
     : {
@@ -61,12 +77,19 @@ function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable
         timeRange$: new BehaviorSubject(undefined),
       };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   return {
-    esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
     timeslice: unifiedSearch$.timeslice$?.getValue(),
+    esqlVariables: apiPublishesESQLVariables(parentApi)
+      ? parentApi.esqlVariables$.getValue()
+      : undefined,
+    projectRouting: projectRouting$?.getValue(),
   };
 }
 
@@ -88,6 +111,9 @@ export function loadEmbeddableData(
     ? parentApi
     : ({} as LensPublicCallbacks);
 
+  const getConsumerMessages = () =>
+    apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
+
   // Some convenience api for the user messaging
   const {
     getUserMessages,
@@ -97,7 +123,14 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
+  } = buildUserMessagesHelpers(
+    api,
+    internalApi,
+    services,
+    onBeforeBadgesRender,
+    metaInfo,
+    getConsumerMessages
+  );
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -119,13 +152,13 @@ export function loadEmbeddableData(
     }
   };
 
-  const controlESQLVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-
   async function reload(
     // make reload easier to debug
-    sourceId: ReloadReason
+    sourceId: ReloadReason,
+    fetchContext?: FetchContext
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
+
     resetMessages();
 
     // reset the render on reload
@@ -149,7 +182,7 @@ export function loadEmbeddableData(
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
+            lastState.ref_id
           )}`,
         };
 
@@ -194,7 +227,7 @@ export function loadEmbeddableData(
 
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi, controlESQLVariables$?.getValue()),
+      fetchContext ? fetchContext : getSearchContext(parentApi),
       api.timeRange$,
       parentApi,
       services
@@ -259,12 +292,6 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // on search context change, reload
-    fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
-    controlESQLVariables$.pipe(
-      waitUntilChanged(),
-      map(() => 'ESQLvariables' as ReloadReason)
-    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
@@ -281,7 +308,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
@@ -294,20 +321,35 @@ export function loadEmbeddableData(
   );
 
   const subscriptions: Subscription[] = [
+    // on search context change, reload
+    fetch$(api)
+      .pipe(debounceTime(0))
+      .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
-    // In case of changes to the dashboard ES|QL controls, re-map them
-    internalApi.esqlVariables$.subscribe((newVariables: ESQLControlVariable[]) => {
-      const query = internalApi.attributes$.getValue().state?.query;
-      const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
-      controlESQLVariables$.next(esqlVariables);
-    }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
-      if (getState().enhancements?.dynamicActions?.events.length) {
+      if (getState().drilldowns?.length) {
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

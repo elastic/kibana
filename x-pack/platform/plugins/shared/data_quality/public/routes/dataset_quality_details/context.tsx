@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
+import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';

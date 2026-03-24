@@ -7,22 +7,21 @@
 import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import {
-  ConfigKey,
+import type {
   HTTPFields,
   PrivateLocation,
   ServiceLocation,
-  MonitorTypeEnum,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { omit } from 'lodash';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import rawExpect from 'expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
@@ -33,6 +32,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const samlAuth = getService('samlAuth');
     const retry = getService('retry');
@@ -165,8 +166,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy?.policy_id).eql(testFleetPolicyID);
@@ -229,8 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -245,8 +244,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
@@ -280,8 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -296,8 +293,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
       );
 
       expect(packagePolicy).eql(undefined);
@@ -311,8 +307,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy).eql(undefined);
@@ -359,13 +354,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const packagePolicy = policyResponse.body.items.find(
         (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === monitorId + '-' + spaceScopedPrivateLocation.id + `-${SPACE_ID}`
+          pkgPolicy.id === monitorId + '-' + spaceScopedPrivateLocation.id
       );
 
       expect(packagePolicy.policy_id).eql(spaceScopedPrivateLocation.id);
-      expect(packagePolicy.name).eql(
-        `${monitor.name}-${spaceScopedPrivateLocation.label}-${SPACE_ID}`
-      );
+      expect(packagePolicy.name).eql(`${monitor.name}-${spaceScopedPrivateLocation.label}`);
       comparePolicies(
         packagePolicy,
         getTestSyntheticsPolicy({
@@ -416,8 +409,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + testFleetPolicyID
         );
         comparePolicies(
           packagePolicy,
@@ -465,8 +457,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + testFleetPolicyID
         );
         comparePolicies(
           packagePolicy,
@@ -511,8 +502,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
         );
 
         expect(packagePolicy.package.version).eql(lowerVersion);
@@ -522,8 +512,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
           );
           const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
-            (pkgPolicy: PackagePolicy) =>
-              pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
+            (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
           );
           expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
         });

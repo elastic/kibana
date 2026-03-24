@@ -5,110 +5,112 @@
  * 2.0.
  */
 
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { Model } from '@kbn/inference-common';
-import { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { sumBy, mean, keyBy, uniq } from 'lodash';
-import { table } from 'table';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
-import { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import { hostname } from 'os';
+import type { Model } from '@kbn/inference-common';
+import type { EvaluationScoreRepository } from './score_repository';
+import { type EvaluationScoreDocument } from './score_repository';
+import { getGitMetadata } from './git_metadata';
+import type { RanExperiment, EvaluationRun, TaskRun } from '../types';
 
-interface DatasetScore {
-  id: string;
-  name: string;
-  totalScore: number;
-  numExamples: number;
+function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
+  return runs[evalRun.experimentRunId];
 }
 
-export async function reportModelScore({
-  log,
-  phoenixClient,
-  model,
+export async function mapToEvaluationScoreDocuments({
   experiments,
+  taskModel,
+  evaluatorModel,
+  runId,
+  totalRepetitions,
 }: {
-  log: SomeDevLog;
-  phoenixClient: KibanaPhoenixClient;
-  model: Model;
   experiments: RanExperiment[];
-}): Promise<void> {
-  const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
-
-  const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
-
-  const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
-
-  const datasetScoresMap = new Map<string, DatasetScore>();
+  taskModel: Model;
+  evaluatorModel: Model;
+  runId: string;
+  totalRepetitions: number;
+}): Promise<EvaluationScoreDocument[]> {
+  const documents: EvaluationScoreDocument[] = [];
+  const timestamp = new Date().toISOString();
+  const gitMetadata = getGitMetadata();
+  const hostName = hostname();
 
   for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs } = experiment;
+    const { datasetId, evaluationRuns, runs = {} } = experiment;
+    if (!evaluationRuns) {
+      continue;
+    }
 
-    const totalScoreForExperiment = evaluationRuns
-      ? sumBy(evaluationRuns, (ev) => ev.result?.score ?? 0)
-      : 0;
+    const datasetName = experiment.datasetName ?? datasetId;
 
-    const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
+    for (const evalRun of evaluationRuns) {
+      const taskRun = getTaskRun(evalRun, runs);
+      const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
 
-    const existing = datasetScoresMap.get(datasetId);
-
-    if (existing) {
-      existing.totalScore += totalScoreForExperiment;
-      existing.numExamples += numExamplesForExperiment;
-    } else {
-      datasetScoresMap.set(datasetId, {
-        id: datasetId,
-        name: datasetInfosById[datasetId]?.name ?? datasetId,
-        totalScore: totalScoreForExperiment,
-        numExamples: numExamplesForExperiment,
+      documents.push({
+        '@timestamp': timestamp,
+        run_id: runId,
+        experiment_id: experiment.id ?? '',
+        example: {
+          id: exampleId,
+          index: taskRun.exampleIndex,
+          input: taskRun.input ?? null,
+          dataset: {
+            id: datasetId,
+            name: datasetName,
+          },
+        },
+        task: {
+          trace_id: taskRun.traceId ?? null,
+          repetition_index: taskRun.repetition,
+          output: taskRun.output ?? null,
+          model: taskModel,
+        },
+        evaluator: {
+          name: evalRun.name,
+          score: evalRun.result?.score ?? null,
+          label: evalRun.result?.label ?? null,
+          explanation: evalRun.result?.explanation ?? null,
+          metadata: evalRun.result?.metadata ?? null,
+          trace_id: evalRun.traceId ?? null,
+          model: evaluatorModel,
+        },
+        run_metadata: {
+          git_branch: gitMetadata.branch,
+          git_commit_sha: gitMetadata.commitSha,
+          total_repetitions: totalRepetitions,
+        },
+        environment: {
+          hostname: hostName,
+        },
       });
     }
   }
 
-  const datasetScores = Array.from(datasetScoresMap.values()).map((dataset) => {
-    return {
-      ...dataset,
-      percent: dataset.totalScore / dataset.numExamples,
-    };
-  });
+  return documents;
+}
 
-  if (datasetScores.length === 0) {
-    log.error(`No dataset scores were available`);
+export async function exportEvaluations(
+  documents: EvaluationScoreDocument[],
+  scoreRepository: EvaluationScoreRepository,
+  log: SomeDevLog
+): Promise<void> {
+  if (documents.length === 0) {
+    log.warning('No evaluation scores to export');
     return;
   }
 
-  // Average (unweighted) percent across datasets
-  const averagePercent = mean(datasetScores.map((d) => d.percent));
+  log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  // Weighted percent across datasets (by number of examples)
-  const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
-  const weightedPercent =
-    totalExamples === 0 ? 0 : sumBy(datasetScores, (d) => d.totalScore) / totalExamples;
+  await scoreRepository.exportScores(documents);
 
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
-  const tableHeader = ['Dataset', 'Total Score', '# Examples', '%'];
+  const { run_id: docRunId, task, environment } = documents[0];
 
-  const datasetRows = datasetScores.map(({ name, totalScore, numExamples, percent }) => {
-    const values = [
-      name,
-      totalScore,
-      numExamples.toString(),
-      chalk.bold.yellow((percent! * 100).toFixed(1) + '%'),
-    ];
-    return values;
-  });
-
-  const summaryRows = [
-    ['', '', '', ''],
-    ['Average %', '', '', chalk.bold.yellow((averagePercent * 100).toFixed(1) + '%')],
-    ['Weighted %', '', '', chalk.bold.yellow((weightedPercent * 100).toFixed(1) + '%')],
-  ];
-
-  const output = table([tableHeader, ...datasetRows, ...summaryRows], {
-    columns: {
-      1: { alignment: 'right' },
-      2: { alignment: 'right' },
-      3: { alignment: 'right' },
-    },
-  });
-
-  log.info(`\n\n${header[0]}\n${output}`);
+  log.info(chalk.green('✅ Evaluation scores exported successfully!'));
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${environment.hostname}" AND task.model.id:"${task.model.id}" AND run_id:"${docRunId}"`
+    )
+  );
 }

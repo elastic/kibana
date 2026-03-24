@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { formulaIntervalFn, formulaNowFn, formulaTimeRangeFn } from './context_fns';
 
 describe('interval', () => {

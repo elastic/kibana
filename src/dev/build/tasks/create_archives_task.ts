@@ -11,9 +11,10 @@ import Path from 'path';
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { mkdirp, compressTar, compressZip, Task } from '../lib';
+import type { Task } from '../lib';
+import { mkdirp, compressTar, compressZip } from '../lib';
 
 interface Archive {
   format: string;
@@ -48,11 +49,11 @@ export const CreateArchives: Task = {
                 destination,
                 archiverOptions: {
                   zlib: {
-                    level: 9,
+                    level: config.isRelease ? 9 : 6,
                   },
                 },
                 createRootDirectory: true,
-                rootDirectoryName: build.getRootDirectory(),
+                rootDirectoryName: build.getRootDirectory(platform),
               }),
             });
             break;
@@ -64,14 +65,9 @@ export const CreateArchives: Task = {
               fileCount: await compressTar({
                 source,
                 destination,
-                archiverOptions: {
-                  gzip: true,
-                  gzipOptions: {
-                    level: 9,
-                  },
-                },
+                gzipLevel: config.isRelease ? 9 : 6,
                 createRootDirectory: true,
-                rootDirectoryName: build.getRootDirectory(),
+                rootDirectoryName: build.getRootDirectory(platform),
               }),
             });
             break;

@@ -6,12 +6,13 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { EuiSearchBarOnChangeArgs, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps } from '@elastic/eui';
 import {
   getDefaultTableOptions,
   useSessionPagination,
 } from '../../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
-import { ContextEditorRow, FIELDS } from '../../../data_anonymization_editor/context_editor/types';
+import type { ContextEditorRow } from '../../../data_anonymization_editor/context_editor/types';
+import { FIELDS } from '../../../data_anonymization_editor/context_editor/types';
 import { ANONYMIZATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import {

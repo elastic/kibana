@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttackDiscovery, Replacements } from '../../schemas';
+import type { AttackDiscovery, Replacements } from '../../schemas';
 import { getTacticLabel, getTacticMetadata } from '../attack_discovery_helpers';
 
 export const getMarkdownFields = (markdown: string): string => {
@@ -15,7 +15,9 @@ export const getMarkdownFields = (markdown: string): string => {
 };
 
 export const getAttackChainMarkdown = (attackDiscovery: AttackDiscovery): string => {
-  const tacticMetadata = getTacticMetadata(attackDiscovery).filter((tactic) => tactic.detected);
+  const tacticMetadata = getTacticMetadata(attackDiscovery.mitreAttackTactics).filter(
+    (tactic) => tactic.detected
+  );
 
   if (tacticMetadata.length === 0) {
     return '';

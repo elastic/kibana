@@ -22,7 +22,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { NodeRoles } from '@kbn/core-node-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import { migrationStateActionMachine } from './migration_state_action_machine';
 import { createContext } from './context';
 import { next } from './next';

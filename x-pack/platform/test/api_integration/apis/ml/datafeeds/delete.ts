@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -55,20 +55,20 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it('should delete datafeed with correct space', async () => {
-      await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
-
-      const exists = await ml.api.datafeedExist(datafeedIdSpace1);
-
-      expect(exists).to.eql(false, `expected datafeed exists to be false (got ${exists})`);
+    it('should not be deletable by ml viewer user', async () => {
+      await deleteDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
     });
 
     it('should not delete datafeed with incorrect space', async () => {
       await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
     });
 
-    it('should not be deletable by ml viewer user', async () => {
-      await deleteDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
+    it('should delete datafeed with correct space', async () => {
+      await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
+
+      const exists = await ml.api.datafeedExist(datafeedIdSpace1);
+
+      expect(exists).to.eql(false, `expected datafeed exists to be false (got ${exists})`);
     });
   });
 };

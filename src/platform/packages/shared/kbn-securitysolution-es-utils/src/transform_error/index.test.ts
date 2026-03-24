@@ -10,7 +10,7 @@
 import Boom from '@hapi/boom';
 import { transformError } from '.';
 import { BadRequestError } from '../bad_request_error';
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 
 describe('transformError', () => {
   test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {

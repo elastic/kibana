@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>) => ({
@@ -13,7 +13,7 @@ export const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>)
   `,
   field: css`
     border-bottom: ${border.thin};
-    height: calc(${size.xl} * 2);
+    min-height: calc(${size.xl} * 2);
     margin-top: ${size.xs};
   `,
   fieldEnabled: css`
@@ -37,7 +37,7 @@ export const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>)
     padding-left: ${size.m};
   `,
   content: css`
-    height: calc(${size.xl} * 2);
+    min-height: calc(${size.xl} * 2);
     position: relative;
   `,
   contentIndent: css`

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BoundOptions, UnboundOptions } from '../bind/bind_api';
+import type { BoundOptions, UnboundOptions } from '../bind/bind_api';
 import type { ChatCompleteOptions, ChatCompleteAPIResponse } from './api';
 
 /**

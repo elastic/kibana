@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -29,6 +29,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -46,13 +47,13 @@ import { ReferenceErrorModal } from '../../../common/components/reference_error_
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
 
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
-import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingDetectionsPrivilegesCallOut } from '../../../detections/components/callouts/missing_detections_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export type Func = () => Promise<void>;
 
@@ -85,12 +86,14 @@ const ExceptionsTable = styled(EuiFlexGroup)`
 `;
 
 export const SharedLists = React.memo(() => {
-  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+  const { edit: canEditExceptions, read: canReadExceptions } =
+    useUserPrivileges().rulesPrivileges.exceptions;
 
   const { loading: listsConfigLoading } = useListsConfig();
-  const loading = userInfoLoading || listsConfigLoading;
+  const loading = listsConfigLoading;
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const {
     services: {
       http,
@@ -110,12 +113,15 @@ export const SharedLists = React.memo(() => {
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
   const exceptionListTypes = useMemo(() => {
-    const lists = [ExceptionListTypeEnum.DETECTION];
+    const lists = [];
+    if (canReadExceptions) {
+      lists.push(ExceptionListTypeEnum.DETECTION);
+    }
     if (canAccessEndpointExceptions) {
       lists.push(ExceptionListTypeEnum.ENDPOINT);
     }
     return lists;
-  }, [canAccessEndpointExceptions]);
+  }, [canAccessEndpointExceptions, canReadExceptions]);
   const [
     loadingExceptions,
     exceptions,
@@ -133,7 +139,9 @@ export const SharedLists = React.memo(() => {
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
-    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+      (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+    ),
   });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
@@ -153,12 +161,12 @@ export const SharedLists = React.memo(() => {
   const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -328,7 +336,10 @@ export const SharedLists = React.memo(() => {
   const handleReferenceDelete = useCallback(async (): Promise<void> => {
     const exceptionListId = referenceModalState.listId;
     const exceptionListNamespaceType = referenceModalState.listNamespaceType;
-    const relevantRules = exceptionsListsRef[exceptionListId].rules;
+    const exceptionList = exceptionsListsRef[exceptionListId];
+
+    const relevantRules = exceptionList?.rules ?? [];
+    const listName = exceptionList?.name ?? '';
 
     try {
       await Promise.all(
@@ -352,7 +363,7 @@ export const SharedLists = React.memo(() => {
         id: exceptionListId,
         namespaceType: exceptionListNamespaceType,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess(),
+        onSuccess: handleDeleteSuccess(listName),
       });
     } catch (err) {
       handleDeleteError(err);
@@ -434,6 +445,8 @@ export const SharedLists = React.memo(() => {
   const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
   const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
 
+  const createButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
   const onCloseCreatePopover = () => {
     setDisplayAddExceptionItemFlyout(false);
@@ -441,9 +454,7 @@ export const SharedLists = React.memo(() => {
   };
   const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
-  const isReadOnly = useMemo(() => {
-    return (canUserREAD && !canUserCRUD) ?? true;
-  }, [canUserREAD, canUserCRUD]);
+  const isReadOnly = canReadExceptions && !canEditExceptions;
 
   useEffect(() => {
     if (isSearchingExceptions && hasNoExceptions) {
@@ -459,7 +470,7 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
-      <MissingPrivilegesCallOut />
+      <MissingDetectionsPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
         description={
@@ -493,9 +504,17 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
-                {i18n.CREATE_BUTTON}
-              </EuiButton>
+              canEditExceptions && (
+                <EuiButton
+                  buttonRef={(node: HTMLButtonElement | null) => {
+                    createButtonRef.current = node;
+                  }}
+                  iconType={'arrowDown'}
+                  onClick={onCreateButtonClick}
+                >
+                  {i18n.CREATE_BUTTON}
+                </EuiButton>
+              )
             }
             isOpen={isCreatePopoverOpen}
             closePopover={onCloseCreatePopover}
@@ -525,13 +544,15 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          <EuiButton
-            data-test-subj="importSharedExceptionList"
-            iconType={'importAction'}
-            onClick={() => setDisplayImportListFlyout(true)}
-          >
-            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-          </EuiButton>,
+          (canEditExceptions || canWriteEndpointExceptions) && (
+            <EuiButton
+              data-test-subj="importSharedExceptionList"
+              iconType={'importAction'}
+              onClick={() => setDisplayImportListFlyout(true)}
+            >
+              {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
+            </EuiButton>
+          ),
         ]}
       />
 
@@ -541,7 +562,11 @@ export const SharedLists = React.memo(() => {
           http={http}
           addSuccess={addSuccess}
           addError={addError}
-          handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)}
+          handleCloseFlyout={() => {
+            setDisplayCreateSharedListFlyout(false);
+            // Without requestAnimationFrame, the flyout's cleanup resets focus before we can move it to the button.
+            requestAnimationFrame(() => createButtonRef.current?.focus());
+          }}
         />
       )}
 
@@ -597,7 +622,11 @@ export const SharedLists = React.memo(() => {
                   <EuiFlexItem key={excList.list_id}>
                     <ExceptionsListCard
                       data-test-subj="exceptionsListCard"
-                      readOnly={isReadOnly}
+                      readOnly={
+                        excList.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                          ? !canWriteEndpointExceptions
+                          : isReadOnly
+                      }
                       exceptionsList={excList}
                       handleDelete={handleDelete}
                       handleExport={handleExport}

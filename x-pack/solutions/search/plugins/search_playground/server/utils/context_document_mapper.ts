@@ -15,8 +15,8 @@ export const contextDocumentHitMapper =
   (hit: SearchHit): Document => {
     let pageContent: string = '';
     const makePageContentForField = (field: string) => {
-      const fieldValue = getValueForSelectedField(hit, field);
-      return fieldValue.length > 0 ? `${field}: ${fieldValue}` : '';
+      const fieldValue = getValueForSelectedField(hit, field) || '';
+      return fieldValue && fieldValue.length > 0 ? `${field}: ${fieldValue}` : '';
     };
     if (typeof contentField === 'string') {
       pageContent = makePageContentForField(contentField);
@@ -27,7 +27,7 @@ export const contextDocumentHitMapper =
       } else {
         pageContent = pageContentFieldKey
           .map((field) => makePageContentForField(field))
-          .filter((fieldContent) => fieldContent.length > 0)
+          .filter((fieldContent) => fieldContent && fieldContent.length > 0)
           .join('\n');
       }
     }

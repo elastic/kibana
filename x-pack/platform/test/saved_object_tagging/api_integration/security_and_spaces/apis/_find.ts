@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { USERS, User, ExpectedResponse } from '../../../common/lib';
-import { FtrProviderContext } from '../services';
+import type { User, ExpectedResponse } from '../../../common/lib';
+import { USERS } from '../../../common/lib';
+import type { FtrProviderContext } from '../services';
 import { createTags, createTestSpaces, deleteTags, deleteTestSpaces } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -82,8 +83,8 @@ export default function (ftrContext: FtrProviderContext) {
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
         USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER,
       ],
-      noResults: [],
-      unauthorized: [USERS.NOT_A_KIBANA_USER],
+      noResults: [USERS.NOT_A_KIBANA_USER], // find proxies so.find and returns no results for unauthorized users instead of 403
+      unauthorized: [],
     };
 
     const createUserTest = (

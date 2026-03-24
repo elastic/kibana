@@ -7,7 +7,8 @@
 
 import { buildSlo } from '../../../data/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { HeaderControl as Component, Props } from './header_control';
+import type { Props } from './header_control';
+import { HeaderControl as Component } from './header_control';
 
 export default {
   component: Component,

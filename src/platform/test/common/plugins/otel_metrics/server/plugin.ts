@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { metrics } from '@opentelemetry/api';
 import { generateOtelMetrics } from './routes';
 import { Metrics } from './monitoring/metrics';

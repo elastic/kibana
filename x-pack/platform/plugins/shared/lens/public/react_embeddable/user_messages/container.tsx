@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { UserMessage } from '../../types';
+import type { UserMessage } from '@kbn/lens-common';
 import { VisualizationErrorPanel } from './error_panel';
 import { EmbeddableFeatureBadge } from './info_badges';
 import { MessagesPopover } from './message_popover';

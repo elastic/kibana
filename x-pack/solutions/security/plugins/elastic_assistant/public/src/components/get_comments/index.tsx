@@ -6,14 +6,19 @@
  */
 
 import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import {
+  getCurrentConversationOwner,
+  replaceAnonymizedValuesWithOriginalValues,
+} from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
+import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
 
@@ -58,17 +63,19 @@ export const getComments: GetComments =
   (args) =>
   ({
     abortStream,
+    contentReferencesVisible,
     currentConversation,
+    isConversationOwner,
     isFetchingResponse,
     refetchCurrentConversation,
     regenerateMessage,
-    showAnonymizedValues,
-    currentUserAvatar,
     setIsStreaming,
+    showAnonymizedValues,
     systemPromptContent,
-    contentReferencesVisible,
   }) => {
     if (!currentConversation) return [];
+
+    const mockResumeGraph: ResumeGraphFunction = (threadId, resumeValue) => Promise.resolve(); // TODO: Replace with actual implementation
 
     const regenerateMessageOfConversation = () => {
       regenerateMessage(currentConversation.id);
@@ -93,6 +100,8 @@ export const getComments: GetComments =
                 setIsStreaming={setIsStreaming}
                 contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                resumeGraph={mockResumeGraph}
+                isLastInConversation={true}
                 contentReferences={null}
                 messageRole="assistant"
                 isFetching
@@ -103,23 +112,6 @@ export const getComments: GetComments =
           },
         ]
       : [];
-
-    const UserAvatar = () => {
-      if (currentUserAvatar) {
-        return (
-          <EuiAvatar
-            name="user"
-            size="l"
-            color={currentUserAvatar?.color ?? 'subdued'}
-            {...(currentUserAvatar?.imageUrl
-              ? { imageUrl: currentUserAvatar.imageUrl as string }
-              : { initials: currentUserAvatar?.initials })}
-          />
-        );
-      }
-
-      return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
-    };
 
     return [
       ...(systemPromptContent && currentConversation.messages.length
@@ -138,10 +130,12 @@ export const getComments: GetComments =
                   refetchCurrentConversation={refetchCurrentConversation}
                   regenerateMessage={regenerateMessageOfConversation}
                   setIsStreaming={setIsStreaming}
+                  resumeGraph={mockResumeGraph}
                   contentReferences={null}
                   contentReferencesVisible={contentReferencesVisible}
                   transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                   messageRole={'assistant'}
+                  isLastInConversation={currentConversation.messages.length === 0}
                   // we never need to append to a code block in the system comment, which is what this index is used for
                   index={999}
                 />
@@ -149,14 +143,16 @@ export const getComments: GetComments =
             },
           ]
         : []),
-      ...currentConversation.messages.map((message, index) => {
-        const isLastComment = index === currentConversation.messages.length - 1;
+      ...currentConversation.messages.map((message, index, total) => {
+        const isLastInConversation = index === total.length - 1 && extraLoadingComment.length === 0;
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
-
+        const user = isUser
+          ? message.user ?? getCurrentConversationOwner(currentConversation)
+          : undefined;
         const messageProps = {
           timelineAvatar: isUser ? (
-            <UserAvatar />
+            <SecurityUserAvatar user={user} />
           ) : (
             <AssistantAvatar name="machine" size="l" color="subdued" />
           ),
@@ -165,11 +161,11 @@ export const getComments: GetComments =
               ? new Date().toLocaleString()
               : new Date(message.timestamp).toLocaleString()
           ),
-          username: isUser ? i18n.YOU : i18n.ASSISTANT,
+          username: isUser ? <SecurityUserName user={user} /> : i18n.ASSISTANT,
           eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
         };
 
-        const isControlsEnabled = isLastComment && !isUser;
+        const isControlsEnabled = isLastInConversation && !isUser && isConversationOwner;
 
         const transformMessage = (content: string) =>
           transformMessageWithReplacements({
@@ -189,6 +185,8 @@ export const getComments: GetComments =
                 contentReferences={null}
                 contentReferencesVisible={contentReferencesVisible}
                 index={index}
+                resumeGraph={mockResumeGraph}
+                isLastInConversation={isLastInConversation}
                 isControlsEnabled={isControlsEnabled}
                 isError={message.isError}
                 reader={message.reader}
@@ -214,7 +212,11 @@ export const getComments: GetComments =
               content={transformedMessage.content}
               contentReferences={message.metadata?.contentReferences}
               contentReferencesVisible={contentReferencesVisible}
+              interruptValue={message.metadata?.interruptValue}
+              interruptResumeValue={message.metadata?.interruptResumeValue}
               index={index}
+              resumeGraph={mockResumeGraph}
+              isLastInConversation={isLastInConversation}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
               // reader is used to determine if streaming controls are shown

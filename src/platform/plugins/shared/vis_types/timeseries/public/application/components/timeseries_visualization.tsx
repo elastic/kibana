@@ -9,17 +9,18 @@
 
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
-import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { PersistedState, visContainerStyle } from '@kbn/visualizations-plugin/public';
+import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { visContainerStyle } from '@kbn/visualizations-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
 import { isVisTableData } from '../../../common/vis_data_utils';
-import { TimeseriesVisParams } from '../../types';
+import type { TimeseriesVisParams } from '../../types';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
 import { getClickFilterData } from './lib/get_click_filter_data';
 import { X_ACCESSOR_INDEX } from '../visualizations/constants';

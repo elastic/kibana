@@ -15,7 +15,9 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSkeletonText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -26,6 +28,7 @@ import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -56,29 +59,41 @@ const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
+
+  const kuery = 'user_id: *';
 
   const { data: packsData } = usePacks({});
 
-  const { data: actionsData } = useAllLiveQueries({
+  const {
+    data: actionsData,
+    isLoading,
+    isFetching,
+  } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    kuery: 'user_id: *',
+    kuery,
   });
 
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
+  const actionItems = useMemo(
+    () => actionsData?.data?.items ?? EMPTY_ARRAY,
+    [actionsData?.data?.items]
+  );
 
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SearchHit>) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageSize]
+  );
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="package" />
+            <EuiIcon type="package" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
         </EuiFlexGroup>
@@ -116,12 +131,14 @@ const ActionsTableComponent = () => {
     []
   );
 
+  const newQueryPath = '/live_queries/new';
+
   const handlePlayClick = useCallback(
     (item: any) => () => {
       const packId = item._source.pack_id;
 
       if (packId) {
-        return push('/live_queries/new', {
+        return push(newQueryPath, {
           form: pickBy(
             {
               packId: item._source.pack_id,
@@ -137,7 +154,7 @@ const ActionsTableComponent = () => {
         });
       }
 
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: pickBy(
           {
             query: item._source.queries[0].query,
@@ -157,6 +174,7 @@ const ActionsTableComponent = () => {
     },
     [push]
   );
+
   const renderPlayButton = useCallback(
     (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
@@ -260,7 +278,7 @@ const ActionsTableComponent = () => {
       pageIndex,
       pageSize,
       totalItemCount: actionsData?.data?.total ?? 0,
-      pageSizeOptions: [20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [actionsData, pageIndex, pageSize]
   );
@@ -272,17 +290,26 @@ const ActionsTableComponent = () => {
     []
   );
 
+  if (isLoading) {
+    return <EuiSkeletonText lines={10} />;
+  }
+
   return (
     <EuiBasicTable
-      items={actionsData?.data?.items ?? EMPTY_ARRAY}
+      items={actionItems}
+      loading={isFetching && !isLoading}
       // @ts-expect-error update types
       columns={columns}
       pagination={pagination}
       onChange={onTableChange}
       rowProps={rowProps}
       data-test-subj="liveQueryActionsTable"
+      tableCaption={i18n.translate('xpack.osquery.liveQueryActions.table.tableCaption', {
+        defaultMessage: 'Live query actions',
+      })}
     />
   );
 };
 
 export const ActionsTable = React.memo(ActionsTableComponent);
+ActionsTable.displayName = 'ActionsTable';

@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { GatlingTestRunner } from './runner';
 
 // These "secret" values are intentionally written in the source.

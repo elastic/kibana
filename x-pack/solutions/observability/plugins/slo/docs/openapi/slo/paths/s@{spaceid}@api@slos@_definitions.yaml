@@ -14,6 +14,11 @@ get:
       description: Indicates if the API returns only outdated SLO or all SLO definitions
       schema:
         type: boolean
+    - name: includeHealth
+      in: query
+      description: Indicates if the API returns SLO health data with definitions
+      schema:
+        type: boolean
       example: true
     - name: tags
       in: query

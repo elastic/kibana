@@ -6,7 +6,7 @@
  */
 
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
-import { GenericMetric } from './rule_condition_chart';
+import type { GenericMetric } from './rule_condition_chart';
 
 export interface LensOperation {
   operation: string;

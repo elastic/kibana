@@ -6,24 +6,27 @@
  */
 import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type {
-  ServiceMapRawResponse,
-  ServiceMapTelemetry,
-} from '../../../../common/service_map/types';
+import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import type { Environment } from '../../../../common/environment_rt';
-import { getServiceMapNodes, getPaths } from '../../../../common/service_map';
-import type { GroupResourceNodesResponse } from '../../../../common/service_map';
+import { transformToReactFlow } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
-type SeriviceMapState = GroupResourceNodesResponse & Pick<ServiceMapTelemetry, 'tracesCount'>;
-const INITIAL_SERVICE_MAP_STATE: SeriviceMapState = {
-  elements: [],
+const INITIAL_STATE: ReactFlowServiceMapResponse = {
+  nodes: [],
+  edges: [],
   nodesCount: 0,
   tracesCount: 0,
 };
+
+export interface UseServiceMapResult {
+  data: ReactFlowServiceMapResponse;
+  error?: Error | IHttpFetchError<ResponseErrorBody>;
+  status: FETCH_STATUS;
+}
+
 export const useServiceMap = ({
   start,
   end,
@@ -31,7 +34,6 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
-  isServiceMapApiV2Enabled,
 }: {
   environment: Environment;
   kuery: string;
@@ -39,17 +41,12 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
-  isServiceMapApiV2Enabled: boolean;
-}) => {
+}): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
 
-  const [serviceMapNodes, setServiceMapNodes] = useState<{
-    data: SeriviceMapState;
-    error?: Error | IHttpFetchError<ResponseErrorBody>;
-    status: FETCH_STATUS;
-  }>({
-    data: INITIAL_SERVICE_MAP_STATE,
+  const [serviceMapNodes, setServiceMapNodes] = useState<UseServiceMapResult>({
+    data: INITIAL_STATE,
     status: FETCH_STATUS.LOADING,
   });
 
@@ -69,7 +66,6 @@ export const useServiceMap = ({
             serviceName,
             serviceGroup: serviceGroupId,
             kuery,
-            useV2: isServiceMapApiV2Enabled,
           },
         },
       });
@@ -83,7 +79,6 @@ export const useServiceMap = ({
       serviceGroupId,
       kuery,
       config.serviceMapEnabled,
-      isServiceMapApiV2Enabled,
     ],
     { preservePreviousData: false }
   );
@@ -96,50 +91,29 @@ export const useServiceMap = ({
 
     if (status === FETCH_STATUS.FAILURE || error) {
       setServiceMapNodes({
-        data: INITIAL_SERVICE_MAP_STATE,
+        data: INITIAL_STATE,
         status: FETCH_STATUS.FAILURE,
         error,
       });
       return;
     }
 
-    if (data) {
-      if ('spans' in data) {
-        try {
-          const transformedData = processServiceMapData(data);
-          setServiceMapNodes({
-            data: {
-              elements: transformedData.elements,
-              nodesCount: transformedData.nodesCount,
-              tracesCount: data.tracesCount,
-            },
-            status: FETCH_STATUS.SUCCESS,
-          });
-        } catch (err) {
-          setServiceMapNodes({
-            data: INITIAL_SERVICE_MAP_STATE,
-            status: FETCH_STATUS.FAILURE,
-            error: err,
-          });
-        }
-      } else {
+    if (data && 'spans' in data) {
+      try {
+        const reactFlowData = transformToReactFlow(data);
         setServiceMapNodes({
-          data,
+          data: reactFlowData,
           status: FETCH_STATUS.SUCCESS,
+        });
+      } catch (err) {
+        setServiceMapNodes({
+          data: INITIAL_STATE,
+          status: FETCH_STATUS.FAILURE,
+          error: err,
         });
       }
     }
   }, [data, status, error]);
 
   return serviceMapNodes;
-};
-
-const processServiceMapData = (data: ServiceMapRawResponse): GroupResourceNodesResponse => {
-  const paths = getPaths({ spans: data.spans });
-  return getServiceMapNodes({
-    connections: paths.connections,
-    exitSpanDestinations: paths.exitSpanDestinations,
-    servicesData: data.servicesData,
-    anomalies: data.anomalies,
-  });
 };

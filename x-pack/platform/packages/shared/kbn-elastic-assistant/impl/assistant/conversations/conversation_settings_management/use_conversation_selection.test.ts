@@ -6,7 +6,7 @@
  */
 import { act, renderHook } from '@testing-library/react';
 import { useConversationSelection } from './use_conversation_selection';
-import { ConversationTableItem } from './types';
+import type { ConversationTableItem } from './types';
 
 describe('useConversationSelection', () => {
   it('should initialize with default values', () => {

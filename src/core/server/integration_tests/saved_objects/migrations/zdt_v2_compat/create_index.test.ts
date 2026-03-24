@@ -10,11 +10,7 @@
 import { join } from 'path';
 import '../jest_matchers';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import {
-  clearLog,
-  getKibanaMigratorTestKit,
-  startElasticsearch,
-} from '../kibana_migrator_test_kit';
+import { clearLog, getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getFooType, getLegacyType } from '../fixtures/zdt_base.fixtures';
 

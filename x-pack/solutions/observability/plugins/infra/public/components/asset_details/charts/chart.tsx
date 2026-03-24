@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
-import { resolveDataView } from '../../../utils/data_view';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
 import { buildCombinedAssetFilter } from '../../../utils/filters/build';
 import type { LensChartProps } from '../../lens';
@@ -18,12 +17,13 @@ import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 
-export type ChartProps = Pick<LensChartProps, 'overrides'> & {
+export type ChartProps = Pick<LensChartProps, 'overrides' | 'dataTestSubj'> & {
   id: string;
   queryField: string;
   dateRange: TimeRange;
   entityId: string;
   lensAttributes: LensConfig;
+  dataView?: DataView;
 };
 
 export const Chart = ({
@@ -33,27 +33,25 @@ export const Chart = ({
   dateRange,
   entityId,
   lensAttributes,
+  dataView,
+  dataTestSubj,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
-  const {
-    services: { dataViews },
-  } = useKibanaContextForPlugin();
 
   const { value: filters = [] } = useAsync(async () => {
-    const resolvedDataView = await resolveDataView({
-      dataViewId: (lensAttributes.dataset as LensDataviewDataset)?.index,
-      dataViewsService: dataViews,
-    });
+    if (!dataView) {
+      return [];
+    }
 
     return [
       buildCombinedAssetFilter({
         field: queryField,
         values: [entityId],
-        dataView: resolvedDataView.dataViewReference,
+        dataView,
       }),
     ];
-  }, [entityId, dataViews, lensAttributes.dataset, queryField]);
+  }, [dataView, queryField, entityId]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {
@@ -93,6 +91,7 @@ export const Chart = ({
       overrides={overrides}
       onBrushEnd={handleBrushEnd}
       onFilter={handleFilter}
+      dataTestSubj={dataTestSubj}
     />
   );
 };

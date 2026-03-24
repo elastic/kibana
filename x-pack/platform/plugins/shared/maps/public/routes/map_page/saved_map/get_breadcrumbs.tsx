@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 import { APP_NAME } from '../../../../common/constants';
 

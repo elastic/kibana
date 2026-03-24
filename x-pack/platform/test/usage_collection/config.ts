@@ -6,7 +6,8 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -34,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         ...findTestPluginPaths(resolve(__dirname, 'plugins')),
+        `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify(['unifiedRulesPage'])}`,
       ],
     },
 

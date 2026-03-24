@@ -15,8 +15,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import 'core_styles';
 import { BehaviorSubject } from 'rxjs';
-import { CoreTheme } from '@kbn/core-theme-browser';
-import { I18nStart } from '@kbn/core-i18n-browser';
+import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { i18n } from '@kbn/i18n';

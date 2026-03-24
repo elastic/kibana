@@ -1,0 +1,102 @@
+openapi: 3.0.0
+info:
+  title: List scripts schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/scripts_library:
+    get:
+      summary: Get a list of scripts
+      operationId: EndpointScriptLibraryListScripts
+      description: Retrieve a list of scripts
+      x-codegen-enabled: false
+#      x-labels: []
+#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+      x-labels: [ ess, serverless ]
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number of the results to return. Defaults to 1.
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of results to return per page. Defaults to 10. Max value is 1000.
+          schema:
+            $ref: '#/components/schemas/ApiPageSize'
+        - name: sortField
+          in: query
+          required: false
+          description: The field to sort the results by. Defaults to name.
+          schema:
+            $ref: '#/components/schemas/ApiSortField'
+        - name: sortDirection
+          in: query
+          required: false
+          description: The direction to sort the results by. Defaults to asc (ascending).
+          schema:
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
+        - name: kuery
+          in: query
+          required: false
+          description: >
+            A KQL query string to filter the list of scripts. Nearly all fields in the script object are searchable.
+          schema:
+            allOf:
+              - $ref: '../model/schema/common.schema.yaml#/components/schemas/Kuery'
+              - example: "platform:windows"
+
+      responses:
+        '200':
+          description: List of scripts response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
+                  pageSize:
+                    $ref: '#/components/schemas/ApiPageSize'
+                  total:
+                    type: integer
+                    description: The total number of scripts matching the query
+                  sortField:
+                    $ref: '#/components/schemas/ApiSortField'
+                  sortDirection:
+                    $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
+                  data:
+                    type: array
+                    items:
+                      $ref: './common.yaml#/components/schemas/EndpointScript'
+              examples:
+                response:
+                  summary: List of scripts response example
+                  value:
+                    page: 1
+                    pageSize: 10
+                    total: 100
+                    sortField: name
+                    sortDirection: asc
+                    data: []
+
+
+components:
+  x-codegen-enabled: false
+  schemas:
+    ApiPageSize:
+      allOf:
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
+        - maximum: 1000
+    ApiSortField:
+      type: string
+      description: Determines which field is used to sort the results.
+      example: updatedAt
+      enum:
+        - name
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+        - fileSize

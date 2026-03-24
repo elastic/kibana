@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { Table } from '../../waterfall/components/waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
-import { WaterfallMetadataEntry } from '../../waterfall/types';
-import { OnFlyoutClose } from '../../waterfall/components/use_flyout';
+import type { WaterfallMetadataEntry } from '../../waterfall/types';
+import type { OnFlyoutClose } from '../../waterfall/components/use_flyout';
 
 export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',

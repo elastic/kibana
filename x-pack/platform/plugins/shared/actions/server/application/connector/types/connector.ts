@@ -20,6 +20,8 @@ export interface Connector {
   isPreconfigured: ConnectorSchemaType['isPreconfigured'];
   isDeprecated: ConnectorSchemaType['isDeprecated'];
   isSystemAction: ConnectorSchemaType['isSystemAction'];
+  isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
+  authMode?: ConnectorSchemaType['authMode'];
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

@@ -11,7 +11,7 @@ import { first } from 'rxjs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
-import type { MarkdownEditorRef } from '../../editor';
+import type { MarkdownEditorRef } from '../../types';
 
 interface DraftComment {
   commentId: string;

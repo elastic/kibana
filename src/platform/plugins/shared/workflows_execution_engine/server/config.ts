@@ -7,13 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * When false, event-driven workflow execution is disabled: event-triggered runs
+   * (triggeredBy not in manual/scheduled/alert) are skipped at execution time.
+   */
+  eventDriven: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    logEvents: schema.boolean({ defaultValue: true }),
   }),
+  logging: schema.object({
+    console: schema.boolean({ defaultValue: false }),
+  }),
+  http: schema.object({
+    allowedHosts: schema.arrayOf(
+      schema.oneOf([schema.string({ hostname: true }), schema.literal('*')]),
+      {
+        defaultValue: ['*'],
+      }
+    ),
+  }),
+  maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
+  collectQueueMetrics: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
+        'Useful for observability but adds to document size. Disabled by default for performance.',
+    },
+  }),
+});
+
+export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
+  schema: configSchema,
 };
-export type MyPluginConfigType = TypeOf<typeof config.schema>;

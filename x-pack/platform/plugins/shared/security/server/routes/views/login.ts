@@ -39,10 +39,11 @@ export function defineLoginRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { excludeFromOAS: true },
+      options: { excludeFromOAS: true, excludeFromRateLimiter: true },
       security: {
         authc: {
           enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users.',
         },
         authz: {
           enabled: false,
@@ -85,7 +86,9 @@ export function defineLoginRoutes({
       const providers = sortedProviders.map(({ type, name }) => {
         // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
         // be sure that config is present for every provider in `config.authc.sortedProviders`.
-        const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
+
+        const { showInSelector, description, hint, icon, origin } =
+          config.authc.providers[type]?.[name]!;
         const usesLoginForm = shouldProviderUseLoginForm(type);
         return {
           type,
@@ -95,6 +98,7 @@ export function defineLoginRoutes({
           description,
           hint,
           icon,
+          origin,
         };
       });
 

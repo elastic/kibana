@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';

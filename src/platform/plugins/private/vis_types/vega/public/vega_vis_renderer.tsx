@@ -10,13 +10,13 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { VegaVisualizationDependencies } from './plugin';
+import { VisualizationContainer } from '@kbn/visualizations-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { VegaVisualizationDependencies } from './plugin';
 import { getUsageCollectionStart } from './services';
-import { RenderValue } from './vega_fn';
+import type { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );

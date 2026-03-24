@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BookState } from '../content_management';
-import { BookAttributes } from './types';
+import type { BookState } from '../content_management';
+import type { BookAttributes } from './types';
 
 export function attributesToBook(attributes: BookAttributes): BookState {
   return {

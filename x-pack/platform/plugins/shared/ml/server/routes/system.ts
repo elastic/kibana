@@ -21,7 +21,7 @@ import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { getSpaces, cloud, resolveMlCapabilities, isServerless }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities, serverless }: SystemRouteDeps
 ) {
   router.versioned
     .post({
@@ -183,7 +183,7 @@ export function systemRoutes(
         try {
           const body = await mlClient.info();
           const cloudId = cloud?.cloudId;
-          const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
+          const isCloudTrial = cloud?.isInTrial() ?? false;
 
           let isMlAutoscalingEnabled = false;
           try {
@@ -205,8 +205,8 @@ export function systemRoutes(
               isCloudTrial,
               cloudUrl: cloud.baseUrl,
               isMlAutoscalingEnabled,
-              showNodeInfo: !isServerless,
-              showLicenseInfo: !isServerless,
+              showNodeInfo: !serverless.isServerless,
+              showLicenseInfo: !serverless.isServerless,
             },
           });
         } catch (error) {

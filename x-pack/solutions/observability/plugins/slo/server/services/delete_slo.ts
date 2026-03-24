@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getCustomSLOWildcardPipelineId,
   getWildcardPipelineId,
 } from '../../common/constants';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { TransformManager } from './transform_manager';
 
 interface Options {
   skipDataDeletion: boolean;
@@ -25,7 +26,7 @@ interface Options {
 
 export class DeleteSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
@@ -45,13 +46,21 @@ export class DeleteSLO {
     // First delete the linked resources before deleting the data
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    const wildcardPipelineId = getWildcardPipelineId(slo.id, slo.revision);
+    const customWildcardPipelineId = getCustomSLOWildcardPipelineId(slo.id);
 
     await Promise.all([
       this.transformManager.uninstall(rollupTransformId),
       this.summaryTransformManager.uninstall(summaryTransformId),
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: getWildcardPipelineId(slo.id, slo.revision) },
+          { id: wildcardPipelineId },
+          { ignore: [404], signal: this.abortController.signal }
+        )
+      ),
+      retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: customWildcardPipelineId },
           { ignore: [404], signal: this.abortController.signal }
         )
       ),

@@ -14,11 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import {
+  GapFillStatus,
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
@@ -118,8 +119,10 @@ export const BulkActionBase = z.object({
    */
   query: z.string().optional(),
   /**
-   * Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
-   */
+      * Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+Only valid when query property is undefined.
+
+      */
   ids: z.array(z.string()).min(1).optional(),
   /**
    * Gaps range start, valid only when query is provided
@@ -129,6 +132,10 @@ export const BulkActionBase = z.object({
    * Gaps range end, valid only when query is provided
    */
   gaps_range_end: z.string().optional(),
+  /**
+   * Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
+   */
+  gap_fill_statuses: z.array(GapFillStatus).optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;
@@ -312,11 +319,11 @@ export const BulkActionEditPayloadSchedule = z.object({
      * Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
      */
     interval: z.string().regex(/^[1-9]\d*[smh]$/),
-    /** 
+    /**
       * Lookback time for the rules.
 
 Additional look-back time that the rule analyzes. For example, "10m" means the rule analyzes the last 10 minutes of data in addition to the frequency interval.
- 
+
       */
     lookback: z.string().regex(/^[1-9]\d*[smh]$/),
   }),
@@ -451,7 +458,7 @@ export const BulkEditRules = BulkActionBase.merge(
 
 export type PerformRulesBulkActionRequestQuery = z.infer<typeof PerformRulesBulkActionRequestQuery>;
 export const PerformRulesBulkActionRequestQuery = z.object({
-  /** 
+  /**
       * Enables dry run mode for the request call.
 
 Enable dry run mode to verify that bulk actions can be applied to specified rules. Certain rules, such as prebuilt Elastic rules on a Basic subscription, can’t be edited and will return errors in the request response. Error details will contain an explanation, the rule name and/or ID, and additional troubleshooting information.
@@ -459,7 +466,7 @@ Enable dry run mode to verify that bulk actions can be applied to specified rule
 To enable dry run mode on a request, add the query parameter `dry_run=true` to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.
 > info
 > Dry run mode is not supported for the `export` bulk action. A 400 error will be returned in the request response.
- 
+
       */
   dry_run: BooleanFromString.optional(),
 });

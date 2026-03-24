@@ -28,6 +28,17 @@ export function createLargeSchema() {
       schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
       schema.number({ min: 0, meta: { description: 'Union number' } }),
     ]),
+    unionWithId: schema.oneOf(
+      [
+        schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
+        schema.number({ min: 0, meta: { description: 'Union number' } }),
+      ],
+      { meta: { id: 'myUnion' } }
+    ),
+    array: schema.arrayOf(schema.object({ foo: schema.string() })),
+    arrayWithId: schema.arrayOf(schema.object({ foo: schema.string() }), {
+      meta: { id: 'myArray' },
+    }),
     uri: schema.uri({
       scheme: ['prototest'],
       defaultValue: () => 'prototest://something',

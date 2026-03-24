@@ -11,7 +11,7 @@ import dedent from 'dedent';
 import getopts from 'getopts';
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 
 export const source: Command = {
   description: 'Build and run from source',
@@ -34,6 +34,7 @@ export const source: Command = {
         -E                Additional key=value settings to pass to Elasticsearch
         --skip-ready-check  Disable the ready check,
         --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+        --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
 
       Example:
 
@@ -50,11 +51,12 @@ export const source: Command = {
         dataArchive: 'data-archive',
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
+        esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
         esArgs: 'E',
       },
 
-      string: ['ready-timeout'],
+      string: ['ready-timeout', 'es-log-level'],
       boolean: ['skip-ready-check'],
 
       default: defaults,
@@ -83,6 +85,7 @@ export const source: Command = {
 
     await cluster.run(installPath, {
       ...options,
+      esStdoutLogLevel: options.esLogLevel || 'info',
       readyTimeout: parseTimeoutToMs(options.readyTimeout),
     });
   },

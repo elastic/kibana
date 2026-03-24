@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
 import { meanBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
-  describe('Service Maps APIs', () => {
+  describe('Service maps APIs', () => {
     describe('when data is loaded ', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       before(async () => {

@@ -1,0 +1,29 @@
+{
+  "description": "Security: Azure Activity Logs - Looks for a spike in the rate of an error message which may simply indicate an impending service failure but these can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
+  "groups": ["security", "azure"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects high distinct count of Azure Activity Logs status messages of failing event actions.",
+        "function": "high_distinct_count",
+        "field_name": "event.action",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["user.email", "source.ip", "source.geo.city_name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "16mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-azure-activitylogs",
+    "security_app_display_name": "Spike in Azure Activity Logs Event Action on Failure",
+    "managed": true,
+    "job_revision": 4
+  }
+}

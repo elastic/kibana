@@ -45,6 +45,11 @@ const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
+}
+
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({
@@ -78,9 +83,20 @@ const requestTimeoutsConfig = schema.object({
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
+const validateDuration = (duration: string) => {
+  try {
+    parseIntervalAsMillisecond(duration);
+  } catch (err) {
+    return `string is not a valid duration: ${duration}`;
+  }
+};
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
+    /* The API key type to switch between UIAM API keys and Elasticsearch API keys. */
+    api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
+      defaultValue: ApiKeyType.ES,
+    }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     discovery: schema.object({
@@ -106,6 +122,10 @@ export const configSchema = schema.object(
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
     ephemeral_tasks: schema.maybe(schema.any()),
     event_loop_delay: eventLoopDelaySchema,
+    invalidate_api_key_task: schema.object({
+      interval: schema.string({ validate: validateDuration, defaultValue: '5m' }),
+      removalDelay: schema.string({ validate: validateDuration, defaultValue: '1h' }),
+    }),
     kibanas_per_partition: schema.number({
       defaultValue: DEFAULT_KIBANAS_PER_PARTITION,
       min: 1,

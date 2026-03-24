@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { BoundOptions, UnboundOptions } from '../bind/bind_api';
+import type { BoundOptions, UnboundOptions } from '../bind/bind_api';
 import type { PromptOptions, PromptAPIResponse } from './api';
-import { Prompt } from './types';
+import type { Prompt } from './types';
 
 /**
  * Options used to call the {@link BoundPromptAPI}

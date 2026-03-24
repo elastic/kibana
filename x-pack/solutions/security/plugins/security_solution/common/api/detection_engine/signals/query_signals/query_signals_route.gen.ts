@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type AlertsSortCombinations = z.infer<typeof AlertsSortCombinations>;
 export const AlertsSortCombinations = z.union([z.string(), z.object({}).catchall(z.unknown())]);
@@ -22,11 +22,8 @@ export const AlertsSortCombinations = z.union([z.string(), z.object({}).catchall
 export type AlertsSort = z.infer<typeof AlertsSort>;
 export const AlertsSort = z.union([AlertsSortCombinations, z.array(AlertsSortCombinations)]);
 
-/**
- * Elasticsearch query and aggregation request
- */
-export type SearchAlertsRequestBody = z.infer<typeof SearchAlertsRequestBody>;
-export const SearchAlertsRequestBody = z.object({
+export type QueryAlertsBodyParams = z.infer<typeof QueryAlertsBodyParams>;
+export const QueryAlertsBodyParams = z.object({
   query: z.object({}).catchall(z.unknown()).optional(),
   aggs: z.object({}).catchall(z.unknown()).optional(),
   size: z.number().int().min(0).optional(),
@@ -36,6 +33,12 @@ export const SearchAlertsRequestBody = z.object({
   runtime_mappings: z.object({}).catchall(z.unknown()).optional(),
   sort: AlertsSort.optional(),
 });
+
+/**
+ * Elasticsearch query and aggregation request
+ */
+export type SearchAlertsRequestBody = z.infer<typeof SearchAlertsRequestBody>;
+export const SearchAlertsRequestBody = QueryAlertsBodyParams;
 export type SearchAlertsRequestBodyInput = z.input<typeof SearchAlertsRequestBody>;
 
 /**

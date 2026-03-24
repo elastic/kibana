@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -23,13 +24,8 @@ import { i18n } from '@kbn/i18n';
 
 import isDeepEqual from 'fast-deep-equal/react';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import {
-  Connector,
-  ConnectorConfigProperties,
-  ConnectorConfiguration,
-  ConnectorStatus,
-  FeatureName,
-} from '../..';
+import type { Connector, ConnectorConfigProperties, ConnectorConfiguration } from '../..';
+import { ConnectorStatus, FeatureName } from '../..';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 
@@ -151,6 +147,7 @@ export const ConnectorConfigurationComponent: FC<
         {!uncategorizedDisplayList.length && (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               color="warning"
               title={i18n.translate(
                 'searchConnectors.configurationConnector.config.noConfigCallout.title',
@@ -239,6 +236,7 @@ export const ConnectorConfigurationComponent: FC<
         {!!error && (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={i18n.translate('searchConnectors.configurationConnector.config.error.title', {
                 defaultMessage: 'Connector error',

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { UseField } from '../../form';
 
-import {
-  DescribedFormRow,
-  Props as DescribedFormRowProps,
-  SwitchProps,
-} from './described_form_row';
+import type { Props as DescribedFormRowProps, SwitchProps } from './described_form_row';
+import { DescribedFormRow } from './described_form_row';
 
 type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
   switchProps: Omit<SwitchProps, 'label'> & { path: string };

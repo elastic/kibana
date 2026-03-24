@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function createPolicy(
@@ -34,7 +34,7 @@ const bodySchema = schema.object({
   name: schema.string({ maxLength: 1000 }),
   deprecated: schema.maybe(schema.boolean()),
   phases: schema.object({
-    hot: schema.any(),
+    hot: schema.maybe(schema.any()),
     warm: schema.maybe(schema.any()),
     cold: schema.maybe(schema.any()),
     frozen: schema.maybe(schema.any()),

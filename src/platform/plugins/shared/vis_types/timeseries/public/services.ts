@@ -14,7 +14,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -24,8 +24,8 @@ export const [getFieldFormats, setFieldFormats] =
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 export const [getDataStart, setDataStart] = createGetterSetter<DataPublicPluginStart>('DataStart');
-export const [getUnifiedSearchStart, setUnifiedSearchStart] =
-  createGetterSetter<UnifiedSearchPublicPluginStart>('unifiedSearchStart');
+
+export const [getKqlStart, setKqlStart] = createGetterSetter<KqlPluginStart>('kqlStart');
 
 export const [getDataViewsStart, setDataViewsStart] =
   createGetterSetter<DataViewsPublicPluginStart>('dataViews');

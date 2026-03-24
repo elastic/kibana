@@ -12,7 +12,7 @@ import {
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
 } from '../../assistant_context/constants';
-import { SelectedConversation } from '../../assistant_context';
+import type { SelectedConversation } from '../../assistant_context';
 export interface LastConversation {
   id: string;
   title?: string;

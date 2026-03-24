@@ -7,42 +7,175 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Subject } from 'rxjs';
+import {
+  type AppDeepLinkLocations,
+  type AppMountParameters,
+  AppStatus,
+  type AppUpdater,
+  type CoreSetup,
+  type CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  type Plugin,
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  WORKFLOWS_AI_AGENT_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
+import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import { triggerSchemas } from './trigger_schemas';
 import type {
-  WorkflowsPluginSetup,
-  WorkflowsPluginStart,
-  AppPluginStartDependencies,
+  AgentBuilderPluginStartContract,
+  WorkflowsPublicPluginSetup,
+  WorkflowsPublicPluginSetupDependencies,
+  WorkflowsPublicPluginStart,
+  WorkflowsPublicPluginStartAdditionalServices,
+  WorkflowsPublicPluginStartDependencies,
+  WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { stepSchemas } from '../common/step_schemas';
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
-  public setup(core: CoreSetup): WorkflowsPluginSetup {
-    // Register an application into the side navigation menu
-    // TODO: add icon
+const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
+
+export class WorkflowsPlugin
+  implements
+    Plugin<
+      WorkflowsPublicPluginSetup,
+      WorkflowsPublicPluginStart,
+      WorkflowsPublicPluginSetupDependencies,
+      WorkflowsPublicPluginStartDependencies
+    >
+{
+  private appUpdater$: Subject<AppUpdater>;
+  private telemetryService: TelemetryService;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
+
+  constructor() {
+    this.appUpdater$ = new Subject<AppUpdater>();
+    this.telemetryService = new TelemetryService();
+  }
+
+  public setup(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
+    plugins: WorkflowsPublicPluginSetupDependencies
+  ): WorkflowsPublicPluginSetup {
+    // Initialize telemetry service
+    this.telemetryService.setup({ analytics: core.analytics });
+
+    // Check if workflows UI is enabled
+    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
+
+    /* **************************************************************************************************************************** */
+    /* WARNING: DO NOT ADD ANYTHING ABOVE THIS LINE, which can expose workflows UI to users who don't have the feature flag enabled */
+    /* **************************************************************************************************************************** */
+    // Return early if workflows UI is not enabled, do not register the connector type and UI
+    if (!isWorkflowsUiEnabled) {
+      return {};
+    }
+
+    // Register workflows connector UI component lazily to reduce main bundle size
+    const registerConnectorType = async () => {
+      const { getWorkflowsConnectorType } = await import('./connectors/workflows');
+      plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
+    };
+
+    registerConnectorType();
+
+    // Resolve Agent Builder client contract lazily for AI authoring features.
+    // Eagerly kick off the dynamic import so the chunk downloads in parallel
+    // with onStart resolution, minimising the window where attachment renderers
+    // are not yet registered when the sidebar opens.
+    const isAiAgentEnabled = core.uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID, false);
+    if (isAiAgentEnabled) {
+      const aiIntegrationModule = import('./features/ai_integration');
+
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
+        .then(async ({ agentBuilder }) => {
+          if (agentBuilder.found) {
+            const [coreStart] = await core.getStartServices();
+            const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
+            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
+              http: coreStart.http,
+              notifications: coreStart.notifications,
+              application: coreStart.application,
+            });
+            return agentBuilder.contract;
+          }
+          return undefined;
+        })
+        .catch(() => undefined);
+    }
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
-      visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
-      async mount(params: AppMountParameters) {
+      euiIconType: 'workflowsApp',
+      visibleIn: VisibleIn,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: 9015,
+      updater$: this.appUpdater$,
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
-        const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        const services = await this.createWorkflowsStartServices(core);
+
+        return renderApp(services, params);
       },
     });
 
-    // Return methods that should be available to other plugins
-    return {
-      // TODO: add methods here
-    };
+    return {};
   }
 
-  public start(core: CoreStart): WorkflowsPluginStart {
+  public start(
+    _core: CoreStart,
+    plugins: WorkflowsPublicPluginStartDependencies
+  ): WorkflowsPublicPluginStart {
+    // Initialize singletons with workflowsExtensions
+    stepSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions);
+
+    // License check to set app status
+    plugins.licensing.license$.subscribe((license) => {
+      if (license.isActive && license.hasAtLeast('enterprise')) {
+        this.appUpdater$.next(() => ({ status: AppStatus.accessible, visibleIn: VisibleIn }));
+      } else {
+        this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      }
+    });
+
     return {};
   }
 
   public stop() {}
+
+  /** Creates the start services to be used in the Kibana services context of the workflows application */
+  private async createWorkflowsStartServices(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
+  ): Promise<WorkflowsServices> {
+    // Get start services as specified in kibana.jsonc
+    const [coreStart, depsStart] = await core.getStartServices();
+
+    const agentBuilder = await this.agentBuilderPromise;
+
+    const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
+      storage: new Storage(localStorage),
+      workflowsManagement: {
+        telemetry: this.telemetryService.getClient(),
+        agentBuilder,
+      },
+    };
+
+    // Make sure the workflows extensions registries are ready before using the services
+    await depsStart.workflowsExtensions.isReady();
+
+    return {
+      ...coreStart,
+      ...depsStart,
+      ...additionalServices,
+    };
+  }
 }

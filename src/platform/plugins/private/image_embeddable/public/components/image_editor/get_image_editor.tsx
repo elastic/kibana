@@ -11,8 +11,9 @@ import React from 'react';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import { ImageConfig } from '../../image_embeddable/types';
-import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
+import type { ImageConfig } from '../../types';
+import type { FileImageMetadata } from '../../imports';
+import { imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService } from '../../services/kibana_services';
 import { createValidateUrl } from '../../utils/validate_url';
 import { ImageViewerContext } from '../image_viewer/image_viewer_context';

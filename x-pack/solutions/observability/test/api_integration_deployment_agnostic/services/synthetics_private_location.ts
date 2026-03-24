@@ -5,41 +5,51 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.4.0';
+export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
   private readonly retry: RetryService;
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     this.supertestWithAuth = getService('supertest');
     this.retry = getService('retry');
   }
 
-  async installSyntheticsPackage(
-    { version }: { version: string } = { version: INSTALLED_VERSION }
-  ) {
+  async fetchSyntheticsPackageVersion(): Promise<string> {
+    const res = await this.supertestWithAuth
+      .get('/api/fleet/epm/packages/synthetics')
+      .set('kbn-xsrf', 'true');
+    return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
+  }
+
+  async installSyntheticsPackage({ version }: { version?: string } = {}) {
     await this.supertestWithAuth
       .post('/api/fleet/setup')
       .set('kbn-xsrf', 'true')
       .send()
       .expect(200);
-    // attempt to delete any existing package so we can install specific version
-    await this.supertestWithAuth
-      .delete(`/api/fleet/epm/packages/synthetics`)
-      .set('kbn-xsrf', 'true');
-    await this.supertestWithAuth
-      .post(`/api/fleet/epm/packages/synthetics/${version}`)
-      .set('kbn-xsrf', 'true')
-      .send({ force: true })
-      .expect(200);
+    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
+    await this.retry.try(async () => {
+      await this.supertestWithAuth
+        .delete(`/api/fleet/epm/packages/synthetics`)
+        .set('kbn-xsrf', 'true');
+      await this.supertestWithAuth
+        .post(`/api/fleet/epm/packages/synthetics/${resolvedVersion}`)
+        .set('kbn-xsrf', 'true')
+        .send({ force: true })
+        .expect(200);
+    });
   }
 
   async addTestPrivateLocation(spaceId?: string) {
@@ -61,6 +71,13 @@ export class PrivateLocationTestService {
         });
       return response;
     });
+  }
+
+  async getPackagePolicies(): Promise<PackagePolicy[]> {
+    const apiResponse = await this.supertestWithAuth.get(
+      '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+    );
+    return apiResponse.body.items;
   }
 
   async setTestLocations(testFleetPolicyIds: string[], spaceId?: string | string[]) {

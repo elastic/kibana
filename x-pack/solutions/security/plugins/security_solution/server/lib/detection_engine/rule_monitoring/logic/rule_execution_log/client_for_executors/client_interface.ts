@@ -7,6 +7,7 @@
 
 import type { Duration } from 'moment';
 import type {
+  LogLevel,
   RuleExecutionStatus,
   RuleExecutionStatusEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -28,34 +29,32 @@ export interface IRuleExecutionLogForExecutors {
   context: RuleExecutionContext;
 
   /**
-   * Writes a trace message to console logs.
-   * If enabled, writes it to .kibana-event-log-* index as well.
+   * Writes a trace message to the event log and console at TRACE level.
    */
-  trace(...messages: string[]): void;
+  trace(message: string, options?: LogMessageOptions): void;
 
   /**
-   * Writes a debug message to console logs.
-   * If enabled, writes it to .kibana-event-log-* index as well.
+   * Writes a debug message to the event log and console at DEBUG level.
    */
-  debug(...messages: string[]): void;
+  debug(message: string, options?: LogMessageOptions): void;
 
   /**
-   * Writes an info message to console logs.
-   * If enabled, writes it to .kibana-event-log-* index as well.
+   * Writes an info message to the event log at INFO level.
+   * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  info(...messages: string[]): void;
+  info(message: string, options?: LogMessageOptions): void;
 
   /**
-   * Writes a warning message to console logs.
-   * If enabled, writes it to .kibana-event-log-* index as well.
+   * Writes a warning message to the event log at WARN level.
+   * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  warn(...messages: string[]): void;
+  warn(message: string, options?: LogMessageOptions): void;
 
   /**
-   * Writes an error message to console logs.
-   * If enabled, writes it to .kibana-event-log-* index as well.
+   * Writes an error message to the event log at ERROR level.
+   * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  error(...messages: string[]): void;
+  error(message: string, options?: LogMessageOptions): void;
 
   /**
    * Writes information about new rule statuses and measured execution metrics:
@@ -109,6 +108,13 @@ export interface RuleExecutionContext {
    * Kibana space id of the rule being executed.
    */
   spaceId: string;
+}
+
+export interface LogMessageOptions {
+  /**
+   * Override the console log level. Defaults to DEBUG when not specified.
+   */
+  consoleLogLevel?: LogLevel;
 }
 
 export interface RunningStatusChangeArgs {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScoutPage, Locator } from '@kbn/scout';
+import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class AlertDetailsRightPanelPage {
   public detailsFlyoutCloseIcon: Locator;

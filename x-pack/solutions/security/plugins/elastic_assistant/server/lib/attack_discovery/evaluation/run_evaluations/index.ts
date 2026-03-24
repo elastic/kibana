@@ -6,11 +6,11 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { asyncForEach } from '@kbn/std';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 
@@ -19,7 +19,7 @@ import { getEvaluatorLlm } from '../helpers/get_evaluator_llm';
 import { getCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefaultPromptTemplate } from '../helpers/get_custom_evaluator/get_default_prompt_template';
 import { getGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import { DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
+import type { DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in
@@ -30,6 +30,7 @@ export const runEvaluations = async ({
   connectorTimeout,
   evaluatorConnectorId,
   datasetName,
+  getInferenceConnectorById,
   graphs,
   langSmithApiKey,
   logger,
@@ -38,8 +39,9 @@ export const runEvaluations = async ({
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   datasetName: string;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   graphs: Array<{
-    connector: Connector;
+    connector: InferenceConnector;
     graph: DefaultAttackDiscoveryGraph;
     llmType: string | undefined;
     name: string;
@@ -83,6 +85,7 @@ export const runEvaluations = async ({
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector: connector,
+        getInferenceConnectorById,
         langSmithApiKey,
         logger,
       });

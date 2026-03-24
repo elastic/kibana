@@ -11,7 +11,7 @@ import React from 'react';
 import type { CoreStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { TelemetryService } from '..';
+import type { TelemetryService } from '..';
 import type { TelemetryConstants } from '../..';
 
 interface RenderBannerConfig

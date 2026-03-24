@@ -8,11 +8,13 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
-import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiIconProps, WithEuiThemeProps } from '@elastic/eui';
+import { EuiLink, withEuiTheme } from '@elastic/eui';
+import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
@@ -25,28 +27,32 @@ import {
   isOfQueryType,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   TimeHistoryContract,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
+import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
-import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ESQLQueryStats } from '@kbn/esql-types';
+import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
-import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import type { SavedQueryMeta } from '../saved_query_form';
+import { SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
-import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
+import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
+import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import { QueryBarTopRow, QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import type {
-  SuggestionsAbstraction,
-  SuggestionsListSize,
-} from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
@@ -145,6 +151,27 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   renderQueryInputAppend?: () => React.ReactNode;
   onESQLDocsFlyoutVisibilityChanged?: QueryBarTopRowProps['onESQLDocsFlyoutVisibilityChanged'];
+  /**
+   * Optional configuration for ES|QL variables.
+   *
+   * This prop allows you to define and manage variables used within ES|QL queries,
+   * typically bound to UI controls like dropdowns or input fields (Dashboard controls here).
+   */
+  esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
+  esqlQueryStats?: ESQLQueryStats;
+
+  /** Optional configurations for the lookup join index editor */
+  onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];
+
+  esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
+  onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
+
+  hasDirtyState?: boolean;
+  useBackgroundSearchButton?: boolean;
+  /**
+   * Enable data source browser suggestion in ES|QL editor.
+   */
+  enableResourceBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -303,8 +330,15 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     return (
       (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
-      this.state.dateRangeTo !== this.props.dateRangeTo
+      this.state.dateRangeTo !== this.props.dateRangeTo ||
+      Boolean(this.props.hasDirtyState)
     );
+  };
+
+  private onDraftChange = (draft: UnifiedSearchDraft | undefined) => {
+    if (this.props.onDraftChange && !isEqual(this.props.draft, draft)) {
+      this.props.onDraftChange(draft);
+    }
   };
 
   componentWillUnmount() {
@@ -515,12 +549,83 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     }
   };
 
+  private showBackgroundSearchCreatedToast(name: string | undefined) {
+    if (!name) return;
+
+    const toast = this.services.notifications.toasts.addSuccess({
+      title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.toast.title', {
+        defaultMessage: 'Background search created',
+      }),
+      text: toMountPoint(
+        <FormattedMessage
+          id="unifiedSearch.search.searchBar.backgroundSearch.toast.text"
+          defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
+          values={{
+            name,
+            link: (chunks: React.ReactNode) => (
+              <EuiLink
+                data-test-subj="backgroundSearchToastLink"
+                onClick={() => {
+                  this.services.notifications.toasts.remove(toast);
+                  this.services.data.search.showSearchSessionsFlyout({
+                    appId: this.services.appName,
+                    trackingProps: { openedFrom: 'toast' },
+                  });
+                }}
+              >
+                {chunks}
+              </EuiLink>
+            ),
+          }}
+        />,
+        this.services
+      ),
+    });
+  }
+
+  private onBackgroundSearch = async (payload: {
+    dateRange: TimeRange;
+    query?: QT | Query | undefined;
+  }) => {
+    try {
+      if (!this.isDirty()) {
+        const searchSession = await this.services.data.search.session.save({
+          entryPoint: 'main button',
+        });
+        this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
+        return;
+      }
+
+      const currentSessionId = this.services.data.search.session.getSessionId();
+
+      const subscription = this.services.data.search.session
+        .getSession$()
+        .subscribe(async (newSessionId) => {
+          if (currentSessionId === newSessionId) return;
+          subscription.unsubscribe();
+          const searchSession = await this.services.data.search.session.save({
+            entryPoint: 'main button',
+          });
+          this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
+        });
+
+      this.onQueryBarSubmit(payload);
+    } catch (e) {
+      this.services.notifications.toasts.addError(e as Error, {
+        title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.errorToast.title', {
+          defaultMessage: 'There was a problem sending your search to background',
+        }),
+      });
+    }
+  };
+
   private shouldShowDatePickerAsBadge() {
     return this.shouldRenderFilterBar() && !this.props.showQueryInput;
   }
 
   public render() {
     const { theme, query } = this.props;
+    const { isBackgroundSearchEnabled, session } = this.services.data.search;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme, isESQLQuery);
@@ -530,7 +635,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       isScreenshotMode && styles.hidden,
     ];
 
-    const classes = classNames('uniSearchBar', {
+    const classes = classNames('uniSearchBar', 'hide-for-sharing', {
       [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
@@ -640,6 +745,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
+        {isBackgroundSearchEnabled && (
+          <BackgroundSearchRestoredCallout isESQLQuery={isESQLQuery} state$={session.state$} />
+        )}
         <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
@@ -663,7 +771,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
-          onDraftChange={this.props.onDraftChange}
+          onDraftChange={this.onDraftChange}
+          onSendToBackground={this.onBackgroundSearch}
           isDirty={this.isDirty()}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
@@ -679,7 +788,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           nonKqlMode={this.props.nonKqlMode}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
-          filters={this.props.filters!}
+          filters={this.props.filters}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
@@ -696,6 +805,13 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
           onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
+          esqlEditorInitialState={this.props.esqlEditorInitialState}
+          onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
+          esqlVariablesConfig={this.props.esqlVariablesConfig}
+          esqlQueryStats={this.props.esqlQueryStats}
+          onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
+          useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>
     );

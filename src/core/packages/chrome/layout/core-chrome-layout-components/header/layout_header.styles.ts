@@ -8,13 +8,15 @@
  */
 
 import { css } from '@emotion/react';
-import { EmotionFn } from '../types';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   grid-area: header;
-  height: var(--kbn-layout--header-height);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
+  height: ${layoutVar('header.height')};
+  max-width: ${layoutVar('header.width')};
+  z-index: ${layoutLevels.header};
 `;
 
 export const styles = {

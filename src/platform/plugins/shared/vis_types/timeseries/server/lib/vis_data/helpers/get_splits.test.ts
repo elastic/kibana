@@ -8,7 +8,7 @@
  */
 
 import { getSplits } from './get_splits';
-import { Panel, Series } from '../../../../common/types';
+import type { Panel, Series } from '../../../../common/types';
 
 describe('getSplits(resp, panel, series)', () => {
   test('should return a splits for everything/filter group bys', async () => {

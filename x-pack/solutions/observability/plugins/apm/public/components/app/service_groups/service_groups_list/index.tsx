@@ -89,10 +89,12 @@ export function ServiceGroupsList() {
             <EuiFlexItem>
               <EuiFormControlLayout
                 fullWidth
+                css={{ blockSize: 'auto' }}
                 clear={!isEmpty(filter) ? { onClick: clearFilterCallback } : undefined}
               >
                 <EuiFieldText
                   controlOnly
+                  compressed
                   data-test-subj="apmServiceGroupsListFieldText"
                   icon="search"
                   fullWidth

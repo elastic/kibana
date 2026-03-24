@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -57,13 +57,3 @@ export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange,
     </EuiFlexGroup>
   </form>
 );
-
-AdvancedFilter.defaultProps = {
-  value: '',
-};
-
-AdvancedFilter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-  commit: PropTypes.func.isRequired,
-};

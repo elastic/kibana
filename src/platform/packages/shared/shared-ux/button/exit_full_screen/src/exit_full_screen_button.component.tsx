@@ -9,7 +9,6 @@
 
 import React from 'react';
 import {
-  EuiScreenReaderOnly,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,10 +16,11 @@ import {
   useEuiTheme,
   useEuiShadow,
   makeHighContrastColor,
+  EuiLiveAnnouncer,
 } from '@elastic/eui';
 // EUI allows reaching into internal folders for component-specific exports, but they aren't typed in Kibana
 // @ts-ignore
-import { useEuiButtonFocusCSS } from '@elastic/eui/lib/themes/amsterdam/global_styling/mixins/button';
+import { useEuiButtonFocusCSS } from '@elastic/eui/lib/global_styling/mixins/_button';
 // @ts-ignore
 import { euiButtonDisplayStyles } from '@elastic/eui/lib/components/button/button_display/_button_display.styles';
 import { i18n } from '@kbn/i18n';
@@ -64,9 +64,7 @@ export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) 
 
   return (
     <div>
-      <EuiScreenReaderOnly>
-        <p aria-live="polite">{description}</p>
-      </EuiScreenReaderOnly>
+      <EuiLiveAnnouncer>{description}</EuiLiveAnnouncer>
       <button
         css={buttonCSS}
         className={cx('exitFullScreenButton', className)}

@@ -15,6 +15,7 @@ import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import type { ScheduledItem } from './utils';
+import { backfillInitiator } from '../../../../common/constants';
 
 jest.mock('./calculate_gaps_state', () => ({
   calculateGapStateFromAllBackfills: jest.fn().mockResolvedValue(undefined),
@@ -40,6 +41,7 @@ const scheduledItems = [
 ] as ScheduledItem[];
 
 const gap = new Gap({
+  ruleId,
   range: {
     gte: '2024-01-01T00:00:00.000Z',
     lte: '2024-01-01T01:00:00.000Z',
@@ -82,6 +84,7 @@ describe('applyScheduledBackfillsToGap', () => {
         backfillClient,
         actionsClient,
         ruleId,
+        initiator: backfillInitiator.USER,
       });
 
       expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems: [] });
@@ -113,6 +116,7 @@ describe('applyScheduledBackfillsToGap', () => {
         backfillClient,
         actionsClient,
         ruleId,
+        initiator: backfillInitiator.USER,
       });
 
       expect(updateGapFromScheduleMock).toHaveBeenCalledWith({
@@ -147,6 +151,7 @@ describe('applyScheduledBackfillsToGap', () => {
         backfillClient,
         actionsClient,
         ruleId,
+        initiator: backfillInitiator.USER,
       });
 
       expect(updateGapFromScheduleMock).toHaveBeenCalledWith({
@@ -176,6 +181,7 @@ describe('applyScheduledBackfillsToGap', () => {
         actionsClient,
         ruleId,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
 
       expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems });
@@ -203,10 +209,126 @@ describe('applyScheduledBackfillsToGap', () => {
         backfillClient,
         actionsClient,
         ruleId,
+        initiator: backfillInitiator.USER,
       });
 
       expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems });
       expect(calculateGapStateFromAllBackfillsMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('failed auto fill attempts', () => {
+    it('should increment failed auto fill attempts when initiator is SYSTEM and has failed backfill task with ERROR status', async () => {
+      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+
+      const scheduledItemsWithError = [
+        ...scheduledItems,
+        {
+          status: adHocRunStatus.ERROR,
+        } as ScheduledItem,
+      ];
+
+      await applyScheduledBackfillsToGap({
+        gap,
+        scheduledItems: scheduledItemsWithError,
+        savedObjectsRepository,
+        logger: mockLogger,
+        backfillClient,
+        actionsClient,
+        ruleId,
+        initiator: backfillInitiator.SYSTEM,
+      });
+
+      expect(gapSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should increment failed auto fill attempts when initiator is SYSTEM and has failed backfill task with TIMEOUT status', async () => {
+      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+
+      const scheduledItemsWithTimeout = [
+        ...scheduledItems,
+        {
+          status: adHocRunStatus.TIMEOUT,
+        } as ScheduledItem,
+      ];
+
+      await applyScheduledBackfillsToGap({
+        gap,
+        scheduledItems: scheduledItemsWithTimeout,
+        savedObjectsRepository,
+        logger: mockLogger,
+        backfillClient,
+        actionsClient,
+        ruleId,
+        initiator: backfillInitiator.SYSTEM,
+      });
+
+      expect(gapSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT increment failed auto fill attempts when initiator is USER and has failed backfill task', async () => {
+      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+
+      const scheduledItemsWithError = [
+        ...scheduledItems,
+        {
+          status: adHocRunStatus.ERROR,
+        } as ScheduledItem,
+      ];
+
+      await applyScheduledBackfillsToGap({
+        gap,
+        scheduledItems: scheduledItemsWithError,
+        savedObjectsRepository,
+        logger: mockLogger,
+        backfillClient,
+        actionsClient,
+        ruleId,
+        initiator: backfillInitiator.USER,
+      });
+
+      expect(gapSpy).not.toHaveBeenCalled();
+    });
+
+    it('should NOT increment failed auto fill attempts when initiator is SYSTEM but has no failed backfill tasks', async () => {
+      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+
+      await applyScheduledBackfillsToGap({
+        gap,
+        scheduledItems,
+        savedObjectsRepository,
+        logger: mockLogger,
+        backfillClient,
+        actionsClient,
+        ruleId,
+        initiator: backfillInitiator.SYSTEM,
+      });
+
+      expect(gapSpy).not.toHaveBeenCalled();
+    });
+
+    it('should NOT increment failed auto fill attempts when initiator is undefined', async () => {
+      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+
+      const scheduledItemsWithError = [
+        ...scheduledItems,
+        {
+          status: adHocRunStatus.ERROR,
+        } as ScheduledItem,
+      ];
+
+      await applyScheduledBackfillsToGap({
+        gap,
+        scheduledItems: scheduledItemsWithError,
+        savedObjectsRepository,
+        logger: mockLogger,
+        backfillClient,
+        actionsClient,
+        ruleId,
+        initiator: undefined,
+      });
+
+      expect(gapSpy).not.toHaveBeenCalled();
     });
   });
 });

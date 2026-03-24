@@ -181,6 +181,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
         {!isSingle && isDeleting ? (
           <Fragment>
             <EuiCallOut
+              announceOnMount
               color="warning"
               title={
                 <Fragment>

@@ -14,7 +14,6 @@ import {
   type EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from '../constants';
@@ -66,7 +65,6 @@ interface Props {
   onSettingsReset?: () => void;
   onSettingsSave?: () => void;
   settings: AlertsSelectionSettings;
-  stats: AttackDiscoveryStats | null;
 }
 
 export const useTabsView = ({
@@ -78,7 +76,6 @@ export const useTabsView = ({
   onSettingsSave,
   onSettingsChanged,
   settings,
-  stats,
 }: Props): UseTabsView => {
   const { settingsView, actionButtons: filterActionButtons } = useSettingsView({
     connectorId,
@@ -89,7 +86,6 @@ export const useTabsView = ({
     onSettingsChanged,
     settings,
     showConnectorSelector: true,
-    stats,
   });
   const { scheduleView, actionButtons: scheduleTabButtons } = useScheduleView();
 

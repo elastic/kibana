@@ -8,127 +8,107 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-plugin/common';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import type {
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-} from '../../state_management/discover_data_state_container';
+import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { DiscoverMainContent } from './discover_main_content';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { PatternAnalysisTab } from '../pattern_analysis';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { createDataSource } from '../../../../../common/data_sources';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverAppState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+
+const dataView = dataViewWithTimefieldMock;
 
 const mountComponent = async ({
   hideChart = false,
   isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
-  storage,
 }: {
   hideChart?: boolean;
   isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
-  storage?: Storage;
-  savedSearch?: SavedSearch;
 } = {}) => {
-  let services = createDiscoverServicesMock();
+  const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
+  const services = createDiscoverServicesMock();
 
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
+  services.profilesManager = profilesManagerMock;
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataView],
   });
-  (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
-    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
+
+  await toolkit.initializeTabs();
+
+  const query: DiscoverAppState['query'] = isEsqlMode
+    ? { esql: 'from *' }
+    : { query: '', language: 'kuery' };
+
+  toolkit.internalState.dispatch(
+    internalStateActions.updateAppState({
+      tabId: toolkit.getCurrentTab().id,
+      appState: {
+        dataSource: createDataSource({ dataView, query }),
+        interval: 'auto',
+        hideChart,
+        columns: [],
+        query,
+      },
+    })
   );
 
-  if (storage) {
-    services = { ...services, storage };
-  }
-
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments: true,
-  }) as DataMain$;
-
-  const documents$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
-  }) as DataDocuments$;
-
-  const totalHits$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHitsMock.length),
-  }) as DataTotalHits$;
-
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  const savedSearchData$ = {
-    main$,
-    documents$,
-    totalHits$,
-  };
-  stateContainer.dataState.data$ = savedSearchData$;
-  const dataView = stateContainer.savedSearchState
-    .getState()
-    .searchSource.getField('index') as DataView;
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
-    interval: 'auto',
-    hideChart,
-    columns: [],
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
   });
 
-  if (isEsqlMode) {
-    stateContainer.appState.update({ query: { esql: 'from * ' } });
-  }
+  dataStateContainer.data$.documents$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
+  });
+  dataStateContainer.data$.totalHits$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: Number(esHitsMock.length),
+  });
+  dataStateContainer.data$.main$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    foundDocuments: true,
+  });
 
   const props: DiscoverMainContentProps = {
     dataView,
-    stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: jest.fn(),
+    }),
     isChartAvailable,
-    panelsToggle: (
-      <PanelsToggle
-        stateContainer={stateContainer}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        isChartAvailable={undefined}
-        renderedFor="root"
-      />
-    ),
   };
 
   const component = mountWithIntl(
-    <DiscoverTestProvider services={services} stateContainer={stateContainer}>
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverMainContent {...props} />
-    </DiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {
@@ -155,24 +135,21 @@ describe('Discover main content component', () => {
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
-    it('should include PanelsToggle when chart is available', async () => {
+    it('should not include inline PanelsToggle when chart is available and visible', async () => {
       const component = await mountComponent({ isChartAvailable: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).exists()).toBe(false);
       expect(component.find(EuiHorizontalRule).exists()).toBe(true);
     });
 
     it('should include PanelsToggle when chart is available and hidden', async () => {
       const component = await mountComponent({ isChartAvailable: true, hideChart: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(false);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
 
     it('should include PanelsToggle when chart is not available', async () => {
       const component = await mountComponent({ isChartAvailable: false });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(true);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });

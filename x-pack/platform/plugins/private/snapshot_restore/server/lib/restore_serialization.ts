@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SnapshotRestoreShard, SnapshotRestoreShardEs } from '../../common/types';
+import type { SnapshotRestoreShard, SnapshotRestoreShardEs } from '../../common/types';
 
 export const deserializeRestoreShard = (
   esSnapshotRestoreShard: SnapshotRestoreShardEs

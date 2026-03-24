@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup(
-        'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+        'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
         {
           from: 'Oct 5, 2017 @ 19:34:48.000',
           to: 'Oct 5, 2017 @ 20:35:12.000',

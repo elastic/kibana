@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Stackframe } from '@kbn/apm-types';
+import type { Stackframe } from '@kbn/apm-types';
 import { renderWithTheme } from '../../utils/test_helpers';
 import { FrameHeading } from './frame_heading';
 

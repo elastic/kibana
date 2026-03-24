@@ -16,7 +16,7 @@ jest.mock('./util', () => {
 });
 
 import { schema } from '@kbn/config-schema';
-import { Router } from '@kbn/core-http-router-server-internal';
+import type { Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
 import { extractResponses, processRouter } from './process_router';
 import { type InternalRouterRoute } from './type';

@@ -20,6 +20,7 @@
 .mapLayerControl__addLayerButton,
 .mapLayerControl__openLayerTOCButton {
   pointer-events: all;
+  padding: 0 $euiSizeS;
 
   &:enabled,
   &:enabled:hover,

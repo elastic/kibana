@@ -1,22 +1,12 @@
 {
-  "extends": "<%- relativePathTo("tsconfig.base.json") %>",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-    <%_ if (pkg.web) { _%>
-      "jest",
-      "node",
-      "react"
-    <%_ } else { _%>
-      "jest",
-      "node"
-    <%_ } _%>
-    ]
   },
   "include": [
     "**/*.ts",
     <%_ if (pkg.web) { _%>
-      "**/*.tsx",
+    "**/*.tsx",
     <%_ } _%>
   ],
   "exclude": [

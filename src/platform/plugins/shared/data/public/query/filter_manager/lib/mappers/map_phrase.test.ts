@@ -9,7 +9,7 @@
 
 import { getPhraseDisplayValue, mapPhrase } from './map_phrase';
 import type { PhraseFilter, Filter } from '@kbn/es-query';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {

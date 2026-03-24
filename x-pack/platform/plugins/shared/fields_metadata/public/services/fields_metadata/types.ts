@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
   FindFieldsMetadataRequestQuery,
   FindFieldsMetadataResponsePayload,
 } from '../../../common/latest';

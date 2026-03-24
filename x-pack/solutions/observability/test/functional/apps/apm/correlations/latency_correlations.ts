@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -28,7 +28,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('latency correlations', () => {
     describe('space with no features disabled', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/metrics_and_apm'
+        );
         await spacesService.delete('custom_space');
         await spacesService.create({
           id: 'custom_space',
@@ -38,7 +40,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/metrics_and_apm'
+        );
         await spacesService.delete('custom_space');
       });
 

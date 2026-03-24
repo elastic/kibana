@@ -80,7 +80,8 @@ export const getApiKeyManager = ({
       return (
         await encryptedSavedObjectsClient.getDecryptedAsInternalUser<EntityDiscoveryAPIKey>(
           EntityDiscoveryApiKeyType.name,
-          getSpaceAwareEntityDiscoverySavedObjectId(namespace)
+          getSpaceAwareEntityDiscoverySavedObjectId(namespace),
+          { namespace }
         )
       ).attributes;
     } catch (err) {

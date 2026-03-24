@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getArgValue, getArgValues } from './read_argv';
+import { getAllArgKeysValueWithPrefix, getArgValue, getArgValues } from './read_argv';
 
 describe('getArgValues', () => {
   it('retrieve the arg value from the provided argv arguments', () => {
@@ -41,6 +41,22 @@ describe('getArgValues', () => {
     );
     expect(argValues).toEqual(['my-config']);
   });
+
+  it('ignores the flag when no value is provided (even if followed by another flag)', () => {
+    const argValues = getArgValues(
+      ['--config', '-c', 'my-config', '--foo', '-b', 'bar'],
+      ['--config', '-c']
+    );
+    expect(argValues).toEqual(['my-config']);
+  });
+
+  it('supports the format --foo=bar', () => {
+    const argValues = getArgValues(
+      ['--config', '-c', 'my-config', '--foo=bar', '-b', 'bar'],
+      ['--foo']
+    );
+    expect(argValues).toEqual(['bar']);
+  });
 });
 
 describe('getArgValue', () => {
@@ -66,5 +82,43 @@ describe('getArgValue', () => {
       '--unicorn'
     );
     expect(argValues).toBeUndefined();
+  });
+});
+
+describe('getAllArgKeysValueWithPrefix', () => {
+  it('returns all the keys exact-matching the provided prefix', () => {
+    const argv = [
+      '--config',
+      'my-config',
+      '--foo',
+      '-b',
+      'bar',
+      '--baz',
+      '--unicorn',
+      '{"name": "Bob", "madeOf": "chocolate"}',
+    ];
+
+    expect(getAllArgKeysValueWithPrefix(argv, '--unicorn')).toEqual([
+      ['unicorn', '{"name": "Bob", "madeOf": "chocolate"}'],
+    ]);
+  });
+
+  it('returns all the sub-keys matching the provided prefix', () => {
+    const argv = [
+      '--config',
+      'my-config',
+      '--foo',
+      '-b',
+      'bar',
+      '--baz',
+      '--unicorn.name',
+      'Bob',
+      '--unicorn.madeOf=chocolate',
+    ];
+
+    expect(getAllArgKeysValueWithPrefix(argv, '--unicorn')).toEqual([
+      ['unicorn.name', 'Bob'],
+      ['unicorn.madeOf', 'chocolate'],
+    ]);
   });
 });

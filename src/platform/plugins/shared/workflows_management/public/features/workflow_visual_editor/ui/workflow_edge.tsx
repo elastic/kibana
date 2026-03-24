@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EdgeProps } from '@xyflow/react';
+import { getBezierPath } from '@xyflow/react';
 import React from 'react';
-import { EdgeProps, getBezierPath } from '@xyflow/react';
 
 export function WorkflowGraphEdge({
   id,

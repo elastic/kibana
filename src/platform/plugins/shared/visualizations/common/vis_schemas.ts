@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig, SupportedAggregation } from './types';
+import type { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { SchemaConfig, SupportedAggregation } from './types';
 
 interface SchemaConfigParams {
   precision?: number;

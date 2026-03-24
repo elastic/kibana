@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen, act, fireEvent } from '@testing-library/react';
-import { SearchQueryRulesQueryRule } from '../../../../common/types';
+import type { SearchQueryRulesQueryRule } from '../../../../common/types';
 import { QueryRuleFlyout } from './query_rule_flyout';
 import * as formContext from 'react-hook-form';
 import { QueryRulesetDetailsForm } from '../../../providers/query_ruleset_details_form';

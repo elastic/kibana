@@ -188,6 +188,7 @@ describe('getNetworkEvents', () => {
       Array [
         Array [
           Object {
+            "ignore_unavailable": true,
             "index": "synthetics-*",
             "query": Object {
               "bool": Object {

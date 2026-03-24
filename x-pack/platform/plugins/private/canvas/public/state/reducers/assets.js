@@ -6,11 +6,9 @@
  */
 
 import { handleActions, combineActions } from 'redux-actions';
-import immutable from 'object-path-immutable';
+import { set, assign, del } from 'object-path-immutable';
 import { get } from 'lodash';
 import { setAssetValue, removeAsset, setAssets, resetAssets, setAsset } from '../actions/assets';
-
-const { set, assign, del } = immutable;
 
 export const assetsReducer = handleActions(
   {

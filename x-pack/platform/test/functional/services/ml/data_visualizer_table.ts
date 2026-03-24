@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
 export function MachineLearningDataVisualizerTableProvider(
@@ -480,10 +480,11 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      await this.ensureDetailsOpen(fieldName);
-
-      await this.assertExamplesList(fieldName, expectedExamplesCount);
-      await this.ensureDetailsClosed(fieldName);
+      if (expectedExamplesCount > 0) {
+        await this.ensureDetailsOpen(fieldName);
+        await this.assertExamplesList(fieldName, expectedExamplesCount);
+        await this.ensureDetailsClosed(fieldName);
+      }
     }
 
     public async assertGeoPointFieldContents(

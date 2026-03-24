@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // temporary workaround for registry promotion
-  describe.skip('Synthetics API Tests', () => {
+  describe('Synthetics API Tests', () => {
     before(async () => {
       await esDeleteAllIndices('heartbeat*');
       await esDeleteAllIndices('synthetics*');
@@ -24,8 +23,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./add_monitor_private_location'));
     loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./sync_global_params'));
+    loadTestFile(require.resolve('./sync_global_params_spaces'));
     loadTestFile(require.resolve('./add_edit_params'));
     loadTestFile(require.resolve('./private_location_apis'));
     loadTestFile(require.resolve('./list_monitors'));
+    loadTestFile(require.resolve('./sync_maintenance_windows'));
+    loadTestFile(require.resolve('./sync_maintenance_windows_non_default_space'));
   });
 }

@@ -11,6 +11,8 @@ import { createHttpApiTestSetupMock } from '../../mocks';
 import { registerCustomScriptsRoute } from './custom_scripts_handler';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 import { getResponseActionsClient } from '../../services';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { EndpointAuthorizationError } from '../../errors';
 
 jest.mock('../../services', () => {
   const actual = jest.requireActual('../../services');
@@ -60,6 +62,22 @@ describe('custom_scripts_handler', () => {
     jest.clearAllMocks();
   });
 
+  it('should error if user has no Authz to API', async () => {
+    (
+      (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+    ).mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canWriteExecuteOperations: false,
+      })
+    );
+
+    await callHandler();
+
+    expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
+      body: expect.any(EndpointAuthorizationError),
+    });
+  });
+
   it('returns custom scripts from the response actions client', async () => {
     await callHandler();
 
@@ -85,5 +103,37 @@ describe('custom_scripts_handler', () => {
     await callHandler();
 
     expect(mockGetResponseActionsClient).toHaveBeenCalledWith('crowdstrike', expect.anything());
+  });
+
+  describe('and agentType is sentinel_one', () => {
+    beforeEach(() => {
+      // @ts-expect-error write to readonly property
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        true;
+      httpRequestMock.query.agentType = 'sentinel_one';
+      httpRequestMock.query.osType = 'linux';
+    });
+
+    it('should return error if feature flag is disabled', async () => {
+      // @ts-expect-error write to readonly property
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        false;
+      await callHandler();
+
+      expect(httpResponseMock.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: expect.objectContaining({
+          message: "Agent type [sentinel_one] does not support 'runscript' response action",
+        }),
+      });
+    });
+
+    it('should pass query params to SentinelOne `getCustomScripts()` method', async () => {
+      await callHandler();
+
+      expect(mockGetResponseActionsClient().getCustomScripts).toHaveBeenCalledWith({
+        osType: 'linux',
+      });
+    });
   });
 });

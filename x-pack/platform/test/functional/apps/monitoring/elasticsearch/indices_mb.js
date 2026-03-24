@@ -17,11 +17,14 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum_mb', {
-        from: 'Oct 6, 2017 @ 19:53:06.748',
-        to: 'Oct 6, 2017 @ 20:15:30.212',
-        useCreate: true,
-      });
+      await setup(
+        'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_red_platinum_mb',
+        {
+          from: 'Oct 6, 2017 @ 19:53:06.748',
+          to: 'Oct 6, 2017 @ 20:15:30.212',
+          useCreate: true,
+        }
+      );
 
       await overview.closeAlertsModal();
 

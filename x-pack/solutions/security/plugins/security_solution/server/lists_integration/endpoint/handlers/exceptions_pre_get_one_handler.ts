@@ -14,6 +14,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 
 export const getExceptionsPreGetOneHandler = (
@@ -40,6 +41,14 @@ export const getExceptionsPreGetOneHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreGetOneItem(
+        exceptionItem
+      );
+      return data;
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      await new TrustedDeviceValidator(endpointAppContextService, request).validatePreGetOneItem(
         exceptionItem
       );
       return data;

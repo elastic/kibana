@@ -73,7 +73,7 @@ export const IntegrationsPage = React.memo<IntegrationsGridProps>(
               showControls={false}
               showSearchTools={true}
               sortByFeaturedIntegrations={false}
-              spacer={false}
+              spacer={true}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

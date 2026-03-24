@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import useBoolean from 'react-use/lib/useBoolean';
-import { useUserData } from '../../../../../detections/components/user_info';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
@@ -32,8 +32,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
-  const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
-  const canUserEditRules = canUserCRUD && !isUserDataLoading;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
@@ -75,7 +74,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={installOnClick}
-              disabled={!canUserEditRules || isRequestInProgress}
+              disabled={!canEditRules || isRequestInProgress}
               data-test-subj="installSelectedRulesButton"
             >
               {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
@@ -91,7 +90,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
                   iconType="boxesVertical"
                   aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
                   onClick={onOverflowButtonClick}
-                  disabled={!canUserEditRules || isRequestInProgress}
+                  disabled={!canEditRules || isRequestInProgress}
                 />
               }
               isOpen={isOverflowPopoverOpen}
@@ -110,7 +109,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={!canUserEditRules || !hasRulesToInstall || isRequestInProgress}
+          disabled={!canEditRules || !hasRulesToInstall || isRequestInProgress}
           aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}

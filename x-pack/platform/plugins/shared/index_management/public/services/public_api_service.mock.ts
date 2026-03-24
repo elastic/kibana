@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { PublicApiServiceSetup } from '@kbn/index-management-shared-types/src/services/public_api_service';
+import type { PublicApiServiceSetup } from '@kbn/index-management-shared-types/src/services/public_api_service';
 
 export type PublicApiServiceSetupMock = jest.Mocked<PublicApiServiceSetup>;
 
 const createServiceMock = (): PublicApiServiceSetupMock => ({
   getAllEnrichPolicies: jest.fn(),
+  getIndexTemplates: jest.fn(),
+  simulateIndexTemplate: jest.fn(),
 });
 
 export const publicApiServiceMock = {

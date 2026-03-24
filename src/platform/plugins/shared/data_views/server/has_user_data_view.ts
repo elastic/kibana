@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { DataViewSavedObjectAttrs } from '../common/data_views';
+import type { DataViewSavedObjectAttrs } from '../common/data_views';
 
 interface Deps {
   esClient: ElasticsearchClient;

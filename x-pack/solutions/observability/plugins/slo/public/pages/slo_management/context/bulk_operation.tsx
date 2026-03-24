@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@kbn/react-query';
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { usePluginContext } from '../../../hooks/use_plugin_context';

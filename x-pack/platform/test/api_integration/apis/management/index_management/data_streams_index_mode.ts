@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_BASE_PATH } from './constants';
 import { datastreamsHelpers } from './lib/datastreams.helpers';
 
@@ -62,7 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
         { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
       ];
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
         it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled} and logs.prior_logs_usage is ${prior_logs_usage}`, async () => {
           await es.cluster.putSettings({

@@ -24,8 +24,7 @@
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import 'cypress-data-session';
-// @ts-ignore
-import registerCypressGrep from '@cypress/grep';
+import { register as registerCypressGrep } from '@cypress/grep';
 
 import { login, ROLE } from '../tasks/login';
 import { loadPage } from '../tasks/common';
@@ -106,5 +105,5 @@ Cypress.on('uncaught:exception', () => false);
 before(() => {
   login(ROLE.soc_manager);
   loadPage('/app/security/alerts');
-  cy.getByTestSubj('manage-alert-detection-rules').should('exist');
+  cy.getByTestSubj('alerts-page-manage-alert-detection-rules').should('exist');
 });

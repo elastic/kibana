@@ -36,20 +36,20 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(user.username, user.password)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-observability.apm.alerts'
+    const observabilityIndex = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith('.alerts-observability.apm.alerts')
     );
-    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts');
-    return observabilityIndex;
+    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts-default');
+    return '.alerts-observability.apm.alerts';
   };
 
   describe('rbac with subfeatures', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     describe('Users:', () => {
@@ -71,22 +71,22 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
       });
 
-      it(`${obsMinRead.username} should NOT be able to access the APM alert in ${SPACE1}`, async () => {
+      it(`${obsMinRead.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
           .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
           .auth(obsMinRead.username, obsMinRead.password)
           .set('kbn-xsrf', 'true')
-          .expect(404);
+          .expect(200);
       });
 
-      it(`${obsMinReadSpacesAll.username} should NOT be able to access the APM alert in ${SPACE1}`, async () => {
+      it(`${obsMinReadSpacesAll.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
           .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
           .auth(obsMinReadSpacesAll.username, obsMinReadSpacesAll.password)
           .set('kbn-xsrf', 'true')
-          .expect(404);
+          .expect(200);
       });
     });
 

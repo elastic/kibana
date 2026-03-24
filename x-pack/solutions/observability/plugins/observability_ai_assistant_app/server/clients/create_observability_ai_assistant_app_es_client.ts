@@ -6,7 +6,7 @@
  */
 
 import { createTracedEsClient } from '@kbn/traced-es-client';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export async function createObservabilityAIAssistantAppEsClient({
   client,

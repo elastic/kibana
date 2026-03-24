@@ -18,13 +18,17 @@ describe('Case View Page observables tab', () => {
   });
 
   it('should render the utility bar for the observables table', async () => {
-    renderWithTestingProviders(<CaseViewObservables isLoading={false} caseData={basicCase} />);
+    renderWithTestingProviders(
+      <CaseViewObservables isLoading={false} caseData={basicCase} onUpdateField={jest.fn()} />
+    );
 
     expect((await screen.findAllByTestId('cases-observables-add')).length).toBe(2);
   });
 
   it('should render the observable table', async () => {
-    renderWithTestingProviders(<CaseViewObservables isLoading={false} caseData={basicCase} />);
+    renderWithTestingProviders(
+      <CaseViewObservables isLoading={false} caseData={basicCase} onUpdateField={jest.fn()} />
+    );
 
     expect(await screen.findByTestId('cases-observables-table')).toBeInTheDocument();
   });

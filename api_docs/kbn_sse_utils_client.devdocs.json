@@ -34,6 +34,8 @@
           ", T>"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-client/src/http_response_into_observable.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

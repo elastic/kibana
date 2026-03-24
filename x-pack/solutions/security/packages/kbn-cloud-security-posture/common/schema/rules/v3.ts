@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
 export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
@@ -41,7 +42,8 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
   rego_rule_id: schema.string(),
   remediation: schema.string(),
   section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
+  // maxSize is set to 100 as it's not expected to have more than 100 tags per rule
+  tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
   version: schema.string(),
 });
 
@@ -68,15 +70,17 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize is set to 50 to cover all available fields with room for future additions
+  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 
   /**
    *  The fields to perform the parsed query against.
    * Valid fields are fields which mapped to 'text' in cspBenchmarkRuleSavedObjectMapping
    */
+  // maxSize is set to 2 as there are only 2 valid search fields
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
-    { defaultValue: ['metadata.name.text'] }
+    { defaultValue: ['metadata.name.text'], maxSize: 2 }
   ),
 
   /**

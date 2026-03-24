@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchProps } from '@elastic/eui';
@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
+import { useBoolean } from '@kbn/react-hooks';
 import type { MetricsExplorerChartOptions as ChartOptions } from '../hooks/use_metrics_explorer_options';
 import {
   MetricsExplorerYAxisMode,
@@ -29,21 +30,18 @@ interface Props {
 }
 
 export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) => {
-  const [isPopoverOpen, setPopoverState] = useState<boolean>(false);
-
-  const handleClosePopover = useCallback(() => {
-    setPopoverState(false);
-  }, []);
-
-  const handleOpenPopover = useCallback(() => {
-    setPopoverState(true);
-  }, []);
+  const [isPopoverOpen, { toggle: togglePopover }] = useBoolean(false);
 
   const button = (
     <EuiButtonEmpty
+      aria-label={i18n.translate(
+        'xpack.infra.metricsExplorerChartOptions.customizeButton.ariaLabel',
+        { defaultMessage: 'Customize' }
+      )}
       iconSide="left"
+      size="s"
       iconType="eye"
-      onClick={handleOpenPopover}
+      onClick={togglePopover}
       data-test-subj="metricsExplorer-customize"
     >
       <FormattedMessage
@@ -127,7 +125,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
       id="MetricExplorerChartOptionsPopover"
       button={button}
       isOpen={isPopoverOpen}
-      closePopover={handleClosePopover}
+      closePopover={togglePopover}
     >
       <EuiForm>
         <EuiFormRow
@@ -142,6 +140,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
             options={typeRadios}
             idSelected={chartOptions.type}
             onChange={handleTypeChange}
+            name="chartStyle"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -170,6 +169,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
             options={yAxisRadios}
             idSelected={chartOptions.yAxisMode}
             onChange={handleYAxisChange}
+            name="yAxisDomain"
           />
         </EuiFormRow>
       </EuiForm>

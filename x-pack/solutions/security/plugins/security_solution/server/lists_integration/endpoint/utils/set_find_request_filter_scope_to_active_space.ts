@@ -26,34 +26,31 @@ export const setFindRequestFilterScopeToActiveSpace = async (
   httpRequest: KibanaRequest,
   findOptions: FindExceptionListItemOptions | FindExceptionListsItemOptions
 ): Promise<void> => {
-  if (endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    const logger = endpointServices.createLogger('setFindRequestFilterScopeToActiveSpace');
+  const logger = endpointServices.createLogger('setFindRequestFilterScopeToActiveSpace');
 
-    logger.debug(() => `Find options prior to adjusting filter:\n${stringify(findOptions)}`);
+  logger.debug(() => `Find options prior to adjusting filter:\n${stringify(findOptions)}`);
 
-    const spaceVisibleDataFilter = (await buildSpaceDataFilter(endpointServices, httpRequest))
-      .filter;
+  const spaceVisibleDataFilter = (await buildSpaceDataFilter(endpointServices, httpRequest)).filter;
 
-    if (isSingleListFindOptions(findOptions)) {
-      findOptions.filter = `${spaceVisibleDataFilter}${
-        findOptions.filter ? ` AND (${findOptions.filter})` : ''
-      }`;
-    } else {
-      if (!findOptions.filter) {
-        findOptions.filter = [];
-      }
-
-      // Add the filter for every list that was defined in the options
-      findOptions.listId.forEach((listId, index) => {
-        const userFilter = findOptions.filter[index];
-        findOptions.filter[index] = `${spaceVisibleDataFilter}${
-          userFilter ? ` AND (${userFilter})` : ''
-        }`;
-      });
+  if (isSingleListFindOptions(findOptions)) {
+    findOptions.filter = `${spaceVisibleDataFilter}${
+      findOptions.filter ? ` AND (${findOptions.filter})` : ''
+    }`;
+  } else {
+    if (!findOptions.filter) {
+      findOptions.filter = [];
     }
 
-    logger.debug(() => `Find options updated with active space filter:\n${stringify(findOptions)}`);
+    // Add the filter for every list that was defined in the options
+    findOptions.listId.forEach((listId, index) => {
+      const userFilter = findOptions.filter[index];
+      findOptions.filter[index] = `${spaceVisibleDataFilter}${
+        userFilter ? ` AND (${userFilter})` : ''
+      }`;
+    });
   }
+
+  logger.debug(() => `Find options updated with active space filter:\n${stringify(findOptions)}`);
 };
 
 const isSingleListFindOptions = (

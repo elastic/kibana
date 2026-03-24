@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
   GET_DETECTION_RULE_ALERTS_STATUS_PATH,
 } from '../../../common/constants';
-import { CspRouter } from '../../types';
+import type { CspRouter } from '../../types';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
@@ -65,7 +65,8 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
         validate: {
           request: {
             query: schema.object({
-              tags: schema.arrayOf(schema.string()),
+              // maxSize is set to 100 as it's not expected to have more than 100 tags
+              tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
             }),
           },
         },

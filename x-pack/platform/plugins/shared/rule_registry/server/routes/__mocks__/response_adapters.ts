@@ -34,6 +34,10 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
   switch (method) {
     case 'ok':
       return calls.map(([call]) => ({ status: 200, body: call.body }));
+    case 'badRequest':
+      return calls.map(([call]) => ({ status: 400, body: call.body }));
+    case 'multiStatus':
+      return calls.map(([call]) => ({ status: 207, body: call.body }));
     case 'customError':
       return calls.map(([call]) => ({
         status: call.statusCode,

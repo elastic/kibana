@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -62,9 +62,10 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
       });
     },
     async displaysEmptyMessage() {
-      await testSubjects.existOrFail('uptimeCertsEmptyMessage');
-      const emptyText = await testSubjects.getVisibleText('uptimeCertsEmptyMessage');
-      expect(emptyText).to.eql('No Certificates found.');
+      await testSubjects.existOrFail('uptimeCertificatesTable');
+      expect(await testSubjects.getVisibleText('uptimeCertificatesTable')).to.include.string(
+        'No Certificates found.'
+      );
     },
   };
 }

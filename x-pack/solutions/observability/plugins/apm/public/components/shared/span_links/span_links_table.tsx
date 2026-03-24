@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
+import type { SpanLinkDetails } from '@kbn/apm-types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -271,5 +271,15 @@ export function SpanLinksTable({ items }: Props) {
     },
   ];
 
-  return <EuiInMemoryTable items={items} columns={columns} sorting={true} pagination={true} />;
+  return (
+    <EuiInMemoryTable
+      items={items}
+      columns={columns}
+      sorting={true}
+      pagination={true}
+      tableCaption={i18n.translate('xpack.apm.spanLinks.table.caption', {
+        defaultMessage: 'Span links list',
+      })}
+    />
+  );
 }

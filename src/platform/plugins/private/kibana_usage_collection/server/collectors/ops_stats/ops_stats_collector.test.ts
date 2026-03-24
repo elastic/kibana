@@ -15,7 +15,7 @@ import {
 } from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerOpsStatsCollector } from '.';
-import { OpsMetrics } from '@kbn/core/server';
+import type { OpsMetrics } from '@kbn/core/server';
 import { loggingSystemMock, metricsServiceMock } from '@kbn/core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();

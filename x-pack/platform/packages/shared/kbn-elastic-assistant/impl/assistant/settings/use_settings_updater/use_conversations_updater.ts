@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { Conversation } from '../../../..';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
-import {
-  ConversationsBulkActions,
-  bulkUpdateConversations,
-} from '../../api/conversations/bulk_update_actions_conversations';
+import type { ConversationsBulkActions } from '../../api/conversations/bulk_update_actions_conversations';
+import { bulkUpdateConversations } from '../../api/conversations/bulk_update_actions_conversations';
 import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
 
 export type SaveConversationsSettingsParams =

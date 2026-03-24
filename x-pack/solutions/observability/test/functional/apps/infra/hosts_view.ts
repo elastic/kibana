@@ -7,14 +7,15 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import {
+import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-} from '@kbn/apm-synthtrace';
+} from '@kbn/synthtrace';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
   HOSTS_LINK_LOCAL_STORAGE_KEY,
@@ -199,6 +200,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -217,6 +219,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
+  const setCustomDashboardsEnabled = (value: boolean = true) =>
+    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
+
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
@@ -322,12 +327,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('#Single Host Flyout', () => {
         before(async () => {
+          await setCustomDashboardsEnabled(true);
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();
         });
 
         describe('Tabs', () => {
           before(async () => {
+            await retry.waitFor(
+              'date picker to be visible before setting range',
+              async () => await pageObjects.timePicker.timePickerExists()
+            );
             await pageObjects.timePicker.setAbsoluteRange(
               START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
               END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
@@ -339,13 +349,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           after(async () => {
-            await retry.tryForTime(5000, async () => {
-              await pageObjects.infraHome.clickCloseFlyoutButton();
-            });
+            await pageObjects.infraHome.closeFlyoutWithEscape();
           });
 
           describe('Overview Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickOverviewTab();
             });
 
@@ -411,6 +421,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Metadata Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickMetadataTab();
             });
 
@@ -440,6 +452,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Metrics Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickMetricsTab();
             });
 
@@ -450,6 +464,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Processes Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickProcessesTab();
             });
 
@@ -460,6 +476,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Logs Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickLogsTab();
             });
 
@@ -468,7 +486,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
+          describe('Dashboards Tab', () => {
+            before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+              await pageObjects.assetDetails.clickDashboardsTab();
+            });
+
+            it('should render dashboards tab splash screen with option to add dashboard', async () => {
+              await pageObjects.assetDetails.addDashboardExists();
+            });
+          });
+
           describe('Flyout links', () => {
+            before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+            });
+
             it('should navigate to Host Details page after click', async () => {
               await pageObjects.assetDetails.clickOpenAsPageLink();
               const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
@@ -602,6 +637,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
+            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -744,15 +780,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('#Page Content with alerts', () => {
         before(async () => {
           return Promise.all([
-            esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+            esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            ),
+            esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+            ),
           ]);
         });
 
         after(async () => {
           return Promise.all([
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+            esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            ),
+            esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+            ),
           ]);
         });
 
@@ -760,7 +804,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ACTIVE_ALERTS = 6;
           const RECOVERED_ALERTS = 4;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-          const COLUMNS = 11;
+          const COLUMNS = 12;
 
           before(async () => {
             await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -897,7 +941,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const ACTIVE_ALERTS = 6;
             const RECOVERED_ALERTS = 4;
             const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-            const COLUMNS = 11;
+            const COLUMNS = 12;
 
             await pageObjects.infraHostsView.visitAlertTab();
 

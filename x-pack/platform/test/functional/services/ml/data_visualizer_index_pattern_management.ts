@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlDataVisualizerTable } from './data_visualizer_table';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlDataVisualizerTable } from './data_visualizer_table';
 
 export function MachineLearningDataVisualizerIndexPatternManagementProvider(
   { getService }: FtrProviderContext,

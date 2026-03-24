@@ -6,13 +6,15 @@
  */
 
 import YAML from 'yaml';
-import {
+import type {
   ContentPack,
   ContentPackDashboard,
   ContentPackEntry,
   ContentPackManifest,
   ContentPackSavedObject,
   ContentPackStream,
+} from '@kbn/content-packs-schema';
+import {
   SUPPORTED_ENTRY_TYPE,
   SUPPORTED_SAVED_OBJECT_TYPE,
   contentPackManifestSchema,
@@ -24,7 +26,7 @@ import {
 import { Streams } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { compact, pick, uniqBy } from 'lodash';
 import { InvalidContentPackError } from './error';
 
@@ -45,7 +47,9 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
   });
 
   const rootDir = getRootDir(zip.getEntries());
+  // @ts-expect-error upgrade typescript v5.9.3
   const manifest = await extractManifest(rootDir, zip);
+  // @ts-expect-error upgrade typescript v5.9.3
   const entries = await extractEntries(rootDir, zip);
 
   return { ...manifest, entries };

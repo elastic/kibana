@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('inspectSyntheticsMonitor', function () {
+    this.tags(['skipCloud']);
+
     const supertest = getService('supertestWithoutAuth');
 
     const monitorTestService = new SyntheticsMonitorTestService(getService);
@@ -27,6 +29,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let _monitors: MonitorFields[];
     let editorUser: RoleCredentials;
     let adminUser: RoleCredentials;
+    const testParamWithNewLine = {
+      key: 'testWithNewLine',
+      value: `-----BEGIN CERTIFICATE-----\nMIICMzBgNV\n\npAqEAJlQND\n-----END CERTIFICATE-----`,
+    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -40,25 +46,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       _monitors = [getFixtureJson('http_monitor'), getFixtureJson('inspect_browser_monitor')];
+
+      // add a test params with new line
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(adminUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(testParamWithNewLine)
+        .expect(200);
+      _monitors[0].password = '${testWithNewLine}';
     });
 
-    // tests public locations which fails in MKI
-    it.skip('inspect http monitor', async () => {
-      const apiResponse = await monitorTestService.inspectMonitor(adminUser, {
-        ..._monitors[0],
-        locations: [
-          {
-            id: 'dev',
-            label: 'Dev Service',
-            isServiceManaged: true,
-          },
-        ],
-      });
+    it('inspect http monitor', async () => {
+      const apiResponse = await monitorTestService.inspectMonitor(
+        adminUser,
+        {
+          ..._monitors[0],
+          locations: [
+            {
+              id: 'dev',
+              label: 'Dev Service',
+              isServiceManaged: true,
+            },
+          ],
+        },
+        false
+      );
 
       rawExpect(apiResponse).toEqual({
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
+              cloud_id: 'ftr_fake_cloud_id',
+              license_level: rawExpect.any(String),
               monitors: [
                 {
                   type: 'http',
@@ -79,7 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
                       max_redirects: '3',
                       max_attempts: 2,
-                      password: 'test',
+                      password: testParamWithNewLine.value,
                       proxy_url: 'http://proxy.com',
                       'response.include_body': 'never',
                       'response.include_headers': true,
@@ -92,9 +114,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ipv4: true,
                       ipv6: true,
                       fields: {
-                        meta: { space_id: 'default' },
+                        meta: { space_id: ['default'] },
                       },
                       fields_under_root: true,
+                      spaces: ['default'],
+                      maintenance_windows: [],
                     },
                   ],
                 },
@@ -108,10 +132,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // tests public locations which fails in MKI
-    it.skip('inspect project browser monitor', async () => {
+    it('inspect project browser monitor', async () => {
       const apiResponse = await monitorTestService.inspectMonitor(editorUser, {
         ..._monitors[1],
+        timeout: '30',
         params: JSON.stringify({
           username: 'elastic',
           password: 'changeme',
@@ -125,6 +149,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ],
       });
       rawExpect(apiResponse).toEqual({
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
@@ -146,6 +172,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       params: {
                         username: '"********"',
                         password: '"********"',
+                        testWithNewLine: '"*******"',
                       },
                       playwright_options: { headless: true, chromiumSandbox: false },
                       'source.project.content':
@@ -156,12 +183,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       throttling: { download: 5, upload: 3, latency: 20 },
                       original_space: 'default',
                       fields: {
-                        meta: { space_id: 'default' },
+                        meta: { space_id: ['default'] },
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                         'monitor.project.id': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                       },
                       fields_under_root: true,
                       max_attempts: 2,
+                      spaces: [],
+                      maintenance_windows: [],
                     },
                   ],
                 },
@@ -176,20 +205,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         decodedCode:
           '// asset:/Users/vigneshh/elastic/synthetics/examples/todos/basic.journey.ts\nimport { journey, step, expect } from "@elastic/synthetics";\njourney("check if title is present", ({ page, params }) => {\n  step("launch app", async () => {\n    await page.goto(params.url);\n  });\n  step("assert title", async () => {\n    const header = await page.$("h1");\n    expect(await header.textContent()).toBe("todos");\n  });\n});\n',
       });
+      rawExpect(apiResponse.result.publicConfigs?.[0]?.monitors?.[0]?.streams?.[0]?.timeout).toBe(
+        undefined
+      );
     });
 
     it('inspect http monitor in private location', async () => {
       const location = await testPrivateLocations.addTestPrivateLocation();
-      const apiResponse = await monitorTestService.inspectMonitor(editorUser, {
-        ..._monitors[0],
-        locations: [
-          {
-            id: location.id,
-            label: location.label,
-            isServiceManaged: false,
-          },
-        ],
-      });
+      const apiResponse = await monitorTestService.inspectMonitor(
+        editorUser,
+        {
+          ..._monitors[0],
+          locations: [
+            {
+              id: location.id,
+              label: location.label,
+              isServiceManaged: false,
+            },
+          ],
+        },
+        false
+      );
 
       const privateConfig = apiResponse.result.privateConfig!;
 
@@ -201,6 +237,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       delete compiledStream.id;
       delete compiledStream.processors[0].add_fields.fields.config_id;
+
+      expect(enabledStream?.vars?.password.value).eql(
+        '"-----BEGIN CERTIFICATE-----\n\nMIICMzBgNV\n\n\npAqEAJlQND\n\n-----END CERTIFICATE-----"'
+      );
 
       expect(enabledStream?.compiled_stream).eql({
         __ui: { is_tls_enabled: false },
@@ -218,7 +258,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         proxy_url: 'http://proxy.com',
         tags: ['tag1', 'tag2'],
         username: 'test-username',
-        password: 'test',
+        password: testParamWithNewLine.value,
         'response.include_headers': true,
         'response.include_body': 'never',
         'response.include_body_max_bytes': 1024,

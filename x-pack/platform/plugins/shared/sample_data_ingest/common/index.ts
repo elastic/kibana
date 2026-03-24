@@ -11,6 +11,15 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
  * The id of the inference endpoint we're creating for our product doc indices.
  */
 export const internalElserInferenceId = defaultInferenceEndpoints.ELSER;
+export const indexNamePrefix = 'kibana_sample_data_';
+export const MINIMUM_LICENSE_TYPE = 'enterprise';
 
-export { type StatusResponse, type InstallResponse, DatasetSampleType } from './types';
+export {
+  InstallationStatus,
+  type StatusResponse,
+  type InstallingResponse,
+  type InstalledResponse,
+  DatasetSampleType,
+} from './types';
 export { STATUS_API_PATH, INSTALL_API_PATH } from './routes';
+export { getSampleDataIndexName } from './utils';

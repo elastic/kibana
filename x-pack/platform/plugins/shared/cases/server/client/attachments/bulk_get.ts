@@ -6,12 +6,17 @@
  */
 
 import { partition } from 'lodash';
-import type { BulkGetAttachmentsResponse } from '../../../common/types/api';
+import type {
+  BulkGetAttachmentsResponse,
+  BulkGetAttachmentsResponseV2,
+} from '../../../common/types/api';
 import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
+  BulkGetAttachmentsResponseRtV2,
 } from '../../../common/types/api';
-import { flattenCommentSavedObjects } from '../../common/utils';
+import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
+import { flattenAttachmentSavedObjects } from '../../common/utils';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -21,7 +26,6 @@ import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
-import type { AttachmentAttributes } from '../../../common/types/domain';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 
@@ -29,10 +33,10 @@ type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>
  * Retrieves multiple attachments by id.
  */
 export async function bulkGet(
-  { attachmentIDs, caseID }: BulkGetArgs,
+  { attachmentIDs, caseID, mode = 'legacy' }: BulkGetArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<BulkGetAttachmentsResponse> {
+): Promise<BulkGetAttachmentsResponseV2> {
   const {
     services: { attachmentService },
     logger,
@@ -45,7 +49,7 @@ export async function bulkGet(
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
 
-    const attachments = await attachmentService.getter.bulkGet(request.ids);
+    const attachments = await attachmentService.getter.bulkGet(request.ids, mode);
 
     const { validAttachments, attachmentsWithErrors, invalidAssociationAttachments } =
       partitionAttachments(caseID, attachments);
@@ -64,11 +68,13 @@ export async function bulkGet(
     });
 
     const res = {
-      attachments: flattenCommentSavedObjects(authorizedAttachments),
+      attachments: flattenAttachmentSavedObjects(authorizedAttachments),
       errors,
     };
-
-    return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
+    if (mode === 'legacy') {
+      return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
+    }
+    return decodeOrThrow(BulkGetAttachmentsResponseRtV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
@@ -86,7 +92,7 @@ interface PartitionedAttachments {
 
 const partitionAttachments = (
   caseId: string,
-  attachments: BulkOptionalAttributes<AttachmentAttributes>
+  attachments: BulkOptionalAttributes<AttachmentAttributesV2>
 ): PartitionedAttachments => {
   const [attachmentsWithoutErrors, errors] = partitionBySOError(attachments.saved_objects);
   const [caseAttachments, invalidAssociationAttachments] = partitionByCaseAssociation(
@@ -101,7 +107,7 @@ const partitionAttachments = (
   };
 };
 
-const partitionBySOError = (attachments: Array<OptionalAttributes<AttachmentAttributes>>) =>
+const partitionBySOError = (attachments: Array<OptionalAttributes<AttachmentAttributesV2>>) =>
   partition(
     attachments,
     (attachment) => attachment.error == null && attachment.attributes != null

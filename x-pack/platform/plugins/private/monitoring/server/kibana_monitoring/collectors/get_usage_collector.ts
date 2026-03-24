@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { IClusterClient } from '@kbn/core/server';
-import { MonitoringConfig } from '../../config';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { IClusterClient } from '@kbn/core/server';
+import type { MonitoringConfig } from '../../config';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
 import { fetchLicenseType } from './lib/fetch_license_type';
-import { MonitoringUsage, StackProductUsage, MonitoringClusterStackProductUsage } from './types';
+import type {
+  MonitoringUsage,
+  StackProductUsage,
+  MonitoringClusterStackProductUsage,
+} from './types';
 import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 
 export function getMonitoringUsageCollector(

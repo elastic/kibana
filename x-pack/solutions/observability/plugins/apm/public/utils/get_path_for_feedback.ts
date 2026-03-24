@@ -7,7 +7,7 @@
 
 const APP_BASE_PATH = '/app';
 
-export const shortenPath = (path: string, pathStart: string) => {
+const shortenPath = (path: string, pathStart: string) => {
   if (path.startsWith(pathStart)) {
     return path;
   }
@@ -16,7 +16,8 @@ export const shortenPath = (path: string, pathStart: string) => {
 };
 
 export const getPathForFeedback = (path: string) => {
-  const pathStartingFromApp = shortenPath(path, APP_BASE_PATH);
+  const sanitizedPath = path || `${APP_BASE_PATH}/apm`;
+  const pathStartingFromApp = shortenPath(sanitizedPath, APP_BASE_PATH);
   const pathParts = pathStartingFromApp.split('/');
   const constructPath = `/${pathParts.slice(1, 4).join('/')}`;
   if (pathStartingFromApp === constructPath) {

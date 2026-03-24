@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiTitle,
@@ -14,7 +15,6 @@ import {
   EuiIcon,
   EuiText,
   EuiFlyoutHeader,
-  IconType,
   EuiSpacer,
   EuiBetaBadge,
 } from '@elastic/eui';
@@ -51,17 +51,13 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
-                      {actionTypeName && actionTypeName.toLowerCase().includes('connector') ? (
-                        actionTypeName
-                      ) : (
-                        <FormattedMessage
-                          defaultMessage="{actionTypeName} connector"
-                          id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
-                          values={{
-                            actionTypeName,
-                          }}
-                        />
-                      )}
+                      <FormattedMessage
+                        defaultMessage="{actionTypeName}"
+                        id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                        values={{
+                          actionTypeName,
+                        }}
+                      />
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -87,10 +83,14 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                     gutterSize="xs"
                     alignItems="center"
                   >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility"
-                      defaultMessage="Compatibility:"
-                    />{' '}
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility"
+                          defaultMessage="Compatibility:"
+                        />{' '}
+                      </p>
+                    </EuiText>
                     {compatibility.map((compatibilityItem: string) => (
                       <EuiFlexItem grow={false} key={compatibilityItem}>
                         <EuiBadge color="default">{compatibilityItem}</EuiBadge>

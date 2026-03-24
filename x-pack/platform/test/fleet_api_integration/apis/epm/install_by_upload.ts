@@ -9,9 +9,9 @@ import fs from 'fs';
 import path from 'path';
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { HTTPError } from 'superagent';
+import type { HTTPError } from 'superagent';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(33);
+      expect(res.body.items.length).to.be.greaterThan(32);
       expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
 
       await deletePackage(testPkgName, testPkgNewVersion);

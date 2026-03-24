@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { ViewCodeFlyout } from './view_code_flyout';
 
 export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({

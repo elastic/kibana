@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
+import type { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
 import fs from 'fs';
 import path from 'path';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 import { bundlePackage, removeBundledPackages } from './install_bundled';

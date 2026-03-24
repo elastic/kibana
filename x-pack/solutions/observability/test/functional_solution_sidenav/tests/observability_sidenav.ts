@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
+  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('observability solution', () => {
@@ -41,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('observability_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'observabilityOnboarding',
         });
@@ -49,46 +49,38 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'observabilityOnboarding',
         });
 
-        // open apm (Application) panel
-        await solutionNavigation.sidenav.openPanel('apm');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
-          expect(isOpen).to.be(true);
-        }
+        // open application panel
+        await solutionNavigation.sidenav.openPanel('applications');
+        expect(await solutionNavigation.sidenav.isPanelOpen('applications')).to.be(true);
 
-        await solutionNavigation.sidenav.closePanel('apm');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
-          expect(isOpen).to.be(false);
-        }
+        // open Infrastructure popover and navigate to some link inside the panel
+        // Note: clickLink now automatically expands More menu if needed
+        await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
 
-        // open Infrastructure panel and navigate to some link inside the panel
-        await solutionNavigation.sidenav.openPanel('metrics');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(true);
-        }
-        await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
+        // open first link in popover to open a panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
+        expect(await solutionNavigation.sidenav.isPanelOpen('metrics')).to.be(true);
+
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Infrastructure Inventory',
+          text: 'Infrastructure inventory',
         });
 
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(false);
-        }
+        await solutionNavigation.sidenav.clickPanelLink('metrics:hosts');
 
-        // navigate to a different section
-        await solutionNavigation.sidenav.openSection(
-          'observability_project_nav_footer.project_settings_project_nav'
-        );
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Hosts',
+        });
+        expect(await solutionNavigation.sidenav.isPanelOpen('metrics')).to.be(true);
+
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+
         await solutionNavigation.sidenav.clickPanelLink('management:tags');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
+
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'observabilityOnboarding',
         });
@@ -99,12 +91,41 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await expectNoPageReload();
       });
 
-      it('renders a feedback callout', async () => {
-        await solutionNavigation.sidenav.feedbackCallout.expectExists();
-        await solutionNavigation.sidenav.feedbackCallout.dismiss();
-        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-        await browser.refresh();
-        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      it('shows cases in sidebar navigation', async () => {
+        await solutionNavigation.expectExists();
+
+        await solutionNavigation.sidenav.expectLinkExists({
+          deepLinkId: 'observability-overview:cases',
+        });
+      });
+
+      it('navigates to cases app', async () => {
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
+
+        await testSubjects.click('createNewCaseBtn');
+        expect(await browser.getCurrentUrl()).contain('app/observability/cases/create');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+        await testSubjects.click('configure-case-button');
+        expect(await browser.getCurrentUrl()).contain('app/observability/cases/configure');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+      });
+
+      it('opens panel on legacy management landing page', async () => {
+        await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
+        await testSubjects.existOrFail('managementHomeSolution');
+        await solutionNavigation.sidenav.expectPanelExists('stack_management');
       });
     });
   });

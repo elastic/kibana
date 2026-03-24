@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import {
   HOSTS_PATH,
   NETWORK_PATH,
@@ -34,7 +35,7 @@ const networkLinks: LinkItem = {
       defaultMessage: 'Network',
     }),
   ],
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.networkFlows,
@@ -97,7 +98,7 @@ const usersLinks: LinkItem = {
       defaultMessage: 'Users',
     }),
   ],
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.usersAll,
@@ -152,7 +153,7 @@ const hostsLinks: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.hostsAll,
@@ -209,7 +210,7 @@ export const exploreLinks: LinkItem = {
   title: EXPLORE,
   path: EXPLORE_PATH,
   globalNavPosition: 8,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
+  capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {
       defaultMessage: 'Explore',

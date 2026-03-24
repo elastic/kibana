@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import type { Incident, PushToServiceResponse } from '@kbn/connector-schemas/jira';
 import type {
   PushToServiceApiHandlerArgs,
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
   ExternalServiceApi,
-  Incident,
   GetFieldsByIssueTypeHandlerArgs,
   GetIssueTypesHandlerArgs,
   GetIssuesHandlerArgs,
-  PushToServiceResponse,
   GetIssueHandlerArgs,
   GetCommonFieldsHandlerArgs,
 } from './types';

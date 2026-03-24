@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { DataView, isRunningResponse, TimeRange } from '@kbn/data-plugin/common';
+import type { DataView, TimeRange } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import {
-  AnalyticsCollectionDataViewLogic,
+import type {
   AnalyticsCollectionDataViewLogicActions,
   AnalyticsCollectionDataViewLogicValues,
 } from './analytics_collection_data_view_logic';
+import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 
 import {
   getBaseSearchTemplate,
@@ -24,20 +26,17 @@ import {
   getPaginationRequestSizeParams,
   getTotalCountRequestParams,
 } from './analytics_collection_explore_table_formulas';
-import {
-  ExploreTableColumns,
+import type {
   ExploreTableItem,
-  ExploreTables,
   SearchTermsTable,
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
   LocationsTable,
 } from './analytics_collection_explore_table_types';
-import {
-  AnalyticsCollectionToolbarLogic,
-  AnalyticsCollectionToolbarLogicValues,
-} from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
+import type { AnalyticsCollectionToolbarLogicValues } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;
 const SEARCH_COOLDOWN = 200;
@@ -436,7 +435,6 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     };
   },
   path: ['enterprise_search', 'analytics', 'collection', 'explore', 'table'],
-  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     isLoading: [
       false,
@@ -450,12 +448,10 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         setTimeRange: () => true,
       },
     ],
-    // @ts-expect-error upgrade typescript v5.1.6
     items: [[], { setItems: (_, { items }) => items }],
     pageIndex: [
       0,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onTableChange: (_, { page }) => page?.index || 0,
         reset: () => 0,
         setSearch: () => 0,
@@ -465,28 +461,22 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     pageSize: [
       BASE_PAGE_SIZE,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onTableChange: (_, { page }) => page?.size || BASE_PAGE_SIZE,
         reset: () => BASE_PAGE_SIZE,
       },
     ],
     search: [
       '',
-      // @ts-expect-error upgrade typescript v5.1.6
       { reset: () => '', setSearch: (_, { search }) => search, setSelectedTable: () => '' },
     ],
-    // @ts-expect-error upgrade typescript v5.1.6
     selectedTable: [null, { setSelectedTable: (_, { id }) => id }],
     sorting: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onTableChange: (_, { sort = null }) => sort,
-        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedTable: (_, { sorting = null }) => sorting,
       },
     ],
-    // @ts-expect-error upgrade typescript v5.1.6
     totalItemsCount: [0, { setTotalItemsCount: (_, { count }) => count }],
   }),
 });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
 import { StreamsApp } from './streams_app';
 
 export interface StreamsPageObjects extends PageObjects {

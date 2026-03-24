@@ -14,7 +14,7 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { FeatureFlagsService } from '..';
-import { FeatureFlagsConfig } from './feature_flags_config';
+import type { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;
@@ -201,6 +201,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('observe a string flag', async () => {
@@ -222,6 +227,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('observe a number flag', async () => {
@@ -243,6 +253,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('with overrides', async () => {

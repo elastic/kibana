@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '../../expression_types';
+import type { Datatable } from '../../expression_types';
 import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
-import { CumulativeSumArgs } from './cumulative_sum';
+import type { CumulativeSumArgs } from './cumulative_sum';
 
 export const cumulativeSumFn = (
   input: Datatable,

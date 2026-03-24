@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   RequestHandler,
   KibanaRequest,
   RouteMethod,
   KibanaResponseFactory,
 } from '@kbn/core/server';
 
-import { ILicense } from '../common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { LicensingRequestHandlerContext } from './types';
 
 export type CheckLicense = (

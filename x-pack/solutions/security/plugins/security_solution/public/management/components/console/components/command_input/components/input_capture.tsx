@@ -16,6 +16,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
@@ -23,6 +24,10 @@ const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
   'xpack.securitySolution.inputCapture.ariaPlaceHolder',
   { defaultMessage: 'Enter a command' }
 );
+
+const ARIA_LABEL_MESSAGE = i18n.translate('xpack.securitySolution.inputCapture.ariaLabel', {
+  defaultMessage: 'Response console input',
+});
 
 const deSelectTextOnPage = () => {
   const selection = getSelection();
@@ -82,7 +87,7 @@ export type InputCaptureProps = PropsWithChildren<{
     /** Keyboard control keys from the keyboard event */
     eventDetails: Pick<
       KeyboardEvent,
-      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
+      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey' | 'code'
     >;
   }) => void;
   /** Sets an interface that allows interactions with this component's focus/blur states */
@@ -97,6 +102,7 @@ export type InputCaptureProps = PropsWithChildren<{
  */
 export const InputCapture = memo<InputCaptureProps>(
   ({ onCapture, focusRef, onChangeFocus, children }) => {
+    const isMounted = useIsMounted();
     const getTestId = useTestIdGenerator(useDataTestSubj());
     // Reference to the `<div>` that take in focus (`tabIndex`)
     const focusEleRef = useRef<HTMLDivElement | null>(null);
@@ -128,8 +134,25 @@ export const InputCapture = memo<InputCaptureProps>(
       return '';
     }, []);
 
+    const isEventFromInputCapture = useCallback((ev: Pick<React.UIEvent, 'target'>) => {
+      if (focusEleRef.current) {
+        const { target: evTarget } = ev;
+
+        return (
+          evTarget === focusEleRef.current ||
+          (evTarget instanceof Node && focusEleRef.current.contains(evTarget))
+        );
+      }
+
+      return false;
+    }, []);
+
     const handleOnKeyDown = useCallback<KeyboardEventHandler>(
       (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
         // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
           if (ev.key === 'a') {
@@ -164,6 +187,7 @@ export const InputCapture = memo<InputCaptureProps>(
           'metaKey',
           'repeat',
           'shiftKey',
+          'code',
         ]);
 
         onCapture({
@@ -176,11 +200,15 @@ export const InputCapture = memo<InputCaptureProps>(
           deSelectTextOnPage();
         }
       },
-      [getTextSelection, onCapture]
+      [getTextSelection, isEventFromInputCapture, onCapture]
     );
 
     const handleOnPaste = useCallback<ClipboardEventHandler>(
       (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
         ev.preventDefault();
         ev.stopPropagation();
 
@@ -198,6 +226,7 @@ export const InputCapture = memo<InputCaptureProps>(
           metaKey: true,
           repeat: false,
           shiftKey: false,
+          code: 'MetaLeft',
         };
 
         onCapture({
@@ -210,14 +239,21 @@ export const InputCapture = memo<InputCaptureProps>(
           deSelectTextOnPage();
         }
       },
-      [getTextSelection, onCapture]
+      [getTextSelection, isEventFromInputCapture, onCapture]
     );
 
-    const handleOnFocus = useCallback(() => {
-      if (onChangeFocus) {
-        onChangeFocus(true);
-      }
-    }, [onChangeFocus]);
+    const handleOnFocus = useCallback<React.FocusEventHandler<HTMLDivElement>>(
+      (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
+        if (onChangeFocus) {
+          onChangeFocus(true);
+        }
+      },
+      [isEventFromInputCapture, onChangeFocus]
+    );
 
     const handleOnBlur = useCallback(() => {
       if (onChangeFocus) {
@@ -236,17 +272,33 @@ export const InputCapture = memo<InputCaptureProps>(
             return;
           }
 
-          hiddenInputEleRef.current?.focus();
+          // Method could be called from State reducers, so need to make sure we don't cause
+          // state to be changed in the middle of an update.
+          // Avoids the nasty React warning: Cannot update a component (`name here`) while rendering a different component (`name here`)
+          Promise.resolve().then(() => {
+            if (isMounted() && hiddenInputEleRef.current) {
+              hiddenInputEleRef.current?.focus();
+            }
+          });
         },
 
         blur: () => {
-          // only blur if the input has focus
-          if (hiddenInputEleRef.current && document.activeElement === hiddenInputEleRef.current) {
-            hiddenInputEleRef.current?.blur();
-          }
+          // Method could be called from State reducers, so need to make sure we don't cause
+          // state to be changed in the middle of an update.
+          // Avoids the nasty React warning: Cannot update a component (`name here`) while rendering a different component (`name here`)
+          Promise.resolve().then(() => {
+            // only blur if the input has focus
+            if (
+              isMounted() &&
+              hiddenInputEleRef.current &&
+              document.activeElement === hiddenInputEleRef.current
+            ) {
+              hiddenInputEleRef.current?.blur();
+            }
+          });
         },
       };
-    }, []);
+    }, [isMounted]);
 
     if (focusRef) {
       focusRef.current = focusInterface;
@@ -260,6 +312,7 @@ export const InputCapture = memo<InputCaptureProps>(
       >
         <div
           role="textbox"
+          aria-label={ARIA_LABEL_MESSAGE}
           aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
           tabIndex={0}
           ref={focusEleRef}

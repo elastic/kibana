@@ -8,7 +8,8 @@
  */
 
 import { inspector } from '../../kibana_services';
-import { InspectPanelActionApi, InspectPanelAction } from './inspect_panel_action';
+import type { InspectPanelActionApi } from './inspect_panel_action';
+import { InspectPanelAction } from './inspect_panel_action';
 
 describe('Inspect panel action', () => {
   let action: InspectPanelAction;

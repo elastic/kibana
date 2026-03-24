@@ -9,7 +9,7 @@ import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
- * Copied from x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/retry.ts
+ * Copied from x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils/retry.ts
  *
  * Retry wrapper for async supertests, with a maximum number of retries.
  * You can pass in a function that executes a supertest test, and make assertions

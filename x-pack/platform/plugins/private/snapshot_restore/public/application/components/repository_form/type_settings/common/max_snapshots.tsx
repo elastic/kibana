@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiTitle, EuiCode } from '@elastic/eui';
-import { RepositorySettingsValidation } from '../../../../services/validation';
+import type { RepositorySettingsValidation } from '../../../../services/validation';
 
 interface Props {
   isInvalid: boolean;

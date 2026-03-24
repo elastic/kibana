@@ -33,8 +33,7 @@ export const calculateGapStateFromAllBackfills = async ({
 }): Promise<Gap> => {
   const transformedBackfills = await backfillClient.findOverlappingBackfills({
     ruleId,
-    start: gap.range.gte,
-    end: gap.range.lte,
+    ranges: [{ start: gap.range.gte, end: gap.range.lte }],
     savedObjectsRepository,
     actionsClient,
   });

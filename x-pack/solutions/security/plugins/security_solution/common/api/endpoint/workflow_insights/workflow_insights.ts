@@ -19,6 +19,11 @@ const arrayWithNonEmptyString = (field: string) =>
     })
   );
 
+const insightTypeOneOf = schema.oneOf([
+  schema.literal('incompatible_antivirus'),
+  schema.literal('policy_response_failure'),
+]);
+
 export const UpdateWorkflowInsightRequestSchema = {
   params: schema.object({
     insightId: schema.string({
@@ -34,9 +39,7 @@ export const UpdateWorkflowInsightRequestSchema = {
     '@timestamp': schema.maybe(schema.string()),
     message: schema.maybe(schema.string()),
     category: schema.maybe(schema.oneOf([schema.literal('endpoint')])),
-    type: schema.maybe(
-      schema.oneOf([schema.literal('incompatible_antivirus'), schema.literal('noisy_process_tree')])
-    ),
+    type: schema.maybe(insightTypeOneOf),
     source: schema.maybe(
       schema.object({
         type: schema.maybe(schema.oneOf([schema.literal('llm-connector')])),
@@ -79,6 +82,8 @@ export const UpdateWorkflowInsightRequestSchema = {
             })
           )
         ),
+        descriptive: schema.maybe(schema.string()),
+        link: schema.maybe(schema.string()),
       })
     ),
     metadata: schema.maybe(
@@ -96,14 +101,7 @@ export const GetWorkflowInsightsRequestSchema = {
     from: schema.maybe(schema.number()),
     ids: schema.maybe(arrayWithNonEmptyString('ids')),
     categories: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
-    types: schema.maybe(
-      schema.arrayOf(
-        schema.oneOf([
-          schema.literal('incompatible_antivirus'),
-          schema.literal('noisy_process_tree'),
-        ])
-      )
-    ),
+    types: schema.maybe(schema.arrayOf(insightTypeOneOf, { maxSize: 20 })),
     sourceTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('llm-connector')]))),
     sourceIds: schema.maybe(arrayWithNonEmptyString('sourceId')),
     targetTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
@@ -121,6 +119,18 @@ export const GetWorkflowInsightsRequestSchema = {
   }),
 };
 
+export const CreateWorkflowInsightRequestSchema = {
+  body: schema.object({
+    insightType: insightTypeOneOf,
+  }),
+};
+
+export const GetPendingInsightsRequestSchema = {
+  query: schema.object({
+    insightType: schema.maybe(insightTypeOneOf),
+  }),
+};
+
 export type GetWorkflowInsightsRequestQueryParams = TypeOf<
   typeof GetWorkflowInsightsRequestSchema.query
 >;
@@ -130,4 +140,8 @@ export type UpdateWorkflowInsightsRequestParams = TypeOf<
 >;
 export type UpdateWorkflowInsightsRequestBody = TypeOf<
   typeof UpdateWorkflowInsightRequestSchema.body
+>;
+
+export type GetPendingInsightsRequestQueryParams = TypeOf<
+  typeof GetPendingInsightsRequestSchema.query
 >;

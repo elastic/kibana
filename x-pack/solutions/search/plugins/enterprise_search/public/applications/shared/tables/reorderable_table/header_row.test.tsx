@@ -41,6 +41,6 @@ describe('HeaderRow', () => {
     const wrapper = shallow(<HeaderRow columns={columns} spacingForRowIdentifier />);
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(3);
-    expect(cells.at(0).children()).toHaveLength(0);
+    expect(cells.at(0).children()).toHaveLength(1);
   });
 });

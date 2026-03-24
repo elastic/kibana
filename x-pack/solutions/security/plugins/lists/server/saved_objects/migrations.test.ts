@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
-import { ExceptionListSoSchema } from '../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../schemas/saved_objects';
 
-import { OldExceptionListSoSchema, migrations } from './migrations';
+import type { OldExceptionListSoSchema } from './migrations';
+import { migrations } from './migrations';
 
 const DEFAULT_EXCEPTION_LIST_SO: ExceptionListSoSchema = {
   comments: undefined,
@@ -101,7 +99,7 @@ describe('7.10.0 lists migrations', () => {
           type: 'nested',
         },
       ],
-      list_id: ENDPOINT_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
     });
 
     expect(migration(doc)).toEqual(
@@ -138,7 +136,7 @@ describe('7.10.0 lists migrations', () => {
             type: 'nested',
           },
         ],
-        list_id: ENDPOINT_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       })
     );
   });
@@ -163,11 +161,14 @@ describe('7.12.0 lists migrations', () => {
   const migration = migrations['7.12.0'];
 
   test('should not convert non trusted apps lists', () => {
-    const doc = createExceptionListSoSchemaSavedObject({ list_id: ENDPOINT_LIST_ID, tags: [] });
+    const doc = createExceptionListSoSchemaSavedObject({
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      tags: [],
+    });
 
     expect(migration(doc)).toEqual(
       createExceptionListSoSchemaSavedObject({
-        list_id: ENDPOINT_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         tags: [],
         tie_breaker_id: expect.anything(),
       })
@@ -176,13 +177,13 @@ describe('7.12.0 lists migrations', () => {
 
   test('converts empty tags to contain list containing "policy:all" tag', () => {
     const doc = createExceptionListSoSchemaSavedObject({
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       tags: [],
     });
 
     expect(migration(doc)).toEqual(
       createExceptionListSoSchemaSavedObject({
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         tags: ['policy:all'],
         tie_breaker_id: expect.anything(),
       })
@@ -191,13 +192,13 @@ describe('7.12.0 lists migrations', () => {
 
   test('preserves existing non policy related tags', () => {
     const doc = createExceptionListSoSchemaSavedObject({
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       tags: ['tag1', 'tag2'],
     });
 
     expect(migration(doc)).toEqual(
       createExceptionListSoSchemaSavedObject({
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         tags: ['tag1', 'tag2', 'policy:all'],
         tie_breaker_id: expect.anything(),
       })
@@ -206,13 +207,13 @@ describe('7.12.0 lists migrations', () => {
 
   test('preserves existing "policy:all" tag and does not add another one', () => {
     const doc = createExceptionListSoSchemaSavedObject({
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       tags: ['policy:all', 'tag1', 'tag2'],
     });
 
     expect(migration(doc)).toEqual(
       createExceptionListSoSchemaSavedObject({
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         tags: ['policy:all', 'tag1', 'tag2'],
         tie_breaker_id: expect.anything(),
       })
@@ -221,13 +222,13 @@ describe('7.12.0 lists migrations', () => {
 
   test('preserves existing policy reference tag and does not add "policy:all" tag', () => {
     const doc = createExceptionListSoSchemaSavedObject({
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       tags: ['policy:056d2d4645421fb92e5cd39f33d70856', 'tag1', 'tag2'],
     });
 
     expect(migration(doc)).toEqual(
       createExceptionListSoSchemaSavedObject({
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         tags: ['policy:056d2d4645421fb92e5cd39f33d70856', 'tag1', 'tag2'],
         tie_breaker_id: expect.anything(),
       })

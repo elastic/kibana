@@ -1,0 +1,61 @@
+{
+  "sha1": "17b1a4a641d878ac91b11b1f11a2dc3d6945c3a4",
+  "tests": [
+    {
+      "id": "0128cb44c44ee5e-e5bd5cf338bcc23",
+      "title": "Alerting Rule newly created rule has api_key_owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rules.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "0128cb44c44ee5e-5d78285e8f5bb4f",
+      "title": "Alerting Rule The rule runs and event log shows success",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rules.spec.ts",
+        "line": 81,
+        "column": 10
+      }
+    },
+    {
+      "id": "0128cb44c44ee5e-eafab7767d29f6e",
+      "title": "Alerting Rule when rule is updated, apiKey and uiamApiKey are queued for invalidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rules.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "0128cb44c44ee5e-94ea894c179baba",
+      "title": "Alerting Rule when rule is deleted, apiKey and uiamApiKey are queued for invalidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rules.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    }
+  ]
+}

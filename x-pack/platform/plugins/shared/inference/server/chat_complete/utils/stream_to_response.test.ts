@@ -6,11 +6,8 @@
  */
 
 import { of } from 'rxjs';
-import {
-  ChatCompletionEvent,
-  ChatCompletionMessageEvent,
-  MessageRole,
-} from '@kbn/inference-common';
+import type { ChatCompletionEvent, ChatCompletionMessageEvent } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { chunkEvent, tokensEvent, messageEvent } from '../../test_utils/chat_complete_events';
 import { streamToResponse } from './stream_to_response';
 
@@ -38,6 +35,19 @@ describe('streamToResponse', () => {
       },
       toolCalls: [],
     });
+  });
+
+  it('returns a response with model if present in the token event', async () => {
+    const response = await streamToResponse(
+      fromEvents(
+        chunkEvent('chunk_1'),
+        chunkEvent('chunk_2'),
+        tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'my_model' }),
+        messageEvent('message')
+      )
+    );
+
+    expect(response.model).toEqual('my_model');
   });
 
   it('returns a response with tool calls if present', async () => {
@@ -116,6 +126,11 @@ describe('streamToResponse', () => {
           },
         ],
       },
+      metadata: {
+        anonymization: {
+          replacementsId: 'replacements-123',
+        },
+      },
     };
 
     const response = await streamToResponse(
@@ -127,6 +142,7 @@ describe('streamToResponse', () => {
       toolCalls: [],
       deanonymized_input: messageWithDeanonymization.deanonymized_input,
       deanonymized_output: messageWithDeanonymization.deanonymized_output,
+      metadata: messageWithDeanonymization.metadata,
     });
   });
 });

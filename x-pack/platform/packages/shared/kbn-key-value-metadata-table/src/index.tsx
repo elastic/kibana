@@ -11,7 +11,7 @@ import React from 'react';
 import type { EuiTableProps } from '@elastic/eui';
 import { EuiTable, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { FormattedValue } from './formatted_value';
-import { KeyValuePair } from './utils/get_flattened_key_value_pairs';
+import type { KeyValuePair } from './utils/get_flattened_key_value_pairs';
 
 export function KeyValueTable({
   keyValuePairs,
@@ -27,12 +27,12 @@ export function KeyValueTable({
           const asArray = castArray(value);
           const valueList =
             asArray.length <= 1 ? (
-              <FormattedValue value={asArray[0]} />
+              <FormattedValue value={asArray[0]} keyName={key} />
             ) : (
               <ul>
                 {asArray.map((val, index) => (
                   <li>
-                    <FormattedValue key={index} value={val} />
+                    <FormattedValue key={index} value={val} keyName={key} />
                   </li>
                 ))}
               </ul>

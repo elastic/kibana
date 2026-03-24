@@ -8,12 +8,12 @@
  */
 
 import { Client, HttpConnection } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
-import {
+import type {
   QueryDslQueryContainer,
   SearchRequest,
   MsearchRequestItem,
 } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
   node: string;

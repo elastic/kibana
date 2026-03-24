@@ -6,18 +6,14 @@
  */
 
 import { castArray, isEmpty, pickBy } from 'lodash';
-import { EuiCode, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useContext, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { replaceParamsQuery } from '../../common/utils/replace_params_query';
 import { AlertAttachmentContext } from '../common/contexts';
 import { LiveQueryForm } from './form';
-import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
-import { OsqueryIcon } from '../components/osquery_icon';
 import type { AgentSelection } from '../agents/types';
+import type { AddToTimelineHandler } from '../types';
 
 interface LiveQueryProps {
   agentId?: string;
@@ -37,6 +33,7 @@ interface LiveQueryProps {
   hideAgentsField?: boolean;
   packId?: string;
   agentSelection?: AgentSelection;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -47,7 +44,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   onSuccess,
   query,
   savedQueryId,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
   queryField,
   ecsMappingField,
@@ -57,9 +53,8 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   timeout,
+  addToTimeline,
 }) => {
-  const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
-
   const initialAgentSelection = useMemo(() => {
     if (agentSelection) {
       return agentSelection;
@@ -102,40 +97,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
   }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId, timeout]);
 
-  if (isLoading) {
-    return <EuiSkeletonText lines={10} />;
-  }
-
-  if (!hasActionResultsPrivileges) {
-    return (
-      <EuiEmptyPrompt
-        icon={<OsqueryIcon />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
-              defaultMessage="Permission denied"
-            />
-          </h2>
-        }
-        titleSize="xs"
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
-              defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{
-                read: <EuiCode>read</EuiCode>,
-                logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
-              }}
-            />
-          </p>
-        }
-      />
-    );
-  }
-
   return (
     <LiveQueryForm
       queryField={queryField}
@@ -145,6 +106,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
     />
   );
 };

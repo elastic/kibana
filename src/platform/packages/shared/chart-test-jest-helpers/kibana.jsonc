@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/chart-test-jest-helpers",
+  "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

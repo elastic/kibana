@@ -16,8 +16,6 @@ import { IntegrationsPopover } from '../../../../common/components/related_integ
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
-import { useUserData } from '../../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import type {
@@ -26,6 +24,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export type TableColumn = EuiBasicTableColumn<RuleResponse>;
 
@@ -128,8 +127,7 @@ const createInstallButtonColumn = (
 });
 
 export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
     state: { loadingRules, isRefetching, isUpgradingSecurityPackages, isInstallingAllRules },
@@ -163,10 +161,10 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions
+      ...(canEditRules
         ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
         : []),
     ],
-    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
+    [showRelatedIntegrations, canEditRules, installOneRule, loadingRules, isDisabled]
   );
 };

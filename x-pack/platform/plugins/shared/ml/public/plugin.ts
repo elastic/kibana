@@ -53,6 +53,10 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
+import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSections } from './application/management';
@@ -104,8 +108,11 @@ export interface MlStartDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   telemetry: ITelemetryClient;
   fieldsMetadata: FieldsMetadataPublicStart;
+  fileUpload: FileUploadPluginStart;
+  cps: CPSPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -216,6 +223,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             telemetry: telemetryClient,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            fileUpload: pluginsStart.fileUpload,
+            kql: pluginsStart.kql,
+            cps: pluginsStart.cps,
             ...deps,
           },
           params,
@@ -304,6 +314,15 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 if (pluginsSetup.cases) {
                   registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
                 }
+
+                pluginStart.cps?.cpsManager?.registerAppAccess('ml', (location: string) =>
+                  location.includes('ml/aiops') ||
+                  location.includes('ml/jobs/new_job/datavisualizer') ||
+                  location.includes('ml/datavisualizer/esql') ||
+                  location.includes('ml/data_drift')
+                    ? ProjectRoutingAccess.EDITABLE
+                    : ProjectRoutingAccess.DISABLED
+                );
 
                 if (pluginsSetup.maps) {
                   // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createAction } from '@reduxjs/toolkit';
-import { GetTrendPayload, TrendRequest, TrendTable } from '../../../../../common/types';
+import type { GetTrendPayload, TrendRequest, TrendTable } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 import type {

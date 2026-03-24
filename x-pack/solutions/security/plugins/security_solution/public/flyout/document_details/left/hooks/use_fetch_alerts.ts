@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { isNumber } from 'lodash';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -41,6 +41,7 @@ export const useFetchAlerts = ({
   from,
   size,
   sort,
+  index,
 }: UseAlertsQueryParams): UseAlertsQueryResult => {
   const QUERY_KEY = `useFetchAlerts`;
 
@@ -54,7 +55,7 @@ export const useFetchAlerts = ({
     SearchResponse<Record<string, unknown>, Record<string, AggregationsAggregate>>,
     unknown
   >(
-    [QUERY_KEY, alertIds, from, size, sort],
+    [QUERY_KEY, alertIds, from, size, sort, index],
     async ({ signal }) =>
       findAlerts({
         signal,
@@ -62,6 +63,7 @@ export const useFetchAlerts = ({
         from,
         size,
         sort,
+        index,
       }),
     {
       keepPreviousData: true,

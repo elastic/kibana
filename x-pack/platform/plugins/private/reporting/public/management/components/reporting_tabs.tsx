@@ -6,21 +6,22 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiBetaBadge, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useParams } from 'react-router-dom';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { ClientConfigType, useInternalApiClient, useKibana } from '@kbn/reporting-public';
+import type { ILicense } from '@kbn/licensing-types';
+import type { ClientConfigType } from '@kbn/reporting-public';
+import { useInternalApiClient, useKibana } from '@kbn/reporting-public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
-import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH, Section } from '../../constants';
+import type { Section } from '../../constants';
+import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH } from '../../constants';
 import ReportExportsTable from './report_exports_table';
 import ReportSchedulesTable from './report_schedules_table';
 import { LicensePrompt } from './license_prompt';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import IlmPolicyWrapper from './ilm_policy_wrapper';
 
 export interface MatchParams {
@@ -119,7 +120,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
         }
         data-test-subj="reportingPageHeader"
         pageTitle={
-          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reports" />
+          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reporting" />
         }
         description={
           <FormattedMessage
@@ -128,20 +129,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
           />
         }
         tabs={tabs.map(({ id, name, isBeta = false }) => ({
-          label: !isBeta ? (
-            name
-          ) : (
-            <>
-              {name}{' '}
-              <EuiBetaBadge
-                className="eui-alignMiddle"
-                size="s"
-                iconType="flask"
-                label={TECH_PREVIEW_LABEL}
-                tooltipContent={TECH_PREVIEW_DESCRIPTION}
-              />
-            </>
-          ),
+          label: !isBeta ? name : <>{name}</>,
           onClick: () => onSectionChange(id as Section),
           isSelected: id === section,
           key: id,
@@ -174,11 +162,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
           path={REPORTING_SCHEDULES_PATH}
           render={() => (
             <Suspense fallback={<EuiLoadingSpinner size={'xl'} />}>
-              {enableLinks && showLinks ? (
-                <ReportSchedulesTable apiClient={apiClient} />
-              ) : (
-                <LicensePrompt />
-              )}
+              {enableLinks && showLinks ? <ReportSchedulesTable /> : <LicensePrompt />}
             </Suspense>
           )}
         />

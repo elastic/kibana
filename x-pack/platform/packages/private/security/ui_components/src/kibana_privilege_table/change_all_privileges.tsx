@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './change_all_privileges.scss';
-
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -15,6 +13,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -79,7 +78,9 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     const button = (
       <EuiLink
         onClick={this.onButtonClick}
-        className={'secPrivilegeFeatureChangeAllLink'}
+        css={({ euiTheme }) => css`
+          margin-left: ${euiTheme.size.s};
+        `}
         data-test-subj="changeAllPrivilegesButton"
       >
         <EuiText size="xs">
@@ -118,7 +119,6 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
           this.onSelectPrivilege(NO_PRIVILEGE_VALUE);
         }}
         disabled={this.props.disabled}
-        // @ts-expect-error leaving this here so that when https://github.com/elastic/eui/issues/8123 is fixed we remove this comment
         css={({ euiTheme }) => ({ color: euiTheme.colors.danger })}
       >
         {this.getPrivilegeCopy(NO_PRIVILEGE_VALUE).label}

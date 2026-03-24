@@ -26,6 +26,23 @@ export const TRUSTED_APPS_LABELS = {
   ),
 };
 
+export const TRUSTED_DEVICES_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.trustedDevicesSummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch trusted devices stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.trustedDevices.fleetIntegration.title"
+      defaultMessage="Trusted devices"
+    />
+  ),
+};
+
 export const EVENT_FILTERS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate(
@@ -71,6 +88,23 @@ export const BLOCKLISTS_LABELS = {
     <FormattedMessage
       id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
       defaultMessage="Blocklist"
+    />
+  ),
+};
+
+export const ENDPOINT_EXCEPTIONS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.endpointExceptionsSummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch endpoint exceptions stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.endpointExceptions.fleetIntegration.title"
+      defaultMessage="Endpoint exceptions"
     />
   ),
 };

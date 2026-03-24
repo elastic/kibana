@@ -9,6 +9,5 @@ export {
   SetSearchChrome,
   SetAnalyticsChrome,
   SetEnterpriseSearchContentChrome,
-  SetSearchExperiencesChrome,
   SetEnterpriseSearchApplicationsChrome,
 } from './set_chrome';

@@ -46,6 +46,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
+        is_connector_type_deprecated: false,
       });
       expect(typeof response.body.id).to.be('string');
 
@@ -132,7 +133,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
       } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
       expect(features).to.be.an(Array);
       const noopFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+        (feature: { id: string }) => feature.id === 'Connector: Test: Noop'
       );
       expect(noopFeature).to.be.ok();
       expect(noopFeature.last_used).to.be.a('string');

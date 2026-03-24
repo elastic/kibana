@@ -12,7 +12,8 @@
       "tags": [ "service:smtp", "org:google" ],
       "privateLocations": [ ],
       "hash": "ekrjelkjrelkjre",
-      "ssl.verification_mode": "strict"
+      "ssl.verification_mode": "strict",
+      "maintenance_windows": ["test-maintenance-window-1"]
     },
     {
       "locations": [ "dev" ],
@@ -23,7 +24,8 @@
       "schedule": 1,
       "tags": "tag1,tag2",
       "privateLocations": [  ],
-      "hash": "ekrjelkjrelkjre"
+      "hash": "ekrjelkjrelkjre",
+      "maintenance_windows": ["test-maintenance-window-2"]
     },
     {
       "locations": [ "dev" ],

@@ -14,6 +14,8 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import type { FailedAttemptError, Options } from 'p-retry';
+import pRetry from 'p-retry';
 import type { DeepReadonly } from 'utility-types';
 import {
   type PostDeletePackagePoliciesResponse,
@@ -47,6 +49,7 @@ import type {
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
+import { deleteOldAndLegacyCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
 import {
   deletePreviousTransformsVersions,
@@ -60,7 +63,7 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
-import { CloudSecurityPostureConfig } from './config';
+import type { CloudSecurityPostureConfig } from './config';
 
 export class CspPlugin
   implements
@@ -113,8 +116,12 @@ export class CspPlugin
     plugins.fleet
       .fleetSetupCompleted()
       .then(async () => {
-        const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-          CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+        const packageInfo = await pRetry(
+          () =>
+            plugins.fleet.packageService.asInternalUser.getInstallation(
+              CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+            ),
+          getRetryOptions(this.logger, 'getInstallation')
         );
 
         // If package is installed we want to make sure all needed assets are installed
@@ -214,7 +221,9 @@ export class CspPlugin
           }
         );
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch((err) => {
+        this.logger.error('CSP plugin getInstallation operation failed after all retries', err);
+      });
 
     return {};
   }
@@ -231,8 +240,10 @@ export class CspPlugin
   ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.createInternalRepository();
     const isIntegrationVersionIncludesTransformAsset =
       isTransformAssetIncluded(packagePolicyVersion);
+
     await initializeCspIndices(
       esClient,
       this.config,
@@ -244,14 +255,26 @@ export class CspPlugin
       isIntegrationVersionIncludesTransformAsset,
       this.logger
     );
+
     await scheduleFindingsStatsTask(taskManager, this.logger);
     await this.initializeIndexAlias(esClient, this.logger);
+
+    // Delete old and legacy CDR data views for all spaces
+    await deleteOldAndLegacyCdrDataViewsForAllSpaces(soClient, this.logger);
+
     this.#isInitialized = true;
   }
 
   // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
   // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
   initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    const isIndexExists = await esClient.indices.exists({
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+    if (isIndexExists) {
+      return;
+    }
+
     const isAliasExists = await esClient.indices.existsAlias({
       name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
@@ -308,4 +331,14 @@ const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
 const isTransformAssetIncluded = (integrationVersion: string): boolean => {
   const majorVersion = semver.major(integrationVersion);
   return majorVersion >= 3;
+};
+
+const getRetryOptions = (logger: Logger, operation: string): Options => {
+  return {
+    retries: 3,
+    onFailedAttempt: (err: FailedAttemptError) => {
+      const message = `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`;
+      logger.warn(message);
+    },
+  };
 };

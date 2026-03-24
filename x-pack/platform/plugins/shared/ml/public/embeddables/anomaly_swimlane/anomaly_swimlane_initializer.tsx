@@ -31,16 +31,14 @@ import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
+import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimlaneInitialInput } from '..';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
 
 export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;
 
 export interface AnomalySwimlaneInitializerProps {
-  initialInput?: Partial<
-    Pick<AnomalySwimLaneEmbeddableState, 'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage' | 'title'>
-  >;
+  initialInput?: AnomalySwimlaneInitialInput;
   onCreate: (swimlaneProps: ExplicitInput) => void;
   onCancel: () => void;
   adJobsApiService: MlApi['jobs'];
@@ -123,7 +121,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
-  const resultInput = {
+  const resultInput: AnomalySwimlaneEmbeddableUserInput = {
     jobIds,
     panelTitle,
     swimlaneType,

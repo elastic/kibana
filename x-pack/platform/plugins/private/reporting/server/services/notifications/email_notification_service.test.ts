@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { set } from '@kbn/safer-lodash-set';
-import { ReportingCore } from '../..';
+import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 import { EmailNotificationService } from './email_notification_service';
 
@@ -60,6 +60,7 @@ describe('EmailNotificationService', () => {
         to: ['test@test.com'],
         subject: 'Scheduled report for 04/18/2025',
         spaceId: 'space1',
+        message: 'Your scheduled report is attached for you to download or share.',
       },
     });
     expect(notifications.getEmailService().sendAttachmentEmail).toHaveBeenCalledWith({
@@ -105,6 +106,7 @@ describe('EmailNotificationService', () => {
         emailParams: {
           to: ['test@test.com'],
           subject: 'Scheduled report for 04/18/2025',
+          message: 'Your scheduled report is attached for you to download or share.',
           spaceId: 'space1',
         },
       })

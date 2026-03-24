@@ -8,9 +8,9 @@
  */
 
 import { schema, ValidationError } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type {
   InternalUiSettingsRequestHandlerContext,
   InternalUiSettingsRouter,
@@ -70,8 +70,7 @@ export function registerSetRoute(router: InternalUiSettingsRouter) {
       validate,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },
@@ -86,8 +85,7 @@ export function registerSetRoute(router: InternalUiSettingsRouter) {
       validate,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { ConfigSchema } from './config';
+import { configSchema } from './config';
 import type { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
@@ -24,13 +25,6 @@ export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
 };
-
-/*
- * Index patterns:
- */
-
-export type { FieldDescriptor, DataViewsServerPluginStart } from './data_views';
-export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './data_views';
 
 export {
   ES_FIELD_TYPES,
@@ -71,6 +65,7 @@ export {
   SearchSessionService,
   NoSearchIdInSessionError,
   INITIAL_SEARCH_SESSION_REST_VERSION,
+  INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
 } from './search';
 
 export { shimHitsTotal } from '../common/search';

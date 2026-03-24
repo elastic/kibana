@@ -11,6 +11,8 @@ import { processAllRuleGaps } from './process_all_rule_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { Gap } from './gap';
 import { gapStatus } from '../../../common/constants';
+import { chunk, concat, groupBy } from 'lodash';
+import pMap from 'p-map';
 
 jest.mock('./find_gaps', () => {
   return {
@@ -18,19 +20,40 @@ jest.mock('./find_gaps', () => {
   };
 });
 
+jest.mock('p-map', () => jest.fn());
+
 const findGapsSearchAfterMock = findGapsSearchAfter as jest.Mock;
+const pMapMock = pMap as jest.Mock;
 
 const range = (rangeStart: string, rangeEnd: string) => ({
   gte: new Date(rangeStart),
   lte: new Date(rangeEnd),
 });
-const createGap = (unfilledIntervals: Array<ReturnType<typeof range>>): Gap => {
+const createGap = (ruleId: string, unfilledIntervals: Array<ReturnType<typeof range>>): Gap => {
   return {
+    ruleId,
     unfilledIntervals,
   } as unknown as Gap;
 };
 
-const generateTestCaseData = (iterations: number) => {
+const getProcessGapsBatchImplementation =
+  (processedGapsCount: Record<string, number>) =>
+  async (gaps: Gap[], limits: Record<string, number>) => {
+    const groupedGaps = groupBy(gaps, 'ruleId');
+    const processedGapsCountCurrentIteration: Record<string, number> = {};
+
+    Object.keys(groupedGaps).forEach((ruleId) => {
+      processedGapsCountCurrentIteration[ruleId] = limits[ruleId]
+        ? Math.min(limits[ruleId], groupedGaps[ruleId].length)
+        : groupedGaps[ruleId].length;
+
+      processedGapsCount[ruleId] += processedGapsCountCurrentIteration[ruleId];
+    });
+
+    return processedGapsCountCurrentIteration;
+  };
+
+const generateTestCaseData = (iterations: number, ruleIds: string[]) => {
   const pageSize = 500;
   const oneMinuteMs = 60 * 1000;
   const endDate = new Date();
@@ -44,7 +67,11 @@ const generateTestCaseData = (iterations: number) => {
   };
   const findGapsSearchReturnValues = Array.from({ length: iterations }).map((_, idx) => {
     return {
-      data: Array.from({ length: 500 }).map((__) => createGap([getDateRange()])),
+      data: concat(
+        ...ruleIds.map((ruleId) =>
+          Array.from({ length: 500 }).map((__) => createGap(ruleId, [getDateRange()]))
+        )
+      ),
       searchAfter: idx + 1 === iterations ? null : `some-search-after-${idx}`,
       pitId: `pitd-${idx}`,
     };
@@ -59,8 +86,10 @@ const generateTestCaseData = (iterations: number) => {
   };
 };
 
+const generateRuleIds = (count: number) =>
+  Array.from({ length: count }).map((_, idx) => `some-rule-id-${idx}`);
+
 describe('processAllRuleGaps', () => {
-  const ruleId = 'some-rule-id';
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
 
@@ -73,18 +102,41 @@ describe('processAllRuleGaps', () => {
   beforeEach(() => {
     let processGapsBatchCall = 1;
     processGapsBatchMock = jest.fn(async () => processGapsBatchCall++);
+    const pMapActual = jest.requireActual('p-map');
+    pMapMock.mockImplementation(pMapActual);
+  });
+
+  describe('concurrency logic', () => {
+    const ruleIds = generateRuleIds(11);
+    beforeEach(async () => {
+      pMapMock.mockImplementation(() => Promise.resolve());
+      await processAllRuleGaps({
+        ruleIds,
+        start: new Date().toISOString(),
+        end: new Date().toISOString(),
+        logger: mockLogger,
+        eventLogClient: mockEventLogClient,
+        processGapsBatch: processGapsBatchMock,
+      });
+    });
+    it('should process rules in batches and concurrently', () => {
+      expect(pMapMock).toHaveBeenCalledTimes(1);
+      expect(pMapMock).toHaveBeenCalledWith(chunk(ruleIds, 10), expect.any(Function), {
+        concurrency: 10,
+      });
+    });
   });
 
   describe('happy path', () => {
-    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3);
+    const ruleIds = generateRuleIds(3);
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3, ruleIds);
     const { start, end } = searchRange;
-    let results: Awaited<ReturnType<typeof processAllRuleGaps>>;
     beforeEach(async () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      results = await processAllRuleGaps({
-        ruleId,
+      await processAllRuleGaps({
+        ruleIds,
         start,
         end,
         logger: mockLogger,
@@ -93,7 +145,7 @@ describe('processAllRuleGaps', () => {
       });
     });
 
-    it('should fetch all the gaps for the rule', () => {
+    it('should fetch all the gaps for the rules', () => {
       const callParams = [
         { pitId: undefined, searchAfter: undefined },
         {
@@ -113,7 +165,7 @@ describe('processAllRuleGaps', () => {
           eventLogClient: mockEventLogClient,
           logger: mockLogger,
           params: {
-            ruleId,
+            ruleIds,
             start,
             end,
             perPage: 500,
@@ -135,26 +187,21 @@ describe('processAllRuleGaps', () => {
       expect(processGapsBatchMock).toHaveBeenCalledTimes(findGapsSearchReturnValues.length);
       findGapsSearchReturnValues.forEach(({ data }, idx) => {
         const callOrder = idx + 1;
-        expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, data);
+        expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, data, {});
       });
-    });
-
-    it('should return a list with the results of each call to processGapsBatch', () => {
-      // In this test we make processGapsBatch to return a number representing how many times it was called
-      expect(results).toEqual(findGapsSearchReturnValues.map((_, idx) => idx + 1));
     });
   });
 
   describe('when there are no gaps to process', () => {
-    let results: Awaited<ReturnType<typeof processAllRuleGaps>>;
+    const ruleIds = generateRuleIds(3);
     beforeEach(async () => {
       findGapsSearchAfterMock.mockResolvedValue({
         data: [],
         searchAfer: null,
         pitId: null,
       });
-      results = await processAllRuleGaps({
-        ruleId,
+      await processAllRuleGaps({
+        ruleIds,
         start: new Date().toISOString(),
         end: new Date().toISOString(),
         logger: mockLogger,
@@ -166,16 +213,12 @@ describe('processAllRuleGaps', () => {
     it('should not call processGapsBatch', () => {
       expect(processGapsBatchMock).not.toHaveBeenCalled();
     });
-
-    it('should return an empty results array', () => {
-      expect(results).toEqual([]);
-    });
   });
 
   describe('when the max iterations are reached', () => {
-    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(10001);
+    const ruleIds = generateRuleIds(1);
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(10001, ruleIds);
     const { start, end } = searchRange;
-    let results: Awaited<ReturnType<typeof processAllRuleGaps>>;
     beforeEach(async () => {
       findGapsSearchAfterMock.mockImplementation(() => {
         return {
@@ -187,8 +230,8 @@ describe('processAllRuleGaps', () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      results = await processAllRuleGaps({
-        ruleId,
+      await processAllRuleGaps({
+        ruleIds,
         start,
         end,
         logger: mockLogger,
@@ -204,31 +247,30 @@ describe('processAllRuleGaps', () => {
     it('should call closePointInTime when it is done', () => {
       expect(mockEventLogClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
-
-    it('should return a list with the results of each call to processGapsBatch', () => {
-      // In this test we make processGapsBatch to return a number representing how many times it was called
-      expect(results).toEqual(findGapsSearchReturnValues.slice(0, 10000).map((_, idx) => idx + 1));
-    });
   });
 
   describe('when the max amount of gaps specified in the params is reached', () => {
-    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3);
+    const ruleIds = generateRuleIds(3);
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3, ruleIds);
     const { start, end } = searchRange;
-    let processedGapsCount = 0;
+    const processedGapsCount = ruleIds.reduce((acc, ruleId) => {
+      acc[ruleId] = 0;
+      return acc;
+    }, {} as Record<string, number>);
     beforeEach(async () => {
-      processGapsBatchMock.mockImplementation(async (gaps) => {
-        processedGapsCount += gaps.length;
-      });
+      processGapsBatchMock.mockImplementation(
+        getProcessGapsBatchImplementation(processedGapsCount)
+      );
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
       await processAllRuleGaps({
-        ruleId,
+        ruleIds,
         start,
         end,
         logger: mockLogger,
         options: {
-          maxFetchedGaps: 550,
+          maxProcessedGapsPerRule: 550,
         },
         eventLogClient: mockEventLogClient,
         processGapsBatch: processGapsBatchMock,
@@ -236,7 +278,9 @@ describe('processAllRuleGaps', () => {
     });
 
     afterEach(() => {
-      processedGapsCount = 0;
+      Object.keys(processedGapsCount).forEach((ruleId) => {
+        processedGapsCount[ruleId] = 0;
+      });
     });
 
     it('should stop fetching gaps when the max number of gaps is reached', () => {
@@ -244,7 +288,9 @@ describe('processAllRuleGaps', () => {
     });
 
     it('should only process the amount of gaps specified', () => {
-      expect(processedGapsCount).toEqual(550);
+      Object.keys(processedGapsCount).forEach((ruleId) => {
+        expect(processedGapsCount[ruleId]).toEqual(550);
+      });
     });
 
     it('should call closePointInTime when it is done', () => {
@@ -253,15 +299,19 @@ describe('processAllRuleGaps', () => {
   });
 
   describe('when nextSearchAfter is null', () => {
-    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(2);
+    const ruleIds = generateRuleIds(3);
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(2, ruleIds);
     // Make it stop after the first result
     findGapsSearchReturnValues[0].searchAfter = null;
     const { start, end } = searchRange;
-    let processedGapsCount = 0;
+    const processedGapsCount = ruleIds.reduce((acc, ruleId) => {
+      acc[ruleId] = 0;
+      return acc;
+    }, {} as Record<string, number>);
     beforeEach(async () => {
-      processGapsBatchMock.mockImplementation(async (gaps) => {
-        processedGapsCount += gaps.length;
-      });
+      processGapsBatchMock.mockImplementation(
+        getProcessGapsBatchImplementation(processedGapsCount)
+      );
       findGapsSearchAfterMock.mockImplementation(() => {
         return {
           data: [],
@@ -273,7 +323,7 @@ describe('processAllRuleGaps', () => {
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
       await processAllRuleGaps({
-        ruleId,
+        ruleIds,
         start,
         end,
         logger: mockLogger,
@@ -292,16 +342,17 @@ describe('processAllRuleGaps', () => {
   });
 
   describe('when there is an error', () => {
+    const ruleIds = generateRuleIds(3);
     const thrownError = new Error('boom!');
     let caughtError: Error;
-    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(2);
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(2, ruleIds);
     const { start, end } = searchRange;
     beforeEach(async () => {
       findGapsSearchAfterMock.mockResolvedValueOnce(findGapsSearchReturnValues[0]);
       findGapsSearchAfterMock.mockRejectedValue(thrownError);
       try {
         await processAllRuleGaps({
-          ruleId,
+          ruleIds,
           start,
           end,
           logger: mockLogger,

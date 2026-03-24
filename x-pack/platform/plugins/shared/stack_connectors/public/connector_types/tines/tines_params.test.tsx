@@ -108,7 +108,9 @@ describe('TinesParamsFields renders', () => {
       );
 
       expect(wrapper.find('[data-test-subj="tines-bodyJsonEditor"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').exists()).toBe(false);
+      expect(
+        wrapper.find('[data-test-subj="bodyAddVariableButton"]').first().prop('disabled')
+      ).toBe(true);
 
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').exists()).toBe(true);
       expect(

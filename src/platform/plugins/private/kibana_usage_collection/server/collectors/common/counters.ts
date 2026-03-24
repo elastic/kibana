@@ -8,13 +8,13 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/logging';
-import {
+import type { Logger } from '@kbn/logging';
+import type {
   CollectorFetchContext,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
+import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 
 export interface CounterEvent {
   domainId: string;

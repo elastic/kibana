@@ -89,6 +89,16 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
+const mockEarliestCaseParams = {
+  filterOptions: { from: undefined, to: undefined, owner: [] },
+  queryParams: {
+    page: 1,
+    perPage: 1,
+    sortField: SortFieldCase.createdAt,
+    sortOrder: 'asc',
+  },
+};
+
 // eslint-disable-next-line prefer-object-spread
 const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
@@ -151,7 +161,10 @@ describe('AllCasesListGeneric', () => {
   beforeAll(() => {
     patchGetComputedStyle();
     mockKibana();
-    const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+    } = useKibanaMock().services;
+
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
@@ -170,7 +183,7 @@ describe('AllCasesListGeneric', () => {
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => false, isAtLeastPlatinum: () => false });
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
     mockKibana();
     moment.tz.setDefault('UTC');
@@ -182,7 +195,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should render AllCasesList', async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
     renderWithTestingProviders(<AllCasesList />);
 
     const caseDetailsLinks = await screen.findAllByTestId('case-details-link');
@@ -192,6 +205,10 @@ describe('AllCasesListGeneric', () => {
     expect(
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
+
+    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
+    expect(incrementalIdTextElements).toHaveLength(1);
+    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
 
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
@@ -215,7 +232,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
 
     renderWithTestingProviders(<AllCasesList />);
 
@@ -409,7 +426,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Status'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -418,6 +435,9 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -438,7 +458,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Severity'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -448,6 +468,9 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by title', async () => {
@@ -456,7 +479,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Name'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -466,6 +489,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by updatedOn', async () => {
@@ -474,7 +501,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Updated on'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -484,6 +511,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by category', async () => {
@@ -492,7 +523,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Category'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -501,6 +532,10 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -512,14 +547,17 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: ['title', 'description'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -628,7 +666,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should clear the filters correctly', async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
 
     renderWithTestingProviders(<AllCasesList />);
 
@@ -637,9 +675,12 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(DEFAULT_CASES_TABLE_STATE);
+    });
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -906,7 +947,10 @@ describe('AllCasesListGeneric', () => {
 
     describe('Assignees', () => {
       it('should hide the assignees column on basic license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => false,
+          isAtLeastPlatinum: () => false,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -915,7 +959,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should show the assignees column on platinum license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => true,
+          isAtLeastPlatinum: () => true,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -924,7 +971,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should hide the assignees filters on basic license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => false,
+          isAtLeastPlatinum: () => false,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -933,7 +983,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should show the assignees filters on platinum license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => true,
+          isAtLeastPlatinum: () => true,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -944,7 +997,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should reset the assignees when deactivating the filter', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => true,
+          isAtLeastPlatinum: () => true,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -959,18 +1015,24 @@ describe('AllCasesListGeneric', () => {
         ).toBeInTheDocument();
 
         // Deactivates assignees filter
-        await userEvent.click(await screen.findByRole('button', { name: 'More' }));
+        await userEvent.click(
+          await screen.findByTestId('options-filter-popover-button-more-filters')
+        );
         await waitForEuiPopoverOpen();
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
 
-        expect(useGetCasesMock).toHaveBeenLastCalledWith({
-          filterOptions: {
-            ...DEFAULT_FILTER_OPTIONS,
-            assignees: [],
-          },
-          queryParams: DEFAULT_QUERY_PARAMS,
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
         });
-
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith({
+            filterOptions: {
+              ...DEFAULT_FILTER_OPTIONS,
+              assignees: [],
+            },
+            queryParams: DEFAULT_QUERY_PARAMS,
+          });
+        });
         // Reopens assignees filter
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
         // Opens the assignees popup

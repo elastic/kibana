@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContentReferencesStore, Options } from '../../types';
+import type { ContentReferencesStore, Options } from '../../types';
 
 export const newContentReferencesStoreMock: (options?: Options) => ContentReferencesStore = jest
   .fn()

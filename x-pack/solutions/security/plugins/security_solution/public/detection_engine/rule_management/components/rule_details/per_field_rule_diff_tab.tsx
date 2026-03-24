@@ -6,7 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
+import type {
+  PartialThreeWayRuleDiff,
+  ThreeWayRuleFieldsDiff,
+} from '../../../../../common/api/detection_engine';
 import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
 import type { RuleDiffHeaderBarProps } from './diff_components';
@@ -16,7 +19,7 @@ import type { FieldsGroupDiff, DiffLayout } from '../../model/rule_details/rule_
 import * as i18n from './translations';
 
 interface PerFieldRuleDiffTabProps extends RuleDiffHeaderBarProps {
-  ruleDiff: PartialRuleDiff;
+  ruleDiff: PartialThreeWayRuleDiff;
   header?: React.ReactNode;
   diffLayout?: DiffLayout;
 }
@@ -35,7 +38,7 @@ export const PerFieldRuleDiffTab = ({
     // Filter out diff outcomes that we don't support displaying in the per-field diff flyout
     const filteredFieldDiffs = filterUnsupportedDiffOutcomes(ruleDiff.fields);
     for (const field of Object.keys(filteredFieldDiffs)) {
-      const typedField = field as keyof RuleFieldsDiff;
+      const typedField = field as keyof ThreeWayRuleFieldsDiff;
       const formattedDiffs = getFormattedFieldDiffGroups(typedField, filteredFieldDiffs);
       fields.push({ formattedDiffs, fieldsGroupName: typedField });
     }

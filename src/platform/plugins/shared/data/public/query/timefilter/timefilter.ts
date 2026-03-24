@@ -10,17 +10,19 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { TimeRange } from '@kbn/es-query';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-service-server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
-import { TimeHistoryContract } from './time_history';
-import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
-import { TimefilterHook, createUseTimefilterHook } from './use_timefilter';
+import type { TimeHistoryContract } from './time_history';
+import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+import { createAutoRefreshLoop } from './lib/auto_refresh_loop';
+import type { TimefilterHook } from './use_timefilter';
+import { createUseTimefilterHook } from './use_timefilter';
 
 export type { AutoRefreshDoneFn };
 

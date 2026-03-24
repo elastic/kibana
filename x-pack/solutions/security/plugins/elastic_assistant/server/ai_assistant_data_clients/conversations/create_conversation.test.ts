@@ -10,7 +10,7 @@ import { createConversation } from './create_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConversation } from './get_conversation';
 import { authenticatedUser } from '../../__mocks__/user';
-import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),
@@ -56,6 +56,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       name: 'test',
     },
   ],
+  createdBy: { name: 'test' },
 });
 
 describe('createConversation', () => {

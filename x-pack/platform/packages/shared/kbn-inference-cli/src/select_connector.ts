@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import inquirer from 'inquirer';
-import { InferenceConnector } from '@kbn/inference-common';
-import { KibanaClient } from '@kbn/kibana-api-cli';
+import type { InferenceConnector } from '@kbn/inference-common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
 import { getConnectors } from './get_connector';
 
 export async function selectConnector({

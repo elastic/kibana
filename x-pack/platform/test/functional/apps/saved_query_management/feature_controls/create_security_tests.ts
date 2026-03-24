@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSavedQuerySecurityUtils } from '../utils/saved_query_security';
 
 export type FeatureName =
@@ -33,6 +33,8 @@ export function createSecurityTests(
     const esArchiver = getService('esArchiver');
     const securityService = getService('security');
     const globalNav = getService('globalNav');
+    const kibanaServer = getService('kibanaServer');
+    const testSubjects = getService('testSubjects');
     const { common, discover, security, dashboard, maps, visualize, spaceSelector } =
       getPageObjects([
         'common',
@@ -43,7 +45,6 @@ export function createSecurityTests(
         'visualize',
         'spaceSelector',
       ]);
-    const kibanaServer = getService('kibanaServer');
 
     async function login(
       featureName: FeatureName,
@@ -107,6 +108,26 @@ export function createSecurityTests(
       }
     }
 
+    async function assertReadOnlyBadgeExists(appName: FeatureApp) {
+      switch (appName) {
+        case 'discover':
+          await testSubjects.existOrFail('discover-readonly-badge');
+          break;
+        default:
+          await globalNav.badgeExistsOrFail('Read only');
+      }
+    }
+
+    async function assertReadOnlyBadgeMissing(appName: FeatureApp) {
+      switch (appName) {
+        case 'discover':
+          await testSubjects.missingOrFail('discover-readonly-badge');
+          break;
+        default:
+          await globalNav.badgeMissingOrFail();
+      }
+    }
+
     describe('Security', () => {
       describe('App vs Global privilege', () => {
         featureConfigs.forEach(({ feature, app, hasImplicitSaveQueryManagement }) => {
@@ -114,10 +135,12 @@ export function createSecurityTests(
             await kibanaServer.savedObjects.cleanStandardList();
 
             await kibanaServer.importExport.load(
-              'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+              'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
             );
 
-            await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+            await esArchiver.loadIfNeeded(
+              'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+            );
 
             // ensure we're logged out, so we can log in as the appropriate users
             await security.forceLogout();
@@ -129,7 +152,7 @@ export function createSecurityTests(
             await security.forceLogout();
 
             await kibanaServer.importExport.unload(
-              'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+              'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
             );
 
             await kibanaServer.savedObjects.cleanStandardList();
@@ -147,7 +170,7 @@ export function createSecurityTests(
             });
 
             it('shows read-only badge', async () => {
-              await globalNav.badgeExistsOrFail('Read only');
+              await assertReadOnlyBadgeExists(app);
             });
 
             savedQuerySecurityUtils.shouldAllowSavingQueries();
@@ -165,7 +188,7 @@ export function createSecurityTests(
             });
 
             it('shows read-only badge', async () => {
-              await globalNav.badgeExistsOrFail('Read only');
+              await assertReadOnlyBadgeExists(app);
             });
 
             savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
@@ -182,7 +205,7 @@ export function createSecurityTests(
             });
 
             it('shows read-only badge', async () => {
-              await globalNav.badgeExistsOrFail('Read only');
+              await assertReadOnlyBadgeExists(app);
             });
 
             if (hasImplicitSaveQueryManagement) {
@@ -203,7 +226,7 @@ export function createSecurityTests(
             });
 
             it("doesn't show read-only badge", async () => {
-              await globalNav.badgeMissingOrFail();
+              await assertReadOnlyBadgeMissing(app);
             });
 
             savedQuerySecurityUtils.shouldAllowSavingQueries();
@@ -220,7 +243,7 @@ export function createSecurityTests(
             });
 
             it("doesn't show read-only badge", async () => {
-              await globalNav.badgeMissingOrFail();
+              await assertReadOnlyBadgeMissing(app);
             });
 
             if (hasImplicitSaveQueryManagement) {
@@ -241,7 +264,7 @@ export function createSecurityTests(
             });
 
             it("doesn't show read-only badge", async () => {
-              await globalNav.badgeMissingOrFail();
+              await assertReadOnlyBadgeMissing(app);
             });
 
             if (hasImplicitSaveQueryManagement) {

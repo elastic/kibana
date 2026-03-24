@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reducer } from 'react';
+import type { Reducer } from 'react';
 import { cloneDeep } from 'lodash';
-import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
-import { TextObject } from '../../../common/text_object';
+import type { DevToolsSettings } from '../../services';
+import { DEFAULT_SETTINGS } from '../../services';
+import type { TextObject } from '../../../common/text_object';
 import { SHELL_TAB_ID } from '../containers/main/constants';
-import { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
-import { RequestToRestore } from '../../types';
+import type { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
+import type { RequestToRestore } from '../../types';
 
 export interface Store {
   ready: boolean;
@@ -22,6 +23,7 @@ export interface Store {
   currentView: string;
   restoreRequestFromHistory: RequestToRestore | null;
   fileToImport: string | null;
+  customParsedRequestsProvider?: (model: any) => any;
 }
 
 export const initialValue: Store = {
@@ -31,6 +33,7 @@ export const initialValue: Store = {
   currentView: SHELL_TAB_ID,
   restoreRequestFromHistory: null,
   fileToImport: null,
+  customParsedRequestsProvider: undefined,
 };
 
 export type Action =

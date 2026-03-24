@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FeatureApp, FeatureName, createSecurityTests } from '../create_security_tests';
+import type { FeatureApp, FeatureName } from '../create_security_tests';
+import { createSecurityTests } from '../create_security_tests';
 
 const featureConfigs: Array<{
   feature: FeatureName;

@@ -6,10 +6,9 @@
  */
 
 import { compressToEncodedURIComponent } from 'lz-string';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const editorTestSubjectSelector = 'searchProfilerEditor';
@@ -20,6 +19,9 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
     },
     async setQuery(query: any) {
       await monacoEditor.setCodeEditorValue(JSON.stringify(query), 0);
+    },
+    async setStringQuery(query: any) {
+      await monacoEditor.setCodeEditorValue(query, 0);
     },
     async getQuery() {
       return JSON.parse(await monacoEditor.getCodeEditorValue(0));
@@ -35,8 +37,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('profileButton');
     },
     async getProfileContent() {
-      const profileTree = await find.byClassName('prfDevTool__main__profiletree');
-      // const profileTree = await find.byClassName('prfDevTool__page');
+      const profileTree = await testSubjects.find('profileTree');
       return profileTree.getVisibleText();
     },
     getUrlWithIndexAndQuery({ indexName, query }: { indexName: string; query: any }) {
@@ -50,6 +51,9 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       const notification = await testSubjects.find('noShardsNotification');
       const text = await notification.getVisibleText();
       return text.includes('Unable to profile');
+    },
+    async editorHasJsonParseErrorNotification() {
+      return await testSubjects.exists('jsonParseErrorToast');
     },
   };
 }

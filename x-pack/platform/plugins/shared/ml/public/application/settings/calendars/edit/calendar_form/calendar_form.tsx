@@ -25,6 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PageTitle } from '../../../../components/page_title';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
@@ -39,13 +40,17 @@ const EditHeader: FC<{ calendarId: string; description: string }> = ({
   return (
     <>
       <MlPageHeader>
-        <span data-test-subj={'mlCalendarTitle'}>
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
-            defaultMessage="Calendar {calendarId}"
-            values={{ calendarId }}
-          />
-        </span>
+        <PageTitle
+          title={
+            <span data-test-subj={'mlCalendarTitle'}>
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
+                defaultMessage="Calendar {calendarId}"
+                values={{ calendarId }}
+              />
+            </span>
+          }
+        />
       </MlPageHeader>
       {description ? (
         <>
@@ -152,17 +157,21 @@ export const CalendarForm: FC<Props> = ({
       ) : (
         <>
           <MlPageHeader>
-            {isDst ? (
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.calendarForm.createCalendarDstTitle"
-                defaultMessage="Create new DST calendar"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-                defaultMessage="Create new calendar"
-              />
-            )}
+            <PageTitle
+              title={
+                isDst ? (
+                  <FormattedMessage
+                    id="xpack.ml.calendarsEdit.calendarForm.createCalendarDstTitle"
+                    defaultMessage="Create new DST calendar"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+                    defaultMessage="Create new calendar"
+                  />
+                )
+              }
+            />
           </MlPageHeader>
           <EuiFormRow
             label={

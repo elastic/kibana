@@ -14,7 +14,8 @@ import {
   EuiHealth,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleLastRunOutcomes, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
+import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
+import { RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import { rulesLastRunOutcomeTranslationMapping } from '../translations';
 import { getOutcomeHealthColor } from '../../../../common/lib';
 

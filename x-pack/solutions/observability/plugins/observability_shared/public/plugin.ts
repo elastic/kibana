@@ -7,18 +7,19 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { BehaviorSubject, combineLatest, type Subscription } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -43,12 +44,12 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
-import { ObservabilitySharedBrowserConfig } from '../common/config';
-import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  DependencyOverviewLocator,
-  DependencyOverviewLocatorDefinition,
-} from '../common/locators/apm/dependency_overview_locator';
+import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
+import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
+export const OBSERVABILITY_SESSION_TAG = 'observability';
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -57,6 +58,7 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -87,11 +89,11 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private config: ObservabilitySharedBrowserConfig;
+  private appChangeSubscription?: Subscription;
+  private lastIsObservabilityApp?: boolean;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
@@ -107,12 +109,14 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      config: this.config,
     };
   }
 
   public start(core: CoreStart, plugins: ObservabilitySharedStart) {
     const { application } = core;
+    const { agentBuilder } = plugins;
+
+    this.setupObservabilityAgentDefault(application, agentBuilder);
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
@@ -130,11 +134,53 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      config: this.config,
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.appChangeSubscription?.unsubscribe();
+  }
+
+  /**
+   * Sets up the Observability Agent as the default AI agent when navigating to Observability apps.
+   * Subscribes to app changes and configures the AI flyout accordingly.
+   */
+  private setupObservabilityAgentDefault(
+    application: CoreStart['application'],
+    agentBuilder: AgentBuilderPluginStart | undefined
+  ) {
+    if (!agentBuilder) {
+      return;
+    }
+
+    this.appChangeSubscription = combineLatest([
+      application.currentAppId$,
+      application.applications$,
+    ]).subscribe(([currentAppId, registeredApps]) => {
+      if (!currentAppId) {
+        return;
+      }
+
+      const currentApp = registeredApps.get(currentAppId);
+      const isObservabilityApp =
+        currentApp?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
+
+      if (isObservabilityApp === this.lastIsObservabilityApp) {
+        return;
+      }
+      this.lastIsObservabilityApp = isObservabilityApp;
+
+      if (isObservabilityApp) {
+        agentBuilder.setChatConfig({
+          agentId: OBSERVABILITY_AGENT_ID,
+          sessionTag: OBSERVABILITY_SESSION_TAG,
+          newConversation: false,
+        });
+      } else {
+        agentBuilder.clearChatConfig?.();
+      }
+    });
+  }
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
     return {

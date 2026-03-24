@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -20,5 +20,6 @@
     "@kbn/core-user-profile-browser",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/react-query",
   ]
 }

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EuiModal } from '@elastic/eui';
-import { IndicesResolutionType } from '../../../../../../../common/types';
+import type { IndicesResolutionType } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import {
@@ -19,7 +19,7 @@ import {
   UIM_REINDEX_UNFREEZE_RETRY_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
-import { ModalStep } from './steps/types';
+import type { ModalStep } from './steps/types';
 import { InitializingStep } from '../../../common/initializing_step';
 import { UpdateIndexModalStep } from './steps/update/update_step';
 import { WarningModalStep } from './steps/warning/warning_step_modal';

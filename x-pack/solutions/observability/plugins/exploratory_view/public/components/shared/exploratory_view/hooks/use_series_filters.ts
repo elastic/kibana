@@ -7,7 +7,7 @@
 
 import { concat } from 'lodash';
 import { useSeriesStorage } from './use_series_storage';
-import { SeriesUrl, UrlFilter } from '../types';
+import type { SeriesUrl, UrlFilter } from '../types';
 
 export interface UpdateFilter {
   field: string;

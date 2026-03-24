@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedFieldListSidebarContainerProps } from '../src/containers/unified_field_list_sidebar';
+import type { UnifiedFieldListSidebarContainerProps } from '../src/containers/unified_field_list_sidebar';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

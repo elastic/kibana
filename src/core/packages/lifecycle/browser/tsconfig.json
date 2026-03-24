@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -24,7 +24,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-deprecations-browser",
     "@kbn/core-overlays-browser",
-    "@kbn/core-saved-objects-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-plugins-contracts-browser",
@@ -32,7 +31,8 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-rendering-browser",
-    "@kbn/core-pricing-browser"
+    "@kbn/core-pricing-browser",
+    "@kbn/core-di",
   ],
   "exclude": [
     "target/**/*",

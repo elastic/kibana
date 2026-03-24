@@ -5,27 +5,6 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../constants/common';
-
-/**
- * Creates an object to pass to the uiSettings property when creating a KibanaReacrContext (see src/platform/plugins/shared/kibana_react/public/context/context.tsx).
- * @param dateFormat defaults to ''
- * @param timezone defaults to 'UTC
- * @returns the object {@link IUiSettingsClient}
- */
-export const mockUiSettingsService = (dateFormat: string = '', timezone: string = 'UTC') =>
-  ({
-    get: (key: string) => {
-      const settings = {
-        [DEFAULT_DATE_FORMAT]: dateFormat,
-        [DEFAULT_DATE_FORMAT_TZ]: timezone,
-      };
-      // @ts-expect-error
-      return settings[key];
-    },
-  } as unknown as IUiSettingsClient);
-
 /**
  * Mocks date format or timezone for testing.
  * @param key dateFormat | dateFormat:tz

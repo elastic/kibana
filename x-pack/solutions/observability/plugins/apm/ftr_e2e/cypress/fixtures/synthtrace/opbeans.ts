@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
-import { apm, timerange, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/synthtrace-client';
+import { apm, timerange, generateLongId, generateShortId } from '@kbn/synthtrace-client';
 import { shuffle, compact } from 'lodash';
 
 function generateExternalSpanLinks() {

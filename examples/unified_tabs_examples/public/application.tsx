@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { AppPluginStartDependencies } from './types';
+import type { AppPluginStartDependencies } from './types';
 import { UnifiedTabsExampleApp } from './example_app';
 
 export const renderApp = (

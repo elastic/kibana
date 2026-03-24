@@ -16,14 +16,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiIcon,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import type { Services } from '../services';
 import type { Item } from '../types';
@@ -38,14 +34,13 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
       entityName,
     },
   }),
-  cancelButtonLabel: i18n.translate('contentManagement.contentEditor.cancelButtonLabel', {
-    defaultMessage: 'Cancel',
-  }),
 });
 
 export interface Props {
   item: Item;
   entityName: string;
+  flyoutTitle: string;
+  flyoutTitleId: string;
   isReadonly?: boolean;
   readonlyReason?: string;
   services: Pick<Services, 'TagSelector' | 'TagList' | 'notifyError'>;
@@ -56,24 +51,21 @@ export interface Props {
     tags: string[];
   }) => Promise<void>;
   customValidators?: CustomValidators;
-  onCancel: () => void;
   appendRows?: React.ReactNode;
 }
-
-const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
 
 export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
+  flyoutTitle,
+  flyoutTitleId,
   isReadonly = true,
   readonlyReason,
   services: { TagSelector, TagList, notifyError },
   onSave,
-  onCancel,
   customValidators,
   appendRows,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
@@ -88,9 +80,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       return arr1.every((tag: string, index) => tag === arr2[index]);
     };
 
+    const description = item.description || '';
+
     return (
       item.title === form.title.value &&
-      item.description === form.description.value &&
+      description === form.description.value &&
       compareTags(itemTags, formTags)
     );
   };
@@ -126,34 +120,13 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
     setIsSubmitted(true);
   }, [onSave, item.id, form, notifyError, entityName]);
 
-  const onClickCancel = useCallback(() => {
-    onCancel();
-  }, [onCancel]);
-
-  const iconCSS = css`
-    margin-right: ${euiTheme.size.m};
-  `;
-
-  const title = capitalize(
-    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
-      defaultMessage: '{entityName} details',
-      values: {
-        entityName,
-      },
-    })
-  );
-
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
-          <h2>
-            <EuiIcon type="info" css={iconCSS} size="l" />
-            <span>{title}</span>
-          </h2>
+          <h2 id={flyoutTitleId}>{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody>
         <MetadataForm
           form={{ ...form, isSubmitted }}
@@ -171,37 +144,23 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           {appendRows}
         </MetadataForm>
       </EuiFlyoutBody>
-
       <EuiFlyoutFooter>
-        <>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {isReadonly === false && (
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                flush="left"
-                onClick={onClickCancel}
-                data-test-subj="closeFlyoutButton"
+              <EuiButton
+                color="primary"
+                onClick={onClickSave}
+                data-test-subj="saveButton"
+                fill
+                disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
+                isLoading={isSubmitting}
               >
-                {i18nTexts.cancelButtonLabel}
-              </EuiButtonEmpty>
+                {i18nTexts.saveButtonLabel}
+              </EuiButton>
             </EuiFlexItem>
-
-            {isReadonly === false && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  onClick={onClickSave}
-                  data-test-subj="saveButton"
-                  fill
-                  disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
-                  isLoading={isSubmitting}
-                >
-                  {i18nTexts.saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
-        </>
+        )}
       </EuiFlyoutFooter>
     </>
   );

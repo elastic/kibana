@@ -48,6 +48,9 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
+import { backfillScheduleIds } from './lib/backfill_schedule_ids';
+
+const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -55,6 +58,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly osqueryAppContextService = new OsqueryAppContextService();
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private coreStart: CoreStart | null = null;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
 
@@ -68,6 +72,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
+    const experimentalFeatures = config.experimentalFeatures;
 
     registerFeatures(plugins.features);
 
@@ -78,6 +83,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       getStartServices: core.getStartServices,
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
+      experimentalFeatures,
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
@@ -105,6 +111,36 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
+    plugins.taskManager?.registerTaskDefinitions({
+      [BACKFILL_TASK_TYPE]: {
+        title: 'Backfill schedule IDs for osquery pack queries',
+        timeout: '5m',
+        maxAttempts: 3,
+        createTaskRunner: ({ taskInstance, abortController }) => ({
+          run: async () => {
+            if (taskInstance.state?.completed) {
+              this.logger.debug('backfillScheduleIds task: already completed, skipping');
+
+              return { state: { completed: true } };
+            }
+
+            if (!this.coreStart) {
+              throw new Error('Core not started');
+            }
+
+            const { hadFailures } = await backfillScheduleIds({
+              coreStart: this.coreStart,
+              osqueryContext: this.osqueryAppContextService,
+              logger: this.logger,
+              abortController,
+            });
+
+            return { state: { completed: !hadFailures } };
+          },
+        }),
+      },
+    });
+
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
@@ -114,12 +150,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
   public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
+    this.coreStart = core;
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     this.osqueryAppContextService.start({
       ...plugins.fleet,
       ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
       logger: this.logger,
       registerIngestCallback,
@@ -156,6 +192,19 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           // we do not want to wait for it
         });
 
+        plugins.taskManager
+          ?.ensureScheduled({
+            id: BACKFILL_TASK_TYPE,
+            taskType: BACKFILL_TASK_TYPE,
+            scope: ['osquery'],
+            schedule: { interval: '24h' },
+            params: {},
+            state: {},
+          })
+          .catch((err) => {
+            this.logger.warn(`Failed to schedule backfillScheduleIds task: ${err.message}`);
+          });
+
         if (registerIngestCallback) {
           registerIngestCallback(
             'packagePolicyCreate',
@@ -174,6 +223,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     saved_objects: data.saved_objects.map((pack) => ({
                       ...pack.attributes,
                       saved_object_id: pack.id,
+                      references: pack.references,
                     })),
                   }));
 
@@ -187,7 +237,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     newPackagePolicy,
                     spaceScopedClient,
                     allPacks.saved_objects,
-                    this.osqueryAppContextService
+                    this.osqueryAppContextService,
+                    soClient.getCurrentNamespace()
                   );
                 }
               }

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { PlaygroundForm } from '../../../types';
+import type { PlaygroundForm } from '../../../types';
 import { LangchainPythonExmaple } from './py_langchain_python';
 
 describe('LangchainPythonExmaple component', () => {

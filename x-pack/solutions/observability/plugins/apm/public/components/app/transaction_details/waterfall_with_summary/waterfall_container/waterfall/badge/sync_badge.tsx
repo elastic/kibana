@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AgentName } from '../../../../../../../../typings/es_schemas/ui/fields/agent';
@@ -15,7 +15,7 @@ export interface SyncBadgeProps {
    * Is the request synchronous? True will show blocking, false will show async.
    */
   sync?: boolean;
-  agentName: AgentName;
+  agentName?: AgentName;
 }
 
 const BLOCKING_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
@@ -24,6 +24,10 @@ const BLOCKING_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeBlo
 
 const ASYNC_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
   defaultMessage: 'async',
+});
+
+const TOOLTIP_CONTENT = i18n.translate('xpack.apm.transactionDetails.syncBadgeTooltip', {
+  defaultMessage: 'Indicates whether the span was executed synchronously or asynchronously.',
 });
 
 // true will show blocking, false will show async.
@@ -41,8 +45,8 @@ const agentsSyncMap: Record<string, boolean> = {
   go: false,
 };
 
-export function getSyncLabel(agentName: AgentName, sync?: boolean) {
-  if (sync === undefined) {
+export function getSyncLabel(agentName?: AgentName, sync?: boolean) {
+  if (sync === undefined || agentName === undefined) {
     return;
   }
 
@@ -62,5 +66,9 @@ export function SyncBadge({ sync, agentName }: SyncBadgeProps) {
     return null;
   }
 
-  return <EuiBadge>{syncLabel}</EuiBadge>;
+  return (
+    <EuiToolTip content={TOOLTIP_CONTENT}>
+      <EuiBadge tabIndex={0}>{syncLabel}</EuiBadge>
+    </EuiToolTip>
+  );
 }

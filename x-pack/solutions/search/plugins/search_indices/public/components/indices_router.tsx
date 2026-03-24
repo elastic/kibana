@@ -7,7 +7,6 @@
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { useKibana } from '../hooks/use_kibana';
 import {
   SEARCH_INDICES_DETAILS_PATH,
   SEARCH_INDICES_DETAILS_TABS_PATH,
@@ -18,7 +17,6 @@ import { CreateIndexPage } from './create_index/create_index_page';
 import { IndexDetailsRootRedirect } from './index_details_root_redirect';
 
 export const SearchIndicesRouter: React.FC = () => {
-  const { application } = useKibana().services;
   return (
     <Routes>
       <Route exact path={[SEARCH_INDICES_DETAILS_TABS_PATH, SEARCH_INDICES_DETAILS_PATH]}>
@@ -28,12 +26,6 @@ export const SearchIndicesRouter: React.FC = () => {
         </Routes>
       </Route>
       <Route exact path={CREATE_INDEX_PATH} component={CreateIndexPage} />
-      <Route
-        render={() => {
-          application.navigateToApp('elasticsearchStart');
-          return null;
-        }}
-      />
     </Routes>
   );
 };

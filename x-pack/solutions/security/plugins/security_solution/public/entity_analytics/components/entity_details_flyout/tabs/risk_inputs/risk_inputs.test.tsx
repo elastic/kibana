@@ -51,7 +51,16 @@ const riskScore = {
 
 const riskScoreWithAssetCriticalityContribution = (contribution: number) => {
   const score = JSON.parse(JSON.stringify(riskScore));
-  score.user.risk.category_2_score = contribution;
+  score.user.risk.modifiers = [
+    {
+      type: 'asset_criticality',
+      contribution,
+      metadata: {
+        criticality_level: 'high_impact',
+      },
+    },
+  ];
+  score.user.risk.category_2_score = contribution; // Keep for backwards compatibility
   return score;
 };
 
@@ -104,6 +113,15 @@ describe('RiskInputsTab', () => {
         risk: {
           ...riskScore.user.risk,
           criticality_level: 'extreme_impact',
+          modifiers: [
+            {
+              type: 'asset_criticality',
+              contribution: 5,
+              metadata: {
+                criticality_level: 'extreme_impact',
+              },
+            },
+          ],
         },
       },
     };

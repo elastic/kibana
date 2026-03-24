@@ -10,16 +10,16 @@ import type {
   QueryDslQueryContainer,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
-import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import type { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import type { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface SloBurnRateRuleParams {
   sloId: string;
@@ -1195,11 +1195,19 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
         // Delete all documents in the alert index if specified
         alertIndexName
-          ? es.deleteByQuery({
-              index: alertIndexName,
-              conflicts: 'proceed',
-              query: { match_all: {} },
-            })
+          ? es
+              .deleteByQuery({
+                index: alertIndexName,
+                conflicts: 'proceed',
+                refresh: true,
+                query: { match_all: {} },
+              })
+              .then(async () => {
+                // Explicitly refresh the index to ensure deletions are visible
+                await es.indices.refresh({ index: alertIndexName }).catch(() => {
+                  // Ignore errors if index doesn't exist
+                });
+              })
           : Promise.resolve(),
         // Delete event logs for the specified consumer if provided
         consumer

@@ -50,7 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .post('/internal/security/user_profile/_data')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', cookie)
-          .send({ some: `data-${userPrefix}` })
+          .send({
+            avatar: { initials: `some-initials-${userPrefix}` },
+          })
           .expect(200);
 
         const { body: profile } = await supertestWithoutAuth
@@ -95,7 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const userProfileText = await testSubjects.getVisibleText(
             `testEndpointsUserProfilesAppUserProfile_user_${userPrefix}`
           );
-          expect(userProfileText).to.equal(`user_${userPrefix}:{"some":"data-${userPrefix}"}`);
+          expect(userProfileText).to.equal(
+            `user_${userPrefix}:{"avatar":{"color":null,"initials":"some-initials-${userPrefix}","imageUrl":null}}`
+          );
         }
       });
     });

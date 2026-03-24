@@ -7,7 +7,7 @@
 
 import {
   type RuleFieldsToUpgrade,
-  type AllFieldsDiff,
+  type AllThreeWayFieldsDiff,
   type UpgradeConflictResolution,
   UpgradeConflictResolutionEnum,
 } from '../../../../../../common/api/detection_engine';
@@ -31,7 +31,7 @@ export const getValueFromMergedVersion = ({
   fieldName: keyof PrebuiltRuleAsset;
   upgradeableRule: RuleTriad;
   fieldUpgradeSpecifier: NonNullable<RuleFieldsToUpgrade[keyof RuleFieldsToUpgrade]>;
-  ruleFieldsDiff: AllFieldsDiff;
+  ruleFieldsDiff: AllThreeWayFieldsDiff;
   onConflict?: UpgradeConflictResolution;
 }) => {
   const ruleId = upgradeableRule.target.rule_id;

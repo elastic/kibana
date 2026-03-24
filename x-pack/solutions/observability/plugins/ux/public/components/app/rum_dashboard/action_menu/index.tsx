@@ -10,7 +10,7 @@ import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } 
 import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { RECORDS_FIELD, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { UxInspectorHeaderLink } from './inpector_link';

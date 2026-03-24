@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
-import { getTranslatableValueFromString, isTruthy } from '../helpers/utils';
+import {
+  getTranslatableValueFromString,
+  getValueFromJSXAttribute,
+  isTruthy,
+} from '../helpers/utils';
 
 export const RULE_WARNING_MESSAGE =
   'Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.';
+
 export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -26,27 +32,26 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
     const { cwd, filename, sourceCode, report } = context;
 
     return {
-      JSXText: (node: TSESTree.JSXText) => {
-        const value = getTranslatableValueFromString(node.value);
+      JSXText(node: Rule.Node) {
+        const jsxTextNode = node as unknown as TSESTree.JSXText;
+        const value = getTranslatableValueFromString(jsxTextNode.value);
 
         // If the JSXText element is empty or untranslatable we don't need to do anything
         if (!value) return;
 
         // Get the whitespaces before the string so we can add them to the autofix suggestion
         const regex = /^(\s*)(\S)(.*)/;
-        const whiteSpaces = node.value.match(regex)?.[1] ?? '';
+        const whiteSpaces = jsxTextNode.value.match(regex)?.[1] ?? '';
 
         // Start building the translation ID suggestion
-        const intent = getIntentFromNode(value, node.parent);
+        const intent = getIntentFromNode(value, jsxTextNode.parent);
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        // @ts-expect-error upgrade typescript v5.1.6
-        const functionDeclaration = sourceCode.getScope(node as TSNode)
-          .block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node).block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
-        const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
+        const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`;
 
         // Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
@@ -57,7 +62,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
 
         // Show warning to developer and offer autofix suggestion
         report({
-          node: node as any,
+          node,
           message: RULE_WARNING_MESSAGE,
           fix(fixer) {
             return [
@@ -77,44 +82,31 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
           },
         });
       },
-      JSXAttribute: (node: TSESTree.JSXAttribute) => {
-        if (
-          node.name.name !== 'aria-label' &&
-          node.name.name !== 'label' &&
-          node.name.name !== 'title'
-        )
-          return;
+      JSXAttribute(node: Rule.Node) {
+        const jsxAttrNode = node as unknown as TSESTree.JSXAttribute;
 
-        let val: string = '';
-
-        // label={'foo'}
+        // Only check specific attributes that should be translated
         if (
-          node.value &&
-          'expression' in node.value &&
-          'value' in node.value.expression &&
-          typeof node.value.expression.value === 'string'
+          jsxAttrNode.name.type !== AST_NODE_TYPES.JSXIdentifier ||
+          (jsxAttrNode.name.name !== 'aria-label' &&
+            jsxAttrNode.name.name !== 'label' &&
+            jsxAttrNode.name.name !== 'title')
         ) {
-          val = getTranslatableValueFromString(node.value.expression.value);
+          return;
         }
 
-        // label="foo"
-        if (node.value && 'value' in node.value && typeof node.value.value === 'string') {
-          val = getTranslatableValueFromString(node.value.value);
-        }
-
+        const val = getValueFromJSXAttribute(jsxAttrNode.value);
         if (!val) return;
 
         // Start building the translation ID suggestion
-        const intent = getIntentFromNode(val, node);
+        const intent = getIntentFromNode(val, jsxAttrNode);
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        // @ts-expect-error upgrade typescript v5.1.6
-        const functionDeclaration = sourceCode.getScope(node as TSNode)
-          .block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node).block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
-        const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
+        const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`;
 
         // Check if i18n has already been imported into the file.
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
@@ -125,12 +117,12 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
 
         // Show warning to developer and offer autofix suggestion
         report({
-          node: node as any,
+          node,
           message: RULE_WARNING_MESSAGE,
           fix(fixer) {
             return [
               fixer.replaceTextRange(
-                node.value!.range,
+                jsxAttrNode.value!.range,
                 `{<FormattedMessage id="${translationIdSuggestion}" defaultMessage="${val}" />}`
               ),
               !hasI18nImportLine && rangeToAddI18nImportLine
@@ -142,6 +134,6 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
           },
         });
       },
-    } as Rule.RuleListener;
+    };
   },
 };

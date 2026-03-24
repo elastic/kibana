@@ -11,8 +11,10 @@ import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
+  UPDATE_ALL_API_PATH,
 } from '../../../common/http_api/installation';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes } from '@kbn/product-doc-common';
 
 const inferenceId = defaultInferenceEndpoints.ELSER;
 
@@ -32,6 +34,20 @@ describe('InstallationService', () => {
       expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH, {
         query: {
           inferenceId,
+        },
+      });
+    });
+
+    it('includes resourceType in query params when provided', async () => {
+      await service.getInstallationStatus({
+        inferenceId,
+        resourceType: ResourceTypes.securityLabs,
+      });
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH, {
+        query: {
+          inferenceId,
+          resourceType: ResourceTypes.securityLabs,
         },
       });
     });
@@ -68,6 +84,17 @@ describe('InstallationService', () => {
         }),
       });
     });
+
+    it('includes resourceType in body when provided', async () => {
+      await service.install({ inferenceId, resourceType: ResourceTypes.securityLabs });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH, {
+        body: JSON.stringify({
+          inferenceId,
+          resourceType: ResourceTypes.securityLabs,
+        }),
+      });
+    });
     it('calls the endpoint with the right parameters for different inference IDs', async () => {
       await service.install({
         inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
@@ -95,6 +122,55 @@ describe('InstallationService', () => {
       );
     });
   });
+  describe('#updateAll', () => {
+    it('calls the endpoint with the forceUpdate as false by default', async () => {
+      await service.updateAll();
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(UPDATE_ALL_API_PATH, {
+        body: JSON.stringify({
+          forceUpdate: false,
+        }),
+      });
+    });
+    it('calls the endpoint with the forceUpdate ', async () => {
+      await service.updateAll({ forceUpdate: true });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(UPDATE_ALL_API_PATH, {
+        body: JSON.stringify({
+          forceUpdate: true,
+        }),
+      });
+    });
+    it('calls the endpoint with the forceUpdate and Inference Ids if provided', async () => {
+      await service.updateAll({
+        forceUpdate: false,
+        inferenceIds: [defaultInferenceEndpoints.ELSER],
+      });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(UPDATE_ALL_API_PATH, {
+        body: JSON.stringify({
+          forceUpdate: false,
+          inferenceIds: [defaultInferenceEndpoints.ELSER],
+        }),
+      });
+    });
+
+    it('returns the value from the server', async () => {
+      const expected = {
+        '.elser-2-elasticsearch': {
+          installing: true,
+        },
+        '.multilingual-e5-small-elasticsearch': {
+          installing: true,
+        },
+      };
+      http.post.mockResolvedValue(expected);
+
+      const response = await service.updateAll();
+      expect(response).toEqual(expected);
+    });
+  });
+
   describe('#uninstall', () => {
     it('calls the endpoint with the right parameters', async () => {
       await service.uninstall({ inferenceId });
@@ -102,6 +178,17 @@ describe('InstallationService', () => {
       expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH, {
         body: JSON.stringify({
           inferenceId,
+        }),
+      });
+    });
+
+    it('includes resourceType in body when provided', async () => {
+      await service.uninstall({ inferenceId, resourceType: ResourceTypes.securityLabs });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH, {
+        body: JSON.stringify({
+          inferenceId,
+          resourceType: ResourceTypes.securityLabs,
         }),
       });
     });

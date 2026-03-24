@@ -10,9 +10,9 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { STATS_OPTIONS_DEFAULT_USEFUL_FILTER } from '@kbn/optimizer-webpack-helpers';
-import { Bundle } from '../common';
+import type { Bundle } from '../common';
 
 export class EmitStatsPlugin {
   constructor(private readonly bundle: Bundle) {}

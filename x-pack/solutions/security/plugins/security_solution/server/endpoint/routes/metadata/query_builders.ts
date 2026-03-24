@@ -130,6 +130,7 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchR
     },
     sort: MetadataSortMethod,
     index: metadataCurrentIndexPattern,
+    size: agentIDs.length,
   };
 }
 

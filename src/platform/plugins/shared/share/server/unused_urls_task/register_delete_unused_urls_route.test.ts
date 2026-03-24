@@ -8,7 +8,8 @@
  */
 
 import moment from 'moment';
-import { KibanaRequest, ReservedPrivilegesSet } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock, httpResourcesMock } from '@kbn/core/server/mocks';
 import { mockRouter as router } from '@kbn/core-http-router-server-mocks';

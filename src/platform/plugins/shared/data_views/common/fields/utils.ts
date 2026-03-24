@@ -8,7 +8,7 @@
  */
 
 import { getFilterableKbnTypeNames } from '@kbn/field-types';
-import { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from '@kbn/es-query';
+import type { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '.';
 
 const filterableTypes = getFilterableKbnTypeNames();

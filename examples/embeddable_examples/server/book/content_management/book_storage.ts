@@ -14,11 +14,11 @@ import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
-import { BookAttributes } from '../saved_object';
+import type { BookAttributes } from '../saved_object';
 import { BOOK_CONTENT_ID, BOOK_SAVED_OBJECT_TYPE } from '../../../common';
 import { cmServicesDefinition } from './schema/cm_services';
 import { attributesToBook, bookToAttributes } from '../saved_object/utils';
-import { BookSearchOptions, BookState } from './schema/latest';
+import type { BookSearchOptions, BookState } from './schema/latest';
 
 const getFindOptions = (
   query: SearchQuery,

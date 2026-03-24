@@ -7,7 +7,7 @@
 
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
 
-import { getConnectorDefaultModel } from './connector_config';
+import { DEFAULT_OPENAI_MODEL, getConnectorDefaultModel } from './connector_config';
 
 const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector => {
   return {
@@ -15,6 +15,8 @@ const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector
     name: 'connector',
     connectorId: 'connectorId',
     config: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
     capabilities: {},
     ...parts,
   };
@@ -46,7 +48,7 @@ describe('getConnectorDefaultModel', () => {
           apiProvider: 'OpenAI',
         },
       });
-      expect(getConnectorDefaultModel(connector)).toBe('gpt-4.1');
+      expect(getConnectorDefaultModel(connector)).toBe(DEFAULT_OPENAI_MODEL);
     });
   });
 

@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GetRuleHealthResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GetRuleHealthRequestBody,
@@ -35,7 +36,7 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       path: GET_RULE_HEALTH_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

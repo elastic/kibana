@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { StartDeps } from './plugin';
 
 export let contentManagement: ContentManagementPublicStart;

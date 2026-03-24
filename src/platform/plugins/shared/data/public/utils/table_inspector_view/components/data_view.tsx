@@ -11,11 +11,11 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { InspectorViewProps, Adapters } from '@kbn/inspector-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { TablesAdapter, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { InspectorViewProps, Adapters } from '@kbn/inspector-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { TablesAdapter, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataTableFormat } from './data_table';
 import { TableSelector } from './data_table_selector';
 import { DataDownloadOptions } from './download_options';

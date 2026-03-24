@@ -12,3 +12,10 @@ export const PLUGIN_NAME = 'searchHomepage';
  * UI Setting id for the Search Homepage feature flag
  */
 export const HOMEPAGE_FEATURE_FLAG_ID = 'searchHomepage:homepageEnabled';
+export const SEARCH_HOMEPAGE_V2_UI_FLAG = 'searchHomepage:searchHomepageV2Enabled';
+
+/**
+ * UI Setting id for Workflows, to show/hide related elements
+ */
+
+export const WORKFLOWS_UI_SETTING_ENABLED_ID = 'workflows:ui:enabled';

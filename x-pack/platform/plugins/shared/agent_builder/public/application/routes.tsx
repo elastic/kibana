@@ -1,0 +1,109 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React from 'react';
+import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AgentBuilderAgentsCreate } from './pages/agent_create';
+import { AgentBuilderAgentsEdit } from './pages/agent_edit';
+import { AgentBuilderAgentsPage } from './pages/agents';
+import { AgentBuilderConversationsPage } from './pages/conversations';
+import { AgentBuilderToolCreatePage } from './pages/tool_create';
+import { AgentBuilderToolDetailsPage } from './pages/tool_details';
+import { AgentBuilderToolsPage } from './pages/tools';
+import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
+import { AgentBuilderSkillsPage } from './pages/skills';
+import { AgentBuilderSkillCreatePage } from './pages/skill_create';
+import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
+import { AgentBuilderPluginsPage } from './pages/plugins';
+import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
+import { useExperimentalFeatures } from './hooks/use_experimental_features';
+import { useKibana } from './hooks/use_kibana';
+import { AgentBuilderConnectorsPage } from './pages/connectors';
+
+export const AgentBuilderRoutes: React.FC<{}> = () => {
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const isConnectorsEnabled = uiSettings.get<boolean>(
+    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+    false
+  );
+
+  return (
+    <Routes>
+      <Route path="/conversations/:conversationId">
+        <AgentBuilderConversationsPage />
+      </Route>
+
+      <Route path="/agents/new">
+        <AgentBuilderAgentsCreate />
+      </Route>
+
+      <Route path="/agents/:agentId">
+        <AgentBuilderAgentsEdit />
+      </Route>
+
+      <Route path="/agents">
+        <AgentBuilderAgentsPage />
+      </Route>
+
+      <Route path="/tools/new">
+        <AgentBuilderToolCreatePage />
+      </Route>
+
+      <Route path="/tools/bulk_import_mcp">
+        <AgentBuilderBulkImportMcpToolsPage />
+      </Route>
+
+      <Route path="/tools/:toolId">
+        <AgentBuilderToolDetailsPage />
+      </Route>
+
+      <Route path="/tools">
+        <AgentBuilderToolsPage />
+      </Route>
+
+      {isConnectorsEnabled ? (
+        <Route path="/connectors">
+          <AgentBuilderConnectorsPage />
+        </Route>
+      ) : null}
+
+      {isExperimentalFeaturesEnabled
+        ? [
+            <Route key="skill-create" path="/skills/new">
+              <AgentBuilderSkillCreatePage />
+            </Route>,
+            <Route key="skill-details" path="/skills/:skillId">
+              <AgentBuilderSkillDetailsPage />
+            </Route>,
+            <Route key="skills-list" path="/skills">
+              <AgentBuilderSkillsPage />
+            </Route>,
+          ]
+        : null}
+
+      {isExperimentalFeaturesEnabled
+        ? [
+            <Route key="plugin-details" path="/plugins/:pluginId">
+              <AgentBuilderPluginDetailsPage />
+            </Route>,
+            <Route key="plugins-list" path="/plugins">
+              <AgentBuilderPluginsPage />
+            </Route>,
+          ]
+        : null}
+
+      {/* Default to conversations page */}
+      <Route path="/">
+        <AgentBuilderConversationsPage />
+      </Route>
+    </Routes>
+  );
+};

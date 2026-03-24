@@ -39,13 +39,15 @@ export interface CasePersistedAttributes {
   duration: number | null;
   external_service: ExternalServicePersisted | null;
   owner: string;
-  settings: { syncAlerts: boolean };
+  settings: { syncAlerts: boolean; extractObservables?: boolean };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
   tags: string[];
   title: string;
   total_alerts: number;
   total_comments: number;
+  total_events?: number;
+  total_observables?: number;
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;
@@ -55,6 +57,11 @@ export interface CasePersistedAttributes {
   time_to_acknowledge?: number | null;
   time_to_investigate?: number | null;
   time_to_resolve?: number | null;
+  template?: {
+    id: string;
+    version: number;
+  } | null;
+  extended_fields?: Record<string, unknown> | null;
 }
 
 type CasePersistedCustomFields = Array<{
@@ -67,6 +74,7 @@ export type CaseTransformedAttributes = CaseAttributes;
 export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
   total_comments: number;
   total_alerts: number;
+  total_events: number;
 };
 
 export const CaseTransformedAttributesRt = CaseAttributesRt;
@@ -81,10 +89,15 @@ export const getPartialCaseTransformedAttributesRt = (): Type<
 
   return exact(
     /**
-     * We add the `total_comments` and `total_alerts` properties to allow the
+     * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the
      * attachments stats to be updated.
      */
-    partial({ ...caseTransformedAttributesProps, total_comments: number, total_alerts: number })
+    partial({
+      ...caseTransformedAttributesProps,
+      total_comments: number,
+      total_alerts: number,
+      total_events: number,
+    })
   );
 };
 

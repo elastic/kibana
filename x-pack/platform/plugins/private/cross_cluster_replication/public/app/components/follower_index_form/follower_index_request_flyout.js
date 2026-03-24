@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
@@ -35,12 +36,13 @@ export class FollowerIndexRequestFlyout extends PureComponent {
     const endpoint = `PUT /${name ? name : '<followerIndexName>'}/_ccr/follow`;
     const payload = JSON.stringify(serializeFollowerIndex(followerIndex), null, 2);
     const request = `${endpoint}\n${payload}`;
+    const flyoutTitleId = htmlIdGenerator()('flyoutTitle');
 
     return (
-      <EuiFlyout maxWidth={480} onClose={close}>
+      <EuiFlyout maxWidth={480} onClose={close} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.title"
                 defaultMessage="Request"

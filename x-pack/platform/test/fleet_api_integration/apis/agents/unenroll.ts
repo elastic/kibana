@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { checkBulkAgentAction } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -24,12 +25,12 @@ export default function (providerContext: FtrProviderContext) {
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
     });
     beforeEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       const accessAPIKeyBody = await esClient.security.createApiKey({
         name: `test access api key: ${uuidv4()}`,
@@ -60,11 +61,11 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     it('/agents/{agent_id}/unenroll should fail for hosted agent policy', async () => {
@@ -263,27 +264,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const actionId = body.actionId;
-
-      await new Promise((resolve, reject) => {
-        let attempts = 0;
-        const intervalId = setInterval(async () => {
-          if (attempts > 10) {
-            clearInterval(intervalId);
-            reject(new Error('action timed out'));
-          }
-          ++attempts;
-          const {
-            body: { items: actionStatuses },
-          } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-          const action = actionStatuses?.find((a: any) => a.actionId === actionId);
-          if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
-            clearInterval(intervalId);
-            resolve({});
-          }
-        }, 1000);
-      }).catch((e) => {
-        throw e;
-      });
+      await checkBulkAgentAction(supertest, actionId);
     });
   });
 }

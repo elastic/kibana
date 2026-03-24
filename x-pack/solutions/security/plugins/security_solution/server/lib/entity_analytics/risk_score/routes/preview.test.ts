@@ -18,13 +18,18 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScorePreviewRoute } from './preview';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../risk_score_service');
 jest.mock('../get_risk_inputs_index');
 
 describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
 
@@ -46,6 +51,11 @@ describe('POST risk_engine/preview route', () => {
     riskScorePreviewRoute(server.router, logger);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
   const buildRequest = (body: object = {}) =>
     requestMock.create({
       method: 'get',
@@ -62,7 +72,9 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({ data_view_id: undefined });
         const result = await server.validate(request);
 
-        expect(result.badRequest).toHaveBeenCalledWith('data_view_id: Required');
+        expect(result.badRequest).toHaveBeenCalledWith(
+          'data_view_id: Invalid input: expected string, received undefined'
+        );
       });
 
       it('respects the provided dataview', async () => {
@@ -120,7 +132,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('range.start: Required')
+          expect.stringContaining('range.start: Invalid input: expected string, received undefined')
         );
       });
     });
@@ -201,7 +213,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('weights.0.host: Number must be less than or equal to 1')
+          expect.stringContaining('host: Too big: expected number to be <=1')
         );
       });
 
@@ -218,7 +230,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('weights.0.type: Invalid literal value')
+          expect.stringContaining('type: Invalid input: expected "global_identifier"')
         );
       });
     });
@@ -275,6 +287,45 @@ describe('POST risk_engine/preview route', () => {
         expect(response.status).toEqual(200);
         expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ excludeAlertTags: ['tag1'] })
+        );
+      });
+    });
+
+    describe('filters', () => {
+      it('respects the provided filters', async () => {
+        const filters = [
+          { entity_types: ['host'], filter: 'agent.type: filebeat' },
+          { entity_types: ['user'], filter: 'user.name: ubuntu' },
+        ];
+        const request = buildRequest({ filters });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters })
+        );
+      });
+
+      it('handles empty filters array', async () => {
+        const request = buildRequest({ filters: [] });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters: [] })
+        );
+      });
+
+      it('handles undefined filters', async () => {
+        const request = buildRequest();
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters: [] })
         );
       });
     });

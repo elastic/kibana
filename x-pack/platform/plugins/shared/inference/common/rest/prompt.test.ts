@@ -7,8 +7,9 @@
 
 import { omit } from 'lodash';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { PromptAPI, PromptOptions, ToolOptions, createPrompt } from '@kbn/inference-common';
-import { z, ZodError } from '@kbn/zod';
+import type { PromptAPI, PromptOptions, ToolOptions } from '@kbn/inference-common';
+import { createPrompt } from '@kbn/inference-common';
+import { z, ZodError } from '@kbn/zod/v4';
 import { createPromptRestApi } from './prompt';
 import { lastValueFrom } from 'rxjs';
 import { getMockHttpFetchStreamingResponse } from '../utils/mock_http_fetch_streaming';
@@ -140,13 +141,12 @@ describe('createPromptRestApi', () => {
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"question\\"
           ],
-          \\"message\\": \\"Required\\"
+          \\"message\\": \\"Invalid input: expected string, received undefined\\"
         }
       ]"
     `);
@@ -171,7 +171,7 @@ describe('createPromptRestApi', () => {
     });
 
     expect(response).toBeInstanceOf(ZodError);
-    expect((response as ZodError).errors[0].path).toContain('question');
+    expect((response as ZodError).issues[0].path).toContain('question');
     expect(http.fetch).not.toHaveBeenCalled();
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from './response';
 
 describe('kibanaResponseFactory', () => {

@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import { ErrorCallout } from '../../../../components/error_callout';
 import { HostsTable } from './hosts_table';
 import { KPIGrid } from './kpis/kpi_grid';

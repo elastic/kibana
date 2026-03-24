@@ -10,17 +10,38 @@
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { DiscoverServices } from '../build_services';
+import {
+  TransferAction,
+  type EmbeddableEditorService,
+} from '../plugin_imports/embeddable_editor_service';
 
 const rootPath = '#/';
 
-function getRootBreadcrumbs({ breadcrumb }: { breadcrumb?: string }): ChromeBreadcrumb[] {
+function getRootBreadcrumbs({
+  breadcrumb,
+  embeddable,
+  isEmbeddedEditor,
+}: {
+  breadcrumb?: string;
+  embeddable: EmbeddableEditorService;
+  isEmbeddedEditor?: boolean;
+}): ChromeBreadcrumb[] {
+  const href = isEmbeddedEditor ? undefined : breadcrumb || rootPath;
+
   return [
     {
-      text: i18n.translate('discover.rootBreadcrumb', {
-        defaultMessage: 'Discover',
-      }),
-      deepLinkId: 'discover',
-      href: breadcrumb || rootPath,
+      text: isEmbeddedEditor
+        ? i18n.translate('discover.rootDashboardsEditorBreadcrumb', {
+            defaultMessage: 'Dashboards',
+          })
+        : i18n.translate('discover.rootBreadcrumb', {
+            defaultMessage: 'Discover',
+          }),
+      deepLinkId: isEmbeddedEditor ? 'dashboards' : 'discover',
+      href,
+      onClick: isEmbeddedEditor
+        ? () => embeddable.transferBackToEditor(TransferAction.Cancel)
+        : undefined,
     },
   ];
 }
@@ -38,16 +59,39 @@ export function setBreadcrumbs({
   titleBreadcrumbText?: string;
   services: DiscoverServices;
 }) {
-  const rootBreadcrumbs = getRootBreadcrumbs({
-    breadcrumb: rootBreadcrumbPath,
-  });
-  const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
-    defaultMessage: 'Discover',
-  });
+  const embeddable = services.embeddableEditor;
+  const isEmbeddedEditor = embeddable.isEmbeddedEditor();
+  const byValueTitle = embeddable.getByValueInput()?.label;
 
-  if (titleBreadcrumbText) {
-    services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
+  const breadcrumbTitle = byValueTitle || titleBreadcrumbText;
+
+  if (breadcrumbTitle) {
+    const rootBreadcrumbs = getRootBreadcrumbs({
+      breadcrumb: rootBreadcrumbPath,
+      embeddable,
+      isEmbeddedEditor,
+    });
+
+    services.chrome.setBreadcrumbs([
+      ...rootBreadcrumbs,
+      {
+        text: isEmbeddedEditor
+          ? i18n.translate('discover.dashboardsEditorBreadcrumbEditingTitle', {
+              defaultMessage: 'Editing {title}',
+              values: { title: breadcrumbTitle },
+            })
+          : breadcrumbTitle,
+      },
+    ]);
   } else {
+    const discoverBreadcrumbsTitle = isEmbeddedEditor
+      ? i18n.translate('discover.dashboardsEditorBreadcrumbTitle', {
+          defaultMessage: 'Dashboards',
+        })
+      : i18n.translate('discover.discoverBreadcrumbTitle', {
+          defaultMessage: 'Discover',
+        });
+
     services.chrome.setBreadcrumbs([
       {
         text: discoverBreadcrumbsTitle,

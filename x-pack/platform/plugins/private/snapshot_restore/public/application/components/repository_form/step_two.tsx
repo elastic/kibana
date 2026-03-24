@@ -17,9 +17,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Repository } from '../../../../common/types';
+import type { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
-import { RepositoryValidation } from '../../services/validation';
+import type { RepositoryValidation } from '../../services/validation';
 import { TypeSettings } from './type_settings';
 import { textService } from '../../services/text';
 import { useCore } from '../../app_context';
@@ -131,7 +131,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="primary"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onBack}
               data-test-subj="backButton"
             >

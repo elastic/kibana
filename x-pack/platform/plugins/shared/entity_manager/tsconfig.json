@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -35,5 +35,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/features-plugin",
     "@kbn/zod-helpers",
+    "@kbn/core-elasticsearch-server-utils",
   ]
 }

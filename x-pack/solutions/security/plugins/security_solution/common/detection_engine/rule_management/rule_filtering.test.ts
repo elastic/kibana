@@ -15,8 +15,20 @@ describe('convertRulesFilterToKQL', () => {
     tags: [],
   };
 
-  it('returns empty string if filter options are empty', () => {
+  it('returns empty string if filter is an empty string', () => {
     const kql = convertRulesFilterToKQL(filterOptions);
+
+    expect(kql).toBe('');
+  });
+
+  it('returns empty string if filter contains only whitespace', () => {
+    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: ' \n\t' });
+
+    expect(kql).toBe('');
+  });
+
+  it('returns empty string if filter is undefined', () => {
+    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: undefined });
 
     expect(kql).toBe('');
   });
@@ -25,16 +37,77 @@ describe('convertRulesFilterToKQL', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, filter: 'foo' });
 
     expect(kql).toBe(
-      '(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")'
+      '(' +
+        'alert.attributes.name.keyword: *foo* ' +
+        'OR alert.attributes.params.index: "foo" ' +
+        'OR alert.attributes.params.threat.tactic.id: "foo" ' +
+        'OR alert.attributes.params.threat.tactic.name: "foo" ' +
+        'OR alert.attributes.params.threat.technique.id: "foo" ' +
+        'OR alert.attributes.params.threat.technique.name: "foo" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "foo" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "foo"' +
+        ')'
     );
   });
 
-  it('escapes "filter" value properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: '" OR (foo: bar)' });
+  it('escapes "filter" value for single term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: '"a<detection\\-rule*with)a<surprise:',
+    });
 
     expect(kql).toBe(
-      '(alert.attributes.name: "\\" OR (foo: bar)" OR alert.attributes.params.index: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo: bar)")'
+      '(' +
+        'alert.attributes.name.keyword: *\\"a\\<detection\\\\-rule\\*with\\)a\\<surprise\\:* ' +
+        'OR alert.attributes.params.index: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a<detection\\\\-rule*with)a<surprise:"' +
+        ')'
     );
+  });
+
+  it('allows partial name matches for single term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: 'sql',
+    });
+
+    expect(kql.startsWith('(alert.attributes.name.keyword: *sql*')).toBe(true);
+    expect(kql).not.toContain('alert.attributes.name: "sql"');
+  });
+
+  it('escapes "filter" value for multiple term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: '"a <detection rule with)\\a< surprise:',
+    });
+
+    expect(kql).toBe(
+      '(' +
+        'alert.attributes.name: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.index: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.id: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.name: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.id: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.name: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a <detection rule with)\\\\a< surprise:"' +
+        ')'
+    );
+  });
+
+  it('allows only exact matching for multi-term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: 'sql server',
+    });
+
+    expect(kql.startsWith('(alert.attributes.name: "sql server"')).toBe(true);
+    expect(kql).not.toContain('alert.attributes.name.keyword: *sql server*');
   });
 
   it('handles presence of "showCustomRules" properly', () => {
@@ -74,7 +147,19 @@ describe('convertRulesFilterToKQL', () => {
     });
 
     expect(kql).toBe(
-      `(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" AND \"tag2\")`
+      `(` +
+        `alert.attributes.name.keyword: *foo* OR ` +
+        `alert.attributes.params.index: "foo" OR ` +
+        `alert.attributes.params.threat.tactic.id: "foo" OR ` +
+        `alert.attributes.params.threat.tactic.name: "foo" OR ` +
+        `alert.attributes.params.threat.technique.id: "foo" OR ` +
+        `alert.attributes.params.threat.technique.name: "foo" OR ` +
+        `alert.attributes.params.threat.technique.subtechnique.id: "foo" OR ` +
+        `alert.attributes.params.threat.technique.subtechnique.name: "foo")` +
+        ` AND ` +
+        `alert.attributes.params.immutable: true` +
+        ` AND ` +
+        `alert.attributes.tags:(\"tag1\" AND \"tag2\")`
     );
   });
 

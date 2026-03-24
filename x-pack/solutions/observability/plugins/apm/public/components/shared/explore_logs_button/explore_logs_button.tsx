@@ -30,7 +30,7 @@ export function ExploreLogsButton({
 }) {
   const { share } = useApmPluginContext();
 
-  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+  const logsLocator = share?.url?.locators?.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
   if (!logsLocator) {
     return null;

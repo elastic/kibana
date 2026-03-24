@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/server';
-import { SyntheticsServerSetup } from '../../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { SyntheticsServerSetup } from '../../types';
 import { normalizeSecrets } from '../utils';
-import {
-  PrivateConfig,
-  SyntheticsPrivateLocation,
-} from '../private_location/synthetics_private_location';
-import { SyntheticsService } from '../synthetics_service';
-import {
-  ConfigKey,
+import type { PrivateConfig } from '../private_location/synthetics_private_location';
+import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
+import type { SyntheticsService } from '../synthetics_service';
+import type {
   EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   MonitorServiceLocation,
-  ScheduleUnit,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
-  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import {
-  ConfigData,
+  ConfigKey,
+  ScheduleUnit,
+  type SyntheticsPrivateLocations,
+} from '../../../common/runtime_types';
+import type { ConfigData } from '../formatters/public_formatters/format_configs';
+import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../formatters/public_formatters/format_configs';
@@ -53,7 +53,7 @@ export class SyntheticsMonitorClient {
     const publicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
 
     for (const monitorObj of monitors) {
       const { formattedConfig, params, config } = await this.formatConfigWithParams(
@@ -100,7 +100,7 @@ export class SyntheticsMonitorClient {
     const deletedPublicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
 
     for (const editedMonitor of monitors) {
       const { str: paramsString, params } = mixParamsWithGlobalParams(
@@ -307,7 +307,7 @@ export class SyntheticsMonitorClient {
       canSave,
       hideParams,
     });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
 
     const { formattedConfig, params, config } = await this.formatConfigWithParams(
       monitorObj,

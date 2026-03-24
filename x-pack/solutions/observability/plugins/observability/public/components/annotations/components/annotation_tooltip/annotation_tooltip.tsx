@@ -17,7 +17,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AnnotationIcon } from '..';
 import { TimestampRangeLabel } from '../timestamp_range_label';
-import { Annotation, CreateAnnotationParams } from '../../../../../common/annotations';
+import type { Annotation, CreateAnnotationParams } from '../../../../../common/annotations';
 
 export interface AnnotationTooltipProps {
   annotation: Annotation | CreateAnnotationParams;

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import { ALL_SPACES_ID } from '../../../common/constants';
+
 import { appContextService } from '../app_context';
 import {
   getIsSpaceAwarenessEnabledCache,
   setIsSpaceAwarenessEnabledCache,
 } from '../epm/packages/cache';
 import { getSettingsOrUndefined } from '../settings';
+import type { AgentPolicy, AgentPolicySOAttributes, PackagePolicy } from '../../types';
 
 export const PENDING_MIGRATION_TIMEOUT = 60 * 60 * 1000;
 /**
@@ -27,6 +33,7 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
 
   const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
+  // @ts-expect-error upgrade typescript v5.9.3
   const res = settings?.use_space_awareness_migration_status === 'success' ?? false;
   setIsSpaceAwarenessEnabledCache(res);
 
@@ -52,4 +59,30 @@ export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
     return true;
   }
   return false;
+}
+
+export function getSpaceForAgentPolicy(agentPolicy: Pick<AgentPolicy, 'space_ids'>): string {
+  return getValidSpaceId(agentPolicy.space_ids);
+}
+
+export function getSpaceForAgentPolicySO(
+  agentPolicySO: Pick<SavedObject<AgentPolicySOAttributes>, 'namespaces'>
+): string {
+  return getValidSpaceId(agentPolicySO.namespaces);
+}
+
+export function getSpaceForPackagePolicy(packagePolicy: Pick<PackagePolicy, 'spaceIds'>): string {
+  return getValidSpaceId(packagePolicy.spaceIds);
+}
+
+export function getSpaceForPackagePolicySO(
+  packagePolicySO: Pick<SavedObject<AgentPolicySOAttributes>, 'namespaces'>
+): string {
+  return getValidSpaceId(packagePolicySO.namespaces);
+}
+
+export function getValidSpaceId(spacedIds?: string[]) {
+  const space = spacedIds?.[0];
+
+  return space && space !== ALL_SPACES_ID ? space : DEFAULT_SPACE_ID;
 }

@@ -8,7 +8,9 @@
 import type { TimefilterContract, TimefilterHook } from '@kbn/data-plugin/public';
 import { useKibana } from './use_kibana';
 
-export function useTimefilter(): TimefilterHook & { setTime: TimefilterContract['setTime'] } {
+export function useTimefilter(): TimefilterHook & {
+  setTime: TimefilterContract['setTime'];
+} {
   const {
     dependencies: {
       start: {

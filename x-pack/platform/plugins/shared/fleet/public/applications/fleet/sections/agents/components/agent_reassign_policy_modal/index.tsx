@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
+  EuiComboBox,
   EuiFormRow,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -59,12 +59,15 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
     isSingleAgent ? (agents[0] as Agent).policy_id : undefined
   );
 
-  // Select the first policy if not policy is selected
+  const hasInitialized = useRef(!!selectedAgentPolicyId);
+
+  // Select the first policy if no policy is selected on initial load. Not after though, as it will overwrite the selected policy. This is now handled in the onChange
   useEffect(() => {
-    if (!selectedAgentPolicyId && agentPolicies.length) {
+    if (!hasInitialized.current && !selectedAgentPolicyId && agentPolicies.length) {
       setSelectedAgentPolicyId(agentPolicies[0]?.id);
+      hasInitialized.current = true;
     }
-  }, [selectedAgentPolicyId, agentPolicies]);
+  }, [agentPolicies, selectedAgentPolicyId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function onSubmit() {
@@ -120,7 +123,9 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         />
       }
       confirmButtonDisabled={
-        isSubmitting || (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
+        isSubmitting ||
+        !selectedAgentPolicyId ||
+        (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
       }
       confirmButtonText={
         <FormattedMessage
@@ -149,15 +154,35 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
               defaultMessage: 'Agent policy',
             })}
           >
-            <EuiSelect
+            <EuiComboBox
               fullWidth
               isLoading={agentPoliciesRequest.isLoading}
               options={agentPolicies.map((agentPolicy) => ({
-                value: agentPolicy.id,
-                text: agentPolicy.name,
+                key: agentPolicy.id,
+                label: agentPolicy.name,
               }))}
-              value={selectedAgentPolicyId}
-              onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
+              singleSelection
+              onChange={(newOptions) => {
+                if (newOptions.length) {
+                  setSelectedAgentPolicyId(newOptions[0].key);
+                } else {
+                  setSelectedAgentPolicyId(undefined);
+                }
+              }}
+              selectedOptions={
+                selectedAgentPolicyId
+                  ? [
+                      {
+                        key: selectedAgentPolicyId,
+                        label:
+                          agentPolicies.find(
+                            (agentPolicy) => agentPolicy.id === selectedAgentPolicyId
+                          )?.name || '',
+                      },
+                    ]
+                  : []
+              }
+              isClearable={true}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { generateData } from './generate_data';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

@@ -217,3 +217,19 @@ export const createMockedStorage = (): jest.Mocked<ContentStorage> => ({
   delete: jest.fn(),
   search: jest.fn(),
 });
+
+export const createMockedMSearchStorage = (
+  savedObjectType: string
+): jest.Mocked<ContentStorage> => ({
+  get: jest.fn(),
+  bulkGet: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  search: jest.fn(),
+  mSearch: {
+    savedObjectType,
+    toItemResult: jest.fn(),
+    additionalSearchFields: [],
+  },
+});

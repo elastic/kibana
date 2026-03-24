@@ -8,7 +8,7 @@
  */
 
 import { getInterval } from './get_interval';
-import { FetchedIndexPattern, Panel, Series } from '../../../common/types';
+import type { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 
 describe('getInterval', () => {
   const index: FetchedIndexPattern = {} as FetchedIndexPattern;

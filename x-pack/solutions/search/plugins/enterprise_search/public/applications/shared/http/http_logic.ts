@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { HttpInterceptorResponseError, HttpResponse, HttpSetup } from '@kbn/core/public';
+import type { HttpInterceptorResponseError, HttpResponse, HttpSetup } from '@kbn/core/public';
 
 import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
@@ -87,7 +88,6 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
     errorConnectingMessage: [
       props.errorConnectingMessage || '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
       },
     ],
@@ -95,14 +95,12 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
     httpInterceptors: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setHttpInterceptors: (_, { httpInterceptors }) => httpInterceptors,
       },
     ],
     readOnlyMode: [
       props.readOnlyMode || false,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
       },
     ],

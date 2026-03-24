@@ -19,8 +19,8 @@ import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-pl
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createVegaVisualization } from '../vega_visualization';
-import { VegaVisualizationDependencies } from '../plugin';
-import { VegaParser } from '../data_model/vega_parser';
+import type { VegaVisualizationDependencies } from '../plugin';
+import type { VegaParser } from '../data_model/vega_parser';
 
 import { GlobalVegaVisStyles } from './vega_vis.styles';
 

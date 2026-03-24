@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -41,29 +41,31 @@ import type {
 import type { Agent } from '../../../../../types';
 
 import {
-  useMigrateSingleAgent,
-  useBulkMigrateAgents,
+  sendMigrateSingleAgent,
+  sendBulkMigrateAgents,
   useStartServices,
 } from '../../../../../hooks';
 
 import { HeadersInput } from './headers_input';
 
 interface Props {
-  agents: Agent[];
+  agents: Agent[] | string;
+  agentCount: number;
   onClose: () => void;
   onSave: () => void;
-  protectedAndFleetAgents: Agent[];
+  unsupportedMigrateAgents: Agent[];
 }
 
 export const AgentMigrateFlyout: React.FC<Props> = ({
   agents,
+  agentCount,
   onClose,
   onSave,
-  protectedAndFleetAgents,
+  unsupportedMigrateAgents,
 }) => {
   const { notifications } = useStartServices();
-  const migrateAgent = useMigrateSingleAgent;
-  const migrateAgents = useBulkMigrateAgents;
+  const migrateAgent = sendMigrateSingleAgent;
+  const migrateAgents = sendBulkMigrateAgents;
   const [formValid, setFormValid] = React.useState(false);
   const [validClusterURL, setValidClusterURL] = React.useState(false);
   const [formContent, setFormContent] = React.useState<
@@ -78,9 +80,22 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
   const flyoutTitleId = useGeneratedHtmlId();
 
+  const filteredAgents = useMemo(
+    () =>
+      Array.isArray(agents)
+        ? agents.filter((agent) => !unsupportedMigrateAgents.some((a) => a.id === agent.id))
+        : agents,
+    [agents, unsupportedMigrateAgents]
+  );
+  const filteredAgentCount = useMemo(
+    () => (Array.isArray(filteredAgents) ? filteredAgents.length : agentCount),
+    [agentCount, filteredAgents]
+  );
+
   useEffect(() => {
     const validateForm = () => {
-      if (formContent.uri && formContent.enrollment_token && validClusterURL) {
+      const hasValidAgents = !Array.isArray(filteredAgents) || filteredAgents.length > 0;
+      if (formContent.uri && formContent.enrollment_token && validClusterURL && hasValidAgents) {
         setFormValid(true);
       } else {
         setFormValid(false);
@@ -103,14 +118,25 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
     validateClusterURL();
     validateForm();
-  }, [formContent, validClusterURL]);
+  }, [formContent, validClusterURL, filteredAgents]);
 
-  const submitForm = () => {
+  const submitForm = async () => {
     try {
-      if (agents.length === 1) {
-        migrateAgent({ ...formContent, id: agents[0].id });
+      if (Array.isArray(filteredAgents)) {
+        if (filteredAgents.length === 1) {
+          await migrateAgent({ ...formContent, id: filteredAgents[0].id });
+        } else {
+          await migrateAgents({
+            ...formContent,
+            agents: filteredAgents.map((agent) => agent.id),
+          });
+        }
       } else {
-        migrateAgents({ ...formContent, agents: agents.map((agent) => agent.id) });
+        // agents is a query string
+        await migrateAgents({
+          ...formContent,
+          agents: filteredAgents,
+        });
       }
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.successNotificationTitle', {
@@ -127,7 +153,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
     } catch (e) {
       notifications.toasts.addError(e, {
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.errorNotificationTitle', {
-          defaultMessage: 'Failed to migrate agent',
+          defaultMessage: 'Failed to migrate {agentCount, plural, one {agent} other {agents}}',
+          values: {
+            agentCount: filteredAgentCount,
+          },
         }),
         toastMessage: i18n.translate(
           'xpack.fleet.agentList.migrateAgentFlyout.errorNotificationDescription',
@@ -153,7 +182,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 id="xpack.fleet.agentList.migrateAgentFlyout.title"
                 defaultMessage="Migrate {agentCount, plural, one {agent} other {agents}}"
                 values={{
-                  agentCount: agents.length,
+                  agentCount: filteredAgentCount,
                 }}
               />
             </h1>
@@ -161,26 +190,26 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.fleet.agentList.migrateAgentFlyout.title"
+              id="xpack.fleet.agentList.migrateAgentFlyout.description"
               defaultMessage="Move {agentCount, plural, one {this agent} other {these agents}} to a different Fleet Server by specifying a new cluster URL and enrollment token."
               values={{
-                agentCount: agents.length,
+                agentCount: filteredAgentCount,
               }}
             />
           </EuiText>
 
-          {protectedAndFleetAgents.length > 0 && (
+          {Array.isArray(agents) && unsupportedMigrateAgents.length > 0 && (
             <>
               <EuiSpacer />
               <EuiPanel color="warning" data-test-subj="migrateAgentFlyoutAlertPanel">
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.migrateAgentFlyout.warning"
-                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet Server agents."
+                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are either tamper-protected agents, Fleet Server agents, containerized agents, or agents on an unsupported version."
                     values={{
                       icon: <EuiIcon type="warning" />,
-                      x: protectedAndFleetAgents.length,
-                      y: agents.length + protectedAndFleetAgents.length,
+                      x: unsupportedMigrateAgents.length,
+                      y: agentCount,
                     }}
                   />
                 </EuiText>
@@ -188,10 +217,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 <EuiAccordion
                   id="migrateAgentFlyoutWarningAccordion"
                   buttonContent={
-                    <EuiButtonEmpty onClick={() => {}}>
+                    <EuiButtonEmpty onClick={() => {}} aria-label="View hosts">
                       <FormattedMessage
                         id="xpack.fleet.agentList.migrateAgentFlyout.warningAccordion"
-                        defaultMessage="View Hosts"
+                        defaultMessage="View hosts"
                       />
                     </EuiButtonEmpty>
                   }
@@ -200,7 +229,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                   <EuiSpacer size="s" />
                   <EuiText>
                     <ul>
-                      {protectedAndFleetAgents.map((agent) => (
+                      {unsupportedMigrateAgents.map((agent) => (
                         <li key={agent.id}>{agent.local_metadata?.host?.hostname}</li>
                       ))}
                     </ul>
@@ -279,9 +308,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             <EuiSpacer size="m" />
 
             {/* Additional Settings Section */}
-            <EuiFormRow fullWidth>
+            <EuiFormRow fullWidth aria-label="Additional options">
               <EuiAccordion
-                arrowDisplay="right"
+                arrowDisplay="left"
                 id="migrateAgentFlyoutAdditionalOptions"
                 initialIsOpen={false}
                 buttonContent={
@@ -522,6 +551,57 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       />
                     </EuiText>
                     <EuiSpacer size="m" />
+                    {agents.length === 1 && (
+                      <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                            defaultMessage="Replace token"
+                          />
+                        }
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          fullWidth
+                          data-test-subj="migrateAgentFlyoutReplaceTokenInput"
+                          onChange={(e) => {
+                            if ('id' in formContent) {
+                              setFormContent({
+                                ...formContent,
+                                settings: {
+                                  ...formContent.settings,
+                                  replace_token: e.target.value,
+                                },
+                              });
+                            }
+                          }}
+                        />
+                      </EuiFormRow>
+                    )}
+
+                    {agents.length === 1 && <EuiSpacer size="m" />}
+
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
+                          defaultMessage="Staging"
+                        />
+                      }
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        fullWidth
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, staging: e.target.value },
+                          })
+                        }
+                      />
+                    </EuiFormRow>
+                    <EuiSpacer size="m" />
+
                     <EuiFormRow fullWidth>
                       <EuiFlexGroup alignItems="flexStart">
                         <EuiFlexItem>
@@ -537,23 +617,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                               setFormContent({
                                 ...formContent,
                                 settings: { ...formContent.settings, insecure: e.target.checked },
-                              })
-                            }
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiSwitch
-                            label={
-                              <FormattedMessage
-                                id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
-                                defaultMessage="Staging"
-                              />
-                            }
-                            checked={formContent.settings?.staging ?? false}
-                            onChange={(e) =>
-                              setFormContent({
-                                ...formContent,
-                                settings: { ...formContent.settings, staging: e.target.checked },
                               })
                             }
                           />
@@ -582,37 +645,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                             }
                           />
                         </EuiFlexItem>
-                        {/* Replace token shouldnt be an option when bulk migrating */}
-                        {agents.length === 1 && (
-                          <EuiFlexItem>
-                            <EuiSwitch
-                              data-test-subj="migrateAgentFlyoutReplaceTokenButton"
-                              label={
-                                <FormattedMessage
-                                  id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
-                                  defaultMessage="Replace Token"
-                                />
-                              }
-                              checked={
-                                (
-                                  formContent.settings as MigrateSingleAgentRequest['body']['settings']
-                                )?.replace_token ?? false
-                              }
-                              onChange={(e) => {
-                                // Only allow setting replace_token when migrating a single agent
-                                if ('id' in formContent) {
-                                  setFormContent({
-                                    ...formContent,
-                                    settings: {
-                                      ...formContent.settings,
-                                      replace_token: e.target.checked,
-                                    },
-                                  });
-                                }
-                              }}
-                            />
-                          </EuiFlexItem>
-                        )}
                       </EuiFlexGroup>
                     </EuiFormRow>
                   </EuiAccordion>
@@ -623,7 +655,11 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiButtonEmpty onClick={onClose} data-test-subj="migrateAgentFlyoutCancelButton">
+            <EuiButtonEmpty
+              onClick={onClose}
+              data-test-subj="migrateAgentFlyoutCancelButton"
+              aria-label="Cancel"
+            >
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -638,7 +674,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.submitButtonLabel"
                 defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount: agents.length }}
+                values={{
+                  agentCount: filteredAgentCount,
+                }}
               />
             </EuiButton>
           </EuiFlexGroup>

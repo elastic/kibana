@@ -398,8 +398,6 @@ describe('Endpoint Pending Action Summary API', () => {
   });
 
   it('should return 404 when spaces is enabled and agent id is not accessible in space', async () => {
-    // @ts-expect-error
-    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     (
       endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
     ).mockRejectedValue(new AgentNotFoundError('agent not found'));

@@ -14,7 +14,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
@@ -31,29 +31,37 @@ describe('SavedSearchURLConflictCallout', () => {
   });
 
   test("should render URLConflictCallout in case of id's conflicts", () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
       sharingSavedObjectProps: {
         outcome: 'conflict',
         aliasTargetId: 'aliasTargetId',
       },
-    } as SavedSearch;
+    } as DiscoverSession;
 
     const component = mountWithIntl(
-      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} history={history} />
+      <SavedSearchURLConflictCallout
+        spaces={spaces}
+        discoverSession={discoverSession}
+        history={history}
+      />
     );
 
     expect(component.children()).toMatchInlineSnapshot(`"callout"`);
   });
 
   test('should not render URLConflictCallout in case of no conflicts', () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
       sharingSavedObjectProps: {},
-    } as SavedSearch;
+    } as DiscoverSession;
 
     const component = mountWithIntl(
-      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} history={history} />
+      <SavedSearchURLConflictCallout
+        spaces={spaces}
+        discoverSession={discoverSession}
+        history={history}
+      />
     );
 
     expect(component.children()).toMatchInlineSnapshot(`null`);

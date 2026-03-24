@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createConnector,
   createAlert,
@@ -29,7 +29,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const objectRemover = new ObjectRemover(supertest);
   const toasts = getService('toasts');
 
-  async function refreshAlertsList() {
+  const refreshAlertsList = async () => {
     const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
     const existsRefreshButton = await testSubjects.exists('refreshRulesButton');
     if (existsClearFilter) {
@@ -40,7 +40,16 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     }
     await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
-  }
+  };
+
+  const toggleRuleStatusFilter = (selector: string) => {
+    return retry.try(async () => {
+      const filter = await testSubjects.find(selector);
+      const filterActive = (await filter.getAttribute('aria-checked')) === 'true';
+      await filter.click();
+      expect((await filter.getAttribute('aria-checked')) === 'true').to.equal(!filterActive);
+    });
+  };
 
   const getAlertSummary = async (ruleId: string) => {
     const { body: summary } = await supertest
@@ -49,8 +58,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     return summary;
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/157623
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -198,7 +206,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('confirmModalConfirmButton');
 
-      await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
@@ -691,33 +698,33 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       // Select only enabled
       await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select enabled or disabled (e.g. all)
-      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
 
       // Select only disabled
-      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select only snoozed
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await testSubjects.click('ruleStatusFilterOption-snoozed');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-disabled');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-snoozed');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select disabled or snoozed
-      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(3);
 
       // Select enabled or disabled or snoozed
-      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await toggleRuleStatusFilter('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
     });

@@ -9,10 +9,10 @@
 
 import { omit } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { KNOWN_HTTP_METHODS } from './http_methods';
 import { isRefNode } from '../process_document';
-import { MergeOptions } from './merge_options';
+import type { MergeOptions } from './merge_options';
 
 export function mergeOperations(
   sourcePathItem: OpenAPIV3.PathItemObject,

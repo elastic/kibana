@@ -549,6 +549,24 @@ describe('restrictInternalApis', () => {
   });
 });
 
+describe('excludeRoutes', () => {
+  it('defaults to empty array', () => {
+    expect(config.schema.validate({}).excludeRoutes).toEqual([]);
+  });
+
+  it('accepts a list of paths', () => {
+    expect(config.schema.validate({ excludeRoutes: ['/api/status'] })).toMatchObject({
+      excludeRoutes: ['/api/status'],
+    });
+  });
+
+  it('rejects entries without a leading slash', () => {
+    expect(() => config.schema.validate({ excludeRoutes: ['api/status'] })).toThrow(
+      'must start with a slash'
+    );
+  });
+});
+
 describe('cdn', () => {
   it('allows correct URL', () => {
     expect(config.schema.validate({ cdn: { url: 'https://cdn.example.com' } })).toMatchObject({
@@ -677,12 +695,12 @@ describe('http2 protocol', () => {
 });
 
 describe('prototypeHardening', () => {
-  it('defaults to false', () => {
-    expect(config.schema.validate({}).prototypeHardening).toBe(false);
+  it('defaults to true', () => {
+    expect(config.schema.validate({}).prototypeHardening).toBe(true);
   });
 
-  it('can be set to true', () => {
-    expect(config.schema.validate({ prototypeHardening: true }).prototypeHardening).toBe(true);
+  it('can be set to false', () => {
+    expect(config.schema.validate({ prototypeHardening: false }).prototypeHardening).toBe(false);
   });
 });
 

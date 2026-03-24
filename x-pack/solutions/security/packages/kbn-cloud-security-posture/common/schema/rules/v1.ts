@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 // Since version 8.3.0
 
@@ -26,6 +27,7 @@ export const cspBenchmarkRuleSchema = schema.object({
   rego_rule_id: schema.string(),
   remediation: schema.string(),
   section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
+  // maxSize is set to 100 as it's not expected to have more than 100 tags per rule
+  tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
   version: schema.string(),
 });

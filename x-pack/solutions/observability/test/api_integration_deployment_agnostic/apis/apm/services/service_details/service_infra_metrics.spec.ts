@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import archives_metadata from '../../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';

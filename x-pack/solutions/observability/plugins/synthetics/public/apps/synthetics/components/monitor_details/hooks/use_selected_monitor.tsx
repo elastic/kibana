@@ -15,7 +15,7 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   selectorMonitorDetailsState,
-  selectorError,
+  selectSyntheticsMonitorError,
 } from '../../../state';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -37,7 +37,7 @@ export const useSelectedMonitor = ({
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-  const error = useSelector(selectorError);
+  const error = useSelector(selectSyntheticsMonitorError);
   const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);

@@ -24,10 +24,12 @@ import {
 import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSavedObjectsClientFactoryMock } from '../../saved_objects/saved_objects_client_factory.mocks';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -71,7 +73,7 @@ export interface ManifestManagerMockOptions
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   productFeaturesService: ProductFeaturesService;
-  experimentalFeatures?: string[];
+  experimentalFeatures?: (keyof ExperimentalFeatures)[];
 }
 
 export const buildManifestManagerMockOptions = (
@@ -109,6 +111,7 @@ export const buildManifestManagerContextMock = (
       .features,
     packagerTaskPackagePolicyUpdateBatchSize: 10,
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    licenseService: createLicenseServiceMock(),
   };
 };
 

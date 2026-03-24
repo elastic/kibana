@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomIntegration } from '../../common';
+import type { CustomIntegration } from '../../common';
 
 interface FindParams {
   eprPackageName?: string;

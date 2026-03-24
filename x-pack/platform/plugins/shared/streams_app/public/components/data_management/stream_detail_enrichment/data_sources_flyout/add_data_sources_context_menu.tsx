@@ -10,18 +10,43 @@ import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import { DATA_SOURCES_I18N } from './translations';
 import {
-  defaultCustomSamplesDataSource,
+  createDefaultCustomSamplesDataSource,
   defaultKqlSamplesDataSource,
 } from '../state_management/stream_enrichment_state_machine/utils';
-import { useStreamEnrichmentEvents } from '../state_management/stream_enrichment_state_machine';
+import {
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from '../state_management/stream_enrichment_state_machine';
 
 export const AddDataSourcesContextMenu = () => {
   const { addDataSource } = useStreamEnrichmentEvents();
-
+  const streamName = useStreamEnrichmentSelector((state) => state.context.definition.stream.name);
   const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
+
+  const menuItems = [
+    {
+      name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
+      icon: 'search',
+      'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
+      onClick: () => {
+        addDataSource(defaultKqlSamplesDataSource);
+        closeMenu();
+      },
+    },
+    {
+      name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
+      icon: 'visText',
+      'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
+      onClick: () => {
+        addDataSource(createDefaultCustomSamplesDataSource(streamName));
+        closeMenu();
+      },
+    },
+  ];
 
   return (
     <EuiPopover
+      data-test-subj="streamsAppProcessingAddDataSourcesContextMenu"
       id="data-sources-menu"
       button={
         <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={toggleMenu}>
@@ -38,24 +63,7 @@ export const AddDataSourcesContextMenu = () => {
         panels={[
           {
             id: 'data-source-options',
-            items: [
-              {
-                name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
-                icon: 'search',
-                onClick: () => {
-                  addDataSource(defaultKqlSamplesDataSource);
-                  closeMenu();
-                },
-              },
-              {
-                name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
-                icon: 'visText',
-                onClick: () => {
-                  addDataSource(defaultCustomSamplesDataSource);
-                  closeMenu();
-                },
-              },
-            ],
+            items: menuItems,
           },
         ]}
       />

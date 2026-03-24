@@ -7,26 +7,28 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  initializeTitleManager,
-  useBatchedPublishingSubjects,
-  fetch$,
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
   PublishesWritableTitle,
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+} from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  useBatchedPublishingSubjects,
+  fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { MonitorFilters } from './types';
 import { StatusGridComponent } from './monitors_grid_component';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
-import { ClientPluginsStart } from '../../../plugin';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
+import type { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import { OverviewView } from '../../synthetics/state';
+import type { OverviewView } from '../../synthetics/state';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
@@ -37,8 +39,8 @@ const DEFAULT_FILTERS: MonitorFilters = {
   projects: [],
   tags: [],
   locations: [],
-  monitorIds: [],
-  monitorTypes: [],
+  monitor_ids: [],
+  monitor_types: [],
 };
 
 export interface OverviewMonitorsEmbeddableCustomState {
@@ -62,19 +64,21 @@ export const getMonitorsEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
-      const view$ = new BehaviorSubject(initialState.rawState.view);
+      // Ensure filters have all required properties with defaults
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
+      const view$ = new BehaviorSubject(initialState.view);
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            view: view$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          view: view$.getValue(),
         };
       }
 
@@ -94,9 +98,9 @@ export const getMonitorsEmbeddableFactory = (
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
-          if (lastSaved?.rawState) view$.next(lastSaved?.rawState.view);
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
+          if (lastSaved) view$.next(lastSaved?.view);
         },
       });
 

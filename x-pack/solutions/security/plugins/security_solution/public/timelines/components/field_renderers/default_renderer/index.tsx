@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Spacer } from '../../../../common/components/page';
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { MoreContainer } from '../more_container';
@@ -50,16 +50,9 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable
-              id={id}
-              field={attrName}
-              value={rowItem}
-              isAggregatable={true}
-              scopeId={scopeId}
-              fieldType={'keyword'}
-            >
+            <CellActionsRenderer field={attrName} value={rowItem} scopeId={scopeId}>
               {render ? render(rowItem) : rowItem}
-            </DefaultDraggable>
+            </CellActionsRenderer>
           )}
         </EuiFlexItem>
       );

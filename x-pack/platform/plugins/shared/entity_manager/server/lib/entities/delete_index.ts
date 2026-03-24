@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { generateLatestIndexName } from './helpers/generate_component_id';
 
 export async function deleteIndices(

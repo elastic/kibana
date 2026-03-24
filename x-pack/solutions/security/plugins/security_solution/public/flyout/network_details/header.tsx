@@ -27,15 +27,14 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
   flowTarget: FlowTargetSourceDest;
 }
 
+const urlParamOverride = { timeline: { isOpen: false } };
+
 /**
  *  Header component for the network details flyout
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {
-    const href = useMemo(
-      () => getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget),
-      [flowTarget, ip]
-    );
+    const href = useMemo(() => getNetworkDetailsUrl(encodeIpv6(ip), flowTarget), [flowTarget, ip]);
 
     return (
       <FlyoutHeader {...flyoutHeaderProps}>
@@ -44,8 +43,14 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
           path={href}
           target={'_blank'}
           external={false}
+          override={urlParamOverride}
         >
-          <FlyoutTitle title={ip} iconType={'globe'} isLink />
+          <FlyoutTitle
+            title={ip}
+            iconType={'globe'}
+            isLink
+            data-test-subj="network-details-flyout-header"
+          />
         </SecuritySolutionLinkAnchor>
       </FlyoutHeader>
     );

@@ -8,7 +8,8 @@
 import { resolve } from 'path';
 import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 

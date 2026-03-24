@@ -6,9 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
+import type { ProcessorFields } from './format_synthetics_policy';
+import type { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { periodToSeconds } from '../../../routes/overview_status/utils';
-import { ProcessorFields } from './format_synthetics_policy';
-import { ConfigKey, HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {

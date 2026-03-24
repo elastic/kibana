@@ -10,7 +10,7 @@ import {
   SINGLE_METRIC_JOB_CONFIG,
   MULTI_METRIC_JOB_CONFIG,
 } from '../../../../api_integration/apis/ml/jobs/common_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('delete job', function () {
     this.tags(['ml']);
     before(async () => {
-      await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esNode.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

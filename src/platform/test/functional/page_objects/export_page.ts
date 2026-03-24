@@ -19,8 +19,21 @@ export class ExportPageObject extends FtrService {
     return await this.testSubjects.exists('exportTopNavButton');
   }
 
+  async exportButtonMissingOrFail() {
+    await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
+  }
+
   async clickExportTopNavButton() {
-    return this.testSubjects.click('exportTopNavButton');
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      return await this.testSubjects.click('exportTopNavButton');
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      return await this.testSubjects.click('exportTopNavButton');
+    }
   }
 
   async isExportPopoverOpen() {
@@ -60,13 +73,18 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    await this.retry.waitFor('close export flyout', async () => {
-      let isExportFlyoutOpen;
-      if ((isExportFlyoutOpen = await this.isExportFlyoutOpen())) {
-        await this.testSubjects.click('exportFlyoutCloseButton');
+    const closeButtonSubj = 'exportFlyoutCloseButton';
+    await this.retry.waitFor('flyout to close', async () => {
+      const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
+
+      if (!isExportFlyoutOpen) {
+        return true; // It was already closed
       }
 
-      return !isExportFlyoutOpen;
+      // Use clickWhenNotDisabledWithoutRetry to avoid the internal retry mechanism
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(closeButtonSubj);
+      await this.testSubjects.waitForDeleted(closeButtonSubj);
+      return true;
     });
   }
 

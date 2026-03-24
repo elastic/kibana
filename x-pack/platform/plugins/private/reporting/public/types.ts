@@ -6,10 +6,10 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { JOB_STATUS } from '@kbn/reporting-common';
+import type { JOB_STATUS } from '@kbn/reporting-common';
 import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
-import { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-form/types';
-import { ReportingPublicPluginStartDependencies } from './plugin';
+import type { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-form/types';
+import type { ReportingPublicPluginStartDependencies } from './plugin';
 
 /*
  * Required services for mounting React components
@@ -23,6 +23,7 @@ export type StartServices = [
     | 'application'
     | 'notifications'
     | 'uiSettings'
+    | 'userProfile'
   >,
   ReportingPublicPluginStartDependencies,
   unknown
@@ -54,6 +55,10 @@ export interface JobSummarySet {
 export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource' | 'csv_v2';
 
 export interface ScheduledReport {
+  /**
+   * The id of the report
+   */
+  id: string;
   /**
    * The title of the report, used for the filename and in the UI
    */
@@ -91,6 +96,22 @@ export interface ScheduledReport {
    * List of email addresses to send the report to (`to` field in the email)
    */
   emailRecipients: string[];
+  /**
+   * List of email addresses to send the report in copy to (`cc` field in the email)
+   */
+  emailCcRecipients: string[];
+  /**
+   * List of email addresses to send the report in blind copy to (`bcc` field in the email)
+   */
+  emailBccRecipients: string[];
+  /**
+   * Email subject
+   */
+  emailSubject: string;
+  /**
+   * Email message
+   */
+  emailMessage: string;
 }
 
 export interface ReportTypeData {

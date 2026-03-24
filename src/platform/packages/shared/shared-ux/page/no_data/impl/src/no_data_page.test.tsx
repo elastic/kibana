@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { NoDataCard } from '@kbn/shared-ux-card-no-data';
+import { render, screen } from '@testing-library/react';
 import { getNoDataPageServicesMock } from '@kbn/shared-ux-page-no-data-mocks';
 
 import { NoDataPage } from './no_data_page';
@@ -17,19 +16,20 @@ import { NoDataPageProvider } from './services';
 
 describe('NoDataPage', () => {
   test('render', () => {
-    const component = mountWithIntl(
+    render(
       <NoDataPageProvider {...getNoDataPageServicesMock()}>
         <NoDataPage
-          solution="Analytics"
           action={{
             elasticAgent: {},
           }}
-          logo={'logoKibana'}
-          docsLink="test"
         />
       </NoDataPageProvider>
     );
-    expect(component.find('h1').html()).toContain('Welcome to Elastic Analytics!');
-    expect(component.find(NoDataCard).length).toBe(1);
+
+    // Should render the NoDataPage with its main container
+    expect(screen.getByTestId('kbnNoDataPage')).toBeInTheDocument();
+
+    // Should render the NoDataCard component (inherited from ActionCard)
+    expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
   });
 });

@@ -7,9 +7,10 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { decompressFromBase64 } from 'lz-string';
 import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
@@ -21,7 +22,6 @@ export default function (ctx: FtrProviderContext) {
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
   const securityService = getService('security');
-  const globalNav = getService('globalNav');
   const {
     common,
     error,
@@ -47,20 +47,23 @@ export default function (ctx: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
   const deployment = getService('deployment');
+  const spaces = getService('spaces');
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
     await timePicker.setDefaultAbsoluteRange();
   }
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/security'
       );
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
 
       // ensure we're logged out so we can login as the appropriate users
       await security.forceLogout();
@@ -72,7 +75,7 @@ export default function (ctx: FtrProviderContext) {
       await security.forceLogout();
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/security'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -124,7 +127,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it(`doesn't show read-only badge`, async () => {
-        await globalNav.badgeMissingOrFail();
+        await testSubjects.missingOrFail('discover-readonly-badge');
       });
 
       it('Shows short urls for users with the right privileges', async () => {
@@ -175,11 +178,18 @@ export default function (ctx: FtrProviderContext) {
         await security.login('global_discover_read_user', 'global_discover_read_user-password', {
           expectSpaceSelector: false,
         });
+
+        await spaces.create({
+          id: 'readonly-solution-space',
+          name: 'Readonly Solution Space',
+          solution: 'oblt',
+        });
       });
 
       after(async () => {
         await securityService.role.delete('global_discover_read_role');
         await securityService.user.delete('global_discover_read_user');
+        await spaces.delete('readonly-solution-space');
       });
 
       it('shows discover navlink', async () => {
@@ -194,8 +204,14 @@ export default function (ctx: FtrProviderContext) {
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
-      it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+      it('shows read-only badge in the default space', async () => {
+        await testSubjects.existOrFail('discover-readonly-badge');
+      });
+
+      it('shows read-only badge in a solution space', async () => {
+        await common.navigateToApp('discover', { basePath: 's/readonly-solution-space' });
+        await common.waitForTopNavToBeVisible();
+        await testSubjects.existOrFail('discover-readonly-badge');
       });
 
       it(`doesn't show visualize button`, async () => {
@@ -212,13 +228,13 @@ export default function (ctx: FtrProviderContext) {
         const actualUrl = await share.getSharedUrl();
         expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
         const urlSearchParams = new URLSearchParams(actualUrl);
-        expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+        const parsedSharedUrl = JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!);
+        expect(omit(parsedSharedUrl, 'tab')).to.eql({
           query: {
             language: 'kuery',
             query: '',
           },
           sort: [['@timestamp', 'desc']],
-          columns: [],
           interval: 'auto',
           filters: [],
           dataViewId: 'logstash-*',
@@ -231,6 +247,8 @@ export default function (ctx: FtrProviderContext) {
             pause: true,
           },
         });
+        expect(parsedSharedUrl.tab.id).to.be.a('string');
+        expect(parsedSharedUrl.tab.label).to.be.a('string');
         await share.closeShareModal();
       });
 
@@ -297,7 +315,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+        await testSubjects.existOrFail('discover-readonly-badge');
       });
 
       it(`doesn't show visualize button`, async () => {
@@ -494,7 +512,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('allows to access only via a permitted index alias', async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+        await testSubjects.existOrFail('discover-readonly-badge');
 
         // can't access logstash index directly
         await discover.selectIndexPattern('logstash-*');

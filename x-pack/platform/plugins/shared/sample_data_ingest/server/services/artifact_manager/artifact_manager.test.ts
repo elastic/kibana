@@ -14,13 +14,15 @@ import {
   loadManifestFileMock,
   majorMinorMock,
   latestVersionMock,
-  unlinkMock,
+  deleteFileMock,
 } from './artifact_manager.test.mocks';
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getArtifactName } from '@kbn/product-doc-common';
 import { DatasetSampleType } from '../../../common';
 import { ArtifactManager } from './artifact_manager';
+
+jest.mock('@kbn/fs');
 
 const artifactsFolder = '/tmp/artifacts';
 const artifactRepositoryUrl = 'https://artifacts.elastic.co';
@@ -81,27 +83,29 @@ describe('ArtifactManager', () => {
 
   describe('prepareArtifact', () => {
     it('should successfully prepare artifact when version matches current version', async () => {
-      const productName = 'kibana' as DatasetSampleType;
+      const expectedArtifactName = getArtifactName({
+        productName: 'elasticsearch',
+        productVersion: '8.16',
+      });
+      const expectedArtifactUrl = `${artifactRepositoryUrl}/${expectedArtifactName}`;
+      const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
 
-      const result = await artifactManager.prepareArtifact(productName);
+      downloadMock.mockResolvedValueOnce(expectedArtifactPath);
+
+      const result = await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
 
       expect(majorMinorMock).toHaveBeenCalledWith(kibanaVersion);
       expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
         artifactRepositoryUrl,
       });
 
-      const expectedArtifactName = getArtifactName({
-        productName,
-        productVersion: '8.16',
-      });
-      const expectedArtifactUrl = `${artifactRepositoryUrl}/${expectedArtifactName}`;
-      const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
-
       expect(downloadMock).toHaveBeenCalledWith(
         expectedArtifactUrl,
         expectedArtifactPath,
-        'application/zip'
+        'application/zip',
+        undefined
       );
+
       expect(openZipArchiveMock).toHaveBeenCalledWith(expectedArtifactPath);
       expect(validateArtifactArchiveMock).toHaveBeenCalledWith(mockArchive);
       expect(loadManifestFileMock).toHaveBeenCalledWith(mockArchive);
@@ -125,55 +129,46 @@ describe('ArtifactManager', () => {
 
       latestVersionMock.mockReturnValue('8.17');
 
-      const productName = 'elasticsearch' as DatasetSampleType;
-
-      await artifactManager.prepareArtifact(productName);
+      await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
 
       expect(latestVersionMock).toHaveBeenCalledWith(['8.14', '8.15', '8.17']);
 
       const expectedArtifactName = getArtifactName({
-        productName,
+        productName: 'elasticsearch',
         productVersion: '8.17',
       });
 
       expect(downloadMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${expectedArtifactName}`,
         `${artifactsFolder}/${expectedArtifactName}`,
-        'application/zip'
+        'application/zip',
+        undefined
       );
     });
 
     it('should throw error when no versions are available for product', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: [],
+        elasticsearch: [],
       });
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await expect(artifactManager.prepareArtifact(productName)).rejects.toThrow(
-        'No versions found for product [kibana]'
-      );
+      await expect(
+        artifactManager.prepareArtifact(DatasetSampleType.elasticsearch)
+      ).rejects.toThrow('No versions found for product [elasticsearch]');
 
       expect(downloadMock).not.toHaveBeenCalled();
     });
 
     it('should throw error when product is not found in versions', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({
-        elasticsearch: ['8.16'],
-      });
+      fetchArtifactVersionsMock.mockResolvedValue({});
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await expect(artifactManager.prepareArtifact(productName)).rejects.toThrow(
-        'No versions found for product [kibana]'
-      );
+      await expect(
+        artifactManager.prepareArtifact(DatasetSampleType.elasticsearch)
+      ).rejects.toThrow('No versions found for product [elasticsearch]');
     });
 
     it('should cache artifact versions after first fetch', async () => {
-      const productName = 'kibana' as DatasetSampleType;
-
-      await artifactManager.prepareArtifact(productName);
-      await artifactManager.prepareArtifact(productName);
+      await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
+      await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
 
       expect(fetchArtifactVersionsMock).toHaveBeenCalledTimes(1);
     });
@@ -182,9 +177,9 @@ describe('ArtifactManager', () => {
       const downloadError = new Error('Download failed');
       downloadMock.mockRejectedValue(downloadError);
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await expect(artifactManager.prepareArtifact(productName)).rejects.toThrow('Download failed');
+      await expect(
+        artifactManager.prepareArtifact(DatasetSampleType.elasticsearch)
+      ).rejects.toThrow('Download failed');
     });
 
     it('should handle archive validation failure', async () => {
@@ -193,36 +188,30 @@ describe('ArtifactManager', () => {
         throw validationError;
       });
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await expect(artifactManager.prepareArtifact(productName)).rejects.toThrow('Invalid archive');
+      await expect(
+        artifactManager.prepareArtifact(DatasetSampleType.elasticsearch)
+      ).rejects.toThrow('Invalid archive');
     });
 
     it('should handle manifest loading failure', async () => {
       const manifestError = new Error('Failed to load manifest');
       loadManifestFileMock.mockRejectedValue(manifestError);
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await expect(artifactManager.prepareArtifact(productName)).rejects.toThrow(
-        'Failed to load manifest'
-      );
+      await expect(
+        artifactManager.prepareArtifact(DatasetSampleType.elasticsearch)
+      ).rejects.toThrow('Failed to load manifest');
     });
 
     it('should handle mappings loading failure', async () => {
       const mappingsError = new Error('Failed to load mappings');
       loadMappingFileMock.mockRejectedValue(mappingsError);
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await expect(artifactManager.prepareArtifact(productName)).rejects.toThrow(
-        'Failed to load mappings'
-      );
+      await expect(
+        artifactManager.prepareArtifact(DatasetSampleType.elasticsearch)
+      ).rejects.toThrow('Failed to load mappings');
     });
 
     it('should load manifest and mappings in parallel', async () => {
-      const productName = 'kibana' as DatasetSampleType;
-
       let manifestResolve: () => void;
       let mappingsResolve: () => void;
 
@@ -237,7 +226,7 @@ describe('ArtifactManager', () => {
       loadManifestFileMock.mockReturnValue(manifestPromise);
       loadMappingFileMock.mockReturnValue(mappingsPromise);
 
-      const preparePromise = artifactManager.prepareArtifact(productName);
+      const preparePromise = artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
 
       manifestResolve!();
       mappingsResolve!();
@@ -252,12 +241,10 @@ describe('ArtifactManager', () => {
       majorMinorMock.mockReturnValue('8.16');
 
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['8.16'],
+        elasticsearch: ['8.16'],
       });
 
-      const productName = 'kibana' as DatasetSampleType;
-
-      await artifactManager.prepareArtifact(productName);
+      await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
 
       expect(majorMinorMock).toHaveBeenCalledWith('8.16');
     });
@@ -276,20 +263,18 @@ describe('ArtifactManager', () => {
 
   describe('cleanup', () => {
     it('should delete downloaded files and clear the set', async () => {
-      const productName = 'kibana' as DatasetSampleType;
-
-      await artifactManager.prepareArtifact(productName);
+      await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
 
       await artifactManager.cleanup();
 
       const expectedArtifactName = getArtifactName({
-        productName,
+        productName: 'elasticsearch',
         productVersion: '8.16',
       });
       const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
 
-      expect(unlinkMock).toHaveBeenCalledWith(expectedArtifactPath);
-      expect(unlinkMock).toHaveBeenCalledTimes(1);
+      expect(deleteFileMock).toHaveBeenCalledWith(expectedArtifactPath);
+      expect(deleteFileMock).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import {
   KibanaEBTUIProvider,
   KibanaEBTServerProvider,
 } from '../../../analytics/services/kibana_ebt';
 import { services as functionalServces } from '../../services';
-import { pageObjects } from '../../page_objects';
+import type { pageObjects } from '../../page_objects';
 
 const services = {
   ...functionalServces,

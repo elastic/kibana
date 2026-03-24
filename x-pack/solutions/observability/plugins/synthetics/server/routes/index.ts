@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_params_settings';
+import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
+import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
+import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
 import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
@@ -18,7 +22,7 @@ import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
-import { SyntheticsRestApiRouteFactory } from './types';
+import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
@@ -27,12 +31,14 @@ import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
-import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
+import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
+import { resetSyntheticsMonitorRoute } from './monitor_cruds/reset_monitor';
+import { resetSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/reset_monitor_bulk';
 import {
   disableSyntheticsRoute,
   getSyntheticsEnablementRoute,
@@ -85,7 +91,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyRoute,
   createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
-  createJourneyFailedStepsRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
   deletePackagePolicyRoute,
@@ -103,6 +108,12 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
   syntheticsInspectTLSRuleRoute,
+  getSyntheticsTriggerTaskRun,
+  resetSyntheticsMonitorRoute,
+  resetSyntheticsMonitorBulkRoute,
+  cleanupPrivateLocationRoute,
+  syncParamsSyntheticsParamsRoute,
+  syncParamsSettingsParamsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

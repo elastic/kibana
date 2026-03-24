@@ -1,0 +1,181 @@
+{
+        "type": "lens",
+        "title": "Requests successful",
+        "embeddableConfig":
+        {
+            "attributes":
+            {
+                "title": "Table ",
+                "references":
+                [],
+                "state":
+                {
+                    "datasourceStates":
+                    {
+                        "textBased":
+                        {
+                            "layers":
+                            {
+                                "3a5310ab-2832-41db-bdbe-1b6939dd5651":
+                                {
+                                    "index": "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0",
+                                    "query":
+                                    {
+                                        "esql": "FROM logs-nginx\\n| WHERE event.dataset == 'nginx.access' AND event.outcome == 'success'\\n| STATS a = COUNT(*)"
+                                    },
+                                    "columns":
+                                    [
+                                        {
+                                            "columnId": "a",
+                                            "fieldName": "a",
+                                            "meta":
+                                            {
+                                                "type": "number"
+                                            },
+                                            "inMetricDimension": true
+                                        }
+                                    ],
+                                    "timeField": "@timestamp"
+                                },
+                                "3b1b0102-bb45-40f5-9ef2-419d2eaaa56c":
+                                {
+                                    "index": "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0",
+                                    "query":
+                                    {
+                                        "esql": "FROM logs-nginx\\n| WHERE event.dataset == 'nginx.access' AND event.outcome == 'success'\\n| STATS a = COUNT(*)"
+                                    },
+                                    "columns":
+                                    [
+                                        {
+                                            "columnId": "aa9a832b-d4bf-4652-b2eb-7cbebb4bbb13",
+                                            "fieldName": "a",
+                                            "meta":
+                                            {
+                                                "type": "number",
+                                                "esType": "long"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "indexPatternRefs":
+                            [
+                                {
+                                    "id": "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0",
+                                    "title": "logs*",
+                                    "timeField": "@timestamp"
+                                }
+                            ]
+                        }
+                    },
+                    "filters":
+                    [],
+                    "query":
+                    {
+                        "esql": "FROM logs-nginx\\n| WHERE event.dataset == 'nginx.access' AND event.outcome == 'success'\\n| STATS a = COUNT(*)"
+                    },
+                    "visualization":
+                    {
+                        "shape": "semiCircle",
+                        "layerId": "3a5310ab-2832-41db-bdbe-1b6939dd5651",
+                        "layerType": "data",
+                        "ticksPosition": "bands",
+                        "labelMajorMode": "auto",
+                        "metricAccessor": "aa9a832b-d4bf-4652-b2eb-7cbebb4bbb13",
+                        "palette":
+                        {
+                            "name": "custom",
+                            "type": "palette",
+                            "params":
+                            {
+                                "steps": 4,
+                                "name": "custom",
+                                "reverse": false,
+                                "rangeType": "percent",
+                                "rangeMin": null,
+                                "rangeMax": null,
+                                "progression": "fixed",
+                                "stops":
+                                [
+                                    {
+                                        "color": "#d7060680",
+                                        "stop": 25
+                                    },
+                                    {
+                                        "color": "#f8e72e80",
+                                        "stop": 50
+                                    },
+                                    {
+                                        "color": "#baf50a80",
+                                        "stop": 75
+                                    },
+                                    {
+                                        "color": "#02bc0c80",
+                                        "stop": 100
+                                    }
+                                ],
+                                "colorStops":
+                                [
+                                    {
+                                        "color": "#d7060680",
+                                        "stop": null
+                                    },
+                                    {
+                                        "color": "#f8e72e80",
+                                        "stop": 25
+                                    },
+                                    {
+                                        "color": "#baf50a80",
+                                        "stop": 50
+                                    },
+                                    {
+                                        "color": "#02bc0c80",
+                                        "stop": 75
+                                    }
+                                ],
+                                "continuity": "all",
+                                "maxSteps": 5
+                            }
+                        },
+                        "colorMode": "palette"
+                    },
+                    "adHocDataViews":
+                    {
+                        "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0":
+                        {
+                            "id": "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0",
+                            "title": "logs*",
+                            "timeFieldName": "@timestamp",
+                            "sourceFilters":
+                            [],
+                            "type": "esql",
+                            "fieldFormats":
+                            {},
+                            "runtimeFieldMap":
+                            {},
+                            "allowNoIndex": false,
+                            "name": "logs*",
+                            "allowHidden": false
+                        }
+                    }
+                },
+                "visualizationType": "lnsGauge",
+                "type": "lens"
+            },
+            "disabledActions":
+            [
+                "OPEN_FLYOUT_ADD_DRILLDOWN"
+            ],
+            "enhancements":
+            {}
+        },
+        "panelIndex": "2757c30b-a233-4cce-9db0-f56313513e9f",
+        "gridData":
+        {
+            "x": 0,
+            "y": 48,
+            "w": 24,
+            "h": 16,
+            "i": "2757c30b-a233-4cce-9db0-f56313513e9f"
+        }
+    }

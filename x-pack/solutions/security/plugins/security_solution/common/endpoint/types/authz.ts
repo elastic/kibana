@@ -54,6 +54,8 @@ export interface EndpointAuthz {
   canGetRunningProcesses: boolean;
   /** If the user has permissions to use the Response Actions Console */
   canAccessResponseConsole: boolean;
+  /** If the user has permissions to use the Cancel Response Action */
+  canCancelAction: boolean;
   /** If the user has write permissions to use execute action */
   canWriteExecuteOperations: boolean;
   /** If the user has write permissions to use file operations */
@@ -64,6 +66,10 @@ export interface EndpointAuthz {
   canWriteTrustedApplications: boolean;
   /** If the user has read permissions for trusted applications */
   canReadTrustedApplications: boolean;
+  /** If the user has write permissions for trusted devices */
+  canWriteTrustedDevices: boolean;
+  /** If the user has read permissions for trusted devices */
+  canReadTrustedDevices: boolean;
   /** If the user has write permissions for host isolation exceptions */
   canWriteHostIsolationExceptions: boolean;
   /** If the user has read permissions for host isolation exceptions */
@@ -108,6 +114,11 @@ export interface EndpointAuthz {
    */
   canReadAdminData: boolean;
   canWriteAdminData: boolean;
+
+  /** User has privilege to read from the scripts library */
+  canReadScriptsLibrary: boolean;
+  /** user has privilege to write to the scripts library */
+  canWriteScriptsLibrary: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

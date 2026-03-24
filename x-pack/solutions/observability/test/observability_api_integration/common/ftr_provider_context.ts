@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from '../../api_integration/services';
-import { CustomApiTestServices } from './config';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import type { services } from '../../api_integration/services';
+import type { CustomApiTestServices } from './config';
 
 export type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 export type ObsFtrProviderContext = GenericFtrProviderContext<

@@ -38,6 +38,7 @@ import { MetricNotAvailableExplanationTooltip } from '../../components/metric_no
 import { useProcessListContext } from '../../hooks/use_process_list';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 interface Props {
   command: string;
@@ -72,6 +73,7 @@ const EmptyChartPlaceholder = ({ metricName }: { metricName: string }) => (
 export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) => {
   const { request$ } = useRequestObservable();
   const { hostTerm, indexPattern, to } = useProcessListContext();
+  const { schema } = useAssetDetailsRenderPropsContext();
   const { isActiveTab } = useTabSwitcherContext();
 
   const { data, status, error } = useFetcher(
@@ -83,12 +85,13 @@ export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) 
           indexPattern,
           to,
           command,
+          schema,
         }),
       });
 
       return decodeOrThrow(ProcessListAPIChartResponseRT)(response);
     },
-    [command, hostTerm, indexPattern, to],
+    [command, hostTerm, indexPattern, to, schema],
     {
       requestObservable$: request$,
       autoFetch: isActiveTab('processes'),

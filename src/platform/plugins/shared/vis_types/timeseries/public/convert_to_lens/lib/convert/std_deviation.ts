@@ -11,7 +11,7 @@ import type { Metric } from '../../../../common/types';
 import { getFormulaEquivalent, SUPPORTED_METRICS } from '../metrics';
 import { createFormulaColumn } from './formula';
 import { convertMetricAggregationColumnWithoutSpecialParams } from './parent_pipeline';
-import { CommonColumnConverterArgs, CommonColumnsConverterArgs } from './types';
+import type { CommonColumnConverterArgs, CommonColumnsConverterArgs } from './types';
 
 const createStandartDeviationFormulaColumn = (
   { series, metric, dataView }: CommonColumnConverterArgs,

@@ -7,6 +7,10 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
+  AgentBuilderEventTypes,
+  AgentBuilderTelemetryEventsMap,
+} from '@kbn/agent-builder-common/telemetry';
+import type {
   AlertsEventTypes,
   AlertsGroupingTelemetryEventsMap,
 } from './events/alerts_grouping/types';
@@ -42,11 +46,27 @@ import type {
 } from './events/preview_rule/types';
 import type { AppEventTypes, AppTelemetryEventsMap } from './events/app/types';
 import type {
-  SiemMigrationsEventTypes,
+  SiemMigrationsRuleEventTypes,
+  SiemMigrationsDashboardEventTypes,
   SiemMigrationsTelemetryEventsMap,
 } from './events/siem_migrations/types';
+import type {
+  RuleUpgradeEventTypes,
+  RuleUpgradeTelemetryEventsMap,
+} from './events/rule_upgrade/types';
+
+import type {
+  AIValueReportEventTypes,
+  AIValueReportTelemetryEventsMap,
+} from './events/ai_value_report/types';
+import type { AttacksEventTypes, AttacksTelemetryEventsMap } from './events/attacks/types';
+import type {
+  TrialCompanionEventTypes,
+  TrialCompanionTelemetryEventsMap,
+} from './events/trial_companion/types';
 
 export * from './events/app/types';
+export * from './events/attacks/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
@@ -56,6 +76,7 @@ export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
 export * from './events/preview_rule/types';
 export * from './events/notes/types';
+export * from '@kbn/agent-builder-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -84,8 +105,20 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? NotesTelemetryEventsMap[T]
   : T extends AppEventTypes
   ? AppTelemetryEventsMap[T]
-  : T extends SiemMigrationsEventTypes
+  : T extends SiemMigrationsRuleEventTypes
   ? SiemMigrationsTelemetryEventsMap[T]
+  : T extends SiemMigrationsDashboardEventTypes
+  ? SiemMigrationsTelemetryEventsMap[T]
+  : T extends RuleUpgradeEventTypes
+  ? RuleUpgradeTelemetryEventsMap[T]
+  : T extends AIValueReportEventTypes
+  ? AIValueReportTelemetryEventsMap[T]
+  : T extends TrialCompanionEventTypes
+  ? TrialCompanionTelemetryEventsMap[T]
+  : T extends AgentBuilderEventTypes
+  ? AgentBuilderTelemetryEventsMap[T]
+  : T extends AttacksEventTypes
+  ? AttacksTelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
@@ -100,4 +133,10 @@ export type TelemetryEventTypes =
   | EventLogEventTypes
   | NotesEventTypes
   | AppEventTypes
-  | SiemMigrationsEventTypes;
+  | SiemMigrationsRuleEventTypes
+  | SiemMigrationsDashboardEventTypes
+  | RuleUpgradeEventTypes
+  | AIValueReportEventTypes
+  | TrialCompanionEventTypes
+  | AgentBuilderEventTypes
+  | AttacksEventTypes;

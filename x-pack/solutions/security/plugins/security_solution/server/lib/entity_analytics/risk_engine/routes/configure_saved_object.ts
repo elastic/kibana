@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../../common/api/entity_analytics';
 import { ConfigureRiskEngineSavedObjectRequestBody } from '../../../../../common/api/entity_analytics';
 import {
@@ -93,6 +93,8 @@ export const riskEngineConfigureSavedObjectRoute = (
               excludeAlertStatuses: request.body.exclude_alert_statuses,
               range: request.body.range,
               excludeAlertTags: request.body.exclude_alert_tags,
+              enableResetToZero: request.body.enable_reset_to_zero,
+              filters: request.body.filters,
             });
             return response.ok({ body: { risk_engine_saved_object_configured: true } });
           } catch (e) {

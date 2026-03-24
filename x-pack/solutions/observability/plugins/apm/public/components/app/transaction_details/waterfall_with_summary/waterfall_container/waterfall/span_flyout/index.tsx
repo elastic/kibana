@@ -27,10 +27,11 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { OpenInDiscover } from '../../../../../../shared/links/discover_links/open_in_discover';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
+import { useTimeRange } from '../../../../../../../hooks/use_time_range';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
@@ -93,8 +94,9 @@ interface Props {
   spanLinksCount: SpanLinksCount;
   flyoutDetailTab?: string;
   onClose: () => void;
-  start: string;
-  end: string;
+  rangeFrom: string;
+  rangeTo: string;
+  kuery?: string;
 }
 
 const INITIAL_DATA = {
@@ -110,9 +112,12 @@ export function SpanFlyout({
   onClose,
   spanLinksCount,
   flyoutDetailTab,
-  start,
-  end,
+  rangeFrom,
+  rangeTo,
+  kuery,
 }: Props) {
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/{traceId}/spans/{spanId}', {
@@ -129,35 +134,44 @@ export function SpanFlyout({
 
   const isLoading = isPending(status);
 
+  const spanDetailsTitle = i18n.translate(
+    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+    {
+      defaultMessage: 'Span details',
+    }
+  );
+
   return (
     <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true} aria-label={spanDetailsTitle}>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>
-                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
-                    defaultMessage: 'Span details',
-                  })}
-                </h2>
+                <h2>{spanDetailsTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <DiscoverSpanLink spanId={span.span.id}>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
-                  )}
-                </DiscoverSpanLink>
+                <OpenInDiscover
+                  dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+                  variant="button"
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  queryParams={{
+                    kuery,
+                    spanId,
+                    sortDirection: 'DESC',
+                  }}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
           {span?.span.composite && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiCallOut color="warning" iconType="gear" size="s">
+                <EuiCallOut announceOnMount color="warning" iconType="gear" size="s">
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
                     {
@@ -203,7 +217,7 @@ function SpanFlyoutBody({
 }) {
   const stackframes = span.span.stacktrace;
   const plaintextStacktrace = span.code?.stacktrace;
-  const codeLanguage = parentTransaction?.service.language?.name;
+  const codeLanguage = parentTransaction?.service?.language?.name;
   const spanDb = span.span.db;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode =
@@ -292,7 +306,9 @@ function SpanFlyoutBody({
                 defaultMessage: 'Type',
               })}
             >
-              <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+              <EuiBadge color="hollow" tabIndex={0}>
+                {spanTypes.spanType}
+              </EuiBadge>
             </EuiToolTip>
             {spanTypes.spanSubtype && (
               <EuiToolTip
@@ -300,7 +316,9 @@ function SpanFlyoutBody({
                   defaultMessage: 'Subtype',
                 })}
               >
-                <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {spanTypes.spanSubtype}
+                </EuiBadge>
               </EuiToolTip>
             )}
             {spanTypes.spanAction && (
@@ -309,13 +327,15 @@ function SpanFlyoutBody({
                   defaultMessage: 'Action',
                 })}
               >
-                <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {spanTypes.spanAction}
+                </EuiBadge>
               </EuiToolTip>
             )}
 
             <FailureBadge outcome={span.event?.outcome} />
 
-            <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
+            <SyncBadge sync={span.span.sync} agentName={span.agent?.name} />
           </ContainerWithMarginRight>,
         ]}
       />

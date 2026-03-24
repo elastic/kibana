@@ -9,13 +9,12 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
-  const find = getService('find');
 
   async function runTemplateTest(type: string, template: string) {
     await PageObjects.console.enterText(`{\n\t"type": "${type}",\n`);
@@ -237,28 +236,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clearEditorText();
       });
 
-      // flaky
-      it.skip('should suppress auto-complete on arrow keys', async () => {
-        await PageObjects.console.enterText(`\nGET _search\nGET _search`);
-        await PageObjects.console.pressEnter();
-        const keyPresses = [
-          'pressUp',
-          'pressUp',
-          'pressDown',
-          'pressDown',
-          'pressRight',
-          'pressRight',
-          'pressLeft',
-          'pressLeft',
-        ] as const;
-        for (const keyPress of keyPresses) {
-          await PageObjects.console.sleepForDebouncePeriod();
-          log.debug('Key', keyPress);
-          await PageObjects.console[keyPress]();
-          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
-        }
-      });
-
       it('should activate auto-complete for methods case-insensitively', async () => {
         const methods = _.sampleSize(
           _.compact(
@@ -336,58 +313,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           async () => await PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
-      });
-    });
-
-    // not implemented for monaco yet https://github.com/elastic/kibana/issues/184856
-    describe.skip('with a missing comma in query', () => {
-      const LINE_NUMBER = 4;
-      beforeEach(async () => {
-        await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('\nGET _search');
-        await PageObjects.console.pressEnter();
-      });
-
-      it('should add a comma after previous non empty line', async () => {
-        await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.sleepForDebouncePeriod();
-        await PageObjects.console.promptAutocomplete();
-        await PageObjects.console.pressEnter();
-        await retry.try(async () => {
-          let conApp = await find.byCssSelector('.conApp');
-          const firstInnerHtml = await conApp.getAttribute('innerHTML');
-          await PageObjects.common.sleep(500);
-          conApp = await find.byCssSelector('.conApp');
-          const secondInnerHtml = await conApp.getAttribute('innerHTML');
-          return firstInnerHtml === secondInnerHtml;
-        });
-        const textAreaString = await PageObjects.console.getEditorText();
-        log.debug('Text Area String Value==================\n');
-        log.debug(textAreaString);
-        expect(textAreaString).to.contain(',');
-        const text = await PageObjects.console.getEditorTextAtLine(LINE_NUMBER);
-        const lastChar = text.charAt(text.length - 1);
-        expect(lastChar).to.be.eql(',');
-      });
-
-      it('should add a comma after the triple quoted strings', async () => {
-        await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"term": """some data"""`);
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.sleepForDebouncePeriod();
-        await PageObjects.console.promptAutocomplete();
-        await PageObjects.console.pressEnter();
-
-        await retry.waitForWithTimeout('text area to contain comma', 25000, async () => {
-          const textAreaString = await PageObjects.console.getEditorText();
-          return textAreaString.includes(',');
-        });
-
-        const text = await PageObjects.console.getEditorTextAtLine(LINE_NUMBER);
-        const lastChar = text.charAt(text.length - 1);
-        expect(lastChar).to.be.eql(',');
       });
     });
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
-import { IlmPhase } from '../types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmPhase } from '../types';
 
 export const getIlmPhase = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined,

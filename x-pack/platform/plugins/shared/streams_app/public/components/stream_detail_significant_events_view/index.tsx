@@ -5,156 +5,99 @@
  * 2.0.
  */
 import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { compact, isEqual } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { Timeline, TimelineEvent } from '../timeline';
-import { formatChangePoint } from './change_point';
-import { ChangePointSummary } from './change_point_summary';
-import { SignificantEventsViewEmptyState } from './empty_state';
-import { SignificantEventFlyout } from './significant_event_flyout';
+import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
+import type { Flow } from './add_significant_event_flyout/types';
+import { EmptyState } from './empty_state';
+import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { SignificantEventsTable } from './significant_events_table';
+import { formatChangePoint } from './utils/change_point';
 
-export function StreamDetailSignificantEventsView({
-  definition,
-  refreshDefinition,
-}: {
+interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
-}) {
-  const {
-    core: { notifications },
-  } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
+}
 
-  const theme = useEuiTheme().euiTheme;
+export function StreamDetailSignificantEventsView({ definition }: Props) {
+  const { rangeFrom, rangeTo, startMs, endMs } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
+  const {
+    dependencies: {
+      start: { unifiedSearch },
+    },
+  } = useKibana();
+  const { euiTheme } = useEuiTheme();
+  const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([start, end]);
-  }, [start, end]);
+    return niceTimeFormatter([startMs, endMs]);
+  }, [startMs, endMs]);
 
+  const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
-    start,
-    end,
+    query,
   });
 
-  const { addQuery, removeQuery } = useSignificantEventsApi({ name: definition.stream.name }) || {};
-
+  const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
+  const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
+  const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
 
-  const events = useMemo(() => {
-    return (
-      significantEventsFetchState.value?.flatMap((item): TimelineEvent[] => {
-        const change = formatChangePoint(item);
-
-        if (!change) {
-          return [];
-        }
-
-        return [
-          {
-            id: item.query.id,
-            label: <ChangePointSummary change={change} xFormatter={xFormatter} />,
-            color: theme.colors[change.color],
-            time: change.time,
-            header: item.query.title,
-          },
-        ];
-      }) ?? []
-    );
-  }, [significantEventsFetchState.value, theme, xFormatter]);
-
-  if (!significantEventsFetchState.value) {
-    return <LoadingPanel />;
+  if (!significantEventsFetchState.data && significantEventsFetchState.isLoading) {
+    return <LoadingPanel size="xxl" />;
   }
 
-  const editFlyout = isEditFlyoutOpen ? (
-    <SignificantEventFlyout
-      onCreate={async (next) => {
-        await addQuery?.(next).then(
-          () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventCreateSuccessToastTitle',
-                {
-                  defaultMessage: `Added significant event`,
-                }
-              ),
-            });
-            setIsEditFlyoutOpen(false);
-            significantEventsFetchState.refresh();
-          },
-          (error) => {
-            notifications.showErrorDialog({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventCreateErrorToastTitle',
-                {
-                  defaultMessage: `Could not add significant event`,
-                }
-              ),
-              error,
-            });
-          }
-        );
-      }}
-      onUpdate={async (next) => {
-        await addQuery?.(next).then(
-          () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventUpdateSuccessToastTitle',
-                {
-                  defaultMessage: `Updated significant event`,
-                }
-              ),
-            });
-            setIsEditFlyoutOpen(false);
-            significantEventsFetchState.refresh();
-          },
-          (error) => {
-            notifications.showErrorDialog({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventUpdateErrorToastTitle',
-                {
-                  defaultMessage: `Could not update significant event`,
-                }
-              ),
-              error,
-            });
-          }
-        );
-      }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-      }}
-      query={queryToEdit}
-      name={definition.stream.name}
+  const editFlyout = (generateOnMount: boolean) => (
+    <EditSignificantEventFlyout
+      setIsEditFlyoutOpen={setIsEditFlyoutOpen}
+      isEditFlyoutOpen={isEditFlyoutOpen}
+      definition={definition}
+      refresh={significantEventsFetchState.refetch}
+      queryToEdit={queryToEdit}
+      setQueryToEdit={setQueryToEdit}
+      initialFlow={initialFlow}
+      generateOnMount={generateOnMount}
+      aiFeatures={aiFeatures}
     />
-  ) : null;
+  );
 
-  if (significantEventsFetchState.value.length === 0) {
+  const noSignificantEvents =
+    !query &&
+    !significantEventsFetchState.isLoading &&
+    significantEventsFetchState.data &&
+    significantEventsFetchState.data.significant_events.length === 0;
+
+  if (noSignificantEvents) {
     return (
       <>
-        <SignificantEventsViewEmptyState
-          onAddClick={() => {
-            setIsEditFlyoutOpen(true);
+        <EmptyState
+          onManualEntryClick={() => {
             setQueryToEdit(undefined);
+            setInitialFlow('manual');
+            setIsEditFlyoutOpen(true);
+          }}
+          onGenerateSuggestionsClick={() => {
+            setInitialFlow('ai');
+            setIsEditFlyoutOpen(true);
           }}
         />
-        {editFlyout}
+        {editFlyout(true)}
       </>
     );
   }
@@ -165,47 +108,108 @@ export function StreamDetailSignificantEventsView({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem grow>
-              <StreamsAppSearchBar showQueryInput={false} showDatePicker />
+              <unifiedSearch.ui.SearchBar
+                appName="streamsApp"
+                showFilterBar={false}
+                showQueryMenu={false}
+                showQueryInput={true}
+                submitButtonStyle="iconOnly"
+                displayStyle="inPage"
+                disableQueryLanguageSwitcher
+                onQuerySubmit={(queryN) => {
+                  setQuery(String(queryN.query?.query ?? ''));
+
+                  if (isEqual(queryN.dateRange, dateRange)) {
+                    refresh();
+                  } else if (queryN.dateRange) {
+                    updateTimeRange(queryN.dateRange);
+                    setDateRange(queryN.dateRange);
+                  }
+                }}
+                query={{
+                  query,
+                  language: 'text',
+                }}
+                isLoading={significantEventsFetchState.isLoading}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                fill={true}
+                size="s"
                 color="primary"
                 onClick={() => {
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
-                iconType="plusInCircle"
+                iconType="plus"
+                data-test-subj="significant_events_existing_queries_open_flyout_button"
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Add significant event query',
+                  defaultMessage: 'Significant events',
                 })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <Timeline start={start} end={end} events={events} xFormatter={xFormatter} />
-        </EuiFlexItem>
+        <EuiPanel grow={false} hasShadow={false} hasBorder={true}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+                  {
+                    defaultMessage: 'Detected event occurrences ({count})',
+                    values: {
+                      count: (
+                        significantEventsFetchState.data?.aggregated_occurrences ?? []
+                      ).reduce((acc, point) => acc + point.y, 0),
+                    },
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <SignificantEventsHistogramChart
+                id={'all-events'}
+                occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
+                changes={compact(
+                  (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
+                    formatChangePoint({
+                      query: item.query,
+                      change_points: item.change_points,
+                      occurrences: item.occurrences,
+                    })
+                  )
+                )}
+                xFormatter={xFormatter}
+                compressed={false}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
+            loading={significantEventsFetchState.isLoading}
             definition={definition.stream}
-            response={significantEventsFetchState}
+            items={significantEventsFetchState.data?.significant_events ?? []}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
-              setQueryToEdit(item.query);
+              setQueryToEdit({ ...item.query });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {
-                significantEventsFetchState.refresh();
+                significantEventsFetchState.refetch();
               });
             }}
             xFormatter={xFormatter}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout}
+      {editFlyout(false)}
     </>
   );
 }

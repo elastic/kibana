@@ -6,4 +6,4 @@
  */
 
 import { MockSiemMigrationTelemetryClient } from './mocks';
-export const SiemMigrationTelemetryClient = MockSiemMigrationTelemetryClient;
+export const RuleMigrationTelemetryClient = MockSiemMigrationTelemetryClient;

@@ -8,7 +8,7 @@
  */
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
 

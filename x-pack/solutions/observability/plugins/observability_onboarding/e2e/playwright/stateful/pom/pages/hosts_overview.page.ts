@@ -24,4 +24,20 @@ export class HostsOverviewPage {
     await expect(this.cpuPercentageValue).toBeVisible();
     expect(await this.cpuPercentageValue.textContent()).toMatch(/\d+%$/);
   }
+
+  public async assertHostCpuNotEmpty(hostname: string) {
+    const hostRow = this.page
+      .locator('[data-test-subj="hostsView-tableRow"]')
+      .filter({ hasText: hostname });
+
+    await expect(hostRow).toBeVisible();
+
+    const cpuCell = hostRow.locator('[data-test-subj="hostsView-tableRow-cpuUsage"]');
+    await expect(cpuCell).toBeVisible();
+
+    // Get the first child element which contains the actual value (not the separator)
+    const cpuValue = cpuCell.locator('> div').first();
+    const cpuText = await cpuValue.textContent();
+    expect(cpuText).toMatch(/\d+(\.\d+)?%$/);
+  }
 }

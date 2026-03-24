@@ -8,7 +8,7 @@
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Annotation } from '../../../../../common/annotations';
+import type { Annotation } from '../../../../../common/annotations';
 
 export function DeleteAnnotationsModal({
   isDeleteModalVisible,
@@ -41,7 +41,7 @@ export function DeleteAnnotationsModal({
         setIsDeleteModalVisible(false);
         setSelection([]);
       }}
-      onConfirm={onDelete}
+      onConfirm={() => onDelete()}
       cancelButtonText={i18n.translate(
         'xpack.observability.deleteAnnotations.euiConfirmModal.cancelButtonLabel',
         { defaultMessage: 'Cancel' }

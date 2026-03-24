@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 
+import type { EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
-  EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiText,
   EuiIconTip,
+  EuiFormAppend,
 } from '@elastic/eui';
 
-import { PhaseWithTiming } from '../../../../../../../../common/types';
+import type { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
@@ -114,10 +116,11 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             />
                           </>
                         );
-                        const selectAppendValue: Array<string | React.ReactElement> =
-                          isUsingRollover
-                            ? [i18nTexts.editPolicy.minAgeUnitFieldSuffix, icon]
-                            : [i18nTexts.editPolicy.minAgeUnitFieldSuffix];
+                        const selectAppendValue = (
+                          <EuiFormAppend label={i18nTexts.editPolicy.minAgeUnitFieldSuffix}>
+                            {isUsingRollover ? icon : undefined}
+                          </EuiFormAppend>
+                        );
                         const unitValue = unitField.value as string;
 
                         let unitOptions = timeUnits;

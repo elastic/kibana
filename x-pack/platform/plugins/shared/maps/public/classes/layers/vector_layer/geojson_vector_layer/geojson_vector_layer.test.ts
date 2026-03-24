@@ -6,10 +6,10 @@
  */
 
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
-import { VectorLayerDescriptor } from '../../../../../common/descriptor_types';
-import { InnerJoin } from '../../../joins/inner_join';
-import { IJoinSource } from '../../../sources/join_sources';
-import { IVectorSource } from '../../../sources/vector_source';
+import type { VectorLayerDescriptor } from '../../../../../common/descriptor_types';
+import type { InnerJoin } from '../../../joins/inner_join';
+import type { IJoinSource } from '../../../sources/join_sources';
+import type { IVectorSource } from '../../../sources/vector_source';
 import { GeoJsonVectorLayer } from './geojson_vector_layer';
 
 const joinDataRequestId = 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';

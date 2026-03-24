@@ -11,7 +11,7 @@ export const downloadMock = jest.fn();
 export const openZipArchiveMock = jest.fn();
 export const loadMappingFileMock = jest.fn();
 export const loadManifestFileMock = jest.fn();
-export const unlinkMock = jest.fn();
+export const deleteFileMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -38,6 +38,6 @@ jest.doMock('./utils/semver', () => {
   };
 });
 
-jest.doMock('fs/promises', () => ({
-  unlink: unlinkMock,
+jest.doMock('@kbn/fs', () => ({
+  deleteFile: deleteFileMock,
 }));

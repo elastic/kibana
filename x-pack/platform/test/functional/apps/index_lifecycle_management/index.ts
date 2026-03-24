@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Lifecycle Management app', function () {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./duplicate_managed_policy'));
     loadTestFile(require.resolve('./read_only_view'));
   });
 };

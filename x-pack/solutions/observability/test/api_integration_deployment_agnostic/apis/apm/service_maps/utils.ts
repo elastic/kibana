@@ -5,37 +5,10 @@
  * 2.0.
  */
 
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { GroupResourceNodesResponse } from '@kbn/apm-plugin/common/service_map';
-import { ServiceMapSpan } from '@kbn/apm-plugin/common/service_map/types';
-
-export function getElements({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) {
-  if ('elements' in body) {
-    return body.elements;
-  }
-
-  return [];
-}
-
-export function getSpans({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) {
-  if ('spans' in body) {
-    return body.spans;
-  }
-
-  return [];
-}
+import type { GroupResourceNodesResponse } from '@kbn/apm-plugin/common/service_map';
+import type { ServiceMapSpan } from '@kbn/apm-plugin/common/service_map/types';
 
 export type ConnectionElements = GroupResourceNodesResponse['elements'];
-
-export function partitionElements(elements: ConnectionElements) {
-  const edges = elements.filter(({ data }) => 'source' in data && 'target' in data);
-  const nodes = elements.filter((element) => !edges.includes(element));
-  return { edges, nodes };
-}
-
-export function getIds(elements: ConnectionElements) {
-  return elements.map(({ data }) => data.id).sort();
-}
 
 export function extractExitSpansConnections(spans: ServiceMapSpan[]) {
   return spans.map((span) => {

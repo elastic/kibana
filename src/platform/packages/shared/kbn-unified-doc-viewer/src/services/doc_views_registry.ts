@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocView, DocViewFactory } from './types';
+import type { DocView } from './types';
 
 export enum ElasticRequestState {
   Loading,
@@ -40,9 +40,7 @@ export class DocViewsRegistry {
     return [...this.docViews.values()];
   }
 
-  add(docViewRaw: DocView | DocViewFactory) {
-    const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
-
+  add(docView: DocView) {
     if (this.docViews.has(docView.id)) {
       throw new Error(
         `DocViewsRegistry#add: a DocView is already registered with id "${docView.id}".`

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getErrorMessage } from '../../../common/errors';
-import { SavedPlaygroundForm } from '../../types';
+import type { SavedPlaygroundForm } from '../../types';
 import { useSavedPlaygroundParameters } from '../../hooks/use_saved_playground_parameters';
 import { useUpdateSavedPlayground } from '../../hooks/use_update_saved_playground';
 import {

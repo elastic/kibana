@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
 /**
  * Schema defining the valid pricing product configurations.
@@ -72,6 +73,7 @@ export const tiersConfigSchema = schema.object({
   }),
   products: schema.maybe(
     schema.arrayOf(pricingProductsSchema, {
+      maxSize: 25,
       validate: (products) => {
         if (products && products.length > 1) {
           const firstTier = products[0].tier;

@@ -6,13 +6,13 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiModalHeader,
   EuiModalBody,
   EuiModalHeaderTitle,
   EuiSwitch,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 import { mapEmbeddablesSingleton } from '../../react_embeddable/map_embeddables_singleton';
 

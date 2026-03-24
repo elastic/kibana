@@ -8,13 +8,8 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiEmptyPromptProps,
-  EuiImage,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const NOT_FOUND_TITLE = i18n.translate('sharedUXPackages.prompt.errors.notFound.title', {
@@ -47,7 +42,7 @@ export const NotFoundPrompt = ({ actions, title, body }: NotFoundProps) => {
 
   const DEFAULT_ACTIONS = useMemo(
     () => [
-      <EuiButtonEmpty iconType="arrowLeft" flush="both" onClick={goBack}>
+      <EuiButtonEmpty iconType="chevronSingleLeft" flush="both" onClick={goBack}>
         {NOT_FOUND_GO_BACK}
       </EuiButtonEmpty>,
     ],

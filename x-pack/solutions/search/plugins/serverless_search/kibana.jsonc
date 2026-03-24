@@ -33,12 +33,13 @@
       "visualizations",
     ],
     "optionalPlugins": [
-      "onechat",
+      "agentBuilder",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
       "searchPlayground",
-      "usageCollection"
+      "usageCollection",
+      "workflowsManagement",
     ],
     "requiredBundles": [
       "kibanaReact"

@@ -19,9 +19,7 @@ export const useAddIntegrationPath = () => {
 
   const assetDiscoveryIntegration = useAssetDiscoveryIntegration();
 
-  const addIntegrationPath = assetDiscoveryIntegration?.path
-    ? assetDiscoveryIntegration.path
-    : integrationsPath;
+  const addIntegrationPath = `${integrationsPath}/browse/security/asset_inventory`;
 
   return {
     addIntegrationPath,

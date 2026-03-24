@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {

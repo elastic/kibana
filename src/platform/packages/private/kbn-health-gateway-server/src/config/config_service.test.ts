@@ -12,7 +12,8 @@ import {
   configServiceMock,
   rawConfigServiceMock,
 } from './config_service.test.mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { fromRoot } from '@kbn/repo-info';
 import { getConfigService } from './config_service';
 

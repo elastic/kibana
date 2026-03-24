@@ -6,7 +6,7 @@
  */
 import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 import {
   getSuccessfulDeletionNotificationText,
@@ -101,7 +101,7 @@ export const DeleteModalConfirmation = ({
     >
       <p>{getConfirmDeletionModalText(numIdsToDelete, singleTitle, multipleTitle)}</p>
       {showWarningText && (
-        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="warning" />
+        <EuiCallOut announceOnMount title={<>{warningText}</>} color="warning" iconType="warning" />
       )}
     </EuiConfirmModal>
   );

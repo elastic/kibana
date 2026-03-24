@@ -61,6 +61,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
 
       <EuiSpacer />
       <EuiRadioGroup
+        name="duplicateExceptionOption"
         options={[
           {
             id: DuplicateOptions.withExceptions,

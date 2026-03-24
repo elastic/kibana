@@ -35,7 +35,8 @@ import {
 } from '../../../../../shared_imports';
 
 import { documentationService } from '../../../../services/documentation';
-import { splitSizeAndUnits, DataStream } from '../../../../../../common';
+import type { DataStream } from '../../../../../../common';
+import { splitSizeAndUnits } from '../../../../../../common';
 import { timeUnits } from '../../../../constants/time_units';
 import { deserializeGlobalMaxRetention, isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
@@ -96,13 +97,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
-  // Whenever the timeUnit field changes, we need to re-validate
+  // Whenever a form data field changes, we need to re-validate
   // the dataRetention field
   useEffect(() => {
-    if (formData.dataRetention) {
-      form.validateFields(['dataRetention']);
-    }
-  }, [formData.timeUnit, form, formData.dataRetention]);
+    form.validateFields(['dataRetention']);
+  }, [form, formData]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -202,6 +201,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       onClose={() => onClose()}
       data-test-subj="editDataRetentionModal"
       css={{ width: 650 }}
+      aria-label={i18n.translate(
+        'xpack.idxMgmt.dataStreams.editDataRetentionModal.modalAriaLabel',
+        {
+          defaultMessage: 'Edit data retention modal',
+        }
+      )}
     >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
@@ -352,6 +357,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
           {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
                 {
@@ -395,7 +401,16 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onClose()}>
+          <EuiButtonEmpty
+            data-test-subj="cancelButton"
+            onClick={() => onClose()}
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.cancelButtonAriaLabel',
+              {
+                defaultMessage: 'Cancel editing data retention',
+              }
+            )}
+          >
             <FormattedMessage
               id="xpack.idxMgmt.dataStreams.editDataRetentionModal.cancelButtonLabel"
               defaultMessage="Cancel"

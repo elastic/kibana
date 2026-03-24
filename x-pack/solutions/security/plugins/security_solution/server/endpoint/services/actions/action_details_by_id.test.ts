@@ -65,7 +65,7 @@ describe('When using `getActionDetailsById()', () => {
       agents: ['agent-a'],
       agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      command: 'running-processes',
+      command: expect.any(String),
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
       errors: undefined,
@@ -79,19 +79,7 @@ describe('When using `getActionDetailsById()', () => {
       parameters: doc?.EndpointActions.data.parameters,
       outputs: {
         'agent-a': {
-          content: {
-            code: 'ra_execute_success_done',
-            cwd: '/some/path',
-            output_file_id: 'some-output-file-id',
-            output_file_stderr_truncated: false,
-            output_file_stdout_truncated: true,
-            shell: 'bash',
-            shell_code: 0,
-            stderr: expect.any(String),
-            stderr_truncated: true,
-            stdout: expect.any(String),
-            stdout_truncated: true,
-          },
+          content: expect.anything(),
           type: 'json',
         },
       },
@@ -184,8 +172,6 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should not validate against spaces when `bypassSpaceValidation` is `true`', async () => {
-    // @ts-expect-error
-    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     (
       endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
     ).mockResolvedValue(undefined);

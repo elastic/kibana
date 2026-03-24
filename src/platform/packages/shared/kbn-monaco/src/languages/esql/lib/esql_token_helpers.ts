@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 import { ESQL_TOKEN_POSTFIX } from './constants';
 import { ESQLToken } from './esql_token';
 

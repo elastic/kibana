@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './arguments';
+export type * from './types';
+export type * from './arguments';
 export * from './expression_function_parameter';
 export * from './expression_function';
 export * from './specs';

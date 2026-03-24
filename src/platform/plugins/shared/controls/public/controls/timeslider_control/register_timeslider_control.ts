@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TIME_SLIDER_CONTROL } from '../../../common';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { untilPluginStartServicesReady } from '../../services/kibana_services';
-import { registerControlFactory } from '../../control_factory_registry';
 
-export function registerTimeSliderControl() {
-  registerControlFactory(TIME_SLIDER_CONTROL, async () => {
+export function registerTimeSliderControl(embeddable: EmbeddableSetup) {
+  embeddable.registerReactEmbeddableFactory(TIME_SLIDER_CONTROL, async () => {
     const [{ getTimesliderControlFactory }] = await Promise.all([
       import('../../controls_module'),
       untilPluginStartServicesReady(),

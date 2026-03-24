@@ -6,9 +6,9 @@
  */
 
 import expect from 'expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryEditorClient,
 } from './helpers/repository_client';
@@ -27,11 +27,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       editorApiClient = await createStreamsRepositoryEditorClient(roleScopedSupertest);
       await enableStreams(adminApiClient);
-      await forkStream(adminApiClient, 'logs', {
+      await forkStream(adminApiClient, 'logs.otel', {
         stream: {
-          name: 'logs.forked',
+          name: 'logs.otel.forked',
         },
-        if: { always: {} },
+        where: { always: {} },
+        status: 'enabled',
       });
     });
 
@@ -42,8 +43,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('cannot fork a stream with editor permissions', async () => {
       const response = await forkStream(
         editorApiClient,
-        'logs',
-        { stream: { name: 'logs.forked2' }, if: { always: {} } },
+        'logs.otel',
+        { stream: { name: 'logs.otel.forked2' }, where: { always: {} }, status: 'enabled' },
         403
       );
 
@@ -62,7 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 manage_pipeline: false,
               },
               index: {
-                'logs.forked2': {
+                'logs.otel.forked2': {
                   create_index: false,
                   manage: false,
                   manage_data_stream_lifecycle: false,
@@ -80,7 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await editorApiClient
         .fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
           params: {
-            path: { name: 'logs.forked' },
+            path: { name: 'logs.otel.forked' },
             body: {
               ingest: {
                 lifecycle: {
@@ -88,11 +89,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     data_retention: '5d',
                   },
                 },
-                processing: [],
+                processing: { steps: [] },
+                settings: {},
                 wired: {
                   fields: {},
                   routing: [],
                 },
+                failure_store: { inherit: {} },
               },
             },
           },
@@ -111,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               has_all_requested: false,
               cluster: {},
               index: {
-                'logs.forked': {
+                'logs.otel.forked': {
                   manage: false,
                   manage_data_stream_lifecycle: false,
                   ...(isServerless ? {} : { manage_ilm: false }),
@@ -128,7 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await editorApiClient
         .fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
-            path: { name: 'logs.forked' },
+            path: { name: 'logs.otel.forked' },
           },
         })
         .expect(403);
@@ -148,7 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 manage_pipeline: false,
               },
               index: {
-                'logs.forked': {
+                'logs.otel.forked': {
                   delete_index: false,
                 },
               },

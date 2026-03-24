@@ -9,10 +9,10 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
-  SUMMARY_ROW_TEXT_TEST_ID,
-  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   SUMMARY_ROW_BUTTON_TEST_ID,
+  SUMMARY_ROW_TEXT_TEST_ID,
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
@@ -42,10 +42,7 @@ describe('<SuppressedAlerts />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render single suppressed alert correctly', () => {

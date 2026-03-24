@@ -10,14 +10,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import type { LegendAction, SeriesIdentifier } from '@elastic/charts';
+import { useLegendAction } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
-import { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
-import { PartitionVisParams } from '../../common/types';
-import { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
+import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
+import type { PartitionVisParams } from '../../common/types';
+import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
@@ -53,6 +55,12 @@ export const getLegendActions = (
     }, [filterData]);
 
     if (columnIndex === -1) {
+      return null;
+    }
+
+    // Don't show filter actions for computed columns
+    const column = visData.columns[columnIndex];
+    if (column?.isComputedColumn === true) {
       return null;
     }
 

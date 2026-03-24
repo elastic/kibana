@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { TrainedModelType } from '@kbn/ml-plugin/common/types/saved_objects';
-import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TrainedModelType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 

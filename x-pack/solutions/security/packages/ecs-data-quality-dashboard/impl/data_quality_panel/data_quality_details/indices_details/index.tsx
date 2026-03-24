@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { Pattern } from './pattern';
-import { SelectedIndex } from '../../types';
+import type { SelectedIndex } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 
 const useStyles = () => {

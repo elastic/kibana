@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart, IBasePath } from '@kbn/core/public';
-import { ForwardDefinition } from '..';
+import type { ApplicationStart, IBasePath } from '@kbn/core/public';
+import type { ForwardDefinition } from '..';
 import { normalizePath } from './normalize_path';
 
 export const navigateToLegacyKibanaUrl = (

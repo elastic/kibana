@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiCodeBlock } from '@elastic/eui';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { useCloudDetails } from '../../../../../shared/cloud_details/cloud_details';
 

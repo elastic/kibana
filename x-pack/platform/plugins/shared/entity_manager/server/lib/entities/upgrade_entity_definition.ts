@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+// TODO(kuba): File contains a single, unused function upgradeBuiltInEntityDefinitions()
+
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
 import { startTransforms } from './start_transforms';
-import { EntityManagerServerSetup } from '../../types';
+import type { EntityManagerServerSetup } from '../../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
 import { ERROR_API_KEY_NOT_FOUND } from '../../../common/errors';
@@ -42,6 +44,7 @@ export async function upgradeBuiltInEntityDefinitions({
   const upgradedDefinitions = await installBuiltInEntityDefinitions({
     esClient,
     soClient,
+    isServerless: false,
     definitions,
     logger,
   });

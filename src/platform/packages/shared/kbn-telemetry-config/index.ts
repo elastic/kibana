@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { telemetryTracingSchema } from './src/config_schema';
+export { telemetryConfigSchema, telemetryConfigSchemaProps } from './src/config_schema';
 export type { TelemetryConfig } from './src/types';

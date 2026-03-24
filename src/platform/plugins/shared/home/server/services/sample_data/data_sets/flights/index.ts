@@ -11,7 +11,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
+import type { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',
@@ -26,10 +26,10 @@ export const flightsSpecProvider: SampleDatasetProvider = ({ staticAssets }) => 
     name: flightsName,
     description: flightsDescription,
     previewImagePath: staticAssets.getPluginAssetHref(
-      '/sample_data_resources/flights/dashboard.webp'
+      '/sample_data_resources/flights/search_rocket.svg'
     ),
     darkPreviewImagePath: staticAssets.getPluginAssetHref(
-      '/sample_data_resources/flights/dashboard_dark.webp'
+      '/sample_data_resources/flights/search_rocket.svg'
     ),
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',

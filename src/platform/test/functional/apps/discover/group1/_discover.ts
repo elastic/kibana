@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -63,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('save query should show toast message and display query name', async function () {
         await discover.saveSearch(queryName1);
+        await discover.waitUntilTabIsLoaded();
         const actualQueryNameString = await discover.getCurrentQueryName();
         expect(actualQueryNameString).to.be(queryName1);
       });
@@ -78,7 +79,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('renaming a saved query should modify name in breadcrumb', async function () {
         const queryName2 = 'Modified Query # 1';
         await discover.loadSavedSearch(queryName1);
+        await discover.waitUntilTabIsLoaded();
         await discover.saveSearch(queryName2);
+        await discover.waitUntilTabIsLoaded();
 
         await retry.try(async function () {
           expect(await discover.getCurrentQueryName()).to.be(queryName2);
@@ -100,8 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should modify the time range when a bar is clicked', async function () {
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
         await discover.clickHistogramBar();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const time = await timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
@@ -118,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct initial chart interval of Auto', async function () {
         await timePicker.setDefaultAbsoluteRange();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await testSubjects.click('discoverQueryHits'); // to cancel out tooltips
         const actualInterval = await discover.getChartInterval();
 
@@ -133,16 +137,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should reload the saved search with persisted query to show the initial hit count', async function () {
         await timePicker.setDefaultAbsoluteRange();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         // apply query some changes
         await queryBar.setQuery('test');
         await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async function () {
           expect(await discover.getHitCount()).to.be('22');
         });
 
         // reset to persisted state
         await queryBar.clearQuery();
+        await discover.waitUntilTabIsLoaded();
         await discover.revertUnsavedChanges();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
@@ -187,12 +193,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
         await timePicker.setDefaultAbsoluteRange();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should support querying on nested fields', async function () {
         await queryBar.setQuery('nestedField:{ child: nestedValue }');
         await queryBar.submitQuery();
+
+        await discover.waitUntilTabIsLoaded();
+
         await retry.try(async function () {
           expect(await discover.getHitCount()).to.be('1');
         });
@@ -208,6 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           await discover.loadSavedSearch(expected.title);
+          await discover.waitUntilTabIsLoaded();
           const { title, description } = await common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
@@ -220,14 +230,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await common.navigateToApp('discover');
         await header.awaitKibanaChrome();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await queryBar.clearQuery();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         log.debug(
           'check that the newest doc timestamp is now -7 hours from the UTC time in the first test'
@@ -243,6 +250,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           useActualUrl: true,
         });
         await header.awaitKibanaChrome();
+        await discover.waitUntilTabIsLoaded();
         const time = await timePicker.getTimeConfig();
         expect(time.start).to.be('~ 15 minutes ago');
         expect(time.end).to.be('now');
@@ -253,18 +261,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.clickFieldListItemAdd('_score');
+        await discover.waitUntilTabIsLoaded();
         await discover.clickFieldSort('_score', 'Sort Low-High');
+        await discover.waitUntilTabIsLoaded();
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
         await unifiedFieldList.clickFieldListItemRemove('_score');
+        await discover.waitUntilTabIsLoaded();
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.clickFieldListItemAdd('referer');
+        await discover.waitUntilTabIsLoaded();
         await discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await discover.getDocHeader()).to.have.string('Referer custom');
         expect(await unifiedFieldList.getAllFieldNames()).to.contain('Referer custom');
@@ -277,6 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should refetch when autofresh is enabled', async () => {
         const intervalS = 5;
         await timePicker.startAutoRefresh(intervalS);
+        await discover.waitUntilTabIsLoaded();
 
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp

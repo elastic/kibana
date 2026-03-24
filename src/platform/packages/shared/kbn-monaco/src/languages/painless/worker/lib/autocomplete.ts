@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   PainlessCompletionResult,
   PainlessCompletionItem,
   PainlessContext,

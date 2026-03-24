@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { BehaviorSubject } from 'rxjs';
-import { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 
 const setBreadcrumbs = jest.fn();
 const setTitle = jest.fn();

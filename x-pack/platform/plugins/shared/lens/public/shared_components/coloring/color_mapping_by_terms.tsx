@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MutableRefObject, useState } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -17,20 +18,22 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import {
+import type {
   ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  CategoricalColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERSION,
   PaletteOutput,
   PaletteRegistry,
   CustomPaletteParams,
+} from '@kbn/coloring';
+import {
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  CategoricalColorMapping,
+  SPECIAL_TOKENS_STRING_CONVERSION,
   getConfigFromPalette,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializedValue } from '@kbn/data-plugin/common';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedValue } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
@@ -69,7 +72,7 @@ export function ColorMappingByTerms({
   allowCustomMatch,
 }: ColorMappingByTermsProps) {
   const { euiTheme } = useEuiTheme();
-  const [useLegacyPalettes, setUseLegacyPalettes] = useState(!colorMapping);
+  const [useLegacyPalettes, setUseLegacyPalettes] = useState(Boolean(!colorMapping && palette));
 
   return (
     <EuiFormRow
@@ -152,7 +155,7 @@ export function ColorMappingByTerms({
                   const newColorMapping = isLegacy
                     ? undefined
                     : palette
-                    ? getConfigFromPalette(palettes, palette.name)
+                    ? getConfigFromPalette(palettes, palette.name as KbnPaletteId)
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
                   trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);

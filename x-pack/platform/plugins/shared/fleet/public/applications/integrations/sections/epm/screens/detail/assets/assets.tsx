@@ -36,10 +36,15 @@ import {
 } from '../../../../../hooks';
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { ALERTING_ASSET_TYPES } from '../alerting';
 
-import { DeferredAssetsSection } from './deferred_assets_accordion';
+import { DeferredAssetsSection } from './deferred_assets_section';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
+
+const filteredDisplayedAssetTypes = displayedAssetTypes.filter(
+  (t) => !(ALERTING_ASSET_TYPES as string[]).includes(t)
+);
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -95,14 +100,17 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgAssetsByType = useMemo(
     () =>
       pkgAssets.reduce((acc, asset) => {
-        if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
-          acc[asset.type] = [];
+        if (filteredDisplayedAssetTypes.includes(asset.type)) {
+          if (!acc[asset.type]) {
+            acc[asset.type] = [];
+          }
+          acc[asset.type].push(asset);
         }
-        acc[asset.type].push(asset);
         return acc;
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -175,6 +183,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   } else if (!canReadPackageSettings) {
     content = (
       <EuiCallOut
+        announceOnMount
         color="warning"
         title={
           <FormattedMessage
@@ -217,6 +226,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       !assetsInstalledInCurrentSpace ? (
         <>
           <EuiCallOut
+            announceOnMount
             heading="h2"
             title={
               <FormattedMessage
@@ -266,7 +276,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       ) : null,
 
       // List all assets by order of `displayedAssetTypes`
-      ...displayedAssetTypes.map((assetType) => {
+      ...filteredDisplayedAssetTypes.map((assetType) => {
         if (config?.hideDashboards && assetType === 'dashboard') {
           // If hideDashboards is set, filter out dashboards from displayed assets
           return null;
@@ -274,12 +284,18 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
         const assets = pkgAssetsByType[assetType] || [];
         const soAssets = assetSavedObjectsByType[assetType] || {};
-        const finalAssets = assets.map((asset) => {
-          return {
-            ...asset,
-            ...soAssets[asset.id],
-          };
-        });
+        const finalAssets = assets
+          .map((asset) => {
+            return {
+              ...asset,
+              ...soAssets[asset.id],
+            };
+          })
+          .sort((a, b) => {
+            const titleA = a.attributes?.title ?? a.id;
+            const titleB = b.attributes?.title ?? b.id;
+            return titleA.localeCompare(titleB);
+          });
 
         if (!finalAssets.length) {
           return null;

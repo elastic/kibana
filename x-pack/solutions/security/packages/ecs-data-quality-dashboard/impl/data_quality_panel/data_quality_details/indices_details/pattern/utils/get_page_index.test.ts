@@ -6,7 +6,7 @@
  */
 
 import { mockDataQualityCheckResult } from '../../../../mock/data_quality_check_result/mock_index';
-import { IndexSummaryTableItem } from '../../../../types';
+import type { IndexSummaryTableItem } from '../../../../types';
 import { getIndexIncompatible } from '../../../../utils/stats';
 import { getPageIndex } from './get_page_index';
 

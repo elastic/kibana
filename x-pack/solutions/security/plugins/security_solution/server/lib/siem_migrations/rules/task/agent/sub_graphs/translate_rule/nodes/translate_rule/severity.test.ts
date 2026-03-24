@@ -27,15 +27,15 @@ describe('tests', () => {
   describe('getElasticRiskScoreFromOriginalRule', () => {
     describe('splunk', () => {
       describe('when there is a vendor match', () => {
-        it('should return the correct risk score', () => {
-          const riskScore = getElasticRiskScoreFromOriginalRule(defaultSplunkRule);
+        it('should return the correct risk score', async () => {
+          const riskScore = await getElasticRiskScoreFromOriginalRule(defaultSplunkRule);
           expect(riskScore).toEqual(47);
         });
       });
       describe('when there is no vendor match', () => {
-        it('should return default risk score', () => {
+        it('should return default risk score', async () => {
           expect(
-            getElasticRiskScoreFromOriginalRule({
+            await getElasticRiskScoreFromOriginalRule({
               ...defaultSplunkRule,
               /* @ts-expect-error because vendor type is "splunk" which raises error below */
               vendor: 'not_splunk',
@@ -97,14 +97,14 @@ describe('tests', () => {
   describe('getElasticSeverityFromOriginalRule', () => {
     describe('splunk', () => {
       describe('when there is a vendor match', () => {
-        it('should call the correct function with the correct severity', () => {
-          expect(getElasticSeverityFromOriginalRule(defaultSplunkRule)).toBe('medium');
+        it('should call the correct function with the correct severity', async () => {
+          expect(await getElasticSeverityFromOriginalRule(defaultSplunkRule)).toBe('medium');
         });
       });
       describe('when there is no vendor match', () => {
-        it('should return default severity when there is no match', () => {
+        it('should return default severity when there is no match', async () => {
           expect(
-            getElasticSeverityFromOriginalRule({
+            await getElasticSeverityFromOriginalRule({
               ...defaultSplunkRule,
               /* @ts-expect-error because vendor type is "splunk" which raises error below */
               vendor: undefined,
@@ -113,9 +113,9 @@ describe('tests', () => {
           ).toEqual('low');
         });
 
-        it('should return default severity when there is no severity', () => {
+        it('should return default severity when there is no severity', async () => {
           expect(
-            getElasticSeverityFromOriginalRule({
+            await getElasticSeverityFromOriginalRule({
               ...defaultSplunkRule,
               severity: undefined,
             })

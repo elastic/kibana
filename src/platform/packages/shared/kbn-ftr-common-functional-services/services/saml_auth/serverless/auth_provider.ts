@@ -8,22 +8,23 @@
  */
 
 import getopts from 'getopts';
-import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
+import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { type Config } from '@kbn/test';
 import { isServerlessProjectType, readRolesDescriptorsFromResource } from '@kbn/es/src/utils';
 import { resolve } from 'path';
-import { Role } from '@kbn/test/src/auth/types';
+import type { Role } from '@kbn/test/src/auth/types';
 import {
   getServerlessInternalRequestHeaders,
   COMMON_REQUEST_HEADERS,
 } from '../default_request_headers';
-import { AuthProvider } from '../get_auth_provider';
+import type { AuthProvider } from '../get_auth_provider';
 
 const projectDefaultRoles = new Map<string, Role>([
   ['es', 'developer'],
   ['security', 'editor'],
   ['oblt', 'editor'],
-  ['chat', 'developer'], // TODO: double check if it's really 'developer'
+  ['workplaceai', 'developer'], // TODO: double check if it's really 'developer'
 ]);
 
 const projectTypesWithCustomRolesEnabled = ['es', 'security', 'oblt'];
@@ -58,6 +59,8 @@ export class ServerlessAuthProvider implements AuthProvider {
       throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
     }
 
+    // TODO: Add support for serverless projects with different tiers
+    // ref https://github.com/elastic/kibana/pull/229919
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 

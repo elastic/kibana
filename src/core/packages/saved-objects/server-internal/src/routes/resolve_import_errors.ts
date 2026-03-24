@@ -8,7 +8,7 @@
  */
 
 import { extname } from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -83,11 +83,12 @@ export const registerResolveImportErrorsRoute = (
                   from: schema.string(),
                   to: schema.string(),
                 }),
-                { defaultValue: [] }
+                { defaultValue: [], maxSize: 100 }
               ),
               createNewCopy: schema.maybe(schema.boolean()),
               ignoreMissingReferences: schema.maybe(schema.boolean()),
-            })
+            }),
+            { maxSize: 10_000 }
           ),
         }),
       },

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const RULE_TYPE_ID = '.es-query';
 
@@ -25,9 +25,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('Query DSL - Consumers and privileges', function () {
-    // Custom roles not yet supported in MKI
-    this.tags(['failsOnMKI']);
-
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const RULE_ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;

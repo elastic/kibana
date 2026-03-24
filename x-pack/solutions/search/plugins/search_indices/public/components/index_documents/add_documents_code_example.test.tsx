@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AddDocumentsCodeExample, exampleTexts } from './add_documents_code_example';
 import { generateSampleDocument } from '../../utils/document_generation';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../utils/language', () => ({
@@ -36,15 +36,19 @@ jest.mock('@kbn/search-api-keys-components', () => ({
   useSearchApiKey: jest.fn().mockReturnValue({ apiKey: 'test-api-key' }),
 }));
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {},
-      share: {},
-      console: {},
-    },
-  }),
-}));
+jest.mock('../../hooks/use_kibana', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+  return {
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {},
+        share: {},
+        console: {},
+        notifications: notificationServiceMock.createStartContract(),
+      },
+    }),
+  };
+});
 
 jest.mock('../../contexts/usage_tracker_context', () => ({
   useUsageTracker: jest.fn().mockReturnValue({

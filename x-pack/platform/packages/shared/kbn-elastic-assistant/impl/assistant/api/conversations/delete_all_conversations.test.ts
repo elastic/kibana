@@ -10,7 +10,7 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 } from '@kbn/elastic-assistant-common';
 import { deleteAllConversations } from './delete_all_conversations';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 
 const mockAddError = jest.fn();
 const toasts = {

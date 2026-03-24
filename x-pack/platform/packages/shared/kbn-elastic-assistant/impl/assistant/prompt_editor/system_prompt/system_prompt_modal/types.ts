@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Conversation } from '../../../../..';
-import { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { Conversation } from '../../../../..';
+import type { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
 
 export interface SystemPromptSettingsProps {
   conversations: Record<string, Conversation>;

@@ -66,6 +66,7 @@ describe('delete', () => {
               {
                 userComments: 2,
                 alerts: 2,
+                events: 0,
               },
             ],
           ])
@@ -164,6 +165,7 @@ describe('delete', () => {
               {
                 userComments: 0,
                 alerts: 0,
+                events: 0,
               },
             ],
           ])

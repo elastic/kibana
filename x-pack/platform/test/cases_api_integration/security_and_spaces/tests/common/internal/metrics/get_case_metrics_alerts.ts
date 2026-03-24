@@ -29,11 +29,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       before(async () => {
         caseId = await createCaseWithAlerts();
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.load(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
         await deleteAllCaseItems(es);
       });
 
@@ -105,11 +109,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       before(async () => {
         caseId = await createCaseWithAlerts();
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.load(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
         await deleteAllCaseItems(es);
       });
 

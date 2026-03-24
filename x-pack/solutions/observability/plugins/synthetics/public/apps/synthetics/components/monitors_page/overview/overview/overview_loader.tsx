@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiFlexGridProps } from '@elastic/eui';
+import type { EuiFlexGridProps } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
 export const OverviewLoader = ({

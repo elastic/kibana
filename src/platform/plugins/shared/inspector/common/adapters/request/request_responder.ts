@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistics, RequestStatus, Response } from './types';
+import type { Request, RequestStatistics, Response } from './types';
+import { RequestStatus } from './types';
 import { moveRequestParamsToTopLevel } from './move_request_params_to_top_level';
 
 /**

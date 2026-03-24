@@ -162,4 +162,16 @@ export class TaskManagerUtils {
       }
     });
   }
+
+  async setTaskEnabled(id: string, enabled: boolean) {
+    await this.es.update({
+      id: `task:${id}`,
+      index: '.kibana_task_manager',
+      doc: {
+        task: {
+          enabled,
+        },
+      },
+    });
+  }
 }

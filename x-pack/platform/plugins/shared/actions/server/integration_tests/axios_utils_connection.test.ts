@@ -321,6 +321,21 @@ describe('axios connections', () => {
     });
   });
 
+  describe('redirect', () => {
+    test('it fails when redirecting to a not-allowed host', async () => {
+      const { url, server } = await createServer({ useHttps: false });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        allowedHosts: ['localhost'],
+      });
+      const redirectUrl = new URL('/redirect', url).toString();
+      const fn = async () =>
+        await request({ axios, url: redirectUrl, logger, configurationUtilities });
+      await expect(fn()).rejects.toThrow('Redirected');
+    });
+  });
+
   // targetHttps, proxyHttps, and proxyAuth should all range over [false, true], but
   // currently the true versions are not passing
   describe(`proxy`, () => {
@@ -603,6 +618,14 @@ async function createServer(options: CreateServerOptions): Promise<CreateServerR
       }
     }
 
+    if (req.url?.endsWith('/redirect')) {
+      const redirectUrl = url.replace('localhost', '127.0.0.1');
+      res.setHeader('Location', redirectUrl);
+      res.writeHead(302); // Found / Moved Temporarily
+      res.end('http: redirecting from localhost to 127.0.0.1');
+      return;
+    }
+
     res.writeHead(200);
     res.end('http: just testing that a connection could be made');
   }
@@ -693,6 +716,14 @@ const BaseActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+  auth: {
+    oauth_authorization_code: {
+      rate_limits: {
+        authorize: { lookbackWindow: '1h', limit: 100 },
+        callback: { lookbackWindow: '1h', limit: 100 },
+      },
+    },
+  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

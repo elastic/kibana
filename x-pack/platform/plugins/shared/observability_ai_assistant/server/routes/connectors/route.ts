@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FindActionResult } from '@kbn/actions-plugin/server';
-import { isSupportedConnector } from '@kbn/inference-common';
+import * as t from 'io-ts';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
@@ -15,33 +15,33 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<FindActionResult[]> => {
+  handler: async (resources): Promise<InferenceConnector[]> => {
     const { request, plugins } = resources;
+    const inferenceStart = await plugins.inference.start();
+    return inferenceStart.getConnectorList(request);
+  },
+});
 
-    const actionsClient = await (
-      await plugins.actions.start()
-    ).getActionsClientWithRequest(request);
-
-    const [availableTypes, connectors] = await Promise.all([
-      actionsClient
-        .listTypes({
-          includeSystemActionTypes: false,
-        })
-        .then((types) =>
-          types
-            .filter((type) => type.enabled && type.enabledInLicense && type.enabledInConfig)
-            .map((type) => type.id)
-        ),
-      actionsClient.getAll(),
-    ]);
-
-    return connectors.filter(
-      (connector) =>
-        availableTypes.includes(connector.actionTypeId) && isSupportedConnector(connector)
-    );
+const getConnectorByIdRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/connectors/{connectorId}',
+  params: t.type({
+    path: t.type({
+      connectorId: t.string,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<InferenceConnector> => {
+    const { request, plugins, params } = resources;
+    const inferenceStart = await plugins.inference.start();
+    return inferenceStart.getConnectorById(params.path.connectorId, request);
   },
 });
 
 export const connectorRoutes = {
   ...listConnectorsRoute,
+  ...getConnectorByIdRoute,
 };

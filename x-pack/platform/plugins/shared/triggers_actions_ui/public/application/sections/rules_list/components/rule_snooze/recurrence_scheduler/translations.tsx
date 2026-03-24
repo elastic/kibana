@@ -55,6 +55,13 @@ export const i18nNthWeekdayShort = (dayOfWeek: string) => [
 ];
 
 export const i18nFreqSummary = (interval: number) => ({
+  [RRuleFrequency.HOURLY]: i18n.translate(
+    'xpack.triggersActionsUI.ruleSnoozeScheduler.recurHourSummary',
+    {
+      defaultMessage: '{interval, plural, one {hour} other {# hours}}',
+      values: { interval },
+    }
+  ),
   [RRuleFrequency.DAILY]: i18n.translate(
     'xpack.triggersActionsUI.ruleSnoozeScheduler.recurDaySummary',
     {
@@ -86,6 +93,22 @@ export const i18nFreqSummary = (interval: number) => ({
 });
 
 export const i18nEndControlOptions = (interval: number) => [
+  {
+    text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurHour', {
+      defaultMessage: '{interval, plural, one {hour} other {# hours}}',
+      values: { interval },
+    }),
+    value: RRuleFrequency.HOURLY,
+    'data-test-subj': 'ruleSnoozeSchedulerRecurHour',
+  },
+  {
+    text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDay', {
+      defaultMessage: '{interval, plural, one {day} other {days}}',
+      values: { interval },
+    }),
+    value: RRuleFrequency.DAILY,
+    'data-test-subj': 'ruleSnoozeSchedulerRecurDay',
+  },
   {
     text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDay', {
       defaultMessage: '{interval, plural, one {day} other {days}}',

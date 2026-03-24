@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -13,7 +13,7 @@ import {
   IRouter,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
+import type { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
 import { defineRoutes } from './routes';
 
 export interface RouteDependencies {
@@ -26,9 +26,11 @@ export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
   private readonly logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
@@ -36,7 +38,9 @@ export class SearchHomepagePlugin
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    defineRoutes(router, this.logger, {
+      isServerless: this.isServerless,
+    });
     return {};
   }
 

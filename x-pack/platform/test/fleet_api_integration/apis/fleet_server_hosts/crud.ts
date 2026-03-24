@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
 
@@ -147,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     describe('GET /fleet_server_hosts', () => {
@@ -181,6 +181,33 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /fleet_server_hosts', () => {
+      it('should not store secrets if fleet server does not meet minimum version', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
+
+        const res = await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            ssl: {
+              certificate_authorities: ['cert authorities'],
+              certificate: 'path/to/cert',
+              es_certificate: 'path/to/EScert',
+              es_certificate_authorities: ['ES cert authorities'],
+            },
+            secrets: { ssl: { key: 'KEY1', es_key: 'KEY2' } },
+          })
+          .expect(200);
+
+        expect(Object.keys(res.body.item)).not.to.contain('secrets');
+        expect(Object.keys(res.body.item)).to.contain('ssl');
+        expect(Object.keys(res.body.item.ssl)).to.contain('key');
+        expect(res.body.item.ssl.key).to.equal('KEY1');
+      });
+
       it('should allow to create a default fleet server host with id', async function () {
         const id = `test-${Date.now()}`;
 
@@ -308,36 +335,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.equal('Cannot specify both ssl.es_key and secrets.ssl.es_key');
       });
 
-      it('should not store secrets if fleet server does not meet minimum version', async function () {
-        await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
-
-        const res = await supertest
-          .post(`/api/fleet/fleet_server_hosts`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `Default ${Date.now()}`,
-            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
-            is_default: true,
-            ssl: {
-              certificate_authorities: ['cert authorities'],
-              certificate: 'path/to/cert',
-              es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
-            },
-            secrets: { ssl: { key: 'KEY1', es_key: 'KEY2' } },
-          })
-          .expect(200);
-
-        expect(Object.keys(res.body.item)).not.to.contain('secrets');
-        expect(Object.keys(res.body.item)).to.contain('ssl');
-        expect(Object.keys(res.body.item.ssl)).to.contain('key');
-        expect(res.body.item.ssl.key).to.equal('KEY1');
-      });
-
       it('should store secrets if fleet server meets minimum version', async function () {
         await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
           .post(`/api/fleet/fleet_server_hosts`)
           .set('kbn-xsrf', 'xxxx')

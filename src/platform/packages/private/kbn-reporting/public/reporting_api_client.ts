@@ -9,7 +9,7 @@
 
 import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   INTERNAL_ROUTES,
@@ -18,7 +18,7 @@ import {
   buildKibanaPath,
   REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
-import {
+import type {
   BaseParams,
   JobId,
   ManagementLinkFn,
@@ -28,7 +28,7 @@ import {
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
 
@@ -242,10 +242,8 @@ export class ReportingAPIClient implements IReportingAPI {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
     // to the export API.
-    const browserTimezone: string =
-      this.uiSettings.get('dateFormat:tz') === 'Browser'
-        ? moment.tz.guess()
-        : this.uiSettings.get('dateFormat:tz');
+    const timeZone = this.uiSettings.get('dateFormat:tz');
+    const browserTimezone = moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
 
     return {
       browserTimezone,

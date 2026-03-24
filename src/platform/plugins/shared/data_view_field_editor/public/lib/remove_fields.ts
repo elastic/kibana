@@ -9,9 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { NotificationsStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DataView, DataViewLazy, UsageCollectionStart } from '../shared_imports';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView, UsageCollectionStart } from '../shared_imports';
+import { DataViewLazy } from '../shared_imports';
 import { pluginName } from '../constants';
 
 export async function removeFields(

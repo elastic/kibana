@@ -9,15 +9,15 @@ import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
 import type {
-  IndexDataVisualizerSpec,
+  GetAdditionalLinksParams,
   ResultLink,
   GetAdditionalLinks,
-  GetAdditionalLinksParams,
-} from '@kbn/data-visualizer-plugin/public';
-import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import useMountedState from 'react-use/lib/useMountedState';
+} from '@kbn/file-upload-common';
 import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -26,8 +26,8 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
-import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
+import { PageTitle } from '../../components/page_title';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -189,24 +189,25 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, mlFeaturesDisabled]
   );
-  const { euiTheme } = useEuiTheme();
+
   return IndexDataVisualizer ? (
     <Fragment>
       {IndexDataVisualizer !== null ? (
         <>
           <MlPageHeader>
             <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
-              <FormattedMessage
-                id="xpack.ml.dataVisualizer.pageHeader"
-                defaultMessage="Data Visualizer"
+              <PageTitle
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.dataVisualizer.pageHeader"
+                    defaultMessage="Data Visualizer"
+                  />
+                }
               />
               {esql ? (
                 <>
                   <EuiFlexItem grow={false}>
                     <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-                    <TechnicalPreviewBadge />
                   </EuiFlexItem>
                 </>
               ) : null}

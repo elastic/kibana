@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../../tsconfig.base.type_check.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "composite": true,
+    "rootDir": ".",
+    "noEmit": false,
+    "emitDeclarationOnly": true
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "../public/**/*.ts",
+    "../public/**/*.tsx",
+    "../common/**/*.ts",
+    "../common/**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/es-ui-shared-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
+    "./**/*.test.ts",
+    "./**/*.test.tsx"
+  ]
+}

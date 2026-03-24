@@ -109,23 +109,4 @@ export interface ChromeNavLinks {
    * @param id
    */
   has(id: string): boolean;
-
-  /**
-   * Enable forced navigation mode, which will trigger a page refresh
-   * when a nav link is clicked and only the hash is updated.
-   *
-   * @remarks
-   * This is only necessary when rendering the status page in place of another
-   * app, as links to that app will set the current URL and change the hash, but
-   * the routes for the correct are not loaded so nothing will happen.
-   * https://github.com/elastic/kibana/pull/29770
-   *
-   * Used only by status_page plugin
-   */
-  enableForcedAppSwitcherNavigation(): void;
-
-  /**
-   * An observable of the forced app switcher state.
-   */
-  getForceAppSwitcherNavigation$(): Observable<boolean>;
 }

@@ -117,6 +117,8 @@ export type {
   RouteAuthc,
   AuthcDisabled,
   AuthcEnabled,
+  AuthcMinimal,
+  AuthcOptional,
   Privilege,
   PrivilegeSet,
   AllRequiredCondition,
@@ -151,6 +153,7 @@ export type {
   SessionStorageFactory,
   SessionCookieValidationResult,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
 } from './src/session_storage';
 
 export type { GetAuthState, IsAuthenticated } from './src/auth_state';

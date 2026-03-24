@@ -93,6 +93,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             ...config,
             defaultModel: 'gpt-4o',
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -123,6 +124,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             ...config,
             defaultModel: 'gpt-3.5-turbo',
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -146,7 +148,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
+                'error validating connector type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
             });
           });
       });
@@ -167,7 +169,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
+                'error validating connector type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -191,7 +193,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -211,7 +213,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+                'error validating connector type secrets: [apiKey]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -505,7 +507,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               connector_id: genAiActionId,
               message: 'an error occurred while running the action',
               retry: true,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });

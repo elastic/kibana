@@ -6,7 +6,8 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { sslSchema } from '@kbn/server-http-tools';
 
 const serviceConfig = schema.object({

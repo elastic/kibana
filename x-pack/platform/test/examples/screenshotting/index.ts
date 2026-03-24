@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
+import type { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({
@@ -20,8 +20,7 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156106
-  describe.skip('Screenshotting Example', function () {
+  describe('Screenshotting Example', function () {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -70,7 +69,7 @@ export default function ({
       const memory = await testSubjects.find('memory');
       const text = await memory.getVisibleText();
 
-      expect(text).to.match(/\d+\.\d+ MB/);
+      expect(text).to.match(/\d+(\.\d+)? MB/);
     });
 
     it('should return CPU metrics', async () => {

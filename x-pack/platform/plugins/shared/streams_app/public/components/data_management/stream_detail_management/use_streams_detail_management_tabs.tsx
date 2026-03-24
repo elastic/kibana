@@ -15,33 +15,33 @@ export function useStreamsDetailManagementTabs({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
     features: { significantEvents },
+    isLoading,
   } = useStreamsPrivileges();
 
-  const isSignificantEventsEnabled = !!significantEvents?.available;
+  const isSignificantEventsEnabled = !!significantEvents?.enabled;
+  const isProcessingEnabled = Streams.ingest.all.GetResponse.is(definition);
 
   return {
-    enrich: {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
-        defaultMessage: 'Processing',
-      }),
-    },
+    isLoading,
+    ...(isProcessingEnabled && {
+      processing: {
+        content: (
+          <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+        ),
+        label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+          defaultMessage: 'Processing',
+        }),
+      },
+    }),
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {
-            content: (
-              <StreamDetailSignificantEventsView
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
+            content: <StreamDetailSignificantEventsView definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
               defaultMessage: 'Significant events',
             }),

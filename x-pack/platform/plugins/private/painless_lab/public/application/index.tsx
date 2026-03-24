@@ -11,10 +11,10 @@ import type { CoreSetup, CoreStart, HttpSetup, ChromeStart } from '@kbn/core/pub
 
 import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';
 
-import { Links } from '../links';
+import type { Links } from '../links';
 import { AppContextProvider } from './context';
 import { Main } from './components/main';
-import { PainlessLabStartServices } from '../types';
+import type { PainlessLabStartServices } from '../types';
 
 interface AppDependencies {
   http: HttpSetup;

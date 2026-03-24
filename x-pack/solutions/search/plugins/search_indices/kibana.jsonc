@@ -14,10 +14,12 @@
     ],
     "requiredPlugins": [
       "share",
-      "indexManagement"
+      "indexManagement",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
+      "cloudConnect",
       "console",
       "usageCollection",
       "serverless",

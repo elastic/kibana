@@ -14,6 +14,7 @@
     ],
     "requiredPlugins": [
       "share",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
@@ -21,6 +22,8 @@
       "searchNavigation",
       "usageCollection",
       "sampleDataIngest",
+      "dataViews",
+      "agentBuilder",
     ],
     "requiredBundles": [
       "kibanaReact"

@@ -12,6 +12,7 @@ export const FEATURE_KEYS = {
   HOST_ISOLATION_EXCEPTION: 'Host isolation exception',
   HOST_ISOLATION_EXCEPTION_BY_POLICY: 'Host isolation exception by policy',
   TRUSTED_APP_BY_POLICY: 'Trusted app by policy',
+  TRUSTED_DEVICE_BY_POLICY: 'Trusted device by policy',
   EVENT_FILTERS_BY_POLICY: 'Event filters by policy',
   BLOCKLIST_BY_POLICY: 'Blocklists by policy',
   RANSOMWARE_PROTECTION: 'Ransomeware protection',
@@ -25,6 +26,8 @@ export const FEATURE_KEYS = {
   EXECUTE: 'Execute command',
   SCAN: 'Scan files',
   RUN_SCRIPT: 'Run script',
+  CANCEL: 'Cancel action',
+  MEMORY_DUMP: 'Memory dump',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
 } as const;
@@ -43,6 +46,8 @@ const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNam
     upload: 'UPLOAD',
     scan: 'SCAN',
     runscript: 'RUN_SCRIPT',
+    cancel: 'CANCEL',
+    'memory-dump': 'MEMORY_DUMP',
   };
 
 export const getResponseActionFeatureKey = (

@@ -266,12 +266,12 @@ function validatePackageManifest(parsed, repoRoot, path) {
   if (
     group !== undefined &&
     (!isSomeString(group) ||
-      !['platform', 'search', 'security', 'observability', 'chat'].includes(group))
+      !['platform', 'search', 'security', 'observability', 'workplaceai'].includes(group))
   ) {
     throw err(
       `plugin.group`,
       group,
-      `must have a valid value ("platform" | "search" | "security" | "observability" | "chat")`
+      `must have a valid value ("platform" | "search" | "security" | "observability" | "workplaceai")`
     );
   }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WithAllKeys } from '@kbn/presentation-publishing';
+import type { WithAllKeys } from '@kbn/presentation-publishing';
 import type { BookState } from '../../../server';
 
 export const defaultBookState: WithAllKeys<BookState> = {

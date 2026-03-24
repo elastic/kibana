@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
+import type {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
+import type {
+  AttachmentAttributes,
+  AttachmentTotals,
+  Case,
+  CaseAttributes,
+  User,
+} from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
@@ -28,7 +38,12 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
+import {
+  countAlertsForID,
+  flattenCaseSavedObject,
+  countUserAttachments,
+  countEventsForID,
+} from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -145,8 +160,17 @@ export const getCasesByAlertID = async (
   }
 };
 
-const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
-  stats.get(id) ?? { alerts: 0, userComments: 0 };
+const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) => {
+  const defaults: AttachmentTotals = { alerts: 0, events: 0, userComments: 0 };
+
+  const {
+    alerts = defaults.alerts,
+    events = defaults.events,
+    userComments = defaults.userComments,
+  } = stats.get(id) ?? defaults;
+
+  return { alerts, events, userComments };
+};
 
 /**
  * The parameters for retrieving a case
@@ -198,25 +222,27 @@ export const get = async (
             ? {
                 totalAlerts: commentStats.get(theCase.id)?.alerts,
                 totalComment: commentStats.get(theCase.id)?.userComments,
+                totalEvents: commentStats.get(theCase.id)?.events,
               }
             : {}),
         })
       );
     }
 
-    const theComments = await caseService.getAllCaseComments({
+    const theComments = (await caseService.getAllCaseComments({
       id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-    });
+    })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
       totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
+      totalEvents: countEventsForID({ comments: theComments }),
     });
 
     return decodeOrThrow(CaseRt)(res);
@@ -267,13 +293,13 @@ export const resolve = async (
       });
     }
 
-    const theComments = await caseService.getAllCaseComments({
+    const theComments = (await caseService.getAllCaseComments({
       id: resolvedSavedObject.id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-    });
+    })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = {
       ...resolveData,
@@ -281,6 +307,7 @@ export const resolve = async (
         savedObject: resolvedSavedObject,
         comments: theComments.saved_objects,
         totalComment: theComments.total,
+        totalEvents: countEventsForID({ comments: theComments }),
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
     };

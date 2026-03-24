@@ -12,6 +12,7 @@ import _ from 'lodash';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
+import { createRequestHash } from '@kbn/vis-type-timeseries-plugin/server';
 
 function getRequestAbortedSignal(aborted$) {
   const controller = new AbortController();
@@ -127,11 +128,13 @@ export default new Datasource('es', {
     const abortSignal = getRequestAbortedSignal(tlConfig.request.events.aborted$);
 
     const searchContext = await tlConfig.context.search;
+    const requestHash = createRequestHash(body.params);
     const resp = await searchContext
       .search(
         body,
         {
           ...tlConfig.request?.body.searchSession,
+          requestHash,
         },
         { ...tlConfig.context, abortSignal }
       )

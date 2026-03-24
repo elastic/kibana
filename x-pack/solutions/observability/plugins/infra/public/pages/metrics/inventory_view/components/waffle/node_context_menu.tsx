@@ -33,12 +33,14 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { HOST_NAME_FIELD, HOST_HOSTNAME_FIELD } from '../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import type {
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
 import { getUptimeUrl } from '../../lib/get_uptime_url';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -52,6 +54,7 @@ export const NodeContextMenu = withEuiTheme(
   ({ options, currentTime, node, nodeType }: PropsWithTheme) => {
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
+    const { preferredSchema } = useWaffleOptionsContext();
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
@@ -59,11 +62,6 @@ export const NodeContextMenu = withEuiTheme(
     const logsLocator = getLogsLocatorFromUrlService(share.url)!;
     const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
     const uiCapabilities = application?.capabilities;
-    // Due to the changing nature of the fields between APM and this UI,
-    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
-    // #26620 for the details for these fields.
-    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-    const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;
 
     const showDetail = inventoryModel.crosslinkSupport.details;
     const showLogsLink =
@@ -114,7 +112,10 @@ export const NodeContextMenu = withEuiTheme(
       app: 'apm',
       hash: 'traces',
       search: {
-        kuery: `${apmField}:"${node.id}"`,
+        kuery:
+          nodeType === 'host'
+            ? `${HOST_NAME_FIELD}:"${node.id}" OR ${HOST_HOSTNAME_FIELD}:"${node.id}"`
+            : `${inventoryModel.fields.id}:"${node.id}"`,
       },
     });
 
@@ -230,6 +231,7 @@ export const NodeContextMenu = withEuiTheme(
             nodeType={nodeType}
             setVisible={setFlyoutVisible}
             visible={flyoutVisible}
+            schema={preferredSchema}
           />
         )}
       </>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   REVERT_PREBUILT_RULES_URL,
   RevertPrebuiltRulesRequest,
@@ -21,7 +22,7 @@ export const revertPrebuiltRule = (router: SecuritySolutionPluginRouter) => {
       path: REVERT_PREBUILT_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
       options: {

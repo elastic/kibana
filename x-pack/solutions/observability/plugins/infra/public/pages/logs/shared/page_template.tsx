@@ -67,9 +67,6 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
     : {
-        solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {
-          defaultMessage: 'Observability',
-        }),
         action: {
           beats: {
             title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
@@ -80,9 +77,13 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
                 'Use the Elastic Agent or Beats to send logs to Elasticsearch. We make it easy with integrations for many popular systems and apps.',
             }),
             href,
+            buttonText: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.buttonLabel', {
+              defaultMessage: 'Add a logging integration',
+            }),
+            docsLink: docLinks.links.observability.guide,
+            'data-test-subj': 'beatsNoDataCard',
           },
         },
-        docsLink: docLinks.links.observability.guide,
       };
 
   return (

@@ -41,7 +41,7 @@ export const TextFieldValue = ({ fieldName, value, maxLength, className }: Props
         </EuiFlexGroup>
       }
     >
-      <span>{trimTextOverflow(value, maxLength)}</span>
+      <span tabIndex={0}>{trimTextOverflow(value, maxLength)}</span>
     </EuiToolTip>
   );
 };

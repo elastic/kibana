@@ -9,21 +9,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSelectableOption, Direction } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiPopover,
   EuiFilterButton,
-  EuiSelectableOption,
   EuiIcon,
-  Direction,
   EuiText,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import { State } from '../table_list_view_table';
+import type { State } from '../table_list_view_table';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;
@@ -175,7 +174,8 @@ export function TableSortSelect({
     return opts;
   });
 
-  const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
+  const selectedOptionLabel =
+    options.find(({ checked }) => checked === 'on')?.label ?? i18nText.nameAscSort;
 
   const panelHeaderCSS = css`
     border-bottom: ${euiTheme.border.thin};
@@ -193,7 +193,7 @@ export function TableSortSelect({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isPopoverOpen}
       onClick={togglePopOver}

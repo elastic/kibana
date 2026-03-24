@@ -11,10 +11,10 @@ import { merge } from 'lodash';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import { SearchStrategyDependencies } from '../../types';
+import type { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
-import { SqlSearchStrategyRequest } from '../../../../common';
+import type { SqlSearchStrategyRequest } from '../../../../common';
 import { getMockSearchConfig } from '../../../../config.mock';
 
 const mockSqlResponse = {

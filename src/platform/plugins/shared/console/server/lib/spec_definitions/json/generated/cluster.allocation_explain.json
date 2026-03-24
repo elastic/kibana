@@ -5,6 +5,10 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
+      "index": "",
+      "shard": "",
+      "primary": "__flag__",
+      "current_node": "",
       "include_disk_info": "__flag__",
       "include_yes_decisions": "__flag__",
       "master_timeout": [

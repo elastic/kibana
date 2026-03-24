@@ -6,8 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { findListItems, ApiParams } from '@kbn/securitysolution-list-api';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import type { ApiParams } from '@kbn/securitysolution-list-api';
+import { findListItems } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useCursor } from '../use_cursor';
 

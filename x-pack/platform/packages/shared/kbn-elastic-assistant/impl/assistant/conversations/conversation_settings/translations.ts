@@ -21,6 +21,13 @@ export const CONNECTOR_TITLE = i18n.translate(
   }
 );
 
+export const SHARING_OPTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversations.settings.sharingOptions',
+  {
+    defaultMessage: 'Sharing options',
+  }
+);
+
 export const SETTINGS_PROMPT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.promptTitle',
   {

@@ -7,11 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ReadEndpointListItemRequestQuery,
   ReadEndpointListItemResponse,
 } from '@kbn/securitysolution-endpoint-exceptions-common/api';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -28,7 +29,7 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
       path: ENDPOINT_LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

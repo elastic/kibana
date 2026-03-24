@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { number } from 'io-ts';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -16,7 +16,12 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
-import { ASSET_FIELDS, MAX_ASSETS_TO_LOAD, QUERY_KEY_GRID_DATA } from '../constants';
+import {
+  ASSET_FIELDS,
+  MAX_ASSETS_TO_LOAD,
+  QUERY_KEY_GRID_DATA,
+  QUERY_KEY_ASSET_INVENTORY,
+} from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 import { useDataViewContext } from './data_view_context';
 import { addEmptyDataFilterQuery } from '../utils/add_empty_data_filter';
@@ -86,7 +91,7 @@ export function useFetchGridData(options: UseAssetsOptions) {
   }, [dataView]);
 
   return useInfiniteQuery(
-    [QUERY_KEY_GRID_DATA, { params: options }],
+    [QUERY_KEY_ASSET_INVENTORY, QUERY_KEY_GRID_DATA, { params: options }],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits },

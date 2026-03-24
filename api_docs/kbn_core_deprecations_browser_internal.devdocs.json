@@ -18,6 +18,8 @@
           ">"
         ],
         "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "() => void"
             ],
             "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -51,6 +55,8 @@
               "DeprecationsServiceStart"
             ],
             "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -62,6 +68,8 @@
                 "label": "{ http }",
                 "description": [],
                 "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+                "lineNumber": 18,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -80,6 +88,8 @@
                       "; }"
                     ],
                     "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+                    "lineNumber": 18,
+                    "columnNumber": 28,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -99,6 +109,8 @@
               "() => void"
             ],
             "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { settings, common, graph, header } = getPageObjects([
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/graph/secrepo');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/graph/secrepo');
       await kibanaServer.savedObjects.cleanStandardList();
       await common.navigateToApp('settings');
       log.debug('create secrepo index pattern');
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/graph/secrepo');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/graph/secrepo');
     });
 
     const graphName = 'my Graph workspace name ' + new Date().getTime();

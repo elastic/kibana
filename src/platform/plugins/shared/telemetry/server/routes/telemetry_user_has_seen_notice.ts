@@ -8,11 +8,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { RequestHandler } from '@kbn/core-http-server';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { UserHasSeenNoticeRoute } from '../../common/routes';
 import { TELEMETRY_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { v2 } from '../../common/types';
+import type { v2 } from '../../common/types';
 import {
   type TelemetrySavedObjectAttributes,
   getTelemetrySavedObject,

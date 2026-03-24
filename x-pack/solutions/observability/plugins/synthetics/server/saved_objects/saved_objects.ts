@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import {
   getSyntheticsMonitorConfigSavedObjectType,

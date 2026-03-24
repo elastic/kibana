@@ -8,8 +8,8 @@
 import { handleActions } from 'redux-actions';
 import { indexStatusAction } from '../actions';
 import { asyncInitState, handleAsyncAction } from './utils';
-import { AsyncInitState } from './types';
-import { StatesIndexStatus } from '../../../../common/runtime_types';
+import type { AsyncInitState } from './types';
+import type { StatesIndexStatus } from '../../../../common/runtime_types';
 
 export interface IndexStatusState {
   indexStatus: AsyncInitState<StatesIndexStatus | null>;

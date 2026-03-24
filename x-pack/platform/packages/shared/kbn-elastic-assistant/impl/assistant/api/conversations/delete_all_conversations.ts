@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, IToasts } from '@kbn/core/public';
-import { API_VERSIONS, DeleteAllConversationsResponse } from '@kbn/elastic-assistant-common';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type { DeleteAllConversationsResponse } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common/constants';
 
 export const deleteAllConversations = async ({

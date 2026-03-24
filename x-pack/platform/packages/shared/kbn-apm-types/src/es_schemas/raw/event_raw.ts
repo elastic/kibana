@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APMBaseDoc } from './apm_base_doc';
-import { TimestampUs } from './fields/timestamp_us';
+import type { APMBaseDoc } from './apm_base_doc';
+import type { TimestampUs } from './fields/timestamp_us';
 
 export interface EventRaw extends APMBaseDoc {
   timestamp: TimestampUs;

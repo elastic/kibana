@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Dispatch } from 'react';
-import { OnFormUpdateArg } from '../../../shared_imports';
-import { SerializeResult } from './serialize';
-import { OnActionHandler, ProcessorInfo } from './components';
-import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
+import type { Dispatch } from 'react';
+import type { OnFormUpdateArg } from '../../../shared_imports';
+import type { SerializeResult } from './serialize';
+import type { OnActionHandler, ProcessorInfo } from './components';
+import type { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
 
 /**
  * An array of keys that map to a value in an object
@@ -49,9 +49,22 @@ export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
  * which will be used to update the in-memory processors data structure.
  */
 export type EditorMode =
-  | { id: 'creatingProcessor'; arg: { selector: ProcessorSelector } }
+  | {
+      id: 'creatingProcessor';
+      arg: {
+        selector: ProcessorSelector;
+        buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
+      };
+    }
   | { id: 'movingProcessor'; arg: ProcessorInfo }
-  | { id: 'managingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
+  | {
+      id: 'managingProcessor';
+      arg: {
+        processor: ProcessorInternal;
+        selector: ProcessorSelector;
+        buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
+      };
+    }
   | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'idle' };
 

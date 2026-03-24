@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 let uiMetricService: UiMetricService;
 

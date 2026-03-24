@@ -13,10 +13,11 @@ import { TestProviders } from '../../../../common/mock';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
-import { useUserData } from '../../../../detections/components/user_info';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('./coverage_overview_dashboard_context');
-jest.mock('../../../../detections/components/user_info');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockEnableAllDisabled = jest.fn();
 
@@ -36,7 +37,13 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
       state: { showExpandedCells: false, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
-    (useUserData as jest.Mock).mockReturnValue([{ loading: false, canUserCRUD: true }]);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
+    });
   });
 
   afterEach(() => {
@@ -108,7 +115,13 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   });
 
   test('"Enable all disabled" button is disabled when user does not have CRUD permissions', async () => {
-    (useUserData as jest.Mock).mockReturnValue([{ loading: false, canUserCRUD: false }]);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
+      },
+    });
     const wrapper = renderTechniquePanelPopover();
 
     act(() => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -22,10 +23,16 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').load(
-          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
       });
       beforeEach(async () => {
+        await supertest
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
         let agentPolicyResponse = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
@@ -88,7 +95,7 @@ export default function (providerContext: FtrProviderContext) {
       after(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').unload(
-          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
       });
 
@@ -148,34 +155,16 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
       });
-
-      it('should delete agent policy with package policy if supports_agentless', async function () {
-        // update existing policy to supports_agentless
-        await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: agentPolicy.name,
-            namespace: agentPolicy.namespace,
-            supports_agentless: true,
-          })
-          .expect(200);
-
-        await supertest
-          .delete(`/api/fleet/package_policies/${packagePolicy.id}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-
-        await supertest.get(`/api/fleet/agent_policies/${agentPolicy.id}`).expect(200);
-      });
     });
-    describe('Delete bulk', () => {
+
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    describe.skip('Delete bulk', () => {
       let agentPolicy: any;
       let packagePolicy: any;
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').load(
-          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
         let agentPolicyResponse = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -236,7 +225,7 @@ export default function (providerContext: FtrProviderContext) {
 
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').unload(
-          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
       });
 

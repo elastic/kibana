@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { StringFormatEditor } from './string';
 

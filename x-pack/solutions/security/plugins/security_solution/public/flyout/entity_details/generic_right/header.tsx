@@ -105,7 +105,7 @@ export const GenericEntityFlyoutHeader = ({ entity, source }: GenericEntityFlyou
 
   return (
     <>
-      <FlyoutHeader>
+      <FlyoutHeader data-test-subj="generic-panel-header">
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
           {timestamp && (
             <EuiFlexItem grow={false}>

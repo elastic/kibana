@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiCodeBlock,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiCode, EuiCodeBlock, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -80,5 +75,8 @@ export const TableTab = ({ data }: { data: CspFinding }) => (
     sorting={sorting}
     search={search}
     pagination={pagination}
+    tableCaption={i18n.translate('xpack.csp.flyout.tableTab.caption', {
+      defaultMessage: 'Flattened finding field details',
+    })}
   />
 );

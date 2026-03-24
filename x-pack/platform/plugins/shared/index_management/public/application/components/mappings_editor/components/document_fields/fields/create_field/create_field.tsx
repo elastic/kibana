@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,18 +14,18 @@ import {
   EuiOutsideClickDetector,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import classNames from 'classnames';
+import type { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useRef } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import type { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
@@ -32,6 +33,21 @@ import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    createFieldRequiredProps: css`
+      margin-top: ${euiTheme.size.l};
+      padding-top: ${euiTheme.size.base};
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    `,
+    createFieldContent: css`
+      position: relative;
+    `,
+  };
+};
 
 export interface ModelIdMapEntry {
   trainedModelId: string;
@@ -56,9 +72,7 @@ interface Props {
   allFields: NormalizedFields['byId'];
   isRootLevelField: boolean;
   isMultiField?: boolean;
-  paddingLeft?: number;
   isCancelable?: boolean;
-  maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
@@ -69,9 +83,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
   isRootLevelField,
   isMultiField,
-  paddingLeft,
   isCancelable,
-  maxNestedDepth,
   onCancelAddingNewFields,
   isAddingFields,
   semanticTextInfo,
@@ -81,6 +93,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const dispatch = useDispatch();
   const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
+  const styles = useStyles();
 
   const { form } = useForm<Field>({
     serializer: fieldSerializer,
@@ -162,7 +175,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
     }
 
-    if (fieldTypeInputRef.current) {
+    if (!clickOutside && fieldTypeInputRef.current) {
       fieldTypeInputRef.current.focus();
     }
   };
@@ -231,7 +244,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
 
     return (
-      <div className="mappingsEditor__createFieldRequiredProps">
+      <div css={styles.createFieldRequiredProps}>
         {typeDefinition?.isBeta ? (
           <>
             <FieldBetaBadge />
@@ -286,18 +299,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onSubmit={submitForm}
           data-test-subj="createFieldForm"
         >
-          <EuiPanel
-            color="subdued"
-            paddingSize="m"
-            className={classNames('mappingsEditor__createFieldWrapper', {
-              'mappingsEditor__createFieldWrapper--toggle':
-                Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-              'mappingsEditor__createFieldWrapper--multiField': isMultiField,
-            })}
-            panelRef={createFieldFormRef}
-            tabIndex={0}
-          >
-            <div className="mappingsEditor__createFieldContent">
+          <EuiPanel color="subdued" paddingSize="m" panelRef={createFieldFormRef} tabIndex={0}>
+            <div css={styles.createFieldContent}>
               {renderFormFields()}
 
               {renderRequiredParametersForm()}

@@ -14,6 +14,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
@@ -77,6 +78,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -204,7 +207,10 @@ async function unmuteAll(success: boolean) {
 
 async function muteInstance(success: boolean) {
   try {
-    await rulesClient.muteInstance({ alertId: MockRuleId, alertInstanceId: 'instance-id' });
+    await rulesClient.muteInstance({
+      params: { alertId: MockRuleId, alertInstanceId: 'instance-id' },
+      query: { validateAlertsExistence: false },
+    });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -342,7 +348,7 @@ beforeEach(() => {
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
 
-  taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '', forced: false });
   taskManager.schedule.mockResolvedValue({
     id: 'scheduled-task-id',
     scheduledAt: new Date(),

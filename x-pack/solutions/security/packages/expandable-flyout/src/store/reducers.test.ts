@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FlyoutPanelProps } from '../types';
+import type { FlyoutPanelProps } from '../types';
 import { panelsReducer, uiReducer } from './reducers';
-import { initialPanelsState, initialUiState, PanelsState, UiState } from './state';
+import type { PanelsState, UiState } from './state';
+import { initialPanelsState, initialUiState } from './state';
 import {
   changePushVsOverlayAction,
   changeUserCollapsedWidthAction,

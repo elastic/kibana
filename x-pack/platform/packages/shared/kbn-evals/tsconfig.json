@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -9,7 +9,8 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.json"
   ],
   "exclude": [
     "target/**/*"
@@ -25,9 +26,13 @@
     "@kbn/zod",
     "@kbn/some-dev-log",
     "@kbn/inference-tracing",
-    "@kbn/apm-config-loader",
     "@kbn/repo-info",
-    "@kbn/std",
+    "@kbn/kbn-client",
     "@kbn/test",
+    "@kbn/inference-prompt-utils",
+    "@kbn/tracing-utils",
+    "@kbn/dev-cli-errors",
+    "@kbn/config-schema",
+    "@kbn/evals-common",
   ]
 }

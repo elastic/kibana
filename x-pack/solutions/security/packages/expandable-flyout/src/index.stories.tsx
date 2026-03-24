@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
 import { TestProvider } from './test/provider';
-import { initialUiState, State } from './store/state';
+import type { State } from './store/state';
+import { initialUiState } from './store/state';
 
 export default {
   component: ExpandableFlyout,

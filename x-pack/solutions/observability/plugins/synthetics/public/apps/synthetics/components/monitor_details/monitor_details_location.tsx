@@ -15,7 +15,7 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
 } from '../../../../../common/constants';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { MonitorLocationSelect } from '../common/components/monitor_location_select';

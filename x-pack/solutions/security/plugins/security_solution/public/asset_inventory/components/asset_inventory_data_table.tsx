@@ -30,6 +30,13 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import {
+  ASSET_INVENTORY_APP_NAME,
+  ASSET_INVENTORY_COLUMN_ADDED,
+  ASSET_INVENTORY_COLUMN_REMOVED,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
@@ -318,13 +325,31 @@ export const AssetInventoryDataTable = ({
     setLocalStorageColumns(defaultColumns.map((c) => c.id));
   };
 
+  const handleAddColumn = (columnId: string) => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.CLICK,
+      ASSET_INVENTORY_COLUMN_ADDED,
+      ASSET_INVENTORY_APP_NAME
+    );
+    onAddColumn(columnId);
+  };
+
+  const handleRemoveColumn = (columnId: string) => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.CLICK,
+      ASSET_INVENTORY_COLUMN_REMOVED,
+      ASSET_INVENTORY_APP_NAME
+    );
+    onRemoveColumn(columnId);
+  };
+
   const externalAdditionalControls = (
     <AdditionalControls
       total={totalHits}
       title={title}
       columns={currentColumns}
-      onAddColumn={onAddColumn}
-      onRemoveColumn={onRemoveColumn}
+      onAddColumn={handleAddColumn}
+      onRemoveColumn={handleRemoveColumn}
       onResetColumns={onResetColumns}
       groupSelectorComponent={groupSelectorComponent}
     />

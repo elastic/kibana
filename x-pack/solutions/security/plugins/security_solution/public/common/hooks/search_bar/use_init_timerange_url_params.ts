@@ -27,6 +27,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
+
   const onInitialize = useCallback(
     (initialState: UrlInputsModel | null) =>
       initializeTimerangeFromUrlParam(initialState, dispatch, isSocTrendsEnabled),
@@ -50,6 +51,8 @@ const initializeTimerangeFromUrlParam = (
 
     const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
     const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
+
+    const valueReportType: TimeRangeKinds = get('valueReport.timerange.kind', initialState);
     if (isSocTrendsEnabled) {
       if (isEmpty(socTrendsLinkTo.linkTo)) {
         dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.socTrends]));
@@ -172,6 +175,39 @@ const initializeTimerangeFromUrlParam = (
           inputsActions.setRelativeRangeDatePicker({
             ...relativeRange,
             id: InputsModelId.socTrends,
+          })
+        );
+      }
+    }
+    if (valueReportType) {
+      if (valueReportType === 'absolute') {
+        const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+          get('valueReport.timerange', initialState)
+        );
+
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            ...absoluteRange,
+            id: InputsModelId.valueReport,
+          })
+        );
+      }
+
+      if (valueReportType === 'relative') {
+        const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+          get('valueReport.timerange', initialState)
+        );
+
+        // Updates date values when timerange is relative
+        relativeRange.from = formatDate(relativeRange.fromStr);
+        relativeRange.to = formatDate(relativeRange.toStr, {
+          roundUp: true,
+        });
+
+        dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            ...relativeRange,
+            id: InputsModelId.valueReport,
           })
         );
       }

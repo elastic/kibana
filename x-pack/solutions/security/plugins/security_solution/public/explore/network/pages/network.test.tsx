@@ -19,6 +19,8 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../sourcerer/containers');
@@ -168,6 +170,9 @@ describe('Network page - rendering', () => {
       indexPattern: {},
     });
 
+    // When there are matched indices
+    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+
     render(
       <TestProviders>
         <Router history={mockHistory}>
@@ -234,6 +239,9 @@ describe('Network page - rendering', () => {
       indexPattern: { fields: [], title: 'title' },
       sourcererDataView: {},
     });
+
+    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+
     const myStore = createMockStore();
     render(
       <TestProviders store={myStore}>

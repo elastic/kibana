@@ -14,12 +14,10 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
-import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
-import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
-import {
-  isSuggestedDashboardsValidRuleTypeId,
-  SuggestedDashboardsValidRuleTypeIds,
-} from './helpers';
+import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import type { DataViewSpec } from '@kbn/response-ops-rule-params/common';
+import type { SuggestedDashboardsValidRuleTypeIds } from './helpers';
+import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
 
 // TS will make sure that if we add a new supported rule type id we had the corresponding function to get the relevant rule fields
 const getRelevantRuleFieldsMap: Record<

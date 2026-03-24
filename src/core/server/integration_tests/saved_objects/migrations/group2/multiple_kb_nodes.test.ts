@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import { omit, sortBy } from 'lodash';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -20,19 +21,16 @@ import {
   getEsClient,
   nextMinor,
   startElasticsearch,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import {
   BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
   BASELINE_DOCUMENTS_PER_TYPE_LARGE,
   BASELINE_TEST_ARCHIVE_LARGE,
 } from '../kibana_migrator_archive_utils';
-import {
-  getRelocatingMigratorTestKit,
-  kibanaSplitIndex,
-} from '../kibana_migrator_test_kit.fixtures';
-import { delay, parseLogFile } from '../test_utils';
+import { getRelocatingMigratorTestKit, kibanaSplitIndex } from '@kbn/migrator-test-kit/fixtures';
+import { parseLogFile } from '../test_utils';
 import '../jest_matchers';
-import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
+import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
 
 const PARALLEL_MIGRATORS = 3;
 type Job<T> = () => Promise<T>;
@@ -86,7 +84,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
   afterEach(async () => {
     await esServer?.stop();
-    await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
+    await timer(5_000); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
   });
 
   async function checkBeforeState() {
@@ -280,7 +278,7 @@ async function startWithDelay<T>(runnables: Array<Job<T>>, delayInSec: number) {
     );
     if (i < runnables.length - 2) {
       // We wait between instances, but not after the last one
-      await delay(delayInSec);
+      await timer(delayInSec * 1000);
     }
   }
   const results = await Promise.all(promises);

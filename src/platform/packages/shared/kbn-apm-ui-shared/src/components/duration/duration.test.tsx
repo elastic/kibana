@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { Duration, DurationProps } from '.';
+import type { DurationProps } from '.';
+import { Duration } from '.';
 import { render, screen } from '@testing-library/react';
 
 describe('Duration', () => {

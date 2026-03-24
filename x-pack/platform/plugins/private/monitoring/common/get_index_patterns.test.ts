@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DS_INDEX_PATTERN_TYPES } from './constants';
-import { MonitoringConfig } from '../server';
+import type { DS_INDEX_PATTERN_TYPES } from './constants';
+import type { MonitoringConfig } from '../server';
 import {
   getElasticsearchDataset,
   getKibanaDataset,

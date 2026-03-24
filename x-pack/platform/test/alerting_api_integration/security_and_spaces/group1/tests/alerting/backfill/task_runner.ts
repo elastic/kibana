@@ -171,8 +171,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]]),
-        true // collapse by execution UUID
+        new Map([['execute-backfill', { equal: 4 }]])
       );
 
       // each execute-backfill event should have these fields
@@ -425,8 +424,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         new Map([
           ['execute-timeout', { equal: 1 }],
           ['execute-backfill', { equal: 1 }],
-        ]),
-        true // collapse by execution UUID
+        ])
       );
 
       // each event log event should have these fields
@@ -567,8 +565,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]]),
-        true
+        new Map([['execute-backfill', { equal: 4 }]])
       );
 
       // each event log event should have these fields

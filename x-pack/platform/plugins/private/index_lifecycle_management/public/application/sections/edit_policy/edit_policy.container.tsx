@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -82,11 +82,14 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
   }
 
   const existingPolicy = getPolicyByName(policies, attemptToURIDecode(policyName));
+  const isNewPolicy = !existingPolicy?.policy;
+  const isHotPhaseRequired = isNewPolicy ? true : Boolean(existingPolicy?.policy?.phases?.hot);
 
   return (
     <EditPolicyContextProvider
       value={{
-        isNewPolicy: !existingPolicy?.policy,
+        isNewPolicy,
+        isHotPhaseRequired,
         policyName: attemptToURIDecode(policyName),
         policy: existingPolicy?.policy ?? defaultPolicy,
         existingPolicies: policies,

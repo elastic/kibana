@@ -30,7 +30,8 @@
       "screenshotMode",
       "share",
       "features",
-      "actions"
+      "actions",
+      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "security",
@@ -39,7 +40,6 @@
       "screenshotting"
     ],
     "requiredBundles": [
-      "embeddable",
       "esUiShared",
       "kibanaReact"
     ]

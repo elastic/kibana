@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FetchEventAnnotationsExpressionFunctionDefinition } from './types';
+import type { FetchEventAnnotationsExpressionFunctionDefinition } from './types';
 
 /** @internal */
 export const getFetchEventAnnotationsMeta: () => Omit<

@@ -13,6 +13,11 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl is required to run this script"
 fi
 
+if ! command -v tar >/dev/null 2>&1; then
+  fail "tar is required to run this script"
+fi
+
+
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then
@@ -27,6 +32,7 @@ kibana_api_endpoint=""
 onboarding_flow_id=""
 elastic_agent_version=""
 metrics_enabled=true
+write_to_logs_streams=false
 
 help() {
   echo "Usage: sudo ./auto-detect.sh <arguments>"
@@ -37,6 +43,7 @@ help() {
   echo "  --kibana-url=<value>  Kibana API endpoint."
   echo "  --id=<value>   Onboarding flow ID."
   echo "  --ea-version=<value>   Elastic Agent version."
+  echo "  --write-to-logs-stream=<true|false>   Route logs to wired streams (default: false)."
   exit 1
 }
 
@@ -71,10 +78,18 @@ for i in "$@"; do
     elastic_agent_version="${i#*=}"
     ;;
   --metrics-enabled=*)
-    val="${1#*=}"
+    val="${i#*=}"
     case "$val" in
       true) metrics_enabled=true ;;
       *) metrics_enabled=false ;;
+    esac
+    shift
+    ;;
+  --write-to-logs-stream=*)
+    val="${i#*=}"
+    case "$val" in
+      true) write_to_logs_streams=true ;;
+      *) write_to_logs_streams=false ;;
     esac
     shift
     ;;
@@ -291,7 +306,11 @@ install_integrations() {
 
     case "$item" in
     "system")
-      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      local host_name=$(hostname 2>/dev/null | tr '[:upper:]' '[:lower:]')
+      if [ -z "$host_name" ]; then
+        host_name="unknown-host"
+      fi
+      metadata="\t$host_name"
       ;;
     esac
 
@@ -305,7 +324,7 @@ install_integrations() {
   done
 
   install_integrations_result=$(curl --request POST \
-    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install?metricsEnabled=$metrics_enabled" \
+    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install?metricsEnabled=$metrics_enabled&writeToLogsStreams=$write_to_logs_streams" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
     --header "Accept: application/x-tar" \

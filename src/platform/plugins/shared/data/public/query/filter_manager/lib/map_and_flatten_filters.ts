@@ -8,7 +8,8 @@
  */
 
 import { compact, flatten } from 'lodash';
-import { Filter, migrateFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { migrateFilter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
 
 export const mapAndFlattenFilters = (filters: Filter[]) => {

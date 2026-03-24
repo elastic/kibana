@@ -11,7 +11,8 @@ import React from 'react';
 import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

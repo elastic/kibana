@@ -18,10 +18,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { getEnabledEntityTypes } from '../../../../../../common/entity_analytics/utils';
-import {
-  EngineComponentResourceEnum,
-  EntityType,
-} from '../../../../../../common/api/entity_analytics/entity_store';
+import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
+import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -110,7 +108,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
       logger.info(
         `[Entity Store] No API key found, returning all entity types as enabled in ${namespace} namespace`
       );
-      return Object.values(EntityType);
+      return getEnabledEntityTypes(true);
     }
 
     const { soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
@@ -261,12 +259,18 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
       interval: taskInstance.schedule?.interval,
     });
 
-    // Track entity store usage
-    const indices = entityTypes.map((entityType) =>
-      getEntitiesIndexName(entityType, state.namespace)
+    // Track entity store usage per namespace & entity type
+    await Promise.all(
+      entityTypes.map(async (entityType) => {
+        const index = getEntitiesIndexName(entityType, state.namespace);
+        const storeSize = await getStoreSize(index);
+        telemetry.reportEvent(ENTITY_STORE_USAGE_EVENT.eventType, {
+          storeSize,
+          entityType,
+          namespace: state.namespace,
+        });
+      })
     );
-    const storeSize = await getStoreSize(indices);
-    telemetry.reportEvent(ENTITY_STORE_USAGE_EVENT.eventType, { storeSize });
 
     return {
       state: updatedState,

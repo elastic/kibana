@@ -9,16 +9,13 @@ import React, { lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/Option';
-import {
-  ActionConnector,
-  ActionConnectorMode,
-  ActionParamsProps,
-  GenericValidationResult,
-} from '../../../types';
+import type { ActionConnector, ActionParamsProps, GenericValidationResult } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor, screen, render } from '@testing-library/react';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
@@ -61,6 +58,7 @@ const actionType = {
   },
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,
+  source: ACTION_TYPE_SOURCES.stack,
 };
 const actionTypeRegistry = actionTypeRegistryMock.create();
 actionTypeRegistry.get.mockReturnValue(actionType);
@@ -106,7 +104,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={none}
@@ -133,6 +131,7 @@ describe('test_connector_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFieldsExecutionMode,
+      source: ACTION_TYPE_SOURCES.stack,
     };
     const actionTypeRegistryExecutionMode = actionTypeRegistryMock.create();
     actionTypeRegistryExecutionMode.get.mockReturnValue(actionTypeExecutionMode);
@@ -149,7 +148,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={none}
@@ -177,7 +176,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some({
@@ -204,7 +203,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some({
@@ -232,7 +231,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some({
@@ -270,7 +269,7 @@ describe('test_connector_form', () => {
           connector={connector}
           executeEnabled={true}
           actionParams={{}}
-          setActionParams={() => {}}
+          onEditAction={() => {}}
           isExecutingAction={false}
           onExecutionAction={async () => {}}
           executionResult={some(undefined)}

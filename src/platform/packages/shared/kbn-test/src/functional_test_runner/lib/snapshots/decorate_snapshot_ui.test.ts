@@ -12,7 +12,7 @@ import fs from 'fs';
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Suite, Test } from '../../fake_mocha_types';
+import type { Suite, Test } from '../../fake_mocha_types';
 import { Lifecycle } from '../lifecycle';
 import { decorateSnapshotUi, expectSnapshot } from './decorate_snapshot_ui';
 

@@ -7,10 +7,12 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { gapStatus } from '@kbn/alerting-plugin/common';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../../../../../common/constants';
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
+import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
 
 export const fetchRulesByQueryOrIds = async ({
   query,
@@ -18,12 +20,14 @@ export const fetchRulesByQueryOrIds = async ({
   rulesClient,
   maxRules,
   gapRange,
+  gapFillStatuses,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
   maxRules: number;
   gapRange?: { start: string; end: string };
+  gapFillStatuses?: GapFillStatus[];
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
     const fallbackErrorMessage = 'Error resolving the rule';
@@ -67,14 +71,17 @@ export const fetchRulesByQueryOrIds = async ({
 
   let ruleIdsWithGaps: string[] | undefined;
   // If there is a gap range, we need to find the rules that have gaps in that range
-  if (gapRange) {
-    const ruleIdsWithGapsResponse = await rulesClient.getRuleIdsWithGaps({
-      start: gapRange.start,
-      end: gapRange.end,
-      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-      hasUnfilledIntervals: true,
+  if (gapRange && gapFillStatuses && gapFillStatuses.length > 0) {
+    const { ruleIds } = await getGapFilteredRuleIds({
+      rulesClient,
+      gapRange,
+      gapFillStatuses,
+      maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+      filter: query,
     });
-    ruleIdsWithGaps = ruleIdsWithGapsResponse.ruleIds;
+
+    ruleIdsWithGaps = ruleIds;
+
     if (ruleIdsWithGaps.length === 0) {
       return {
         results: [],

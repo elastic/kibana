@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './adapter_types';
+export type * from './adapter_types';

@@ -10,7 +10,7 @@
 import { css, type SerializedStyles } from '@emotion/react';
 import { CELL_MATCH_INDEX_ATTRIBUTE, HIGHLIGHT_CLASS_NAME } from './constants';
 import type { ActiveMatch } from './types';
-import { getHighlightColors } from './get_highlight_colors';
+import type { getHighlightColors } from './get_highlight_colors';
 
 export interface GetActiveMatchCssProps {
   activeMatch: ActiveMatch;

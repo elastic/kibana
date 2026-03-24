@@ -8,6 +8,12 @@
 export interface GroupModel {
   activeGroups: string[];
   options: Array<{ key: string; label: string }>;
+  settings?: {
+    hideNoneOption?: boolean;
+    hideCustomFieldOption?: boolean;
+    hideOptionsTitle?: boolean;
+    popoverButtonLabel?: string;
+  };
 }
 
 export interface Groups {

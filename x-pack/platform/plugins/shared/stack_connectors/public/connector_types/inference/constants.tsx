@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SUB_ACTION } from '../../../common/inference/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 
 export const DEFAULT_CHAT_COMPLETE_BODY = {
   input: 'What is Elastic?',

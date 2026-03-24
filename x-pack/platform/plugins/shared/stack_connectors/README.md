@@ -394,7 +394,7 @@ When creating a new connector type, your plugin will eventually call `server.plu
 
 Consider working with the alerting team on early structure /design feedback of new connectors, especially as the APIs and infrastructure are still under development.
 
-Don't forget to ping @elastic/security-detections-response to see if the new connector should be enabled within their solution.
+Don't forget to ping @elastic/security-detection-rule-management and @elastic/security-detection-engine to see if the new connector should be enabled within their solution.
 
 ## Licensing
 
@@ -408,9 +408,9 @@ Connectors that take URLs or hostnames should check that those values are allowe
 
 ## Documentation
 
-You should create asciidoc for the new connector type. Add an entry to the connector type index - [`docs/user/alerting/action-types.asciidoc`](../../../../../docs/user/alerting/action-types.asciidoc), which points to a new document for the connector type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+You should create markdown docs for the new connector type. Add an entry to appropriate location in the table of content - [`docs/reference/toc.yml`](../../../../../docs/reference/toc.yml), which points to a new document for the connector type that should be in the [`docs/reference/connectors-kibana`](../../../../../docs/reference/connectors-kibana) directory.
 
-We suggest following the template provided in `docs/action-type-template.asciidoc`. The [Email action type](https://www.elastic.co/guide/en/kibana/master/email-action-type.html) is an example of documentation created following the template.
+We suggest following the template provided in `docs/action-type-template.md`. The [Email action type](https://www.elastic.co/docs/reference/kibana/connectors-kibana/email-action-type) is an example of documentation created following the template.
 
 ## Tests
 

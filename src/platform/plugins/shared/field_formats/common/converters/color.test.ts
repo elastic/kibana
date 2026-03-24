@@ -8,11 +8,26 @@
  */
 
 import { ColorFormat } from './color';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
   const checkResult = (text: string | number, color: string, backgroundColor: string) =>
     `<span style=\"color:${color};background-color:${backgroundColor};display:inline-block;padding:0 8px;border-radius:3px\">${text}</span>`;
+
+  const checkMissingValues = (colorer: ColorFormat) => {
+    expect(colorer.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(colorer.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(colorer.convert('', HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(blank)</span>'
+    );
+    expect(colorer.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(colorer.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(colorer.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
+  };
 
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {
@@ -34,6 +49,8 @@ describe('Color Format', () => {
       expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(checkResult(100, 'blue', 'yellow'));
       expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(checkResult(150, 'blue', 'yellow'));
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
+
+      checkMissingValues(colorer);
     });
 
     test('should not convert invalid ranges', () => {
@@ -73,6 +90,8 @@ describe('Color Format', () => {
 
       expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(checkResult('true', 'blue', 'yellow'));
       expect(colorer.convert(false, HTML_CONTEXT_TYPE)).toBe('false');
+
+      checkMissingValues(colorer);
     });
   });
 
@@ -103,6 +122,8 @@ describe('Color Format', () => {
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
       expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &lt;', 'white', 'red'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
+
+      checkMissingValues(colorer);
     });
 
     test('returns original value (escaped) when regex is invalid', () => {
@@ -122,6 +143,8 @@ describe('Color Format', () => {
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
+
+      checkMissingValues(colorer);
     });
 
     test('returns original value (escaped) on regex with syntax error', () => {

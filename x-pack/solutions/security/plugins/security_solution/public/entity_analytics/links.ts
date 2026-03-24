@@ -12,20 +12,19 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  ENTITY_ANALYTICS_WATCHLISTS_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
+import {
+  ENTITY_ANALYTICS,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
+  ENTITY_ANALYTICS_WATCHLISTS,
+} from '../app/translations';
 import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
 import eaOverviewPageImg from '../common/images/ea_overview_page.png';
 
 const privMonLinks: LinkItem = {
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.navigation.privilegedUserMonitoring.betaStatus', {
-      defaultMessage: 'TECHNICAL PREVIEW',
-    }),
-  },
   id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
   title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
   description: i18n.translate(
@@ -42,12 +41,30 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
-  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+};
+
+const watchlistsLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsWatchlists,
+  title: ENTITY_ANALYTICS_WATCHLISTS,
+  description: i18n.translate('xpack.securitySolution.navigation.watchlists.description', {
+    defaultMessage:
+      'Provides entity-level monitoring for manually tagging and tracking high-risk entities with configurable statuses and risk score adjustments.',
+  }),
+  path: ENTITY_ANALYTICS_WATCHLISTS_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.watchlists', {
+      defaultMessage: 'Watchlists Management',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+  experimentalKey: 'entityAnalyticsWatchlistEnabled',
 };
 
 const eaOverviewLinks: LinkItem = {
@@ -73,6 +90,32 @@ const eaOverviewLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityAnalyticsNewHomePageEnabled',
+};
+
+const homePageLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHomePage,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage', {
+    defaultMessage: 'Entity Analytics',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.homePage.description',
+    {
+      defaultMessage:
+        'Entity analytics interface for analyzing entity risk scores, anomalies, and investigating potential security threats across users, hosts, and services.',
+    }
+  ),
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage.keywords', {
+      defaultMessage: 'entity analytics',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+  experimentalKey: 'entityAnalyticsNewHomePageEnabled',
 };
 
 export const entityAnalyticsLinks: LinkItem = {
@@ -85,11 +128,9 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks],
+  links: [eaOverviewLinks, privMonLinks, homePageLinks, watchlistsLinks],
   hideTimeline: true,
   skipUrlState: true,
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
-  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

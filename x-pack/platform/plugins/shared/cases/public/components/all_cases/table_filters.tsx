@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
+import { css } from '@emotion/react';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
@@ -20,6 +21,7 @@ import { useSystemFilterConfig } from './table_filter_config/use_system_filter_c
 import { useFilterConfig } from './table_filter_config/use_filter_config';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { TableSearch } from './search';
+import { DateRangeFilter } from './date_range_filter';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -33,6 +35,7 @@ export interface CasesTableFiltersProps {
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
+  deselectCases: () => void;
 }
 
 const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
@@ -53,6 +56,7 @@ const CasesTableFiltersComponent = ({
   isLoading,
   currentUserProfile,
   filterOptions,
+  deselectCases,
 }: CasesTableFiltersProps) => {
   const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
@@ -129,7 +133,7 @@ const CasesTableFiltersComponent = ({
           </EuiButton>
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <TableSearch
           filterOptionsSearch={filterOptions.search}
           /**
@@ -141,22 +145,31 @@ const CasesTableFiltersComponent = ({
           onFilterOptionsChange={onFilterOptionsChange}
         />
       </EuiFlexItem>
-      {activeFilters.map((filter) => (
-        <EuiFlexItem grow={false} key={filter.key}>
-          {filter.render({ filterOptions })}
-        </EuiFlexItem>
-      ))}
-
-      {isSelectorView || (
-        <EuiFlexItem grow={false}>
-          <MoreFiltersSelectable
-            options={selectableOptions}
-            activeFilters={activeSelectableOptionKeys}
-            onChange={onFilterConfigChange}
-            isLoading={isLoadingFilters}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup
+          css={css`
+            background-color: transparent;
+          `}
+        >
+          {activeFilters.map((filter) => filter.render({ filterOptions }))}
+          {isSelectorView || (
+            <MoreFiltersSelectable
+              options={selectableOptions}
+              activeFilters={activeSelectableOptionKeys}
+              onChange={onFilterConfigChange}
+              isLoading={isLoadingFilters}
+            />
+          )}
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DateRangeFilter
+          isLoading={isLoadingFilters}
+          filterOptions={filterOptions}
+          onFilterOptionsChange={onFilterOptionsChange}
+          deselectCases={deselectCases}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

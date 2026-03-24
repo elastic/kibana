@@ -10,7 +10,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { debounce } from 'lodash';
 import { fieldNameWildcardMatcher, type FieldTypeKnown } from '@kbn/field-utils';
 import type { FieldListItem } from '@kbn/unified-field-list';
@@ -19,7 +19,7 @@ import {
   type FieldTypeFilterProps,
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { FieldRow } from './field_row';
+import type { FieldRow } from './field_row';
 
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
@@ -115,18 +115,13 @@ const getStoredFieldTypes = (storage: Storage) => {
   return Array.isArray(parsedFieldTypes) ? parsedFieldTypes : [];
 };
 
-export interface UseTableFiltersReturn extends TableFiltersCommonProps {
-  onFilterField: (row: FieldRow) => boolean;
-  onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
-}
-
-export const useTableFilters = ({
+export const useTableFiltersState = ({
   storage,
   storageKey,
 }: {
   storage: Storage;
   storageKey: string;
-}): UseTableFiltersReturn => {
+}): TableFiltersCommonProps => {
   const [searchTerm, setSearchTerm] = useState(storage.get(storageKey) || '');
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>(
     getStoredFieldTypes(storage)
@@ -148,8 +143,28 @@ export const useTableFilters = ({
     [storage, setSelectedFieldTypes]
   );
 
-  const onFindSearchTermMatch: UseTableFiltersReturn['onFindSearchTermMatch'] = useCallback(
-    (row, term) => {
+  return useMemo(
+    () => ({
+      searchTerm,
+      onChangeSearchTerm,
+      selectedFieldTypes,
+      onChangeFieldTypes,
+    }),
+    [searchTerm, onChangeSearchTerm, selectedFieldTypes, onChangeFieldTypes]
+  );
+};
+
+export interface UseTableFiltersCallbacksReturn {
+  onFilterField: (row: FieldRow) => boolean;
+  onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
+}
+
+export const useTableFiltersCallbacks = ({
+  searchTerm,
+  selectedFieldTypes,
+}: Pick<ReturnType<typeof useTableFiltersState>, 'searchTerm' | 'selectedFieldTypes'>) => {
+  const onFindSearchTermMatch: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'] =
+    useCallback((row, term) => {
       const { name, dataViewField } = row;
 
       let termMatch: TermMatch | null = null;
@@ -166,11 +181,9 @@ export const useTableFilters = ({
       }
 
       return termMatch;
-    },
-    []
-  );
+    }, []);
 
-  const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
+  const onFilterField: UseTableFiltersCallbacksReturn['onFilterField'] = useCallback(
     (row) => {
       const { fieldType } = row;
       const term = searchTerm?.trim();
@@ -190,22 +203,9 @@ export const useTableFilters = ({
 
   return useMemo(
     () => ({
-      // props for TableFilters component
-      searchTerm,
-      onChangeSearchTerm,
-      selectedFieldTypes,
-      onChangeFieldTypes,
-      // the actual filtering function
       onFilterField,
       onFindSearchTermMatch,
     }),
-    [
-      searchTerm,
-      onChangeSearchTerm,
-      selectedFieldTypes,
-      onChangeFieldTypes,
-      onFilterField,
-      onFindSearchTermMatch,
-    ]
+    [onFilterField, onFindSearchTermMatch]
   );
 };

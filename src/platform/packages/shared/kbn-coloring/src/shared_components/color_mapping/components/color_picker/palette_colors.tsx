@@ -13,15 +13,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiTitle,
-  EuiToolTip,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
-import { ColorMapping } from '../../config';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { ColorMapping } from '../../config';
 import { isSameColor } from '../../color/color_math';
 
 export function PaletteColors({
@@ -96,7 +96,7 @@ export function PaletteColors({
               {i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsLabel', {
                 defaultMessage: 'Neutral colors',
               })}
-              <EuiToolTip
+              <EuiIconTip
                 position="bottom"
                 content={i18n.translate(
                   'coloring.colorMapping.colorPicker.themeAwareColorsTooltip',
@@ -105,9 +105,8 @@ export function PaletteColors({
                       'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
                   }
                 )}
-              >
-                <EuiIcon tabIndex={0} type="question" />
-              </EuiToolTip>
+                type="question"
+              />
             </h6>
           </EuiTitle>
           <EuiSpacer size="s" />

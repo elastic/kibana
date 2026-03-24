@@ -9,7 +9,8 @@
 
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
+import type { Task, GlobalTask } from '../lib';
+import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 
 export const Clean: GlobalTask = {
   global: true,
@@ -163,6 +164,9 @@ export const CleanExtraFilesFromModules: Task = {
           '**/component.json',
           '**/bower.json',
           '**/yarn.lock',
+
+          // nested package manager artifacts (e.g. pnpm virtual store leaked into published packages)
+          '**/.pnpm',
 
           // misc
           '**/.*ignore',

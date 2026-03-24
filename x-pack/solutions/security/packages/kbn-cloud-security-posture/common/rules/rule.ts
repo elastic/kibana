@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleCreateProps } from './create_detection_rule';
+import type { RuleCreateProps } from './create_detection_rule';
 
 export interface RuleResponse extends RuleCreateProps {
   id: string;

@@ -9,20 +9,16 @@ import React from 'react';
 import { EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { Settings, SettingsWorkspaceProps } from './settings';
+import type { SettingsWorkspaceProps } from './settings';
+import { Settings } from './settings';
 import { act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
-import {
-  GraphStore,
-  updateSettings,
-  loadFields,
-  saveTemplate,
-  removeTemplate,
-} from '../../state_management';
+import type { GraphStore } from '../../state_management';
+import { updateSettings, loadFields, saveTemplate, removeTemplate } from '../../state_management';
 import { createMockGraphStore } from '../../state_management/mocks';
 import { Provider } from 'react-redux';
-import { UrlTemplate } from '../../types';
+import type { UrlTemplate } from '../../types';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

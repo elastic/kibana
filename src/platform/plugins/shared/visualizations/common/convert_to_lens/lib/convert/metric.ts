@@ -10,10 +10,10 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Operations } from '../../constants';
 import { createColumn, getFormat } from './column';
-import { SupportedMetric } from './supported_metrics';
-import { CommonColumnConverterArgs, MetricsWithField } from './types';
-import { SchemaConfig } from '../../../types';
-import {
+import type { SupportedMetric } from './supported_metrics';
+import type { CommonColumnConverterArgs, MetricsWithField } from './types';
+import type { SchemaConfig } from '../../../types';
+import type {
   AvgColumn,
   CardinalityColumn,
   CountColumn,
@@ -24,7 +24,7 @@ import {
 } from './types';
 import { getFieldNameFromField } from '../utils';
 import { isFieldValid } from '../../utils';
-import { Operation } from '../../types';
+import type { Operation } from '../../types';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE

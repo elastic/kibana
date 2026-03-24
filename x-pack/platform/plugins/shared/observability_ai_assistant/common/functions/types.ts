@@ -6,7 +6,7 @@
  */
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
-import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
+import type { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 
 type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;
 

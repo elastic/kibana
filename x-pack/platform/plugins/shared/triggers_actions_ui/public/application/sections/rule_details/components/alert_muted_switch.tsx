@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
-import { AlertListItem } from './types';
+import type { AlertListItem } from './types';
 
 interface ComponentOpts {
   alert: AlertListItem;

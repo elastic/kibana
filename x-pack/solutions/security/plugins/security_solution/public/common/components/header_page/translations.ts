@@ -14,9 +14,3 @@ export const SAVE = i18n.translate('xpack.securitySolution.header.editableTitle.
 export const CANCEL = i18n.translate('xpack.securitySolution.header.editableTitle.cancel', {
   defaultMessage: 'Cancel',
 });
-
-export const EDIT_TITLE_ARIA = (title: string) =>
-  i18n.translate('xpack.securitySolution.header.editableTitle.editButtonAria', {
-    values: { title },
-    defaultMessage: 'You can edit {title} by clicking',
-  });

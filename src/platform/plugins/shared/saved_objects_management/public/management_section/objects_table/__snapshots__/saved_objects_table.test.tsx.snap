@@ -103,6 +103,15 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 
 exports[`SavedObjectsTable should render normally 1`] = `
 <div>
+  <div
+    aria-live="polite"
+    style={
+      Object {
+        "left": "-9999px",
+        "position": "absolute",
+      }
+    }
+  />
   <Header
     filteredCount={5}
     onExportAll={[Function]}
@@ -232,6 +241,11 @@ exports[`SavedObjectsTable should render normally 1`] = `
         Object {
           "getAll": [MockFunction],
           "has": [MockFunction],
+        }
+      }
+      deleteButtonRef={
+        Object {
+          "current": null,
         }
       }
       filterOptions={

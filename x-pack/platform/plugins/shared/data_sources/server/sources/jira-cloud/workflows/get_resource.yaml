@@ -1,0 +1,31 @@
+version: '1'
+name: 'sources.jira.get_resource'
+description: 'Fetch full details of a single Jira issue or project by ID or key. Use when you already have the issue key (e.g. PROJ-123) or project ID and need the complete record. Inputs: resourceType (choice: issue|project), id (string).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: resourceType
+    type: choice
+    options:
+      - 'issue'
+      - 'project'
+  - name: id
+    type: string
+steps:
+  - name: route-by-type
+    type: if
+    condition: "${{ inputs.resourceType == 'issue' }}"
+    steps:
+      - name: get-issue
+        type: jira-cloud.getIssue
+        connector-id: <%= jira-cloud-stack-connector-id %>
+        with:
+          issueId: "${{ inputs.id }}"
+    else:
+      - name: get-project
+        type: jira-cloud.getProject
+        connector-id: <%= jira-cloud-stack-connector-id %>
+        with:
+          projectId: "${{ inputs.id }}"

@@ -14,16 +14,23 @@ export const CreateMLJobsButton: React.FunctionComponent<{
   onClick: () => void;
 }> = ({ isDisabled, onClick }) => {
   return (
-    <EuiButton
-      data-test-subj="infraCreateMLJobsButtonCreateMlJobButton"
-      isDisabled={isDisabled}
-      fill
-      onClick={onClick}
-    >
+    <>
       <FormattedMessage
-        id="xpack.infra.analysisSetup.createMlJobButton"
-        defaultMessage="Create ML job"
+        id="xpack.infra.analysisSetup.retentionPeriodText"
+        defaultMessage="The results are retained for 120 days by default."
+        tagName="p"
       />
-    </EuiButton>
+      <EuiButton
+        data-test-subj="infraCreateMLJobsButtonCreateMlJobButton"
+        isDisabled={isDisabled}
+        fill
+        onClick={onClick}
+      >
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.createMlJobButton"
+          defaultMessage="Create ML job"
+        />
+      </EuiButton>
+    </>
   );
 };

@@ -27,6 +27,12 @@ const notifications: NotificationsStart = {
     get$: () => of([]),
   },
   showErrorDialog: () => {},
+  feedback: {
+    isEnabled: () => true,
+  },
+  tours: {
+    isEnabled: () => true,
+  },
 };
 
 export const getNotifications = () => notifications;

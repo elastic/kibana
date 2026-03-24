@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -23,6 +23,7 @@ import { CreateAlertRuleButton } from '../../../../shared/alerts/links/create_al
 import { LinkToAlertsPage } from '../../../../shared/alerts/links/link_to_alerts_page';
 import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { INTEGRATIONS } from '../../../constants';
+import { createFocusTrapProps } from '../../../../../utils/create_focus_trap_props';
 
 export const AlertsSummaryContent = ({
   entityId,
@@ -35,10 +36,13 @@ export const AlertsSummaryContent = ({
 }) => {
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
-  const { overrides } = useAssetDetailsRenderPropsContext();
+  const { overrides, schema } = useAssetDetailsRenderPropsContext();
   const [collapsibleStatus, setCollapsibleStatus] =
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
+  const createAlertRuleButtonRef = useRef<HTMLButtonElement>(null);
+
+  const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 
   const onLoaded = (alertsCount?: AlertsCount) => {
     const { activeAlertCount = 0 } = alertsCount ?? {};
@@ -68,6 +72,7 @@ export const AlertsSummaryContent = ({
             {showCreateRuleFeature && (
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
+                  buttonRef={createAlertRuleButtonRef}
                   onClick={toggleAlertFlyout}
                   data-test-subj="infraAssetDetailsAlertsTabCreateAlertsRuleButton"
                 />
@@ -94,9 +99,11 @@ export const AlertsSummaryContent = ({
         <AlertFlyout
           filter={`${entityIdField}: "${entityId}"`}
           nodeType={entityType}
+          schema={schema}
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
           options={overrides?.alertRule?.options}
+          focusTrapProps={focusTrapProps}
         />
       )}
     </>

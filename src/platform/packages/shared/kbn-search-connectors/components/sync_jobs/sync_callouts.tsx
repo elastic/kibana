@@ -17,7 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
-import { ConnectorSyncJob, SyncStatus, TriggerMethod } from '../..';
+import type { ConnectorSyncJob } from '../..';
+import { SyncStatus, TriggerMethod } from '../..';
 
 interface SyncJobCalloutsProps {
   syncJob: ConnectorSyncJob;
@@ -29,6 +30,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
       {!!syncJob.completed_at && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             color="success"
             iconType="check"
             title={i18n.translate('searchConnectors.syncJobs.flyout.completedTitle', {
@@ -48,6 +50,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
       {syncJob.status === SyncStatus.ERROR && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="cross"
             title={i18n.translate('searchConnectors.syncJobs.flyout.failureTitle', {
@@ -66,6 +69,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
       {syncJob.status === SyncStatus.CANCELED && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="cross"
             title={i18n.translate('searchConnectors.syncJobs.flyout.canceledTitle', {
@@ -87,6 +91,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
       {syncJob.status === SyncStatus.IN_PROGRESS && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="clock"
             title={i18n.translate('searchConnectors.syncJobs.flyout.inProgressTitle', {
@@ -105,6 +110,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
       {!!syncJob.started_at && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             color="primary"
             iconType="info"
             title={

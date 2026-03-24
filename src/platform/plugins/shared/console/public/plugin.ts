@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
 import { EmbeddableConsole } from './application/containers/embeddable';
-import {
+import type {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
   ClientConfigType,
@@ -96,7 +96,7 @@ export class ConsoleUIPlugin
             application,
             ...startServices
           } = core;
-          const { dataViews, data, licensing } = deps;
+          const { data, licensing } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -106,7 +106,6 @@ export class ConsoleUIPlugin
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
             application,
-            dataViews,
             data,
             licensing,
             notifications,
@@ -156,7 +155,6 @@ export class ConsoleUIPlugin
       consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
           core,
-          dataViews: deps.dataViews,
           data: deps.data,
           licensing: deps.licensing,
           usageCollection: deps.usageCollection,

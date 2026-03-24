@@ -7,30 +7,91 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ActionsApiRequestHandlerContext,
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
+import type { HooksServiceSetup } from '@kbn/agent-builder-server';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
+import type {
+  AlertingApiRequestHandlerContext,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import {
-  TaskManagerStartContract,
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
   TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type { ZodObject } from '@kbn/zod/v4';
+import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPluginSetup {}
-
-export interface WorkflowsPluginStart {
-  runWorkflow(workflow: WorkflowExecutionEngineModel, params: Record<string, any>): Promise<string>;
+export interface WorkflowsServerPluginSetup {
+  management: WorkflowsManagementApi;
 }
 
-export interface WorkflowsExecutionEnginePluginStartDeps {
+export type WorkflowsServerPluginStart = Record<string, never>;
+
+/**
+ * AgentBuilder plugin setup contract interface.
+ * Uses types from @kbn/agent-builder-server (shared package) instead of
+ * importing from the plugin directly, to avoid a circular dependency.
+ */
+export interface AgentBuilderPluginSetupContract {
+  agents: {
+    register: (definition: BuiltInAgentDefinition) => void;
+  };
+  tools: {
+    // x-pack/platform/plugins/shared/agent_builder/server/services/tools/types.ts
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- any is used by the original type
+    register: <RunInput extends ZodObject<any>>(tool: StaticToolRegistration<RunInput>) => void;
+  };
+  attachments: {
+    registerType: (definition: AttachmentTypeDefinition) => void;
+  };
+  hooks: HooksServiceSetup;
+  skills: {
+    register: (definition: SkillDefinition) => void;
+  };
+}
+
+export interface WorkflowsServerPluginSetupDeps {
+  features?: FeaturesPluginSetup;
+  taskManager?: TaskManagerSetupContract;
+  actions?: ActionsPluginSetupContract;
+  alerting?: AlertingServerSetup;
+  spaces?: SpacesPluginStart;
+  serverless?: ServerlessServerSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+}
+
+export interface WorkflowsServerPluginStartDeps {
   taskManager: TaskManagerStartContract;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
-export interface WorkflowsManagementPluginServerDependenciesSetup {
-  features?: FeaturesPluginSetup;
-  taskManager?: TaskManagerSetupContract;
-}
+export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
+  actions: ActionsApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
+}>;
+
+export type WorkflowsRouter = IRouter<WorkflowsRequestHandlerContext>;

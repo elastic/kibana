@@ -20,7 +20,7 @@ import { FieldPreviewError } from './field_preview_error';
 import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
 import { useStateSelector } from '../../state_utils';
-import { PreviewState } from './types';
+import type { PreviewState } from './types';
 
 const previewResponseSelector = (state: PreviewState) => state.previewResponse;
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
@@ -92,6 +92,7 @@ export const FieldPreview = () => {
 
           {showWarningPreviewNotAvailable ? (
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.notAvailableWarningCallout.title',
                 {

@@ -13,10 +13,12 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedAttacks } from '../../shared/hooks/use_show_related_attacks';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
@@ -27,9 +29,9 @@ import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_re
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -38,6 +40,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
+jest.mock('../../shared/hooks/use_show_related_attacks');
 jest.mock('../../shared/hooks/use_show_related_cases');
 jest.mock('../../shared/hooks/use_show_suppressed_alerts');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
@@ -66,9 +69,7 @@ const NO_DATA_MESSAGE = 'No correlations data available.';
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useEnableExperimental as jest.Mock).mockReturnValue({
-      newDataViewPickerEnabled: true,
-    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
@@ -84,6 +85,7 @@ describe('CorrelationsDetails', () => {
     jest
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: true, entityId: 'entityId' });
+    jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: true, attackIds: ['attack-id'] });
     jest.mocked(useShowRelatedCases).mockReturnValue(true);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
 
@@ -117,6 +119,9 @@ describe('CorrelationsDetails', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(
+      getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
+    ).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)).toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
@@ -132,6 +137,7 @@ describe('CorrelationsDetails', () => {
     jest
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: false, entityId: 'entityId' });
+    jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
@@ -145,6 +151,9 @@ describe('CorrelationsDetails', () => {
     ).not.toBeInTheDocument();
     expect(
       queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
     ).not.toBeInTheDocument();
     expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
     expect(

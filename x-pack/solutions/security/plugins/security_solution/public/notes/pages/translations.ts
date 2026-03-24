@@ -49,10 +49,3 @@ export const TABLE_ERROR = i18n.translate('xpack.securitySolution.notes.manageme
 export const REFRESH = i18n.translate('xpack.securitySolution.notes.management.refresh', {
   defaultMessage: 'Refresh',
 });
-
-export const OPEN_TIMELINE = i18n.translate(
-  'xpack.securitySolution.notes.management.openTimeline',
-  {
-    defaultMessage: 'Open timeline',
-  }
-);

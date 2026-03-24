@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { AssetType, CanvasAsset } from '../../types';
+import type { AssetType, CanvasAsset } from '../../types';
 import { getId } from './get_id';
 import { getCanvasNotifyService } from '../services/canvas_notify_service';
 

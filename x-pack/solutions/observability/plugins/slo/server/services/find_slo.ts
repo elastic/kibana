@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
+import type { FindSLOParams, FindSLOResponse } from '@kbn/slo-schema';
+import { findSLOResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
-import { SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type {
   Pagination,
   Sort,
@@ -24,7 +25,7 @@ const MAX_PER_PAGE_OR_SIZE = 5000;
 
 export class FindSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private summarySearchClient: SummarySearchClient
   ) {}
 

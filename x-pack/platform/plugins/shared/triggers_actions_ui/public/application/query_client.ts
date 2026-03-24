@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 
 /**
  * The main query client for the triggers_actions_ui app

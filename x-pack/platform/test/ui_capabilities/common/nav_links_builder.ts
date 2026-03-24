@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Features } from './features';
+import type { Features } from './features';
 
 type BuildCallback = (featureId: string, capabilityId: string) => boolean;
 export class NavLinksBuilder {

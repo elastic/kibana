@@ -27,6 +27,7 @@ export const AlertsClosedContent = ({ activeAlertCount }: { activeAlertCount?: n
           data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts"
           iconType="warning"
           color="danger"
+          tabIndex={0}
         >
           {activeAlertCount}
         </EuiBadge>

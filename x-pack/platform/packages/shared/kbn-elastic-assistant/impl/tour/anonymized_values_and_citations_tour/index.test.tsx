@@ -14,7 +14,7 @@ import {
   conversationWithContentReferences,
   welcomeConvo,
 } from '../../mock/conversation';
-import { TourState } from '../knowledge_base';
+import type { TourState } from '../knowledge_base';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
@@ -23,6 +23,23 @@ jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
   throttle: jest.fn().mockImplementation((fn) => fn),
 }));
+
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          ...notificationServiceMock.createStartContract(),
+          tours: {
+            isEnabled: mockToursIsEnabled,
+          },
+        },
+      },
+    }),
+  };
+});
 
 const mockGetItem = jest.fn();
 Object.defineProperty(window, 'localStorage', {
@@ -153,6 +170,32 @@ describe('AnonymizedValuesAndCitationsTour', () => {
     );
 
     render(<AnonymizedValuesAndCitationsTour conversation={welcomeConvo} />, {
+      wrapper: Wrapper,
+    });
+
+    jest.runAllTimers();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();
+    });
+
+    expect(
+      screen.queryByTestId('anonymizedValuesAndCitationsTourStepPanel')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render tour when tour is disabled', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    mockToursIsEnabled.mockReturnValue(false);
+
+    mockGetItem.mockReturnValue(
+      JSON.stringify({
+        currentTourStep: 2,
+        isTourActive: true,
+      } as TourState)
+    );
+
+    render(<AnonymizedValuesAndCitationsTour conversation={conversationWithContentReferences} />, {
       wrapper: Wrapper,
     });
 

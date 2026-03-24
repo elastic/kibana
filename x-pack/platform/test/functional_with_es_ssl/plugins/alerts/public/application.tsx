@@ -8,11 +8,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export interface AlertingExampleComponentParams {
   basename: string;
@@ -44,9 +43,7 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
-      <AlertingExampleApp basename={appBasePath} {...deps} />
-    </KibanaRenderContextProvider>,
+    core.rendering.addContext(<AlertingExampleApp basename={appBasePath} {...deps} />),
     element
   );
 

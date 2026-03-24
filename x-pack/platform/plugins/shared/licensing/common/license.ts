@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   LicenseType,
   ILicense,
   LicenseStatus,
   LicenseCheck,
-  LICENSE_TYPE,
   PublicLicenseJSON,
   PublicLicense,
   PublicFeatures,
-} from './types';
+} from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 
 /**
  * @public
@@ -136,9 +136,9 @@ export class License implements ILicense {
     return { state: 'valid' };
   }
 
-  getFeature(name: string) {
-    if (this.isAvailable && this.features && Object.hasOwn(this.features, name)) {
-      return { ...this.features[name] };
+  getFeature(id: string) {
+    if (this.isAvailable && this.features && Object.hasOwn(this.features, id)) {
+      return { ...this.features[id] };
     }
 
     return {

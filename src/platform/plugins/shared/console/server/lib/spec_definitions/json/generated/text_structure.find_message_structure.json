@@ -5,7 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "column_names": "",
+      "column_names": [],
       "delimiter": "",
       "ecs_compatibility": [
         "disabled",
@@ -21,6 +21,7 @@
       "grok_pattern": "",
       "quote": "",
       "should_trim_fields": "__flag__",
+      "should_parse_recursively": "__flag__",
       "timeout": [
         "25s",
         "-1",

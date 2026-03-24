@@ -6,13 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import {
+import type {
   IScopedClusterClient,
   IUiSettingsClient,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { flatten } from 'lodash';
 
 export const alertDetailsContextRt = t.intersection([

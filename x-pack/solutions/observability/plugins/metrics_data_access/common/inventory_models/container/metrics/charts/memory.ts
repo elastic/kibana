@@ -9,8 +9,9 @@ import type { LensConfigWithId } from '../../../types';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
-  DEFAULT_XY_HIDDEN_LEGEND,
+  DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
+  DEFAULT_LEGEND_STATS,
   MEMORY_USAGE_LABEL,
 } from '../../../shared/charts/constants';
 import { formulas } from '../formulas';
@@ -26,9 +27,20 @@ const dockerContainerMemoryUsageXY: LensConfigWithId = {
       xAxis: '@timestamp',
       yAxis: [formulas.dockerContainerMemoryUsage],
     },
+    {
+      type: 'reference',
+      yAxis: [
+        {
+          value: '1',
+        },
+      ],
+    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: DEFAULT_LEGEND_STATS,
+  },
   ...DEFAULT_XY_YBOUNDS,
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
@@ -44,9 +56,20 @@ const k8sContainerMemoryUsageXY: LensConfigWithId = {
       xAxis: '@timestamp',
       yAxis: [formulas.k8sContainerMemoryUsage],
     },
+    {
+      type: 'reference',
+      yAxis: [
+        {
+          value: '1',
+        },
+      ],
+    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: DEFAULT_LEGEND_STATS,
+  },
   ...DEFAULT_XY_YBOUNDS,
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };

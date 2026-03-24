@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldSelector } from './common/field_selector';
-import { Annotation } from '../../../../common/annotations';
+import type { Annotation } from '../../../../common/annotations';
 
 export function ServiceApplyTo({ editAnnotation }: { editAnnotation?: Annotation | null }) {
   return (

@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DocLinksServiceStart, DocLinksServiceSetup } from './src/types';
+export type {
+  DocLinksServiceStart,
+  DocLinksServiceSetup,
+  DocLinksServicePreboot,
+} from './src/types';

@@ -10,10 +10,9 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -94,13 +93,13 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.fleet.integrationSyncStatus.naTooltip', {
               defaultMessage: 'Integration syncing only applies to remote outputs.',
             })}
-          >
-            <EuiIcon type="info" color="subdued" />
-          </EuiToolTip>
+            type="info"
+            color="subdued"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -115,14 +114,14 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.fleet.integrationSyncStatus.disabledTooltip', {
               defaultMessage:
                 'Integration syncing is disabled for this remote output. Enable it by clicking the edit icon and updating the output settings.',
             })}
-          >
-            <EuiIcon type="info" color="subdued" />
-          </EuiToolTip>
+            type="info"
+            color="subdued"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

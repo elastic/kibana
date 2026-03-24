@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
-import { StartServices } from '../../types';
-import { TagBulkAction } from '../types';
+import type { TagsCapabilities } from '../../../common';
+import type { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import type { StartServices } from '../../types';
+import type { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
 import { getBulkAssignAction } from './bulk_assign';
 import { getClearSelectionAction } from './clear_selection';

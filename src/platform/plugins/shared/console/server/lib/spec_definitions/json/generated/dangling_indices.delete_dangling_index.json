@@ -7,10 +7,12 @@
       "pretty": "__flag__",
       "accept_data_loss": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ],
       "timeout": [
+        "30s",
         "-1",
         "0"
       ]

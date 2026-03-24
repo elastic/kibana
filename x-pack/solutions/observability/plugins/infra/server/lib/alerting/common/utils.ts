@@ -22,8 +22,10 @@ import type {
   InventoryLocatorParams,
   MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
   ALERT_RULE_PARAMETERS_NODE_TYPE,
+  ALERT_RULE_PARAMETERS_SCHEMA,
   getInventoryViewInAppUrl,
   getMetricsViewInAppUrl,
 } from '../../../../common/alerting/metrics/alert_link';
@@ -108,6 +110,7 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
   hostName,
   assetDetailsLocator,
   inventoryLocator,
+  schema,
 }: {
   criteria: InventoryMetricConditions[];
   nodeType: string;
@@ -115,6 +118,7 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
   hostName?: string;
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
+  schema?: DataSchemaFormat;
 }) => {
   const { metric, customMetric } = criteria[0];
 
@@ -124,6 +128,7 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`]: [customMetric?.aggregation],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: [customMetric?.field],
     [ALERT_RULE_PARAMETERS_NODE_TYPE]: [nodeType],
+    [ALERT_RULE_PARAMETERS_SCHEMA]: [schema],
     [TIMESTAMP]: timestamp,
     [HOST_NAME]: hostName,
   };

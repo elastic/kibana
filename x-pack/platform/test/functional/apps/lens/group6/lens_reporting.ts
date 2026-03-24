@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, dashboard, lens, reporting, timePicker, visualize, exports } = getPageObjects([
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens reporting', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/reporting'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
 

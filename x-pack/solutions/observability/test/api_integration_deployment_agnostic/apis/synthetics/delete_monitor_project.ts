@@ -5,24 +5,25 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
-  ConfigKey,
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   ProjectMonitorsRequest,
   PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { REQUEST_TOO_LARGE_DELETE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/delete_monitor_project';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('DeleteProjectMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
@@ -111,8 +112,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete })
           .expect(400);
-        const { message } = response.body;
-        expect(message).to.eql(REQUEST_TOO_LARGE_DELETE);
+        expect(response.body.message).to.eql(
+          '[request body.monitors]: array size is [550], but cannot be greater than [500]'
+        );
       } finally {
         await supertest
           .delete(

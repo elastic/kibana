@@ -22,7 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorSyncJob } from '../../types';
+import type { ConnectorSyncJob } from '../../types';
 import { SyncJobDocumentsPanel } from './documents_panel';
 import { SyncJobEventsPanel } from './events_panel';
 import { FilteringPanel } from './filtering_panel';
@@ -65,6 +65,9 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
               })}
             >
               <EuiBasicTable
+                tableCaption={i18n.translate('searchConnectors.syncJobs.flyout.sync.tableCaption', {
+                  defaultMessage: 'Sync job details',
+                })}
                 columns={[
                   {
                     field: 'id',

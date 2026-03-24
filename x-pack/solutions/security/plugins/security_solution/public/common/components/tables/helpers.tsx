@@ -18,7 +18,8 @@ import {
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
@@ -50,7 +51,7 @@ export const getRowItemsWithActions = ({
           mode={CellActionsMode.HOVER_DOWN}
           visibleCellActions={5}
           showActionTooltips
-          triggerId={SecurityCellActionsTrigger.DEFAULT}
+          triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
           data={{
             value,
             field: fieldName,
@@ -207,7 +208,7 @@ export const OverflowFieldComponent = ({
   <span>
     {showToolTip ? (
       <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
-        <>{value.substring(0, overflowLength)}</>
+        <span tabIndex={0}>{value.substring(0, overflowLength)}</span>
       </EuiToolTip>
     ) : (
       <>{value.substring(0, overflowLength)}</>
