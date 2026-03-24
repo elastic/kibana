@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -321,6 +321,16 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation synchronously.
    */
   getActiveSolutionNavId(): SolutionId | null;
+
+  /**
+   * APIs for the project header.
+   */
+  projectHeader: {
+    /**
+     * Set the app menu configuration for the current application.
+     */
+    setAppMenu(config?: AppMenuConfigNext): void;
+  };
 
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers

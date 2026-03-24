@@ -18,11 +18,13 @@ import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
 import type { NavLinksService } from './services/nav_links';
 import type { ProjectNavigationService } from './services/project_navigation';
+import type { ProjectHeaderService } from './services/project_header';
 import type { DocTitleService } from './services/doc_title';
 
 type NavControlsStart = ReturnType<NavControlsService['start']>;
 type NavLinksStart = ReturnType<NavLinksService['start']>;
 type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
+type ProjectHeaderStart = ReturnType<ProjectHeaderService['start']>;
 type DocTitleStart = ReturnType<DocTitleService['start']>;
 type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
 
@@ -34,6 +36,7 @@ export interface ChromeApiDeps {
     recentlyAccessed: RecentlyAccessedStart;
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
+    projectHeader: ProjectHeaderStart;
   };
   sidebar: SidebarStart;
 }
@@ -166,6 +169,12 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
+
+    // Project Header
+    projectHeader: {
+      setAppMenu: services.projectHeader.setAppMenu,
+    },
+
     sidebar,
   };
 

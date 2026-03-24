@@ -23,6 +23,7 @@ export type {
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
+  AppMenuConfigNext,
 } from './types';
 
 export {
