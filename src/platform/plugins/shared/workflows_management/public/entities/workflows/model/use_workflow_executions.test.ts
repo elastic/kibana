@@ -1,0 +1,244 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useWorkflowExecutions } from './use_workflow_executions';
+import { useKibana } from '../../../hooks/use_kibana';
+
+jest.mock('../../../hooks/use_kibana');
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+const createWrapper = (queryClient: QueryClient) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return Wrapper;
+};
+
+describe('useWorkflowExecutions', () => {
+  let mockHttpGet: jest.Mock;
+  let queryClient: QueryClient;
+
+  const executionsPage1 = {
+    results: [
+      { id: 'exec-1', status: 'completed' },
+      { id: 'exec-2', status: 'running' },
+    ],
+    page: 1,
+    size: 100,
+    total: 2,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHttpGet = jest.fn().mockResolvedValue(executionsPage1);
+    mockUseKibana.mockReturnValue({
+      services: { http: { get: mockHttpGet } },
+    } as any);
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+  });
+
+  it('should fetch executions for a workflow', async () => {
+    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1' }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/api/workflowExecutions',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          workflowId: 'wf-1',
+          page: 1,
+          size: 100,
+        }),
+      })
+    );
+  });
+
+  it('should not fetch when workflowId is null', () => {
+    renderHook(() => useWorkflowExecutions({ workflowId: null }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    expect(mockHttpGet).not.toHaveBeenCalled();
+  });
+
+  it('should flatten pages into allExecutions data', async () => {
+    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1' }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(result.current.data).toEqual({
+      results: [
+        { id: 'exec-1', status: 'completed' },
+        { id: 'exec-2', status: 'running' },
+      ],
+      page: 1,
+      size: 100,
+      total: 2,
+    });
+  });
+
+  it('should pass statuses filter to query params', async () => {
+    const statuses = ['completed', 'failed'] as any;
+
+    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', statuses }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/api/workflowExecutions',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          statuses,
+        }),
+      })
+    );
+  });
+
+  it('should pass executionTypes filter to query params', async () => {
+    const executionTypes = ['manual'] as any;
+
+    const { result } = renderHook(
+      () => useWorkflowExecutions({ workflowId: 'wf-1', executionTypes }),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/api/workflowExecutions',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          executionTypes,
+        }),
+      })
+    );
+  });
+
+  it('should pass executedBy filter when it has entries', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutions({
+          workflowId: 'wf-1',
+          executedBy: ['user-1'],
+        }),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/api/workflowExecutions',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          executedBy: ['user-1'],
+        }),
+      })
+    );
+  });
+
+  it('should not include executedBy when the array is empty', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutions({
+          workflowId: 'wf-1',
+          executedBy: [],
+        }),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    const callQuery = mockHttpGet.mock.calls[0][1].query;
+    expect(callQuery).not.toHaveProperty('executedBy');
+  });
+
+  it('should pass omitStepRuns when provided', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutions({
+          workflowId: 'wf-1',
+          omitStepRuns: true,
+        }),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/api/workflowExecutions',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          omitStepRuns: true,
+        }),
+      })
+    );
+  });
+
+  it('should use custom page size when provided', async () => {
+    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', size: 25 }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/api/workflowExecutions',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          size: 25,
+        }),
+      })
+    );
+  });
+
+  it('should return null data when there are no pages', () => {
+    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: null }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    expect(result.current.data).toBeNull();
+  });
+
+  it('should handle HTTP errors', async () => {
+    mockHttpGet.mockRejectedValue(new Error('Server error'));
+
+    const { result } = renderHook(
+      () => useWorkflowExecutions({ workflowId: 'wf-1' }, { retry: false }),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.error).toBeTruthy());
+  });
+
+  it('should expose hasNextPage as false when all results fit in one page', async () => {
+    const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1' }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(result.current.hasNextPage).toBe(false);
+  });
+});
