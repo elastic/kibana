@@ -21,9 +21,12 @@ interface UseUpdateRuleProps {
 export const useUpdateRule = ({ http, notifications, ruleId }: UseUpdateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
-      return http.patch<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`, {
-        body: JSON.stringify(mapFormValuesToUpdateRequest(formValues)),
-      });
+      return http.patch<RuleResponse>(
+        `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
+        {
+          body: JSON.stringify(mapFormValuesToUpdateRequest(formValues)),
+        }
+      );
     },
     {
       onSuccess: (data: RuleResponse) => {

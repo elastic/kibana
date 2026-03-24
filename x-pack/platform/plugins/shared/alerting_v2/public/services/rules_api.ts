@@ -72,23 +72,20 @@ export class RulesApi {
   }
 
   public async bulkDeleteRules(params: BulkOperationParams) {
-    return this.http.post<BulkOperationResponse>(
-      `${ALERTING_V2_RULE_API_PATH}/_bulk_delete`,
-      { body: JSON.stringify(params) }
-    );
+    return this.http.post<BulkOperationResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_delete`, {
+      body: JSON.stringify(params),
+    });
   }
 
   public async bulkEnableRules(params: BulkOperationParams) {
-    return this.http.post<BulkOperationResponse>(
-      `${ALERTING_V2_RULE_API_PATH}/_bulk_enable`,
-      { body: JSON.stringify(params) }
-    );
+    return this.http.post<BulkOperationResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_enable`, {
+      body: JSON.stringify(params),
+    });
   }
 
   public async bulkDisableRules(params: BulkOperationParams) {
-    return this.http.post<BulkOperationResponse>(
-      `${ALERTING_V2_RULE_API_PATH}/_bulk_disable`,
-      { body: JSON.stringify(params) }
-    );
+    return this.http.post<BulkOperationResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_disable`, {
+      body: JSON.stringify(params),
+    });
   }
 }

@@ -34,9 +34,12 @@ export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesInd
       return;
     }
 
-    const rulesResponse = await services.http.get<FindRulesResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk`, {
-      query: { ids: uncachedIds },
-    });
+    const rulesResponse = await services.http.get<FindRulesResponse>(
+      `${ALERTING_V2_RULE_API_PATH}/_bulk`,
+      {
+        query: { ids: uncachedIds },
+      }
+    );
     rulesResponse.items.forEach((rule) => {
       cacheRef.current[rule.id] = rule;
     });
