@@ -20,12 +20,12 @@ describe('useAutoRefresh', () => {
     jest.useRealTimers();
   });
 
-  it('returns null countdown when paused', () => {
+  it('shows full interval countdown when initially paused', () => {
     const { result } = renderHook(() =>
       useAutoRefresh({ isPaused: true, intervalMs: 5000, onRefresh: jest.fn() })
     );
 
-    expect(result.current.secondsRemaining).toBeNull();
+    expect(result.current.secondsRemaining).toBe(5);
   });
 
   it('returns null when interval is zero, negative, or non-finite', () => {
@@ -76,7 +76,7 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(3);
   });
 
-  it('stops firing onRefresh after pause until unpaused', () => {
+  it('stops firing `onRefresh` after pause and preserves the countdown', () => {
     const onRefresh = jest.fn();
     const { result, rerender } = renderHook(
       ({ paused }) => useAutoRefresh({ isPaused: paused, intervalMs: 2000, onRefresh }),
@@ -84,20 +84,47 @@ describe('useAutoRefresh', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(1000);
     });
 
-    expect(onRefresh).toHaveBeenCalledTimes(1);
-    expect(result.current.secondsRemaining).toBe(2);
+    expect(result.current.secondsRemaining).toBe(1);
 
     rerender({ paused: true });
-    expect(result.current.secondsRemaining).toBeNull();
+    expect(result.current.secondsRemaining).toBe(1);
 
     act(() => {
       jest.advanceTimersByTime(10_000);
     });
 
+    expect(onRefresh).not.toHaveBeenCalled();
+    expect(result.current.secondsRemaining).toBe(1);
+  });
+
+  it('resumes countdown from paused position on unpause', () => {
+    const onRefresh = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ paused }) => useAutoRefresh({ isPaused: paused, intervalMs: 5000, onRefresh }),
+      { initialProps: { paused: false } }
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
+    expect(result.current.secondsRemaining).toBe(2);
+
+    rerender({ paused: true });
+    expect(result.current.secondsRemaining).toBe(2);
+
+    rerender({ paused: false });
+    expect(result.current.secondsRemaining).toBe(2);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
     expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(result.current.secondsRemaining).toBe(5);
   });
 
   it('does not leak: unmount clears the interval', () => {
@@ -115,7 +142,7 @@ describe('useAutoRefresh', () => {
     expect(onRefresh).not.toHaveBeenCalled();
   });
 
-  it('restarts the countdown when intervalMs changes', () => {
+  it('restarts the countdown when `intervalMs` changes', () => {
     const onRefresh = jest.fn();
     const { result, rerender } = renderHook(
       ({ intervalMs }: { intervalMs: number }) =>
