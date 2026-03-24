@@ -5,10 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a new feature! Please fill out the sections below so we can evaluate your request.
-
         **Tip:** Use the `/gh-create-issue` skill in your coding agent (e.g. Claude Code, Cursor) — it will interview you and file the issue for you.
-
   - type: textarea
     id: what
     attributes:
