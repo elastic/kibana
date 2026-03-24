@@ -6,11 +6,12 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { Logger } from '@kbn/core/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 
 import { getLlmType } from '../../../../../routes/utils';
 
@@ -19,24 +20,29 @@ export const getEvaluatorLlm = async ({
   connectorTimeout,
   evaluatorConnectorId,
   experimentConnector,
+  getInferenceConnectorById,
   langSmithApiKey,
   logger,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
-  experimentConnector: Connector;
+  experimentConnector: InferenceConnector;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   langSmithApiKey: string | undefined;
   logger: Logger;
 }): Promise<ActionsClientLlm> => {
-  const evaluatorConnector =
-    (await actionsClient.get({
-      id: evaluatorConnectorId ?? experimentConnector.id, // fallback to the experiment connector if the evaluator connector is not found:
-      throwIfSystemAction: false,
-    })) ?? experimentConnector;
+  let evaluatorConnector: InferenceConnector;
+  try {
+    evaluatorConnector = await getInferenceConnectorById(
+      evaluatorConnectorId ?? experimentConnector.connectorId
+    );
+  } catch {
+    evaluatorConnector = experimentConnector;
+  }
 
-  const evaluatorLlmType = getLlmType(evaluatorConnector.actionTypeId);
-  const experimentLlmType = getLlmType(experimentConnector.actionTypeId);
+  const evaluatorLlmType = getLlmType(evaluatorConnector.type);
+  const experimentLlmType = getLlmType(experimentConnector.type);
 
   logger.info(
     `The ${evaluatorConnector.name} (${evaluatorLlmType}) connector will judge output from the ${experimentConnector.name} (${experimentLlmType}) connector`
@@ -55,9 +61,10 @@ export const getEvaluatorLlm = async ({
 
   return new ActionsClientLlm({
     actionsClient,
-    connectorId: evaluatorConnector.id,
+    connectorId: evaluatorConnector.connectorId,
     llmType: evaluatorLlmType,
     logger,
+    model: getConnectorDefaultModel(evaluatorConnector),
     temperature: 0, // zero temperature for evaluation
     timeout: connectorTimeout,
     traceOptions,
