@@ -100,13 +100,10 @@ export function getCpsRequestHandler(
     }
     (options.context as any).cpsRoutingContext = routingContext;
 
-    // Store timing context for transport instrumentation (opt-in only)
-    if (kibanaRequest?.enableEsTimingTracking) {
-      (options.context as any).timingContext = {
-        startTime: performance.now(),
-        kibanaRequest,
-      };
-    }
+    (options.context as any).timingContext = {
+      startTime: performance.now(),
+      kibanaRequest,
+    };
   };
 }
 

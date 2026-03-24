@@ -234,21 +234,6 @@ export interface KibanaRequest<
    * These events are automatically included in the Server-Timing response header.
    */
   readonly publicallyAvailableTiming: RequestTiming;
-
-  /**
-   * Opt-in flag to enable Elasticsearch request timing tracking.
-   * When set to true, all ES requests made during this request's lifecycle
-   * will have their duration measured and reported via Server-Timing header.
-   *
-   * @example
-   * ```typescript
-   * // In route handler
-   * request.enableEsTimingTracking = true;
-   * const results = await esClient.search(...);
-   * // ES request timing will appear in Server-Timing header
-   * ```
-   */
-  enableEsTimingTracking?: boolean;
 }
 
 /**
