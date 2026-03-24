@@ -21,8 +21,8 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  type Criteria,
   type EuiBasicTableColumn,
-  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,6 +46,8 @@ interface RuleActionsMenuProps {
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
 }
+
+export type RulesListTableSortField = 'kind' | 'enabled';
 
 const RuleActionsMenu = ({
   rule,
@@ -143,6 +145,9 @@ export interface RulesListTableProps {
   page: number;
   perPage: number;
   search: string;
+  hasActiveFilters: boolean;
+  sortField?: RulesListTableSortField;
+  sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
 
   /** Bulk selection state */
@@ -167,7 +172,7 @@ export interface RulesListTableProps {
   onToggleEnabled: (rule: RuleApiResponse) => void;
 
   /** Pagination callback */
-  onTableChange: (criteria: CriteriaWithPagination<RuleApiResponse>) => void;
+  onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
 export const RulesListTable: React.FC<RulesListTableProps> = ({
@@ -176,6 +181,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   page,
   perPage,
   search,
+  hasActiveFilters,
+  sortField,
+  sortDirection,
   isLoading,
   selectedCount,
   isAllSelected,
@@ -309,6 +317,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
         ),
         width: '12%',
+        sortable: true,
         render: (kind: string) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -336,6 +345,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
         ),
         width: '10%',
+        sortable: true,
         render: (enabled: boolean) =>
           enabled ? (
             <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
@@ -383,13 +393,14 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     ]
   );
 
-  const noItemsMessage = search
-    ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-        defaultMessage: 'No rules match your search.',
-      })
-    : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-        defaultMessage: 'No rules found.',
-      });
+  const noItemsMessage =
+    search || hasActiveFilters
+      ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
+          defaultMessage: 'No rules match your search or filters.',
+        })
+      : i18n.translate('xpack.alertingV2.rulesList.noRules', {
+          defaultMessage: 'No rules found.',
+        });
 
   return (
     <>
@@ -524,6 +535,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         columns={columns}
         loading={isLoading}
         pagination={pagination}
+        sorting={
+          sortField && sortDirection
+            ? { sort: { field: sortField, direction: sortDirection } }
+            : undefined
+        }
         noItemsMessage={noItemsMessage}
         onChange={onTableChange}
         responsiveBreakpoint={false}
