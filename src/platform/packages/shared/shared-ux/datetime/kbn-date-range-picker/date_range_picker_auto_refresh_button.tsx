@@ -10,7 +10,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiFormAppend } from '@elastic/eui';
 
 import { autoRefreshButtonTexts } from './translations';
 import { msToSeconds, formatAutoRefreshCountdown } from './utils';
@@ -24,7 +24,6 @@ const labelStyles = css`
 `;
 
 export interface DateRangePickerAutoRefreshButtonProps {
-  compressed: boolean;
   disabled: boolean;
   interval: number;
   isPaused: boolean;
@@ -36,7 +35,6 @@ export interface DateRangePickerAutoRefreshButtonProps {
  * Play / pause control for auto-refresh with a live `mm:ss` / `hh:mm:ss` countdown label.
  */
 export function DateRangePickerAutoRefreshButton({
-  compressed,
   disabled,
   interval,
   isPaused,
@@ -53,16 +51,15 @@ export function DateRangePickerAutoRefreshButton({
     : autoRefreshButtonTexts.pauseAriaLabel(countdownLabel);
 
   return (
-    <EuiButtonEmpty
-      size={compressed ? 'xs' : 's'}
-      iconType={isPaused ? 'play' : 'pause'}
+    <EuiFormAppend
+      element="button"
+      iconLeft={isPaused ? 'play' : 'pause'}
+      label={countdownLabel}
       onClick={onClick}
       isDisabled={disabled}
       aria-label={ariaLabel}
       data-test-subj="dateRangePickerAutoRefreshButton"
       css={labelStyles}
-    >
-      {countdownLabel}
-    </EuiButtonEmpty>
+    />
   );
 }

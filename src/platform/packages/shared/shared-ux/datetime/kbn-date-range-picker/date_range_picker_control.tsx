@@ -177,7 +177,6 @@ export function DateRangePickerControl() {
               interval={settings.autoRefresh.interval}
               secondsRemaining={autoRefreshSecondsRemaining}
               onClick={toggleAutoRefresh}
-              compressed={compressed}
               disabled={disabled}
             />
           ) : undefined
