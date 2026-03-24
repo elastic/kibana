@@ -61,7 +61,7 @@ const pieStateSharedSchema = {
         visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
         position: schema.maybe(
           schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
-            meta: { description: 'Section of slice labels' },
+            meta: { description: 'Renders the pie/donut chart slice labels inside or outside the pie' },
           })
         ),
       },
