@@ -49,12 +49,6 @@ body:
         **Deployment & rollout**
         - [ ] The feature is gated behind the `my_feature_flag` feature flag
         - [ ] Behavior on Serverless: [same as Stateful / not available / scoped to X tier]
-
-        <!-- Anti-patterns to avoid:
-             ✗ "render all values"     → too vague, not testable
-             ✗ "should work correctly" → what does correct mean?
-             ✓ "A viewer navigating to /app/metrics sees the Hosts tab with data loaded within 3s"
-        -->
     validations:
       required: false
 
