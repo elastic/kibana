@@ -44,6 +44,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   isEventDrivenExecutionEnabled: () => boolean;
   isLogTriggerEventsEnabled: () => boolean;
+  getMaxEventChainDepth: () => number;
+  getMaxWorkflowDepth: () => number;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
