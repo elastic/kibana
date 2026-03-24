@@ -14,16 +14,17 @@ import {
 import { createUpdateDetectionService } from './update_detection';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
-import { WatchlistEntitySourceClient } from '../../infra/entity_source_client';
+import { MonitoringEntitySourceDescriptorClient } from '../../../../privilege_monitoring/saved_objects';
 
-jest.mock('../../infra/entity_source_client');
+const mockGetLastProcessedMarker = jest.fn();
+const mockUpdateLastProcessedMarker = jest.fn();
 
-const { mockGetLastProcessedMarker, mockUpdateLastProcessedMarker } = jest.requireMock(
-  '../../infra/entity_source_client'
-) as {
-  mockGetLastProcessedMarker: jest.Mock;
-  mockUpdateLastProcessedMarker: jest.Mock;
-};
+jest.mock('../../../../privilege_monitoring/saved_objects', () => ({
+  MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
+    getLastProcessedMarker: mockGetLastProcessedMarker,
+    updateLastProcessedMarker: mockUpdateLastProcessedMarker,
+  })),
+}));
 
 type CapturedSearchRequest = SearchRequest & {
   aggs?: {
@@ -69,7 +70,7 @@ const createEntityStoreEntityIdsByType = (
 
 describe('Watchlist update detection service', () => {
   const createDescriptorClient = () =>
-    new WatchlistEntitySourceClient({
+    new MonitoringEntitySourceDescriptorClient({
       soClient: savedObjectsClientMock.create(),
       namespace: 'default',
     });
