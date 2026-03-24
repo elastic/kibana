@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import {
   EuiForm,
   EuiFlexGroup,
@@ -110,7 +110,12 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
     isLoading,
     data: aiConnectors,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled, settings });
+  } = useLoadConnectors({
+    http,
+    toasts: notifications.toasts,
+    featureId: 'automatic_import',
+    settings,
+  });
 
   useEffect(() => {
     if (aiConnectors != null) {
