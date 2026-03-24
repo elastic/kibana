@@ -11,6 +11,7 @@ import axios from 'axios';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import { API_BASE_PATH } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
@@ -43,7 +44,7 @@ export const registerAuthenticateRoute = ({
 }: AuthenticateRouteOptions) => {
   router.get(
     {
-      path: '/internal/cloud_connect/config',
+      path: `${API_BASE_PATH}/config`,
       security: {
         authz: {
           enabled: false,
@@ -106,7 +107,7 @@ export const registerAuthenticateRoute = ({
 
   router.post(
     {
-      path: '/internal/cloud_connect/authenticate',
+      path: `${API_BASE_PATH}/authenticate`,
       security: {
         authz: {
           enabled: false,
