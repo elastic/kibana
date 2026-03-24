@@ -254,7 +254,7 @@ describe('OpenAPI Bundler - assign a tag', () => {
     ]);
   });
 
-  it('dedupes tags by name when bundled documents define the same tag', async () => {
+  it('dedupes tags when keys are shuffled but the content is equal', async () => {
     const spec1 = createOASDocument({
       paths: {
         '/api/some_api': {
