@@ -95,6 +95,7 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
+import { registerStepDefinitionProvider } from '../lib/monaco_providers/step_definition_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
@@ -231,6 +232,8 @@ export const WorkflowYAMLEditor = ({
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const workflowLookupRef = useRef(workflowLookup);
+  workflowLookupRef.current = workflowLookup;
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -436,6 +439,13 @@ export const WorkflowYAMLEditor = ({
         // Register the unified hover provider for API documentation and template expressions
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
+
+        // Register go-to-definition for step/consts/inputs/variables/foreach references (Cmd+Click)
+        const definitionDisposable = registerStepDefinitionProvider({
+          getWorkflowLookup: () => workflowLookupRef.current,
+          getYamlDocument: () => yamlDocumentRef.current,
+        });
+        disposablesRef.current.push(definitionDisposable);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
