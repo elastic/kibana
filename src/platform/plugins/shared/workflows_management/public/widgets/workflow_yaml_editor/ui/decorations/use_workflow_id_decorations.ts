@@ -60,15 +60,23 @@ function createWorkflowIdDecoration(
     return null;
   }
 
+  // Clamp end to the same line — the YAML node range can extend to the next line
+  // due to trailing whitespace, which would cause the highlight to bleed into the next line.
+  const endColumn =
+    valueRange.endLineNumber === valueRange.startLineNumber
+      ? valueRange.endColumn
+      : model.getLineLength(valueRange.startLineNumber) + 1;
+
   return {
     range: new monaco.Range(
       valueRange.startLineNumber,
       valueRange.startColumn,
       valueRange.startLineNumber,
-      valueRange.startColumn + 1
+      endColumn
     ),
     options: {
       stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+      inlineClassName: 'template-variable-info',
       before: {
         content: `✓ ${workflowName}`,
         cursorStops: monaco.editor.InjectedTextCursorStops.None,
