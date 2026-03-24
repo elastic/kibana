@@ -127,7 +127,7 @@ export const NotificationPolicyActionsCell = ({
           name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.updateApiKey', {
             defaultMessage: 'Update API key',
           }),
-          icon: 'lock',
+          icon: 'key',
           onClick: () => {
             closePopover();
             onUpdateApiKey(policy.id);

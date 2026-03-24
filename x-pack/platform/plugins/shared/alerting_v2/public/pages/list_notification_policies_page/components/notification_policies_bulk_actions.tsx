@@ -95,7 +95,7 @@ export const NotificationPoliciesBulkActions = ({
           name: i18n.translate('xpack.alertingV2.notificationPolicy.bulkAction.updateApiKey', {
             defaultMessage: 'Update API keys',
           }),
-          icon: 'lock',
+          icon: 'key',
           onClick: () => handleAction('update_api_key'),
           disabled: isLoading,
         },
