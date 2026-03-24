@@ -58,6 +58,7 @@ async function getTestProps({
         rowHeight: false,
         breakdownField: false,
         hideChart: false,
+        hideTable: false,
       },
     })
   );
@@ -614,6 +615,7 @@ describe('buildEsqlFetchSubscribe', () => {
     expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       hideChart: false,
+      hideTable: false,
       rowHeight: false,
       breakdownField: false,
     });
@@ -634,6 +636,7 @@ describe('buildEsqlFetchSubscribe', () => {
       expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
+        hideTable: true,
         rowHeight: true,
         breakdownField: true,
       })
@@ -649,6 +652,7 @@ describe('buildEsqlFetchSubscribe', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideTable: false,
         },
       })
     );
@@ -667,6 +671,7 @@ describe('buildEsqlFetchSubscribe', () => {
         rowHeight: false,
         breakdownField: false,
         hideChart: false,
+        hideTable: false,
       })
     );
     documents$.next({
@@ -688,6 +693,7 @@ describe('buildEsqlFetchSubscribe', () => {
         rowHeight: true,
         breakdownField: true,
         hideChart: true,
+        hideTable: true,
       })
     );
     documents$.next({
@@ -759,6 +765,7 @@ describe('buildEsqlFetchSubscribe', () => {
       rowHeight: false,
       breakdownField: false,
       hideChart: false,
+      hideTable: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -771,6 +778,7 @@ describe('buildEsqlFetchSubscribe', () => {
         rowHeight: false,
         breakdownField: false,
         hideChart: false,
+        hideTable: false,
       })
     );
     documents$.next({
@@ -784,6 +792,7 @@ describe('buildEsqlFetchSubscribe', () => {
         rowHeight: false,
         breakdownField: false,
         hideChart: false,
+        hideTable: false,
       })
     );
   });

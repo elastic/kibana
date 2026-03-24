@@ -145,5 +145,12 @@ describe('Discover getDataViewAppState', () => {
     expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
 
+  test('should set hideTable to false when switching to a non-time-based data view', async () => {
+    const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
+    const next = getDataView('b', '', ['timeFieldA']);
+
+    const result = getDataViewAppState(current, next, emptyDefaultColumns, [], []);
+    expect(result.hideTable).toBe(false);
+  });
   // TODO: add tests
 });
