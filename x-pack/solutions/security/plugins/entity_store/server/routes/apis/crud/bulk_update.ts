@@ -8,6 +8,7 @@
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { unflattenObject } from '@kbn/object-utils';
 import { ALL_ENTITY_TYPES, ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -19,7 +20,10 @@ const bodySchema = z.object({
   entities: z.array(
     z.object({
       type: z.enum(ALL_ENTITY_TYPES),
-      doc: Entity,
+      doc: z.preprocess(
+        (val) => unflattenObject(val as Record<string, unknown>),
+        Entity
+      ),
     })
   ),
 });
