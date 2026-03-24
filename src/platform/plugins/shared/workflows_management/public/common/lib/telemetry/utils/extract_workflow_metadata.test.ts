@@ -13,6 +13,19 @@ import {
   extractWorkflowMetadata,
 } from './extract_workflow_metadata';
 
+/**
+ * Runtime workflow YAML can include nested shapes (e.g. `on-failure` on steps) that are wider than
+ * Zod-inferred `WorkflowYaml['steps']`. The extractor supports them; this helper isolates the cast.
+ */
+function asRuntimeSteps(steps: unknown): WorkflowYaml['steps'] {
+  return steps as WorkflowYaml['steps'];
+}
+
+/** Legacy inputs array form is not fully expressed on `WorkflowYaml['inputs']` union typing. */
+function asRuntimeInputs(inputs: unknown): WorkflowYaml['inputs'] {
+  return inputs as WorkflowYaml['inputs'];
+}
+
 const minimalConsoleStep = { name: 's1', type: 'console', with: {} };
 
 function baseWorkflow(overrides: Partial<WorkflowYaml> = {}): Partial<WorkflowYaml> {
@@ -52,7 +65,7 @@ describe('extractWorkflowMetadata (workflows management UI)', () => {
 
   it('reflects root field: steps including on-failure fallback paths', () => {
     const wf: Partial<WorkflowYaml> = baseWorkflow({
-      steps: [
+      steps: asRuntimeSteps([
         {
           name: 'outer',
           type: 'foreach',
@@ -64,7 +77,7 @@ describe('extractWorkflowMetadata (workflows management UI)', () => {
             },
           ],
         },
-      ] as unknown as WorkflowYaml['steps'],
+      ]),
     });
     const meta = extractWorkflowMetadata(wf);
     expect(meta.stepCount).toBe(3);
@@ -86,10 +99,10 @@ describe('extractWorkflowMetadata (workflows management UI)', () => {
     expect(
       extractWorkflowMetadata(
         baseWorkflow({
-          inputs: [
+          inputs: asRuntimeInputs([
             { name: 'a', type: 'string' },
             { name: 'b', type: 'number' },
-          ] as unknown as WorkflowYaml['inputs'],
+          ]),
         })
       ).inputCount
     ).toBe(2);

@@ -160,6 +160,7 @@ describe('extractExecutionMetadata', () => {
       status: ExecutionStatus.TIMED_OUT,
       startedAt: '2024-01-01T00:00:00.000Z',
       finishedAt: '2024-01-01T00:01:30.000Z',
+      duration: 90000,
       context: {
         event: { type: 'alert', rule: { id: 'rule-xyz' } },
       },
