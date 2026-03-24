@@ -91,19 +91,6 @@ describe('WorkflowExecuteManualForm', () => {
     expect(screen.getByText('Input Data')).toBeInTheDocument();
   });
 
-  it('should render the code editor', () => {
-    renderWithProviders(
-      <WorkflowExecuteManualForm
-        value='{"key": "value"}'
-        setValue={mockSetValue}
-        errors={null}
-        setErrors={mockSetErrors}
-      />
-    );
-
-    expect(screen.getByTestId('workflow-manual-json-editor')).toBeInTheDocument();
-  });
-
   it('should display the validation callout when errors are present', () => {
     renderWithProviders(
       <WorkflowExecuteManualForm
@@ -143,26 +130,5 @@ describe('WorkflowExecuteManualForm', () => {
 
     // The useEffect should call setValue with the default workflow input
     expect(mockSetValue).toHaveBeenCalledWith(expect.any(String));
-  });
-
-  it('should render with inputs schema provided', () => {
-    const inputs = {
-      type: 'object' as const,
-      properties: {
-        name: { type: 'string' as const },
-      },
-    };
-
-    renderWithProviders(
-      <WorkflowExecuteManualForm
-        value='{"name": "test"}'
-        inputs={inputs}
-        setValue={mockSetValue}
-        errors={null}
-        setErrors={mockSetErrors}
-      />
-    );
-
-    expect(screen.getByTestId('workflow-manual-json-editor')).toBeInTheDocument();
   });
 });

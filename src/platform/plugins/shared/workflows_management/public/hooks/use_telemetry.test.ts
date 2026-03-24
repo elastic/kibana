@@ -17,16 +17,26 @@ describe('useTelemetry', () => {
     jest.clearAllMocks();
   });
 
-  it('should return a WorkflowsBaseTelemetry instance when telemetry service is available', async () => {
-    // The auto-mock from __mocks__/use_kibana.ts provides workflowsManagement.telemetry
+  it('should delegate reportEvent calls to the telemetry service', async () => {
+    const mockReportEvent = jest.fn();
+    const { useKibana } = await import('./use_kibana');
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { workflowsManagement: { telemetry: { reportEvent: mockReportEvent } } },
+    });
+
     const { useTelemetry } = await import('./use_telemetry');
     const { result } = renderHook(() => useTelemetry());
 
-    expect(result.current).toBeDefined();
-    expect(typeof result.current.reportWorkflowCreated).toBe('function');
+    result.current.reportWorkflowCreated({ workflowId: 'wf-1' });
+
+    expect(mockReportEvent).toHaveBeenCalledTimes(1);
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ workflowId: 'wf-1' })
+    );
   });
 
-  it('should return a no-op WorkflowsBaseTelemetry instance when telemetry is not available', async () => {
+  it('should return a no-op instance that does not throw when telemetry is unavailable', async () => {
     const { useKibana } = await import('./use_kibana');
     (useKibana as jest.Mock).mockReturnValue({
       services: { workflowsManagement: undefined },
@@ -35,8 +45,8 @@ describe('useTelemetry', () => {
     const { useTelemetry } = await import('./use_telemetry');
     const { result } = renderHook(() => useTelemetry());
 
-    expect(result.current).toBeDefined();
-    expect(typeof result.current.reportWorkflowCreated).toBe('function');
+    // Calling a telemetry method should not throw
+    expect(() => result.current.reportWorkflowCreated({ workflowId: 'wf-1' })).not.toThrow();
   });
 
   it('should return the same telemetry instance on subsequent calls', async () => {

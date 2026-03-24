@@ -8,20 +8,15 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
 import { useWorkflowExecution } from './use_workflow_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
+import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
 jest.mock('../../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-
-const createWrapper = (queryClient: QueryClient) => {
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-  return Wrapper;
-};
 
 describe('useWorkflowExecution', () => {
   let mockHttpGet: jest.Mock;
@@ -35,13 +30,11 @@ describe('useWorkflowExecution', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const services = createStartServicesMock();
     mockHttpGet = jest.fn().mockResolvedValue(executionResponse);
-    mockUseKibana.mockReturnValue({
-      services: { http: { get: mockHttpGet } },
-    } as any);
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
+    (services.http.get as jest.Mock) = mockHttpGet;
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
+    queryClient = createTestQueryClient();
   });
 
   afterEach(() => {
@@ -50,7 +43,7 @@ describe('useWorkflowExecution', () => {
 
   it('should fetch execution data when executionId is provided', async () => {
     const { result } = renderHook(() => useWorkflowExecution({ executionId: 'exec-1' }), {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -61,7 +54,7 @@ describe('useWorkflowExecution', () => {
 
   it('should not fetch when executionId is null', () => {
     const { result } = renderHook(() => useWorkflowExecution({ executionId: null }), {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     expect(result.current.isFetching).toBe(false);
@@ -71,7 +64,7 @@ describe('useWorkflowExecution', () => {
   it('should not fetch when enabled is false', () => {
     const { result } = renderHook(
       () => useWorkflowExecution({ executionId: 'exec-1', enabled: false }),
-      { wrapper: createWrapper(queryClient) }
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     expect(result.current.isFetching).toBe(false);
@@ -86,7 +79,7 @@ describe('useWorkflowExecution', () => {
           includeInput: true,
           includeOutput: false,
         }),
-      { wrapper: createWrapper(queryClient) }
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -100,11 +93,31 @@ describe('useWorkflowExecution', () => {
     mockHttpGet.mockRejectedValue(new Error('Not found'));
 
     const { result } = renderHook(() => useWorkflowExecution({ executionId: 'exec-1' }), {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error).toBeTruthy();
+  });
+
+  it('should exclude includeInput from query when undefined but include when false', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecution({
+          executionId: 'exec-1',
+          includeInput: undefined,
+          includeOutput: false,
+        }),
+      { wrapper: createQueryClientWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const query = mockHttpGet.mock.calls[0][1].query;
+    // undefined should NOT appear in query (source uses `!= null`)
+    expect(query).not.toHaveProperty('includeInput');
+    // false should appear (it is not null/undefined)
+    expect(query).toHaveProperty('includeOutput', false);
   });
 });

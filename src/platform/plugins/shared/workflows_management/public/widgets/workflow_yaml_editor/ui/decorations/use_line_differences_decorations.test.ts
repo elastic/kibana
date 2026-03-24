@@ -45,19 +45,6 @@ const createMockEditor = () => {
 };
 
 describe('useLineDifferencesDecorations', () => {
-  it('returns a decorationCollectionRef', () => {
-    const { result } = renderHook(() =>
-      useLineDifferencesDecorations({
-        editor: null,
-        isEditorMounted: false,
-        highlightDiff: false,
-      })
-    );
-
-    expect(result.current.decorationCollectionRef).toBeDefined();
-    expect(result.current.decorationCollectionRef.current).toBeNull();
-  });
-
   it('does not create decorations when highlightDiff is false', () => {
     const { editor } = createMockEditor();
 

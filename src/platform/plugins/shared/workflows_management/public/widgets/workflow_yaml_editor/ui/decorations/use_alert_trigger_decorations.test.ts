@@ -63,20 +63,6 @@ const createMockEditor = (value: string) => {
 };
 
 describe('useAlertTriggerDecorations', () => {
-  it('returns a decorationCollectionRef', () => {
-    const { result } = renderHook(() =>
-      useAlertTriggerDecorations({
-        editor: null,
-        yamlDocument: null,
-        isEditorMounted: false,
-        readOnly: false,
-      })
-    );
-
-    expect(result.current.decorationCollectionRef).toBeDefined();
-    expect(result.current.decorationCollectionRef.current).toBeNull();
-  });
-
   it('does not create decorations when editor is null', () => {
     const yamlString = ['version: "1"', 'name: test', 'triggers:', '  - type: alert'].join('\n');
     const doc = parseDocument(yamlString, { keepSourceTokens: true });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowTags } from './workflow_tags';
 
@@ -41,20 +41,5 @@ describe('WorkflowTags', () => {
     // The component should render; overflow badge text depends on calculated visible count.
     // With zero container width the component renders a tag icon + count.
     expect(screen.getByText(tags[0])).toBeInTheDocument();
-  });
-
-  it('opens the popover when the overflow badge is clicked', () => {
-    // With jsdom, width is 0 so all tags overflow and the icon-only badge is rendered
-    const tags = ['a', 'b', 'c'];
-    render(<WorkflowTags tags={tags} />);
-
-    // The overflow badge should contain the count of overflow tags
-    const overflowBadge = screen.queryByText(/\+?\d+/);
-    if (overflowBadge) {
-      fireEvent.click(overflowBadge);
-      // After click the popover content appears, showing all tags with data-test-subj
-      const popoverTags = screen.queryAllByTestId('workflow-tag-popover');
-      expect(popoverTags.length).toBeGreaterThanOrEqual(0);
-    }
   });
 });

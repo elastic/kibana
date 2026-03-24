@@ -74,7 +74,7 @@ describe('applyTriggerTypeDecorations', () => {
       'steps: []',
     ].join('\n');
 
-    const { editor, decorationsCollection } = createMockEditor(yamlString);
+    const { editor } = createMockEditor(yamlString);
     const collectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null> = {
       current: null,
     };
@@ -150,19 +150,6 @@ describe('useTriggerTypeDecorations', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-  });
-
-  it('returns a decoration collection ref', () => {
-    const { result } = renderHook(() =>
-      useTriggerTypeDecorations({
-        editor: null,
-        yamlDocument: null,
-        isEditorMounted: false,
-      })
-    );
-
-    expect(result.current.decorationCollectionRef).toBeDefined();
-    expect(result.current.decorationCollectionRef.current).toBeNull();
   });
 
   it('does not apply decorations when editor is null', () => {

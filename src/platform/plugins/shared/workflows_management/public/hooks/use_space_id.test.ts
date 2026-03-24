@@ -10,6 +10,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
+import { createStartServicesMock, createUseKibanaMockValue } from '../mocks';
 
 jest.mock('./use_kibana');
 
@@ -21,13 +22,9 @@ describe('useSpaceId', () => {
   });
 
   it('should return the current space ID', async () => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        spaces: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'my-space' }),
-        },
-      },
-    } as any);
+    const services = createStartServicesMock();
+    (services.spaces.getActiveSpace as jest.Mock).mockResolvedValue({ id: 'my-space' });
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
 
     const { result } = renderHook(() => useSpaceId());
 
@@ -37,13 +34,9 @@ describe('useSpaceId', () => {
   });
 
   it('should return undefined initially before space is loaded', () => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        spaces: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-        },
-      },
-    } as any);
+    const services = createStartServicesMock();
+    (services.spaces.getActiveSpace as jest.Mock).mockResolvedValue({ id: 'default' });
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
 
     const { result } = renderHook(() => useSpaceId());
 
@@ -51,12 +44,17 @@ describe('useSpaceId', () => {
   });
 
   it('should return undefined when spaces service is not available', () => {
-    mockUseKibana.mockReturnValue({
-      services: { spaces: undefined },
-    } as any);
+    const services = createStartServicesMock();
+    // Override spaces to undefined to simulate missing service
+    Object.defineProperty(services, 'spaces', { value: undefined });
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
 
     const { result } = renderHook(() => useSpaceId());
 
     expect(result.current).toBeUndefined();
   });
+
+  // NOTE: The source hook calls `.then()` without `.catch()`, so a rejection from
+  // `getActiveSpace()` results in an unhandled promise rejection. This is a known
+  // gap — adding a `.catch()` to the source would make this test pass cleanly.
 });

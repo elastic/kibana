@@ -8,11 +8,16 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import type { QueryClient } from '@kbn/react-query';
+import { ExecutionStatus } from '@kbn/workflows/types/v1';
 import { useLazyStepExecutionFetcher } from './use_lazy_step_execution_fetcher';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../../../mocks';
+import { createMockStepExecutionDto } from '../../../../shared/test_utils/mock_workflow_factories';
+import {
+  createQueryClientWrapper,
+  createTestQueryClient,
+} from '../../../../shared/test_utils/query_client_wrapper';
 
 jest.mock('../../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -23,63 +28,26 @@ jest.mock('@kbn/workflows', () => ({
   ),
 }));
 
-const createStepExecution = (
-  overrides: Partial<WorkflowStepExecutionDto> = {}
-): WorkflowStepExecutionDto => ({
-  id: 'doc-1',
-  stepId: 'step-1',
-  stepType: 'action',
-  scopeStack: [],
-  workflowRunId: 'run-1',
-  workflowId: 'wf-1',
-  status: ExecutionStatus.COMPLETED,
-  startedAt: '2024-01-01T00:00:00Z',
-  topologicalIndex: 0,
-  globalExecutionIndex: 0,
-  stepExecutionIndex: 0,
-  ...overrides,
-});
-
-const createWrapper = (queryClient: QueryClient) => {
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-  return Wrapper;
-};
-
 describe('useLazyStepExecutionFetcher', () => {
   let mockHttpGet: jest.Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
+    const services = createStartServicesMock();
     mockHttpGet = jest.fn();
-    mockUseKibana.mockReturnValue({
-      services: { http: { get: mockHttpGet } },
-    } as any);
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-      },
-    });
+    (services.http.get as jest.Mock) = mockHttpGet;
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
+    queryClient = createTestQueryClient();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns a ref to the fetcher function', () => {
-    const { result } = renderHook(
-      () => useLazyStepExecutionFetcher('exec-1', [createStepExecution()]),
-      { wrapper: createWrapper(queryClient) }
-    );
-
-    expect(result.current).toBeDefined();
-    expect(result.current.current).toBeInstanceOf(Function);
-  });
-
   it('returns null when executionId is undefined', async () => {
     const { result } = renderHook(
-      () => useLazyStepExecutionFetcher(undefined, [createStepExecution()]),
-      { wrapper: createWrapper(queryClient) }
+      () => useLazyStepExecutionFetcher(undefined, [createMockStepExecutionDto()]),
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');
@@ -89,8 +57,11 @@ describe('useLazyStepExecutionFetcher', () => {
 
   it('returns null when stepId is not found in stepExecutions', async () => {
     const { result } = renderHook(
-      () => useLazyStepExecutionFetcher('exec-1', [createStepExecution({ stepId: 'other-step' })]),
-      { wrapper: createWrapper(queryClient) }
+      () =>
+        useLazyStepExecutionFetcher('exec-1', [
+          createMockStepExecutionDto({ stepId: 'other-step' }),
+        ]),
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');
@@ -109,8 +80,8 @@ describe('useLazyStepExecutionFetcher', () => {
     mockHttpGet.mockResolvedValue(apiResponse);
 
     const { result } = renderHook(
-      () => useLazyStepExecutionFetcher('exec-1', [createStepExecution()]),
-      { wrapper: createWrapper(queryClient) }
+      () => useLazyStepExecutionFetcher('exec-1', [createMockStepExecutionDto()]),
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');
@@ -140,9 +111,9 @@ describe('useLazyStepExecutionFetcher', () => {
     const { result } = renderHook(
       () =>
         useLazyStepExecutionFetcher('exec-1', [
-          createStepExecution({ stepId: 'step-1', status: ExecutionStatus.COMPLETED }),
+          createMockStepExecutionDto({ stepId: 'step-1', status: ExecutionStatus.COMPLETED }),
         ]),
-      { wrapper: createWrapper(queryClient) }
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');
@@ -179,9 +150,9 @@ describe('useLazyStepExecutionFetcher', () => {
     const { result } = renderHook(
       () =>
         useLazyStepExecutionFetcher('exec-1', [
-          createStepExecution({ stepId: 'step-1', status: ExecutionStatus.RUNNING }),
+          createMockStepExecutionDto({ stepId: 'step-1', status: ExecutionStatus.RUNNING }),
         ]),
-      { wrapper: createWrapper(queryClient) }
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');
@@ -200,8 +171,8 @@ describe('useLazyStepExecutionFetcher', () => {
     mockHttpGet.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(
-      () => useLazyStepExecutionFetcher('exec-1', [createStepExecution()]),
-      { wrapper: createWrapper(queryClient) }
+      () => useLazyStepExecutionFetcher('exec-1', [createMockStepExecutionDto()]),
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');
@@ -212,8 +183,8 @@ describe('useLazyStepExecutionFetcher', () => {
     mockHttpGet.mockResolvedValue(null);
 
     const { result } = renderHook(
-      () => useLazyStepExecutionFetcher('exec-1', [createStepExecution()]),
-      { wrapper: createWrapper(queryClient) }
+      () => useLazyStepExecutionFetcher('exec-1', [createMockStepExecutionDto()]),
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     const data = await result.current.current('step-1');

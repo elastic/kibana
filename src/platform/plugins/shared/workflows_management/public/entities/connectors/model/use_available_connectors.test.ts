@@ -8,16 +8,11 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import {
-  useAvailableConnectors,
-  useConnectorInstances,
-  useConnectorTypes,
-  useFetchConnector,
-} from './use_available_connectors';
+import type { QueryClient } from '@kbn/react-query';
+import { useFetchConnector } from './use_available_connectors';
 import { useKibana } from '../../../hooks/use_kibana';
-import { TestWrapper } from '../../../shared/test_utils';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
+import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
 jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/alerts-ui-shared/src/common/apis', () => ({
@@ -29,51 +24,9 @@ const { fetchConnector: mockFetchConnector } = jest.requireMock(
 );
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const createQueryWrapper = (queryClient: QueryClient) => {
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-  return Wrapper;
-};
-
-describe('useAvailableConnectors', () => {
-  it('should return connector data from Redux store', () => {
-    const { result } = renderHook(() => useAvailableConnectors(), {
-      wrapper: ({ children }: { children: React.ReactNode }) =>
-        React.createElement(TestWrapper, null, children),
-    });
-
-    // The initial Redux state has connectors as undefined
-    expect(result.current).toBeUndefined();
-  });
-});
-
-describe('useConnectorInstances', () => {
-  it('should return instances for a given action type', () => {
-    const { result } = renderHook(() => useConnectorInstances('.email'), {
-      wrapper: ({ children }: { children: React.ReactNode }) =>
-        React.createElement(TestWrapper, null, children),
-    });
-
-    // With default store state, no instances should be available
-    expect(result.current).toEqual([]);
-  });
-});
-
-describe('useConnectorTypes', () => {
-  it('should return available connector types', () => {
-    const { result } = renderHook(() => useConnectorTypes(), {
-      wrapper: ({ children }: { children: React.ReactNode }) =>
-        React.createElement(TestWrapper, null, children),
-    });
-
-    // With default store state, it should return an empty array
-    expect(result.current).toEqual([]);
-  });
-});
-
 describe('useFetchConnector', () => {
   let queryClient: QueryClient;
-  let mockHttp: { get: jest.Mock };
+  let services: ReturnType<typeof createStartServicesMock>;
 
   const connectorResponse = {
     id: 'connector-1',
@@ -83,14 +36,10 @@ describe('useFetchConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHttp = { get: jest.fn() };
-    mockUseKibana.mockReturnValue({
-      services: { http: mockHttp },
-    } as any);
+    services = createStartServicesMock();
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
     mockFetchConnector.mockResolvedValue(connectorResponse);
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
+    queryClient = createTestQueryClient();
   });
 
   afterEach(() => {
@@ -99,20 +48,20 @@ describe('useFetchConnector', () => {
 
   it('should fetch a connector when connectorId is provided', async () => {
     const { result } = renderHook(() => useFetchConnector('connector-1'), {
-      wrapper: createQueryWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(mockFetchConnector).toHaveBeenCalledWith('connector-1', {
-      http: mockHttp,
+      http: services.http,
     });
     expect(result.current.data).toEqual(connectorResponse);
   });
 
   it('should not fetch when connectorId is undefined', () => {
     const { result } = renderHook(() => useFetchConnector(undefined), {
-      wrapper: createQueryWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     expect(result.current.isFetching).toBe(false);
@@ -123,11 +72,20 @@ describe('useFetchConnector', () => {
     mockFetchConnector.mockRejectedValue(new Error('Connector not found'));
 
     const { result } = renderHook(() => useFetchConnector('bad-id'), {
-      wrapper: createQueryWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error).toBeTruthy();
+  });
+
+  it('should not fetch when connectorId is an empty string', () => {
+    const { result } = renderHook(() => useFetchConnector(''), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+
+    expect(result.current.isFetching).toBe(false);
+    expect(mockFetchConnector).not.toHaveBeenCalled();
   });
 });

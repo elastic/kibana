@@ -10,6 +10,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { useNavigateToExecution } from './use_navigate_to_execution';
 import { PLUGIN_ID } from '../../../common';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../mocks';
 import { useKibana } from '../use_kibana';
 
 jest.mock('../use_kibana');
@@ -17,21 +18,19 @@ jest.mock('../use_kibana');
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('useNavigateToExecution', () => {
-  const mockNavigateToApp = jest.fn();
-  const mockGetUrlForApp = jest.fn(
-    (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
-  );
+  let mockNavigateToApp: jest.Mock;
+  let mockGetUrlForApp: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: mockNavigateToApp,
-          getUrlForApp: mockGetUrlForApp,
-        },
-      },
-    } as any);
+    const services = createStartServicesMock();
+    mockNavigateToApp = jest.fn();
+    mockGetUrlForApp = jest.fn(
+      (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
+    );
+    (services.application.navigateToApp as jest.Mock) = mockNavigateToApp;
+    (services.application.getUrlForApp as jest.Mock) = mockGetUrlForApp;
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
   });
 
   it('should return href with executions tab for a workflow without executionId', () => {

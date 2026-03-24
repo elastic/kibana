@@ -8,20 +8,15 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
 import { useWorkflowStepExecutions } from './use_workflow_step_executions';
 import { useKibana } from '../../../hooks/use_kibana';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
+import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
 jest.mock('../../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-
-const createWrapper = (queryClient: QueryClient) => {
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-  return Wrapper;
-};
 
 describe('useWorkflowStepExecutions', () => {
   let mockHttpGet: jest.Mock;
@@ -37,13 +32,11 @@ describe('useWorkflowStepExecutions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const services = createStartServicesMock();
     mockHttpGet = jest.fn().mockResolvedValue(stepExecutionsResponse);
-    mockUseKibana.mockReturnValue({
-      services: { http: { get: mockHttpGet } },
-    } as any);
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
+    (services.http.get as jest.Mock) = mockHttpGet;
+    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
+    queryClient = createTestQueryClient();
   });
 
   afterEach(() => {
@@ -52,7 +45,7 @@ describe('useWorkflowStepExecutions', () => {
 
   it('should fetch step executions for a workflow', async () => {
     const { result } = renderHook(() => useWorkflowStepExecutions({ workflowId: 'wf-1' }), {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -65,7 +58,7 @@ describe('useWorkflowStepExecutions', () => {
 
   it('should not fetch when workflowId is null', () => {
     const { result } = renderHook(() => useWorkflowStepExecutions({ workflowId: null }), {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     expect(result.current.isFetching).toBe(false);
@@ -75,7 +68,7 @@ describe('useWorkflowStepExecutions', () => {
   it('should include stepId in query when provided', async () => {
     const { result } = renderHook(
       () => useWorkflowStepExecutions({ workflowId: 'wf-1', stepId: 'fetch_data' }),
-      { wrapper: createWrapper(queryClient) }
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -88,7 +81,7 @@ describe('useWorkflowStepExecutions', () => {
   it('should pass page and size params when provided', async () => {
     const { result } = renderHook(
       () => useWorkflowStepExecutions({ workflowId: 'wf-1', page: 2, size: 50 }),
-      { wrapper: createWrapper(queryClient) }
+      { wrapper: createQueryClientWrapper(queryClient) }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -102,7 +95,7 @@ describe('useWorkflowStepExecutions', () => {
     mockHttpGet.mockRejectedValue(new Error('Server error'));
 
     const { result } = renderHook(() => useWorkflowStepExecutions({ workflowId: 'wf-1' }), {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

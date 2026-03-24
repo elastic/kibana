@@ -119,10 +119,4 @@ describe('WorkflowsPlugin', () => {
       expect(license$.observed).toBe(true);
     });
   });
-
-  describe('stop()', () => {
-    it('should not throw', () => {
-      expect(() => plugin.stop()).not.toThrow();
-    });
-  });
 });

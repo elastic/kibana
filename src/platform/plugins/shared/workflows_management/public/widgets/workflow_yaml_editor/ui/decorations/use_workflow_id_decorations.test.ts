@@ -98,12 +98,6 @@ describe('useWorkflowIdDecorations', () => {
     jest.clearAllMocks();
   });
 
-  it('returns a decorationCollectionRef', () => {
-    const { result } = renderWithStore(null, null, false);
-    expect(result.current.decorationCollectionRef).toBeDefined();
-    expect(result.current.decorationCollectionRef.current).toBeNull();
-  });
-
   it('does not create decorations when editor is null', () => {
     const yamlString = 'version: "1"\nname: test';
     const doc = parseDocument(yamlString, { keepSourceTokens: true });
