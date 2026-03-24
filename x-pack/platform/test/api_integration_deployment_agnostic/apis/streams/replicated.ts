@@ -75,7 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('GET returns replicated: true for a replicated data stream', async () => {
       const response = await getStream(apiClient, LEADER_STREAM);
-      expect(response.replicated).to.be(true);
+      expect((response as unknown as Record<string, unknown>).replicated).to.be(true);
       expect(response.stream.name).to.be(LEADER_STREAM);
     });
 
@@ -120,12 +120,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         422
       );
 
-      expect(body.message).to.contain('replicated');
+      expect((body as unknown as Record<string, unknown>).message).to.contain('replicated');
     });
 
     it('DELETE returns 422 for a replicated data stream', async () => {
       const body = await deleteStream(apiClient, LEADER_STREAM, 422);
-      expect(body.message).to.contain('replicated');
+      expect((body as unknown as Record<string, unknown>).message).to.contain('replicated');
     });
   });
 }
