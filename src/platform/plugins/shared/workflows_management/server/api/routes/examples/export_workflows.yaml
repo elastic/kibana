@@ -12,7 +12,11 @@ responses:
   200:
     description: 'A ZIP archive containing the exported workflow YAML files'
     content:
-      application/zip: {}
+      application/zip:
+        examples:
+          exportWorkflowsResponseExample:
+            description: 'A ZIP archive containing the exported workflow YAML files'
+            value: '{binary ZIP content}'
 x-codeSamples:
   - lang: curl
     source: |

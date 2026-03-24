@@ -49,8 +49,16 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
               includeOutput: schema.maybe(
                 schema.boolean({ meta: { description: 'Include step output data.' } })
               ),
-              page: schema.maybe(schema.number({ min: 1 })),
-              size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+              page: schema.maybe(
+                schema.number({ min: 1, meta: { description: 'Page number for pagination.' } })
+              ),
+              size: schema.maybe(
+                schema.number({
+                  min: 1,
+                  max: MAX_PAGE_SIZE,
+                  meta: { description: 'Number of results per page.' },
+                })
+              ),
             }),
           },
         },
