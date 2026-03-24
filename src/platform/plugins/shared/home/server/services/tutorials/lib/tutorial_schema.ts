@@ -32,7 +32,8 @@ const artifactsSchema = schema.object({
     })
   ),
   // Kibana dashboards created by this product.
-  dashboards: schema.arrayOf(dashboardSchema, { maxSize: 100 }),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+  dashboards: schema.arrayOf(dashboardSchema),
   application: schema.maybe(
     schema.object({
       path: schema.string(),
@@ -49,7 +50,8 @@ const statusCheckSchema = schema.object({
   success: schema.maybe(schema.string()),
   error: schema.maybe(schema.string()),
   esHitsCheck: schema.object({
-    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
+    // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
     query: schema.recordOf(schema.string(), schema.any()),
   }),
 });
@@ -58,7 +60,8 @@ export type StatusCheckSchema = TypeOf<typeof statusCheckSchema>;
 const instructionSchema = schema.object({
   title: schema.maybe(schema.string()),
   textPre: schema.maybe(schema.string()),
-  commands: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+  commands: schema.maybe(schema.arrayOf(schema.string())),
   textPost: schema.maybe(schema.string()),
   customComponentName: schema.maybe(schema.string()),
 });
@@ -66,7 +69,8 @@ export type Instruction = TypeOf<typeof instructionSchema>;
 
 const instructionVariantSchema = schema.object({
   id: schema.string(),
-  instructions: schema.arrayOf(instructionSchema, { maxSize: 100 }),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+  instructions: schema.arrayOf(instructionSchema),
   initialSelected: schema.maybe(schema.boolean()),
 });
 
@@ -82,13 +86,15 @@ const instructionSetSchema = schema.object({
     })
   ),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: schema.arrayOf(instructionVariantSchema, { maxSize: 100 }),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+  instructionVariants: schema.arrayOf(instructionVariantSchema),
   statusCheck: schema.maybe(statusCheckSchema),
 });
 export type InstructionSetSchema = TypeOf<typeof instructionSetSchema>;
 
 const instructionsSchema = schema.object({
-  instructionSets: schema.arrayOf(instructionSetSchema, { maxSize: 100 }),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+  instructionSets: schema.arrayOf(instructionSetSchema),
 });
 export type InstructionsSchema = TypeOf<typeof instructionsSchema>;
 
@@ -144,7 +150,8 @@ export const tutorialSchema = schema.object({
   customStatusCheckName: schema.maybe(schema.string()),
 
   // Category assignment for the integration browser
-  integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
+  integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string())),
 
   // Name of an equivalent package in EPR. e.g. this needs to be explicitly defined if it cannot be derived from a heuristic.
   eprPackageOverlap: schema.maybe(schema.string()),
