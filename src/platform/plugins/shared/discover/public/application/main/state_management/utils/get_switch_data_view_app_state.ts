@@ -10,7 +10,7 @@
 import { uniq } from 'lodash';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortArray } from '@kbn/discover-utils';
 import type { DiscoverAppState } from '../redux';
@@ -70,11 +70,14 @@ export function getDataViewAppState(
     );
   }
 
+  const isChartAvailable = nextDataView.type !== DataViewType.ROLLUP && nextDataView.isTimeBased();
+
   return {
     dataSource: nextDataView.id
       ? createDataViewDataSource({ dataViewId: nextDataView.id })
       : undefined,
     columns,
     sort: nextSort,
+    ...(!isChartAvailable && { hideTable: false }),
   };
 }

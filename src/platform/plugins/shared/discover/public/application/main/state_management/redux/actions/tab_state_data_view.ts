@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
@@ -126,13 +125,6 @@ export const changeDataView: InternalStateThunkActionCreator<
         uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
         currentAppState.query
       );
-
-      const isChartAvailable =
-        nextDataView.type !== DataViewType.ROLLUP && nextDataView.isTimeBased();
-
-      if (!isChartAvailable) {
-        nextAppState.hideTable = false;
-      }
 
       dispatch(internalStateActions.updateAppState({ tabId, appState: nextAppState }));
 
