@@ -163,6 +163,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView();
 
+  const [filteredDataView, setFilteredDataView] = useState(dataView);
   const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize(
     RESULTS_PAGE_SIZE_STORAGE_KEY
   );
@@ -190,7 +191,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   } = useResultsFiltering(
     {
       enabled: true,
-      dataView,
+      dataView: filteredDataView,
       actionId,
       scheduleId,
       executionCount,
@@ -423,12 +424,21 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       }
     };
 
-    allResultsData.edges.slice(0, 5).forEach((edge) => collectPaths(edge._source));
+    allResultsData.edges.slice(0, 5).forEach((edge) => {
+      collectPaths(edge._source);
+      // Also include field names from `edge.fields` — the table displays data
+      // from `fields` (via flattenOsqueryHit), so the SearchBar data view must
+      // know about them for filter badges to resolve correctly.
+      if (edge.fields) {
+        for (const fieldName of Object.keys(edge.fields)) {
+          names.add(fieldName);
+        }
+      }
+    });
 
     return Array.from(names).sort().join(',');
   }, [allResultsData?.edges]);
 
-  const [filteredDataView, setFilteredDataView] = useState(dataView);
   useEffect(() => {
     if (!dataView) return;
     if (!sourceFieldNamesKey) {
