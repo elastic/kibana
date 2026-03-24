@@ -46,4 +46,30 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
     expect(query).toContain('FirstSeenLogInPage > TO_DATETIME("2022-01-01T12:00:00.000Z")');
     expect(query).toMatchSnapshot();
   });
+
+  it('inserts whenConditionTrueSetFieldsAfterStats EVAL after STATS and before KEEP without recent. prefix', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildCcsLogsExtractionEsqlQuery({
+      indexPatterns: ['remote:metrics-*'],
+      entityDefinition: {
+        ...base,
+        whenConditionTrueSetFieldsAfterStats: [
+          {
+            condition: { field: 'host.name', eq: 'server1' },
+            fields: { 'host.name': { source: 'host.id' } },
+          },
+        ],
+      },
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      docsLimit: 100,
+    });
+    const statsIdx = query.indexOf('| STATS');
+    const afterStatsEvalIdx = query.indexOf('host.name = CASE(');
+    const keepIdx = query.indexOf('| KEEP');
+    expect(statsIdx).toBeGreaterThan(-1);
+    expect(afterStatsEvalIdx).toBeGreaterThan(statsIdx);
+    expect(keepIdx).toBeGreaterThan(afterStatsEvalIdx);
+    expect(query).not.toContain('recent.host.name');
+  });
 });
