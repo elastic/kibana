@@ -96,6 +96,15 @@ export const GridSectionTitle = React.memo(
       [sectionId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
 
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          toggleIsCollapsed();
+        }
+      },
+      [toggleIsCollapsed]
+    );
+
     return (
       <>
         <EuiFlexItem grow={false} css={styles.titleButton}>
@@ -106,7 +115,7 @@ export const GridSectionTitle = React.memo(
               defaultMessage: 'Toggle collapse',
             })}
             iconType={'arrowDown'}
-            onClick={toggleIsCollapsed}
+            onKeyDown={readOnly ? undefined : handleKeyDown}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
             aria-controls={`kbnGridSection-${sectionId}`}
