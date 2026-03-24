@@ -12,6 +12,10 @@ export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
 export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
 export const BIGGER_TIMEOUT = 45000;
 
+export const SERVICE_OPBEANS_NODE = 'opbeans-node';
+export const SERVICE_OPBEANS_JAVA = 'opbeans-java';
+export const SERVICE_OPBEANS_RUM = 'opbeans-rum';
+
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 // Error constants - based on opbeans synthtrace data
 export const ERROR_MESSAGE = '[MockError] Foo';

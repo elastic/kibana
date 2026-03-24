@@ -70,6 +70,7 @@ export const LICENSE_ALLOWED = [
   'Nuclide software',
   'Python-2.0',
   '(Apache-2.0 AND MIT)',
+  'Apache-2.0 AND MIT',
   'BlueOak-1.0.0',
   'WTFPL OR CC0-1.0',
 ];
@@ -82,10 +83,9 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 // but can be brought in on a per-package basis
 export const PER_PACKAGE_ALLOWED_LICENSES = {
   'openpgp@5.11.3': ['LGPL-3.0+'],
-  'dompurify@3.2.4': ['(MPL-2.0 OR Apache-2.0)'],
   '@img/sharp-libvips-linuxmusl-x64@1.2.3': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.2.3': ['LGPL-3.0-or-later'],
-  'dompurify@3.3.0': ['(MPL-2.0 OR Apache-2.0)'],
+  'dompurify@3.3.2': ['(MPL-2.0 OR Apache-2.0)'],
 };
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {

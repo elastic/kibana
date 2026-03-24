@@ -234,6 +234,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
+
   const [flyoutHeaderName, setFlyoutHeaderName] = useState<string>('Select a connector');
   useEffect(() => {
     if (actionType) {
@@ -244,6 +245,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       }
     }
   }, [actionType]);
+
+  const handleErrorFocus = useCallback((node: HTMLDivElement) => {
+    node?.focus();
+  }, []);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -296,7 +302,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  tabIndex={-1}
                   announceOnMount
+                  ref={handleErrorFocus}
                   size="s"
                   color="danger"
                   iconType="warning"

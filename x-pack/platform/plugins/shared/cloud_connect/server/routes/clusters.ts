@@ -11,6 +11,7 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { i18n } from '@kbn/i18n';
 import axios from 'axios';
+import { API_BASE_PATH } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
@@ -38,7 +39,7 @@ export const registerClustersRoute = ({
 }: ClustersRouteOptions) => {
   router.get(
     {
-      path: '/internal/cloud_connect/cluster_details',
+      path: `${API_BASE_PATH}/cluster_details`,
       security: {
         authz: {
           enabled: false,
@@ -143,7 +144,7 @@ export const registerClustersRoute = ({
 
   router.delete(
     {
-      path: '/internal/cloud_connect/cluster',
+      path: `${API_BASE_PATH}/cluster`,
       security: {
         authz: {
           enabled: false,
@@ -217,7 +218,7 @@ export const registerClustersRoute = ({
 
   router.put(
     {
-      path: '/internal/cloud_connect/cluster_details',
+      path: `${API_BASE_PATH}/cluster_details`,
       security: {
         authz: {
           enabled: false,

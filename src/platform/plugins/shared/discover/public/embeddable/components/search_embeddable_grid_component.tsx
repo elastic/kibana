@@ -223,6 +223,7 @@ export function SearchEmbeddableGridComponent({
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
+      onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTestTargetFromProcessArguments, stripRunCommand } from './cli_processing';
+import {
+  getRunCommand,
+  getTestTargetFromProcessArguments,
+  stripRunCommand,
+} from './cli_processing';
 
 describe('cli_processing', () => {
   describe('stripRunCommand', () => {
@@ -66,6 +70,49 @@ describe('cli_processing', () => {
       expect(() => stripRunCommand(argv)).toThrow(
         /Invalid command structure: Expected "node <playwright_path> test" or "npx playwright test"/
       );
+    });
+  });
+
+  describe('getRunCommand', () => {
+    const originalEnv = process.env.SCOUT_RUN_COMMAND;
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.SCOUT_RUN_COMMAND;
+      } else {
+        process.env.SCOUT_RUN_COMMAND = originalEnv;
+      }
+    });
+
+    it(`should prefer SCOUT_RUN_COMMAND when provided`, () => {
+      process.env.SCOUT_RUN_COMMAND =
+        'node scripts/scout.js run-tests --arch serverless --domain observability_complete --config path/to/config';
+
+      const argv = [
+        'npx',
+        'playwright',
+        'test',
+        '--config',
+        'path/to/config',
+        '--project',
+        'local',
+      ];
+      expect(getRunCommand(argv)).toBe(process.env.SCOUT_RUN_COMMAND);
+    });
+
+    it(`should fall back to stripRunCommand when SCOUT_RUN_COMMAND is not set`, () => {
+      delete process.env.SCOUT_RUN_COMMAND;
+      const argv = [
+        'npx',
+        'playwright',
+        'test',
+        '--config',
+        'path/to/config',
+        '--project',
+        'local',
+        '--grep=@local-serverless-search',
+      ];
+      expect(getRunCommand(argv)).toBe(stripRunCommand(argv));
     });
   });
 
