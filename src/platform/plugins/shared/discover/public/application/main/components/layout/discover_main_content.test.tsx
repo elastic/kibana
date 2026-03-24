@@ -37,11 +37,13 @@ const dataView = dataViewWithTimefieldMock;
 
 const mountComponent = async ({
   hideChart = false,
+  hideTable = false,
   isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
 }: {
   hideChart?: boolean;
+  hideTable?: boolean;
   isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
@@ -69,6 +71,7 @@ const mountComponent = async ({
         dataSource: createDataSource({ dataView, query }),
         interval: 'auto',
         hideChart,
+        hideTable,
         columns: [],
         query,
       },
@@ -150,6 +153,7 @@ describe('Discover main content component', () => {
     it('should include PanelsToggle when chart is not available', async () => {
       const component = await mountComponent({ isChartAvailable: false });
       expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(true);
+      expect(component.find(PanelsToggle).prop('omitTableButton')).toBe(true);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });
@@ -160,6 +164,13 @@ describe('Discover main content component', () => {
       expect(component.find(DiscoverDocuments).exists()).toBe(true);
       expect(component.find(PatternAnalysisTab).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+    });
+
+    it('should hide DiscoverDocuments when table is collapsed', async () => {
+      const component = await mountComponent({ hideTable: true });
+      expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
+      expect(component.find(PanelsToggle).exists()).toBe(false);
     });
 
     it('should show FieldStatisticsTab when VIEW_MODE is AGGREGATED_LEVEL', async () => {
@@ -174,6 +185,24 @@ describe('Discover main content component', () => {
       expect(component.find(DiscoverDocuments).exists()).toBe(false);
       expect(component.find(PatternAnalysisTab).exists()).toBe(true);
       expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+    });
+
+    it('should hide FieldStatisticsTab when table is collapsed', async () => {
+      const component = await mountComponent({
+        hideTable: true,
+        viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+      });
+      expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+      expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
+    });
+
+    it('should hide PatternAnalysisTab when table is collapsed', async () => {
+      const component = await mountComponent({
+        hideTable: true,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      });
+      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
+      expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
     });
   });
 });
