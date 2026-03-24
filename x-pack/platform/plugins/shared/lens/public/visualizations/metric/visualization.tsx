@@ -575,6 +575,10 @@ export const getMetricVisualization = ({
 
   onDatasourceUpdate(state, frame) {
     const datasource = frame?.datasourceLayers?.[state.layerId];
+    if (!datasource) {
+      return state;
+    }
+
     const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
     const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
       datasource,
