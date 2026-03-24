@@ -67,10 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('GET /api/streams/logs.ecs returns the root stream', async () => {
-      const { body } = await supertest
-        .get('/api/streams/logs.ecs')
-        .set(PUBLIC_HEADERS)
-        .expect(200);
+      const { body } = await supertest.get('/api/streams/logs.ecs').set(PUBLIC_HEADERS).expect(200);
 
       expect(body).to.have.property('stream');
       expect(body.stream).to.have.property('name', 'logs.ecs');
