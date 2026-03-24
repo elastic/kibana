@@ -199,19 +199,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       setSelectedStepExecutionId(id);
     }, []);
 
-    const handleChange = useCallback(
-      (newValue: string) => {
-        setValue(newValue);
-        try {
-          JSON.parse(newValue);
-          setErrors(null);
-        } catch {
-          setErrors(translations.invalidJson);
-        }
-      },
-      [setValue, setErrors]
-    );
-
     // Hook Monaco on mount to register the schema for validation + suggestions
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -279,7 +266,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                       maxLines: 15,
                     }}
                     width="100%"
-                    onChange={handleChange}
+                    onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj="workflow-test-step-historical-json-editor"
                     overflowWidgetsContainerZIndexOverride={6001}
@@ -339,9 +326,6 @@ const translations = {
     }),
   testRun: i18n.translate('workflows.testStepModal.testRun', {
     defaultMessage: 'Test Run',
-  }),
-  invalidJson: i18n.translate('workflows.testStepModal.invalidJson', {
-    defaultMessage: 'Invalid JSON',
   }),
   selectStepExecutionLabel: i18n.translate('workflows.testStepModal.selectStepExecutionLabel', {
     defaultMessage: 'Select step execution',
