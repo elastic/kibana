@@ -8,6 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
 import type {
@@ -32,8 +33,6 @@ import {
   AUTO_TARGET_NUMBER_OF_BUCKETS,
   getTimeZoneAndInterval,
   hasDateRange,
-  T_END,
-  T_START,
 } from './date_histogram_esql';
 
 // esAggs column ID manipulation functions
@@ -108,8 +107,6 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   ms: '1ms',
 } as const;
 
-export { T_START, T_END } from './date_histogram_esql';
-
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
 
 export function generateEsqlQuery(
@@ -142,8 +139,11 @@ export function generateEsqlQuery(
   const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
 
   if (indexPattern.timeFieldName) {
+    const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
     const timeField = `${esql.col(indexPattern.timeFieldName)}`;
-    queryParts.push(`WHERE ${timeField} >= ${T_START} AND ${timeField} <= ${T_END}`);
+    queryParts.push(
+      `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`
+    );
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);

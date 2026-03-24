@@ -33,6 +33,8 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import { esql } from '@elastic/esql';
+import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
+
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
@@ -44,8 +46,6 @@ import {
   getTimeZoneAndInterval,
   hasDateRange,
   restrictedInterval,
-  T_END,
-  T_START,
 } from '../../date_histogram_esql';
 
 const { isValidInterval } = search.aggs;
@@ -215,8 +215,9 @@ export const dateHistogramOperation: OperationDefinition<
 
     if (interval === AUTO_INTERVAL) {
       if (hasDateRange(dateRange)) {
+        const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
         return {
-          template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${T_START}, ${T_END})`,
+          template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${ESQL_TIME_RANGE_START}, ${ESQL_TIME_RANGE_END})`,
         };
       }
       // Fall back to default 1h when date range is missing
