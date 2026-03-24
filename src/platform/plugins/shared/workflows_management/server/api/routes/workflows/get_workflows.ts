@@ -8,7 +8,8 @@
  */
 
 import path from 'path';
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import type { GetWorkflowsParams } from '../../workflows_management_api';
 import type { RouteDependencies } from '../types';
 import {
   API_VERSION,
@@ -20,6 +21,31 @@ import {
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
+
+const querySchema = schema.object({
+  query: schema.maybe(schema.string({ meta: { description: 'Free-text search query.' } })),
+  size: schema.maybe(
+    schema.number({ min: 1, meta: { description: 'Number of results per page.' } })
+  ),
+  page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
+  enabled: schema.maybe(
+    schema.oneOf([schema.boolean(), schema.arrayOf(schema.boolean(), { maxSize: 2 })], {
+      meta: { description: 'Filter by enabled state.' },
+    })
+  ),
+  createdBy: schema.maybe(
+    schema.oneOf(
+      [schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })],
+      { meta: { description: 'Filter by creator.' } }
+    )
+  ),
+  tags: schema.maybe(
+    schema.oneOf(
+      [schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })],
+      { meta: { description: 'Filter by tags.' } }
+    )
+  ),
+});
 
 export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -40,51 +66,36 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
         options: {
           oasOperationObject: () => path.join(__dirname, '../examples/get_workflows.yaml'),
         },
-        validate: {
-          request: {
-            query: schema.object({
-              size: schema.maybe(
-                schema.number({ min: 1, meta: { description: 'Number of results per page.' } })
-              ),
-              page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
-              enabled: schema.maybe(
-                schema.arrayOf(schema.boolean(), {
-                  meta: { description: 'Filter by enabled state.' },
-                  maxSize: 2,
-                })
-              ),
-              createdBy: schema.maybe(
-                schema.arrayOf(schema.string(), {
-                  meta: { description: 'Filter by creator.' },
-                  maxSize: MAX_ARRAY_PARAM_SIZE,
-                })
-              ),
-              tags: schema.maybe(
-                schema.arrayOf(schema.string(), {
-                  meta: { description: 'Filter by tags.' },
-                  maxSize: MAX_ARRAY_PARAM_SIZE,
-                })
-              ),
-              query: schema.maybe(
-                schema.string({ meta: { description: 'Free-text search query.' } })
-              ),
-            }),
-          },
-        },
+        validate: { request: { query: querySchema } },
       },
       withLicenseCheck(async (context, request, response) => {
         try {
-          const { size, page, enabled, createdBy, tags, query } = request.query;
+          const params = prepareParams(request.query);
           const spaceId = spaces.getSpaceId(request);
           return response.ok({
-            body: await api.getWorkflows(
-              { size: size ?? MAX_PAGE_SIZE, page: page ?? 1, enabled, createdBy, tags, query },
-              spaceId
-            ),
+            body: await api.getWorkflows(params, spaceId),
           });
         } catch (error) {
           return handleRouteError(response, error);
         }
       })
     );
+}
+
+function prepareParams({
+  size,
+  page,
+  enabled,
+  createdBy,
+  tags,
+  query,
+}: TypeOf<typeof querySchema>): GetWorkflowsParams {
+  return {
+    query,
+    size: size ?? MAX_PAGE_SIZE,
+    page: page ?? 1,
+    enabled: enabled != null && !Array.isArray(enabled) ? [enabled] : enabled,
+    createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
+    tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
+  };
 }

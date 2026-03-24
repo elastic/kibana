@@ -57,7 +57,21 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
-  const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
+
+  const searchParams = useMemo(() => {
+    if (search.enabled != null) {
+      // The stats aggs return enabled as 0 (false) and 1 (true), we need to convert the values to booleans for the search params.
+      return { ...search, enabled: search.enabled.map((enabled) => Boolean(enabled)) };
+    }
+    return search;
+  }, [search]);
+
+  const {
+    data: workflows,
+    isLoading: isLoadingWorkflows,
+    error,
+    refetch,
+  } = useWorkflows(searchParams);
   const {
     eventDrivenExecutionEnabled,
     isLoading: isLoadingEventDrivenStatus,
