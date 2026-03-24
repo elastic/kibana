@@ -65700,12 +65700,6 @@ paths:
                   ids:
                     - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
-              mgetWorkflowsWithSourceRequestExample:
-                description: Example request to retrieve only the name and enabled fields
-                value:
-                  ids:
-                    - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
-                    - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
                   source:
                     - name
                     - enabled
