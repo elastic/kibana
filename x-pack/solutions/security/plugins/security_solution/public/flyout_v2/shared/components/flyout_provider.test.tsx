@@ -11,13 +11,48 @@ import { createMemoryHistory } from 'history';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { StartServices } from '../../../types';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { flyoutProviders } from './flyout_provider';
+
+jest.mock('../../../common/components/discover_in_timeline/provider', () => ({
+  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 
 const services = {
   uiActions: {
     getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
   },
+  upselling: new UpsellingService(),
+  application: {
+    capabilities: {
+      [SECURITY_FEATURE_ID]: {
+        crud: false,
+        show: false,
+      },
+      securitySolutionTimeline: {
+        read: false,
+        crud: false,
+      },
+      securitySolutionNotes: {
+        read: false,
+        crud: false,
+      },
+    },
+  },
+  notifications: {
+    toasts: {
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      addInfo: jest.fn(),
+      remove: jest.fn(),
+    },
+  },
+  http: {},
 } as unknown as StartServices;
 
 const LocationProbe = () => {
