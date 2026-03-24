@@ -39,6 +39,7 @@ interface OAuthConnectorConfig {
  */
 export interface OAuthConfig {
   authorizationUrl: string;
+  tokenUrl: string;
   clientId: string;
   scope?: string;
 }
@@ -128,16 +129,18 @@ export class OAuthAuthorizationService {
     // For connector specs, OAuth config is always in secrets (encrypted)
     // Fallback to config for backwards compatibility with legacy connectors
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
+    const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
-    if (!authorizationUrl || !clientId) {
+    if (!authorizationUrl || !tokenUrl || !clientId) {
       throw new Error(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
+        'Connector missing required OAuth configuration (authorizationUrl, tokenUrl, clientId)'
       );
     }
 
     return {
       authorizationUrl,
+      tokenUrl,
       clientId,
       scope,
     };

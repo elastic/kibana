@@ -16,6 +16,7 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 
 const paramsSchema = schema.object({
   connectorId: schema.string(),
@@ -34,7 +35,8 @@ export const oauthAuthorizeRoute = (
   licenseState: ILicenseState,
   logger: Logger,
   coreSetup: CoreSetup<ActionsPluginsStart>,
-  oauthRateLimiter: OAuthRateLimiter
+  oauthRateLimiter: OAuthRateLimiter,
+  configurationUtilities: ActionsConfigurationUtilities
 ) => {
   router.post(
     {
@@ -114,6 +116,12 @@ export const oauthAuthorizeRoute = (
             namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
           }
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
+
+          // Validate authorizationUrl against xpack.actions.allowedHosts
+          configurationUtilities.ensureUriAllowed(oauthConfig.authorizationUrl);
+          // Validate tokenUrl against xpack.actions.allowedHosts (used by callback + token refresh)
+          configurationUtilities.ensureUriAllowed(oauthConfig.tokenUrl);
+
           const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
 
           // Validate return URL for post-OAuth redirect.
