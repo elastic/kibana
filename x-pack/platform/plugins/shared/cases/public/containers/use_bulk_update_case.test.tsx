@@ -56,6 +56,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({
         cases: [{ id: basicCaseFixture.id, version: basicCaseFixture.version }],
         successToasterTitle: 'Success title',
+        originalCases: [basicCaseFixture],
       });
     });
 
@@ -77,6 +78,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({
         cases: [{ id: basicCaseFixture.id, version: basicCaseFixture.version }],
         successToasterTitle: 'Success title',
+        originalCases: [basicCaseFixture],
       });
     });
 
@@ -98,6 +100,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({
         cases: [{ id: basicCaseFixture.id, version: basicCaseFixture.version }],
         successToasterTitle: 'Success title',
+        originalCases: [basicCaseFixture],
       });
     });
 
@@ -157,6 +160,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({
         cases: [{ id: basicCaseFixture.id, version: basicCaseFixture.version }],
         successToasterTitle: 'Success title',
+        originalCases: [basicCaseFixture],
       });
     });
 

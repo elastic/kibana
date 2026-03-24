@@ -17,9 +17,19 @@ import { rebaseCaseMutationOnConflict } from './conflict_rebase';
 interface MutationArgs {
   cases: CaseUpdateRequest[];
   successToasterTitle: string;
-  originalCases?: CasesUI;
+  originalCases: CasesUI;
 }
 
+/**
+ * Executes bulk case updates and retries once on version conflicts caused only by
+ * system-managed field drift.
+ *
+ * `cases` is the minimal patch payload sent to the API. `originalCases` is the
+ * pre-update snapshot used to decide whether a 409 can be safely rebased with
+ * fresh versions. `originalCases` may be a superset of `cases` when unchanged
+ * selected cases are filtered out before the request; only matching ids are used
+ * for the rebase check.
+ */
 export const useUpdateCases = () => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
@@ -28,10 +38,9 @@ export const useUpdateCases = () => {
     (request: MutationArgs) =>
       rebaseCaseMutationOnConflict({
         request,
-        staleCases:
-          request.originalCases?.filter(({ id }) =>
-            request.cases.some((caseToUpdate) => caseToUpdate.id === id)
-          ) ?? [],
+        staleCases: request.originalCases.filter(({ id }) =>
+          request.cases.some((caseToUpdate) => caseToUpdate.id === id)
+        ),
         executeRequest: ({ cases }) => updateCases({ cases }),
         fetchLatestCase: (caseId) => getCase({ caseId }),
         buildRetryRequest: ({ request: retryRequest, latestCases }) => ({
