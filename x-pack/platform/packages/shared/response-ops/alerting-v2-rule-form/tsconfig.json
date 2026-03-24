@@ -40,8 +40,7 @@
     "@kbn/field-types",
     "@kbn/lens-plugin",
     "@kbn/visualization-utils",
-    "@kbn/expressions-plugin",
-    "@kbn/alerting-v2-plugin"
+    "@kbn/expressions-plugin"
   ]
 }
 

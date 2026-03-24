@@ -8,7 +8,6 @@
 import { useMutation } from '@kbn/react-query';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-plugin/public/constants';
 import type { FormValues } from '../types';
 import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
 
@@ -22,7 +21,7 @@ export const useUpdateRule = ({ http, notifications, ruleId }: UseUpdateRuleProp
   const mutation = useMutation(
     (formValues: FormValues) => {
       return http.patch<RuleResponse>(
-        `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
+        `/api/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
         {
           body: JSON.stringify(mapFormValuesToUpdateRequest(formValues)),
         }

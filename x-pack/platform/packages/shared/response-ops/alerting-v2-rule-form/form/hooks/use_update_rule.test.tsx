@@ -8,7 +8,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-plugin/public/constants';
 import { createQueryClientWrapper } from '../../test_utils';
 import { useUpdateRule } from './use_update_rule';
 import type { FormValues } from '../types';
@@ -68,7 +67,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(http.patch).toHaveBeenCalledWith(
-        `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
+        `/api/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
         expect.any(Object)
       );
     });
@@ -137,7 +136,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(http.patch).toHaveBeenCalledWith(
-        `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
+        `/api/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
         { body: JSON.stringify(expectedPayload) }
       );
     });

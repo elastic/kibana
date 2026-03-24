@@ -8,7 +8,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-plugin/public/constants';
 import { createQueryClientWrapper } from '../../test_utils';
 import { useCreateRule } from './use_create_rule';
 import type { FormValues } from '../types';
@@ -93,7 +92,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, expect.any(Object));
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rule', expect.any(Object));
     });
   });
 
@@ -117,7 +116,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rule', {
         body: JSON.stringify(expectedApiPayload),
       });
     });
@@ -374,7 +373,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rule', {
         body: JSON.stringify(expectedPayload),
       });
     });

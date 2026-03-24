@@ -8,8 +8,9 @@
 import { useRef } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-plugin/public/constants';
 import useAsync from 'react-use/lib/useAsync';
+
+const RULE_API_PATH = '/api/alerting/v2/rule';
 
 export interface UseAlertingRulesIndexOptions {
   ruleIds: string[];
@@ -35,7 +36,7 @@ export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesInd
     }
 
     const rulesResponse = await services.http.get<FindRulesResponse>(
-      `${ALERTING_V2_RULE_API_PATH}/_bulk`,
+      `${RULE_API_PATH}/_bulk`,
       {
         query: { ids: uncachedIds },
       }
