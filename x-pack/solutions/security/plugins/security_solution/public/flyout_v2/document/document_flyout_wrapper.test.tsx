@@ -10,16 +10,16 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { TestProviders } from '../../../common/mock';
-import { OverviewTabWrapper } from './overview_tab_wrapper';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { TestProviders } from '../../common/mock';
+import { DocumentFlyoutWrapper } from './document_flyout_wrapper';
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../data_view_manager/hooks/use_data_view');
 
-const mockOverviewTab = jest.fn((props: unknown) => <div data-test-subj="overviewTabStub" />);
-jest.mock('./overview_tab', () => ({
-  OverviewTab: (props: unknown) => mockOverviewTab(props),
+const mockDocumentFlyout = jest.fn((props: unknown) => <div data-test-subj="documentFlyoutStub" />);
+jest.mock('.', () => ({
+  DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
 }));
 
 const mockDataView = {
@@ -27,14 +27,18 @@ const mockDataView = {
   getIndexPattern: () => 'logs-*',
 };
 
-const renderEventOverviewFlyoutContent = () =>
+const renderDocumentFlyoutWrapper = () =>
   render(
     <TestProviders>
-      <OverviewTabWrapper documentId="doc-id" indexName="my-index" renderCellActions={jest.fn()} />
+      <DocumentFlyoutWrapper
+        documentId="doc-id"
+        indexName="my-index"
+        renderCellActions={jest.fn()}
+      />
     </TestProviders>
   );
 
-describe('EventOverviewFlyoutContent', () => {
+describe('DocumentFlyoutWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -46,7 +50,7 @@ describe('EventOverviewFlyoutContent', () => {
   });
 
   it('fetches clicked document using document id and index', () => {
-    renderEventOverviewFlyoutContent();
+    renderDocumentFlyoutWrapper();
 
     expect(useEsDocSearch).toHaveBeenCalledWith({
       id: 'doc-id',
@@ -62,7 +66,7 @@ describe('EventOverviewFlyoutContent', () => {
       dataView: mockDataView,
     });
 
-    const { getByTestId } = renderEventOverviewFlyoutContent();
+    const { getByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('analyzer-event-overview-loading')).toBeInTheDocument();
     expect(useEsDocSearch).toHaveBeenCalledWith(
@@ -72,14 +76,14 @@ describe('EventOverviewFlyoutContent', () => {
     );
   });
 
-  it('renders OverviewTab when document is found', () => {
+  it('renders DocumentFlyout when document is found', () => {
     const hit = { id: '1' } as DataTableRecord;
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
 
-    const { getByTestId } = renderEventOverviewFlyoutContent();
+    const { getByTestId } = renderDocumentFlyoutWrapper();
 
-    expect(getByTestId('overviewTabStub')).toBeInTheDocument();
-    expect(mockOverviewTab).toHaveBeenCalledWith(
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         hit,
       })
@@ -89,7 +93,7 @@ describe('EventOverviewFlyoutContent', () => {
   it('renders not-found state when no document matches', () => {
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
 
-    const { getByTestId } = renderEventOverviewFlyoutContent();
+    const { getByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('analyzer-event-overview-not-found')).toBeInTheDocument();
   });
@@ -97,7 +101,7 @@ describe('EventOverviewFlyoutContent', () => {
   it('renders error state when document fetch fails', () => {
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Error, null, jest.fn()]);
 
-    const { getByTestId } = renderEventOverviewFlyoutContent();
+    const { getByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('analyzer-event-overview-fetch-error')).toBeInTheDocument();
   });
