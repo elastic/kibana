@@ -81,7 +81,7 @@ const getTermAggregation = (key: keyof EntitiesGroupingAggregation, field: strin
   },
 });
 
-const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
+export const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   if (isNoneGroup([field])) {
     return [];
   }
@@ -102,7 +102,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   return aggMetrics;
 };
 
-const buildResolutionGroupingQuery = ({
+export const buildResolutionGroupingQuery = ({
   filters,
   pageIndex,
   pageSize,
