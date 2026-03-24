@@ -10,7 +10,7 @@ import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Selection Modal without AI Assistants Privileges',
-  { tag: ['@ess'] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsNonAssistantUser();

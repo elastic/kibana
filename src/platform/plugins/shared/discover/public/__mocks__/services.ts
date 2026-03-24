@@ -272,7 +272,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
-    notifications: notificationServiceMock.createStartContract(),
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
+    },
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
@@ -315,6 +317,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
       clearEditorState: jest.fn(),
+    },
+    alertingVTwo: {
+      DynamicRuleFormFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;

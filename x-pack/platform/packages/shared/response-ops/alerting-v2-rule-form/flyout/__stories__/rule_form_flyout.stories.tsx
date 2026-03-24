@@ -57,6 +57,10 @@ const mockServices = {
       subscribe: () => ({ unsubscribe: () => {} }),
     },
   } as any,
+  lens: {
+    EmbeddableComponent: () => null,
+    stateHelperApi: () => ({}),
+  } as any,
 };
 
 const mockFormServices: RuleFormServices = {
@@ -65,6 +69,7 @@ const mockFormServices: RuleFormServices = {
   dataViews: mockServices.dataViews,
   application: mockServices.application,
   notifications: mockServices.notifications,
+  lens: mockServices.lens,
 };
 
 // =============================================================================

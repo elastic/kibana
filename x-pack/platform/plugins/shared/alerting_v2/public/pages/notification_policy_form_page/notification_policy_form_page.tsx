@@ -149,7 +149,7 @@ const NotificationPolicyFormPageContent = ({
   const onSubmitUpdate = (id: string, data: UpdateNotificationPolicyBody) =>
     updatePolicy({ id, data }, { onSuccess });
 
-  const { methods, isEditMode, handleSubmit } = useNotificationPolicyForm({
+  const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useNotificationPolicyForm({
     initialValues: initialPolicy,
     onSubmitCreate,
     onSubmitUpdate,
@@ -202,7 +202,7 @@ const NotificationPolicyFormPageContent = ({
               fill
               onClick={handleSubmit}
               isLoading={isLoading}
-              disabled={!methods.formState.isValid}
+              disabled={!isSubmitEnabled}
               data-test-subj="submitButton"
             >
               {isEditMode ? (

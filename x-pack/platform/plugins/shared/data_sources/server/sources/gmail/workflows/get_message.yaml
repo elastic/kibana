@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.gmail.get_message'
+description: 'Retrieve one Gmail message by ID. You must call search or list first to get message IDs, then pass one of those IDs here.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: messageId
+    type: string
+    required: true
+    description: "Required. The Gmail message ID to fetch. Get this from searchMessages or listMessages (id field); always pass it when calling get_message."
+  - name: format
+    type: string
+    required: false
+    description: "Message format: 'minimal' (headers only, recommended) or 'full' (includes body). Use minimal unless user needs email body."
+steps:
+  - name: get_message
+    type: gmail.getMessage
+    connector-id: <%= gmail-stack-connector-id %>
+    with:
+      messageId: "${{inputs.messageId}}"
+      format: "${{inputs.format}}"

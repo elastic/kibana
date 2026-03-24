@@ -41,9 +41,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
       const alertEventsBatch = buildBatch([...state.esqlRowBatch]);
 
-      if (alertEventsBatch.length > 0) {
-        yield { type: 'continue', state: { ...state, alertEventsBatch } };
-      }
+      yield { type: 'continue', state: { ...state, alertEventsBatch } };
     });
   }
 }

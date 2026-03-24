@@ -16,6 +16,8 @@
       "data",
       "dataViews",
       "esql",
+      "kql",
+      "lens",
       "security",
       "encryptedSavedObjects",
       "workflowsManagement"

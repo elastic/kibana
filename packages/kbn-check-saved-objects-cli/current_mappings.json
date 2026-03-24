@@ -338,6 +338,9 @@
       "createdBy": {
         "type": "keyword"
       },
+      "createdByUsername": {
+        "type": "keyword"
+      },
       "description": {
         "fields": {
           "keyword": {
@@ -361,6 +364,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "groupBy": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -378,12 +384,29 @@
       },
       "updatedBy": {
         "type": "keyword"
+      },
+      "updatedByUsername": {
+        "type": "keyword"
       }
     }
   },
   "alerting_rule": {
     "dynamic": false,
     "properties": {
+      "artifacts": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "createdAt": {
         "type": "date"
       },
@@ -1657,6 +1680,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1683,6 +1709,10 @@
       },
       "internal": {
         "type": "boolean"
+      },
+      "is_dependency_of": {
+        "dynamic": false,
+        "properties": {}
       },
       "keep_policies_up_to_date": {
         "index": false,
@@ -2190,6 +2220,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
@@ -2206,6 +2239,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2355,6 +2392,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -2620,6 +2660,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_diagnostics": {
         "index": false,
         "type": "flattened"
@@ -2648,6 +2691,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2979,6 +3026,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -3393,6 +3443,20 @@
       }
     }
   },
+  "oauth_state": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "state": {
+        "type": "keyword"
+      }
+    }
+  },
   "observability-onboarding-state": {
     "properties": {
       "progress": {
@@ -3800,6 +3864,9 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "deprecated": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -4696,6 +4763,25 @@
       }
     }
   },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "upgrade-assistant-ml-upgrade-operation": {
     "dynamic": false,
     "properties": {
@@ -4776,6 +4862,20 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user_connector_token": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "credentialType": {
+        "type": "keyword"
+      },
+      "profileUid": {
         "type": "keyword"
       }
     }

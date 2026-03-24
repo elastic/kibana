@@ -8,6 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
+import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -26,7 +27,9 @@ export class FetchPoliciesStep implements DispatcherStep {
   ) {}
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const result = await this.notificationPolicySavedObjectService.findAllDecrypted();
+    const result = await this.notificationPolicySavedObjectService.findAllDecrypted({
+      filter: { enabled: true },
+    });
 
     const policies = new Map<NotificationPolicyId, NotificationPolicy>();
 
@@ -37,13 +40,14 @@ export class FetchPoliciesStep implements DispatcherStep {
 
       policies.set(doc.id, {
         id: doc.id,
+        spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.name,
         enabled: doc.attributes.enabled,
         destinations: doc.attributes.destinations ?? [],
-        matcher: doc.attributes.matcher,
-        groupBy: doc.attributes.group_by ?? [],
-        throttle: doc.attributes.throttle,
-        snoozedUntil: doc.attributes.snoozedUntil,
+        matcher: doc.attributes.matcher ?? undefined,
+        groupBy: doc.attributes.groupBy ?? [],
+        throttle: doc.attributes.throttle ?? undefined,
+        snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.auth.apiKey,
       });
     }

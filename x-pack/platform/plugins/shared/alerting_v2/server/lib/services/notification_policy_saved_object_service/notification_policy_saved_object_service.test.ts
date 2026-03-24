@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { NotificationPolicySavedObjectService } from './notification_policy_saved_object_service';
@@ -22,7 +23,9 @@ const mockAttrs: NotificationPolicySavedObjectAttributes = {
     createdByUser: false,
   },
   createdBy: 'elastic',
+  createdByUsername: 'elastic',
   updatedBy: 'elastic',
+  updatedByUsername: 'elastic',
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };
@@ -30,11 +33,13 @@ const mockAttrs: NotificationPolicySavedObjectAttributes = {
 describe('NotificationPolicySavedObjectService', () => {
   let service: NotificationPolicySavedObjectService;
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockEncryptedSoClient: jest.Mocked<EncryptedSavedObjectsClient>;
 
   beforeEach(() => {
     const mocks = createNotificationPolicySavedObjectService();
     service = mocks.notificationPolicySavedObjectService;
     mockSoClient = mocks.mockSavedObjectsClient;
+    mockEncryptedSoClient = mocks.mockEncryptedSavedObjectsClient;
   });
 
   afterEach(() => {
@@ -349,6 +354,135 @@ describe('NotificationPolicySavedObjectService', () => {
       });
 
       expect(result).toEqual([{ id: 'policy-missing', error: soError }]);
+    });
+  });
+
+  describe('bulkDelete', () => {
+    it('returns empty array when ids is empty without calling the client', async () => {
+      const result = await service.bulkDelete({ ids: [] });
+
+      expect(result).toEqual([]);
+      expect(mockSoClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes saved objects and returns id for each', async () => {
+      mockSoClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      const result = await service.bulkDelete({ ids: ['policy-1', 'policy-2'] });
+
+      expect(result).toEqual([{ id: 'policy-1' }, { id: 'policy-2' }]);
+      expect(mockSoClient.bulkDelete).toHaveBeenCalledWith([
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2' },
+      ]);
+    });
+
+    it('returns errors for failed deletes', async () => {
+      const soError = { statusCode: 404, error: 'Not Found', message: 'Not found' };
+      mockSoClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-missing',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            success: false,
+            error: soError,
+          },
+        ],
+      });
+
+      const result = await service.bulkDelete({ ids: ['policy-missing'] });
+
+      expect(result).toEqual([{ id: 'policy-missing', error: soError }]);
+    });
+  });
+
+  describe('findAllDecrypted', () => {
+    const mockClose = jest.fn();
+
+    beforeEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('does not pass a filter when called without params', async () => {
+      mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
+        async *find() {},
+        close: mockClose,
+      } as any);
+
+      await service.findAllDecrypted();
+
+      expect(
+        mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith({
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: ['*'],
+        perPage: 1000,
+      });
+    });
+
+    it('passes an enabled filter to the PIT finder when filter.enabled is provided', async () => {
+      mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
+        async *find() {},
+        close: mockClose,
+      } as any);
+
+      await service.findAllDecrypted({ filter: { enabled: true } });
+
+      expect(
+        mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith({
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: ['*'],
+        perPage: 1000,
+        filter: `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+      });
+    });
+
+    it('returns attributes and namespaces for successful documents', async () => {
+      mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
+        async *find() {
+          yield {
+            saved_objects: [
+              { id: 'p1', attributes: mockAttrs, namespaces: ['default'], references: [] },
+            ],
+          };
+        },
+        close: mockClose,
+      } as any);
+
+      const result = await service.findAllDecrypted();
+
+      expect(result).toEqual([{ id: 'p1', attributes: mockAttrs, namespaces: ['default'] }]);
+      expect(mockClose).toHaveBeenCalled();
+    });
+
+    it('returns errors for documents that failed decryption', async () => {
+      const soError = { statusCode: 500, error: 'Error', message: 'Decryption failed' };
+      mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
+        async *find() {
+          yield {
+            saved_objects: [{ id: 'p1', error: soError, attributes: {}, references: [] }],
+          };
+        },
+        close: mockClose,
+      } as any);
+
+      const result = await service.findAllDecrypted();
+
+      expect(result).toEqual([{ id: 'p1', error: soError }]);
     });
   });
 });

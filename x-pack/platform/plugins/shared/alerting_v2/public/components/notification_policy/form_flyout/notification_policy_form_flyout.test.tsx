@@ -12,6 +12,20 @@ import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NotificationPolicyFormFlyout } from './notification_policy_form_flyout';
 
+jest.mock('../form/components/matcher_input', () => ({
+  MatcherInput: (props: {
+    value: string;
+    onChange: (v: string) => void;
+    'data-test-subj'?: string;
+  }) => (
+    <input
+      data-test-subj={props['data-test-subj']}
+      value={props.value}
+      onChange={(e) => props.onChange(e.target.value)}
+    />
+  ),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -118,12 +132,15 @@ describe('NotificationPolicyFormFlyout', () => {
       description: 'Routes critical alerts',
       enabled: true,
       matcher: 'data.severity : "critical"',
-      group_by: ['host.name', 'service.name'],
+      groupBy: ['host.name', 'service.name'],
       throttle: { interval: '5m' },
+      snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
+      createdByUsername: 'elastic',
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
+      updatedByUsername: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
       auth: {
         owner: 'elastic',
@@ -151,7 +168,7 @@ describe('NotificationPolicyFormFlyout', () => {
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       matcher: 'data.severity : "critical"',
-      group_by: ['host.name', 'service.name'],
+      groupBy: ['host.name', 'service.name'],
       throttle: { interval: '5m' },
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
     });

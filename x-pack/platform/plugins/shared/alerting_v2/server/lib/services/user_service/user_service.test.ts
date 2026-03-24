@@ -27,6 +27,19 @@ describe('UserService', () => {
     });
   });
 
+  it('returns the current user info when user profile service is available', async () => {
+    const { userService, userProfile } = createUserService();
+
+    await expect(userService.getCurrentUserProfile()).resolves.toEqual({
+      uid: 'elastic_profile_uid',
+      username: 'elastic',
+    });
+
+    expect(userProfile.getCurrent).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
+  });
+
   it('returns null when the profile is not found', async () => {
     const { userService, userProfile } = createUserService();
     userProfile.getCurrent.mockResolvedValue(null);
@@ -70,5 +83,15 @@ describe('UserService', () => {
     security.authc.getCurrentUser.mockReturnValue(null);
 
     await expect(userService.getCurrentUsername()).resolves.toBeNull();
+  });
+
+  it('returns null user info when the profile is not found', async () => {
+    const { userService, userProfile } = createUserService();
+    userProfile.getCurrent.mockResolvedValue(null);
+
+    await expect(userService.getCurrentUserProfile()).resolves.toEqual({
+      uid: null,
+      username: null,
+    });
   });
 });

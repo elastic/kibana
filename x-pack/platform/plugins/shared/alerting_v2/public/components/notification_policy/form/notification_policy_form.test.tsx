@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,6 +14,20 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
+
+jest.mock('./components/matcher_input', () => ({
+  MatcherInput: (props: {
+    value: string;
+    onChange: (v: string) => void;
+    'data-test-subj'?: string;
+  }) => (
+    <input
+      data-test-subj={props['data-test-subj']}
+      value={props.value}
+      onChange={(e) => props.onChange(e.target.value)}
+    />
+  ),
+}));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({

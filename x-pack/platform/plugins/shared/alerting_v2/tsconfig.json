@@ -9,7 +9,8 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "public/**/*"
+    "public/**/*",
+    "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -66,7 +67,6 @@
     "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
     "@kbn/react-query",
-    "@kbn/es-query",
     "@kbn/react-hooks",
     "@kbn/core-security-server-mocks",
     "@kbn/inference-common",
@@ -80,7 +80,13 @@
     "@kbn/es-types",
     "@kbn/search-types",
     "@kbn/discover-plugin",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/es-query",
+    "@kbn/deeplinks-workflows",
+    "@kbn/lens-plugin",
+    "@kbn/kql",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

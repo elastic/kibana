@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType } from 'react';
 import type {
   AttachmentServiceStartContract,
   EventsServiceStartContract,
@@ -43,6 +42,32 @@ export interface WorkflowsPublicPluginSetupDependencies {
  * Defined here instead of importing from the plugin directly to avoid circular
  * dependencies (workflowsManagement uses runtimePluginDependencies).
  */
+
+interface EmbeddableConversationProps {
+  sessionTag?: string;
+  agentId?: string;
+  initialMessage?: string;
+  autoSendInitialMessage?: boolean;
+  attachments?: AttachmentInput[];
+  browserApiTools?: Array<{
+    id: string;
+    description: string;
+    schema: unknown;
+    handler: (params: unknown) => void | Promise<void>;
+  }>;
+}
+
+export interface AgentBuilderPluginStartContract {
+  openChat: (options?: EmbeddableConversationProps & { onClose?: () => void }) => {
+    chatRef: { close: () => void };
+  };
+  tools: ToolServiceStartContract;
+  attachments: AttachmentServiceStartContract;
+  events: EventsServiceStartContract;
+  addAttachment: (attachment: AttachmentInput) => void;
+  setChatConfig: (config: EmbeddableConversationProps) => void;
+  clearChatConfig: () => void;
+}
 
 interface EmbeddableConversationProps {
   sessionTag?: string;

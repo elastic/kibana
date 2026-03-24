@@ -27,6 +27,9 @@ describe('FetchPoliciesStep', () => {
           name: 'Policy 1',
           description: 'Test',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          matcher: null,
+          groupBy: null,
+          throttle: null,
           auth: { apiKey: 'decrypted-key', owner: 'elastic', createdByUser: false },
           createdBy: null,
           updatedBy: null,
@@ -48,8 +51,12 @@ describe('FetchPoliciesStep', () => {
     const policy = result.data?.policies?.get('p1');
     expect(policy?.name).toBe('Policy 1');
     expect(policy?.apiKey).toBe('decrypted-key');
+    expect(policy?.matcher).toBeUndefined();
+    expect(policy?.groupBy).toEqual([]);
+    expect(policy?.throttle).toBeUndefined();
+    expect(policy?.snoozedUntil).toBeNull();
 
-    expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
   });
 
   it('returns empty map when no policies exist', async () => {
@@ -118,6 +125,6 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
   });
 });

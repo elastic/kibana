@@ -10,10 +10,10 @@ import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_ACTIONS_DATA_STREAM = '.alerting-actions';
+export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const ALERT_ACTIONS_DATA_STREAM_VERSION = 1;
-export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alerting-actions-*';
-export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alerting-actions-ilm-policy';
+export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
+export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alert-actions-ilm-policy';
 
 export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
   _meta: { managed: true },
@@ -40,6 +40,7 @@ const mappings: MappingsDefinition = {
     group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
     rule_id: { type: 'keyword' },
+    tags: { type: 'keyword' },
     notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
     reason: { type: 'text' },

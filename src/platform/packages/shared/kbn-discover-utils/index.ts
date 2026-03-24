@@ -65,6 +65,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   prepareDataViewForEditing,
+  getEsqlDataView,
   LogLevelBadge,
   getDefaultSort,
   getSort,

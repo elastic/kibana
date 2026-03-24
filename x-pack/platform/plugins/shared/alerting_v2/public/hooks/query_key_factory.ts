@@ -8,16 +8,22 @@
 export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
-  list: (filters: { page: number; perPage: number }) => [...ruleKeys.lists(), filters] as const,
+  list: (filters: { page: number; perPage: number; search?: string }) =>
+    [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   create: () => [...ruleKeys.all, 'create'] as const,
   update: () => [...ruleKeys.all, 'update'] as const,
   delete: () => [...ruleKeys.all, 'delete'] as const,
+  bulkDelete: () => [...ruleKeys.all, 'bulkDelete'] as const,
+  bulkEnable: () => [...ruleKeys.all, 'bulkEnable'] as const,
+  bulkDisable: () => [...ruleKeys.all, 'bulkDisable'] as const,
 };
 
 export const workflowKeys = {
   all: ['workflow'] as const,
+  details: () => [...workflowKeys.all, 'details'] as const,
+  detail: (id: string) => [...workflowKeys.details(), id] as const,
   searches: () => [...workflowKeys.all, 'search'] as const,
   search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
 };
@@ -31,13 +37,13 @@ export const notificationPolicyKeys = {
   disable: () => [...notificationPolicyKeys.all, 'disable'] as const,
   snooze: () => [...notificationPolicyKeys.all, 'snooze'] as const,
   unsnooze: () => [...notificationPolicyKeys.all, 'unsnooze'] as const,
+  bulkAction: () => [...notificationPolicyKeys.all, 'bulkAction'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
   lists: () => [...notificationPolicyKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
     perPage: number;
     search?: string;
-    destinationType?: string;
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';

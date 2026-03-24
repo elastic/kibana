@@ -36,6 +36,7 @@ interface NotificationPolicyActionsCellProps {
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
   isStateLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export const NotificationPolicyActionsCell = ({
@@ -48,6 +49,7 @@ export const NotificationPolicyActionsCell = ({
   onSnooze,
   onCancelSnooze,
   isStateLoading,
+  isDisabled = false,
 }: NotificationPolicyActionsCellProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -126,6 +128,7 @@ export const NotificationPolicyActionsCell = ({
           icon: 'trash',
           css: css`
             color: ${euiTheme.colors.textDanger};
+            padding: ${euiTheme.size.s};
           `,
           onClick: () => {
             closePopover();
@@ -179,11 +182,13 @@ export const NotificationPolicyActionsCell = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="pencil"
+          color="text"
           aria-label={i18n.translate(
             'xpack.alertingV2.notificationPoliciesList.action.edit.description',
             { defaultMessage: 'Edit this notification policy' }
           )}
           onClick={() => onEdit(policy.id)}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -195,6 +200,7 @@ export const NotificationPolicyActionsCell = ({
             { defaultMessage: 'Delete this notification policy' }
           )}
           onClick={() => onDelete(policy)}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -202,10 +208,12 @@ export const NotificationPolicyActionsCell = ({
           button={
             <EuiButtonIcon
               iconType="boxesHorizontal"
+              color="text"
               aria-label={i18n.translate('xpack.alertingV2.notificationPoliciesList.action.more', {
                 defaultMessage: 'More actions',
               })}
               onClick={togglePopover}
+              isDisabled={isDisabled}
             />
           }
           isOpen={isPopoverOpen}

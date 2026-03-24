@@ -230,6 +230,39 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.status).to.be(200);
           expect(response.body.total).to.be(3);
         });
+
+        it('should filter by enabled state', async () => {
+          const allResponse = await listPolicies(roleAuthc);
+          expect(allResponse.status).to.be(200);
+          const alphaPolicy = allResponse.body.items.find(
+            (item: { name: string }) => item.name === 'Alpha Policy'
+          );
+
+          await supertestWithoutAuth
+            .post(`${NOTIFICATION_POLICY_API_PATH}/${alphaPolicy.id}/_disable`)
+            .set(roleAuthc.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .expect(200);
+
+          const enabledResponse = await listPolicies(roleAuthc, { enabled: 'true' });
+          expect(enabledResponse.status).to.be(200);
+          expect(enabledResponse.body.total).to.be(2);
+          const enabledNames = enabledResponse.body.items.map(
+            (item: { name: string }) => item.name
+          );
+          expect(enabledNames).to.not.contain('Alpha Policy');
+
+          const disabledResponse = await listPolicies(roleAuthc, { enabled: 'false' });
+          expect(disabledResponse.status).to.be(200);
+          expect(disabledResponse.body.total).to.be(1);
+          expect(disabledResponse.body.items[0].name).to.be('Alpha Policy');
+
+          await supertestWithoutAuth
+            .post(`${NOTIFICATION_POLICY_API_PATH}/${alphaPolicy.id}/_enable`)
+            .set(roleAuthc.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .expect(200);
+        });
       });
 
       describe('sort', () => {

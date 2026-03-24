@@ -23,8 +23,8 @@ describe('getDispatchableAlertEventsQuery', () => {
   it('queries both alert events and alert actions data streams', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('.alerting-events');
-    expect(req.query).toContain('.alerting-actions');
+    expect(req.query).toContain('.rule-events');
+    expect(req.query).toContain('.alert-actions');
   });
 
   it('filters for alert event type', () => {
@@ -102,7 +102,7 @@ describe('getAlertEpisodeSuppressionsQuery', () => {
   it('queries the alert actions data stream', () => {
     const req = getAlertEpisodeSuppressionsQuery([createAlertEpisode()]);
 
-    expect(req.query).toContain('.alerting-actions');
+    expect(req.query).toContain('.alert-actions');
   });
 
   it('filters for suppression action types', () => {
@@ -187,7 +187,7 @@ describe('getLastNotifiedTimestampsQuery', () => {
     const req = getLastNotifiedTimestampsQuery(['group-1']);
 
     expect(req.query).toContain('notification_group_id IN ("group-1")');
-    expect(req.query).toContain('.alerting-actions');
+    expect(req.query).toContain('.alert-actions');
     expect(req.query).toContain('last_notified = MAX(@timestamp)');
   });
 

@@ -48,7 +48,13 @@
         "description": [],
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
-          "UnifiedMetricsGridProps",
+          {
+            "pluginId": "@kbn/unified-chart-section-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+            "section": "def-public.UnifiedMetricsGridProps",
+            "text": "UnifiedMetricsGridProps"
+          },
           " & Pick<",
           {
             "pluginId": "@kbn/restorable-state",
@@ -88,9 +94,586 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.Dimension",
+        "type": "Interface",
+        "tags": [],
+        "label": "Dimension",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.Dimension.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.Dimension.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.MetricsESQLResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsESQLResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsESQLResponse.metric_name",
+            "type": "string",
+            "tags": [],
+            "label": "metric_name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsESQLResponse.data_stream",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsESQLResponse.unit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.MetricUnit",
+                "text": "MetricUnit"
+              },
+              "[] | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsESQLResponse.metric_type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "metric_type",
+            "description": [],
+            "signature": [
+              "MappingTimeSeriesMetricType",
+              " | ",
+              "MappingTimeSeriesMetricType",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsESQLResponse.field_type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "field_type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsESQLResponse.dimension_fields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dimension_fields",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.MetricsInfoResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsInfoResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsInfoResponse.loading",
+            "type": "boolean",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsInfoResponse.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsInfoResponse.metricItems",
+            "type": "Array",
+            "tags": [],
+            "label": "metricItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.ParsedMetricItem",
+                "text": "ParsedMetricItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsInfoResponse.allDimensions",
+            "type": "Array",
+            "tags": [],
+            "label": "allDimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.ParsedMetricItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedMetricItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricItem.metricName",
+            "type": "string",
+            "tags": [],
+            "label": "metricName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricItem.dataStream",
+            "type": "string",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricItem.units",
+            "type": "Array",
+            "tags": [],
+            "label": "units",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.MetricUnit",
+                "text": "MetricUnit"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricItem.metricTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "metricTypes",
+            "description": [],
+            "signature": [
+              "MappingTimeSeriesMetricType",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricItem.fieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricItem.dimensionFields",
+            "type": "Array",
+            "tags": [],
+            "label": "dimensionFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.ParsedMetricsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedMetricsResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricsResult.metricItems",
+            "type": "Array",
+            "tags": [],
+            "label": "metricItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.ParsedMetricItem",
+                "text": "ParsedMetricItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.ParsedMetricsResult.allDimensions",
+            "type": "Array",
+            "tags": [],
+            "label": "allDimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.UnifiedMetricsGridProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedMetricsGridProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/unified-chart-section-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+            "section": "def-public.UnifiedMetricsGridProps",
+            "text": "UnifiedMetricsGridProps"
+          },
+          " extends ",
+          "ChartSectionProps"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.UnifiedMetricsGridProps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "ChartSectionActions"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.UnifiedMetricsGridProps.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [
+              "\nBreakdown field from Discover's app state, synced from sidebar \"Add Breakdown\" action"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.UnifiedMetricsGridProps.onBreakdownFieldChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onBreakdownFieldChange",
+            "description": [
+              "\nOptional callback used to push toolbar breakdown selections back to Discover app state."
+            ],
+            "signature": [
+              "((fieldName?: string | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-chart-section-viewer",
+                "id": "def-public.UnifiedMetricsGridProps.onBreakdownFieldChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+                "lineNumber": 32,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
+        "id": "def-public.MetricUnit",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricUnit",
+        "description": [],
+        "signature": [
+          "\"count\" | \"m\" | \"s\" | \"percent\" | \"d\" | \"h\" | \"ms\" | \"bytes\" | \"us\" | \"ns\" | `{${string}}`"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/unified-chart-section-viewer",
         "id": "def-public.UnifiedMetricsGridRestorableState",

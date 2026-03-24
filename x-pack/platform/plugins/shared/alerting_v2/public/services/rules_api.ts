@@ -21,13 +21,33 @@ export interface FindRulesResponse {
   perPage: number;
 }
 
+export interface ListRulesParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}
+
+export interface BulkOperationError {
+  id: string;
+  error: { message: string; statusCode: number };
+}
+
+export interface BulkOperationResponse {
+  rules: RuleResponse[];
+  errors: BulkOperationError[];
+}
+
+export type BulkOperationParams =
+  | { ids: string[]; filter?: undefined }
+  | { filter: string; ids?: undefined };
+
 @injectable()
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listRules(params: { page?: number; perPage?: number }) {
+  public async listRules(params: ListRulesParams) {
     return this.http.get<FindRulesResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
-      query: { page: params.page, perPage: params.perPage },
+      query: { page: params.page, perPage: params.perPage, search: params.search },
     });
   }
 
@@ -49,5 +69,26 @@ export class RulesApi {
 
   public async deleteRule(id: string) {
     return this.http.delete<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
+  }
+
+  public async bulkDeleteRules(params: BulkOperationParams) {
+    return this.http.post<BulkOperationResponse>(
+      `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_delete`,
+      { body: JSON.stringify(params) }
+    );
+  }
+
+  public async bulkEnableRules(params: BulkOperationParams) {
+    return this.http.post<BulkOperationResponse>(
+      `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_enable`,
+      { body: JSON.stringify(params) }
+    );
+  }
+
+  public async bulkDisableRules(params: BulkOperationParams) {
+    return this.http.post<BulkOperationResponse>(
+      `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_disable`,
+      { body: JSON.stringify(params) }
+    );
   }
 }

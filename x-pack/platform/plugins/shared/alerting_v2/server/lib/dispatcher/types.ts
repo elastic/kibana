@@ -47,6 +47,7 @@ export interface DispatcherTaskState {
 
 export interface Rule {
   id: RuleId;
+  spaceId: string;
   name: string;
   description: string;
   labels: string[];
@@ -57,6 +58,7 @@ export interface Rule {
 
 export interface NotificationPolicy {
   id: NotificationPolicyId;
+  spaceId: string;
   name: string;
   enabled: boolean;
   /** KQL expression evaluated against the alert episode context.
@@ -83,9 +85,18 @@ export interface MatchedPair {
 
 export interface NotificationGroup {
   id: NotificationGroupId;
+  spaceId: string;
   ruleId: RuleId;
   policyId: NotificationPolicyId;
   destinations: NotificationPolicyDestination[];
+  groupKey: Record<string, unknown>;
+  episodes: AlertEpisode[];
+}
+
+export interface NotificationPolicyWorkflowPayload {
+  id: NotificationGroupId;
+  ruleId: RuleId;
+  policyId: NotificationPolicyId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
 }

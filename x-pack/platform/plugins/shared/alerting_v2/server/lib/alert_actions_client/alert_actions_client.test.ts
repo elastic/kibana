@@ -14,6 +14,7 @@ import { createUserProfile, createUserService } from '../services/user_service/u
 import { AlertActionsClient } from './alert_actions_client';
 import {
   getBulkAlertEventsESQLResponse,
+  getBulkGetAlertActionsESQLResponse,
   getAlertEventESQLResponse,
   getEmptyESQLResponse,
 } from './fixtures/query_responses';
@@ -56,7 +57,7 @@ describe('AlertActionsClient', () => {
       const operations = callArgs.operations ?? [];
       const docs = operations.filter((_, index) => index % 2 === 1);
       expect(operations).toHaveLength(2);
-      expect(operations[0]).toEqual({ create: { _index: '.alerting-actions' } });
+      expect(operations[0]).toEqual({ create: { _index: '.alert-actions' } });
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         group_hash: 'test-group-hash',
@@ -104,6 +105,33 @@ describe('AlertActionsClient', () => {
       const operations = callArgs.operations ?? [];
       const docs = operations.filter((_, index) => index % 2 === 1);
       expect(docs[0]).toMatchObject({ episode_id: 'episode-2' });
+    });
+
+    it('should handle action with tags', async () => {
+      const tagAction: CreateAlertActionBody = {
+        action_type: 'tag',
+        tags: ['critical', 'network'],
+      };
+
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+
+      await client.createAction({
+        groupHash: 'test-group-hash',
+        action: tagAction,
+      });
+
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs).toHaveLength(1);
+      expect(docs[0]).toMatchObject({
+        group_hash: 'test-group-hash',
+        action_type: 'tag',
+        tags: ['critical', 'network'],
+        rule_id: 'test-rule-id',
+        actor: 'test-uid',
+      });
     });
 
     it('should handle null profile uid when security is not available', async () => {
@@ -185,6 +213,141 @@ describe('AlertActionsClient', () => {
 
       expect(result).toEqual({ processed: 0, total: 2 });
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkGet', () => {
+    it('should return action states for multiple episode IDs', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkGetAlertActionsESQLResponse([
+          {
+            episode_id: 'episode-1',
+            rule_id: 'rule-1',
+            group_hash: 'hash-1',
+            last_ack_action: 'ack',
+            last_snooze_action: 'snooze',
+          },
+          {
+            episode_id: 'episode-2',
+            rule_id: 'rule-2',
+            group_hash: 'hash-2',
+            last_deactivate_action: 'deactivate',
+          },
+        ])
+      );
+
+      const result = await client.bulkGet(['episode-1', 'episode-2']);
+
+      expect(result).toEqual([
+        {
+          episode_id: 'episode-1',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          last_ack_action: 'ack',
+          last_deactivate_action: null,
+          last_snooze_action: 'snooze',
+          tags: null,
+        },
+        {
+          episode_id: 'episode-2',
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          last_ack_action: null,
+          last_deactivate_action: 'deactivate',
+          last_snooze_action: null,
+          tags: null,
+        },
+      ]);
+    });
+
+    it('should return default records with nulls for episodes without actions', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      const result = await client.bulkGet(['unknown-episode']);
+
+      expect(result).toEqual([
+        {
+          episode_id: 'unknown-episode',
+          rule_id: null,
+          group_hash: null,
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+          tags: null,
+        },
+      ]);
+    });
+
+    it('should include both matched and unmatched episodes', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkGetAlertActionsESQLResponse([{ episode_id: 'episode-1', last_ack_action: 'ack' }])
+      );
+
+      const result = await client.bulkGet(['episode-1', 'episode-2']);
+
+      expect(result).toEqual([
+        {
+          episode_id: 'episode-1',
+          rule_id: 'test-rule-id',
+          group_hash: 'test-group-hash',
+          last_ack_action: 'ack',
+          last_deactivate_action: null,
+          last_snooze_action: null,
+          tags: null,
+        },
+        {
+          episode_id: 'episode-2',
+          rule_id: null,
+          group_hash: null,
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+          tags: null,
+        },
+      ]);
+    });
+
+    it('should return tags for episodes with tag actions', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkGetAlertActionsESQLResponse([
+          {
+            episode_id: 'episode-1',
+            rule_id: 'rule-1',
+            group_hash: 'hash-1',
+            last_ack_action: 'ack',
+            tags: ['critical', 'network'],
+          },
+          {
+            episode_id: 'episode-2',
+            rule_id: 'rule-2',
+            group_hash: 'hash-2',
+            tags: ['security'],
+          },
+        ])
+      );
+
+      const result = await client.bulkGet(['episode-1', 'episode-2']);
+
+      expect(result).toEqual([
+        {
+          episode_id: 'episode-1',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          last_ack_action: 'ack',
+          last_deactivate_action: null,
+          last_snooze_action: null,
+          tags: ['critical', 'network'],
+        },
+        {
+          episode_id: 'episode-2',
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+          tags: ['security'],
+        },
+      ]);
     });
   });
 });

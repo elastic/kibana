@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
-import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { WorkflowsSearchParams, WorkflowListDto } from '@kbn/workflows';
+import type { HttpStart } from '@kbn/core/public';
+import type { WorkflowDetailDto, WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { inject, injectable } from 'inversify';
 
 @injectable()
 export class WorkflowsApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
+
+  public async getWorkflow(id: string): Promise<WorkflowDetailDto> {
+    return this.http.get<WorkflowDetailDto>(`/api/workflows/${id}`);
+  }
 
   public async searchWorkflows(params: WorkflowsSearchParams): Promise<WorkflowListDto> {
     return this.http.post<WorkflowListDto>('/api/workflows/search', {
