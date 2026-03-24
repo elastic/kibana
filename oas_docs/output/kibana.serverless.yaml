@@ -64744,6 +64744,12 @@ paths:
         Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
       operationId: get-workflows
       parameters:
+        - description: Free-text search query.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
         - description: Number of results per page.
           in: query
           name: size
@@ -64763,34 +64769,34 @@ paths:
           name: enabled
           required: false
           schema:
-            items:
-              type: boolean
-            maxItems: 2
-            type: array
+            anyOf:
+              - type: boolean
+              - items:
+                  type: boolean
+                maxItems: 2
+                type: array
         - description: Filter by creator.
           in: query
           name: createdBy
           required: false
           schema:
-            items:
-              type: string
-            maxItems: 1000
-            type: array
+            anyOf:
+              - type: string
+              - items:
+                  type: string
+                maxItems: 1000
+                type: array
         - description: Filter by tags.
           in: query
           name: tags
           required: false
           schema:
-            items:
-              type: string
-            maxItems: 1000
-            type: array
-        - description: Free-text search query.
-          in: query
-          name: query
-          required: false
-          schema:
-            type: string
+            anyOf:
+              - type: string
+              - items:
+                  type: string
+                maxItems: 1000
+                type: array
       responses:
         '200':
           content:
