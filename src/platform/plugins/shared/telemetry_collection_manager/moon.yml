@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/usage-collection-plugin'
+  - '@kbn/tracing-utils'
 tags:
   - plugin
   - prod
