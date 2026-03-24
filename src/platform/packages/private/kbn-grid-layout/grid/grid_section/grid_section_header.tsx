@@ -393,6 +393,8 @@ const styles = {
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
+        pointerEvents: 'auto',
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
           opacity: 1,
