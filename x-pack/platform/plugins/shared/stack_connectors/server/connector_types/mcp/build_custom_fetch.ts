@@ -154,7 +154,16 @@ export function buildCustomFetch(
 }
 
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
-const MAX_REDIRECTS = 20; // standard per WHATWG Fetch spec
+
+// WHATWG Fetch specification constants
+const MAX_REDIRECTS = 20;
+const BLOCKED_CROSS_ORIGIN_HEADERS = ['authorization']; // spec also mentions 'cookie', 'proxy-authorization', 'host'. Not applicable here
+const STRIPPED_METHOD_CHANGE_HEADERS = [
+  'content-encoding',
+  'content-language',
+  'content-location',
+  'content-type',
+];
 
 function createFetchWithDispatcher(
   dispatcher: Dispatcher,
@@ -190,20 +199,32 @@ function createFetchWithDispatcher(
     configurationUtilities.ensureUriAllowed(resolvedUrl);
     logger.debug(`MCP connector: following redirect (${response.status}) to ${resolvedUrl}`);
 
-    await response.body?.cancel();
+    // undici explicitly recommends reading/cancelling the body to free up resources
+    try {
+      await response.body?.cancel();
+    } catch {
+      // body may be already cancelled or not readable, ignore
+    }
 
     const preserveMethod = response.status === 307 || response.status === 308;
-    const redirectInit: RequestInit = preserveMethod
-      ? { ...init }
-      : { ...init, method: 'GET', body: undefined };
+    const redirectInit: RequestInit = { ...init };
+
+    if (!preserveMethod) {
+      const sanitizedHeaders = new Headers(redirectInit.headers);
+      STRIPPED_METHOD_CHANGE_HEADERS.forEach((header) => sanitizedHeaders.delete(header));
+
+      redirectInit.headers = sanitizedHeaders;
+      redirectInit.method = 'GET';
+      delete redirectInit.body;
+    }
 
     // Per WHATWG Fetch, strip authorization header on cross-origin redirects
     const requestOrigin = new URL(url).origin;
     const redirectOrigin = new URL(resolvedUrl).origin;
     if (requestOrigin !== redirectOrigin && redirectInit.headers) {
-      const sanitized = new Headers(redirectInit.headers);
-      sanitized.delete('authorization');
-      redirectInit.headers = sanitized;
+      const sanitizedHeaders = new Headers(redirectInit.headers);
+      BLOCKED_CROSS_ORIGIN_HEADERS.forEach((header) => sanitizedHeaders.delete(header));
+      redirectInit.headers = sanitizedHeaders;
     }
 
     return followRedirects(resolvedUrl, redirectInit, redirectCount + 1);

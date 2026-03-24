@@ -412,6 +412,61 @@ describe('buildCustomFetch', () => {
       }
     );
 
+    it.each([301, 302, 303])('strips request-body-headers on %i method change', async (status) => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(
+          mockRedirectResponse(status, 'https://mcp-server.example.com/v2/mcp')
+        )
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Encoding': 'gzip',
+          'Content-Language': 'en',
+          'Content-Location': '/resource',
+          'X-Custom-Header': 'keep-me',
+        },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      const entries =
+        redirectHeaders instanceof Headers
+          ? Object.fromEntries(redirectHeaders.entries())
+          : redirectHeaders;
+
+      expect(entries).not.toHaveProperty('content-type');
+      expect(entries).not.toHaveProperty('content-encoding');
+      expect(entries).not.toHaveProperty('content-language');
+      expect(entries).not.toHaveProperty('content-location');
+      expect(entries).toHaveProperty('x-custom-header', 'keep-me');
+    });
+
+    it.each([307, 308])('preserves request-body-headers on %i redirects', async (status) => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(
+          mockRedirectResponse(status, 'https://mcp-server.example.com/v2/mcp')
+        )
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Encoding': 'gzip',
+        },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      expect(redirectHeaders).toHaveProperty('Content-Type', 'application/json');
+      expect(redirectHeaders).toHaveProperty('Content-Encoding', 'gzip');
+    });
+
     it('resolves relative Location URLs against the request URL', async () => {
       const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
@@ -467,7 +522,7 @@ describe('buildCustomFetch', () => {
       const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1/mcp'))
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1/mcp'))
         .mockResolvedValueOnce(new Response('final', { status: 200 }));
 
       await customFetch(targetUrl, {
@@ -489,7 +544,7 @@ describe('buildCustomFetch', () => {
       const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://mcp-server.example.com/v2/mcp'))
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://mcp-server.example.com/v2/mcp'))
         .mockResolvedValueOnce(new Response('final', { status: 200 }));
 
       await customFetch(targetUrl, {
@@ -500,6 +555,37 @@ describe('buildCustomFetch', () => {
       const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
       expect(redirectHeaders).toHaveProperty('Authorization', 'Bearer secret-token');
       expect(redirectHeaders).toHaveProperty('Content-Type', 'application/json');
+    });
+
+    it('strips both authorization and request-body-headers on cross-origin method change', async () => {
+      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      globalFetchSpy
+        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1/mcp'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await customFetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer secret-token',
+          'Content-Type': 'application/json',
+          'X-Custom-Header': 'keep-me',
+        },
+      });
+
+      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers;
+      const entries =
+        redirectHeaders instanceof Headers
+          ? Object.fromEntries(redirectHeaders.entries())
+          : redirectHeaders;
+
+      expect(entries).not.toHaveProperty('authorization');
+      expect(entries).not.toHaveProperty('content-type');
+      expect(entries).toHaveProperty('x-custom-header', 'keep-me');
+
+      const { method, body } = globalFetchSpy.mock.calls[1][1];
+      expect(method).toBe('GET');
+      expect(body).toBeUndefined();
     });
   });
 });
