@@ -131,7 +131,7 @@ describe('PluginsService', () => {
     };
 
     const service = createPluginsService();
-    service.setup();
+    service.setup({ skillsSetup: { registerSkill: jest.fn() } });
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,

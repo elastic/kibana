@@ -19,6 +19,7 @@ import { createClient, parsedArchiveToCreateRequest } from './client';
 import { parsePluginFromUrl, parsePluginFromFile } from './utils';
 import { createClient as createSkillClient } from '../skills/persisted/client';
 import type { SkillClient } from '../skills/persisted/client';
+import type { SkillServiceSetup } from '../skills';
 import {
   createBuiltinPluginRegistry,
   createBuiltinPluginProvider,
@@ -33,6 +34,10 @@ export interface PluginsServiceSetup {
   register: (plugin: BuiltInPluginDefinition) => void;
 }
 
+export interface PluginsServiceSetupDeps {
+  skillsSetup: SkillServiceSetup;
+}
+
 export interface PluginsServiceStart {
   getRegistry(options: { request: KibanaRequest }): PluginRegistry;
   installPlugin(options: {
@@ -44,7 +49,7 @@ export interface PluginsServiceStart {
 }
 
 export interface PluginsService {
-  setup(): PluginsServiceSetup;
+  setup(deps: PluginsServiceSetupDeps): PluginsServiceSetup;
   start(deps: PluginsServiceStartDeps): PluginsServiceStart;
 }
 
@@ -73,7 +78,7 @@ class PluginsServiceImpl implements PluginsService {
     this.builtinRegistry = createBuiltinPluginRegistry();
   }
 
-  setup(): PluginsServiceSetup {
+  setup({ skillsSetup }: PluginsServiceSetupDeps): PluginsServiceSetup {
     return {
       register: (plugin) => {
         if (!isAllowedBuiltinPlugin(plugin.id)) {
@@ -83,6 +88,12 @@ class PluginsServiceImpl implements PluginsService {
           );
         }
         this.builtinRegistry.register(plugin);
+
+        if (plugin.skills) {
+          for (const skill of plugin.skills) {
+            skillsSetup.registerSkill(skill);
+          }
+        }
       },
     };
   }

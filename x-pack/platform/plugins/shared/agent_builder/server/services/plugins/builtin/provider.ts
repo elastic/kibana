@@ -47,7 +47,7 @@ const toPluginDefinition = (definition: BuiltInPluginDefinition): PluginDefiniti
   description: definition.description,
   readonly: true,
   manifest: definition.manifest ?? {},
-  skill_ids: definition.skill_ids ?? [],
+  skill_ids: (definition.skills ?? []).map((s) => s.id),
   unmanaged_assets: emptyUnmanagedAssets,
   created_at: '',
   updated_at: '',
