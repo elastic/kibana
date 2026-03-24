@@ -1,0 +1,36 @@
+---
+# This file is used to generate "Spaces settings in Kibana" page in the product docs
+
+product: Kibana
+collection: Spaces settings in Kibana
+id: spaces-settings-kb
+page_description: |
+  By default, spaces is enabled in {{kib}}. To secure spaces, [enable security](/reference/configuration-reference/security-settings.md).
+
+groups:
+  - group: General settings
+    id: general-spaces-settings
+    settings:
+
+      - setting: xpack.spaces.maxSpaces
+        description: |
+          The maximum number of spaces that you can use with the {{kib}} instance. Some {{kib}} operations return all spaces using a single `_search` from {{es}}, so you must configure this setting lower than the `index.max_result_window` in {{es}}. The default is `1000`.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.spaces.defaultSolution
+        description: |
+          Sets the solution view for your default space.
+        datatype: enum
+        options:
+          - option: es
+          - option: oblt
+          - option: security
+        applies_to:
+          stack: ga 9.1
+          self: ga
+          ech: unavailable

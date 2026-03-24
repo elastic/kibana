@@ -10,6 +10,13 @@ applies_to:
 
 # Alerting and action settings in {{kib}} [alert-action-settings-kb]
 
+
+:::{settings} /alerting-settings.yml
+:::
+
+
+
+
 Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
 
 1. [Set up {{kib}} to work with {{stack}} {{security-features}}](docs-content://deploy-manage/security/secure-your-cluster-deployment.md).
