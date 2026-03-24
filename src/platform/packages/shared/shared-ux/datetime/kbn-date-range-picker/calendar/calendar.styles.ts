@@ -33,10 +33,7 @@ export const useCalendarStyles = () => {
     ${useEuiOverflowScroll('y', true)}
   `;
 
-  const monthItem = css`
-    content-visibility: auto;
-    contain-intrinsic-size: auto ${CALENDAR_MONTH_ESTIMATED_HEIGHT}px;
-  `;
+  const monthItem = css``;
 
   const todayButton = css`
     background: ${euiTheme.colors.backgroundBasePlain};
