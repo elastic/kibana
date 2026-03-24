@@ -13,6 +13,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const createMockServices = (): RuleFormServices => ({
   http: httpServiceMock.createStartContract(),
@@ -20,6 +21,7 @@ const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  lens: lensPluginMock.createStartContract(),
 });
 
 // Capture props passed to the underlying DynamicRuleFormFlyout from the package

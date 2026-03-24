@@ -11,6 +11,7 @@ import { CoreSetup } from '@kbn/core-di-browser';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { mountAlertingV2App } from './main';
 import { ALERTING_V2_APP_ID } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
@@ -41,6 +42,7 @@ export const module = new ContainerModule(({ bind }) => {
         application: coreStart.application,
         data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
         dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
+        lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
       });
     });
 
