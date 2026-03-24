@@ -15,6 +15,7 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   extractGrokPatternDangerouslySlow,
   groupMessagesByPattern as groupMessagesByGrokPattern,
+  type GrokPatternNode,
 } from '@kbn/grok-heuristics';
 
 import { i18n } from '@kbn/i18n';
@@ -41,8 +42,6 @@ export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
   telemetryClient: StreamsTelemetryClient;
   notifications: NotificationsStart;
 }
-
-type GrokPatternNode = { pattern: string } | { id: string; component: string; values: string[] };
 
 interface ExtractedGrokPattern {
   type: 'grok';
@@ -140,7 +139,7 @@ async function extractGrokPatternsClientSide(
       const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
       return {
         messages: group.messages.slice(0, 10), // Limit to 10 samples per group
-        nodes: grokPatternNodes as GrokPatternNode[], // forward full nodes with proper typing
+        nodes: grokPatternNodes,
       };
     });
 

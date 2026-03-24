@@ -128,6 +128,8 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     error: undefined,
     isLoading: false,
     refresh: jest.fn(),
+    timeSeriesCountLoading: false,
+    timeSeriesCountError: undefined,
   };
 
   it('does not mark unsaved changes just because flyout is open', async () => {

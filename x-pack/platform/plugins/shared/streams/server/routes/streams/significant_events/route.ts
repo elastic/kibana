@@ -6,12 +6,11 @@
  */
 import {
   getStreamTypeFromDefinition,
-  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
@@ -101,6 +100,12 @@ const readStreamSignificantEventsRoute = createServerRoute({
         .string()
         .optional()
         .describe('Query string to filter significant events on metadata fields'),
+      searchMode: z
+        .enum(['keyword', 'semantic', 'hybrid'])
+        .optional()
+        .describe(
+          'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+        ),
     }),
   }),
 
@@ -132,7 +137,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize, query } = params.query;
+    const { from, to, bucketSize, query, searchMode } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -141,6 +146,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         to,
         bucketSize,
         query,
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );
@@ -169,9 +175,6 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Number of sample documents to use for generation from the current data of stream'
         ),
-    }),
-    body: z.object({
-      system: systemSchema.optional(),
     }),
   }),
   options: {
@@ -243,7 +246,6 @@ const generateSignificantEventsRoute = createServerRoute({
       map(({ queries, tokensUsed, toolUsage }) => {
         telemetry.trackSignificantEventsQueriesGenerated({
           count: queries.length,
-          systems_count: 0,
           stream_name: definition.name,
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,

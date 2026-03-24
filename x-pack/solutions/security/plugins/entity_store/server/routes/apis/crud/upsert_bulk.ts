@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
-import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -17,10 +16,12 @@ import { ENGINE_STATUS } from '../../../domain/constants';
 import { BadCRUDRequestError, EntityStoreNotRunningError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
+const ENTITY_TYPES = ['user', 'host', 'service', 'generic'] as const;
+
 const bodySchema = z.object({
   entities: z.array(
     z.object({
-      type: EntityType,
+      type: z.enum(ENTITY_TYPES),
       doc: Entity,
     })
   ),
@@ -52,7 +53,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, crudClient } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Upsert Bulk api called');
         const { engines } = await assetManager.getStatus();

@@ -23,6 +23,7 @@ import { isResponseError } from '@kbn/es-errors';
 import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import type { TransportRequestOptions } from '@elastic/transport';
 import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
@@ -42,6 +43,7 @@ import type {
   StorageClientMigrateDocumentsOptions,
   StorageClientMigrateDocumentsResponse,
   InternalIStorageClient,
+  StorageTransportOptions,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
@@ -113,6 +115,12 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
     caughtError.stack += error.stack;
     throw caughtError;
   });
+}
+
+function optionalTransportArgs(
+  transportOptions?: StorageTransportOptions
+): [] | [TransportRequestOptions] {
+  return transportOptions ? [transportOptions] : [];
 }
 
 export interface StorageIndexAdapterOptions<TApplicationType> {
@@ -368,14 +376,15 @@ export class StorageIndexAdapter<
     }
   }
 
-  private search: StorageClientSearch<TApplicationType> = async (request) => {
+  private search: StorageClientSearch<TApplicationType> = async (request, transportOptions) => {
+    const searchRequest = {
+      ...request,
+      index: this.getSearchIndexPattern(),
+      allow_no_indices: true,
+    };
     return (await wrapEsCall(
       this.esClient
-        .search({
-          ...request,
-          index: this.getSearchIndexPattern(),
-          allow_no_indices: true,
-        })
+        .search(searchRequest, ...optionalTransportArgs(transportOptions))
         .then(async (response) => {
           const migratedHits = await Promise.all(
             response.hits.hits.map(async (hit) => ({
@@ -415,24 +424,25 @@ export class StorageIndexAdapter<
     )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
   };
 
-  private index: StorageClientIndex<TApplicationType> = async ({
-    id,
-    refresh = 'wait_for',
-    document: userDocument,
-    ...request
-  }): Promise<StorageClientIndexResponse> => {
+  private index: StorageClientIndex<TApplicationType> = async (
+    { id, refresh = 'wait_for', document: userDocument, ...request },
+    transportOptions
+  ): Promise<StorageClientIndexResponse> => {
     const document = this.prepareDocumentForWrite(userDocument as Record<string, unknown>);
 
     const attemptIndex = async (): Promise<IndexResponse> => {
       const indexResponse = await wrapEsCall(
-        this.esClient.index({
-          ...request,
-          document,
-          id,
-          refresh,
-          index: this.getWriteTarget(),
-          require_alias: true,
-        })
+        this.esClient.index(
+          {
+            ...request,
+            document,
+            id,
+            refresh,
+            index: this.getWriteTarget(),
+            require_alias: true,
+          },
+          ...optionalTransportArgs(transportOptions)
+        )
       );
 
       return indexResponse;
@@ -445,12 +455,10 @@ export class StorageIndexAdapter<
     });
   };
 
-  private bulk: StorageClientBulk<TApplicationType> = ({
-    operations,
-    refresh = 'wait_for',
-    throwOnFail = false,
-    ...request
-  }): Promise<StorageClientBulkResponse> => {
+  private bulk: StorageClientBulk<TApplicationType> = (
+    { operations, refresh = 'wait_for', throwOnFail = false, ...request },
+    transportOptions
+  ): Promise<StorageClientBulkResponse> => {
     if (operations.length === 0) {
       this.logger.debug(`Bulk request with 0 operations is a noop`);
       return Promise.resolve({
@@ -483,13 +491,16 @@ export class StorageIndexAdapter<
 
     const attemptBulk = async () => {
       return wrapEsCall(
-        this.esClient.bulk({
-          ...request,
-          refresh,
-          operations: bulkOperations,
-          index: this.getWriteTarget(),
-          require_alias: true,
-        })
+        this.esClient.bulk(
+          {
+            ...request,
+            refresh,
+            operations: bulkOperations,
+            index: this.getWriteTarget(),
+            require_alias: true,
+          },
+          ...optionalTransportArgs(transportOptions)
+        )
       );
     };
 
@@ -543,11 +554,10 @@ export class StorageIndexAdapter<
     };
   };
 
-  private delete: StorageClientDelete = async ({
-    id,
-    refresh = 'wait_for',
-    ...request
-  }): Promise<StorageClientDeleteResponse> => {
+  private delete: StorageClientDelete = async (
+    { id, refresh = 'wait_for', ...request },
+    transportOptions
+  ): Promise<StorageClientDeleteResponse> => {
     this.logger.debug(`Deleting document with id ${id}`);
     const searchResponse = await this.search({
       track_total_hits: false,
@@ -569,12 +579,15 @@ export class StorageIndexAdapter<
 
     if (document) {
       await wrapEsCall(
-        this.esClient.delete({
-          ...request,
-          refresh,
-          id,
-          index: document._index,
-        })
+        this.esClient.delete(
+          {
+            ...request,
+            refresh,
+            id,
+            index: document._index,
+          },
+          ...optionalTransportArgs(transportOptions)
+        )
       );
 
       return { acknowledged: true, result: 'deleted' };
@@ -583,24 +596,30 @@ export class StorageIndexAdapter<
     return { acknowledged: true, result: 'not_found' };
   };
 
-  private get: StorageClientGet<TApplicationType> = async ({ id, ...request }) => {
-    const response = await this.search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                _id: id,
+  private get: StorageClientGet<TApplicationType> = async (
+    { id, ...request },
+    transportOptions
+  ) => {
+    const response = await this.search(
+      {
+        track_total_hits: false,
+        size: 1,
+        terminate_after: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  _id: id,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
+        ...request,
       },
-      ...request,
-    });
+      transportOptions
+    );
 
     const hit: SearchHit = response.hits.hits[0];
 

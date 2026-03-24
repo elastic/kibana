@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiCallOut,
+  EuiSpacer,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCheckbox,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { NestedView } from '../../../nested_view';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
@@ -34,11 +43,17 @@ export interface ReviewSuggestionsFormProps
     | 'acceptSuggestion'
     | 'rejectSuggestion'
     | 'updateSuggestion'
+    | 'selectedSuggestionNames'
+    | 'toggleSuggestionSelection'
+    | 'isSuggestionSelected'
+    | 'selectAllSuggestions'
+    | 'clearSuggestionSelection'
   > {
   suggestions: PartitionSuggestion[];
   onRegenerate: (connectorId: string) => void;
   definition: Streams.WiredStream.GetResponse;
   aiFeatures: AIFeatures;
+  onBulkAccept: () => void;
 }
 
 export function ReviewSuggestionsForm({
@@ -52,6 +67,12 @@ export function ReviewSuggestionsForm({
   rejectSuggestion,
   updateSuggestion,
   onRegenerate,
+  selectedSuggestionNames,
+  toggleSuggestionSelection,
+  isSuggestionSelected,
+  onBulkAccept,
+  selectAllSuggestions,
+  clearSuggestionSelection,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } })
@@ -64,6 +85,7 @@ export function ReviewSuggestionsForm({
       snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
       snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   );
+  const theme = useEuiTheme();
 
   const partitionForModal = ruleUnderReview
     ? suggestions.find(({ name }) => name === ruleUnderReview)
@@ -77,6 +99,30 @@ export function ReviewSuggestionsForm({
   );
 
   const { editSuggestion } = useStreamRoutingEvents();
+
+  const allSelected = selectedSuggestionNames.size === suggestions.length && suggestions.length > 0;
+  const someSelected =
+    selectedSuggestionNames.size > 0 && selectedSuggestionNames.size < suggestions.length;
+  const noneSelected = selectedSuggestionNames.size === 0;
+
+  const handleMasterCheckboxChange = useCallback(() => {
+    if (allSelected || someSelected) {
+      clearSuggestionSelection();
+    } else {
+      selectAllSuggestions();
+    }
+  }, [allSelected, someSelected, clearSuggestionSelection, selectAllSuggestions]);
+
+  const masterCheckboxLabel = useMemo(() => {
+    if (allSelected) {
+      return i18n.translate('xpack.streams.reviewSuggestionsForm.deselectAllLabel', {
+        defaultMessage: 'Deselect all suggestions',
+      });
+    }
+    return i18n.translate('xpack.streams.reviewSuggestionsForm.selectAllLabel', {
+      defaultMessage: 'Select all suggestions',
+    });
+  }, [allSelected]);
 
   return (
     <>
@@ -124,8 +170,27 @@ export function ReviewSuggestionsForm({
           </>
         ) : (
           <>
+            <EuiCheckbox
+              id="master-suggestion-checkbox"
+              checked={allSelected}
+              indeterminate={someSelected}
+              onChange={handleMasterCheckboxChange}
+              label={i18n.translate('xpack.streams.reviewSuggestionsForm.selectAllCheckbox', {
+                defaultMessage: 'Select all',
+              })}
+              aria-label={masterCheckboxLabel}
+              data-test-subj="streamsAppMasterSuggestionCheckbox"
+              className={css`
+                margin-left: ${theme.euiTheme.size.s};
+              `}
+            />
+            <EuiSpacer size="m" />
             {suggestions.map((partition, index) => (
-              <NestedView key={partition.name} last={index === suggestions.length - 1}>
+              <NestedView
+                key={partition.name}
+                last={index === suggestions.length - 1}
+                useDarkBorders
+              >
                 <SuggestedStreamPanel
                   definition={definition}
                   partition={partition}
@@ -134,25 +199,43 @@ export function ReviewSuggestionsForm({
                   onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
                   onEdit={editSuggestion}
                   onSave={(updatedSuggestion) => updateSuggestion(index, updatedSuggestion)}
+                  isSelectedForBulk={isSuggestionSelected(partition.name)}
+                  onToggleSelection={() => toggleSuggestionSelection(partition.name)}
                 />
                 <EuiSpacer size="s" />
               </NestedView>
             ))}
             <EuiSpacer size="m" />
-            <GenerateSuggestionButton
-              iconType="refresh"
-              size="s"
-              onClick={onRegenerate}
-              isLoading={isLoadingSuggestions}
-              aiFeatures={aiFeatures}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-                {
-                  defaultMessage: 'Regenerate',
-                }
-              )}
-            </GenerateSuggestionButton>
+            <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="check"
+                  size="s"
+                  fill
+                  onClick={onBulkAccept}
+                  disabled={noneSelected}
+                  data-test-subj="streamsAppAcceptSelectedSuggestionsButton"
+                >
+                  {i18n.translate('xpack.streams.reviewSuggestionsForm.acceptSelectedButton', {
+                    defaultMessage: 'Accept selected ({count})',
+                    values: { count: selectedSuggestionNames.size },
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <GenerateSuggestionButton
+                  iconType="refresh"
+                  size="s"
+                  onClick={onRegenerate}
+                  isLoading={isLoadingSuggestions}
+                  aiFeatures={aiFeatures}
+                >
+                  {i18n.translate('xpack.streams.reviewSuggestionsForm.regenerateAllButton', {
+                    defaultMessage: 'Regenerate all',
+                  })}
+                </GenerateSuggestionButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </>
         )}
       </EuiCallOut>

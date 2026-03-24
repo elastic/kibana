@@ -47,6 +47,37 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Artifact list export failed',
     }
   ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastTitle',
+    {
+      defaultMessage: 'Artifact list imported successfully',
+    }
+  ),
+  getPageImportSuccessToastText: (successCount: number): string =>
+    i18n.translate('xpack.securitySolution.artifactListPage.importSuccessToastText', {
+      defaultMessage:
+        '{successCount} {successCount, plural, one {artifact} other {artifacts}} imported.',
+      values: { successCount },
+    }),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importErrorToastTitle',
+    {
+      defaultMessage: 'Artifact list import failed',
+    }
+  ),
+  importFlyoutDetails: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutDetails',
+    {
+      defaultMessage:
+        'Attention: importing your artifacts will overwrite the existing list, which results in losing all existing artifacts that can be edited by the current user.',
+    }
+  ),
+  importFlyoutImportSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
+    {
+      defaultMessage: 'Import list',
+    }
+  ),
 
   // ------------------------------
   // EMPTY state labels
@@ -66,6 +97,10 @@ export const artifactListPageLabels = Object.freeze({
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import list' }
   ),
 
   // ------------------------------
@@ -136,6 +171,8 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageExportButtonTitle'
   | 'pageExportSuccessToastTitle'
   | 'pageExportErrorToastTitle'
+  | 'pageImportSuccessToastTitle'
+  | 'pageImportErrorToastTitle'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'
   | 'cardActionDeleteLabel'
@@ -150,6 +187,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'emptyStateTitle'
   | 'emptyStateInfo'
   | 'emptyStatePrimaryButtonLabel'
+  | 'emptyStateImportButtonLabel'
 >;
 
 export type ArtifactListPageOptionalLabels = Omit<IAllLabels, keyof ArtifactListPageRequiredLabels>;

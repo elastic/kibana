@@ -11,9 +11,14 @@ import type { SearchEmbeddableState } from '../../common/embeddable/types';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
-export const LEGACY_LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
+//
+// Do not change constant value - part of public REST APIs
+//
+export const LEGACY_LOG_STREAM_EMBEDDABLE = 'log_stream';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
+
+export const ACTION_ADD_DISCOVER_SESSION_PANEL = 'ACTION_ADD_DISCOVER_SESSION_PANEL';
 
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 

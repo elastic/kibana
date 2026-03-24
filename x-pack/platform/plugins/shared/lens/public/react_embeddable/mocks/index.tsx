@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -95,7 +95,7 @@ function getDefaultLensApiMock() {
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),
-    updateSavedObjectId: jest.fn(),
+    updateRefId: jest.fn(),
     updateOverrides: jest.fn(),
     getSerializedStateByReference: jest.fn(),
     getSerializedStateByValue: jest.fn(),
@@ -138,7 +138,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.string.uuid(),
+    ref_id: faker.string.uuid(),
     ...getDefaultLensSerializedStateMock(),
     ...overrides,
   };
@@ -179,6 +179,9 @@ export function makeEmbeddableServices(
     visualizations: visualizationsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     eventAnnotation: {} as LensEmbeddableStartServices['eventAnnotation'],
+    eventAnnotationService: {
+      annotationGroupUpdated$: NEVER,
+    } as unknown as LensEmbeddableStartServices['eventAnnotationService'],
     timefilter: services.data.query.timefilter.timefilter,
     coreHttp: services.http,
     coreStart: coreMock.createStart(),

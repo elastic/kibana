@@ -381,7 +381,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
           const request = await inspector.getRequest(1);
-          expect(request.command).to.be('POST /_query/async?drop_null_columns');
+          expect(request.command).to.be('POST /_query/async?drop_null_columns=true');
         });
       });
     });

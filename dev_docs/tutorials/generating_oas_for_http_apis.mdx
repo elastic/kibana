@@ -68,7 +68,7 @@ Use this section as a practical checklist when authoring public APIs.
 | `schema.any()` | Escape hatch that produces little to no useful contract in generated OAS. | Use a small explicit `schema.object({...})`, `schema.recordOf(...)`, or a constrained union with documented fields. |
 | `schema.mapOf()` / `schema.recordOf()` when key shape matters | OAS generally represents these as `type: object` with `additionalProperties`, which does not clearly communicate all key constraints to clients. | If keys are known, model explicit object properties. If keys are dynamic, keep values simple and document key format in descriptions. |
 | `schema.oneOf()` for object variants (especially nested `oneOf`) | Unions without a clear discriminator are harder for humans/tools to understand. Nested forms like `schema.oneOf([schema.oneOf([a, b]), schema.oneOf([c, d])])` are especially hard to read and lead to poor validation errors. | Prefer `schema.discriminatedUnion('type', [...])` with a stable discriminator and flat variants. |
-| `schema.conditional()`, `schema.contextRef()`, `schema.siblingRef()` in HTTP contracts | Behavior depends on runtime context, which is difficult to encode as a stable, portable OAS contract. | Prefer explicit route versions or explicit discriminator/object shapes so behavior is statically visible in the contract. |
+| `schema.conditional()`, `schema.contextRef()`, `schema.siblingRef()` | Behavior depends on runtime context, which is difficult to encode as a stable, portable OAS contract. | Prefer explicit route versions or explicit discriminator/object shapes so behavior is statically visible in the contract. |
 
 #### 1. Runtime schema definitions
 

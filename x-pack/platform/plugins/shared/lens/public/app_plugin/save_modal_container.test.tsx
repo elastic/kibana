@@ -30,7 +30,7 @@ describe('runSaveLensVisualization', () => {
       ...makeDefaultServices(),
       // start with both the initial input and lastKnownDoc synced
       lastKnownDoc: defaultDoc,
-      initialInput: { attributes: defaultDoc, savedObjectId: defaultDoc.savedObjectId },
+      initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
       redirectToOrigin,
       redirectTo,
       onAppLeave,
@@ -260,7 +260,7 @@ describe('runSaveLensVisualization', () => {
             state: expect.arrayContaining([
               expect.objectContaining({
                 type: 'lens',
-                serializedState: expect.objectContaining({ savedObjectId: undefined }),
+                serializedState: expect.objectContaining({ ref_id: undefined }),
               }),
             ]),
           })
@@ -290,7 +290,7 @@ describe('runSaveLensVisualization', () => {
             state: expect.arrayContaining([
               expect.objectContaining({
                 type: 'lens',
-                serializedState: expect.objectContaining({ savedObjectId: '1234' }),
+                serializedState: expect.objectContaining({ ref_id: '1234' }),
               }),
             ]),
           })

@@ -18,6 +18,7 @@ import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
 import { useGridPanelState } from './use_panel_grid_data';
+import { ResizeGauge } from './grid_panel_resize_gauge';
 
 export interface GridPanelProps {
   panelId: string;
@@ -189,6 +190,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
       {panelContents}
       <ResizeHandle panelId={panelId} sectionId={sectionId} />
+      <ResizeGauge panelId={panelId} />
     </div>
   );
 });

@@ -16,7 +16,8 @@ const ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-*';
 const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
 const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
 
-test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/255610
+test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
   let indexThresholdRuleId: string;
 
   test.beforeAll(async ({ apiServices }) => {

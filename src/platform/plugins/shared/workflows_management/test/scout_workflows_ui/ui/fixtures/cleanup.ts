@@ -23,7 +23,7 @@ export async function cleanupWorkflowsAndRules({
   scoutSpace: ScoutSpaceParallelFixture;
   apiServices: WorkflowsApiServicesFixture;
 }) {
-  await apiServices.workflows.deleteAll(scoutSpace.id);
+  await apiServices.workflows.deleteAll();
   await apiServices.alerting.cleanup.deleteAllRules(scoutSpace.id);
   await scoutSpace.savedObjects.cleanStandardList();
 }

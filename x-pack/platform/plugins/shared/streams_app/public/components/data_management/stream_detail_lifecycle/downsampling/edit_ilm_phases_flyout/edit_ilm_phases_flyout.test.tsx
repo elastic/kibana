@@ -9,6 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
@@ -236,16 +237,51 @@ describe('EditIlmPhasesFlyout', () => {
       fireEvent.click(getTab('warm'));
       const warmPanel = withinPhase('warm');
 
-      fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
-        target: { value: '10' },
-      });
+      const moveAfterInput = warmPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+      fireEvent.change(moveAfterInput, { target: { value: '10' } });
+      fireEvent.blur(moveAfterInput);
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: { name: 'warm', size_in_bytes: 0, min_age: '10d' },
-        })
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '10d' },
+          },
+          { invalidPhases: [] }
+        )
       );
+    });
+
+    it('emits invalidPhases meta when a phase is invalid', async () => {
+      const { onChange } = renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+            cold: { name: 'cold', size_in_bytes: 0, min_age: '40d' },
+          },
+        },
+        { initialSelectedPhase: 'cold' }
+      );
+
+      await tick();
+      onChange.mockClear();
+
+      const coldPanel = withinPhase('cold');
+      const moveAfterInput = coldPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+      fireEvent.change(moveAfterInput, { target: { value: '-1' } });
+      fireEvent.blur(moveAfterInput);
+
+      await waitFor(() => {
+        const lastCall = onChange.mock.calls.at(-1);
+        expect(lastCall).toBeDefined();
+        const meta = lastCall?.[1];
+        expect(meta.invalidPhases).toContain('cold');
+      });
     });
 
     it('defaults a newly-enabled phase min_age to 2x the closest enabled previous phase', async () => {
@@ -274,7 +310,7 @@ describe('EditIlmPhasesFlyout', () => {
       expect(unitSelect.value).toBe('d');
     });
 
-    it('prevents saving when cold min_age is cleared and clears the required error when value is set again', async () => {
+    it('restores the last min_age value on blur when cleared', async () => {
       const onSave = jest.fn();
       renderFlyout(
         {
@@ -297,23 +333,22 @@ describe('EditIlmPhasesFlyout', () => {
       await tick();
 
       const coldPanel = withinPhase('cold');
-      fireEvent.change(coldPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+      const valueInput = coldPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+
+      fireEvent.change(valueInput, {
         target: { value: '' },
       });
 
-      await waitFor(() => expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled());
-
-      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
-      expect(onSave).toHaveBeenCalledTimes(0);
-
-      // Set a valid value again -> save should be enabled.
-      fireEvent.change(coldPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
-        target: { value: '41' },
-      });
-
+      expect(valueInput.value).toBe('');
       await waitFor(() =>
         expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).not.toBeDisabled()
       );
+
+      fireEvent.blur(valueInput);
+
+      await waitFor(() => expect(valueInput.value).toBe('40'));
     });
   });
 
@@ -336,18 +371,57 @@ describe('EditIlmPhasesFlyout', () => {
       fireEvent.click(switchEl);
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: {
-            name: 'warm',
-            size_in_bytes: 0,
-            min_age: '30d',
-            downsample: { after: '30d', fixed_interval: '1d' },
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: {
+              name: 'warm',
+              size_in_bytes: 0,
+              min_age: '30d',
+              downsample: { after: '30d', fixed_interval: '1d' },
+            },
           },
-        })
+          { invalidPhases: [] }
+        )
       );
 
       expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingIntervalValue`)).toBeVisible();
+    });
+
+    it('restores the last downsampling interval value on blur when cleared', async () => {
+      const onChange = jest.fn();
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+        },
+        onChange,
+      });
+
+      await tick();
+      fireEvent.click(getTab('warm'));
+      await tick();
+
+      const warmPanel = withinPhase('warm');
+      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
+      await tick();
+
+      onChange.mockClear();
+
+      const valueInput = warmPanel.getByTestId(
+        `${DATA_TEST_SUBJ}DownsamplingIntervalValue`
+      ) as HTMLInputElement;
+      const initialValue = valueInput.value;
+      expect(initialValue).not.toBe('');
+
+      fireEvent.change(valueInput, { target: { value: '' } });
+      expect(valueInput.value).toBe('');
+
+      await tick();
+      expect(onChange).toHaveBeenCalledTimes(0);
+
+      fireEvent.blur(valueInput);
+      expect(valueInput.value).toBe(initialValue);
     });
 
     it('shows a warning when downsampling is enabled but not supported', async () => {
@@ -394,20 +468,23 @@ describe('EditIlmPhasesFlyout', () => {
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: {
-            name: 'hot',
-            size_in_bytes: 0,
-            rollover: {},
-            downsample: { after: '0ms', fixed_interval: '1d' },
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: {
+              name: 'hot',
+              size_in_bytes: 0,
+              rollover: {},
+              downsample: { after: '0ms', fixed_interval: '1d' },
+            },
+            warm: {
+              name: 'warm',
+              size_in_bytes: 0,
+              min_age: '30d',
+              downsample: { after: '30d', fixed_interval: '2d' },
+            },
           },
-          warm: {
-            name: 'warm',
-            size_in_bytes: 0,
-            min_age: '30d',
-            downsample: { after: '30d', fixed_interval: '2d' },
-          },
-        })
+          { invalidPhases: [] }
+        )
       );
     });
 
@@ -441,15 +518,18 @@ describe('EditIlmPhasesFlyout', () => {
       expect(warmPanel.queryByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).not.toBeInTheDocument();
 
       // Ensure output does not include warm.readonly even if it was previously enabled.
-      expect(onChange).toHaveBeenLastCalledWith({
-        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-        warm: {
-          name: 'warm',
-          size_in_bytes: 0,
-          min_age: '30d',
-          downsample: { after: '30d', fixed_interval: '1d' },
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: {
+            name: 'warm',
+            size_in_bytes: 0,
+            min_age: '30d',
+            downsample: { after: '30d', fixed_interval: '1d' },
+          },
         },
-      });
+        { invalidPhases: [] }
+      );
 
       // Disable downsampling -> readonly should re-appear (re-mounted).
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
@@ -500,12 +580,11 @@ describe('EditIlmPhasesFlyout', () => {
       // 5. Change warm fixed_interval to 30d (while cold is disabled).
       setSelectedPhase('warm');
       await tick();
-      fireEvent.change(
-        withinPhase('warm').getByTestId(`${DATA_TEST_SUBJ}DownsamplingIntervalValue`),
-        {
-          target: { value: '30' },
-        }
-      );
+      const warmIntervalInput = withinPhase('warm').getByTestId(
+        `${DATA_TEST_SUBJ}DownsamplingIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(warmIntervalInput, { target: { value: '30' } });
+      fireEvent.blur(warmIntervalInput);
       await tick();
 
       // 6. Re-enable cold: interval remains 4d, but should now be validated against warm (30d) and block saving.
@@ -611,17 +690,20 @@ describe('EditIlmPhasesFlyout', () => {
       });
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          ...initialPhases,
-          cold: {
-            ...initialPhases.cold,
-            searchable_snapshot: 'repo2',
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            ...initialPhases,
+            cold: {
+              ...initialPhases.cold,
+              searchable_snapshot: 'repo2',
+            },
+            frozen: {
+              ...initialPhases.frozen,
+              searchable_snapshot: 'repo2',
+            },
           },
-          frozen: {
-            ...initialPhases.frozen,
-            searchable_snapshot: 'repo2',
-          },
-        })
+          { invalidPhases: [] }
+        )
       );
     });
 
@@ -695,9 +777,12 @@ describe('EditIlmPhasesFlyout', () => {
 
       await waitFor(() => expect(queryTab('warm')).not.toBeInTheDocument());
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-        })
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          },
+          { invalidPhases: [] }
+        )
       );
       expect(getPanel('hot')).toBeVisible();
     });
@@ -776,6 +861,65 @@ describe('EditIlmPhasesFlyout', () => {
     });
   });
 
+  describe('parent-owned draft rehydration', () => {
+    it('keeps the latest draft across a remount', async () => {
+      const initialPhases: IlmPolicyPhases = {
+        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+        warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+      };
+
+      const WrapperWithDraft = () => {
+        const [draft, setDraft] = React.useState<IlmPolicyPhases>(initialPhases);
+        const [selectedPhase, setSelectedPhase] = React.useState<PhaseName | undefined>('warm');
+        const [instanceKey, setInstanceKey] = React.useState(0);
+
+        return (
+          <>
+            <button
+              type="button"
+              data-test-subj="remountFlyout"
+              onClick={() => setInstanceKey((k) => k + 1)}
+            >
+              remount
+            </button>
+            <EditIlmPhasesFlyout
+              key={instanceKey}
+              initialPhases={draft}
+              selectedPhase={selectedPhase}
+              setSelectedPhase={setSelectedPhase}
+              searchableSnapshotRepositories={[]}
+              onClose={jest.fn()}
+              onChange={(next) => setDraft((prev) => (isEqual(prev, next) ? prev : next))}
+              onSave={jest.fn()}
+              isMetricsStream={true}
+              onChangeDebounceMs={0}
+            />
+          </>
+        );
+      };
+
+      render(
+        <I18nProvider>
+          <WrapperWithDraft />
+        </I18nProvider>
+      );
+      await tick();
+
+      const warmPanel = withinPhase('warm');
+      const moveAfterInput = warmPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+
+      fireEvent.change(moveAfterInput, { target: { value: '10' } });
+      fireEvent.blur(moveAfterInput);
+      await tick();
+
+      fireEvent.click(screen.getByTestId('remountFlyout'));
+      await tick();
+      expect(withinPhase('warm').getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toHaveValue(10);
+    });
+  });
+
   describe('onChange emission', () => {
     it('debounces rapid user edits into a single onChange', async () => {
       jest.useFakeTimers();
@@ -801,15 +945,15 @@ describe('EditIlmPhasesFlyout', () => {
         clearTimeoutSpy.mockClear();
 
         const warmPanel = withinPhase('warm');
-        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
-          target: { value: '1' },
-        });
-        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
-          target: { value: '2' },
-        });
-        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
-          target: { value: '3' },
-        });
+        const moveAfterInput = warmPanel.getByTestId(
+          `${DATA_TEST_SUBJ}MoveAfterValue`
+        ) as HTMLInputElement;
+        fireEvent.change(moveAfterInput, { target: { value: '1' } });
+        fireEvent.blur(moveAfterInput);
+        fireEvent.change(moveAfterInput, { target: { value: '2' } });
+        fireEvent.blur(moveAfterInput);
+        fireEvent.change(moveAfterInput, { target: { value: '3' } });
+        fireEvent.blur(moveAfterInput);
 
         expect(onChange).toHaveBeenCalledTimes(0);
 
@@ -818,10 +962,13 @@ describe('EditIlmPhasesFlyout', () => {
         });
 
         expect(onChange).toHaveBeenCalledTimes(1);
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: { name: 'warm', size_in_bytes: 0, min_age: '3d' },
-        });
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '3d' },
+          },
+          { invalidPhases: [] }
+        );
 
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
@@ -854,9 +1001,13 @@ describe('EditIlmPhasesFlyout', () => {
         clearTimeoutSpy.mockClear();
 
         const warmPanel = withinPhase('warm');
-        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
-          target: { value: '10' },
-        });
+        const moveAfterInput = warmPanel.getByTestId(
+          `${DATA_TEST_SUBJ}MoveAfterValue`
+        ) as HTMLInputElement;
+        fireEvent.change(moveAfterInput, { target: { value: '10' } });
+
+        // Commit happens on blur.
+        fireEvent.blur(moveAfterInput);
 
         unmount();
 

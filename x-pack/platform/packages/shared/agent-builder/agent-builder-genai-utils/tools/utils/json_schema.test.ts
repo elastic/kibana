@@ -13,7 +13,7 @@ describe('wrapJsonSchema', () => {
       const schema = {
         type: 'object' as const,
         properties: {
-          name: { type: 'string' },
+          name: { type: 'string' as const },
         },
       };
 
@@ -27,7 +27,7 @@ describe('wrapJsonSchema', () => {
         type: 'object' as const,
         description: 'My custom description',
         properties: {
-          name: { type: 'string' },
+          name: { type: 'string' as const },
         },
       };
 
@@ -46,7 +46,7 @@ describe('wrapJsonSchema', () => {
       const schema = {
         type: 'object' as const,
         properties: {
-          name: { type: 'string' },
+          name: { type: 'string' as const },
         },
       };
 
@@ -65,7 +65,7 @@ describe('wrapJsonSchema', () => {
       const schema = {
         type: 'object' as const,
         properties: {
-          name: { type: 'string' },
+          name: { type: 'string' as const },
         },
       };
 
@@ -115,7 +115,7 @@ describe('wrapJsonSchema', () => {
     it('wraps an array schema', () => {
       const schema = {
         type: 'array' as const,
-        items: { type: 'string' },
+        items: { type: 'string' as const },
       };
 
       const result = wrapJsonSchema({ schema });

@@ -164,6 +164,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
         'processor.event': 'error',
@@ -196,6 +197,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2. Alert when > 2.',
         'processor.event': 'error',
@@ -228,6 +230,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 3,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
         'processor.event': 'error',
@@ -330,6 +333,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo, name: tx-name-foo. Alert when > 2.',
         'processor.event': 'error',
@@ -367,6 +371,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, name: tx-name-foo-2. Alert when > 2.',
         'processor.event': 'error',
@@ -404,6 +409,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 3,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar, name: tx-name-bar. Alert when > 2.',
         'processor.event': 'error',
@@ -509,6 +515,7 @@ describe('Error count alert', () => {
         'error.grouping_key': 'error-key-foo',
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo, error key: error-key-foo. Alert when > 2.',
         'processor.event': 'error',
@@ -544,6 +551,7 @@ describe('Error count alert', () => {
         'error.grouping_key': 'error-key-foo-2',
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, error key: error-key-foo-2. Alert when > 2.',
         'processor.event': 'error',
@@ -579,6 +587,7 @@ describe('Error count alert', () => {
         'error.grouping_key': 'error-key-bar',
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 3,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar, error key: error-key-bar. Alert when > 2.',
         'processor.event': 'error',
@@ -676,6 +685,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
         'processor.event': 'error',
@@ -708,6 +718,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2. Alert when > 2.',
         'processor.event': 'error',
@@ -740,6 +751,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 3,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
         'processor.event': 'error',
@@ -839,6 +851,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
         'processor.event': 'error',
@@ -872,6 +885,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 4 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
         'processor.event': 'error',
@@ -904,6 +918,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 3,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
         'processor.event': 'error',
@@ -1011,6 +1026,7 @@ describe('Error count alert', () => {
         'error.grouping_name': 'error-name-foo',
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo, error key: error-key-foo, error name: error-name-foo. Alert when > 2.',
         'processor.event': 'error',
@@ -1049,6 +1065,7 @@ describe('Error count alert', () => {
         'error.grouping_name': 'error-name-foo2',
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, error key: error-key-foo-2, error name: error-name-foo2. Alert when > 2.',
         'processor.event': 'error',
@@ -1087,6 +1104,7 @@ describe('Error count alert', () => {
         'error.grouping_name': 'error-name-bar',
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 3,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar, error key: error-key-bar, error name: error-name-bar. Alert when > 2.',
         'processor.event': 'error',
@@ -1179,6 +1197,7 @@ describe('Error count alert', () => {
         'error.grouping_key': undefined,
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
         'processor.event': 'error',
@@ -1237,6 +1256,15 @@ describe('Error count alert', () => {
           'processor.event': 'error',
           'kibana.alert.evaluation.value': 60568922,
           'kibana.alert.evaluation.threshold': 24999998,
+          'kibana.alert.grouping': {
+            service: {
+              environment: 'Synthtrace: many_errors',
+              name: 'synthtrace-high-cardinality-0',
+            },
+            transaction: {
+              name: 'from-recovered-hit',
+            },
+          },
           'kibana.alert.reason':
             'Error count is 60568922 in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors. Alert when > 24999998.',
           'agent.name': 'java',
@@ -1291,6 +1319,9 @@ describe('Error count alert', () => {
           service: {
             environment: 'Synthtrace: many_errors',
             name: 'synthtrace-high-cardinality-0',
+          },
+          transaction: {
+            name: 'from-recovered-hit',
           },
         },
         interval: '5 mins',

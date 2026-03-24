@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod/v4';
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
@@ -75,8 +76,15 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   updated_by: { type: 'keyword', required: false },
 };
 
+type SiemMigrationResourceWithoutId = Omit<
+  z.infer<typeof SiemMigrationResource>,
+  'id' | 'metadata'
+> & {
+  metadata?: Record<string, unknown>;
+};
+
 export const ruleMigrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
+  SchemaFieldMapKeys<SiemMigrationResourceWithoutId>
 > = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },

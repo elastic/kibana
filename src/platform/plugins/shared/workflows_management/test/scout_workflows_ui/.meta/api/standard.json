@@ -1,0 +1,337 @@
+{
+  "sha1": "88b77477d67e2420c4b476d5ed8dbc781e9c260e",
+  "tests": [
+    {
+      "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
+      "title": "Workflows Import/Export API should bulk create a single workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-bac81496a83c3c2",
+      "title": "Workflows Import/Export API should bulk create multiple workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-d1958b5e6fc896e",
+      "title": "Workflows Import/Export API should detect conflicts via check-conflicts endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-cf0fe557870d52d",
+      "title": "Workflows Import/Export API should overwrite existing workflow via bulk create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 98,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-c26bae7ee5b0379",
+      "title": "Workflows Import/Export API should export workflows as a ZIP archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 124,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-19dac064bd6210e",
+      "title": "Workflows Import/Export API should return 404 when exporting non-existent workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 151,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-59e24ea00904554",
+      "title": "Workflows Import/Export API should round-trip: export then re-import produces equivalent workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 164,
+        "column": 10
+      }
+    },
+    {
+      "id": "fedda44db506679-b402fd1accda876",
+      "title": "Workflow execution concurrency control cancel-in-progress strategy cancels previous executions and completes the latest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
+        "line": 110,
+        "column": 14
+      }
+    },
+    {
+      "id": "fedda44db506679-f33c86dd5c9b2b6",
+      "title": "Workflow execution concurrency control drop strategy drops new executions until there is an already running execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
+        "line": 142,
+        "column": 14
+      }
+    },
+    {
+      "id": "337190238aab48d-18b2bd5c7982ed9",
+      "title": "Scheduled workflow execution enabling a scheduled workflow triggers executions automatically",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "337190238aab48d-289b622e62f8bf0",
+      "title": "Scheduled workflow execution disabling a scheduled workflow stops new executions from firing",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "337190238aab48d-2ebbbceb81e94d9",
+      "title": "Scheduled workflow execution scheduled executions do not overlap",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
+        "line": 138,
+        "column": 12
+      }
+    },
+    {
+      "id": "1644db0ad4ec69d-e7a489178f42992",
+      "title": "Workflow composition async: dispatches child workflow and receives execution metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
+        "line": 165,
+        "column": 12
+      }
+    },
+    {
+      "id": "1644db0ad4ec69d-e0a4458f1e424fb",
+      "title": "Workflow composition sync: waits for child workflow and completes with correct step count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
+        "line": 193,
+        "column": 12
+      }
+    },
+    {
+      "id": "1644db0ad4ec69d-756a9dfc6d23929",
+      "title": "Workflow composition sync: fails when child workflow fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
+        "line": 208,
+        "column": 12
+      }
+    },
+    {
+      "id": "c74c765cb818461-e8ac210a9d9227d",
+      "title": "Scheduled workflow save and update updating a scheduled workflow with a changed interval succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/scheduled_workflow_save_update.spec.ts",
+        "line": 46,
+        "column": 12
+      }
+    }
+  ]
+}

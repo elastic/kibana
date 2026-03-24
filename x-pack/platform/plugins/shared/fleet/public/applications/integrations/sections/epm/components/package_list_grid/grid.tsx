@@ -6,6 +6,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import type { ListRowRenderer } from 'react-virtualized';
 import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { css } from '@emotion/react';
@@ -57,10 +58,24 @@ export const GridColumn = ({
 
   // Reset the row measurement cache when the list changes
   useEffect(() => {
-    if (rowMeasurementCache.current) {
-      rowMeasurementCache.current.clearAll();
-    }
-  }, [list]);
+    rowMeasurementCache?.current?.clearAll();
+
+    windowScrollerRef.current?.updatePosition();
+  }, [list.length, columnCount, isLoading]);
+
+  // Use to work on small screen when categories are loaded
+  useEffect(() => {
+    const scrollerNode = windowScrollerRef.current;
+    if (!scrollerNode) return;
+    const element = ReactDOM.findDOMNode(scrollerNode) as Element | null;
+    if (!element?.parentElement) return;
+
+    const observer = new ResizeObserver(() => {
+      windowScrollerRef.current?.updatePosition();
+    });
+    observer.observe(element.parentElement);
+    return () => observer.disconnect();
+  }, [list.length, columnCount, isLoading]);
 
   if (isLoading) {
     return (
@@ -151,9 +166,7 @@ export const GridColumn = ({
         window
       }
       onResize={() => {
-        if (rowMeasurementCache.current) {
-          rowMeasurementCache.current.clearAll();
-        }
+        rowMeasurementCache.current?.clearAll();
       }}
     >
       {({ height, isScrolling, onChildScroll, scrollTop }) => (

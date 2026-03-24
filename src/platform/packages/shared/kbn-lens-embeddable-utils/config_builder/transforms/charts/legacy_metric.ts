@@ -137,7 +137,7 @@ function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersisted
 }
 
 function getValueColumns(layer: LegacyMetricStateESQL) {
-  return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
+  return [getValueColumn(ACCESSOR, layer.metric, 'number')];
 }
 
 type LegacyMetricAttributes = Extract<
@@ -175,7 +175,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

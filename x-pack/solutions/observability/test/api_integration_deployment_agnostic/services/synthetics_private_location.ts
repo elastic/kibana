@@ -13,7 +13,7 @@ import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-service
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.4.2';
+export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
@@ -26,23 +26,30 @@ export class PrivateLocationTestService {
     this.retry = getService('retry');
   }
 
-  async installSyntheticsPackage(
-    { version }: { version: string } = { version: INSTALLED_VERSION }
-  ) {
+  async fetchSyntheticsPackageVersion(): Promise<string> {
+    const res = await this.supertestWithAuth
+      .get('/api/fleet/epm/packages/synthetics')
+      .set('kbn-xsrf', 'true');
+    return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
+  }
+
+  async installSyntheticsPackage({ version }: { version?: string } = {}) {
     await this.supertestWithAuth
       .post('/api/fleet/setup')
       .set('kbn-xsrf', 'true')
       .send()
       .expect(200);
-    // attempt to delete any existing package so we can install specific version
-    await this.supertestWithAuth
-      .delete(`/api/fleet/epm/packages/synthetics`)
-      .set('kbn-xsrf', 'true');
-    await this.supertestWithAuth
-      .post(`/api/fleet/epm/packages/synthetics/${version}`)
-      .set('kbn-xsrf', 'true')
-      .send({ force: true })
-      .expect(200);
+    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
+    await this.retry.try(async () => {
+      await this.supertestWithAuth
+        .delete(`/api/fleet/epm/packages/synthetics`)
+        .set('kbn-xsrf', 'true');
+      await this.supertestWithAuth
+        .post(`/api/fleet/epm/packages/synthetics/${resolvedVersion}`)
+        .set('kbn-xsrf', 'true')
+        .send({ force: true })
+        .expect(200);
+    });
   }
 
   async addTestPrivateLocation(spaceId?: string) {

@@ -7,6 +7,7 @@
 
 import type { PreservedTimeUnit } from './time_unit_types';
 import { formatMillisecondsInUnit } from './duration_utils';
+import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
 
 export const getBoundsHelpTextValues = ({
   lowerBoundMs,
@@ -17,7 +18,11 @@ export const getBoundsHelpTextValues = ({
   upperBoundMs: number | undefined;
   unit: PreservedTimeUnit;
 }): { min: string; max: string | undefined } => {
-  const min = formatMillisecondsInUnit(lowerBoundMs, unit);
-  const max = upperBoundMs === undefined ? undefined : formatMillisecondsInUnit(upperBoundMs, unit);
+  const minRaw = formatMillisecondsInUnit(lowerBoundMs, unit);
+  const maxRaw =
+    upperBoundMs === undefined ? undefined : formatMillisecondsInUnit(upperBoundMs, unit);
+
+  const min = getTimeSizeAndUnitLabel(minRaw) ?? minRaw;
+  const max = maxRaw === undefined ? undefined : getTimeSizeAndUnitLabel(maxRaw) ?? maxRaw;
   return { min, max };
 };

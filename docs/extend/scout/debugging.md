@@ -43,7 +43,25 @@ When you add new tests, fix flakes, or make significant changes, run the same te
 
 ### Repeat the same test locally [scout-debugging-flaky-tests-local]
 
-To reproduce flakiness locally, you can run the same test multiple times with Playwright’s `--repeat-each`.
+To reproduce flakiness locally, you can run the same test multiple times with the `--repeatEach` flag.
+
+#### Using Scout `run-tests`
+
+The `run-tests` command supports a `--repeatEach` flag that forwards Playwright's `--repeat-each` option. Scout resolves the correct `--project` and `--grep` tag automatically from the `--arch` and `--domain` flags.
+
+```bash
+node scripts/scout run-tests \
+  --arch stateful \
+  --domain classic \
+  --config src/platform/plugins/shared/dashboard/test/scout/ui/parallel.playwright.config.ts \
+  --repeatEach 30
+```
+
+The value must be a positive integer. See [Run tests](./run-tests.md) for the full list of `run-tests` flags.
+
+#### Using Playwright directly [scout-debugging-flaky-tests-local-playwright]
+
+If you need more control (for example, targeting a specific spec file), you can call Playwright directly with `--repeat-each`.
 
 **Grepping is key**: always pass `--grep` with the test title or tag that matches the target environment you’re running against, otherwise you may run suites that aren’t compatible with your chosen `--project`.
 

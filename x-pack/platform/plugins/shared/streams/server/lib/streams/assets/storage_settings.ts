@@ -11,8 +11,10 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_KQL_BODY,
+  QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
   RULE_BACKED,
@@ -36,6 +38,7 @@ export const queryStorageSettings = {
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_ESQL_QUERY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
+      [QUERY_DESCRIPTION]: types.text(),
       [QUERY_SEVERITY_SCORE]: types.long(),
       [RULE_BACKED]: types.boolean(),
       [RULE_ID]: types.keyword(),
@@ -45,3 +48,13 @@ export const queryStorageSettings = {
 } satisfies IndexStorageSettings;
 
 export type QueryStorageSettings = typeof queryStorageSettings;
+
+export const getQueryStorageSettingsWithSemantic = (inferenceId: string): IndexStorageSettings => ({
+  name: '.kibana_streams_assets',
+  schema: {
+    properties: {
+      ...queryStorageSettings.schema.properties,
+      [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+    },
+  },
+});

@@ -212,7 +212,7 @@ function fromDocumentToSerializedState(
   return {
     ...originalInput,
     attributes: omit(doc, 'savedObjectId'),
-    savedObjectId: doc.savedObjectId,
+    ref_id: doc.savedObjectId,
     ...panelSettings,
   };
 }
@@ -309,7 +309,7 @@ export const runSaveLensVisualization = async (
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-  const originalSavedObjectId = originalInput?.savedObjectId;
+  const originalSavedObjectId = originalInput?.ref_id;
   if (options.saveToLibrary) {
     await lensDocumentService.checkForDuplicateTitle(
       {
@@ -333,7 +333,7 @@ export const runSaveLensVisualization = async (
       docToSave,
       {
         time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
-        savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
+        ref_id: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
       originalInput
     );
@@ -373,7 +373,7 @@ export const runSaveLensVisualization = async (
     }
 
     if (shouldNavigateBackToOrigin) {
-      const apiConfig = transformToApiConfig({ ...newDoc, savedObjectId });
+      const apiConfig = transformToApiConfig({ ...newDoc, ref_id: savedObjectId });
       redirectToOrigin({
         state: apiConfig,
         isCopied: saveProps.newCopyOnSave,
@@ -386,7 +386,7 @@ export const runSaveLensVisualization = async (
     // without redirect?
     if (saveProps.dashboardId) {
       redirectToDashboard({
-        embeddableInput: { ...newDoc, savedObjectId },
+        embeddableInput: { ...newDoc, ref_id: savedObjectId },
         dashboardId: saveProps.dashboardId,
         stateTransfer,
         originatingApp: props.originatingApp,

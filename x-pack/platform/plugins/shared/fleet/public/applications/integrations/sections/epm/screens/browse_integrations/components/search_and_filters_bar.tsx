@@ -403,7 +403,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
         }
       )}
       value={searchTerms}
-      data-test-subj="browseIntegrations.searchBar.input"
+      data-test-subj="epmList.searchBar"
       onChange={(e) => setSearchTerms(e.target.value)}
       fullWidth
       prepend={
