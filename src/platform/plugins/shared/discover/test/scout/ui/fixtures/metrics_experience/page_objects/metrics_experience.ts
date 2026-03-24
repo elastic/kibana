@@ -14,8 +14,12 @@ import type { MetricsFlyout } from './flyout';
 import { createFlyout } from './flyout';
 import type { ChartActions } from './chart_actions';
 import { createChartActions } from './chart_actions';
+import type { ChartInteractions } from './chart_interactions';
+import { createChartInteractions } from './chart_interactions';
 import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
+import type { ShareHelper } from './share_helper';
+import { createShareHelper } from './share_helper';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
@@ -28,7 +32,9 @@ export class MetricsExperiencePage {
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
   public readonly chartActions: ChartActions;
+  public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
+  public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
 
   constructor(page: ScoutPage) {
@@ -40,10 +46,12 @@ export class MetricsExperiencePage {
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
     this.chartActions = createChartActions(page);
+    this.chartInteractions = createChartInteractions(page, (index) => this.getCardByIndex(index));
     this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
+    this.share = createShareHelper(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
   }
 

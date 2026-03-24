@@ -178,6 +178,8 @@ export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
   `${CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent` as const;
 export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
   `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
+export const CORRELATIONS_RELATED_ATTACKS_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAttacks` as const;
 
 /* Visualizations section */
 
