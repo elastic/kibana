@@ -616,9 +616,13 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
 
   let result: Record<string, unknown> = {};
 
+  const hasPropertyNames = 'propertyNames' in node;
+
   for (const [key, value] of Object.entries(node)) {
     // Strip `propertyNames` (not supported in OAS 3.0)
     if (key === 'propertyNames') continue;
+    // Strip companion `required` emitted by z.toJSONSchema() for z.record(z.enum([...]), ...)
+    if (key === 'required' && hasPropertyNames) continue;
 
     // `const: value` → `enum: [value]`
     if (key === 'const') {
