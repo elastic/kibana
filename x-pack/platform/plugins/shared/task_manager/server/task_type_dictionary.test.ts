@@ -119,7 +119,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"[fail]: definition for this key is missing"`
+        `"[fail]: Additional properties are not allowed ('fail' was unexpected)"`
       );
     });
 
