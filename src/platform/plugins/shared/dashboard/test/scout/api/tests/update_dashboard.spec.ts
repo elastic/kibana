@@ -120,7 +120,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(response).toHaveStatusCode(403);
-      expect(response.body.message).toBe('Forbidden');
+      expect(response.body.message).toBe('Unable to update dashboard');
     }
   );
 });
