@@ -94,6 +94,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
         clickOutsideDisables: false,
         onClickOutside: onClose,
       }}
+      aria-label={displayName}
       data-test-subj={`controlDisplaySettings-${api.uuid}`}
     >
       <EuiFormRow label={strings.minimumWidth} fullWidth>
