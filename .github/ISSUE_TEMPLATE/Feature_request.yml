@@ -5,9 +5,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to suggest a new feature! Please fill out the sections below so we can evaluate your request.
+        Thanks for suggesting a new feature! Please fill out the sections below so we can evaluate your request.
 
-        **Tip:** If filling this out feels like too much work, try the `/gh-create-issue` skill in your coding agent (e.g. Claude Code, Cursor) — it will interview you and file the issue for you.
+        **Tip:** Use the `/gh-create-issue` skill in your coding agent (e.g. Claude Code, Cursor) — it will interview you and file the issue for you.
 
   - type: textarea
     id: what
