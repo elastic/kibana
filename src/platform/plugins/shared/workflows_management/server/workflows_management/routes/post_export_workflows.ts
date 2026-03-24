@@ -12,7 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
-import type { WorkflowExportEntry } from '../../../common/lib/export';
+import type { WorkflowExportEntry } from '../../../common/lib/import';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 import { withLicenseCheck } from '../lib/with_license_check';
 import { generateWorkflowsArchive } from '../lib/zip_archive';
