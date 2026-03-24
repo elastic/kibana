@@ -65,6 +65,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.alertingV2}.describe_data_source`,
   `${internalNamespaces.alertingV2}.propose_rule`,
   `${internalNamespaces.alertingV2}.propose_notification_policy`,
+  `${internalNamespaces.alertingV2}.get_notification_context`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

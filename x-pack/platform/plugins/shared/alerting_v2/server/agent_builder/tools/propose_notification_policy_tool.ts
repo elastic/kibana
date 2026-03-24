@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import {
   NOTIFICATION_POLICY_TYPE,
   type NotificationPolicyAttachmentData,
@@ -17,7 +18,13 @@ import {
 const workflowParamSchema = z.discriminatedUnion('source', [
   z.object({
     source: z.literal('existing'),
-    id: z.string().describe('Saved-object ID of the existing workflow.'),
+    id: z
+      .string()
+      .describe(
+        'The workflowId of an existing workflow (format: "workflow-{uuid}"). ' +
+          'Use the workflowId from get_notification_context results. ' +
+          'Do NOT use a connectorId here — connectors are referenced inside the workflow YAML via connector-id, not here.'
+      ),
     name: z.string().describe('Display name of the existing workflow.'),
   }),
   z.object({
@@ -74,14 +81,16 @@ const proposeNotificationPolicySchema = z.object({
       'Minimum interval between repeated notifications for the same episode (e.g. "1h", "5m").'
     ),
   workflow: workflowParamSchema.describe(
-    'The workflow destination. Use source "existing" to reference a saved workflow by ID, ' +
-      'or source "inline" to embed a new workflow YAML that will be created alongside the policy.'
+    'The workflow destination. Use source "existing" to reference a saved workflow by its workflowId ' +
+      '(format: "workflow-{uuid}"), or source "inline" to embed a new workflow YAML that will be ' +
+      'created alongside the policy. IMPORTANT: Do NOT confuse workflowId with connectorId — ' +
+      'connectors go inside the workflow YAML via the connector-id step field.'
   ),
 });
 
-export const proposeNotificationPolicyTool = (): BuiltinToolDefinition<
-  typeof proposeNotificationPolicySchema
-> => ({
+export const proposeNotificationPolicyTool = (
+  workflowsApi: WorkflowsManagementApi
+): BuiltinToolDefinition<typeof proposeNotificationPolicySchema> => ({
   id: `${internalNamespaces.alertingV2}.propose_notification_policy`,
   type: ToolType.builtin,
   description:
@@ -91,24 +100,45 @@ export const proposeNotificationPolicyTool = (): BuiltinToolDefinition<
     'reference a saved workflow.',
   tags: ['alerting', 'notifications'],
   schema: proposeNotificationPolicySchema,
-  handler: async (params, { events, attachments }) => {
+  handler: async (params, { events, attachments, spaceId, request }) => {
     events.reportProgress('Preparing notification policy proposal...');
 
-    const workflow =
-      params.workflow.source === 'existing'
-        ? {
-            source: 'existing' as const,
-            id: params.workflow.id,
-            name: params.workflow.name,
-          }
-        : {
-            source: 'inline' as const,
-            name: params.workflow.name,
-            description: params.workflow.description,
-            yaml: params.workflow.yaml,
-            connectorTypes: params.workflow.connector_types,
-            isValid: params.workflow.is_valid,
-          };
+    let workflow: NotificationPolicyAttachmentData['workflow'];
+    let validationErrors: string[] | undefined;
+
+    if (params.workflow.source === 'existing') {
+      workflow = {
+        source: 'existing' as const,
+        id: params.workflow.id,
+        name: params.workflow.name,
+      };
+    } else {
+      let isValid = params.workflow.is_valid;
+      try {
+        const validation = await workflowsApi.validateWorkflow(
+          params.workflow.yaml,
+          spaceId,
+          request
+        );
+        isValid = validation.valid;
+        if (!validation.valid) {
+          validationErrors = validation.diagnostics
+            .filter((d: { severity: string }) => d.severity === 'error')
+            .map((d: { message: string }) => d.message);
+        }
+      } catch {
+        // If validation service is unavailable, fall back to the agent's claim
+      }
+
+      workflow = {
+        source: 'inline' as const,
+        name: params.workflow.name,
+        description: params.workflow.description,
+        yaml: params.workflow.yaml,
+        connectorTypes: params.workflow.connector_types,
+        isValid,
+      };
+    }
 
     const attachmentData: NotificationPolicyAttachmentData = {
       name: params.name,
@@ -146,6 +176,16 @@ export const proposeNotificationPolicyTool = (): BuiltinToolDefinition<
       workflowName: params.workflow.name,
       workflowSource: params.workflow.source,
       matcher: params.matcher,
+      ...(validationErrors?.length
+        ? {
+            workflowValidationErrors: validationErrors,
+            _validationWarning:
+              'The workflow YAML has validation errors. Read the alert-workflow-example reference ' +
+              'content, call get_step_definitions to check the correct step types and with-block ' +
+              'params, fix the YAML, and call propose_notification_policy again with the corrected ' +
+              'YAML and the attachment_id to update in-place.',
+          }
+        : {}),
       _renderInstructions: [
         'IMPORTANT: You MUST start your response with the render tag below as the VERY FIRST LINE.',
         'Do NOT write any text before it. The tag must be the first thing in your message.',

@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useForm, FormProvider, Controller, useWatch } from 'react-hook-form';
 import type {
   AttachmentRenderProps,
@@ -63,6 +64,7 @@ export const NotificationPolicyCanvasContent = ({
   attachment,
   http,
   notifications,
+  application,
   closeCanvas,
   WorkflowEditor,
 }: NotificationPolicyCanvasContentProps) => {
@@ -353,6 +355,20 @@ export const NotificationPolicyCanvasContent = ({
     [methods, frequency]
   );
 
+  const handleEditInWorkflows = useCallback(() => {
+    if (data.workflow.source === 'existing') {
+      application.navigateToApp(WORKFLOWS_APP_ID, {
+        path: data.workflow.id,
+        openInNewTab: true,
+      });
+    } else {
+      application.navigateToApp(WORKFLOWS_APP_ID, {
+        path: '/create',
+        state: { initialYaml: data.workflow.yaml },
+      });
+    }
+  }, [application, data.workflow]);
+
   const workflowTab: EuiTabbedContentTab = useMemo(
     () => ({
       id: 'workflow',
@@ -385,6 +401,20 @@ export const NotificationPolicyCanvasContent = ({
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
+                <EuiFlexItem grow />
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={handleEditInWorkflows}
+                  >
+                    {i18n.translate(
+                      'xpack.alertingVTwo.attachments.notificationPolicy.canvas.editInWorkflows',
+                      { defaultMessage: 'Edit in Workflows' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <Suspense fallback={<EuiLoadingSpinner size="l" />}>
@@ -393,9 +423,26 @@ export const NotificationPolicyCanvasContent = ({
             </>
           ) : (
             <EuiPanel hasShadow={false} hasBorder={true} paddingSize="l">
-              <EuiTitle size="xs">
-                <h3>{data.workflow.name}</h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow>
+                  <EuiTitle size="xs">
+                    <h3>{data.workflow.name}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={handleEditInWorkflows}
+                  >
+                    {i18n.translate(
+                      'xpack.alertingVTwo.attachments.notificationPolicy.canvas.editInWorkflows',
+                      { defaultMessage: 'Edit in Workflows' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 {i18n.translate(
@@ -412,7 +459,7 @@ export const NotificationPolicyCanvasContent = ({
         </>
       ),
     }),
-    [data.workflow, WorkflowEditor]
+    [data.workflow, WorkflowEditor, handleEditInWorkflows]
   );
 
   const tabs = useMemo(() => [policyTab, workflowTab], [policyTab, workflowTab]);

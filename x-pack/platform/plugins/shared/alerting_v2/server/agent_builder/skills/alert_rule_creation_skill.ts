@@ -73,24 +73,30 @@ Render the attachment from \`_renderInstructions\` as the first line of your res
 
 ## Set Up Notifications (Phase 3)
 
-This section applies whenever the user mentions notifications, alerts, getting notified, or configuring how a rule sends messages. **Act immediately — do not explain concepts first.** The \`propose_notification_policy\` tool bundles both the workflow and the notification policy into a single attachment, so you only need **one tool call**.
+This section applies whenever the user mentions notifications, alerts, getting notified, or configuring how a rule sends messages. **Act immediately — do not explain concepts first.** The \`propose_notification_policy\` tool bundles both the workflow and the notification policy into a single attachment, so you only need **one tool call** to propose.
 
-**Step 1: Check existing state.**
-Call \`${internalNamespaces.alertingV2}.list_notification_policies\` and \`platform.workflows.list_workflows\` immediately (in parallel if possible).
+**Step 1: Gather context.**
+Call \`${internalNamespaces.alertingV2}.get_notification_context\`. This single call returns all existing notification policies, workflows, and configured connectors. Analyze the results:
 
-→ **Policies exist that match**: Present them briefly and ask if the user wants to reuse one. If yes, update the rule's labels to match that policy's matchers. Done.
+→ **Policies exist that match the rule**: Present them briefly and ask if the user wants to reuse one. If yes, update the rule's labels to match that policy's matchers. Done.
 
-→ **No matching policies**: Continue to step 2.
+→ **Reusable workflows exist** (workflows with manual triggers): Ask the user if they want to route to one. If yes, note the workflow ID and name — you'll pass them as \`workflow: { source: "existing", id: "<id>", name: "<name>" }\`. Skip to step 3.
 
-**Step 2: Determine the workflow destination.**
+→ **No matching policies and no reusable workflows**: You need to build an inline workflow. Use the connectors from the context response to determine what channels are available:
+  - If the user already said where they want to be notified (e.g. "Slack"), find the matching connector from the context results.
+  - If the user hasn't specified a channel, suggest the available options based on the connectors list (e.g. "I see you have Slack and email connectors configured — which would you prefer?"). Do NOT ask a generic question without mentioning the actual available options.
+  - If no connectors are configured at all, tell the user to set one up in Stack Management > Connectors before proceeding.
 
-→ **Existing workflows with alert triggers**: Ask the user if they want to use one. If yes, note the workflow ID and name — you'll pass them as \`workflow: { source: "existing", id: "<id>", name: "<name>" }\`.
-
-→ **No workflows exist**: Ask the user where they want to be notified (Slack, email, PagerDuty, etc.). When the user answers:
-1. Call \`platform.workflows.get_connectors\` to find configured connectors for that channel.
-2. Read the alert workflow template via \`filestore.read\` with path \`skills/platform/alerting/alert-rule-creation/alert-workflow-example.md\`.
-3. Build the workflow YAML from the template, replacing the \`console\` steps with the appropriate connector step using the connector ID. Call \`platform.workflows.validate_workflow\` to validate the YAML.
-4. If no connector is configured, tell the user to set one up in Stack Management > Connectors.
+**Step 2: Build an inline workflow.**
+Once you know the target connector:
+1. Call \`platform.workflows.get_step_definitions\` with \`stepType\` set to the connector type (e.g. \`"slack"\`, \`"email"\`, \`"pagerduty"\`) to discover the exact \`with\` parameters the step requires. Do NOT guess parameters — they vary per connector type.
+2. Read the alert workflow template via \`filestore.read\` with path \`skills/platform/alerting/alert-rule-creation/alert-workflow-example.md\`. This contains complete examples for Slack, Email, and PagerDuty workflows with the correct inputs schema and connector step patterns.
+3. Build the workflow YAML using the template as a base. The workflow **MUST** include:
+   - A \`manual\` trigger (NOT \`alert\` or \`scheduled\` — the Dispatcher invokes via manual trigger)
+   - The full \`inputs\` schema accepting the notification payload (id, ruleId, policyId, groupKey, episodes) — copy this exactly from the template
+   - Connector steps with the correct \`type\`, \`connector-id\` (from the step 1 context results), and \`with\` parameters from \`get_step_definitions\`
+   - A \`foreach\` loop over \`{{ inputs.episodes | json }}\` with \`if\` conditions on \`foreach.item.episode_status\`
+4. Call \`platform.workflows.validate_workflow\` with the complete YAML. If validation returns errors, fix them and re-validate until valid. Pass \`is_valid: true\` to \`propose_notification_policy\` only when validation succeeds.
 
 **Step 3: Propose the notification policy (one tool call).**
 Call \`${internalNamespaces.alertingV2}.propose_notification_policy\` with:
@@ -189,10 +195,11 @@ FROM logs-* | STATS doc_count = COUNT(*) | WHERE doc_count == 0
     `${internalNamespaces.alertingV2}.create_rule`,
     `${internalNamespaces.alertingV2}.validate_esql_query`,
     `${internalNamespaces.alertingV2}.explain_rule_query`,
-    `${internalNamespaces.alertingV2}.list_notification_policies`,
+    `${internalNamespaces.alertingV2}.get_notification_context`,
     `${internalNamespaces.alertingV2}.propose_notification_policy`,
-    'platform.workflows.list_workflows',
-    'platform.workflows.get_connectors',
     'platform.workflows.validate_workflow',
+    'platform.workflows.get_step_definitions',
+    'platform.workflows.get_trigger_definitions',
+    'platform.workflows.get_examples',
   ],
 });

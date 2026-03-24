@@ -14,11 +14,19 @@ const getConnectorsSchema = z.object({
   actionTypeId: z
     .string()
     .optional()
-    .describe('Filter by connector action type ID (e.g., ".slack", ".jira", ".webhook")'),
+    .describe(
+      'Filter by exact connector action type ID. Only use this if you already know the precise ' +
+        'actionTypeId value from a previous get_connectors call. Do NOT guess or infer this value ' +
+        '— call without this parameter first to discover available action types.'
+    ),
   stepType: z
     .string()
     .optional()
-    .describe('Filter by workflow step type (e.g., "slack", "jira", "inference.completion")'),
+    .describe(
+      'Filter by exact workflow step type. Only use this if you already know the precise stepType ' +
+        'value from a previous get_connectors call. Do NOT guess or infer this value — call ' +
+        'without this parameter first to discover available step types.'
+    ),
   search: z.string().optional().describe('Search term to match against connector names'),
 });
 
@@ -29,7 +37,9 @@ export const getConnectorsTool = (
   type: ToolType.builtin,
   description:
     "Get connector instances configured in the user's environment. " +
-    'Returns connector IDs needed for the connector-id field in workflow steps.',
+    'Returns connector IDs needed for the connector-id field in workflow steps. ' +
+    'Call with no filters first to discover all available connectors and their action types, ' +
+    'then use filters in subsequent calls only with exact values from the initial response.',
   tags: ['workflows', 'connectors'],
   schema: getConnectorsSchema,
   handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {

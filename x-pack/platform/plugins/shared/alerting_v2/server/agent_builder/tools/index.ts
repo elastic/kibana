@@ -25,6 +25,7 @@ import { getConnectorsTool } from './get_connectors_tool';
 import { listWorkflowsTool } from './list_workflows_tool';
 import { validateWorkflowTool } from './validate_workflow_tool';
 import { proposeNotificationPolicyTool } from './propose_notification_policy_tool';
+import { getNotificationContextTool } from './get_notification_context_tool';
 
 export const registerTools = ({
   agentBuilder,
@@ -52,7 +53,8 @@ export const registerTools = ({
 
   // P3 — notification policies
   agentBuilder.tools.register(listNotificationPoliciesTool(getScopedServices));
-  agentBuilder.tools.register(proposeNotificationPolicyTool());
+  agentBuilder.tools.register(proposeNotificationPolicyTool(workflowsApi));
+  agentBuilder.tools.register(getNotificationContextTool(getScopedServices, workflowsApi));
 
   // P4 — data discovery & profiling
   agentBuilder.tools.register(discoverDataSourcesTool());
