@@ -205,7 +205,7 @@ export const AZURE_SHARED_KEY_ACCOUNT_NAME_LABEL = i18n.translate(
 export const AZURE_SHARED_KEY_ACCOUNT_NAME_REQUIRED_MESSAGE = i18n.translate(
   'connectorSpecs.azureSharedKeyAuth.accountName.requiredMessage',
   {
-    defaultMessage: 'Storage account name is required',
+    defaultMessage: 'Enter a storage account name.',
   }
 );
 
@@ -219,7 +219,7 @@ export const AZURE_SHARED_KEY_ACCOUNT_KEY_LABEL = i18n.translate(
 export const AZURE_SHARED_KEY_ACCOUNT_KEY_REQUIRED_MESSAGE = i18n.translate(
   'connectorSpecs.azureSharedKeyAuth.accountKey.requiredMessage',
   {
-    defaultMessage: 'Storage account key is required',
+    defaultMessage: 'Enter a storage account key.',
   }
 );
 

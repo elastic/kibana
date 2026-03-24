@@ -105,7 +105,7 @@ export const AzureBlob: ConnectorSpec = {
         placeholder: 'https://myaccount.blob.core.windows.net',
         helpText: i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.helpText', {
           defaultMessage:
-            'The blob service endpoint (e.g. https://myaccount.blob.core.windows.net)',
+            'The blob service endpoint, for example https://myaccount.blob.core.windows.net.',
         }),
       }),
   }),
