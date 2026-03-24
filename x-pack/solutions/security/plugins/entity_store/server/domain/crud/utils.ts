@@ -22,7 +22,7 @@ import { BadCRUDRequestError } from '../errors';
 const GENERIC_TYPE = 'generic' as EntityType;
 
 export function hashEuid(id: string): string {
-  return createHash(HASH_ALG.toLowerCase()).update(id).digest('hex');
+  return createHash(HASH_ALG).update(id).digest('hex');
 }
 
 export function validateAndTransformDocForUpsert(

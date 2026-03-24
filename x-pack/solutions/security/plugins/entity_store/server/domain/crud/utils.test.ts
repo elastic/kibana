@@ -56,7 +56,7 @@ describe('crud_client utils', () => {
 
   it('hashEuid: returns a valid SHA-256 hash', () => {
     const hashedId = hashEuid('entity-id');
-    const expectedHash = createHash(HASH_ALG.toLowerCase()).update('entity-id').digest('hex');
+    const expectedHash = createHash(HASH_ALG).update('entity-id').digest('hex');
 
     expect(hashedId).toMatch(/^[a-f0-9]{64}$/);
     expect(hashedId).toBe(expectedHash);
