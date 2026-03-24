@@ -9,13 +9,14 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isEqual } from 'lodash';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { isChartAvailableForDataView } from './is_chart_available';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
 const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
@@ -162,10 +163,7 @@ export const buildEsqlFetchSubscribe = ({
     const { viewMode, hideTable } = getCurrentTab().appState;
     const currentDataView = getCurrentDataView();
     const isChartAvailable =
-      currentDataView !== undefined &&
-      currentDataView.type !== DataViewType.ROLLUP &&
-      currentDataView.isTimeBased() &&
-      !hasTransformationalCommand(nextQuery.esql);
+      isChartAvailableForDataView(currentDataView) && !hasTransformationalCommand(nextQuery.esql);
     const changeHideTable = !isChartAvailable && hideTable === true;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 

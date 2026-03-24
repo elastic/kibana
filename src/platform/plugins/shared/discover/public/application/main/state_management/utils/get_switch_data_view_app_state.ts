@@ -10,11 +10,12 @@
 import { uniq } from 'lodash';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortArray } from '@kbn/discover-utils';
 import type { DiscoverAppState } from '../redux';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { isChartAvailableForDataView } from './is_chart_available';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
@@ -70,7 +71,7 @@ export function getDataViewAppState(
     );
   }
 
-  const isChartAvailable = nextDataView.type !== DataViewType.ROLLUP && nextDataView.isTimeBased();
+  const isChartAvailable = isChartAvailableForDataView(nextDataView);
 
   return {
     dataSource: nextDataView.id

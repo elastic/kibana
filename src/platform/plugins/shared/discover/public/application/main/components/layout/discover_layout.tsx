@@ -28,7 +28,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { type DataView, type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
 import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
@@ -71,6 +71,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
+import { isChartAvailableForDataView } from '../../state_management/utils/is_chart_available';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -144,7 +145,7 @@ export function DiscoverLayout() {
   // representation of those documents does not have the time field that _field_caps
   // reports us.
   const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
+    return isChartAvailableForDataView(dataView);
   }, [dataView]);
 
   const resultState = useMemo(
