@@ -246,6 +246,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   triggers?: string[];
   /**
+   * Optional priority used to sort suggestions when multiple visualizations
+   * compete. Higher values are sorted first. Defaults to 0.
+   */
+  suggestionPriority?: number;
+
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */
