@@ -63,8 +63,9 @@ body:
       label: Priority
       description: How important is this feature to you?
       options:
-        - Nice to have
+        - Nice to have (quality of life improvement)
         - Important (workaround exists)
+        - Urgent (workaround exists, but is very painful)
         - Critical (blocking my workflow)
     validations:
       required: false
