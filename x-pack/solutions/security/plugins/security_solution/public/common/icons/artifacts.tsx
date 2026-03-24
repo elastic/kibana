@@ -27,7 +27,7 @@ export const IconArtifacts: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =
     </svg>
   );
 
-  // Replace inner content below with dark-theme SddVG (use unique ids, e.g. artifacts-dark-* in defs).
+  // Replace inner content below with dark-theme SVG (use unique ids, e.g. artifacts-dark-* in defs).
   const dark = (
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M1 4.69325C1 0.927757 5.8963 -0.424857 7.74512 2.85634L15.1475 16.0028L14.8711 16.4931L7.74512 29.1483C5.89659 32.4298 1.00019 31.0779 1 27.3124V4.69325ZM6.00195 3.83583C5.17253 2.36381 3 2.96348 3 4.69032V27.3095C3 29.0364 5.17259 29.6362 6.00195 28.164L12.8525 15.9999L6.00195 3.83583Z" fill="white" />

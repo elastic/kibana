@@ -33,32 +33,32 @@ const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 jest.mock('../endpoint_exceptions/view/endpoint_exceptions', () => ({
   EndpointExceptions: () => (
-    <div data-test-subj="artifacts-stub-endpointExceptions">endpoint-exceptions</div>
+    <div data-test-subj="artifacts-stub-endpointExceptions">{'endpoint-exceptions'}</div>
   ),
 }));
 
 jest.mock('../trusted_apps/view/trusted_apps_list', () => ({
-  TrustedAppsList: () => <div data-test-subj="artifacts-stub-trustedApps">trusted-apps</div>,
+  TrustedAppsList: () => <div data-test-subj="artifacts-stub-trustedApps">{'trusted-apps'}</div>,
 }));
 
 jest.mock('../trusted_devices/view/trusted_devices_list', () => ({
   TrustedDevicesList: () => (
-    <div data-test-subj="artifacts-stub-trustedDevices">trusted-devices</div>
+    <div data-test-subj="artifacts-stub-trustedDevices">{'trusted-devices'}</div>
   ),
 }));
 
 jest.mock('../event_filters/view/event_filters_list', () => ({
-  EventFiltersList: () => <div data-test-subj="artifacts-stub-eventFilters">event-filters</div>,
+  EventFiltersList: () => <div data-test-subj="artifacts-stub-eventFilters">{'event-filters'}</div>,
 }));
 
 jest.mock('../host_isolation_exceptions/view/host_isolation_exceptions_list', () => ({
   HostIsolationExceptionsList: () => (
-    <div data-test-subj="artifacts-stub-hostIsolationExceptions">host-isolation</div>
+    <div data-test-subj="artifacts-stub-hostIsolationExceptions">{'host-isolation'}</div>
   ),
 }));
 
 jest.mock('../blocklist/view/blocklist', () => ({
-  Blocklist: () => <div data-test-subj="artifacts-stub-blocklist">blocklist</div>,
+  Blocklist: () => <div data-test-subj="artifacts-stub-blocklist">{'blocklist'}</div>,
 }));
 
 const fullArtifactReadPrivileges: Partial<EndpointPrivileges> = {

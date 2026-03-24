@@ -122,10 +122,7 @@ export const ArtifactsPage = memo(() => {
     canReadEndpointExceptions,
   } = useUserPrivileges().endpointPrivileges;
 
-  const activeTab = useMemo(
-    () => getActiveTabFromPathname(location.pathname),
-    [location.pathname]
-  );
+  const activeTab = useMemo(() => getActiveTabFromPathname(location.pathname), [location.pathname]);
 
   const visibleTabs = useMemo(() => {
     return ARTIFACT_SUB_TABS.filter((tab) => {
