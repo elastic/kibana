@@ -12,7 +12,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ImportWorkflowsFlyout } from './import_workflows_flyout';
-import type { WorkflowPreview } from '../../../../common/lib/export';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { parseImportFile } from '../lib/parse_import_file';

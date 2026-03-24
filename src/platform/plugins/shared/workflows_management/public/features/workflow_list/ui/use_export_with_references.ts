@@ -11,7 +11,7 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { isNotNullable } from '../../../../common/lib/utils';
+import { isNotNullable } from '../../../../common/lib/type_guards';
 import {
   exportSingleWorkflow,
   exportWorkflows,

@@ -17,8 +17,8 @@ import type {
   WorkflowListDto,
 } from '@kbn/workflows';
 import { useRunWorkflow } from '@kbn/workflows-ui';
-import type { WorkflowPreview } from '../../../../common/lib/export';
-import { rewriteWorkflowReferences } from '../../../../common/lib/export';
+import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';

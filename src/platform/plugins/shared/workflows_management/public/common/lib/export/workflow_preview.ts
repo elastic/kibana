@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isRecord } from '../type_guards';
-import { parseYamlToJSONWithoutValidation } from '../yaml/parse_workflow_yaml_to_json_without_validation';
+import { isRecord } from '../../../../common/lib/type_guards';
+import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
 export interface WorkflowPreview {
   id: string;
