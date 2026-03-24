@@ -46,7 +46,8 @@ export function registerGetWorkflowExecutionsRoute({
                     ExecutionStatusValues.map((type) => schema.literal(type)) as [
                       Type<ExecutionStatus>
                     ]
-                  )
+                  ),
+                  { maxSize: ExecutionStatusValues.length }
                 ),
               ],
               {
@@ -63,7 +64,8 @@ export function registerGetWorkflowExecutionsRoute({
                 schema.arrayOf(
                   schema.oneOf(
                     ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
-                  )
+                  ),
+                  { maxSize: ExecutionTypeValues.length }
                 ),
               ],
               {
