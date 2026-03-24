@@ -8932,6 +8932,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-column-presets@link:src/platform/packages/shared/shared-ux/column-presets":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-document-data-cascade@link:src/platform/packages/shared/shared-ux/document_data_cascade/impl":
   version "0.0.0"
   uid ""
@@ -10948,7 +10952,7 @@
     "@opentelemetry/instrumentation" "^0.57.1"
     "@opentelemetry/semantic-conventions" "^1.27.0"
 
-"@opentelemetry/instrumentation-hapi@0.57.0", "@opentelemetry/instrumentation-hapi@^0.57.0":
+"@opentelemetry/instrumentation-hapi@^0.57.0":
   version "0.57.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-hapi/-/instrumentation-hapi-0.57.0.tgz#27b3a44a51444af3100a321f2e40623e89e5bb75"
   integrity sha512-Os4THbvls8cTQTVA8ApLfZZztuuqGEeqog0XUnyRW7QVF0d/vOVBEcBCk1pazPFmllXGEdNbbat8e2fYIWdFbw==
