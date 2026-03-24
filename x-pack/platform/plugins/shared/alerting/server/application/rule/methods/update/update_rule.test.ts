@@ -3984,7 +3984,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.group]: definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.group]: Additional properties are not allowed ('group' was unexpected)]`
       );
     });
 
@@ -4017,7 +4017,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.frequency]: definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.frequency]: Additional properties are not allowed ('frequency' was unexpected)]`
       );
     });
 
@@ -4048,7 +4048,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.alertsFilter]: definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.alertsFilter]: Additional properties are not allowed ('alertsFilter' was unexpected)]`
       );
     });
 

@@ -94,7 +94,7 @@ export const ProcessTreeAlert = ({
       >
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            iconType="expand"
+            iconType="maximize"
             aria-label="expand"
             data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
             onClick={handleExpandClick}

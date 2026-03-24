@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import type { InferenceConnector as CommonInferenceConnector } from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -24,7 +24,7 @@ import {
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface UseGenAIConnectorsResult {
-  connectors?: FindActionResult[];
+  connectors?: CommonInferenceConnector[];
   selectedConnector?: string;
   loading: boolean;
   error?: Error;
@@ -44,7 +44,7 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
 export function useGenAIConnectorsWithoutContext(
   assistant: ObservabilityAIAssistantService
 ): UseGenAIConnectorsResult {
-  const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
+  const [connectors, setConnectors] = useState<CommonInferenceConnector[] | undefined>(undefined);
   const {
     services: { uiSettings },
   } = useKibana();
@@ -86,16 +86,27 @@ export function useGenAIConnectorsWithoutContext(
   const fetchConnectors = useCallback(async () => {
     setLoading(true);
     try {
-      let results = await assistant.callApi('GET /internal/observability_ai_assistant/connectors', {
-        signal: controller.signal,
-      });
+      let results: CommonInferenceConnector[];
       if (isConnectorSelectionRestricted) {
-        const defaultC = results.find((con) => con.id === defaultConnector);
-        results = defaultC ? [defaultC] : [];
+        const connector = await assistant.callApi(
+          'GET /internal/observability_ai_assistant/connectors/{connectorId}',
+          {
+            signal: controller.signal,
+            params: { path: { connectorId: defaultConnector } },
+          }
+        );
+        results = [connector];
+      } else {
+        results = await assistant.callApi('GET /internal/observability_ai_assistant/connectors', {
+          signal: controller.signal,
+        });
       }
       setConnectors(results);
       setLastUsedConnector((connectorId) => {
-        if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
+        if (
+          connectorId &&
+          results.findIndex((result) => result.connectorId === connectorId) === -1
+        ) {
           return '';
         }
         return connectorId;
@@ -119,7 +130,7 @@ export function useGenAIConnectorsWithoutContext(
   }, [controller, fetchConnectors]);
 
   const getConnector = (id: string) => {
-    const connector = connectors?.find((_connector) => _connector.id === id);
+    const connector = connectors?.find((_connector) => _connector.connectorId === id);
     return getInferenceConnectorInfo(connector);
   };
 
@@ -127,7 +138,7 @@ export function useGenAIConnectorsWithoutContext(
     connectors,
     loading,
     error,
-    selectedConnector: selectedConnector || connectors?.[0]?.id,
+    selectedConnector: selectedConnector || connectors?.[0]?.connectorId,
     selectConnector: (id: string) => {
       setLastUsedConnector(id);
     },

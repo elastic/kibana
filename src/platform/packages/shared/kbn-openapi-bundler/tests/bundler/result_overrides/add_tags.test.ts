@@ -253,4 +253,62 @@ describe('OpenAPI Bundler - assign a tag', () => {
       },
     ]);
   });
+
+  it('dedupes tags when keys are shuffled but the content is equal', async () => {
+    const spec1 = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+              },
+            },
+          },
+        },
+      },
+      tags: [
+        {
+          name: 'system',
+          description: 'Get information about the system status.',
+          'x-displayName': 'System',
+        },
+      ],
+    });
+    const spec2 = createOASDocument({
+      paths: {
+        '/api/another_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+              },
+            },
+          },
+        },
+      },
+      tags: [
+        {
+          description: 'Get information about the system status.',
+          name: 'system',
+          'x-displayName': 'System',
+        },
+      ],
+    });
+
+    const [bundledSpec] = Object.values(
+      await bundleSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    );
+
+    expect(bundledSpec.tags).toEqual([
+      {
+        name: 'system',
+        description: 'Get information about the system status.',
+        'x-displayName': 'System',
+      },
+    ]);
+  });
 });

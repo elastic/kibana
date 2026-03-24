@@ -17,7 +17,7 @@ import { ExpandableBadgeGroup } from './components/expandable_badge_group';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 
 const initialBadgeLimit = 3;
 const maxBadgeContainerHeight = 200;
