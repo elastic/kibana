@@ -12,8 +12,8 @@ import {
   apiTest,
   createSloTransformAssertions,
   DEFAULT_SLO,
+  mergeSloApiHeaders,
   pollUntilTrue,
-  type SloScoutApi,
   type SloTransformAssertions,
 } from '../fixtures';
 
@@ -54,13 +54,14 @@ apiTest.describe(
   'Create SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
     let transformHelper: SloTransformAssertions;
+    let headers: Record<string, string>;
 
     apiTest.beforeAll(
-      async ({ apiServices, apiClient, esClient, samlAuth, sloFtrDataForgeSuite }) => {
+      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
         await sloFtrDataForgeSuite.setup();
-        sloApi = apiServices.slo;
+        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
         transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
           samlAuth.session.getApiCredentialsForRole('admin')
         );
@@ -73,12 +74,19 @@ apiTest.describe(
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('creates a new slo and transforms', async () => {
-      const apiResponse = await sloApi.create(DEFAULT_SLO);
+    apiTest('creates a new slo and transforms', async ({ apiClient }) => {
+      const apiResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(apiResponse).toHaveStatusCode(200);
       const id = apiResponse.body.id as string;
 
-      const definitionsRes = await sloApi.findDefinitions();
+      const definitionsRes = await apiClient.get('api/observability/slos/_definitions', {
+        headers,
+        responseType: 'json',
+      });
       expect(definitionsRes).toHaveStatusCode(200);
       const definitions = definitionsRes.body as {
         total: number;
@@ -161,42 +169,67 @@ apiTest.describe(
       });
     });
 
-    apiTest('persists dashboard artifacts and returns them in the definition', async () => {
-      const ARTIFACTS_SLO = {
-        ...DEFAULT_SLO,
-        artifacts: { dashboards: [{ id: 'dashboard-abc' }, { id: 'dashboard-def' }] },
-      };
+    apiTest(
+      'persists dashboard artifacts and returns them in the definition',
+      async ({ apiClient }) => {
+        const ARTIFACTS_SLO = {
+          ...DEFAULT_SLO,
+          artifacts: { dashboards: [{ id: 'dashboard-abc' }, { id: 'dashboard-def' }] },
+        };
 
-      const createRes = await sloApi.create(ARTIFACTS_SLO);
-      expect(createRes).toHaveStatusCode(200);
-      const id = createRes.body.id as string;
+        const createRes = await apiClient.post('api/observability/slos', {
+          headers,
+          body: ARTIFACTS_SLO,
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        const id = createRes.body.id as string;
 
-      const retrieved = await sloApi.get(id);
-      expect(retrieved).toHaveStatusCode(200);
-      expect((retrieved.body as { artifacts: unknown }).artifacts).toStrictEqual({
-        dashboards: [{ id: 'dashboard-abc' }, { id: 'dashboard-def' }],
-      });
-    });
+        const retrieved = await apiClient.get(`api/observability/slos/${id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(retrieved).toHaveStatusCode(200);
+        expect((retrieved.body as { artifacts: unknown }).artifacts).toStrictEqual({
+          dashboards: [{ id: 'dashboard-abc' }, { id: 'dashboard-def' }],
+        });
+      }
+    );
 
-    apiTest('creates two SLOs with matching ids across different spaces', async ({ kbnClient }) => {
-      await kbnClient.spaces.create({ id: 'space1', name: 'space1', initials: '1' });
-      await kbnClient.spaces.create({ id: 'space2', name: 'space2', initials: '2' });
+    apiTest(
+      'creates two SLOs with matching ids across different spaces',
+      async ({ apiClient, kbnClient }) => {
+        await kbnClient.spaces.create({ id: 'space1', name: 'space1', initials: '1' });
+        await kbnClient.spaces.create({ id: 'space2', name: 'space2', initials: '2' });
 
-      const spaceId1 = 'space1';
-      const spaceId2 = 'space2';
+        const spaceId1 = 'space1';
+        const spaceId2 = 'space2';
 
-      const sloApiResponse = await sloApi.createWithSpace(DEFAULT_SLO, spaceId1);
-      expect(sloApiResponse).toHaveStatusCode(200);
-      const id = sloApiResponse.body.id as string;
+        const sloApiResponse = await apiClient.post(`s/${spaceId1}/api/observability/slos`, {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
+        expect(sloApiResponse).toHaveStatusCode(200);
+        const id = sloApiResponse.body.id as string;
 
-      const conflict = await sloApi.createWithSpace({ ...DEFAULT_SLO, id }, spaceId2);
-      expect(conflict).toHaveStatusCode(409);
-    });
+        const conflict = await apiClient.post(`s/${spaceId2}/api/observability/slos`, {
+          headers,
+          body: { ...DEFAULT_SLO, id },
+          responseType: 'json',
+        });
+        expect(conflict).toHaveStatusCode(409);
+      }
+    );
 
-    apiTest('creates instanceId for SLOs with multi groupBy', async ({ esClient }) => {
-      const apiResponse = await sloApi.create({
-        ...DEFAULT_SLO,
-        groupBy: ['system.network.name', 'event.dataset'],
+    apiTest('creates instanceId for SLOs with multi groupBy', async ({ apiClient, esClient }) => {
+      const apiResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          groupBy: ['system.network.name', 'event.dataset'],
+        },
+        responseType: 'json',
       });
       expect(apiResponse).toHaveStatusCode(200);
       const id = apiResponse.body.id as string;
@@ -214,10 +247,14 @@ apiTest.describe(
       );
     });
 
-    apiTest('creates instanceId for SLOs with single groupBy', async ({ esClient }) => {
-      const apiResponse = await sloApi.create({
-        ...DEFAULT_SLO,
-        groupBy: 'system.network.name',
+    apiTest('creates instanceId for SLOs with single groupBy', async ({ apiClient, esClient }) => {
+      const apiResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          groupBy: 'system.network.name',
+        },
+        responseType: 'json',
       });
       expect(apiResponse).toHaveStatusCode(200);
       const id = apiResponse.body.id as string;
@@ -235,10 +272,14 @@ apiTest.describe(
       );
     });
 
-    apiTest('creates instanceId for SLOs without groupBy ([])', async ({ esClient }) => {
-      const apiResponse = await sloApi.create({
-        ...DEFAULT_SLO,
-        groupBy: [],
+    apiTest('creates instanceId for SLOs without groupBy ([])', async ({ apiClient, esClient }) => {
+      const apiResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          groupBy: [],
+        },
+        responseType: 'json',
       });
       expect(apiResponse).toHaveStatusCode(200);
       const id = apiResponse.body.id as string;
@@ -256,31 +297,42 @@ apiTest.describe(
       );
     });
 
-    apiTest('creates instanceId for SLOs without groupBy (["*"])', async ({ esClient }) => {
-      const apiResponse = await sloApi.create({
-        ...DEFAULT_SLO,
-        groupBy: ['*'],
-      });
-      expect(apiResponse).toHaveStatusCode(200);
-      const id = apiResponse.body.id as string;
+    apiTest(
+      'creates instanceId for SLOs without groupBy (["*"])',
+      async ({ apiClient, esClient }) => {
+        const apiResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: {
+            ...DEFAULT_SLO,
+            groupBy: ['*'],
+          },
+          responseType: 'json',
+        });
+        expect(apiResponse).toHaveStatusCode(200);
+        const id = apiResponse.body.id as string;
 
-      await pollUntilTrue(
-        async () => {
-          const response = await esClient.search(getRollupDataEsQuery(id));
-          const hits = (
-            response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
-          ).aggregations?.last_doc?.hits?.hits;
-          const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
-          return src?._source?.slo?.instanceId === '*';
+        await pollUntilTrue(
+          async () => {
+            const response = await esClient.search(getRollupDataEsQuery(id));
+            const hits = (
+              response as { aggregations?: { last_doc?: { hits?: { hits?: unknown[] } } } }
+            ).aggregations?.last_doc?.hits?.hits;
+            const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
+            return src?._source?.slo?.instanceId === '*';
+          },
+          { timeoutMs: 180_000, intervalMs: 3000 }
+        );
+      }
+    );
+
+    apiTest('creates instanceId for SLOs without groupBy ("")', async ({ apiClient, esClient }) => {
+      const apiResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          groupBy: '',
         },
-        { timeoutMs: 180_000, intervalMs: 3000 }
-      );
-    });
-
-    apiTest('creates instanceId for SLOs without groupBy ("")', async ({ esClient }) => {
-      const apiResponse = await sloApi.create({
-        ...DEFAULT_SLO,
-        groupBy: '',
+        responseType: 'json',
       });
       expect(apiResponse).toHaveStatusCode(200);
       const id = apiResponse.body.id as string;

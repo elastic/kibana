@@ -12,25 +12,37 @@ import {
   cleanupSloSummaryDocs,
   createApmSummaryDoc,
   insertSloSummaryDocs,
+  mergeSloApiHeaders,
 } from '../fixtures';
 
 apiTest.describe(
   'Get SLO Grouped Stats',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let headers: Record<string, string>;
+
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+    });
+
     apiTest.afterEach(async ({ esClient }) => {
       await cleanupSloSummaryDocs(esClient);
     });
 
-    apiTest('returns empty results when no APM SLOs exist', async ({ apiServices }) => {
-      const response = await apiServices.slo.postGroupedStats({ type: 'apm' });
+    apiTest('returns empty results when no APM SLOs exist', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/slos/_grouped_stats', {
+        headers,
+        body: { type: 'apm' },
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(200);
       expect((response.body as { results: unknown[] }).results).toHaveLength(0);
     });
 
     apiTest(
       'returns grouped stats by service.name for APM SLOs',
-      async ({ apiServices, esClient }) => {
+      async ({ apiClient, esClient }) => {
         const now = new Date().toISOString();
         await insertSloSummaryDocs(esClient, [
           createApmSummaryDoc('slo-1', 'service-a', 'HEALTHY', now),
@@ -40,7 +52,11 @@ apiTest.describe(
           createApmSummaryDoc('slo-5', 'service-b', 'DEGRADING', now),
         ]);
 
-        const response = await apiServices.slo.postGroupedStats({ type: 'apm' });
+        const response = await apiClient.post('internal/slos/_grouped_stats', {
+          headers,
+          body: { type: 'apm' },
+          responseType: 'json',
+        });
         expect(response).toHaveStatusCode(200);
         const body = response.body as {
           results: Array<{
@@ -66,7 +82,7 @@ apiTest.describe(
       }
     );
 
-    apiTest('filters by serviceNames', async ({ apiServices, esClient }) => {
+    apiTest('filters by serviceNames', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       await insertSloSummaryDocs(esClient, [
         createApmSummaryDoc('slo-1', 'service-a', 'HEALTHY', now),
@@ -74,9 +90,13 @@ apiTest.describe(
         createApmSummaryDoc('slo-3', 'service-c', 'HEALTHY', now),
       ]);
 
-      const response = await apiServices.slo.postGroupedStats({
-        type: 'apm',
-        serviceNames: ['service-a', 'service-b'],
+      const response = await apiClient.post('internal/slos/_grouped_stats', {
+        headers,
+        body: {
+          type: 'apm',
+          serviceNames: ['service-a', 'service-b'],
+        },
+        responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
       const entities = (response.body as { results: Array<{ entity: string }> }).results.map(
@@ -87,16 +107,24 @@ apiTest.describe(
       expect(entities).not.toContain('service-c');
     });
 
-    apiTest('returns 400 for unsupported SLO type', async ({ apiServices }) => {
-      const response = await apiServices.slo.postGroupedStats({ type: 'unsupported-type' });
+    apiTest('returns 400 for unsupported SLO type', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/slos/_grouped_stats', {
+        headers,
+        body: { type: 'unsupported-type' },
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(400);
       expect((response.body as { message: string }).message).toContain(
         '"unsupported-type" does not match expected type'
       );
     });
 
-    apiTest('returns 400 for invalid size parameter', async ({ apiServices }) => {
-      const response = await apiServices.slo.postGroupedStats({ type: 'apm', size: 0 });
+    apiTest('returns 400 for invalid size parameter', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/slos/_grouped_stats', {
+        headers,
+        body: { type: 'apm', size: 0 },
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(400);
       expect((response.body as { message: string }).message).toContain(
         'size must be equal to or greater than'

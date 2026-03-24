@@ -12,6 +12,8 @@ import {
   cleanupSloSummaryDocs,
   DEFAULT_SLO,
   insertSloSummaryDocs,
+  mergeSloApiHeaders,
+  sloApiPathWithQuery,
   TEST_SPACE_ID,
   createGroupedSummaryDoc,
 } from '../fixtures';
@@ -23,9 +25,12 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let sloId: string;
+    let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, sloFtrDataForgeSuite }) => {
+    apiTest.beforeAll(async ({ apiServices, requestAuth, sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.setup();
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       const response = await apiServices.slo.create({ ...DEFAULT_SLO, groupBy: 'host' });
       expect(response).toHaveStatusCode(200);
       sloId = response.body.id as string;
@@ -39,7 +44,7 @@ apiTest.describe(
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('returns all instances for a given SLO id', async ({ apiServices, esClient }) => {
+    apiTest('returns all instances for a given SLO id', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = [
         createGroupedSummaryDoc(sloId, [...GROUP_BY], { host: 'instance-1' }, now),
@@ -49,7 +54,10 @@ apiTest.describe(
       ];
       await insertSloSummaryDocs(esClient, docs);
 
-      const response = await apiServices.slo.findInstances(sloId, {});
+      const response = await apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, {}),
+        { headers, responseType: 'json' }
+      );
       expect(response).toHaveStatusCode(200);
       const body = response.body as { results: Array<{ instanceId: string }> };
       const actualInstances = body.results.filter((r) => r.instanceId !== '*');
@@ -61,7 +69,7 @@ apiTest.describe(
       ]);
     });
 
-    apiTest('filters instances by search term', async ({ apiServices, esClient }) => {
+    apiTest('filters instances by search term', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = [
         createGroupedSummaryDoc(sloId, [...GROUP_BY], { host: 'admin-console.001' }, now),
@@ -71,7 +79,10 @@ apiTest.describe(
       ];
       await insertSloSummaryDocs(esClient, docs);
 
-      const response = await apiServices.slo.findInstances(sloId, { search: 'admin' });
+      const response = await apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, { search: 'admin' }),
+        { headers, responseType: 'json' }
+      );
       expect(response).toHaveStatusCode(200);
       const body = response.body as { results: Array<{ instanceId: string }> };
       expect(body.results).toHaveLength(2);
@@ -81,17 +92,20 @@ apiTest.describe(
       ]);
     });
 
-    apiTest('returns 404 for non-existent SLO id', async ({ apiServices, esClient }) => {
+    apiTest('returns 404 for non-existent SLO id', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       await insertSloSummaryDocs(esClient, [
         createGroupedSummaryDoc(sloId, [...GROUP_BY], { host: 'instance-1' }, now),
       ]);
 
-      const response = await apiServices.slo.findInstances('non-existent-slo', {});
+      const response = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/non-existent-slo/_instances', {}),
+        { headers, responseType: 'json' }
+      );
       expect(response).toHaveStatusCode(404);
     });
 
-    apiTest('respects size parameter', async ({ apiServices, esClient }) => {
+    apiTest('respects size parameter', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = [
         createGroupedSummaryDoc(sloId, [...GROUP_BY], { host: 'instance-1' }, now),
@@ -102,14 +116,17 @@ apiTest.describe(
       ];
       await insertSloSummaryDocs(esClient, docs);
 
-      const response = await apiServices.slo.findInstances(sloId, { size: '2' });
+      const response = await apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, { size: '2' }),
+        { headers, responseType: 'json' }
+      );
       expect(response).toHaveStatusCode(200);
       const body = response.body as { results: unknown[]; searchAfter?: unknown };
       expect(body.results).toHaveLength(2);
       expect(body.searchAfter).toBeDefined();
     });
 
-    apiTest('supports pagination with searchAfter', async ({ apiServices, esClient }) => {
+    apiTest('supports pagination with searchAfter', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = [
         createGroupedSummaryDoc(sloId, [...GROUP_BY], { host: 'instance-1' }, now),
@@ -119,7 +136,10 @@ apiTest.describe(
       ];
       await insertSloSummaryDocs(esClient, docs);
 
-      const firstPage = await apiServices.slo.findInstances(sloId, { size: '2' });
+      const firstPage = await apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, { size: '2' }),
+        { headers, responseType: 'json' }
+      );
       expect(firstPage).toHaveStatusCode(200);
       const fp = firstPage.body as {
         results: Array<{ instanceId: string }>;
@@ -128,10 +148,13 @@ apiTest.describe(
       expect(fp.results).toHaveLength(2);
       expect(fp.searchAfter).toBeDefined();
 
-      const secondPage = await apiServices.slo.findInstances(sloId, {
-        size: '2',
-        searchAfter: fp.searchAfter,
-      });
+      const secondPage = await apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, {
+          size: '2',
+          searchAfter: fp.searchAfter,
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(secondPage).toHaveStatusCode(200);
       const sp = secondPage.body as { results: Array<{ instanceId: string }> };
       expect(sp.results).toHaveLength(2);
@@ -141,7 +164,7 @@ apiTest.describe(
       expect(new Set([...firstPageIds, ...secondPageIds]).size).toBe(4);
     });
 
-    apiTest('only returns instances for the current space', async ({ apiServices, esClient }) => {
+    apiTest('only returns instances for the current space', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = [
         createGroupedSummaryDoc(sloId, [...GROUP_BY], { host: 'instance-1' }, now, TEST_SPACE_ID),
@@ -149,7 +172,10 @@ apiTest.describe(
       ];
       await insertSloSummaryDocs(esClient, docs);
 
-      const response = await apiServices.slo.findInstances(sloId, {});
+      const response = await apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, {}),
+        { headers, responseType: 'json' }
+      );
       expect(response).toHaveStatusCode(200);
       const body = response.body as { results: Array<{ instanceId: string }> };
       const actualInstances = body.results.filter((r) => r.instanceId !== '*');

@@ -20,8 +20,8 @@ apiTest.describe.skip(
   () => {
     apiTest(
       'placeholder — enable when https://github.com/elastic/kibana/issues/258358 is fixed',
-      async ({ apiServices }) => {
-        void apiServices;
+      async ({ apiClient }) => {
+        void apiClient.get;
         expect(true).toBe(true);
       }
     );

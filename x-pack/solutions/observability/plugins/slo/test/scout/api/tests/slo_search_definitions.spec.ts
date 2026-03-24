@@ -11,6 +11,8 @@ import {
   apiTestWithoutDataForge as apiTest,
   cleanupSloSummaryDocs,
   insertSloSummaryDocs,
+  mergeSloApiHeaders,
+  sloApiPathWithQuery,
   TEST_SPACE_ID,
   createDummySummaryDoc,
 } from '../fixtures';
@@ -19,11 +21,18 @@ apiTest.describe(
   'Search SLO Definitions',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let headers: Record<string, string>;
+
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+    });
+
     apiTest.afterEach(async ({ esClient }) => {
       await cleanupSloSummaryDocs(esClient);
     });
 
-    apiTest('searches SLO definitions by name', async ({ apiServices, esClient }) => {
+    apiTest('searches SLO definitions by name', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       await insertSloSummaryDocs(esClient, [
         createDummySummaryDoc('slo-alpha', '*', now, TEST_SPACE_ID, {
@@ -36,7 +45,10 @@ apiTest.describe(
         }),
       ]);
 
-      const searchResultsRes = await apiServices.slo.searchDefinitions({ search: 'Alpha' });
+      const searchResultsRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', { search: 'Alpha' }),
+        { headers, responseType: 'json' }
+      );
       expect(searchResultsRes).toHaveStatusCode(200);
       const searchResults = searchResultsRes.body as {
         results: Array<{ id: string; name: string }>;
@@ -48,14 +60,17 @@ apiTest.describe(
 
     apiTest(
       'returns all SLO definitions when no search term is provided',
-      async ({ apiServices, esClient }) => {
+      async ({ apiClient, esClient }) => {
         const now = new Date().toISOString();
         await insertSloSummaryDocs(esClient, [
           createDummySummaryDoc('slo-gamma', '*', now, TEST_SPACE_ID, { name: 'Test SLO Gamma' }),
           createDummySummaryDoc('slo-delta', '*', now, TEST_SPACE_ID, { name: 'Test SLO Delta' }),
         ]);
 
-        const searchResultsRes = await apiServices.slo.searchDefinitions({});
+        const searchResultsRes = await apiClient.get(
+          'internal/observability/slos/_search_definitions',
+          { headers, responseType: 'json' }
+        );
         expect(searchResultsRes).toHaveStatusCode(200);
         const searchResults = searchResultsRes.body as { results: Array<{ id: string }> };
         expect(searchResults.results.length).toBeGreaterThan(1);
@@ -65,7 +80,7 @@ apiTest.describe(
       }
     );
 
-    apiTest('respects the size parameter', async ({ apiServices, esClient }) => {
+    apiTest('respects the size parameter', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = Array.from({ length: 5 }, (_, i) =>
         createDummySummaryDoc(`slo-size-${i}`, '*', now, TEST_SPACE_ID, {
@@ -74,13 +89,16 @@ apiTest.describe(
       );
       await insertSloSummaryDocs(esClient, docs);
 
-      const searchResultsRes = await apiServices.slo.searchDefinitions({ size: 2 });
+      const searchResultsRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', { size: 2 }),
+        { headers, responseType: 'json' }
+      );
       expect(searchResultsRes).toHaveStatusCode(200);
       const searchResults = searchResultsRes.body as { results: unknown[] };
       expect(searchResults.results.length).toBeLessThan(3);
     });
 
-    apiTest('handles pagination with searchAfter', async ({ apiServices, esClient }) => {
+    apiTest('handles pagination with searchAfter', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       const docs = Array.from({ length: 3 }, (_, i) =>
         createDummySummaryDoc(`slo-pagination-${i}`, '*', now, TEST_SPACE_ID, {
@@ -89,7 +107,10 @@ apiTest.describe(
       );
       await insertSloSummaryDocs(esClient, docs);
 
-      const firstPageRes = await apiServices.slo.searchDefinitions({ size: 1 });
+      const firstPageRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', { size: 1 }),
+        { headers, responseType: 'json' }
+      );
       expect(firstPageRes).toHaveStatusCode(200);
       const firstPage = firstPageRes.body as {
         results: Array<{ id: string }>;
@@ -97,17 +118,20 @@ apiTest.describe(
       };
       expect(firstPage.results).toHaveLength(1);
       expect(firstPage.searchAfter).toBeDefined();
-      const secondPageRes = await apiServices.slo.searchDefinitions({
-        size: 1,
-        searchAfter: firstPage.searchAfter as string,
-      });
+      const secondPageRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', {
+          size: 1,
+          searchAfter: firstPage.searchAfter as string,
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(secondPageRes).toHaveStatusCode(200);
       const secondPage = secondPageRes.body as { results: Array<{ id: string }> };
       expect(secondPage.results.length).toBeLessThan(2);
       expect(secondPage.results[0].id).not.toBe(firstPage.results[0].id);
     });
 
-    apiTest('normalizes groupBy array correctly', async ({ apiServices, esClient }) => {
+    apiTest('normalizes groupBy array correctly', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       await insertSloSummaryDocs(esClient, [
         createDummySummaryDoc('slo-groupby', '*', now, TEST_SPACE_ID, {
@@ -116,7 +140,12 @@ apiTest.describe(
         }),
       ]);
 
-      const searchResultsRes = await apiServices.slo.searchDefinitions({ search: 'GroupBy' });
+      const searchResultsRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', {
+          search: 'GroupBy',
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(searchResultsRes).toHaveStatusCode(200);
       const searchResults = searchResultsRes.body as {
         results: Array<{ id: string; groupBy: string[] }>;
@@ -129,7 +158,7 @@ apiTest.describe(
       expect(result!.groupBy).toContain('service');
     });
 
-    apiTest('handles SLOs with ALL_VALUE groupBy', async ({ apiServices, esClient }) => {
+    apiTest('handles SLOs with ALL_VALUE groupBy', async ({ apiClient, esClient }) => {
       const now = new Date().toISOString();
       await insertSloSummaryDocs(esClient, [
         createDummySummaryDoc('slo-allvalue', '*', now, TEST_SPACE_ID, {
@@ -138,7 +167,12 @@ apiTest.describe(
         }),
       ]);
 
-      const searchResultsRes = await apiServices.slo.searchDefinitions({ search: 'All Value' });
+      const searchResultsRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', {
+          search: 'All Value',
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(searchResultsRes).toHaveStatusCode(200);
       const searchResults = searchResultsRes.body as {
         results: Array<{ id: string; groupBy: string[] }>;
@@ -150,19 +184,25 @@ apiTest.describe(
       expect(result!.groupBy).toHaveLength(0);
     });
 
-    apiTest('handles invalid searchAfter gracefully', async ({ apiServices }) => {
-      const searchResultsRes = await apiServices.slo.searchDefinitions({
-        searchAfter: 'invalid-json',
-      });
+    apiTest('handles invalid searchAfter gracefully', async ({ apiClient }) => {
+      const searchResultsRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', {
+          searchAfter: 'invalid-json',
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(searchResultsRes).toHaveStatusCode(200);
       const searchResults = searchResultsRes.body as { results: unknown[] };
       expect(Array.isArray(searchResults.results)).toBe(true);
     });
 
-    apiTest('returns empty results when no SLOs match', async ({ apiServices }) => {
-      const searchResultsRes = await apiServices.slo.searchDefinitions({
-        search: 'NonExistentSLO12345',
-      });
+    apiTest('returns empty results when no SLOs match', async ({ apiClient }) => {
+      const searchResultsRes = await apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', {
+          search: 'NonExistentSLO12345',
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(searchResultsRes).toHaveStatusCode(200);
       const searchResults = searchResultsRes.body as { results: unknown[] };
       expect(searchResults.results).toHaveLength(0);

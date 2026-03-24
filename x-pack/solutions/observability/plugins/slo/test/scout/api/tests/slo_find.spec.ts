@@ -7,36 +7,51 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, DEFAULT_SLO, pollUntilTrue, type SloScoutApi } from '../fixtures';
+import {
+  apiTest,
+  DEFAULT_SLO,
+  mergeSloApiHeaders,
+  pollUntilTrue,
+  sloApiPathWithQuery,
+} from '../fixtures';
 
 apiTest.describe(
   'Find SLOs using kql query',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, sloFtrDataForgeSuite }) => {
+    apiTest.beforeAll(async ({ requestAuth, sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.setup();
-      sloApi = apiServices.slo;
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
     apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('searches SLOs using kqlQuery', async () => {
+    apiTest('searches SLOs using kqlQuery', async ({ apiClient }) => {
       const testTag = `test-${Date.now()}`;
-      const createResponse1 = await sloApi.create({
-        ...DEFAULT_SLO,
-        tags: ['test', testTag],
-        groupBy: '*',
+      const createResponse1 = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          tags: ['test', testTag],
+          groupBy: '*',
+        },
+        responseType: 'json',
       });
       expect(createResponse1).toHaveStatusCode(200);
-      const createResponse2 = await sloApi.create({
-        ...DEFAULT_SLO,
-        name: 'something irrelevant foo',
-        tags: ['test', testTag],
-        groupBy: '*',
+      const createResponse2 = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          name: 'something irrelevant foo',
+          tags: ['test', testTag],
+          groupBy: '*',
+        },
+        responseType: 'json',
       });
       expect(createResponse2).toHaveStatusCode(200);
 
@@ -45,11 +60,14 @@ apiTest.describe(
 
       await pollUntilTrue(
         async () => {
-          let response = await sloApi.findSlosWithKql({
-            page: 1,
-            perPage: 333,
-            kqlQuery: `slo.tags:"${testTag}"`,
-          });
+          let response = await apiClient.get(
+            sloApiPathWithQuery('api/observability/slos', {
+              page: 1,
+              perPage: 333,
+              kqlQuery: `slo.tags:"${testTag}"`,
+            }),
+            { headers, responseType: 'json' }
+          );
           if (response.statusCode !== 200) {
             return false;
           }
@@ -69,7 +87,13 @@ apiTest.describe(
             return false;
           }
 
-          response = await sloApi.findSlosWithKql({ size: 222, kqlQuery: 'slo.name:irrelevant' });
+          response = await apiClient.get(
+            sloApiPathWithQuery('api/observability/slos', {
+              size: 222,
+              kqlQuery: 'slo.name:irrelevant',
+            }),
+            { headers, responseType: 'json' }
+          );
           if (response.statusCode !== 200) {
             return false;
           }
@@ -92,7 +116,10 @@ apiTest.describe(
             return false;
           }
 
-          response = await sloApi.findSlosWithKql({ kqlQuery: 'slo.name:integration' });
+          response = await apiClient.get(
+            sloApiPathWithQuery('api/observability/slos', { kqlQuery: 'slo.name:integration' }),
+            { headers, responseType: 'json' }
+          );
           if (response.statusCode !== 200) {
             return false;
           }

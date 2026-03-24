@@ -7,7 +7,11 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTestWithoutDataForge as apiTest, type SloScoutApi } from '../fixtures';
+import {
+  apiTestWithoutDataForge as apiTest,
+  mergeSloApiHeaders,
+  sloApiPathWithQuery,
+} from '../fixtures';
 
 const SLO_TEMPLATE_SO_TYPE = 'slo_template';
 
@@ -15,13 +19,14 @@ apiTest.describe(
   'Find SLO Templates',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices }) => {
-      sloApi = apiServices.slo;
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
-    apiTest('returns templates with default pagination', async ({ kbnClient }) => {
+    apiTest('returns templates with default pagination', async ({ apiClient, kbnClient }) => {
       const id = `scout-find-tpl-default-${Date.now()}`;
       await kbnClient.savedObjects.create({
         type: SLO_TEMPLATE_SO_TYPE,
@@ -30,7 +35,10 @@ apiTest.describe(
         overwrite: true,
       });
       try {
-        const response = await sloApi.findTemplates({});
+        const response = await apiClient.get(
+          sloApiPathWithQuery('api/observability/slo_templates', {}),
+          { headers, responseType: 'json' }
+        );
         expect(response).toHaveStatusCode(200);
         const body = response.body as {
           page: number;
@@ -47,8 +55,11 @@ apiTest.describe(
       }
     });
 
-    apiTest('returns error when page is zero', async ({ apiServices }) => {
-      const response = await apiServices.slo.findTemplates({ page: 0 });
+    apiTest('returns error when page is zero', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        sloApiPathWithQuery('api/observability/slo_templates', { page: 0 }),
+        { headers, responseType: 'json' }
+      );
       expect(response).toHaveStatusCode(400);
       expect((response.body as { message: string }).message).toContain(
         'page must be a positive integer'

@@ -21,9 +21,9 @@ import {
   createSloPipelineAssertions,
   createSloTransformAssertions,
   DEFAULT_SLO,
+  mergeSloApiHeaders,
   pollUntilTrue,
   type SloPipelineAssertions,
-  type SloScoutApi,
   type SloTransformAssertions,
 } from '../fixtures';
 
@@ -31,14 +31,15 @@ apiTest.describe(
   'Delete SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
     let transformHelper: SloTransformAssertions;
     let pipelineHelper: SloPipelineAssertions;
 
     apiTest.beforeAll(
-      async ({ apiServices, apiClient, esClient, samlAuth, sloFtrDataForgeSuite }) => {
+      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
         await sloFtrDataForgeSuite.setup();
-        sloApi = apiServices.slo;
+        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
         transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
           samlAuth.session.getApiCredentialsForRole('admin')
         );
@@ -50,15 +51,25 @@ apiTest.describe(
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('deletes SLO and related resources', async ({ esClient }) => {
-      const response = await sloApi.create(DEFAULT_SLO);
+    apiTest('deletes SLO and related resources', async ({ apiClient, esClient }) => {
+      const response = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(200);
       const id = response.body.id as string;
 
-      const del = await sloApi.delete(id);
+      const del = await apiClient.delete(`api/observability/slos/${id}`, {
+        headers,
+        responseType: 'json',
+      });
       expect(del).toHaveStatusCode(204);
 
-      const definitions = await sloApi.findDefinitions();
+      const definitions = await apiClient.get('api/observability/slos/_definitions', {
+        headers,
+        responseType: 'json',
+      });
       expect(definitions).toHaveStatusCode(200);
       expect((definitions.body as { total: number }).total).toBe(0);
 
@@ -97,8 +108,12 @@ apiTest.describe(
       );
     });
 
-    apiTest('deletes custom pipelines when deleting SLO', async ({ esClient }) => {
-      const response = await sloApi.create(DEFAULT_SLO);
+    apiTest('deletes custom pipelines when deleting SLO', async ({ apiClient, esClient }) => {
+      const response = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(200);
       const id = response.body.id as string;
 
@@ -118,7 +133,10 @@ apiTest.describe(
       await pipelineHelper.assertExists(customSLOPipelineId);
       await pipelineHelper.assertExists(customSLOSummaryPipelineId);
 
-      const del = await sloApi.delete(id);
+      const del = await apiClient.delete(`api/observability/slos/${id}`, {
+        headers,
+        responseType: 'json',
+      });
       expect(del).toHaveStatusCode(204);
 
       await pipelineHelper.assertNotFound(customSLOPipelineId);

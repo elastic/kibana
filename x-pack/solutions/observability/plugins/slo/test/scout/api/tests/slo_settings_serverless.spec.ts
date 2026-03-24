@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../server/services/slo_settings_repository';
-import { apiTestWithoutDataForge as apiTest } from '../fixtures';
+import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
 
 function pickKeys<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
@@ -25,15 +25,22 @@ apiTest.describe(
   'SLO settings API (serverless)',
   { tag: [...tags.serverless.observability.complete] },
   () => {
-    apiTest('PUT updates setting (serverless)', async ({ apiServices }) => {
+    apiTest('PUT updates setting (serverless)', async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+
       const defaultSettings = pickKeys(DEFAULT_SETTINGS as Record<string, unknown>, [
         'staleThresholdInHours',
         'staleInstancesCleanupEnabled',
       ]);
       try {
-        const updatedSettingsRes = await apiServices.slo.updateSettings({
-          staleThresholdInHours: 72,
-          staleInstancesCleanupEnabled: true,
+        const updatedSettingsRes = await apiClient.put('internal/slo/settings', {
+          headers,
+          body: {
+            staleThresholdInHours: 72,
+            staleInstancesCleanupEnabled: true,
+          },
+          responseType: 'json',
         });
         expect(updatedSettingsRes).toHaveStatusCode(200);
         expect(updatedSettingsRes.body).toStrictEqual({
@@ -43,7 +50,10 @@ apiTest.describe(
           selectedRemoteClusters: DEFAULT_SETTINGS.selectedRemoteClusters,
         });
 
-        const retrievedRes = await apiServices.slo.getSettings();
+        const retrievedRes = await apiClient.get('internal/slo/settings', {
+          headers,
+          responseType: 'json',
+        });
         expect(retrievedRes).toHaveStatusCode(200);
         expect(retrievedRes.body).toStrictEqual({
           staleThresholdInHours: 72,
@@ -52,9 +62,11 @@ apiTest.describe(
           selectedRemoteClusters: DEFAULT_SETTINGS.selectedRemoteClusters,
         });
       } finally {
-        const resetRes = await apiServices.slo.updateSettings(
-          defaultSettings as Record<string, unknown>
-        );
+        const resetRes = await apiClient.put('internal/slo/settings', {
+          headers,
+          body: defaultSettings as Record<string, unknown>,
+          responseType: 'json',
+        });
         expect(resetRes).toHaveStatusCode(200);
       }
     });

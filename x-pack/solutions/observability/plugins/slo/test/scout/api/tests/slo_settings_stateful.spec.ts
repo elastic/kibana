@@ -8,10 +8,13 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../server/services/slo_settings_repository';
-import { apiTestWithoutDataForge as apiTest } from '../fixtures';
+import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
 
 apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic] }, () => {
-  apiTest('PUT updates settings (non-serverless only)', async ({ apiServices }) => {
+  apiTest('PUT updates settings (non-serverless only)', async ({ apiClient, requestAuth }) => {
+    const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+    const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+
     const payload = {
       useAllRemoteClusters: true,
       selectedRemoteClusters: ['cluster-1', 'cluster-2'],
@@ -19,7 +22,11 @@ apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic
       staleInstancesCleanupEnabled: true,
     };
     try {
-      const updatedSettingsRes = await apiServices.slo.updateSettings(payload);
+      const updatedSettingsRes = await apiClient.put('internal/slo/settings', {
+        headers,
+        body: payload,
+        responseType: 'json',
+      });
       expect(updatedSettingsRes).toHaveStatusCode(200);
       expect(updatedSettingsRes.body).toStrictEqual({
         useAllRemoteClusters: true,
@@ -28,7 +35,10 @@ apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic
         staleInstancesCleanupEnabled: true,
       });
 
-      const retrievedRes = await apiServices.slo.getSettings();
+      const retrievedRes = await apiClient.get('internal/slo/settings', {
+        headers,
+        responseType: 'json',
+      });
       expect(retrievedRes).toHaveStatusCode(200);
       expect(retrievedRes.body).toStrictEqual({
         useAllRemoteClusters: true,
@@ -37,9 +47,11 @@ apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic
         staleInstancesCleanupEnabled: true,
       });
     } finally {
-      const resetRes = await apiServices.slo.updateSettings(
-        DEFAULT_SETTINGS as Record<string, unknown>
-      );
+      const resetRes = await apiClient.put('internal/slo/settings', {
+        headers,
+        body: DEFAULT_SETTINGS as Record<string, unknown>,
+        responseType: 'json',
+      });
       expect(resetRes).toHaveStatusCode(200);
     }
   });

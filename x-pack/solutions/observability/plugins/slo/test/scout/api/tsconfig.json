@@ -5,5 +5,5 @@
   },
   "include": ["**/*"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/scout-oblt", "@kbn/data-forge", "@kbn/slo-schema"]
+  "kbn_references": ["@kbn/scout", "@kbn/scout-oblt", "@kbn/data-forge", "@kbn/slo-schema"]
 }

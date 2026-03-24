@@ -7,29 +7,38 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, DEFAULT_SLO, pollUntilTrue, type SloScoutApi } from '../fixtures';
+import { apiTest, DEFAULT_SLO, mergeSloApiHeaders, pollUntilTrue } from '../fixtures';
 
 apiTest.describe(
   'Bulk Delete SLO',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, sloFtrDataForgeSuite }) => {
+    apiTest.beforeAll(async ({ requestAuth, sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.setup();
-      sloApi = apiServices.slo;
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
     apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('successfully processes the list of SLOs', async () => {
-      const createRes = await sloApi.create(DEFAULT_SLO);
+    apiTest('successfully processes the list of SLOs', async ({ apiClient }) => {
+      const createRes = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(createRes).toHaveStatusCode(200);
       const sloId = createRes.body.id as string;
 
-      const response = await sloApi.bulkDelete({ list: [sloId, 'inexistant-slo'] });
+      const response = await apiClient.post('api/observability/slos/_bulk_delete', {
+        headers,
+        body: { list: [sloId, 'inexistant-slo'] },
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(200);
       const bulkBody = response.body as { taskId?: string };
       expect(bulkBody.taskId).toBeDefined();
@@ -37,13 +46,19 @@ apiTest.describe(
 
       await pollUntilTrue(
         async () => {
-          const status = await sloApi.bulkDeleteStatus(taskId);
+          const status = await apiClient.get(`api/observability/slos/_bulk_delete/${taskId}`, {
+            headers,
+            responseType: 'json',
+          });
           return status.statusCode === 200 && status.body.isDone === true;
         },
         { timeoutMs: 120_000, intervalMs: 2000, label: 'bulk delete task completion' }
       );
 
-      const status = await sloApi.bulkDeleteStatus(taskId);
+      const status = await apiClient.get(`api/observability/slos/_bulk_delete/${taskId}`, {
+        headers,
+        responseType: 'json',
+      });
       expect(status.body).toStrictEqual({
         isDone: true,
         results: [
@@ -53,8 +68,11 @@ apiTest.describe(
       });
     });
 
-    apiTest('returns task not found', async () => {
-      const status = await sloApi.bulkDeleteStatus('inexistant');
+    apiTest('returns task not found', async ({ apiClient }) => {
+      const status = await apiClient.get('api/observability/slos/_bulk_delete/inexistant', {
+        headers,
+        responseType: 'json',
+      });
       expect(status).toHaveStatusCode(200);
       expect(status.body).toStrictEqual({ isDone: true, error: 'Task not found' });
     });

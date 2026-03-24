@@ -21,7 +21,7 @@ export function mergeSloApiHeaders(apiKeyHeader: Record<string, string>): Record
   };
 }
 
-function withQuery(
+export function sloApiPathWithQuery(
   path: string,
   query?: Record<string, string | number | boolean | undefined>
 ): string {
@@ -106,6 +106,12 @@ export interface SloScoutApi {
   postGroupedStats(body: Record<string, unknown>): ReturnType<ApiClientFixture['post']>;
 }
 
+/**
+ * Binds SLO HTTP routes to `apiClient` with fixed headers (typically admin API key + SLO Kibana headers).
+ * Use from worker-scoped `apiServices` for lifecycle/setup helpers (data forge, `beforeAll` creation).
+ * For tests that assert authorization or per-role behavior, call `apiClient` directly with credentials from
+ * `requestAuth.getApiKey(...)` instead of this helper.
+ */
 export function createSloScoutApi(
   apiClient: ApiClientFixture,
   authHeaders: Record<string, string>
@@ -188,7 +194,7 @@ export function createSloScoutApi(
     },
 
     findDefinitions(params?: Record<string, string>) {
-      return apiClient.get(withQuery('api/observability/slos/_definitions', params), {
+      return apiClient.get(sloApiPathWithQuery('api/observability/slos/_definitions', params), {
         headers: jsonHeaders,
         responseType: 'json',
       });
@@ -209,7 +215,7 @@ export function createSloScoutApi(
         queryParams.remoteName = params.remoteName;
       }
       return apiClient.get(
-        withQuery('internal/observability/slos/_search_definitions', queryParams),
+        sloApiPathWithQuery('internal/observability/slos/_search_definitions', queryParams),
         {
           headers: jsonHeaders,
           responseType: 'json',
@@ -270,10 +276,13 @@ export function createSloScoutApi(
     },
 
     findInstances(sloId, params) {
-      return apiClient.get(withQuery(`internal/observability/slos/${sloId}/_instances`, params), {
-        headers: jsonHeaders,
-        responseType: 'json',
-      });
+      return apiClient.get(
+        sloApiPathWithQuery(`internal/observability/slos/${sloId}/_instances`, params),
+        {
+          headers: jsonHeaders,
+          responseType: 'json',
+        }
+      );
     },
 
     getSettings() {
@@ -312,7 +321,7 @@ export function createSloScoutApi(
       if (params.perPage !== undefined) {
         queryParams.perPage = params.perPage;
       }
-      return apiClient.get(withQuery('api/observability/slo_templates', queryParams), {
+      return apiClient.get(sloApiPathWithQuery('api/observability/slo_templates', queryParams), {
         headers: jsonHeaders,
         responseType: 'json',
       });
@@ -356,7 +365,7 @@ export function createSloScoutApi(
         queryParams.allSpaces = params.allSpaces;
       }
       return apiClient.get(
-        withQuery(`internal/observability/slos/_health/scans/${scanId}`, queryParams),
+        sloApiPathWithQuery(`internal/observability/slos/_health/scans/${scanId}`, queryParams),
         {
           headers: jsonHeaders,
           responseType: 'json',
@@ -369,14 +378,17 @@ export function createSloScoutApi(
       if (params?.size !== undefined) {
         queryParams.size = params.size;
       }
-      return apiClient.get(withQuery('internal/observability/slos/_health/scans', queryParams), {
-        headers: jsonHeaders,
-        responseType: 'json',
-      });
+      return apiClient.get(
+        sloApiPathWithQuery('internal/observability/slos/_health/scans', queryParams),
+        {
+          headers: jsonHeaders,
+          responseType: 'json',
+        }
+      );
     },
 
     findSlosWithKql(query: Record<string, string | number>) {
-      return apiClient.get(withQuery('api/observability/slos', query), {
+      return apiClient.get(sloApiPathWithQuery('api/observability/slos', query), {
         headers: jsonHeaders,
         responseType: 'json',
       });

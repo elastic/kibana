@@ -13,7 +13,7 @@ import {
   apiTest,
   createSloTransformAssertions,
   DEFAULT_SLO,
-  type SloScoutApi,
+  mergeSloApiHeaders,
   type SloTransformAssertions,
 } from '../fixtures';
 
@@ -21,13 +21,14 @@ apiTest.describe(
   'Repair SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
     let transformHelper: SloTransformAssertions;
 
     apiTest.beforeAll(
-      async ({ apiServices, apiClient, esClient, samlAuth, sloFtrDataForgeSuite }) => {
+      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
         await sloFtrDataForgeSuite.setup();
-        sloApi = apiServices.slo;
+        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
         transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
           samlAuth.session.getApiCredentialsForRole('admin')
         );
@@ -38,58 +39,86 @@ apiTest.describe(
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('repairs missing rollup transform by recreating it', async ({ esClient }) => {
-      const createResponse = await sloApi.create(DEFAULT_SLO);
-      expect(createResponse).toHaveStatusCode(200);
-      const sloId = createResponse.body.id as string;
-      const sloRevision = 1;
+    apiTest(
+      'repairs missing rollup transform by recreating it',
+      async ({ apiClient, esClient }) => {
+        const createResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const sloId = createResponse.body.id as string;
+        const sloRevision = 1;
 
-      const rollupTransform = await transformHelper.assertExist(
-        getSLOTransformId(sloId, sloRevision)
-      );
-      expect((rollupTransform as { transforms: unknown[] }).transforms).toHaveLength(1);
+        const rollupTransform = await transformHelper.assertExist(
+          getSLOTransformId(sloId, sloRevision)
+        );
+        expect((rollupTransform as { transforms: unknown[] }).transforms).toHaveLength(1);
 
-      await esClient.transform.deleteTransform({
-        transform_id: getSLOTransformId(sloId, sloRevision),
-        force: true,
-      });
+        await esClient.transform.deleteTransform({
+          transform_id: getSLOTransformId(sloId, sloRevision),
+          force: true,
+        });
 
-      await transformHelper.assertNotFound(getSLOTransformId(sloId, sloRevision));
+        await transformHelper.assertNotFound(getSLOTransformId(sloId, sloRevision));
 
-      const repairRes = await sloApi.repair([sloId]);
-      expect(repairRes).toHaveStatusCode(207);
+        const repairRes = await apiClient.post('api/observability/slos/_repair', {
+          headers,
+          body: { list: [sloId] },
+          responseType: 'json',
+        });
+        expect(repairRes).toHaveStatusCode(207);
 
-      await transformHelper.assertTransformIsStarted(getSLOTransformId(sloId, sloRevision));
-    });
+        await transformHelper.assertTransformIsStarted(getSLOTransformId(sloId, sloRevision));
+      }
+    );
 
-    apiTest('repairs missing summary transform by recreating it', async ({ esClient }) => {
-      const createResponse = await sloApi.create(DEFAULT_SLO);
-      expect(createResponse).toHaveStatusCode(200);
-      const sloId = createResponse.body.id as string;
-      const sloRevision = 1;
+    apiTest(
+      'repairs missing summary transform by recreating it',
+      async ({ apiClient, esClient }) => {
+        const createResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const sloId = createResponse.body.id as string;
+        const sloRevision = 1;
 
-      const summaryTransform = await transformHelper.assertExist(
-        getSLOSummaryTransformId(sloId, sloRevision)
-      );
-      expect((summaryTransform as { transforms: unknown[] }).transforms).toHaveLength(1);
+        const summaryTransform = await transformHelper.assertExist(
+          getSLOSummaryTransformId(sloId, sloRevision)
+        );
+        expect((summaryTransform as { transforms: unknown[] }).transforms).toHaveLength(1);
 
-      await esClient.transform.deleteTransform({
-        transform_id: getSLOSummaryTransformId(sloId, sloRevision),
-        force: true,
-      });
+        await esClient.transform.deleteTransform({
+          transform_id: getSLOSummaryTransformId(sloId, sloRevision),
+          force: true,
+        });
 
-      await transformHelper.assertNotFound(getSLOSummaryTransformId(sloId, sloRevision));
+        await transformHelper.assertNotFound(getSLOSummaryTransformId(sloId, sloRevision));
 
-      const repairRes = await sloApi.repair([sloId]);
-      expect(repairRes).toHaveStatusCode(207);
+        const repairRes = await apiClient.post('api/observability/slos/_repair', {
+          headers,
+          body: { list: [sloId] },
+          responseType: 'json',
+        });
+        expect(repairRes).toHaveStatusCode(207);
 
-      await transformHelper.assertTransformIsStarted(getSLOSummaryTransformId(sloId, sloRevision));
-    });
+        await transformHelper.assertTransformIsStarted(
+          getSLOSummaryTransformId(sloId, sloRevision)
+        );
+      }
+    );
 
     apiTest(
       'repairs stopped transform by starting it when SLO is enabled',
-      async ({ esClient }) => {
-        const createResponse = await sloApi.create(DEFAULT_SLO);
+      async ({ apiClient, esClient }) => {
+        const createResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
         expect(createResponse).toHaveStatusCode(200);
         const sloId = createResponse.body.id as string;
         const sloRevision = 1;
@@ -103,34 +132,56 @@ apiTest.describe(
 
         await transformHelper.assertTransformIsStopped(getSLOTransformId(sloId, sloRevision));
 
-        const repairRes = await sloApi.repair([sloId]);
+        const repairRes = await apiClient.post('api/observability/slos/_repair', {
+          headers,
+          body: { list: [sloId] },
+          responseType: 'json',
+        });
         expect(repairRes).toHaveStatusCode(207);
 
         await transformHelper.assertTransformIsStarted(getSLOTransformId(sloId, sloRevision));
       }
     );
 
-    apiTest('repairs started transform by stopping it when SLO should be disabled', async () => {
-      const createResponse = await sloApi.create(DEFAULT_SLO);
-      expect(createResponse).toHaveStatusCode(200);
-      const sloId = createResponse.body.id as string;
-      const sloRevision = 1;
+    apiTest(
+      'repairs started transform by stopping it when SLO should be disabled',
+      async ({ apiClient }) => {
+        const createResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const sloId = createResponse.body.id as string;
+        const sloRevision = 1;
 
-      await transformHelper.assertTransformIsStarted(getSLOTransformId(sloId, sloRevision));
+        await transformHelper.assertTransformIsStarted(getSLOTransformId(sloId, sloRevision));
 
-      const dis = await sloApi.disable(sloId);
-      expect(dis).toHaveStatusCode(204);
+        const dis = await apiClient.post(`api/observability/slos/${sloId}/disable`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(dis).toHaveStatusCode(204);
 
-      const repairRes = await sloApi.repair([sloId]);
-      expect(repairRes).toHaveStatusCode(207);
+        const repairRes = await apiClient.post('api/observability/slos/_repair', {
+          headers,
+          body: { list: [sloId] },
+          responseType: 'json',
+        });
+        expect(repairRes).toHaveStatusCode(207);
 
-      await transformHelper.assertTransformIsStopped(getSLOTransformId(sloId, sloRevision));
-    });
+        await transformHelper.assertTransformIsStopped(getSLOTransformId(sloId, sloRevision));
+      }
+    );
 
     apiTest(
       'repairs missing rollup transform for disabled SLO by recreating and stopping it',
-      async ({ esClient }) => {
-        const createResponse = await sloApi.create(DEFAULT_SLO);
+      async ({ apiClient, esClient }) => {
+        const createResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
         expect(createResponse).toHaveStatusCode(200);
         const sloId = createResponse.body.id as string;
         const sloRevision = 1;
@@ -140,7 +191,10 @@ apiTest.describe(
         );
         expect((rollupTransform as { transforms: unknown[] }).transforms).toHaveLength(1);
 
-        const dis = await sloApi.disable(sloId);
+        const dis = await apiClient.post(`api/observability/slos/${sloId}/disable`, {
+          headers,
+          responseType: 'json',
+        });
         expect(dis).toHaveStatusCode(204);
 
         await esClient.transform.deleteTransform({
@@ -149,18 +203,34 @@ apiTest.describe(
 
         await transformHelper.assertNotFound(getSLOTransformId(sloId, sloRevision));
 
-        const repairRes = await sloApi.repair([sloId]);
+        const repairRes = await apiClient.post('api/observability/slos/_repair', {
+          headers,
+          body: { list: [sloId] },
+          responseType: 'json',
+        });
         expect(repairRes).toHaveStatusCode(207);
 
         await transformHelper.assertTransformIsStopped(getSLOTransformId(sloId, sloRevision));
       }
     );
 
-    apiTest('returns noop for multiple healthy SLOs', async () => {
+    apiTest('returns noop for multiple healthy SLOs', async ({ apiClient }) => {
       const [slo1, slo2, slo3] = await Promise.all([
-        sloApi.create(DEFAULT_SLO),
-        sloApi.create(DEFAULT_SLO),
-        sloApi.create(DEFAULT_SLO),
+        apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        }),
+        apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        }),
+        apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        }),
       ]);
       expect(slo1).toHaveStatusCode(200);
       expect(slo2).toHaveStatusCode(200);
@@ -176,7 +246,11 @@ apiTest.describe(
         );
       }
 
-      const repairRes = await sloApi.repair(sloIds);
+      const repairRes = await apiClient.post('api/observability/slos/_repair', {
+        headers,
+        body: { list: sloIds },
+        responseType: 'json',
+      });
       expect(repairRes).toHaveStatusCode(207);
       const results = repairRes.body as RepairActionsGroupResult[];
 
@@ -191,11 +265,23 @@ apiTest.describe(
 
     apiTest(
       'returns noop for healthy SLOs and start-transform for SLO with stopped transforms',
-      async ({ esClient }) => {
+      async ({ apiClient, esClient }) => {
         const [slo1, slo2, slo3] = await Promise.all([
-          sloApi.create(DEFAULT_SLO),
-          sloApi.create(DEFAULT_SLO),
-          sloApi.create(DEFAULT_SLO),
+          apiClient.post('api/observability/slos', {
+            headers,
+            body: DEFAULT_SLO,
+            responseType: 'json',
+          }),
+          apiClient.post('api/observability/slos', {
+            headers,
+            body: DEFAULT_SLO,
+            responseType: 'json',
+          }),
+          apiClient.post('api/observability/slos', {
+            headers,
+            body: DEFAULT_SLO,
+            responseType: 'json',
+          }),
         ]);
         expect(slo1).toHaveStatusCode(200);
         expect(slo2).toHaveStatusCode(200);
@@ -228,7 +314,11 @@ apiTest.describe(
           getSLOSummaryTransformId(stoppedSloId, sloRevision)
         );
 
-        const repairRes = await sloApi.repair(sloIds);
+        const repairRes = await apiClient.post('api/observability/slos/_repair', {
+          headers,
+          body: { list: sloIds },
+          responseType: 'json',
+        });
         expect(repairRes).toHaveStatusCode(207);
         const results = repairRes.body as RepairActionsGroupResult[];
 

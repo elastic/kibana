@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { SLO_MODEL_VERSION, getSLOPipelineId } from '../../../../common/constants';
-import { apiTest, DEFAULT_SLO, pollUntilTrue } from '../fixtures';
+import { apiTest, DEFAULT_SLO, mergeSloApiHeaders, pollUntilTrue } from '../fixtures';
 
 apiTest.describe(
   'Reset SLOs',
@@ -22,9 +22,15 @@ apiTest.describe(
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('resets the related resources', async ({ apiServices, esClient }) => {
-      const { slo } = apiServices;
-      const createResponse = await slo.create(DEFAULT_SLO);
+    apiTest('resets the related resources', async ({ apiClient, requestAuth, esClient }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+
+      const createResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(createResponse).toHaveStatusCode(200);
       const sloId = createResponse.body.id as string;
 
@@ -40,7 +46,10 @@ apiTest.describe(
         { timeoutMs: 60_000, intervalMs: 2000 }
       );
 
-      const resetResponse = await slo.reset(sloId);
+      const resetResponse = await apiClient.post(`api/observability/slos/${sloId}/_reset`, {
+        headers,
+        responseType: 'json',
+      });
       expect(resetResponse).toHaveStatusCode(200);
       expect(resetResponse.body).toMatchObject({ version: SLO_MODEL_VERSION, revision: 2 });
 

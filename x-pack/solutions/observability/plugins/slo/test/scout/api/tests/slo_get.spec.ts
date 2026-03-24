@@ -7,35 +7,46 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, DEFAULT_SLO, type SloScoutApi } from '../fixtures';
+import { apiTest, DEFAULT_SLO, mergeSloApiHeaders } from '../fixtures';
 
 apiTest.describe(
   'Get SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
-
-    apiTest.beforeAll(async ({ apiServices, sloFtrDataForgeSuite }) => {
+    apiTest.beforeAll(async ({ sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.setup();
-      sloApi = apiServices.slo;
     });
 
     apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('get SLO by id', async () => {
-      const createRes1 = await sloApi.create(DEFAULT_SLO);
+    apiTest('get SLO by id', async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+
+      const createRes1 = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(createRes1).toHaveStatusCode(200);
-      const createRes2 = await sloApi.create({
-        ...DEFAULT_SLO,
-        name: 'something irrelevant foo',
+      const createRes2 = await apiClient.post('api/observability/slos', {
+        headers,
+        body: {
+          ...DEFAULT_SLO,
+          name: 'something irrelevant foo',
+        },
+        responseType: 'json',
       });
       expect(createRes2).toHaveStatusCode(200);
 
       const sloId1 = createRes1.body.id as string;
 
-      const getSloResponse = await sloApi.get(sloId1);
+      const getSloResponse = await apiClient.get(`api/observability/slos/${sloId1}`, {
+        headers,
+        responseType: 'json',
+      });
       expect(getSloResponse).toHaveStatusCode(200);
       const body = getSloResponse.body as Record<string, unknown>;
       expect(body.summary).toBeDefined();

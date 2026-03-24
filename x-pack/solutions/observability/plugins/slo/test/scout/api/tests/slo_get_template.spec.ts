@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTestWithoutDataForge as apiTest, type SloScoutApi } from '../fixtures';
+import { apiTestWithoutDataForge as apiTest, mergeSloApiHeaders } from '../fixtures';
 
 const SLO_TEMPLATE_SO_TYPE = 'slo_template';
 
@@ -15,13 +15,14 @@ apiTest.describe(
   'Get SLO Template',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices }) => {
-      sloApi = apiServices.slo;
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
-    apiTest('returns all valid fields for full template', async ({ kbnClient }) => {
+    apiTest('returns all valid fields for full template', async ({ apiClient, kbnClient }) => {
       const TEMPLATE_ID = 'full-valid-template-scout';
       await kbnClient.savedObjects.create({
         type: SLO_TEMPLATE_SO_TYPE,
@@ -50,7 +51,10 @@ apiTest.describe(
         overwrite: true,
       });
       try {
-        const res = await sloApi.getTemplate(TEMPLATE_ID);
+        const res = await apiClient.get(`api/observability/slo_templates/${TEMPLATE_ID}`, {
+          headers,
+          responseType: 'json',
+        });
         expect(res).toHaveStatusCode(200);
         const template = res.body as Record<string, unknown>;
         expect(template.templateId).toBe(TEMPLATE_ID);
@@ -70,8 +74,14 @@ apiTest.describe(
       }
     });
 
-    apiTest('returns 404 when template does not exist', async ({ apiServices }) => {
-      const res = await apiServices.slo.getTemplate('non-existent-template-id-scout');
+    apiTest('returns 404 when template does not exist', async ({ apiClient }) => {
+      const res = await apiClient.get(
+        'api/observability/slo_templates/non-existent-template-id-scout',
+        {
+          headers,
+          responseType: 'json',
+        }
+      );
       expect(res).toHaveStatusCode(404);
       const body = res.body as { message?: string };
       expect(body.message).toContain(

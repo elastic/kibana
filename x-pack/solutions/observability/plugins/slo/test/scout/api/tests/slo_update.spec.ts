@@ -12,7 +12,7 @@ import {
   apiTest,
   createSloTransformAssertions,
   DEFAULT_SLO,
-  type SloScoutApi,
+  mergeSloApiHeaders,
   type SloTransformAssertions,
 } from '../fixtures';
 
@@ -20,13 +20,14 @@ apiTest.describe(
   'Update SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
     let transformHelper: SloTransformAssertions;
 
     apiTest.beforeAll(
-      async ({ apiServices, apiClient, esClient, samlAuth, sloFtrDataForgeSuite }) => {
+      async ({ apiClient, esClient, samlAuth, requestAuth, sloFtrDataForgeSuite }) => {
         await sloFtrDataForgeSuite.setup();
-        sloApi = apiServices.slo;
+        const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+        headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
         transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
           samlAuth.session.getApiCredentialsForRole('admin')
         );
@@ -37,18 +38,26 @@ apiTest.describe(
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('with revision bump updates the definition', async () => {
-      const createResponse = await sloApi.create(DEFAULT_SLO);
+    apiTest('with revision bump updates the definition', async ({ apiClient }) => {
+      const createResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(createResponse).toHaveStatusCode(200);
       const sloId = createResponse.body.id as string;
 
-      const getResponse = await sloApi.get(sloId);
+      const getResponse = await apiClient.get(`api/observability/slos/${sloId}`, {
+        headers,
+        responseType: 'json',
+      });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body).toMatchObject({ revision: 1 });
 
-      const updateResponse = await sloApi.update({
-        sloId,
-        slo: { ...DEFAULT_SLO, objective: { target: 0.63 } },
+      const updateResponse = await apiClient.put(`api/observability/slos/${sloId}`, {
+        headers,
+        body: { ...DEFAULT_SLO, objective: { target: 0.63 } },
+        responseType: 'json',
       });
       expect(updateResponse).toHaveStatusCode(200);
       expect(updateResponse.body).toMatchObject({ revision: 2, objective: { target: 0.63 } });
@@ -60,18 +69,26 @@ apiTest.describe(
       await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 2));
     });
 
-    apiTest('without revision bump updates the definition', async () => {
-      const createResponse = await sloApi.create(DEFAULT_SLO);
+    apiTest('without revision bump updates the definition', async ({ apiClient }) => {
+      const createResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(createResponse).toHaveStatusCode(200);
       const sloId = createResponse.body.id as string;
 
-      const getResponse = await sloApi.get(sloId);
+      const getResponse = await apiClient.get(`api/observability/slos/${sloId}`, {
+        headers,
+        responseType: 'json',
+      });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body).toMatchObject({ revision: 1 });
 
-      const updateResponse = await sloApi.update({
-        sloId,
-        slo: { ...DEFAULT_SLO, name: 'updated name' },
+      const updateResponse = await apiClient.put(`api/observability/slos/${sloId}`, {
+        headers,
+        body: { ...DEFAULT_SLO, name: 'updated name' },
+        responseType: 'json',
       });
       expect(updateResponse).toHaveStatusCode(200);
       expect(updateResponse.body).toMatchObject({ revision: 1, name: 'updated name' });
@@ -80,17 +97,22 @@ apiTest.describe(
       await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 1));
     });
 
-    apiTest('without revision bump updates dashboard artifacts', async () => {
-      const createResp = await sloApi.create(DEFAULT_SLO);
+    apiTest('without revision bump updates dashboard artifacts', async ({ apiClient }) => {
+      const createResp = await apiClient.post('api/observability/slos', {
+        headers,
+        body: DEFAULT_SLO,
+        responseType: 'json',
+      });
       expect(createResp).toHaveStatusCode(200);
       const sloId = createResp.body.id as string;
 
-      const updateResponse = await sloApi.update({
-        sloId,
-        slo: {
+      const updateResponse = await apiClient.put(`api/observability/slos/${sloId}`, {
+        headers,
+        body: {
           ...DEFAULT_SLO,
           artifacts: { dashboards: [{ id: 'dash-x' }, { id: 'dash-y' }] },
         },
+        responseType: 'json',
       });
       expect(updateResponse).toHaveStatusCode(200);
       expect(updateResponse.body).toMatchObject({

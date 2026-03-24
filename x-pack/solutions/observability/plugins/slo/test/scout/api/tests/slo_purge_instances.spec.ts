@@ -12,6 +12,7 @@ import {
   cleanupSloSummaryDocs,
   countSloSummaryDocs,
   insertSloSummaryDocs,
+  mergeSloApiHeaders,
   pollUntilTrue,
   refreshSloSummaryIndex,
   TEST_SPACE_ID,
@@ -22,11 +23,18 @@ apiTest.describe(
   'Purge Instances',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let headers: Record<string, string>;
+
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+    });
+
     apiTest.afterEach(async ({ esClient }) => {
       await cleanupSloSummaryDocs(esClient);
     });
 
-    apiTest('purges all stale instances without list filter', async ({ apiServices, esClient }) => {
+    apiTest('purges all stale instances without list filter', async ({ apiClient, esClient }) => {
       const oldDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
       const docs = [
         createDummySummaryDoc('slo-1', 'instance-1', oldDate),
@@ -40,14 +48,21 @@ apiTest.describe(
       });
       expect(countBefore).toBe(3);
 
-      const response = await apiServices.slo.purgeInstances({ staleDuration: '30d' });
+      const response = await apiClient.post('api/observability/slos/_purge_instances', {
+        headers,
+        body: { staleDuration: '30d' },
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(200);
       const taskBody = response.body as { taskId?: string };
       expect(taskBody.taskId).toBeDefined();
 
       await pollUntilTrue(
         async () => {
-          const status = await apiServices.slo.purgeInstancesStatus(taskBody.taskId as string);
+          const status = await apiClient.get(
+            `api/observability/slos/_purge_instances/${taskBody.taskId as string}`,
+            { headers, responseType: 'json' }
+          );
           return (
             status.statusCode === 200 && (status.body as { completed?: boolean }).completed === true
           );
@@ -55,7 +70,10 @@ apiTest.describe(
         { timeoutMs: 120_000, intervalMs: 2000 }
       );
 
-      const status = await apiServices.slo.purgeInstancesStatus(taskBody.taskId as string);
+      const status = await apiClient.get(
+        `api/observability/slos/_purge_instances/${taskBody.taskId as string}`,
+        { headers, responseType: 'json' }
+      );
       const st = status.body as { completed: boolean; status: { deleted: number } };
       expect(st.completed).toBe(true);
       expect(st.status.deleted).toBe(3);
@@ -69,7 +87,7 @@ apiTest.describe(
 
     apiTest(
       'purges only specific SLO instances when list is provided',
-      async ({ apiServices, esClient }) => {
+      async ({ apiClient, esClient }) => {
         const oldDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
         const docs = [
           createDummySummaryDoc('slo-to-purge-1', 'instance-1', oldDate),
@@ -85,16 +103,23 @@ apiTest.describe(
         });
         expect(countBefore).toBe(4);
 
-        const response = await apiServices.slo.purgeInstances({
-          list: ['slo-to-purge-1'],
-          staleDuration: '30d',
+        const response = await apiClient.post('api/observability/slos/_purge_instances', {
+          headers,
+          body: {
+            list: ['slo-to-purge-1'],
+            staleDuration: '30d',
+          },
+          responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
         const taskBody = response.body as { taskId: string };
 
         await pollUntilTrue(
           async () => {
-            const status = await apiServices.slo.purgeInstancesStatus(taskBody.taskId);
+            const status = await apiClient.get(
+              `api/observability/slos/_purge_instances/${taskBody.taskId}`,
+              { headers, responseType: 'json' }
+            );
             return (
               status.statusCode === 200 &&
               (status.body as { completed?: boolean }).completed === true
@@ -120,7 +145,7 @@ apiTest.describe(
 
     apiTest(
       'respects staleDuration parameter and only deletes old documents',
-      async ({ apiServices, esClient }) => {
+      async ({ apiClient, esClient }) => {
         const oldDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
         const recentDate = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
         const docs = [
@@ -135,13 +160,20 @@ apiTest.describe(
         });
         expect(countBefore).toBe(2);
 
-        const response = await apiServices.slo.purgeInstances({ staleDuration: '30d' });
+        const response = await apiClient.post('api/observability/slos/_purge_instances', {
+          headers,
+          body: { staleDuration: '30d' },
+          responseType: 'json',
+        });
         expect(response).toHaveStatusCode(200);
         const taskBody = response.body as { taskId: string };
 
         await pollUntilTrue(
           async () => {
-            const status = await apiServices.slo.purgeInstancesStatus(taskBody.taskId);
+            const status = await apiClient.get(
+              `api/observability/slos/_purge_instances/${taskBody.taskId}`,
+              { headers, responseType: 'json' }
+            );
             return (
               status.statusCode === 200 &&
               (status.body as { completed?: boolean }).completed === true
@@ -170,7 +202,7 @@ apiTest.describe(
 
     apiTest(
       'allows force parameter to override staleDuration validation',
-      async ({ apiServices, esClient }) => {
+      async ({ apiClient, esClient }) => {
         const oldDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
         const docs = [createDummySummaryDoc('slo-1', 'instance-1', oldDate)];
 
@@ -181,13 +213,20 @@ apiTest.describe(
         });
         expect(countBefore).toBe(1);
 
-        const response = await apiServices.slo.purgeInstances({ staleDuration: '5d', force: true });
+        const response = await apiClient.post('api/observability/slos/_purge_instances', {
+          headers,
+          body: { staleDuration: '5d', force: true },
+          responseType: 'json',
+        });
         expect(response).toHaveStatusCode(200);
         const taskBody = response.body as { taskId: string };
 
         await pollUntilTrue(
           async () => {
-            const status = await apiServices.slo.purgeInstancesStatus(taskBody.taskId);
+            const status = await apiClient.get(
+              `api/observability/slos/_purge_instances/${taskBody.taskId}`,
+              { headers, responseType: 'json' }
+            );
             return (
               status.statusCode === 200 &&
               (status.body as { completed?: boolean }).completed === true
@@ -204,8 +243,11 @@ apiTest.describe(
       }
     );
 
-    apiTest('returns task not found error for invalid taskId', async ({ apiServices }) => {
-      const status = await apiServices.slo.purgeInstancesStatus('inexistant-task-id');
+    apiTest('returns task not found error for invalid taskId', async ({ apiClient }) => {
+      const status = await apiClient.get(
+        'api/observability/slos/_purge_instances/inexistant-task-id',
+        { headers, responseType: 'json' }
+      );
       expect(status).toHaveStatusCode(200);
       const body = status.body as { completed: boolean; error?: string };
       expect(body.completed).toBe(false);

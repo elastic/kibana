@@ -7,24 +7,31 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, DEFAULT_SLO, pollUntilTrue, type SloScoutApi } from '../fixtures';
+import {
+  apiTest,
+  DEFAULT_SLO,
+  mergeSloApiHeaders,
+  pollUntilTrue,
+  sloApiPathWithQuery,
+} from '../fixtures';
 
 apiTest.describe(
   'Find SLOs by outdated status and tags',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let sloApi: SloScoutApi;
+    let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, sloFtrDataForgeSuite }) => {
+    apiTest.beforeAll(async ({ requestAuth, sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.setup();
-      sloApi = apiServices.slo;
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
     apiTest.afterAll(async ({ sloFtrDataForgeSuite }) => {
       await sloFtrDataForgeSuite.teardown();
     });
 
-    apiTest('finds SLOs by different tags', async () => {
+    apiTest('finds SLOs by different tags', async ({ apiClient }) => {
       const tagsList = ['test1', 'test2'];
       const slo1 = {
         ...DEFAULT_SLO,
@@ -37,13 +44,22 @@ apiTest.describe(
         name: 'Test SLO for api integration 2',
       };
 
-      await Promise.allSettled([sloApi.create(slo1), sloApi.create(slo2)]);
+      await Promise.allSettled([
+        apiClient.post('api/observability/slos', { headers, body: slo1, responseType: 'json' }),
+        apiClient.post('api/observability/slos', { headers, body: slo2, responseType: 'json' }),
+      ]);
 
-      const definitions = await sloApi.findDefinitions({ tags: tagsList.join(',') });
+      const definitions = await apiClient.get(
+        sloApiPathWithQuery('api/observability/slos/_definitions', { tags: tagsList.join(',') }),
+        { headers, responseType: 'json' }
+      );
       expect(definitions).toHaveStatusCode(200);
       expect((definitions.body as { total: number }).total).toBe(2);
 
-      const definitionsWithoutTag2 = await sloApi.findDefinitions({ tags: tagsList[0] });
+      const definitionsWithoutTag2 = await apiClient.get(
+        sloApiPathWithQuery('api/observability/slos/_definitions', { tags: tagsList[0] }),
+        { headers, responseType: 'json' }
+      );
       expect(definitionsWithoutTag2).toHaveStatusCode(200);
       const d2 = definitionsWithoutTag2.body as {
         total: number;
@@ -53,35 +69,57 @@ apiTest.describe(
       expect(d2.results.find((def) => def.tags.includes('tag2'))).toBeUndefined();
     });
 
-    apiTest('finds outdated SLOs', async () => {
+    apiTest('finds outdated SLOs', async ({ apiClient }) => {
       const outdatedSLO = { ...DEFAULT_SLO, name: 'outdated slo' };
       const recentSLO = { ...DEFAULT_SLO, name: 'recent slo' };
-      const outdatedResponse = await sloApi.create(outdatedSLO);
+      const outdatedResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: outdatedSLO,
+        responseType: 'json',
+      });
       expect(outdatedResponse).toHaveStatusCode(200);
-      const recentResponse = await sloApi.create(recentSLO);
+      const recentResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: recentSLO,
+        responseType: 'json',
+      });
       expect(recentResponse).toHaveStatusCode(200);
       const outdatedSloId = outdatedResponse.body.id as string;
 
-      const soRes = await sloApi.getSavedObject(outdatedSloId);
+      const soRes = await apiClient.get(
+        `api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${outdatedSloId})`,
+        { headers, responseType: 'json' }
+      );
       expect(soRes).toHaveStatusCode(200);
       const savedObject = (
         soRes.body as { saved_objects: Array<{ attributes: unknown; id: string }> }
       ).saved_objects[0];
 
-      const updateSo = await sloApi.updateSavedObject(
-        { ...(savedObject.attributes as Record<string, unknown>), version: 1 } as never,
-        savedObject.id
-      );
+      const updateSo = await apiClient.put(`api/saved_objects/slo/${savedObject.id}`, {
+        headers,
+        body: {
+          attributes: { ...(savedObject.attributes as Record<string, unknown>), version: 1 },
+        },
+        responseType: 'json',
+      });
       expect(updateSo).toHaveStatusCode(200);
 
-      const allDefinitions = await sloApi.findDefinitions({ includeOutdatedOnly: 'false' });
+      const allDefinitions = await apiClient.get(
+        sloApiPathWithQuery('api/observability/slos/_definitions', {
+          includeOutdatedOnly: 'false',
+        }),
+        { headers, responseType: 'json' }
+      );
       expect(allDefinitions).toHaveStatusCode(200);
       const all = allDefinitions.body as { results: Array<{ id: string }> };
       expect(all.results.find((slo) => slo.id === recentResponse.body.id)?.id).toBe(
         recentResponse.body.id as string
       );
 
-      const definitions = await sloApi.findDefinitions({ includeOutdatedOnly: 'true' });
+      const definitions = await apiClient.get(
+        sloApiPathWithQuery('api/observability/slos/_definitions', { includeOutdatedOnly: 'true' }),
+        { headers, responseType: 'json' }
+      );
       expect(definitions).toHaveStatusCode(200);
       const defBody = definitions.body as { results: Array<{ id: string }> };
       expect(defBody.results.find((slo) => slo.id === recentResponse.body.id)).toBeUndefined();
@@ -90,15 +128,22 @@ apiTest.describe(
       );
     });
 
-    apiTest('finds SLOs with health data when includeHealth is true', async () => {
-      const slo = { ...DEFAULT_SLO, name: 'Test SLO with health' };
-      const createResponse = await sloApi.create(slo);
+    apiTest('finds SLOs with health data when includeHealth is true', async ({ apiClient }) => {
+      const sloBody = { ...DEFAULT_SLO, name: 'Test SLO with health' };
+      const createResponse = await apiClient.post('api/observability/slos', {
+        headers,
+        body: sloBody,
+        responseType: 'json',
+      });
       expect(createResponse).toHaveStatusCode(200);
       const sloId = createResponse.body.id as string;
 
       await pollUntilTrue(
         async () => {
-          const definitions = await sloApi.findDefinitions({ includeHealth: 'true' });
+          const definitions = await apiClient.get(
+            sloApiPathWithQuery('api/observability/slos/_definitions', { includeHealth: 'true' }),
+            { headers, responseType: 'json' }
+          );
           if (definitions.statusCode !== 200) {
             return false;
           }

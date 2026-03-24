@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture } from '@kbn/scout-oblt';
-import { apiTest as obltApiTest, mergeTests, sloDataFixture } from '@kbn/scout-oblt';
+import type { RequestAuthFixture } from '@kbn/scout-oblt';
+import type { ApiClientFixture, ApiServicesFixture } from '@kbn/scout-oblt';
+import { apiTest as baseTest, mergeTests, sloDataFixture } from '@kbn/scout-oblt';
 import {
   setupSloFtrDataForgeSuite,
   teardownSloFtrDataForgeSuite,
@@ -15,18 +16,28 @@ import { createSloScoutApi, mergeSloApiHeaders, type SloScoutApi } from './slo_s
 
 export type SloPluginApiServicesFixture = ApiServicesFixture & { slo: SloScoutApi };
 
-const apiTestWithSloServices = obltApiTest.extend<{}, { apiServices: SloPluginApiServicesFixture }>(
-  {
-    apiServices: [
-      async ({ apiServices, apiClient, requestAuth }, use) => {
-        const adminCredentials = await requestAuth.getApiKey('admin');
-        const slo = createSloScoutApi(apiClient, mergeSloApiHeaders(adminCredentials.apiKeyHeader));
-        await use({ ...apiServices, slo });
+const apiTestWithSloServices = baseTest.extend<{}, { apiServices: SloPluginApiServicesFixture }>({
+  apiServices: [
+    async (
+      {
+        apiServices,
+        apiClient,
+        requestAuth,
+      }: {
+        apiServices: ApiServicesFixture;
+        apiClient: ApiClientFixture;
+        requestAuth: RequestAuthFixture;
       },
-      { scope: 'worker' },
-    ],
-  }
-);
+      use: (extended: SloPluginApiServicesFixture) => Promise<void>
+    ) => {
+      const adminCredentials = await requestAuth.getApiKey('admin');
+      const slo = createSloScoutApi(apiClient, mergeSloApiHeaders(adminCredentials.apiKeyHeader));
+      const extendedApiServices: SloPluginApiServicesFixture = { ...apiServices, slo };
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
+});
 
 /**
  * `apiTest` from `@kbn/scout-oblt` plus `apiServices.slo` and `sloData`, without FTR data-forge lifecycle.
@@ -83,7 +94,12 @@ export {
   removeSloFtrDataForge,
 } from './slo_data_forge_lifecycle';
 export { createSloPipelineAssertions, type SloPipelineAssertions } from './slo_pipeline_assertions';
-export { createSloScoutApi, mergeSloApiHeaders, type SloScoutApi } from './slo_scout_api';
+export {
+  createSloScoutApi,
+  mergeSloApiHeaders,
+  sloApiPathWithQuery,
+  type SloScoutApi,
+} from './slo_scout_api';
 export {
   cleanupSloSummaryDocs,
   countSloSummaryDocs,
