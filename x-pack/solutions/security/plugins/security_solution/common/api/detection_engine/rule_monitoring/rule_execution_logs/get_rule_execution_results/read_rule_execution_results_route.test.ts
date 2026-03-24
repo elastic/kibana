@@ -13,7 +13,7 @@ const validFilter = {
   to: '2026-03-12T00:00:00.000Z',
 };
 
-describe('ReadRuleExecutionResultsRequestBody', () => {
+describe('Request schema of Read rule execution results endpoint', () => {
   describe('Required fields', () => {
     it('should succeed when body is empty (filter is optional)', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({});
@@ -91,17 +91,17 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
   });
 
   describe('sort.field', () => {
-    it('should accept valid sort field values', () => {
-      const cases = ['execution_start', 'execution_duration_ms'];
-      cases.forEach((field) => {
+    it.each(['execution_start', 'execution_duration_ms'])(
+      'should accept "%s" as a valid sort field',
+      (field) => {
         const result = ReadRuleExecutionResultsRequestBody.safeParse({
           filter: validFilter,
           sort: { field },
         });
         expectParseSuccess(result);
         expect(result.data?.sort?.field).toEqual(field);
-      });
-    });
+      }
+    );
 
     it('should reject invalid sort field values', () => {
       const result = ReadRuleExecutionResultsRequestBody.safeParse({
@@ -125,16 +125,13 @@ describe('ReadRuleExecutionResultsRequestBody', () => {
   });
 
   describe('sort.order', () => {
-    it('should accept asc and desc', () => {
-      const cases = ['asc', 'desc'] as const;
-      cases.forEach((order) => {
-        const result = ReadRuleExecutionResultsRequestBody.safeParse({
-          filter: validFilter,
-          sort: { order },
-        });
-        expectParseSuccess(result);
-        expect(result.data?.sort?.order).toEqual(order);
+    it.each(['asc', 'desc'] as const)('should accept "%s" as a valid sort order', (order) => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: validFilter,
+        sort: { order },
       });
+      expectParseSuccess(result);
+      expect(result.data?.sort?.order).toEqual(order);
     });
 
     it('should default sort order to desc', () => {
