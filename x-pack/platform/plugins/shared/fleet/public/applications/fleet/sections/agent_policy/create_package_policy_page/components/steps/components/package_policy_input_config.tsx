@@ -28,6 +28,7 @@ import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { shouldShowVar } from '../../../services/var_group_helpers';
 import type { VarGroupSelection } from '../../../services/var_group_helpers';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { VarGroupSelector } from './var_group_selector';
@@ -69,6 +70,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+    const { isAgentlessEnabled } = useAgentless();
 
     // Split vars into required and advanced, filtering by var_group visibility and deprecated vars
     const [requiredVars, advancedVars] = useMemo(() => {
@@ -193,6 +195,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                   varGroup={varGroup}
                   selectedOptionName={varGroupSelections[varGroup.name]}
                   onSelectionChange={onVarGroupSelectionChange ?? (() => {})}
+                  isAgentlessEnabled={isAgentlessEnabled}
                 />
               </EuiFlexItem>
             ))}
