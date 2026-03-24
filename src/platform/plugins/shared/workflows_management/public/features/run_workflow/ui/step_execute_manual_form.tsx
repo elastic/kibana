@@ -20,14 +20,14 @@ const SCHEMA_URI = `inmemory://schemas/test-step-json-manual-editor-schema`;
 
 export interface StepExecuteManualFormProps {
   value: string;
-  onChange: (value: string) => void;
+  setValue: (value: string) => void;
   errors: string | null;
   warnings: string | null;
   contextJsonSchema?: z.core.JSONSchema.BaseSchema;
 }
 
 export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
-  ({ value, onChange, errors, warnings, contextJsonSchema }) => {
+  ({ value, setValue, errors, warnings, contextJsonSchema }) => {
     // Hook Monaco on mount to register the schema for validation + suggestions
     const mountedOnce = useRef(false);
     const handleMount = useCallback(
@@ -80,7 +80,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
               languageId="json"
               value={value}
               editorDidMount={handleMount}
-              onChange={onChange}
+              onChange={setValue}
               fitToContent={{
                 minLines: 5,
                 maxLines: 15,

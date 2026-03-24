@@ -117,7 +117,7 @@ export class AgentBuilderPlugin
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
           uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services').get('sml'),
+          logger: this.logger.get('services.sml'),
         };
       },
     });
@@ -193,6 +193,7 @@ export class AgentBuilderPlugin
       serviceManager: this.serviceManager,
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger.get('connector-lifecycle'),
+      getStartServices: coreSetup.getStartServices,
     });
 
     setupDeps.actions.registerConnectorLifecycleListener({
@@ -263,7 +264,7 @@ export class AgentBuilderPlugin
     scheduleSmlCrawlerTasks({
       taskManager,
       smlService: startServices.sml,
-      logger: this.logger.get('services').get('sml'),
+      logger: this.logger.get('services.sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
@@ -303,7 +304,8 @@ export class AgentBuilderPlugin
             spaces: [spaceId],
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
-            logger: this.logger.get('services').get('sml'),
+            logger: this.logger.get('services.sml'),
+            request: params.request,
           });
         },
       },
